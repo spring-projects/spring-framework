@@ -16,18 +16,16 @@
 package org.springframework.ui.message;
 
 /**
- * Communicates information about an event to the user.
- * For example, a validation message may inform a web application user a business rule was violated.
- * A message is attached to a receiving element, has text providing the basis for communication,
- * and has severity indicating the priority or intensity of the message for its receiver.
- * 
+ * Communicates information of interest to the user.
+ * For example, a error message may inform a user of a web application a business rule was violated.
+ * TODO - should we introduce summary/detail fields instead of just text
  * @author Keith Donald
  */
 public interface Message {
 
 	/**
 	 * The severity of this message.
-	 * The severity indicates the intensity or priority of the communication.
+	 * The severity indicates the intensity or priority of the message.
 	 * @return the message severity
 	 */
 	public Severity getSeverity();

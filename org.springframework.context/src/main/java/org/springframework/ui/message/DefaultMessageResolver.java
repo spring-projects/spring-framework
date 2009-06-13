@@ -95,7 +95,7 @@ class DefaultMessageResolver implements MessageResolver, MessageSourceResolvable
 				defaultText).toString();
 	}
 
-	static class TextMessage implements Message {
+	private static class TextMessage implements Message {
 
 		private Severity severity;
 
@@ -116,7 +116,7 @@ class DefaultMessageResolver implements MessageResolver, MessageSourceResolvable
 
 	}
 
-	static class MessageSourceResolvableAccessor implements PropertyAccessor {
+	private static class MessageSourceResolvableAccessor implements PropertyAccessor {
 
 		private MessageSource messageSource;
 		
@@ -140,12 +140,11 @@ class DefaultMessageResolver implements MessageResolver, MessageSourceResolvable
 			return false;
 		}
 
-		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 			throw new UnsupportedOperationException("Should not be called");
 		}
 
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { MessageSourceResolvable.class };
 		}
 		
