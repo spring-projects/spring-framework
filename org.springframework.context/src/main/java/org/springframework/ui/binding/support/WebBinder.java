@@ -84,7 +84,7 @@ public class WebBinder extends GenericBinder {
 	}
 
 	protected Object getEmptyValue(BindingImpl binding) {
-		Class<?> type = binding.getValueType();
+		Class<?> type = binding.getType();
 		if (boolean.class.equals(type) || Boolean.class.equals(type)) {
 			return Boolean.FALSE;
 		} else {

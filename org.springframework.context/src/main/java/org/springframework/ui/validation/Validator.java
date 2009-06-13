@@ -33,6 +33,6 @@ public interface Validator {
 	 * @param properties
 	 * @return
 	 */
-	ValidateResults validate(Object model, List<String> properties);
+	ValidationResults validate(Object model, List<String> properties);
 
 }

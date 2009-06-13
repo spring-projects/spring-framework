@@ -259,7 +259,7 @@ public class GenericBinder implements Binder {
 		}
 
 		public boolean isCollection() {
-			Class type = getValueType();
+			Class type = getType();
 			TypeDescriptor<?> typeDesc = TypeDescriptor.valueOf(type);
 			return typeDesc.isCollection() || typeDesc.isArray();
 		}
@@ -291,8 +291,8 @@ public class GenericBinder implements Binder {
 
 		// public impl only
 
-		public Class getValueType() {
-			Class type;
+		public Class<?> getType() {
+			Class<?> type;
 			try {
 				type = property.getValueType(createEvaluationContext());
 			} catch (EvaluationException e) {
