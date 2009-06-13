@@ -45,7 +45,7 @@ public interface Binder {
 	void setStrict(boolean strict);
 
 	/**
-	 * Adds new binding.
+	 * Adds a new binding.
 	 * @param binding the binding configuration
 	 * @return the new binding created from the configuration provided
 	 */
