@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.expression;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -69,13 +68,13 @@ public interface Expression {
 	public <T> T getValue(EvaluationContext context, Class<T> desiredResultType) throws EvaluationException;
 
 	/**
-	 * Set this expression in the provided context to the value provided.
+	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method using
+	 * the default context.
 	 * 
-	 * @param context the context in which to set the value of the expression
-	 * @param value the new value
-	 * @throws EvaluationException if there is a problem during evaluation
+	 * @return the most general type of value that can be set on this context
+	 * @throws EvaluationException if there is a problem determining the type
 	 */
-	public void setValue(EvaluationContext context, Object value) throws EvaluationException;
+	public Class getValueType() throws EvaluationException;
 
 	/**
 	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for
@@ -91,10 +90,10 @@ public interface Expression {
 	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method using
 	 * the default context.
 	 * 
-	 * @return the most general type of value that can be set on this context
+	 * @return a type descriptor for the most general type of value that can be set on this context
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
-	public Class getValueType() throws EvaluationException;
+	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException;
 
 	/**
 	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method for
@@ -107,23 +106,6 @@ public interface Expression {
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException;
 
 	/**
-	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)} method using
-	 * the default context.
-	 * 
-	 * @return a type descriptor for the most general type of value that can be set on this context
-	 * @throws EvaluationException if there is a problem determining the type
-	 */
-	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException;
-
-	
-	/**
-	 * Returns the original string used to create this expression, unmodified.
-	 * 
-	 * @return the original expression string
-	 */
-	public String getExpressionString();
-
-	/**
 	 * Determine if an expression can be written to, i.e. setValue() can be called.
 	 * 
 	 * @param context the context in which the expression should be checked
@@ -131,4 +113,21 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining if it is writable
 	 */
 	public boolean isWritable(EvaluationContext context) throws EvaluationException;
+	
+	/**
+	 * Set this expression in the provided context to the value provided.
+	 * 
+	 * @param context the context in which to set the value of the expression
+	 * @param value the new value
+	 * @throws EvaluationException if there is a problem during evaluation
+	 */
+	public void setValue(EvaluationContext context, Object value) throws EvaluationException;
+
+	/**
+	 * Returns the original string used to create this expression, unmodified.
+	 * 
+	 * @return the original expression string
+	 */
+	public String getExpressionString();
+
 }
