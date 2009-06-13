@@ -19,9 +19,8 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 /**
- * A factory for {@link NumberFormat} objects. Conceals the complexity associated with configuring, constructing, and/or
- * caching number format instances.
- * 
+ * A factory for {@link NumberFormat} objects.
+ * Conceals the complexity associated with configuring, constructing, and/or caching number format instances.
  * @author Keith Donald
  * @since 3.0
  */
