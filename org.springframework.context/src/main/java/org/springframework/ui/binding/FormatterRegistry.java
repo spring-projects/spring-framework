@@ -6,8 +6,8 @@ import org.springframework.ui.format.Formatter;
 
 /**
  * A centralized registry of Formatters indexed by property types.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public interface FormatterRegistry {
 

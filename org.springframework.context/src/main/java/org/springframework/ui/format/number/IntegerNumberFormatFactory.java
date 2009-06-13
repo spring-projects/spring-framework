@@ -23,6 +23,7 @@ import java.util.Locale;
  * 
  * @author Keith Donald
  * @see NumberFormat
+ * @since 3.0
  */
 final class IntegerNumberFormatFactory extends NumberFormatFactory {
 	public NumberFormat getNumberFormat(Locale locale) {

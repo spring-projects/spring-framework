@@ -19,7 +19,7 @@ package org.springframework.ui.message;
  * Enum exposing supported message severities.
  * 
  * @author Keith Donald
- * @author Jeremy Grelle
+ * @since 3.0 
  * @see Message
  */
 public enum Severity {

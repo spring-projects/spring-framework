@@ -36,6 +36,8 @@ import org.springframework.util.StringUtils;
  * <p>
  * Call {@link #addScript(Resource)} to add a SQL script location.<br>
  * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.<br>
+ * @author Keith Donald
+ * @since 3.0
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 

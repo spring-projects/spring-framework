@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Keith Donald
  * @see NumberFormat
  * @see DecimalFormat
+ * @since 3.0
  */
 class DefaultNumberFormatFactory extends NumberFormatFactory {
 

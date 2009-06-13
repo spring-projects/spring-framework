@@ -20,6 +20,7 @@ package org.springframework.ui.message;
  * For example, a error message may inform a user of a web application a business rule was violated.
  * TODO - should we introduce summary/detail fields instead of just text
  * @author Keith Donald
+ * @since 3.0
  */
 public interface Message {
 

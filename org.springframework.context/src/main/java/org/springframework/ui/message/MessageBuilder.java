@@ -48,6 +48,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * mathForm.decimalField=Decimal Field
  * </pre>
  * @author Keith Donald
+ * @since 3.0 
  * @see MessageContext#add(MessageResolver, String)
  */
 public class MessageBuilder {

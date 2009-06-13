@@ -31,6 +31,7 @@ import org.springframework.ui.format.Formatter;
  * Sets the scale of parsed BigDecimal values to {@link NumberFormat#getMaximumFractionDigits()}.
  * Applies {@link RoundingMode#DOWN} to parsed values.
  * @author Keith Donald
+ * @since 3.0
  */
 public class CurrencyFormatter implements Formatter<BigDecimal> {
 

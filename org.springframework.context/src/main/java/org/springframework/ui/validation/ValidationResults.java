@@ -18,7 +18,6 @@ package org.springframework.ui.validation;
 
 /**
  * TODO Document ValidateResults.
- *
  * @author Keith Donald
  * @since 3.0
  */

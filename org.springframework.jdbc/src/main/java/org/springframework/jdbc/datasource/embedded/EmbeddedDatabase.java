@@ -22,6 +22,7 @@ import javax.sql.DataSource;
  * Is a {@link DataSource}.
  * Adds a shutdown operation so the embedded database instance can be shutdown.
  * @author Keith Donald
+ * @since 3.0
  */
 public interface EmbeddedDatabase extends DataSource {
 	

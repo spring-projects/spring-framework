@@ -29,6 +29,7 @@ import org.springframework.ui.format.Formatter;
  * Configures BigDecimal parsing so there is no loss in precision.
  * Allows configuration over the decimal number pattern; see {@link #DecimalFormatter(String)}.
  * @author Keith Donald
+ * @since 3.0
  */
 public class DecimalFormatter implements Formatter<BigDecimal> {
 

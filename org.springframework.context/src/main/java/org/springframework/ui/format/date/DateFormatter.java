@@ -28,8 +28,9 @@ import org.springframework.ui.format.Formatter;
 /**
  * A formatter for {@link Date} types.
  * Allows the configuration of an explicit date pattern and locale.
- * @see SimpleDateFormat
  * @author Keith Donald
+ * @since 3.0
+ * @see SimpleDateFormat 
  */
 public class DateFormatter implements Formatter<Date> {
 

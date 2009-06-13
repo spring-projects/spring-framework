@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource.embedded;
  * DataSourceFactory helper that allows essential JDBC connection properties to be configured consistently,
  * independent of the actual DataSource implementation.
  * @author Keith Donald
+ * @since 3.0
  * @see DataSourceFactory
  */
 public interface ConnectionProperties {

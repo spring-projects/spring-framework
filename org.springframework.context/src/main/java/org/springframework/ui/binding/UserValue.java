@@ -18,7 +18,8 @@ package org.springframework.ui.binding;
 /**
  * Holds a user-entered value to bind to a model property.
  * @author Keith Donald
- * @see Binder#bind(List).
+ * @since 3.0
+ * @see Binder#bind(List)
  */
 public class UserValue {
 

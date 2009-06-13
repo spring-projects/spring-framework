@@ -24,6 +24,7 @@ import java.util.Locale;
  * 
  * @see NumberFormat
  * @author Keith Donald
+ * @since 3.0
  */
 final class PercentNumberFormatFactory extends NumberFormatFactory {
 	public NumberFormat getNumberFormat(Locale locale) {

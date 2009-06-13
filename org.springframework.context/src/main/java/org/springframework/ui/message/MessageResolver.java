@@ -22,6 +22,7 @@ import org.springframework.context.MessageSource;
 /**
  * A factory for a localized Message.
  * @author Keith Donald
+ * @since 3.0
  * @see Message
  * @see MessageSource
  */

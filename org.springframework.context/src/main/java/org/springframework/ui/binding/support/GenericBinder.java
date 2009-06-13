@@ -57,8 +57,9 @@ import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A generic {@link Binder binder} suitable for use in most binding environments.
+ * A generic {@link Binder binder} suitable for use in most environments.
  * @author Keith Donald
+ * @since 3.0
  * @see #add(BindingConfiguration)
  * @see #bind(UserValues)
  */

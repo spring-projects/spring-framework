@@ -36,8 +36,8 @@ import org.springframework.util.Assert;
  * Call {@link #setDatabasePopulator(DatabasePopulator)} to change the algorithm used to populate the database.<br>
  * Call {@link #setDataSourceFactory(DataSourceFactory)} to change the type of DataSource used to connect to the database.<br>
  * Call {@link #getDatabase()} to get the {@link EmbeddedDatabase} instance.<br>
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class EmbeddedDatabaseFactory {
 

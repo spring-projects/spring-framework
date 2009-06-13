@@ -22,6 +22,7 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 /**
  * Creates a {@link SimpleDriverDataSource}.
  * @author Keith Donald
+ * @since 3.0
  */
 final class SimpleDriverDataSourceFactory implements DataSourceFactory {
 

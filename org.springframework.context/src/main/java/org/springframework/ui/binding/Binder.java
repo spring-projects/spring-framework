@@ -23,7 +23,7 @@ import org.springframework.ui.format.Formatter;
 /**
  * Binds user-entered values to properties of a model object.
  * @author Keith Donald
- *
+ * @since 3.0
  * @param <M> The kind of model object this binder binds to
  * @see #add(BindingConfiguration)
  * @see #bind(UserValues)

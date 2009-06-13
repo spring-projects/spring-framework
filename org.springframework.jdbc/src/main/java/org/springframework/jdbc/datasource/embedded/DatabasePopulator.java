@@ -21,6 +21,7 @@ import java.sql.SQLException;
 /**
  * Strategy used to populate an embedded database during initialization.
  * @author Keith Donald
+ * @since 3.0
  * @see ResourceDatabasePopulator
  */
 public interface DatabasePopulator {

@@ -20,8 +20,8 @@ import org.springframework.core.io.support.EncodedResource;
 /**
  * Thrown by {@link ResourceDatabasePopulator} if one of its SQL scripts could
  * not be read during population.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 @SuppressWarnings("serial")
 public class CannotReadScriptException extends RuntimeException {

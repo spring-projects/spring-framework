@@ -32,8 +32,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link EmbeddedDatabaseConfigurer} for the Apache Derby database.
- * 
  * @author Oliver Gierke
+ * @since 3.0
  */
 final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 

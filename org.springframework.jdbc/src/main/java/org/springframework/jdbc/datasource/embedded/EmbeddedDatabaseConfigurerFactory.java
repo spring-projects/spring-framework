@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
  * strategies.
  * @author Keith Donald
  * @author Oliver Gierke
+ * @since 3.0
  */
 final class EmbeddedDatabaseConfigurerFactory {
 
