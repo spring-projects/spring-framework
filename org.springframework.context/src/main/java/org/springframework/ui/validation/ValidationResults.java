@@ -22,6 +22,6 @@ package org.springframework.ui.validation;
  * @author Keith Donald
  * @since 3.0
  */
-public interface ValidateResults {
+public interface ValidationResults {
 
 }

@@ -52,5 +52,10 @@ public interface Binding {
 	 */
 	String[] getCollectionValues();
 
+	/**
+	 * The type of the underlying property associated with this binding.
+	 */
+	Class<?>getType();
+
 
 }
