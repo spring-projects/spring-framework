@@ -20,9 +20,7 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 
 /**
- * A factory for a Message. Allows a Message to be internationalized and to be resolved from a
- * {@link MessageSource message resource bundle}.
- * 
+ * A factory for a localized Message.
  * @author Keith Donald
  * @see Message
  * @see MessageSource
@@ -30,10 +28,11 @@ import org.springframework.context.MessageSource;
 public interface MessageResolver {
 
 	/**
-	 * Resolve the message from the message source using the current locale.
+	 * Resolve the message from the message source for the locale.
 	 * @param messageSource the message source, an abstraction for a resource bundle
-	 * @param locale the current locale of this request
+	 * @param locale the locale of this request
 	 * @return the resolved message
+	 * @throws MessageResolutionException if a resolution failure occurs
 	 */
 	public Message resolveMessage(MessageSource messageSource, Locale locale);
 }
