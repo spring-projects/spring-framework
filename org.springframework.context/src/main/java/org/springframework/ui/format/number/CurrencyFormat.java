@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 /**
  * A annotation to apply to a BigDecimal property to have its value formatted as currency amount using a {@link CurrencyFormatter}.
  * @author Keith Donald
+ * @since 3.0
  */
 @Target( { ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
