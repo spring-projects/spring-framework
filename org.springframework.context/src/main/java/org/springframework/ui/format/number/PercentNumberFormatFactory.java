@@ -21,7 +21,6 @@ import java.util.Locale;
 
 /**
  * Produces NumberFormat instances that format percent values.
- * 
  * @see NumberFormat
  * @author Keith Donald
  * @since 3.0

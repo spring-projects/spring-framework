@@ -20,7 +20,6 @@ import java.util.Locale;
 
 /**
  * Produces NumberFormat instances that format integer values.
- * 
  * @author Keith Donald
  * @see NumberFormat
  * @since 3.0

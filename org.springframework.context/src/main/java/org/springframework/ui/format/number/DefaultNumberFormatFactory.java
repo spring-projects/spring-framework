@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Works with a general purpose {@link DecimalFormat} instance returned by calling
  * {@link NumberFormat#getInstance(Locale)} by default.
- * 
  * @author Keith Donald
  * @see NumberFormat
  * @see DecimalFormat
