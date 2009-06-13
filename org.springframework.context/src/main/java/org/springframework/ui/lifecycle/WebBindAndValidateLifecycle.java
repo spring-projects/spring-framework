@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui;
+package org.springframework.ui.lifecycle;
 
 import java.util.Map;
 
@@ -23,14 +23,18 @@ import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.binding.support.WebBinder;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.MessageContext;
-import org.springframework.ui.validation.ValidationResults;
+import org.springframework.ui.message.MessageResolver;
 import org.springframework.ui.validation.Validator;
 
+/**
+ * Implementation of the bind and validate lifecycle for web (HTTP) environments.
+ * @author Keith Donald
+ * @since 3.0
+ */
 public class WebBindAndValidateLifecycle {
 
 	private final WebBinder binder;
 
-	@SuppressWarnings("unused")
 	private final MessageContext messageContext;
 
 	private ValidationDecider validationDecider = ValidationDecider.ALWAYS_VALIDATE;
@@ -38,6 +42,9 @@ public class WebBindAndValidateLifecycle {
 	private Validator validator;
 
 	public WebBindAndValidateLifecycle(Object model, MessageContext messageContext) {
+		// TODO allow binder to be configured with bindings from model metadata
+		// TODO support @Bound property annotation?
+		// TODO support @StrictBinding class-level annotation?
 		this.binder = new WebBinder(model);
 		this.messageContext = messageContext;
 	}
@@ -46,29 +53,24 @@ public class WebBindAndValidateLifecycle {
 		UserValues values = binder.createUserValues(userMap);
 		BindingResults bindingResults = binder.bind(values);
 		if (validationDecider.shouldValidateAfter(bindingResults)) {
-			ValidationResults validationResults = validator.validate(binder.getModel(), bindingResults.successes()
-					.properties());
+			// TODO get validation results
+			validator.validate(binder.getModel(), bindingResults.successes().properties());
 		}
-		// TODO translate binding and validation results into messages
 		MessageBuilder builder = new MessageBuilder();
 		for (BindingResult result : bindingResults.failures()) {
-			builder.
-				code(modelPropertyError(result)).
-				code(propertyError(result)).
-				code(typeError(result)).
-				code(error(result)).
-				//argContextFactory(createContextFactory(bindingResult)).
-				// TODO arg names
-				// TODO el support including ability to setup evaluation context
-				//resolvableArg("label", getModelProperty(result)).
-				//arg("value", result.getUserValue()).
-				//arg("binding", binder.getBinding(result.getProperty())).
-				//args(result.getErrorArguments()).
-				build();
+			MessageResolver message = builder.code(modelPropertyError(result)).code(propertyError(result)).code(
+					typeError(result)).code(error(result)).resolvableArg("label", getModelProperty(result)).arg(
+					"value", result.getUserValue()).
+					// TODO add binding el resolver allowing binding.format to be called
+					arg("binding", binder.getBinding(result.getProperty())).
+					// TODO allow binding result to contribute additional arguments
+					build();
+			// TODO should model name be part of element id?
+			messageContext.add(message, result.getProperty());
 		}
-		// TODO expose property Binding in EL context for property error message resolution?
+		// TODO translate validation results into messages
 	}
-	
+
 	private String modelPropertyError(BindingResult result) {
 		return getModelProperty(result) + "." + result.getErrorCode();
 	}
@@ -77,20 +79,21 @@ public class WebBindAndValidateLifecycle {
 		return result.getProperty() + "." + result.getErrorCode();
 	}
 
-	private String typeError(BindingResult result) { 
+	private String typeError(BindingResult result) {
 		return binder.getBinding(result.getProperty()).getType().getName() + "." + result.getErrorCode();
 	}
-	
+
 	private String error(BindingResult result) {
 		return result.getErrorCode();
 	}
-	
+
 	private String getModelProperty(BindingResult result) {
 		return getModel() + "." + result.getProperty();
 	}
-	
+
 	private String getModel() {
 		// TODO would be nice if model name was module.ClassName by default where module is subpackage of app base package
+		// TODO model name should probably be specifiable using class-level annotation
 		return binder.getModel().getClass().getName();
 	}
 
