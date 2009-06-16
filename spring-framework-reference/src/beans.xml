@@ -5815,7 +5815,7 @@ public @interface MovieQualifier {
       <emphasis>stereotype</emphasis> of a repository (a.k.a. Data Access
       Object or DAO). Among the possibilities for leveraging such a marker is
       the automatic translation of exceptions as described in <xref
-      linkend="orm-jpa-exceptions" />.</para>
+      linkend="orm-exception-translation" />.</para>
 
       <para>Spring 2.5 introduces further stereotype annotations:
       <interfacename>@Component</interfacename>,
