@@ -2809,6 +2809,49 @@ public class FileUploadBean {
     exception mapping feature from the Servlet API, but it's also possible to
     implement more finely grained mappings of exceptions from different
     handlers.</para>
+
+    <section id="mvc-ann-exceptionhandler">
+      <title><interfacename>@ExceptionResolver</interfacename></title>
+
+      <para>As an alternative to implementing the <interfacename>HandlerExceptionResolver</interfacename>, you
+        can use the <interfacename>@ExceptionHandler</interfacename>. The <classname>@ExceptionHandler</classname> method annotation is
+      used within a controller to specify which method will be invoked when an
+      exception of a specific type is thrown during the execution of
+      controller methods. For example</para>
+
+      <programlisting language="java">@Controller
+public class SimpleController {
+
+  // other controller method omitted
+
+  @ExceptionHandler(IOException.class)
+  public String handleIOException(IOException ex, HttpServletRequest request) {
+    return ClassUtils.getShortName(ex.getClass());
+  }
+}</programlisting>
+
+      <para>will invoke the 'handlerIOException' method when a
+      <classname>java.io.IOException</classname> is thrown.</para>
+
+      <para>The <classname>@ExceptionHandler</classname> value can be set to
+      an array of Exception types. If an exception is thrown matches one of
+      the types in the list, then the method annotated with the matching
+      <classname>@ExceptionHandler</classname> will be invoked. If the
+      annotation value is not set then the exception types listed as method
+      arguments are used.</para>
+
+      <para>Much like standard controller methods annotated with a
+      <classname>@RequestMapping</classname> annotation, the method arguments
+      and return values of <classname>@ExceptionHandler</classname> methods
+      are very flexible. For example, the
+      <classname>HttpServletRequest</classname> can be accessed in Servlet
+      environments and the <classname>PortletRequest</classname> in Portlet
+      environments. The return type can be a <classname>String</classname>,
+      which is interpreted as a view name or a
+      <classname>ModelAndView</classname> object. Please refer to the API
+      documentation for more details.</para>
+    </section>
+
   </section>
 
   <section id="mvc-coc">
