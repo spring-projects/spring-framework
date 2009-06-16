@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="introduction">
   <title>Introduction</title>
 
@@ -138,13 +137,13 @@
 
       <para>The <link linkend="beans-introduction"><emphasis>Core
       Container</emphasis></link> consists of the Core, Beans, Context and
-      Expression modules. </para>
+      Expression modules.</para>
 
       <para>The <link linkend="beans-introduction"><emphasis>Core and
       Beans</emphasis></link> modules provide the most fundamental parts of
       the framework and provides the IoC and Dependency Injection features.
-      The basic concept here is the <classname>BeanFactory</classname>, which
-      provides a sophisticated implementation of the factory pattern which
+      The basic concept here is the <classname>BeanFactory</classname> which
+      provides a sophisticated implementation of the factory pattern. It
       removes the need for programmatic singletons and allows you to decouple
       the configuration and specification of dependencies from your actual
       program logic.</para>
@@ -160,7 +159,9 @@
       event-propagation, resource-loading, and the transparent creation of
       contexts by, for example, a servlet container. The Context module also
       contains support for some Java EE features like EJB, JMX and basic
-      remoting support.</para>
+      remoting support. The <classname>ApplicationContext</classname>
+      interface is the focal point of the Context module that provides these
+      features.</para>
 
       <para>The <emphasis>Expression Language</emphasis> module provides a
       powerful expression language for querying and manipulating an object
@@ -182,7 +183,7 @@
 
       <para>The <link linkend="jdbc-introduction">JDBC</link> module provides
       a JDBC-abstraction layer that removes the need to do tedious JDBC coding
-      and parsing of database-vendor specific error codes. </para>
+      and parsing of database-vendor specific error codes.</para>
 
       <para>The <link
       linkend="orm-introduction"><emphasis>ORM</emphasis></link> module
@@ -195,30 +196,32 @@
       offers, such as the simple declarative transaction management feature
       mentioned previously.</para>
 
-      <para>The <link linkend="oxm">OXM</link> module provides an abstraction layer for using a number of
-      Object/XML mapping implementations. Supported technologies include JAXB,
-      Castor, XMLBeans, JiBX and XStream.</para>
+      <para>The <link linkend="oxm">OXM</link> module provides an abstraction
+      layer for using a number of Object/XML mapping implementations.
+      Supported technologies include JAXB, Castor, XMLBeans, JiBX and
+      XStream.</para>
 
-      <para>The <link linkend="jms">JMS</link> module provides Spring's support for the Java Messaging Service. It 
-      contains features for both producing and consuming messages. </para>
+      <para>The <link linkend="jms">JMS</link> module provides Spring's
+      support for the Java Messaging Service. It contains features for both
+      producing and consuming messages.</para>
 
-      <para>The <link linkend="transaction">Transaction</link> module provides a way to do programmatic as well
-      as declarative transaction management, not only for classes implementing
-      special interfaces, but for <emphasis>all your POJOs (plain old Java
-      objects)</emphasis>.</para>
+      <para>The <link linkend="transaction">Transaction</link> module provides
+      a way to do programmatic as well as declarative transaction management,
+      not only for classes implementing special interfaces, but for
+      <emphasis>all your POJOs (plain old Java objects)</emphasis>.</para>
     </section>
 
     <section>
       <title>Web</title>
 
-      <para>The <emphasis>Web</emphasis> layer consists of the Web, Web-Servlet
-      and Web-Portlet modules.</para>
+      <para>The <emphasis>Web</emphasis> layer consists of the Web,
+      Web-Servlet and Web-Portlet modules.</para>
 
       <para>Spring's <emphasis>Web</emphasis> module provides basic
       web-oriented integration features, such as multipart file-upload
       functionality, the initialization of the IoC container using servlet
-      listeners and a web-oriented application context. It also contains the web
-      related parts of Spring's remoting support.</para>
+      listeners and a web-oriented application context. It also contains the
+      web related parts of Spring's remoting support.</para>
 
       <para>The <emphasis>Web-Servlet</emphasis> module provides Spring's
       Model-View-Controller (<link
@@ -275,11 +278,13 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/overview-full.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-full.png"
+                     format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/overview-full.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-full.png"
+                     format="PNG" />
         </imageobject>
 
         <caption><para>Typical full-fledged Spring web
@@ -304,13 +309,13 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/overview-thirdparty-web.png"
-                     format="PNG" />
+          <imagedata align="center"
+                     fileref="images/overview-thirdparty-web.png" format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/overview-thirdparty-web.png"
-                     format="PNG" />
+          <imagedata align="center"
+                     fileref="images/overview-thirdparty-web.png" format="PNG" />
         </imageobject>
 
         <caption><para>Spring middle-tier using a third-party web
@@ -330,11 +335,13 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/overview-remoting.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-remoting.png"
+                     format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/overview-remoting.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-remoting.png"
+                     format="PNG" />
         </imageobject>
 
         <caption><para>Remoting usage scenario</para></caption>
@@ -348,11 +355,13 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/overview-ejb.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-ejb.png"
+                     format="PNG" />
         </imageobject>
 
         <imageobject role="html">
-          <imagedata align="center" fileref="images/overview-ejb.png" format="PNG" />
+          <imagedata align="center" fileref="images/overview-ejb.png"
+                     format="PNG" />
         </imageobject>
 
         <caption><para>EJBs - Wrapping existing POJOs</para></caption>

@@ -3,7 +3,7 @@
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 
 <chapter id="ejb">
-	<title>Enterprise Java Beans (EJB) integration</title>
+	<title>Enterprise JavaBeans (EJB) integration</title>
 
 	<section id="ejb-introduction">
     <title>Introduction</title>

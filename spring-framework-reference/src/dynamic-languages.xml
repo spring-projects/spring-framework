@@ -224,7 +224,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
         <para>
           The final step involves defining dynamic-language-backed bean definitions,
           one for each bean that you want to configure (this is no different to
-          normal Java bean configuration). However, instead of specifying the
+          normal JavaBean configuration). However, instead of specifying the
           fully qualified classname of the class that is to be instantiated and
           configured by the container, you use the <literal>&lt;lang:language/&gt;</literal>
           element to define the dynamic language-backed bean.

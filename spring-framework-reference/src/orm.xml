@@ -118,21 +118,21 @@
     which ORM technology you use. The Hibernate section provides more details
     and also show these features/configurations in a concrete context.</para>
 
-    <para>The major goal is to allow for clear application layering, with any
-    data access and transaction technology, and for loose coupling of
-    application objects. No more business service dependencies on the data
-    access or transaction strategy, no more hard-coded resource lookups, no
-    more hard-to-replace singletons, no more custom service registries. One
-    simple and consistent approach to wiring up application objects, keeping
-    them as reusable and free from container dependencies as possible. All the
-    individual data access features are usable on their own but integrate
-    nicely with Spring's application context concept, providing XML-based
-    configuration and cross-referencing of plain JavaBean instances that don't
-    need to be Spring-aware. In a typical Spring application, many important
-    objects are JavaBeans: data access templates, data access objects,
-    transaction managers, business services (that use the data access objects
-    and transaction managers), web view resolvers, web controllers (that use
-    the business services),and so on.</para>
+    <para>The major goal of Spring's ORM integration is to allow for clear
+    application layering, with any data access and transaction technology, and
+    for loose coupling of application objects. No more business service
+    dependencies on the data access or transaction strategy, no more
+    hard-coded resource lookups, no more hard-to-replace singletons, no more
+    custom service registries. One simple and consistent approach to wiring up
+    application objects, keeping them as reusable and free from container
+    dependencies as possible. All the individual data access features are
+    usable on their own but integrate nicely with Spring's application context
+    concept, providing XML-based configuration and cross-referencing of plain
+    JavaBean instances that don't need to be Spring-aware. In a typical Spring
+    application, many important objects are JavaBeans: data access templates,
+    data access objects, transaction managers, business services (that use the
+    data access objects and transaction managers), web view resolvers, web
+    controllers (that use the business services),and so on.</para>
 
     <section id="orm-resource-mngmnt">
       <title>Resource and Transaction management</title>
@@ -386,12 +386,12 @@ public class ProductDaoImpl implements ProductDao {
       <title>Declarative transaction demarcation</title>
 
       <para>We recommended that you use Spring's declarative transaction
-      support, which essentially enables you to replace explicit transaction
-      demarcation API calls in your Java code with an AOP transaction
-      interceptor configured in a Spring container. This allows you to keep
-      business services free of repetitive transaction demarcation code, and
-      allows you to focus on adding business logic which is where the real
-      value of your application lies.</para>
+      support, which enables you to replace explicit transaction demarcation
+      API calls in your Java code with an AOP transaction interceptor
+      configured in a Spring container using Java annotations or XML. This
+      allows you to keep business services free of repetitive transaction
+      demarcation code, and allows you to focus on adding business logic which
+      is where the real value of your application lies.</para>
 
       <note>
         <para>You are <emphasis>strongly</emphasis> encouraged to read the
@@ -925,10 +925,10 @@ public class ProductDaoImpl implements ProductDao {
       up through direct instantiation of a
       <interfacename>PersistenceManagerFactory</interfacename> implementation
       class. A JDO <interfacename>PersistenceManagerFactory</interfacename>
-      implementation class is supposed to follow the JavaBeans pattern, just
-      like a JDBC <interfacename>DataSource</interfacename> implementation
-      class, which is a natural fit for a Spring bean definition. This setup
-      style usually supports a Spring-defined JDBC
+      implementation class follows the JavaBeans pattern, just like a JDBC
+      <interfacename>DataSource</interfacename> implementation class, which is
+      a natural fit for configuration using Spring. This setup style usually
+      supports a Spring-defined JDBC
       <interfacename>DataSource</interfacename>, passed into the
       "connectionFactory" property. For example, for the open source JDO
       implementation DataNucleus (formerly JPOX) (<ulink
