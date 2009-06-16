@@ -1295,8 +1295,8 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
       </section>
 
       <section id="mvc-ann-responsebody">
-          <title>Mapping the response body with the @ResponseBody
-          annotation</title>
+        <title>Mapping the response body with the @ResponseBody
+        annotation</title>
 
         <para>Similar to <interfacename>@RequestBody</interfacename>, there is
         the <interfacename>@ResponseBody</interfacename> annotation. This
@@ -1550,15 +1550,15 @@ public class MyFormController {
   <section id="mvc-handlermapping">
     <title>Handler mappings</title>
 
-	  <para>In previous versions of Spring MVC, users were required to define <interfacename>HandlerMapping</interfacename>s in
-		  the web application context
-	  to map incoming web requests to
-    appropriate handlers. With the introduction of Spring 2.5, the <classname>DispatcherServlet</classname> enables the
-		  <classname>DefaultAnnotationHandlerMapping</classname>, which looks for
-		  <interfacename>@RequestMapping</interfacename> annotations on <interfacename>@Controllers</interfacename>.
-		  Typically, you do not need to override this default mapping, except when overriding the properties.
-		  These properties are:
-	  </para>
+    <para>In previous versions of Spring MVC, users were required to define
+    <interfacename>HandlerMapping</interfacename>s in the web application
+    context to map incoming web requests to appropriate handlers. With the
+    introduction of Spring 2.5, the <classname>DispatcherServlet</classname>
+    enables the <classname>DefaultAnnotationHandlerMapping</classname>, which
+    looks for <interfacename>@RequestMapping</interfacename> annotations on
+    <interfacename>@Controllers</interfacename>. Typically, you do not need to
+    override this default mapping, except when overriding the properties.
+    These properties are:</para>
 
     <itemizedlist spacing="compact">
       <listitem>
@@ -1615,16 +1615,17 @@ public class MyFormController {
     subclasses of
     <classname>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</classname></emphasis>).</para>
 
-	  <para>The following example shows how to override the default mapping, and add an interceptor:</para>
+    <para>The following example shows how to override the default mapping, and
+    add an interceptor:</para>
 
-	  <programlisting language="xml"><![CDATA[<beans>
-  <bean id="handlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-    <property name="interceptors">
-      <bean class="example.MyInterceptor"/>
-    </property>
-  </bean>
+    <programlisting language="xml">&lt;beans&gt;
+  &lt;bean id="handlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"&gt;
+    &lt;property name="interceptors"&gt;
+      &lt;bean class="example.MyInterceptor"/&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
 
-<beans>]]></programlisting>
+&lt;beans&gt;</programlisting>
 
     <section id="mvc-handlermapping-interceptor">
       <title>Intercepting requests - the
@@ -1841,10 +1842,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
             <row>
               <entry><classname>ContentNegotiatingViewResolver</classname></entry>
 
-              <entry>An implementation of the <interfacename>ViewResolver</interfacename>
-				  interface that that resolves a view based on the request file name or <literal>Accept</literal> header.
-				  See <xref linkend="mvc-multiple-representations"/>.
-			  </entry>
+              <entry>An implementation of the
+              <interfacename>ViewResolver</interfacename> interface that that
+              resolves a view based on the request file name or
+              <literal>Accept</literal> header. See <xref
+              linkend="mvc-multiple-representations" />.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -2068,139 +2070,138 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       </section>
     </section>
 
-	  <section id="mvc-multiple-representations">
-		<title><classname>ContentNegotiatingViewResolver</classname></title>
+    <section id="mvc-multiple-representations">
+      <title><classname>ContentNegotiatingViewResolver</classname></title>
 
-		<para>The <classname>ContentNegotiatingViewResolver</classname>
-			does not resolve views itself, but rather delegates to other
-			view resolvers, selecting the view that resembles the representation
-			requested by the client.
-			There are two strategies for a client to inform the server of
-		the representation it is interested in receiving.</para>
+      <para>The <classname>ContentNegotiatingViewResolver</classname> does not
+      resolve views itself, but rather delegates to other view resolvers,
+      selecting the view that resembles the representation requested by the
+      client. There are two strategies for a client to inform the server of
+      the representation it is interested in receiving.</para>
 
-		<para>The first strategy is to use a distinct URI for each resource.
-		This is typically done by using a different file extension in the URI.
-		For example the URI<literal>
-		http://www.example.com/users/fred.pdf</literal> requests a PDF
-		representation of the user fred while
-		<literal>http://www.example.com/users/fred.xml</literal> requests an XML
-		representation.</para>
+      <para>The first strategy is to use a distinct URI for each resource.
+      This is typically done by using a different file extension in the URI.
+      For example the URI<literal>
+      http://www.example.com/users/fred.pdf</literal> requests a PDF
+      representation of the user fred while
+      <literal>http://www.example.com/users/fred.xml</literal> requests an XML
+      representation.</para>
 
-		<para>The second strategy is for the client to use the same URI to
-		locate the resource but set the <literal>Accept</literal> HTTP request
-		header to list the <ulink
-		url="http://en.wikipedia.org/wiki/Internet_media_type">media
-		types</ulink> that it understands. For example, a HTTP request for
-		<literal>http://www.example.com/users/fred</literal> with an
-		<literal>Accept</literal> header set to <literal>application/pdf
-		</literal>requests a PDF representation of the user fred while
-		<literal>http://www.example.com/users/fred</literal> with an
-		<literal>Accept</literal> header set to <literal>text/xml</literal>
-		requests an XML representation. This strategy is known as <ulink
-		url="http://en.wikipedia.org/wiki/Content_negotiation">content
-		negotiation</ulink>.</para>
+      <para>The second strategy is for the client to use the same URI to
+      locate the resource but set the <literal>Accept</literal> HTTP request
+      header to list the <ulink
+      url="http://en.wikipedia.org/wiki/Internet_media_type">media
+      types</ulink> that it understands. For example, a HTTP request for
+      <literal>http://www.example.com/users/fred</literal> with an
+      <literal>Accept</literal> header set to <literal>application/pdf
+      </literal>requests a PDF representation of the user fred while
+      <literal>http://www.example.com/users/fred</literal> with an
+      <literal>Accept</literal> header set to <literal>text/xml</literal>
+      requests an XML representation. This strategy is known as <ulink
+      url="http://en.wikipedia.org/wiki/Content_negotiation">content
+      negotiation</ulink>.</para>
 
-		<note>
-		  <para>One issue with the Accept header is that is impossible to change
-		  it in a web browser, in HTML. For instance, in Firefox, it's fixed
-		  to</para>
+      <note>
+        <para>One issue with the Accept header is that is impossible to change
+        it in a web browser, in HTML. For instance, in Firefox, it's fixed
+        to</para>
 
-		  <programlisting>Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+        <programlisting>Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
   </programlisting>
 
-		  <para>For this reason it is common to see the use of a distinct URI
-		  for each representation.</para>
-		</note>
+        <para>For this reason it is common to see the use of a distinct URI
+        for each representation.</para>
+      </note>
 
-		<para>To support multiple representations of a resource Spring provides
-		the <classname>ContentNegotiatingViewResolver</classname> to resolve a
-		view based on the file extension or <literal>Accept</literal> header of
-		the HTTP request. <classname>ContentNegotiatingViewResolver</classname>
-		does not perform the view resolution itself, but instead delegates to a
-		list of view resolvers set using the bean property
-		<literal>ViewResolvers</literal>.</para>
+      <para>To support multiple representations of a resource Spring provides
+      the <classname>ContentNegotiatingViewResolver</classname> to resolve a
+      view based on the file extension or <literal>Accept</literal> header of
+      the HTTP request. <classname>ContentNegotiatingViewResolver</classname>
+      does not perform the view resolution itself, but instead delegates to a
+      list of view resolvers set using the bean property
+      <literal>ViewResolvers</literal>.</para>
 
-		<para>The <classname>ContentNegotiatingViewResolver</classname> selects
-		an appropriate <classname>View</classname> to handle the request by
-		comparing the request media type(s) with the media type (a.k.a.
-		<literal>Content-Type</literal>) supported by the
-		<classname>View</classname> associated with each of its
-		<classname>ViewResolvers</classname>. The first
-		<classname>View</classname> in the list that has a compatible
-		<literal>Content-Type</literal> is used to return the representation to
-		the client. The <literal>Accept</literal> header may include wild cards,
-		for example 'text/*', in which case a <classname>View</classname> whose
-		Context-Type was 'text/xml' is a compatible match.</para>
+      <para>The <classname>ContentNegotiatingViewResolver</classname> selects
+      an appropriate <classname>View</classname> to handle the request by
+      comparing the request media type(s) with the media type (a.k.a.
+      <literal>Content-Type</literal>) supported by the
+      <classname>View</classname> associated with each of its
+      <classname>ViewResolvers</classname>. The first
+      <classname>View</classname> in the list that has a compatible
+      <literal>Content-Type</literal> is used to return the representation to
+      the client. The <literal>Accept</literal> header may include wild cards,
+      for example 'text/*', in which case a <classname>View</classname> whose
+      Context-Type was 'text/xml' is a compatible match.</para>
 
-		<para>To support the resolution of a view based on a file extension,
-		<classname>ContentNegotiatingViewResolver</classname>'s bean property
-		<literal>MediaTypes</literal> is used to specify a mapping of file
-		extensions to media types. For more information on the algorithm to
-		determine the request media type, refer to the API documentation for
-		<classname>ContentNegotiatingViewResolver</classname>..</para>
+      <para>To support the resolution of a view based on a file extension,
+      <classname>ContentNegotiatingViewResolver</classname>'s bean property
+      <literal>MediaTypes</literal> is used to specify a mapping of file
+      extensions to media types. For more information on the algorithm to
+      determine the request media type, refer to the API documentation for
+      <classname>ContentNegotiatingViewResolver</classname>..</para>
 
-		<para>Here is an example configuration of a
-		<classname>ContentNegotiatingViewResolver</classname></para>
+      <para>Here is an example configuration of a
+      <classname>ContentNegotiatingViewResolver</classname></para>
 
-		<programlisting language="xml"><![CDATA[<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-  <property name="mediaTypes">
-    <map>
-      <entry key="atom" value="application/atom+xml"/>
-      <entry key="html" value="text/html"/>
-    </map>
-  </property>
-  <property name="viewResolvers">
-    <list>
-      <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
-      <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/jsp/"/>
-        <property name="suffix" value=".jsp"/>
-      </bean>
-    </list>
-  </property>
-</bean>
+      <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"&gt;
+  &lt;property name="mediaTypes"&gt;
+    &lt;map&gt;
+      &lt;entry key="atom" value="application/atom+xml"/&gt;
+      &lt;entry key="html" value="text/html"/&gt;
+    &lt;/map&gt;
+  &lt;/property&gt;
+  &lt;property name="viewResolvers"&gt;
+    &lt;list&gt;
+      &lt;bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/&gt;
+      &lt;bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+        &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
+        &lt;property name="suffix" value=".jsp"/&gt;
+      &lt;/bean&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;
 
 
-<bean id="content" class="com.springsource.samples.rest.SampleContentAtomView"/>]]></programlisting>
+&lt;bean id="content" class="com.springsource.samples.rest.SampleContentAtomView"/&gt;</programlisting>
 
-		<para>The <classname>InternalResourceViewResolver</classname> handles
-		the translation of view names and JSP pages while the
-		<classname>BeanNameViewResolver</classname> returns a view based on the
-		name of a bean. (See "<link
-		linkend="mvc-viewresolver-resolver">Resolving views - the ViewResolver
-		interface</link>" for more details on how Spring looks up and
-		instantiates a view.) In this example, the <literal>content</literal>
-		bean is a class that inherits from
-		<classname>AbstractAtomFeedView</classname> which returns an Atom RSS
-		feed. For more information on creating an Atom Feed representation see
-		the section 'Atom Views'.</para>
+      <para>The <classname>InternalResourceViewResolver</classname> handles
+      the translation of view names and JSP pages while the
+      <classname>BeanNameViewResolver</classname> returns a view based on the
+      name of a bean. (See "<link
+      linkend="mvc-viewresolver-resolver">Resolving views - the ViewResolver
+      interface</link>" for more details on how Spring looks up and
+      instantiates a view.) In this example, the <literal>content</literal>
+      bean is a class that inherits from
+      <classname>AbstractAtomFeedView</classname> which returns an Atom RSS
+      feed. For more information on creating an Atom Feed representation see
+      the section 'Atom Views'.</para>
 
-		<para>In this configuration, if a request is made with a .html extension
-		the view resolver will look for a view that matches the text/html media
-		type. The <classname>InternalResourceViewResolver</classname> provides
-		the matching view for text/html. If the request is made with the file
-		extension .atom, the view resolver will look for a view that matches the
-		application/atom+xml media type. This view is provided by the
-		<classname>BeanNameViewResolver</classname> that maps to the
-		<classname>SampleContentAtomView</classname> if the view name returned
-		is 'content'. Alternatively, client requests could be made without a
-		file extension and setting the Accept header to the preferred media-type
-		and the same resolution of request to views would occur.</para>
+      <para>In this configuration, if a request is made with a .html extension
+      the view resolver will look for a view that matches the text/html media
+      type. The <classname>InternalResourceViewResolver</classname> provides
+      the matching view for text/html. If the request is made with the file
+      extension .atom, the view resolver will look for a view that matches the
+      application/atom+xml media type. This view is provided by the
+      <classname>BeanNameViewResolver</classname> that maps to the
+      <classname>SampleContentAtomView</classname> if the view name returned
+      is 'content'. Alternatively, client requests could be made without a
+      file extension and setting the Accept header to the preferred media-type
+      and the same resolution of request to views would occur.</para>
 
-		<note>
-		  <para>If <classname>ContentNegotiatingViewResolver</classname>'s list
-		  of ViewResolvers is not configured explicitly, then it will
-		  automatically use any ViewResolvers defined in the application
-		  context.</para>
-		</note>
+      <note>
+        <para>If <classname>ContentNegotiatingViewResolver</classname>'s list
+        of ViewResolvers is not configured explicitly, then it will
+        automatically use any ViewResolvers defined in the application
+        context.</para>
+      </note>
 
-		<para>The corresponding controller code that returns an Atom RSS feed
-		for a URI of the form <literal>http://localhost/content.atom</literal>
-		or <literal>http://localhost/content</literal> with an
-		<literal>Accept</literal> header of application/atom+xml is shown
-		below</para>
+      <para>The corresponding controller code that returns an Atom RSS feed
+      for a URI of the form <literal>http://localhost/content.atom</literal>
+      or <literal>http://localhost/content</literal> with an
+      <literal>Accept</literal> header of application/atom+xml is shown
+      below</para>
 
-		<programlisting language="java">@Controller
+      <programlisting language="java">@Controller
   public class ContentController {
 
 	  private List&lt;SampleContent&gt; contentList = new ArrayList&lt;SampleContent&gt;();
@@ -2214,9 +2215,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 	  }
 
   }</programlisting>
-
-	  </section>
-
+    </section>
   </section>
 
   <section id="mvc-localeresolver">
@@ -2813,9 +2812,11 @@ public class FileUploadBean {
     <section id="mvc-ann-exceptionhandler">
       <title><interfacename>@ExceptionResolver</interfacename></title>
 
-      <para>As an alternative to implementing the <interfacename>HandlerExceptionResolver</interfacename>, you
-        can use the <interfacename>@ExceptionHandler</interfacename>. The <classname>@ExceptionHandler</classname> method annotation is
-      used within a controller to specify which method will be invoked when an
+      <para>As an alternative to implementing the
+      <interfacename>HandlerExceptionResolver</interfacename>, you can use the
+      <interfacename>@ExceptionHandler</interfacename>. The
+      <classname>@ExceptionHandler</classname> method annotation is used
+      within a controller to specify which method will be invoked when an
       exception of a specific type is thrown during the execution of
       controller methods. For example</para>
 
@@ -2851,7 +2852,6 @@ public class SimpleController {
       <classname>ModelAndView</classname> object. Please refer to the API
       documentation for more details.</para>
     </section>
-
   </section>
 
   <section id="mvc-coc">
@@ -3187,6 +3187,49 @@ public class SimpleController {
       <classname>DefaultRequestToViewNameTranslator</classname> class for
       details of the various properties that can be configured.</para>
     </section>
+  </section>
+
+  <section id="mvc-etag">
+    <title>ETag support</title>
+
+    <para>An <ulink url="http://en.wikipedia.org/wiki/HTTP_ETag">ETag</ulink>
+    (entity tag) is an HTTP response header returned by an HTTP/1.1 compliant
+    web server used to determine change in content at a given URL. It can be
+    considered to be the more sophisticated successor to the
+    <literal>Last-Modified</literal> header. When a server returns a
+    representation with an ETag header, the client can use this header in
+    subsequent GETs, in an <literal>If-None-Match</literal> header. If the
+    content has not changed, the server will return <literal>304: Not
+    Modified</literal>.</para>
+
+    <para>Support for ETags is provided by the servlet filter
+    <classname>ShallowEtagHeaderFilter</classname>. Since it is a plain
+    Servlet Filter, and thus can be used in combination with any web
+    framework. The <classname>ShallowEtagHeaderFilter</classname> filter
+    creates so-called shallow ETags (as opposed to deep ETags, more about that
+    later). The way it works is quite simple: the filter simply caches the
+    content of the rendered JSP (or other content), generates an MD5 hash over
+    that, and returns that as an ETag header in the response. The next time a
+    client sends a request for the same resource, it uses that hash as the
+    <literal>If-None-Match</literal> value. The filter notices this, renders
+    the view again, and compares the two hashes. If they are equal, a
+    <literal>304</literal> is returned. It is important to note that this
+    filter will not save processing power, as the view is still rendered. The
+    only thing it saves is bandwidth, as the rendered response is not sent
+    back over the wire.</para>
+
+    <para>You configure the <classname>ShallowEtagHeaderFilter</classname> in
+    <filename>web.xml</filename>:</para>
+
+    <programlisting language="xml">&lt;filter&gt;
+  &lt;filter-name&gt;etagFilter&lt;/filter-name&gt;
+    &lt;filter-class&gt;org.springframework.web.filter.ShallowEtagHeaderFilter&lt;/filter-class&gt;
+&lt;/filter&gt;
+
+&lt;filter-mapping&gt;
+  &lt;filter-name&gt;etagFilter&lt;/filter-name&gt;
+  &lt;servlet-name&gt;petclinic&lt;/servlet-name&gt;
+&lt;/filter-mapping&gt;</programlisting>
   </section>
 
   <section id="mvc-resources">
