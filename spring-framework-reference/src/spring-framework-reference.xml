@@ -265,9 +265,6 @@
 					<para><xref linkend="view"/></para>
 				</listitem>
 				<listitem>
-					<para><xref linkend="rest"/></para>
-				</listitem>
-				<listitem>
 					<para><xref linkend="web-integration"/></para>
 				</listitem>
 				<listitem>
@@ -277,7 +274,6 @@
 		</partintro>
 		<xi:include href="mvc.xml"/>
 		<xi:include href="view.xml"/>
-		<xi:include href="rest.xml"/>
 		<xi:include href="web-integration.xml"/>
 		<xi:include href="portlet.xml"/>
 	</part>
