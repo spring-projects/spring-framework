@@ -38,50 +38,6 @@
     configuration</link> to understand the general programming model.</para>
   </section>
 
-    <section id="rest-method-conversion">
-      <title>HTTP Method Conversion</title>
-
-      <para>A key principle of REST is the use of the Uniform Interface. This
-      means that all resources (URLs) can be manipulated using the same four
-      HTTP methods: GET, PUT, POST, and DELETE. For each methods, the HTTP
-      specification defines the exact semantics. For instance, a GET should
-      always be a safe operation, meaning that is has no side effects, and a
-      PUT or DELETE should be idempotent, meaning that you can repeat these
-      operations over and over again, but the end result should be the same.
-      While HTTP defines these four methods, HTML only supports two: GET and
-      POST. Fortunately, there are two possible workarounds: you can either
-      use JavaScript to do your PUT or DELETE, or simply do a POST with the
-      'real' method as an additional parameter (modeled as a hidden input
-      field in an HTML form). This latter trick is what Spring's
-      <classname>HiddenHttpMethodFilter</classname> does. This filter is a
-      plain Servlet Filter and therefore it can be used in combination with
-      any web framework (not just Spring MVC). Simply add this filter to your
-      web.xml, and a POST with a hidden _method parameter will be converted
-      into the corresponding HTTP method request.</para>
-
-      <section id="rest-form-tags">
-        <title>Supporting Spring form tags</title>
-
-        <para>To support HTTP method conversion the Spring MVC form tag was
-        updated to support setting the HTTP method. For example, the following
-        snippet taken from the updated Petclinic sample</para>
-
-        <programlisting language="xml">&lt;form:form method="delete"&gt;
-    &lt;p class="submit"&gt;&lt;input type="submit" value="Delete Pet"/&gt;&lt;/p&gt;
-&lt;/form:form&gt;</programlisting>
-
-        <para>This will actually perform an HTTP POST, with the 'real' DELETE
-        method hidden behind a request parameter, to be picked up by the
-        <classname>HiddenHttpMethodFilter</classname>. The corresponding
-        @Controller method is shown below</para>
-
-        <programlisting language="java">@RequestMapping(method = RequestMethod.DELETE)
-public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
-    this.clinic.deletePet(petId);
-    return "redirect:/owners/" + ownerId;
-}</programlisting>
-      </section>
-    </section>
 
     <section id="rest-etag">
       <title>ETag support</title>
