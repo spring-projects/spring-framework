@@ -35,13 +35,18 @@ public interface BindingResult {
 	boolean isError();
 
 	/**
-	 * If an error result, the error code; for example, "invalidFormat", "propertyNotFound", or "evaluationException".
+	 * If an error result, the error code; for example, "invalidFormat" or "propertyNotFound".
 	 */
 	String getErrorCode();
 
 	/**
+	 * If an error, result returns a default message describing what went wrong.
+	 */
+	String getErrorMessage();
+
+
+	/**
 	 * If an error result, the cause of the error.
-	 * @return the cause, or <code>null</code> if this is not an error
 	 */
 	Throwable getErrorCause();
 
