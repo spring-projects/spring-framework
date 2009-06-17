@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.message.Message;
@@ -36,7 +35,6 @@ public class DefaultMessageContextTests {
 	}
 
 	@Test
-	@Ignore
 	public void addMessage() {
 		MessageBuilder builder = new MessageBuilder();
 		MessageResolver message = builder.severity(Severity.ERROR).code("invalidFormat").resolvableArg("label",
