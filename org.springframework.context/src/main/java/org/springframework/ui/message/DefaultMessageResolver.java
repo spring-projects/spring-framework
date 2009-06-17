@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.expression.MapAccessor;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -40,13 +39,13 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 	private String[] codes;
 
 	private Map<String, Object> args;
-	
+
 	private String defaultText;
 
 	private ExpressionParser expressionParser;
 
-	public DefaultMessageResolver(Severity severity, String[] codes, Map<String, Object> args,
-			String defaultText, ExpressionParser expressionParser) {
+	public DefaultMessageResolver(Severity severity, String[] codes, Map<String, Object> args, String defaultText,
+			ExpressionParser expressionParser) {
 		this.severity = severity;
 		this.codes = codes;
 		this.args = args;
@@ -67,8 +66,7 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 		try {
 			StandardEvaluationContext context = new StandardEvaluationContext();
 			context.setRootObject(args);
-			context.addPropertyAccessor(new MapAccessor());
-			context.addPropertyAccessor(new MessageSourceResolvableAccessor(messageSource, locale));
+			context.addPropertyAccessor(new MessageArgumentAccessor(messageSource, locale));
 			String text = (String) message.getValue(context);
 			return new TextMessage(severity, text);
 		} catch (EvaluationException e) {
@@ -116,37 +114,44 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 
 	}
 
-	private static class MessageSourceResolvableAccessor implements PropertyAccessor {
+	static class MessageArgumentAccessor implements PropertyAccessor {
 
 		private MessageSource messageSource;
 		
 		private Locale locale;
-		
-		public MessageSourceResolvableAccessor(MessageSource messageSource, Locale locale) {
+
+		public MessageArgumentAccessor(MessageSource messageSource, Locale locale) {
 			this.messageSource = messageSource;
 			this.locale = locale;
 		}
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return true;
+			return (((Map) target).containsKey(name));
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			// TODO this does not get called when resolving MessageSourceResolvable variables; only when accessing properties on MessageSourceResolvable targets.
-			return new TypedValue(messageSource.getMessage((MessageSourceResolvable)target, locale));
+			Object o = ((Map) target).get(name);
+			if (o instanceof MessageSourceResolvable) {
+				String message = messageSource.getMessage((MessageSourceResolvable) o, locale);
+				return new TypedValue(message);
+			} else {
+				return new TypedValue(o);
+			}
 		}
-
+		
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue)
+				throws AccessException {
 			throw new UnsupportedOperationException("Should not be called");
 		}
-
-		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { MessageSourceResolvable.class };
-		}
 		
+		public Class[] getSpecificTargetClasses() {
+			return new Class[] { Map.class };
+		}
+
 	}
+
 }

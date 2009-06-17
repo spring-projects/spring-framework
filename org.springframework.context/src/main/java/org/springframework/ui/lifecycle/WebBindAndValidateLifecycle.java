@@ -56,15 +56,20 @@ public class WebBindAndValidateLifecycle {
 			// TODO get validation results
 			validator.validate(binder.getModel(), bindingResults.successes().properties());
 		}
+		// TODO make message translation pluggable
 		MessageBuilder builder = new MessageBuilder();
 		for (BindingResult result : bindingResults.failures()) {
-			MessageResolver message = builder.code(modelPropertyError(result)).code(propertyError(result)).code(
-					typeError(result)).code(error(result)).resolvableArg("label", getModelProperty(result)).arg(
-					"value", result.getUserValue()).
-					// TODO add binding el resolver allowing binding.format to be called
-					arg("binding", binder.getBinding(result.getProperty())).
-					// TODO allow binding result to contribute additional arguments
-					build();
+			MessageResolver message = builder.
+				code(modelPropertyError(result)).
+				code(propertyError(result)).
+				code(typeError(result)).
+				code(error(result)).
+				resolvableArg("label", getModelProperty(result)).
+				arg("value", result.getUserValue()).
+				// TODO add binding el resolver allowing binding.format to be called
+				arg("binding", binder.getBinding(result.getProperty())).
+				// TODO allow binding result to contribute additional arguments
+				build();
 			// TODO should model name be part of element id?
 			messageContext.add(message, result.getProperty());
 		}

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MessageBuilderTests {
@@ -12,7 +11,6 @@ public class MessageBuilderTests {
 	private MessageBuilder builder = new MessageBuilder();
 
 	@Test
-	@Ignore
 	public void buildMessage() {
 		MessageResolver resolver = builder.severity(Severity.ERROR).code("invalidFormat").resolvableArg("label", "mathForm.decimalField")
 				.arg("format", "#,###.##").defaultText("Field must be in format #,###.##").build();
