@@ -53,7 +53,7 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node child = childNodes.item(i);
-			if (!(child instanceof Element) || !child.getLocalName().equals("task")) {
+			if (!(child instanceof Element) || !child.getLocalName().equals("scheduled")) {
 				continue;
 			}
 			Element taskElement = (Element) child;

@@ -155,7 +155,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="task" type="taskType" minOccurs="1" maxOccurs="unbounded"/>
+				<xsd:element name="scheduled" type="scheduledTaskType" minOccurs="1" maxOccurs="unbounded"/>
 			</xsd:sequence>
 			<xsd:attribute name="scheduler" type="xsd:string" use="optional">
 				<xsd:annotation>
@@ -173,10 +173,10 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:complexType name="taskType">
+	<xsd:complexType name="scheduledTaskType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Element defining a method-invoking task and its corresponding trigger.
+	Element defining a scheduled method-invoking task and its corresponding trigger.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:attribute name="cron" type="xsd:string" use="optional">
