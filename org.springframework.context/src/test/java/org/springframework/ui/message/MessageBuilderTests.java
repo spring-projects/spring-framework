@@ -12,7 +12,7 @@ public class MessageBuilderTests {
 
 	@Test
 	public void buildMessage() {
-		MessageResolver resolver = builder.severity(Severity.ERROR).code("invalidFormat").resolvableArg("label", "mathForm.decimalField")
+		MessageResolver resolver = builder.severity(Severity.ERROR).code("invalidFormat").arg("label", new ResolvableArgument("mathForm.decimalField"))
 				.arg("format", "#,###.##").defaultText("Field must be in format #,###.##").build();
 		MockMessageSource messageSource = new MockMessageSource();
 		messageSource.addMessage("invalidFormat", Locale.US, "#{label} must be in format #{format}");

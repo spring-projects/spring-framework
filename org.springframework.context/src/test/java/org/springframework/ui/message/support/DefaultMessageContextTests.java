@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.ui.message.ResolvableArgument;
 import org.springframework.ui.message.Message;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.MessageResolver;
@@ -37,8 +38,8 @@ public class DefaultMessageContextTests {
 	@Test
 	public void addMessage() {
 		MessageBuilder builder = new MessageBuilder();
-		MessageResolver message = builder.severity(Severity.ERROR).code("invalidFormat").resolvableArg("label",
-				"mathForm.decimalField").arg("format", "#,###.##").defaultText("Field must be in format #,###.##").build();
+		MessageResolver message = builder.severity(Severity.ERROR).code("invalidFormat").arg("label", new ResolvableArgument("mathForm.decimalField")).
+			arg("format", "#,###.##").defaultText("Field must be in format #,###.##").build();
 		context.add(message, "mathForm.decimalField");
 		Map<String, List<Message>> messages = context.getMessages();
 		assertEquals(1, messages.size());

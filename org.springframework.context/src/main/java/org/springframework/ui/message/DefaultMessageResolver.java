@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -56,7 +57,12 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 	// implementing MessageResolver
 
 	public Message resolveMessage(MessageSource messageSource, Locale locale) {
-		String messageString = messageSource.getMessage(this, locale);
+		String messageString; 
+		try {
+			messageString = messageSource.getMessage(this, locale);
+		} catch (NoSuchMessageException e) {
+			throw new MessageResolutionException("Unable to resolve message in MessageSource [" + messageSource + "]", e);
+		}
 		Expression message;
 		try {
 			message = expressionParser.parseExpression(messageString, ParserContext.TEMPLATE_EXPRESSION);
@@ -70,7 +76,7 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 			String text = (String) message.getValue(context);
 			return new TextMessage(severity, text);
 		} catch (EvaluationException e) {
-			throw new MessageResolutionException("Failed to evaluate expression to generate message text", e);
+			throw new MessageResolutionException("Failed to evaluate message expression '" + message.getExpressionString() + "' to generate final message text", e);
 		}
 	}
 
@@ -114,6 +120,7 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 
 	}
 
+	@SuppressWarnings("unchecked")
 	static class MessageArgumentAccessor implements PropertyAccessor {
 
 		private MessageSource messageSource;

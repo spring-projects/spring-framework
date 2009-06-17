@@ -21,9 +21,11 @@ import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.binding.support.WebBinder;
+import org.springframework.ui.message.ResolvableArgument;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.MessageContext;
 import org.springframework.ui.message.MessageResolver;
+import org.springframework.ui.message.Severity;
 import org.springframework.ui.validation.Validator;
 
 /**
@@ -42,7 +44,7 @@ public class WebBindAndValidateLifecycle {
 	private Validator validator;
 
 	public WebBindAndValidateLifecycle(Object model, MessageContext messageContext) {
-		// TODO allow binder to be configured with bindings from model metadata
+		// TODO allow binder to be configured with bindings from @Model metadata
 		// TODO support @Bound property annotation?
 		// TODO support @StrictBinding class-level annotation?
 		this.binder = new WebBinder(model);
@@ -52,7 +54,7 @@ public class WebBindAndValidateLifecycle {
 	public void execute(Map<String, ? extends Object> userMap) {
 		UserValues values = binder.createUserValues(userMap);
 		BindingResults bindingResults = binder.bind(values);
-		if (validationDecider.shouldValidateAfter(bindingResults)) {
+		if (validator != null && validationDecider.shouldValidateAfter(bindingResults)) {
 			// TODO get validation results
 			validator.validate(binder.getModel(), bindingResults.successes().properties());
 		}
@@ -60,14 +62,16 @@ public class WebBindAndValidateLifecycle {
 		MessageBuilder builder = new MessageBuilder();
 		for (BindingResult result : bindingResults.failures()) {
 			MessageResolver message = builder.
+				severity(Severity.ERROR).
 				code(modelPropertyError(result)).
 				code(propertyError(result)).
 				code(typeError(result)).
 				code(error(result)).
-				resolvableArg("label", getModelProperty(result)).
+				arg("label", new ResolvableArgument(getModelProperty(result))).
 				arg("value", result.getUserValue()).
 				// TODO add binding el resolver allowing binding.format to be called
 				arg("binding", binder.getBinding(result.getProperty())).
+				defaultText(result.getErrorMessage()).
 				// TODO allow binding result to contribute additional arguments
 				build();
 			// TODO should model name be part of element id?

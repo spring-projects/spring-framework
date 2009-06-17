@@ -1,81 +1,67 @@
-package org.springframework.ui.binding.support;
+package org.springframework.ui.lifecycle;
 
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.binding.Binder;
-import org.springframework.ui.binding.BindingConfiguration;
-import org.springframework.ui.binding.BindingResults;
-import org.springframework.ui.binding.UserValues;
-import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
-import org.springframework.ui.format.number.CurrencyFormatter;
+import org.springframework.ui.message.MockMessageSource;
+import org.springframework.ui.message.Severity;
+import org.springframework.ui.message.support.DefaultMessageContext;
 
-public class WebBinderTests {
-
-	TestBean bean = new TestBean();
+public class WebBindAndLifecycleTests {
 	
-	Binder binder = new WebBinder(bean);
+	private WebBindAndValidateLifecycle lifecycle;
 
+	private DefaultMessageContext messages;
+	
 	@Before
 	public void setUp() {
-		LocaleContextHolder.setLocale(Locale.US);
-	}
-	
-	@After
-	public void tearDown() {
-		LocaleContextHolder.setLocale(null);
+		MockMessageSource messageSource = new MockMessageSource();
+		messageSource.addMessage("invalidFormat", Locale.US, "#{label} must be a ${objectType} in format #{format}; parsing of your value '#{value}' failed at the #{errorPosition} character");
+		messageSource.addMessage("typeConversionFailure", Locale.US, "The value '#{value}' entered into the #{label} field could not be converted");
+		messageSource.addMessage("org.springframework.ui.lifecycle.WebBindAndLifecycleTests$TestBean.integer", Locale.US, "Integer");
+		messages = new DefaultMessageContext(messageSource);
+		TestBean model = new TestBean();
+		lifecycle = new WebBindAndValidateLifecycle(model, messages);
 	}
 	
 	@Test
-	public void bindUserValuesCreatedFromUserMap() throws ParseException {
-		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
-		binder.add(new BindingConfiguration("date", new DateFormatter()));
-		Map<String, String> userMap = new LinkedHashMap<String, String>();
+	public void testExecuteLifecycleNoErrors() {
+		Map<String, Object> userMap = new HashMap<String, Object>();
 		userMap.put("string", "test");
-		userMap.put("_integer", "doesn't matter");
-		userMap.put("_bool", "doesn't matter");
-		userMap.put("!date", "2009-06-10");
-		userMap.put("!currency", "$5.00");
-		userMap.put("_currency", "doesn't matter");
-		userMap.put("_addresses", "doesn't matter");
-		UserValues values = binder.createUserValues(userMap);
-		BindingResults results = binder.bind(values);
-		assertEquals(6, results.size());
-		assertEquals("test", results.get(0).getUserValue());
-		assertEquals(null, results.get(1).getUserValue());
-		assertEquals(Boolean.FALSE, results.get(2).getUserValue());
-		assertEquals("2009-06-10", results.get(3).getUserValue());		
-		assertEquals("$5.00", results.get(4).getUserValue());
-		assertEquals(null, results.get(5).getUserValue());
-		
-		assertEquals("test", bean.getString());
-		assertEquals(0, bean.getInteger());
-		assertEquals(new DateFormatter().parse("2009-06-10", Locale.US), bean.getDate());
-		assertEquals(false, bean.isBool());
-		assertEquals(new BigDecimal("5.00"), bean.getCurrency());
-		assertEquals(null, bean.getAddresses());
+		userMap.put("integer", "3");
+		userMap.put("foo", "BAR");
+		lifecycle.execute(userMap);
+		assertEquals(0, messages.getMessages().size());
 	}
-	
+
+	@Test
+	public void testExecuteLifecycleBindingErrors() {
+		Map<String, Object> userMap = new HashMap<String, Object>();
+		userMap.put("string", "test");
+		userMap.put("integer", "bogus");
+		userMap.put("foo", "BAR");
+		lifecycle.execute(userMap);
+		assertEquals(1, messages.getMessages().size());
+		assertEquals(Severity.ERROR, messages.getMessages("integer").get(0).getSeverity());
+		assertEquals("The value 'bogus' entered into the Integer field could not be converted", messages.getMessages("integer").get(0).getText());
+	}
+
 	public static enum FooEnum {
 		BAR, BAZ, BOOP;
 	}
-
+	
 	public static class TestBean {
 		private String string;
 		private int integer;
-		private boolean bool;
 		private Date date;
 		private FooEnum foo;
 		private BigDecimal currency;
@@ -96,14 +82,6 @@ public class WebBinderTests {
 
 		public void setInteger(int integer) {
 			this.integer = integer;
-		}
-		
-		public boolean isBool() {
-			return bool;
-		}
-
-		public void setBool(boolean bool) {
-			this.bool = bool;
 		}
 
 		public Date getDate() {

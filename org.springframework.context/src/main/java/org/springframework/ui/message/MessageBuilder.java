@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.context.MessageSource;
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.core.style.ToStringCreator;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
@@ -37,7 +35,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * new MessageBuilder().
  *     severity(Severity.ERROR).
  *     code("invalidFormat").
- *     resolvableArg("label", "mathForm.decimalField").
+ *     arg("label", new LocalizedArgumentValue("mathForm.decimalField")).
  *     arg("format", "#,###.##").
  *     defaultText("The decimal field must be in format #,###.##").
  *     build();
@@ -89,24 +87,14 @@ public class MessageBuilder {
 	 * Named message arguments are inserted by eval expressions denoted within the resolved message template.
 	 * For example, the value of the 'format' argument would be inserted where a corresponding #{format} expression is defined in the message template.
 	 * Successive calls to this method add additional arguments.
+	 * May also add {@link ResolvableArgument resolvable arguments} whose values are resolved against the MessageSource passed to the {@link MessageResolver}.
 	 * @param name the argument name
 	 * @param value the argument value
 	 * @return this, for fluent API usage
+	 * @see ResolvableArgument
 	 */
 	public MessageBuilder arg(String name, Object value) {
 		args.put(name, value);
-		return this;
-	}
-
-	/**
-	 * Add a message argument to insert into the message text, where the actual value to be inserted should be resolved by the {@link MessageSource}.
-	 * Successive calls to this method add additional resolvable arguments.
-	 * @param name the argument name
-	 * @param code the code to use to resolve the argument value
-	 * @return this, for fluent API usage
-	 */
-	public MessageBuilder resolvableArg(String name, Object code) {
-		args.put(name, new ResolvableArgumentValue(code));
 		return this;
 	}
 
@@ -138,32 +126,6 @@ public class MessageBuilder {
 		}
 		String[] codesArray = (String[]) codes.toArray(new String[codes.size()]);
 		return new DefaultMessageResolver(severity, codesArray, args, defaultText, expressionParser);
-	}
-
-	private static class ResolvableArgumentValue implements MessageSourceResolvable {
-
-		private Object code;
-
-		public ResolvableArgumentValue(Object code) {
-			this.code = code;
-		}
-
-		public Object[] getArguments() {
-			return null;
-		}
-
-		public String[] getCodes() {
-			return new String[] { code.toString() };
-		}
-
-		public String getDefaultMessage() {
-			return String.valueOf(code);
-		}
-
-		public String toString() {
-			return new ToStringCreator(this).append("code", code).toString();
-		}
-
 	}
 
 }

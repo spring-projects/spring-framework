@@ -31,9 +31,12 @@ import java.util.Map;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultTypeConverter;
+import org.springframework.core.style.StylerUtils;
+import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -463,6 +466,10 @@ public class GenericBinder implements Binder {
 			return "invalidFormat";
 		}
 
+		public String getErrorMessage() {
+			return "Failed to bind to property '" + property + "'; the user value " + StylerUtils.style(formatted) + " has an invalid format and could no be parsed";
+		}
+		
 		public Throwable getErrorCause() {
 			return e;
 		}
@@ -496,14 +503,31 @@ public class GenericBinder implements Binder {
 
 		public String getErrorCode() {
 		    SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
-		    if (spelCode==SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+		    if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
 		    	return "typeConversionFailure";                                 
 		    } else if (spelCode==SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
 		    	return "propertyNotFound";                              
 		    } else {
 		    	// TODO return more specific code based on underlying EvaluationException error code
-				return "couldNotSetValue";		    	 
+				return "couldNotSetValue";
 		    }
+		}
+
+		public String getErrorMessage() {
+		    SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
+		    if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+		    	AccessException accessException = (AccessException) e.getCause();
+		    	if (accessException.getCause() != null) {
+		    		Throwable cause = accessException.getCause();
+		    		if (cause instanceof SpelEvaluationException && ((SpelEvaluationException)cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
+		    			ConversionFailedException failure = (ConversionFailedException) cause.getCause();
+		    			return "Failed to bind to property '" + property + "'; user value " + StylerUtils.style(formatted) + " could not be converted to property type [" + failure.getTargetType() + "]";
+		    		}
+		    	}
+		    } else if (spelCode==SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+	    		return "Failed to bind to property '" + property + "'; no such property exists on model";
+		    }
+    		return "Failed to bind to property '" + property + "'; reason = " + e.getLocalizedMessage();
 		}
 
 		public Throwable getErrorCause() {
@@ -538,6 +562,10 @@ public class GenericBinder implements Binder {
 			return null;
 		}
 
+		public String getErrorMessage() {
+			return null;
+		}
+		
 		public Throwable getErrorCause() {
 			return null;
 		}
