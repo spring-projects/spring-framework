@@ -20,25 +20,23 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.context.MessageSource;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
- * A builder for building {@link MessageResolver} objects.
- * Typically used by Controllers to {@link MessageContext#add(MessageResolver, String) add} messages to display in a user interface.
- * Supports MessageResolvers that hard-code the message text, as well as MessageResolvers that resolve the message text from a localized {@link MessageSource}.
- * Also supports named arguments whose values can be inserted into messages using #{eval expressions}.
+ * Builds a {@link MessageResolver} that can resolve a localized message for display in a user interface.
+ * Allows convenient specification of the codes to try to resolve the message.
+ * Also supports named arguments that can inserted into a message template using eval #{expressions}.
  * <p>
  * Usage example: 
  * <pre>
- * new MessageBuilder().
- *     severity(Severity.ERROR).
+ * MessageResolver resolver = new MessageResolverBuilder().
  *     code("invalidFormat").
- *     arg("label", new LocalizedArgumentValue("mathForm.decimalField")).
+ *     arg("label", new ResolvableArgument("mathForm.decimalField")).
  *     arg("format", "#,###.##").
- *     defaultText("The decimal field must be in format #,###.##").
+ *     defaultMessage("The decimal field must be in format #,###.##").
  *     build();
+ * String message = resolver.resolveMessage(messageSource, locale);
  * </pre>
  * Example messages.properties loaded by the MessageSource:
  * <pre>
@@ -46,86 +44,75 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * mathForm.decimalField=Decimal Field
  * </pre>
  * @author Keith Donald
- * @since 3.0 
- * @see MessageContext#add(MessageResolver, String)
+ * @since 3.0
+ * @see #code(String)
+ * @see #arg(String, Object)
+ * @see #defaultMessage(String)
  */
-public class MessageBuilder {
+public class MessageResolverBuilder {
 
-	private Severity severity;
-	
 	private Set<String> codes = new LinkedHashSet<String>();
 
 	private Map<String, Object> args = new LinkedHashMap<String, Object>();
 
-	private String defaultText;
+	private String defaultMessage;
 
 	private ExpressionParser expressionParser = new SpelExpressionParser();
 	
 	/**
-	 * Set the severity of the message.
-	 * @return this, for fluent API usage
-	 */
-	public MessageBuilder severity(Severity severity) {
-		this.severity = severity;
-		return this;
-	}
-	
-	/**
-	 * Add a code to use to resolve the template for generating the localized message text.
+	 * Add a code that will be tried to lookup the message template used to create the localized message.
      * Successive calls to this method add additional codes.
 	 * Codes are tried in the order they are added.
-	 * @param code the message code
+	 * @param code a message code to try
 	 * @return this, for fluent API usage
 	 */
-	public MessageBuilder code(String code) {
+	public MessageResolverBuilder code(String code) {
 		codes.add(code);
 		return this;
 	}
 
 	/**
-	 * Add a message argument to insert into the message text.
-	 * Named message arguments are inserted by eval expressions denoted within the resolved message template.
+	 * Add an argument to insert into the message.
+	 * Named arguments are inserted by eval #{expressions} denoted within the message template.
 	 * For example, the value of the 'format' argument would be inserted where a corresponding #{format} expression is defined in the message template.
 	 * Successive calls to this method add additional arguments.
-	 * May also add {@link ResolvableArgument resolvable arguments} whose values are resolved against the MessageSource passed to the {@link MessageResolver}.
+	 * May also add {@link ResolvableArgument resolvable arguments} whose values are resolved against the MessageSource passed to
+	 * {@link MessageResolver#resolveMessage(org.springframework.context.MessageSource, java.util.Locale)}.
 	 * @param name the argument name
 	 * @param value the argument value
 	 * @return this, for fluent API usage
 	 * @see ResolvableArgument
 	 */
-	public MessageBuilder arg(String name, Object value) {
+	public MessageResolverBuilder arg(String name, Object value) {
 		args.put(name, value);
 		return this;
 	}
 
 	/**
-	 * Set the fallback text for the message.
-	 * If the message has no codes, this will always be used as the text.
-	 * If the message has codes but none can be resolved, this will always be used as the text.
-	 * @param text the default text
+	 * Set the default message.
+	 * If the MessageResolver has no codes to try, this will be used as the message.
+	 * If the MessageResolver has codes to try but none of those resolve to a message, this will be used as the message.
+	 * @param message the default text
 	 * @return this, for fluent API usage
 	 */
-	public MessageBuilder defaultText(String text) {
-		defaultText = text;
+	public MessageResolverBuilder defaultMessage(String message) {
+		defaultMessage = message;
 		return this;
 	}
 
 	/**
-	 * Builds the message that will be resolved.
+	 * Builds the resolver for the message.
 	 * Call after recording all builder instructions.
 	 * @return the built message resolver
-	 * @throws Illegal
+	 * @throws IllegalStateException if no codes have been added and there is no default message
 	 */
 	public MessageResolver build() {
-		if (severity == null) {
-			severity = Severity.INFO;
-		}
-		if (codes == null && defaultText == null) {
+		if (codes == null && defaultMessage == null) {
 			throw new IllegalStateException(
 					"A message code or the message text is required to build this message resolver");
 		}
 		String[] codesArray = (String[]) codes.toArray(new String[codes.size()]);
-		return new DefaultMessageResolver(severity, codesArray, args, defaultText, expressionParser);
+		return new DefaultMessageResolver(codesArray, args, defaultMessage, expressionParser);
 	}
 
 }

@@ -6,38 +6,29 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.ui.alert.Severity;
+import org.springframework.ui.alert.support.DefaultAlertContext;
+import org.springframework.ui.binding.support.GenericFormatterRegistry;
 import org.springframework.ui.format.number.CurrencyFormat;
-import org.springframework.ui.message.MockMessageSource;
-import org.springframework.ui.message.Severity;
-import org.springframework.ui.message.support.DefaultMessageContext;
+import org.springframework.ui.format.number.IntegerFormatter;
 
 public class WebBindAndLifecycleTests {
 
 	private WebBindAndValidateLifecycle lifecycle;
 
-	private DefaultMessageContext messages;
+	private TestBean model;
+	
+	private DefaultAlertContext alertContext;
 
 	@Before
 	public void setUp() {
-		MockMessageSource messageSource = new MockMessageSource();
-		messageSource
-				.addMessage(
-						"invalidFormat",
-						Locale.US,
-						"#{label} must be a ${objectType} in format #{format}; parsing of your value '#{value}' failed at the #{errorPosition} character");
-		messageSource.addMessage("typeConversionFailure", Locale.US,
-				"The value '#{value}' entered into the #{label} field could not be converted");
-		messageSource.addMessage("org.springframework.ui.lifecycle.WebBindAndLifecycleTests$TestBean.integer",
-				Locale.US, "Integer");
-		messages = new DefaultMessageContext(messageSource);
-		TestBean model = new TestBean();
-		lifecycle = new WebBindAndValidateLifecycle(model, messages);
+		model = new TestBean();
+		alertContext = new DefaultAlertContext();
+		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
 	}
 
 	@Test
@@ -47,10 +38,9 @@ public class WebBindAndLifecycleTests {
 		userMap.put("integer", "3");
 		userMap.put("foo", "BAR");
 		lifecycle.execute(userMap);
-		assertEquals(0, messages.getMessages().size());
+		assertEquals(0, alertContext.getAlerts().size());
 	}
 
-	@Ignore("Disabled test until it passes consistently in the Ant build on Mac OS X")
 	@Test
 	public void testExecuteLifecycleBindingErrors() {
 		Map<String, Object> userMap = new HashMap<String, Object>();
@@ -58,10 +48,24 @@ public class WebBindAndLifecycleTests {
 		userMap.put("integer", "bogus");
 		userMap.put("foo", "BAR");
 		lifecycle.execute(userMap);
-		assertEquals(1, messages.getMessages().size());
-		assertEquals(Severity.ERROR, messages.getMessages("integer").get(0).getSeverity());
-		assertEquals("The value 'bogus' entered into the Integer field could not be converted", messages.getMessages(
-				"integer").get(0).getText());
+		assertEquals(1, alertContext.getAlerts().size());
+		assertEquals(Severity.FATAL, alertContext.getAlerts("integer").get(0).getSeverity());
+		assertEquals("Failed to bind to property 'integer'; user value 'bogus' could not be converted to property type [java.lang.Integer]", alertContext.getAlerts("integer").get(0).getMessage());
+	}
+	
+	@Test
+	public void testExecuteLifecycleInvalidFormatBindingErrors() {
+		Map<String, Object> userMap = new HashMap<String, Object>();
+		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(new IntegerFormatter(), Integer.class);
+		lifecycle.setFormatterRegistry(registry);
+		userMap.put("string", "test");
+		userMap.put("integer", "bogus");
+		userMap.put("foo", "BAR");
+		lifecycle.execute(userMap);
+		assertEquals(1, alertContext.getAlerts().size());
+		assertEquals(Severity.ERROR, alertContext.getAlerts("integer").get(0).getSeverity());
+		assertEquals("Failed to bind to property 'integer'; the user value 'bogus' has an invalid format and could no be parsed", alertContext.getAlerts("integer").get(0).getMessage());
 	}
 
 	public static enum FooEnum {

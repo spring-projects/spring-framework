@@ -15,6 +15,8 @@
  */
 package org.springframework.ui.binding;
 
+import org.springframework.ui.alert.Alert;
+
 /**
  * The result of a bind operation.
  * @author Keith Donald
@@ -28,32 +30,24 @@ public interface BindingResult {
 	 * The name of the model property associated with this binding result.
 	 */
 	String getProperty();
-	
-	/**
-	 * Indicates if this result is an error result.
-	 */
-	boolean isError();
-
-	/**
-	 * If an error result, the error code; for example, "invalidFormat" or "propertyNotFound".
-	 */
-	String getErrorCode();
-
-	/**
-	 * If an error, result returns a default message describing what went wrong.
-	 */
-	String getErrorMessage();
-
-
-	/**
-	 * If an error result, the cause of the error.
-	 */
-	Throwable getErrorCause();
 
 	/**
 	 * The raw user-entered value for which binding was attempted.
-	 * If not an error result, this value was successfully bound to the model.
+	 * If not a failure, this value was successfully bound to the model.
+	 * @see #isFailure()
 	 */
 	Object getUserValue();
+	
+	/**
+	 * Indicates if the binding failed.
+	 */
+	boolean isFailure();
+
+	/**
+	 * Gets the alert for this binding result, appropriate for rendering the result to the user.
+	 * An alert describing a successful binding will have info severity.
+	 * An alert describing a failed binding will have either warning, error, or fatal severity.
+	 */
+	Alert getAlert();
 
 }

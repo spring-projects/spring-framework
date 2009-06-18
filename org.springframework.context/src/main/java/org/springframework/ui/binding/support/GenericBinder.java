@@ -48,6 +48,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
+import org.springframework.ui.alert.Alert;
+import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
@@ -58,9 +60,11 @@ import org.springframework.ui.binding.UserValue;
 import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
+import org.springframework.util.Assert;
 
 /**
  * A generic {@link Binder binder} suitable for use in most environments.
+ * TODO - localization of alert messages using MessageResolver/MesageSource
  * @author Keith Donald
  * @since 3.0
  * @see #add(BindingConfiguration)
@@ -90,6 +94,7 @@ public class GenericBinder implements Binder {
 	 * @param model the model object containing properties this binder will bind to
 	 */
 	public GenericBinder(Object model) {
+		Assert.notNull(model, "The model Object is reqyured");
 		this.model = model;
 		bindings = new HashMap<String, Binding>();
 		int parserConfig = SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull
@@ -104,6 +109,11 @@ public class GenericBinder implements Binder {
 
 	public void setStrict(boolean strict) {
 		this.strict = strict;
+	}
+
+	public void setFormatterRegistry(FormatterRegistry formatterRegistry) {
+		Assert.notNull(formatterRegistry, "The FormatterRegistry is required");
+		this.formatterRegistry = formatterRegistry;
 	}
 
 	public Binding add(BindingConfiguration binding) {
@@ -156,11 +166,11 @@ public class GenericBinder implements Binder {
 	static class ArrayListBindingResults implements BindingResults {
 
 		private List<BindingResult> results;
-		
+
 		public ArrayListBindingResults() {
 			results = new ArrayList<BindingResult>();
 		}
-		
+
 		public ArrayListBindingResults(int size) {
 			results = new ArrayList<BindingResult>(size);
 		}
@@ -170,27 +180,27 @@ public class GenericBinder implements Binder {
 		}
 
 		// implementing Iterable
-		
+
 		public Iterator<BindingResult> iterator() {
 			return results.iterator();
 		}
 
 		// implementing BindingResults
-		
+
 		public BindingResults successes() {
 			ArrayListBindingResults results = new ArrayListBindingResults();
 			for (BindingResult result : this) {
-				if (!result.isError()) {
+				if (!result.isFailure()) {
 					results.add(result);
 				}
 			}
 			return results;
 		}
-		
+
 		public BindingResults failures() {
 			ArrayListBindingResults results = new ArrayListBindingResults();
 			for (BindingResult result : this) {
-				if (result.isError()) {
+				if (result.isFailure()) {
 					results.add(result);
 				}
 			}
@@ -212,10 +222,9 @@ public class GenericBinder implements Binder {
 		public int size() {
 			return results.size();
 		}
-		
+
 	}
-	
-	
+
 	class BindingImpl implements Binding {
 
 		private Expression property;
@@ -446,39 +455,47 @@ public class GenericBinder implements Binder {
 
 		private Object formatted;
 
-		private ParseException e;
-
 		public InvalidFormatResult(String property, Object formatted, ParseException e) {
 			this.property = property;
 			this.formatted = formatted;
-			this.e = e;
 		}
 
 		public String getProperty() {
 			return property;
 		}
 
-		public boolean isError() {
-			return true;
-		}
-
-		public String getErrorCode() {
-			return "invalidFormat";
-		}
-
-		public String getErrorMessage() {
-			return "Failed to bind to property '" + property + "'; the user value " + StylerUtils.style(formatted) + " has an invalid format and could no be parsed";
-		}
-		
-		public Throwable getErrorCause() {
-			return e;
-		}
-
 		public Object getUserValue() {
 			return formatted;
 		}
+
+		public boolean isFailure() {
+			return true;
+		}
+
+		public Alert getAlert() {
+			return new Alert() {
+				public String getElement() {
+					// TODO append model first? e.g. model.property
+					return getProperty();
+				}
+
+				public String getCode() {
+					return "invalidFormat";
+				}
+
+				public Severity getSeverity() {
+					return Severity.ERROR;
+				}
+
+				public String getMessage() {
+					return "Failed to bind to property '" + property + "'; the user value "
+							+ StylerUtils.style(formatted) + " has an invalid format and could no be parsed";
+				}
+			};
+		}
 	}
 
+	// TODO the if branching in here is not very clean
 	static class ExpressionEvaluationErrorResult implements BindingResult {
 
 		private String property;
@@ -497,45 +514,76 @@ public class GenericBinder implements Binder {
 			return property;
 		}
 
-		public boolean isError() {
+		public Object getUserValue() {
+			return formatted;
+		}
+
+		public boolean isFailure() {
 			return true;
 		}
 
-		public String getErrorCode() {
-		    SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
-		    if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
-		    	return "typeConversionFailure";                                 
-		    } else if (spelCode==SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
-		    	return "propertyNotFound";                              
-		    } else {
-		    	// TODO return more specific code based on underlying EvaluationException error code
+		public Alert getAlert() {
+			return new Alert() {
+				public String getElement() {
+					// TODO append model first? e.g. model.property
+					return getProperty();
+				}
+
+				public String getCode() {
+					return getFailureCode();
+				}
+				
+				public Severity getSeverity() {
+					return getFailureSeverity();
+				}
+
+				public String getMessage() {
+					return getFailureMessage();
+				}
+			};
+		}
+
+		public String getFailureCode() {
+			SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
+			if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+				return "typeConversionFailure";
+			} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+				return "propertyNotFound";
+			} else {
+				// TODO return more specific code based on underlying EvaluationException error code
 				return "couldNotSetValue";
-		    }
+			}
+		}
+		
+		public Severity getFailureSeverity() {
+			SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
+			if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+				return Severity.FATAL;
+			} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+				return Severity.WARNING;
+			} else {
+				return Severity.FATAL;
+			}
 		}
 
-		public String getErrorMessage() {
-		    SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
-		    if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
-		    	AccessException accessException = (AccessException) e.getCause();
-		    	if (accessException.getCause() != null) {
-		    		Throwable cause = accessException.getCause();
-		    		if (cause instanceof SpelEvaluationException && ((SpelEvaluationException)cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
-		    			ConversionFailedException failure = (ConversionFailedException) cause.getCause();
-		    			return "Failed to bind to property '" + property + "'; user value " + StylerUtils.style(formatted) + " could not be converted to property type [" + failure.getTargetType() + "]";
-		    		}
-		    	}
-		    } else if (spelCode==SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
-	    		return "Failed to bind to property '" + property + "'; no such property exists on model";
-		    }
-    		return "Failed to bind to property '" + property + "'; reason = " + e.getLocalizedMessage();
-		}
-
-		public Throwable getErrorCause() {
-			return e;
-		}
-
-		public Object getUserValue() {
-			return formatted;
+		public String getFailureMessage() {
+			SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
+			if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+				AccessException accessException = (AccessException) e.getCause();
+				if (accessException.getCause() != null) {
+					Throwable cause = accessException.getCause();
+					if (cause instanceof SpelEvaluationException
+							&& ((SpelEvaluationException) cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
+						ConversionFailedException failure = (ConversionFailedException) cause.getCause();
+						return "Failed to bind to property '" + property + "'; user value "
+								+ StylerUtils.style(formatted) + " could not be converted to property type ["
+								+ failure.getTargetType().getName() + "]";
+					}
+				}
+			} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+				return "Failed to bind to property '" + property + "'; no such property exists on model";
+			}
+			return "Failed to bind to property '" + property + "'; reason = " + e.getLocalizedMessage();
 		}
 	}
 
@@ -553,25 +601,35 @@ public class GenericBinder implements Binder {
 		public String getProperty() {
 			return property;
 		}
-
-		public boolean isError() {
-			return false;
-		}
-
-		public String getErrorCode() {
-			return null;
-		}
-
-		public String getErrorMessage() {
-			return null;
-		}
 		
-		public Throwable getErrorCause() {
-			return null;
-		}
-
 		public Object getUserValue() {
 			return formatted;
 		}
+		
+		public boolean isFailure() {
+			return false;
+		}
+		
+		public Alert getAlert() {
+			return new Alert() {
+				public String getElement() {
+					// TODO append model first? e.g. model.property					
+					return getProperty();
+				}
+
+				public String getCode() {
+					return "bindSuccess";
+				}
+
+				public Severity getSeverity() {
+					return Severity.INFO;
+				}
+
+				public String getMessage() {
+					return "Sucessfully bound user value " + StylerUtils.style(formatted) + "to property '" + property + "'";
+				}
+			};
+		}
+
 	}
 }

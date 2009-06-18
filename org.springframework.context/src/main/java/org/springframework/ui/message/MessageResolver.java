@@ -20,10 +20,10 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 
 /**
- * A factory for a localized Message.
+ * A factory for a localized message.
+ * TODO - consider putting this abstraction together with MessageSource; does it need to be in its own package?
  * @author Keith Donald
  * @since 3.0
- * @see Message
  * @see MessageSource
  */
 public interface MessageResolver {
@@ -35,5 +35,5 @@ public interface MessageResolver {
 	 * @return the resolved message
 	 * @throws MessageResolutionException if a resolution failure occurs
 	 */
-	public Message resolveMessage(MessageSource messageSource, Locale locale);
+	public String resolveMessage(MessageSource messageSource, Locale locale);
 }
