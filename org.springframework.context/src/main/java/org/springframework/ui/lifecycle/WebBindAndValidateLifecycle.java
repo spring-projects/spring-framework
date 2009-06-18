@@ -17,15 +17,12 @@ package org.springframework.ui.lifecycle;
 
 import java.util.Map;
 
+import org.springframework.ui.alert.AlertContext;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.binding.FormatterRegistry;
 import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.binding.support.WebBinder;
-import org.springframework.ui.message.ResolvableArgument;
-import org.springframework.ui.message.MessageBuilder;
-import org.springframework.ui.message.MessageContext;
-import org.springframework.ui.message.MessageResolver;
-import org.springframework.ui.message.Severity;
 import org.springframework.ui.validation.Validator;
 
 /**
@@ -37,18 +34,22 @@ public class WebBindAndValidateLifecycle {
 
 	private final WebBinder binder;
 
-	private final MessageContext messageContext;
+	private final AlertContext alertContext;
 
 	private ValidationDecider validationDecider = ValidationDecider.ALWAYS_VALIDATE;
 
 	private Validator validator;
 
-	public WebBindAndValidateLifecycle(Object model, MessageContext messageContext) {
+	public WebBindAndValidateLifecycle(Object model, AlertContext alertContext) {
 		// TODO allow binder to be configured with bindings from @Model metadata
 		// TODO support @Bound property annotation?
 		// TODO support @StrictBinding class-level annotation?
 		this.binder = new WebBinder(model);
-		this.messageContext = messageContext;
+		this.alertContext = alertContext;
+	}
+	
+	public void setFormatterRegistry(FormatterRegistry registry) {
+		binder.setFormatterRegistry(registry);
 	}
 
 	public void execute(Map<String, ? extends Object> userMap) {
@@ -58,52 +59,10 @@ public class WebBindAndValidateLifecycle {
 			// TODO get validation results
 			validator.validate(binder.getModel(), bindingResults.successes().properties());
 		}
-		// TODO make message translation pluggable
-		MessageBuilder builder = new MessageBuilder();
 		for (BindingResult result : bindingResults.failures()) {
-			MessageResolver message = builder.
-				severity(Severity.ERROR).
-				code(modelPropertyError(result)).
-				code(propertyError(result)).
-				code(typeError(result)).
-				code(error(result)).
-				arg("label", new ResolvableArgument(getModelProperty(result))).
-				arg("value", result.getUserValue()).
-				// TODO add binding el resolver allowing binding.format to be called
-				arg("binding", binder.getBinding(result.getProperty())).
-				defaultText(result.getErrorMessage()).
-				// TODO allow binding result to contribute additional arguments
-				build();
-			// TODO should model name be part of element id?
-			messageContext.add(message, result.getProperty());
+			alertContext.add(result.getAlert());
 		}
 		// TODO translate validation results into messages
-	}
-
-	private String modelPropertyError(BindingResult result) {
-		return getModelProperty(result) + "." + result.getErrorCode();
-	}
-
-	private String propertyError(BindingResult result) {
-		return result.getProperty() + "." + result.getErrorCode();
-	}
-
-	private String typeError(BindingResult result) {
-		return binder.getBinding(result.getProperty()).getType().getName() + "." + result.getErrorCode();
-	}
-
-	private String error(BindingResult result) {
-		return result.getErrorCode();
-	}
-
-	private String getModelProperty(BindingResult result) {
-		return getModel() + "." + result.getProperty();
-	}
-
-	private String getModel() {
-		// TODO would be nice if model name was module.ClassName by default where module is subpackage of app base package
-		// TODO model name should probably be specifiable using class-level annotation
-		return binder.getModel().getClass().getName();
 	}
 
 	interface ValidationDecider {
@@ -116,4 +75,5 @@ public class WebBindAndValidateLifecycle {
 			}
 		};
 	}
+
 }

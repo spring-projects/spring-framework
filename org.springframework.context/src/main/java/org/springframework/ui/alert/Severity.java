@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.message;
+package org.springframework.ui.alert;
 
 /**
- * Enum exposing supported message severities.
- * 
+ * The set of alert severities.
  * @author Keith Donald
  * @since 3.0 
- * @see Message
+ * @see Alert
  */
 public enum Severity {
 
@@ -30,7 +29,7 @@ public enum Severity {
 	INFO,
 
 	/**
-	 * The "Warning" severity. Used to indicate there is a minor problem, or to inform the message receiver of possible
+	 * The "Warning" severity. Used to indicate there is a minor problem, or to inform the user of possible
 	 * misuse, or to indicate a problem may arise in the future.
 	 */
 	WARNING,
@@ -41,7 +40,7 @@ public enum Severity {
 	ERROR,
 
 	/**
-	 * The "Fatal" severity. Used to indicate a fatal problem like a system error.
+	 * The "Fatal" severity. Used to indicate a fatal problem like a system error or runtime exception.
 	 */
 	FATAL
 

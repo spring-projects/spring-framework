@@ -35,8 +35,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 final class DefaultMessageResolver implements MessageResolver, MessageSourceResolvable {
 
-	private Severity severity;
-
 	private String[] codes;
 
 	private Map<String, Object> args;
@@ -45,9 +43,8 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 
 	private ExpressionParser expressionParser;
 
-	public DefaultMessageResolver(Severity severity, String[] codes, Map<String, Object> args, String defaultText,
+	public DefaultMessageResolver(String[] codes, Map<String, Object> args, String defaultText,
 			ExpressionParser expressionParser) {
-		this.severity = severity;
 		this.codes = codes;
 		this.args = args;
 		this.defaultText = defaultText;
@@ -56,8 +53,8 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 
 	// implementing MessageResolver
 
-	public Message resolveMessage(MessageSource messageSource, Locale locale) {
-		String messageString; 
+	public String resolveMessage(MessageSource messageSource, Locale locale) {
+		String messageString;
 		try {
 			messageString = messageSource.getMessage(this, locale);
 		} catch (NoSuchMessageException e) {
@@ -73,10 +70,10 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 			StandardEvaluationContext context = new StandardEvaluationContext();
 			context.setRootObject(args);
 			context.addPropertyAccessor(new MessageArgumentAccessor(messageSource, locale));
-			String text = (String) message.getValue(context);
-			return new TextMessage(severity, text);
+			return (String) message.getValue(context);
 		} catch (EvaluationException e) {
-			throw new MessageResolutionException("Failed to evaluate message expression '" + message.getExpressionString() + "' to generate final message text", e);
+			throw new MessageResolutionException("Failed to evaluate message expression '"
+					+ message.getExpressionString() + "' to generate final message text", e);
 		}
 	}
 
@@ -95,36 +92,14 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("severity", severity).append("codes", codes).append("defaultText",
-				defaultText).toString();
-	}
-
-	private static class TextMessage implements Message {
-
-		private Severity severity;
-
-		private String text;
-
-		public TextMessage(Severity severity, String text) {
-			this.severity = severity;
-			this.text = text;
-		}
-
-		public Severity getSeverity() {
-			return severity;
-		}
-
-		public String getText() {
-			return text;
-		}
-
+		return new ToStringCreator(this).append("codes", codes).append("defaultText", defaultText).toString();
 	}
 
 	@SuppressWarnings("unchecked")
 	static class MessageArgumentAccessor implements PropertyAccessor {
 
 		private MessageSource messageSource;
-		
+
 		private Locale locale;
 
 		public MessageArgumentAccessor(MessageSource messageSource, Locale locale) {
@@ -133,11 +108,16 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 		}
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (((Map) target).containsKey(name));
+			return true;
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			Object o = ((Map) target).get(name);
+			Map map = (Map) target;
+			Object o = map.get(name);
+			if (o == null) {
+				throw new AccessException("No message argument named '" + name
+						+ "' is defined in the argument map; arguments available are " + map.keySet(), null);
+			}
 			if (o instanceof MessageSourceResolvable) {
 				String message = messageSource.getMessage((MessageSourceResolvable) o, locale);
 				return new TypedValue(message);
@@ -145,7 +125,7 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 				return new TypedValue(o);
 			}
 		}
-		
+
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
@@ -154,7 +134,7 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 				throws AccessException {
 			throw new UnsupportedOperationException("Should not be called");
 		}
-		
+
 		public Class[] getSpecificTargetClasses() {
 			return new Class[] { Map.class };
 		}

@@ -19,7 +19,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.expression.EvaluationException;
 import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
@@ -61,18 +60,15 @@ public class GenericBinderTests {
 		assertEquals(3, results.size());
 		
 		assertEquals("string", results.get(0).getProperty());
-		assertFalse(results.get(0).isError());
-		assertNull(results.get(0).getErrorCause());
+		assertFalse(results.get(0).isFailure());
 		assertEquals("test", results.get(0).getUserValue());
 
 		assertEquals("integer", results.get(1).getProperty());
-		assertFalse(results.get(1).isError());
-		assertNull(results.get(1).getErrorCause());
+		assertFalse(results.get(1).isFailure());
 		assertEquals("3", results.get(1).getUserValue());
 
 		assertEquals("foo", results.get(2).getProperty());
-		assertFalse(results.get(2).isError());
-		assertNull(results.get(2).getErrorCause());		
+		assertFalse(results.get(2).isFailure());
 		assertEquals("BAR", results.get(2).getUserValue());
 		
 		assertEquals("test", bean.getString());
@@ -89,8 +85,8 @@ public class GenericBinderTests {
 		values.add("foo", "BAR");
 		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
-		assertTrue(results.get(1).isError());
-		assertEquals("typeConversionFailure", results.get(1).getErrorCode());
+		assertTrue(results.get(1).isFailure());
+		assertEquals("typeConversionFailure", results.get(1).getAlert().getCode());
 	}
 
 	@Test
@@ -131,8 +127,8 @@ public class GenericBinderTests {
 	public void bindSingleValuePropertyNotFound() throws ParseException {
 		BindingResults results = binder.bind(UserValues.single("bogus", "2009-06-01"));
 		assertEquals(1, results.size());
-		assertTrue(results.get(0).isError());
-		assertEquals("propertyNotFound", results.get(0).getErrorCode());
+		assertTrue(results.get(0).isFailure());
+		assertEquals("propertyNotFound", results.get(0).getAlert().getCode());
 	}
 	
 	@Test
@@ -156,7 +152,7 @@ public class GenericBinderTests {
 		assertEquals("0", b.getValue());
 		BindingResult result = b.setValue("5");
 		assertEquals("5", b.getValue());
-		assertFalse(result.isError());
+		assertFalse(result.isFailure());
 	}
 
 	@Test
@@ -170,7 +166,7 @@ public class GenericBinderTests {
 		assertEquals("0", b.getValue());
 		BindingResult result = b.setValue("5");
 		assertEquals("5", b.getValue());
-		assertFalse(result.isError());
+		assertFalse(result.isFailure());
 	}
 
 	@Test
@@ -214,9 +210,8 @@ public class GenericBinderTests {
 		assertTrue(b.isCollection());
 		assertEquals(0, b.getCollectionValues().length);
 		BindingResult result = b.setValue(new String[] { "BAR", "BOGUS", "BOOP" });
-		assertTrue(result.isError());
-		assertTrue(result.getErrorCause() instanceof EvaluationException);
-		assertEquals("typeConversionFailure", result.getErrorCode());
+		assertTrue(result.isFailure());
+		assertEquals("typeConversionFailure", result.getAlert().getCode());
 	}
 
 	@Test
