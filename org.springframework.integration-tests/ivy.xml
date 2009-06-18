@@ -25,10 +25,10 @@
 		<dependency org="com.oracle.oc4j" name="com.springsource.oracle.classloader" rev="10.1.3.1" conf="provided->compile"/>
 		<dependency org="com.oracle.toplink.essentials" name="com.springsource.oracle.toplink.essentials" rev="2.0.0.b41-beta2" conf="test->compile"/>
 		<dependency org="com.sun.enterprise" name="com.springsource.com.sun.enterprise.loader" rev="1.0.0" conf="test->compile"/>
-		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="0.9.0" conf="test->compile"/>
+		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="1.0.0" conf="test->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="test->compile"/>
 		<dependency org="javax.ejb" name="com.springsource.javax.ejb" rev="3.0.0" conf="test->compile"/>
-		<dependency org="javax.el" name="com.springsource.javax.el" rev="2.1.0" conf="test->compile"/>
+		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="test->compile"/>
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08" conf="test->compile"/>
 		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.1.0" conf="test->compile"/>
 		<dependency org="javax.jms" name="com.springsource.javax.jms" rev="1.1.0" conf="test->compile"/>
@@ -49,7 +49,7 @@
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.fileupload" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.pool" rev="1.4.0" conf="test->compile"/>
 		<dependency org="org.apache.ibatis" name="com.springsource.com.ibatis" rev="2.3.4.726" conf="test->compile"/>
-		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.0.2" conf="test->compile"/>
+		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.1.0" conf="test->compile"/>
 		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.java5" rev="1.0.2" conf="test->compile"/>
 		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.jdbc.java5" rev="1.0.2" conf="test->compile"/>
 		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.lib" rev="1.0.2" conf="test->compile"/>
