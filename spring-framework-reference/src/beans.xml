@@ -23,11 +23,10 @@
     interface builds on top of the <interfacename>BeanFactory</interfacename>
     (it is a sub-interface) and adds other functionality such as easier
     integration with Spring's AOP features, message resource handling (for use
-    in internationalization), event propagation, and application-layer
-    in internationalization), event publication, and application-layer
-    specific contexts such as the
-    <interfacename>WebApplicationContext</interfacename> for use in web
-    applications.</para>
+    in internationalization), event propagation, and application-layer in
+    internationalization), event publication, and application-layer specific
+    contexts such as the <interfacename>WebApplicationContext</interfacename>
+    for use in web applications.</para>
 
     <para>In short, the <interfacename>BeanFactory</interfacename> provides
     the configuration framework and basic functionality, while the
@@ -249,7 +248,7 @@
         the chapter entitled <xref linkend="resources" />.</para>
       </note>
 
-      <para>The <literal>services.xml</literal> configuration file is </para>
+      <para>The <literal>services.xml</literal> configuration file is</para>
 
       <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -301,7 +300,7 @@
       that the <literal>property</literal> element refers to the name of
       JavaBean property and the <literal>ref</literal> element refers to the
       name of another bean definition. This linkage between id and ref
-      elements expresses the dependency between collaborating objects. </para>
+      elements expresses the dependency between collaborating objects.</para>
 
       <section id="beans-factory-xml-import">
         <title>Composing XML-based configuration metadata</title>
@@ -1292,38 +1291,14 @@ public class ExampleBean {
         <title>Straight values (primitives, <literal>Strings</literal>,
         etc.)</title>
 
-        <para>The <literal>&lt;value/&gt;</literal> element specifies a
-        property or constructor argument as a human-readable string
-        representation. <link
+        <para>The <literal>value</literal> attribute of the
+        <literal>&lt;property/&gt;</literal> element specifies a property or
+        constructor argument as a human-readable string representation. <link
         linkend="beans-factory-collaborators-propertyeditor">As mentioned
         previously</link>, JavaBeans <literal>PropertyEditors</literal> are
         used to convert these string values from a
         <classname>String</classname> to the actual type of the property or
         argument.</para>
-
-        <programlisting language="xml">&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
-  
-  <lineannotation>&lt;!-- results in a <methodname>setDriverClassName(String)</methodname> call --&gt;</lineannotation>
-  &lt;property name="driverClassName"&gt;
-     &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;
-  &lt;/property&gt;
-  &lt;property name="url"&gt;
-    &lt;value&gt;jdbc:mysql://localhost:3306/mydb&lt;/value&gt;
-  &lt;/property&gt;
-  &lt;property name="username"&gt;
-    &lt;value&gt;root&lt;/value&gt;
-  &lt;/property&gt;
-  &lt;property name="password"&gt;
-    &lt;value&gt;masterkaoli&lt;/value&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
-
-        <para>The <literal>&lt;property/&gt;</literal> and
-        <literal>&lt;constructor-arg/&gt;</literal> elements also support the
-        use of the <literal>'value'</literal> attribute, which can lead to
-        much more succinct configuration. When using the
-        <literal>'value'</literal> attribute, the above bean definition reads
-        like so:</para>
 
         <programlisting language="xml">&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
   
@@ -1334,12 +1309,42 @@ public class ExampleBean {
   &lt;property name="password" value="masterkaoli"/&gt;
 &lt;/bean&gt;</programlisting>
 
-        <para>The Spring team generally prefer the attribute style over the
-        use of nested <literal>&lt;value/&gt;</literal> elements. If you are
-        reading this reference manual straight through from top to bottom
-        (wow!) then we are getting slightly ahead of ourselves here, but you
-        can also configure a <classname>java.util.Properties</classname>
-        instance like so:</para>
+        <para>You can also use the <link
+        linkend="beans-p-namespace">p-namespace</link> for even more succinct
+        XML configuration.</para>
+
+        <programlisting>&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+
+  &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+        p:driverClassName="com.mysql.jdbc.Driver"
+        p:url="jdbc:mysql://localhost:3306/mydb"
+        p:username="root"
+        p:password="masterkaoli"/&gt;
+
+  
+&lt;/beans&gt;
+
+</programlisting>
+
+        <para>While the XML is in a more succinct form, there is still an
+        issue with authoring any XML based bean definition which is how to
+        ensure you do not make any typos for property names. Any typos will be
+        discovered at runtime, not design time unless you are using an IDE
+        such as <ulink url="http://www.jetbrains.com/idea/">IntelliJ
+        IDEA</ulink> or the <ulink
+        url="http://www.springsource.com/products/sts">SpringSource Tool
+        Suite</ulink> (STS) that support automatic property completion when
+        defining bean definitions. The use of such IDE assistance is highly
+        recommended. </para>
+
+        <para>If you are reading this reference manual straight through from
+        top to bottom (wow!) then we are getting slightly ahead of ourselves
+        here, but you can also configure a
+        <classname>java.util.Properties</classname> instance like so:</para>
 
         <programlisting language="xml">&lt;bean id="mappings" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
             
@@ -1750,7 +1755,7 @@ support=support@example.co.uk</programlisting>
         value ("")</para>
 
         <programlisting language="xml">&lt;bean class="ExampleBean"&gt;
-  &lt;property name="email"&gt;&lt;value/&gt;&lt;/property&gt;
+  &lt;property name="email" value=""/&gt;
 &lt;/bean&gt;</programlisting>
 
         <para>This is equivalent to the following Java code:
@@ -2705,8 +2710,8 @@ public class ReplacementComputeValue implements MethodReplacer {
             linkend="beans-factory-scopes-session">session</link>
             </para></entry>
 
-            <entry><para>Scopes a single bean definition to the lifecycle of an
-            HTTP <interfacename>Session</interfacename>. Only valid in the
+            <entry><para>Scopes a single bean definition to the lifecycle of
+            an HTTP <interfacename>Session</interfacename>. Only valid in the
             context of a web-aware Spring
             <interfacename>ApplicationContext</interfacename>.</para></entry>
           </row>
@@ -3986,8 +3991,8 @@ public final class Boot {
       <interfacename>BeanPostProcessor</interfacename> interface, and register
       them as post-processors, to be then called appropriately by the
       container on bean creation. Nothing else needs to be done other than
-      deploying the post-processors in a similar fashion to any other bean.
-      </para>
+      deploying the post-processors in a similar fashion to any other
+      bean.</para>
 
       <note>
         <title><interfacename>BeanPostProcessors</interfacename> and AOP
@@ -6458,7 +6463,8 @@ public class AppConfig {
         <title>Specifying bean scope</title>
 
         <section id="beans-javaconfig-available-scopes">
-          <title>Using the <interfacename>@Scope</interfacename> annotation</title>
+          <title>Using the <interfacename>@Scope</interfacename>
+          annotation</title>
 
           <para>You can specify that your beans defined with the
           <interfacename>@Bean</interfacename> annotation should have a
@@ -6466,11 +6472,9 @@ public class AppConfig {
           the <link linkend="beans-factory-scopes">Bean Scopes</link>
           section.</para>
 
-          <para>The default scope is <literal>"singleton"</literal>, but
-          this can be overridden by using the
-          <interfacename>@Scope</interfacename> annotation:
-<programlisting
-          language="java">@Configuration
+          <para>The default scope is <literal>"singleton"</literal>, but this
+          can be overridden by using the <interfacename>@Scope</interfacename>
+          annotation: <programlisting language="java">@Configuration
 public class MyConfiguration {
     @Bean
     <emphasis role="bold">@Scope("prototype")</emphasis>
@@ -6538,9 +6542,9 @@ public Service userService() {
 
           <para>Using Java-configuration support we can easily create a
           subclass of <code>CommandManager</code> where the abstract
-          <code>createCommand()</code> method is overridden in such a way that it
-          'looks up' a brand new (prototype) command object: <programlisting
-          language="java">@Bean
+          <code>createCommand()</code> method is overridden in such a way that
+          it 'looks up' a brand new (prototype) command object:
+          <programlisting language="java">@Bean
 @Scope("prototype")
 public AsyncCommand asyncCommand() {
     AsyncCommand command = new AsyncCommand();
@@ -6594,7 +6598,7 @@ public class AppConfig {
     frameworks that integrate with Spring. Often third-party components that
     can not use more modern equivalents such as @PostConstruct or @PreDestroy
     in order to remain compatible with JDK 1.4 or avoid a dependency on
-    JSR-250. </para>
+    JSR-250.</para>
 
     <para>This section provides some additional background into the
     differences between the BeanFactory and ApplicationContext and how one
@@ -6652,6 +6656,7 @@ public class AppConfig {
               align="center"><interfacename>ApplicationContext</interfacename></entry>
             </row>
           </thead>
+
           <tbody>
             <row>
               <entry><para>Bean instantiation/wiring</para></entry>
@@ -6690,6 +6695,7 @@ public class AppConfig {
 
               <entry align="center"><para>Yes</para></entry>
             </row>
+
             <row>
               <entry><para><interfacename>ApplicationEvent</interfacename>
               publication</para></entry>
