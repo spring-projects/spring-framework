@@ -45,27 +45,22 @@ import org.springframework.web.util.UriTemplate;
  * enforces RESTful principles. It handles HTTP connections, leaving application code to provide URLs (with possible
  * template variables) and extract results.
  *
- * <p>The main entry points of this template are the methods named after the six main HTTP methods:
- * <table>
- * <tr><th>HTTP method</th><th>RestTemplate methods</th></tr>
- * <tr><td>DELETE</td><td>{@link #delete}</td></tr>
- * <tr><td>GET</td><td>{@link #getForObject}</td></tr>
- * <tr><td>HEAD</td><td>{@link #headForHeaders}</td></tr>
- * <tr><td>OPTIONS</td><td>{@link #optionsForAllow}</td></tr>
- * <tr><td>POST</td><td>{@link #postForLocation}</td></tr>
- * <tr><td>PUT</td><td>{@link #put}</td></tr>
- * <tr><td>any</td><td>{@link #execute}</td></tr>
- * </table>
+ * <p>The main entry points of this template are the methods named after the six main HTTP methods: <table> <tr><th>HTTP
+ * method</th><th>RestTemplate methods</th></tr> <tr><td>DELETE</td><td>{@link #delete}</td></tr>
+ * <tr><td>GET</td><td>{@link #getForObject}</td></tr> <tr><td>HEAD</td><td>{@link #headForHeaders}</td></tr>
+ * <tr><td>OPTIONS</td><td>{@link #optionsForAllow}</td></tr> <tr><td>POST</td><td>{@link #postForLocation}</td></tr>
+ * <tr><td>PUT</td><td>{@link #put}</td></tr> <tr><td>any</td><td>{@link #execute}</td></tr> </table>
  *
  * <p>Each of these methods takes {@linkplain UriTemplate uri template} arguments in two forms: as a {@code String}
  * variable arguments array, or as a {@code Map<String, String>}. The string varargs variant expands the given template
  * variables in order, so that
  * <pre>
- * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42", "21");
+ * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42",
+ * "21");
  * </pre>
- * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template
- * based on variable name, and is therefore more useful when using many variables, or when a single variable is used
- * multiple times. For example:
+ * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template based on
+ * variable name, and is therefore more useful when using many variables, or when a single variable is used multiple
+ * times. For example:
  * <pre>
  * Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
@@ -78,9 +73,9 @@ import org.springframework.web.util.UriTemplate;
  * bean property.
  *
  * <p>This template uses a {@link org.springframework.http.client.SimpleClientHttpRequestFactory} and a {@link
- * DefaultResponseErrorHandler} as default strategies for creating HTTP connections or handling HTTP errors, respectively.
- * These defaults can be overridden through the {@link #setRequestFactory(ClientHttpRequestFactory) requestFactory} and
- * {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
+ * DefaultResponseErrorHandler} as default strategies for creating HTTP connections or handling HTTP errors,
+ * respectively. These defaults can be overridden through the {@link #setRequestFactory(ClientHttpRequestFactory)
+ * requestFactory} and {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
  *
  * @author Arjen Poutsma
  * @see HttpMessageConverter
@@ -116,18 +111,15 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	}
 
 	/**
-	 * Set the message body converters to use. These converters are used to convert
-	 * from and to HTTP requests and responses.
+	 * Set the message body converters to use. These converters are used to convert from and to HTTP requests and
+	 * responses.
 	 */
 	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.messageConverters = messageConverters;
 	}
 
-	/**
-	 * Returns the message body converters. These converters are used to convert
-	 * from and to HTTP requests and responses.
-	 */
+	/** Returns the message body converters. These converters are used to convert from and to HTTP requests and responses. */
 	public HttpMessageConverter<?>[] getMessageConverters() {
 		return this.messageConverters;
 	}
@@ -167,7 +159,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 		checkForSupportedMessageConverter(responseType);
 		List<HttpMessageConverter<T>> supportedMessageConverters = getSupportedMessageConverters(responseType);
-		return execute(url, HttpMethod.GET, new GetCallback<T>(supportedMessageConverters),
+		return execute(url, HttpMethod.GET, new AcceptHeaderRequestCallback<T>(supportedMessageConverters),
 				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters), urlVariables);
 	}
 
@@ -176,7 +168,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 		checkForSupportedMessageConverter(responseType);
 		List<HttpMessageConverter<T>> supportedMessageConverters = getSupportedMessageConverters(responseType);
-		return execute(url, HttpMethod.GET, new GetCallback<T>(supportedMessageConverters),
+		return execute(url, HttpMethod.GET, new AcceptHeaderRequestCallback<T>(supportedMessageConverters),
 				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters), urlVariables);
 	}
 
@@ -209,6 +201,28 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		HttpHeaders headers =
 				execute(url, HttpMethod.POST, new PostPutCallback(request), this.headersExtractor, urlVariables);
 		return headers.getLocation();
+	}
+
+	public <T> T postForObject(String url, Object request, Class<T> responseType, String... uriVariables)
+			throws RestClientException {
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
+		checkForSupportedMessageConverter(responseType);
+		List<HttpMessageConverter<T>> responseMessageConverters = getSupportedMessageConverters(responseType);
+		return execute(url, HttpMethod.POST, new PostPutCallback<T>(request, responseMessageConverters),
+				new HttpMessageConverterExtractor<T>(responseType, responseMessageConverters), uriVariables);
+	}
+
+	public <T> T postForObject(String url, Object request, Class<T> responseType, Map<String, String> uriVariables)
+			throws RestClientException {
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
+		checkForSupportedMessageConverter(responseType);
+		List<HttpMessageConverter<T>> responseMessageConverters = getSupportedMessageConverters(responseType);
+		return execute(url, HttpMethod.POST, new PostPutCallback<T>(request, responseMessageConverters),
+				new HttpMessageConverterExtractor<T>(responseType, responseMessageConverters), uriVariables);
 	}
 
 	// PUT
@@ -337,11 +351,11 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	}
 
 	/** Request callback implementation that prepares the request's accept headers. */
-	private class GetCallback<T> implements RequestCallback {
+	private class AcceptHeaderRequestCallback<T> implements RequestCallback {
 
 		private final List<HttpMessageConverter<T>> messageConverters;
 
-		private GetCallback(List<HttpMessageConverter<T>> messageConverters) {
+		private AcceptHeaderRequestCallback(List<HttpMessageConverter<T>> messageConverters) {
 			this.messageConverters = messageConverters;
 		}
 
@@ -357,22 +371,32 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 					allSupportedMediaTypes.add(supportedMediaType);
 				}
 			}
-			Collections.sort(allSupportedMediaTypes);
-			request.getHeaders().setAccept(allSupportedMediaTypes);
+			if (!allSupportedMediaTypes.isEmpty()) {
+				Collections.sort(allSupportedMediaTypes);
+				request.getHeaders().setAccept(allSupportedMediaTypes);
+			}
 		}
 	}
 
 	/** Request callback implementation that writes the given object to the request stream. */
-	private class PostPutCallback implements RequestCallback {
+	private class PostPutCallback<T> extends AcceptHeaderRequestCallback<T> {
 
 		private final Object request;
 
-		private PostPutCallback(Object request) {
+		private PostPutCallback(Object request, List<HttpMessageConverter<T>> responseMessageConverters) {
+			super(responseMessageConverters);
 			this.request = request;
 		}
 
+		private PostPutCallback(Object request) {
+			super(Collections.<HttpMessageConverter<T>>emptyList());
+			this.request = request;
+		}
+
+		@Override
 		@SuppressWarnings("unchecked")
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
+			super.doWithRequest(httpRequest);
 			if (request != null) {
 				HttpMessageConverter entityConverter = getSupportedMessageConverters(this.request.getClass()).get(0);
 				entityConverter.write(this.request, httpRequest);

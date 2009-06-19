@@ -42,24 +42,26 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
 import org.springframework.util.FileCopyUtils;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class RestTemplateIntegrationTests {
 
 	private RestTemplate template;
 
 	private static Server jettyServer;
 
+	private static String helloWorld = "H\u00e9llo W\u00f6rld";
+
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
 		jettyServer = new Server(8889);
 		Context jettyContext = new Context(jettyServer, "/");
-		String s = "H\u00e9llo W\u00f6rld";
-		byte[] bytes = s.getBytes("UTF-8");
-		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, "text/plain;charset=utf-8")), "/get");
-		jettyContext
-				.addServlet(new ServletHolder(new PostServlet(s, new URI("http://localhost:8889/post/1"))), "/post");
+		byte[] bytes = helloWorld.getBytes("UTF-8");
+		String contentType = "text/plain;charset=utf-8";
+		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
+		jettyContext.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
+		jettyContext.addServlet(
+				new ServletHolder(new PostServlet(helloWorld, "http://localhost:8889/post/1", bytes, contentType)),
+				"/post");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/errors/notfound");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)), "/errors/server");
 		jettyServer.start();
@@ -67,7 +69,6 @@ public class RestTemplateIntegrationTests {
 
 	@Before
 	public void createTemplate() {
-//		template = new RestTemplate();
 		template = new RestTemplate(new CommonsClientHttpRequestFactory());
 	}
 
@@ -81,13 +82,25 @@ public class RestTemplateIntegrationTests {
 	@Test
 	public void getString() {
 		String s = template.getForObject("http://localhost:8889/{method}", String.class, "get");
-		assertEquals("Invalid content", "H\u00e9llo W\u00f6rld", s);
+		assertEquals("Invalid content", helloWorld, s);
 	}
 
 	@Test
-	public void postString() throws URISyntaxException {
-		URI location = template.postForLocation("http://localhost:8889/{method}", "H\u00e9llo W\u00f6rld", "post");
+	public void getNoResponse() {
+		String s = template.getForObject("http://localhost:8889/get/nothing", String.class);
+		assertEquals("Invalid content", "", s);
+	}
+
+	@Test
+	public void postForLocation() throws URISyntaxException {
+		URI location = template.postForLocation("http://localhost:8889/{method}", helloWorld, "post");
 		assertEquals("Invalid location", new URI("http://localhost:8889/post/1"), location);
+	}
+
+	@Test
+	public void postForObject() throws URISyntaxException {
+		String s = template.postForObject("http://localhost:8889/{method}", helloWorld, String.class, "post");
+		assertEquals("Invalid content", helloWorld, s);
 	}
 
 	@Test(expected = HttpClientErrorException.class)
@@ -107,10 +120,7 @@ public class RestTemplateIntegrationTests {
 				EnumSet.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE), allowed);
 	}
 
-
-	/**
-	 * Servlet that returns and error message for a given status code.
-	 */
+	/** Servlet that returns and error message for a given status code. */
 	private static class ErrorServlet extends GenericServlet {
 
 		private final int sc;
@@ -124,7 +134,6 @@ public class RestTemplateIntegrationTests {
 			((HttpServletResponse) response).sendError(sc);
 		}
 	}
-
 
 	private static class GetServlet extends HttpServlet {
 
@@ -140,22 +149,27 @@ public class RestTemplateIntegrationTests {
 		@Override
 		protected void doGet(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
-			response.setContentLength(buf.length);
 			response.setContentType(contentType);
+			response.setContentLength(buf.length);
 			FileCopyUtils.copy(buf, response.getOutputStream());
 		}
 	}
-
 
 	private static class PostServlet extends HttpServlet {
 
 		private final String s;
 
-		private final URI location;
+		private final String location;
 
-		private PostServlet(String s, URI location) {
+		private final byte[] buf;
+
+		private final String contentType;
+
+		private PostServlet(String s, String location, byte[] buf, String contentType) {
 			this.s = s;
 			this.location = location;
+			this.buf = buf;
+			this.contentType = contentType;
 		}
 
 		@Override
@@ -166,7 +180,10 @@ public class RestTemplateIntegrationTests {
 			String body = FileCopyUtils.copyToString(request.getReader());
 			assertEquals("Invalid request body", s, body);
 			response.setStatus(HttpServletResponse.SC_CREATED);
-			response.setHeader("Location", location.toASCIIString());
+			response.setHeader("Location", location);
+			response.setContentLength(buf.length);
+			response.setContentType(contentType);
+			FileCopyUtils.copy(buf, response.getOutputStream());
 		}
 	}
 

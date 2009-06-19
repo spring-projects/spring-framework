@@ -40,9 +40,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 @SuppressWarnings("unchecked")
 public class RestTemplateTests {
 
@@ -265,7 +263,7 @@ public class RestTemplateTests {
 	}
 
 	@Test
-	public void postNull() throws Exception {
+	public void postForLocationNull() throws Exception {
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		expect(request.getHeaders()).andReturn(requestHeaders);
@@ -277,6 +275,58 @@ public class RestTemplateTests {
 
 		replayMocks();
 		template.postForLocation("http://example.com", null);
+		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+
+		verifyMocks();
+	}
+
+	@Test
+	public void postForObject() throws Exception {
+		expect(converter.supports(String.class)).andReturn(true).times(2);
+		expect(converter.supports(Integer.class)).andReturn(true).times(2);
+		MediaType textPlain = new MediaType("text", "plain");
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(this.request.getHeaders()).andReturn(requestHeaders);
+		String request = "Hello World";
+		converter.write(request, this.request);
+		expect(this.request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		expect(response.getHeaders()).andReturn(responseHeaders);
+		Integer expected = 42;
+		expect(converter.read(Integer.class, response)).andReturn(expected);
+		response.close();
+
+		replayMocks();
+
+		Integer result = template.postForObject("http://example.com", request, Integer.class);
+		assertEquals("Invalid POST result", expected, result);
+		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+
+		verifyMocks();
+	}
+
+	@Test
+	public void postForObjectNull() throws Exception {
+		expect(converter.supports(Integer.class)).andReturn(true).times(2);
+		MediaType textPlain = new MediaType("text", "plain");
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(request.getHeaders()).andReturn(requestHeaders).times(2);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		expect(response.getHeaders()).andReturn(responseHeaders);
+		expect(converter.read(Integer.class, response)).andReturn(null);
+		response.close();
+
+		replayMocks();
+		template.postForObject("http://example.com", null, Integer.class);
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
 
 		verifyMocks();
