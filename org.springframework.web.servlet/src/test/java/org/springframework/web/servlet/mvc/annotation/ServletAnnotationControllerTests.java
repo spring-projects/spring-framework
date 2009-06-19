@@ -974,6 +974,22 @@ public class ServletAnnotationControllerTests {
 
 	}
 
+	@Test
+	public void ambiguousParams() throws ServletException, IOException {
+		initServlet(AmbiguousParamsController.class);
+
+		MockHttpServletRequest request;// = new MockHttpServletRequest("GET", "/test");
+		MockHttpServletResponse response;// = new MockHttpServletResponse();
+//		servlet.service(request, response);
+//		assertEquals("noParams", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/test");
+		request.addParameter("myParam", "42");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myParam-42", response.getContentAsString());
+	}
+
 
 	/*
 	 * Controllers
@@ -1647,6 +1663,21 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Controller
+	@RequestMapping("/test*")
+	private static class AmbiguousParamsController {
+
+		@RequestMapping(method = RequestMethod.GET)
+		public void noParams(Writer writer) throws IOException {
+			writer.write("noParams");
+		}
+
+		@RequestMapping(params = "myParam")
+		public void param(@RequestParam("myParam") int myParam, Writer writer) throws IOException {
+			writer.write("myParam-" + myParam);
+		}
+
+	}
 
 
 }

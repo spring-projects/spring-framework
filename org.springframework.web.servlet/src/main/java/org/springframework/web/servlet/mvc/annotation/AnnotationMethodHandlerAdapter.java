@@ -820,7 +820,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	 * Comparator capable of sorting {@link RequestMappingInfo}s (RHIs) so that sorting a list with this comparator will
 	 * result in: <ul> <li>RHIs with {@linkplain RequestMappingInfo#matchedPaths better matched paths} take prescedence
 	 * over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String) path
-	 * pattern comparator}.) Typically, this means that patterns without wild chards and uri templates will be ordered
+	 * pattern comparator}.) Typically, this means that patterns without wild cards and uri templates will be ordered
 	 * before those without.</li> <li>RHIs with one single {@linkplain RequestMappingInfo#methods request method} will be
 	 * ordered before those without a method, or with more than one method.</li> <li>RHIs with more {@linkplain
 	 * RequestMappingInfo#params request parameters} will be ordered before those with less parameters</li> </ol>
@@ -838,6 +838,16 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			if (pathComparison != 0) {
 				return pathComparison;
 			}
+			int info1ParamCount = info1.params.length;
+			int info2ParamCount = info2.params.length;
+			if (info1ParamCount != info2ParamCount) {
+				return info2ParamCount - info1ParamCount;
+			}
+			int info1HeaderCount = info1.headers.length;
+			int info2HeaderCount = info2.headers.length;
+			if (info1HeaderCount != info2HeaderCount) {
+				return info2HeaderCount - info1HeaderCount;
+			}
 			int info1MethodCount = info1.methods.length;
 			int info2MethodCount = info2.methods.length;
 			if (info1MethodCount == 0 && info2MethodCount > 0) {
@@ -851,16 +861,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 			else if (info2MethodCount == 1 & info1MethodCount > 1) {
 				return 1;
-			}
-			int info1ParamCount = info1.params.length;
-			int info2ParamCount = info2.params.length;
-			if (info1ParamCount != info2ParamCount) {
-				return info2ParamCount - info1ParamCount;
-			}
-			int info1HeaderCount = info1.headers.length;
-			int info2HeaderCount = info2.headers.length;
-			if (info1HeaderCount != info2HeaderCount) {
-				return info2HeaderCount - info1HeaderCount;
 			}
 			return 0;
 		}
