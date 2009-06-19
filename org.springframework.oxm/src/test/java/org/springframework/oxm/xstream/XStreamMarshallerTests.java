@@ -68,8 +68,8 @@ public class XStreamMarshallerTests {
 	@Before
 	public void createMarshaller() throws Exception {
 		marshaller = new XStreamMarshaller();
-		Map<String, Class> aliases = new HashMap<String, Class>();
-		aliases.put("flight", Flight.class);
+		Map<String, String> aliases = new HashMap<String, String>();
+		aliases.put("flight", Flight.class.getName());
 		marshaller.setAliases(aliases);
 		flight = new Flight();
 		flight.setFlightNumber(42L);
@@ -214,6 +214,14 @@ public class XStreamMarshallerTests {
 		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
 
+	@Test
+	public void fieldAliases() throws Exception {
+		marshaller.setFieldAliases(Collections.singletonMap("org.springframework.oxm.xstream.Flight.flightNumber", "flightNo"));
+		Writer writer = new StringWriter();
+		marshaller.marshal(flight, new StreamResult(writer));
+		String expected = "<flight><flightNo>42</flightNo></flight>";
+		assertXMLEqual("Marshaller does not use aliases", expected, writer.toString());
+	}
 
 	@Test
 	@SuppressWarnings("unchecked")
