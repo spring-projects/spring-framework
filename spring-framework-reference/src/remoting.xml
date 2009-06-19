@@ -1369,6 +1369,15 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
             </row>
 
             <row>
+              <entry></entry>
+
+              <entry><ulink
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)">postForObject(String
+				  url, Object request, Class&lt;T&gt; responseType, String…
+				  uriVariables)</ulink></entry>
+            </row>
+
+            <row>
               <entry>PUT</entry>
 
               <entry><ulink
@@ -1387,9 +1396,10 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       object. The method <methodname>postForLocation</methodname> will do a
       POST, converting the given object into a HTTP request and return the
       response HTTP Location header where the newly created object can be
-      found In case of an exception processing the HTTP request, an exception
+      found. In case of an exception processing the HTTP request, an exception
       of the type <classname>RestClientException</classname> will be
-      thrown.</para>
+      thrown, this behavior can be changed by plugging in another <interfacename>ResponseErrorHandler</interfacename>
+	  implementation into the <classname>RestTemplate</classname>.</para>
 
       <para>Objects passed to and returned from these methods are converted to
       and from HTTP messages by
