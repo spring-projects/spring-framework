@@ -270,6 +270,16 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
+	 * Set the auto-detection mode of XStream.
+	 * <p><strong>Note</strong> that auto-detection implies that the XStream is configured while it is processing the
+	 * XML steams, and thus introduces a potential concurrency problem.
+	 * @see XStream#autodetectAnnotations(boolean)
+	 */
+	public void setAutodetectAnnotations(boolean autodetectAnnotations) {
+		this.getXStream().autodetectAnnotations(autodetectAnnotations);
+	}
+
+	/**
 	 * Set the XStream hierarchical stream driver to be used with stream readers and writers.
 	 */
 	public void setStreamDriver(HierarchicalStreamDriver streamDriver) {
