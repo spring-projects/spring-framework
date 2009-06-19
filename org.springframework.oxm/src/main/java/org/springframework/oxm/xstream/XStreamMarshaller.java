@@ -58,6 +58,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
@@ -66,6 +67,7 @@ import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
@@ -88,7 +90,7 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setConverters
  * @see #setEncoding
  */
-public class XStreamMarshaller extends AbstractMarshaller implements InitializingBean {
+public class XStreamMarshaller extends AbstractMarshaller implements InitializingBean, BeanClassLoaderAware {
 
 	/**
 	 * The default encoding used for stream access: UTF-8.
@@ -103,6 +105,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	private String encoding = DEFAULT_ENCODING;
 
 	private Class[] supportedClasses;
+
+	private ClassLoader classLoader;
 
 	/**
 	 * Returns the XStream instance used by this marshaller.
@@ -142,11 +146,48 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set an alias/type map, consisting of string aliases mapped to <code>Class</code> instances.
+	 * Sets an alias/type map, consisting of string aliases mapped to classes. Keys are aliases; values are either
+	 * {@code Class} instances, or String class names.
+	 *
+	 * @see XStream#alias(String, Class)
 	 */
-	public void setAliases(Map<String, Class> aliases) {
-		for (Map.Entry<String, Class> entry : aliases.entrySet()) {
-			this.getXStream().alias(entry.getKey(), entry.getValue());
+	public void setAliases(Map<String, ?> aliases) throws ClassNotFoundException {
+		for (Map.Entry<String, ?> entry : aliases.entrySet()) {
+			String alias = entry.getKey();
+			Object value = entry.getValue();
+			Class type;
+			if (value instanceof Class) {
+				type = (Class) value;
+			} else if (value instanceof String) {
+				String s = (String) value;
+				type = ClassUtils.forName(s, classLoader);
+			} else {
+				throw new IllegalArgumentException("Unknown value [" + value + "], expected String or Class");
+			}
+			this.getXStream().alias(alias, type);
+		}
+	}
+
+	/**
+	 * Sets a field alias/type map, consiting of field names
+	 * @param aliases
+	 * @throws ClassNotFoundException
+	 * @throws NoSuchFieldException
+	 * @see XStream#aliasField(String, Class, String) 
+	 */
+	public void setFieldAliases(Map<String, String> aliases) throws ClassNotFoundException, NoSuchFieldException {
+		for (Map.Entry<String, String> entry : aliases.entrySet()) {
+			String alias = entry.getValue();
+			String field = entry.getKey();
+			int idx = field.lastIndexOf('.');
+			if (idx != -1) {
+				String className = field.substring(0, idx);
+				Class clazz = ClassUtils.forName(className, classLoader);
+				String fieldName = field.substring(idx + 1);
+				this.getXStream().aliasField(alias, clazz, fieldName);
+			} else {
+				throw new IllegalArgumentException("Field name [" + field + "] does not contain '.'");
+			}
 		}
 	}
 
@@ -212,7 +253,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	/**
 	 * Set the classes for which mappings will be read from class-level JDK 1.5+ annotation metadata.
-	 * @see com.thoughtworks.xstream.XStream#processAnnotations(Class)
+	 * @see XStream#processAnnotations(Class)
 	 */
 	public void setAnnotatedClass(Class<?> annotatedClass) {
 		Assert.notNull(annotatedClass, "'annotatedClass' must not be null");
@@ -221,7 +262,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	/**
 	 * Set annotated classes for which aliases will be read from class-level JDK 1.5+ annotation metadata.
-	 * @see com.thoughtworks.xstream.XStream#processAnnotations(Class[])
+	 * @see XStream#processAnnotations(Class[])
 	 */
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "'annotatedClasses' must not be empty");
@@ -254,6 +295,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	public final void afterPropertiesSet() throws Exception {
 		customizeXStream(getXStream());
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 
 	/**
