@@ -45,10 +45,14 @@ import org.springframework.web.util.UriTemplate;
  * enforces RESTful principles. It handles HTTP connections, leaving application code to provide URLs (with possible
  * template variables) and extract results.
  *
- * <p>The main entry points of this template are the methods named after the six main HTTP methods: <table> <tr><th>HTTP
+ * <p>The main entry points of this template are the methods named after the six main HTTP methods:
+ * <table> <tr><th>HTTP
  * method</th><th>RestTemplate methods</th></tr> <tr><td>DELETE</td><td>{@link #delete}</td></tr>
- * <tr><td>GET</td><td>{@link #getForObject}</td></tr> <tr><td>HEAD</td><td>{@link #headForHeaders}</td></tr>
- * <tr><td>OPTIONS</td><td>{@link #optionsForAllow}</td></tr> <tr><td>POST</td><td>{@link #postForLocation}</td></tr>
+ * <tr><td>GET</td><td>{@link #getForObject}</td></tr>
+ * <tr><td>HEAD</td><td>{@link #headForHeaders}</td></tr>
+ * <tr><td>OPTIONS</td><td>{@link #optionsForAllow}</td></tr>
+ * <tr><td>POST</td><td>{@link #postForLocation}</td></tr>
+ * <tr><td></td><td>{@link #postForObject}</td></tr>
  * <tr><td>PUT</td><td>{@link #put}</td></tr> <tr><td>any</td><td>{@link #execute}</td></tr> </table>
  *
  * <p>Each of these methods takes {@linkplain UriTemplate uri template} arguments in two forms: as a {@code String}

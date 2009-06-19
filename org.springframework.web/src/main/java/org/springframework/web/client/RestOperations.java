@@ -105,7 +105,7 @@ public interface RestOperations {
 	URI postForLocation(String url, Object request, Map<String, String> uriVariables) throws RestClientException;
 
 	/**
-	 * Create a new resource by POSTing the given object to the URI template, and returns the converted representation
+	 * Create a new resource by POSTing the given object to the URI template, and returns the representation
 	 * found in the response. <p>URI Template variables are expanded using the given URI variables, if any.
 	 *
 	 * @param url the URL
@@ -116,7 +116,7 @@ public interface RestOperations {
 			throws RestClientException;
 
 	/**
-	 * Create a new resource by POSTing the given object to the URI template, and returns the converted representation
+	 * Create a new resource by POSTing the given object to the URI template, and returns the representation
 	 * found in the response. <p>URI Template variables are expanded using the given map.
 	 *
 	 * @param url the URL
