@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="testing">
   <title>Testing</title>
 
@@ -22,8 +21,8 @@
 
     <para>One of the main benefits of Dependency Injection is that your code
     should really depend far less on the container than in traditional J2EE
-    development. The POJOs that make up your application should be testable
-    in JUnit or TestNG tests, with objects simply instantiated using the
+    development. The POJOs that make up your application should be testable in
+    JUnit or TestNG tests, with objects simply instantiated using the
     <literal>new</literal> operator, <emphasis>without Spring or any other
     container</emphasis>. You can use <link linkend="mock-objects">mock
     objects</link> (in conjunction with many other valuable testing
@@ -120,21 +119,20 @@
         <title>Spring MVC</title>
 
         <para>The <literal>org.springframework.test.web</literal> package
-        contains <classname>ModelAndViewAssert</classname>, which can be
-        used in combination with any testing framework (e.g., JUnit 4+,
-        TestNG, etc.) for unit tests dealing with Spring MVC
+        contains <classname>ModelAndViewAssert</classname>, which can be used
+        in combination with any testing framework (e.g., JUnit 4+, TestNG,
+        etc.) for unit tests dealing with Spring MVC
         <classname>ModelAndView</classname> objects.</para>
-        
+
         <tip>
-	        <title>Unit testing Spring MVC Controllers</title>
-	        <para>
-		        To test your Spring MVC <literal>Controller</literal>s,
-		        use <classname>ModelAndViewAssert</classname> combined with
-		        <literal>MockHttpServletRequest</literal>,
-		        <literal>MockHttpSession</literal>, etc. from the <link
-		        linkend="mock-objects-servlet"><literal>org.springframework.mock.web</literal></link>
-		        package.
-	        </para>
+          <title>Unit testing Spring MVC Controllers</title>
+
+          <para>To test your Spring MVC <literal>Controller</literal>s, use
+          <classname>ModelAndViewAssert</classname> combined with
+          <literal>MockHttpServletRequest</literal>,
+          <literal>MockHttpSession</literal>, etc. from the <link
+          linkend="mock-objects-servlet"><literal>org.springframework.mock.web</literal></link>
+          package.</para>
         </tip>
       </section>
     </section>
@@ -165,44 +163,43 @@
       </itemizedlist>
 
       <para>The Spring Framework provides first class support for integration
-      testing in the <filename class="libraryfile">org.springframework.test-VERSION.jar</filename>
-      library (where <literal>VERSION</literal> is the release version). In this library,
-      you will find the <literal>org.springframework.test</literal> package
-      which contains valuable classes for integration testing using a Spring
-      container, while at the same time not being reliant on an application
-      server or other deployment environment. Such tests will be slower to run
-      than unit tests but much faster to run than the equivalent Cactus tests
-      or remote tests relying on deployment to an application server.</para>
+      testing in the <filename
+      class="libraryfile">org.springframework.test-VERSION.jar</filename>
+      library (where <literal>VERSION</literal> is the release version). In
+      this library, you will find the
+      <literal>org.springframework.test</literal> package which contains
+      valuable classes for integration testing using a Spring container, while
+      at the same time not being reliant on an application server or other
+      deployment environment. Such tests will be slower to run than unit tests
+      but much faster to run than the equivalent Cactus tests or remote tests
+      relying on deployment to an application server.</para>
 
-      <para>
-	      Since Spring 2.5, unit and integration testing support is provided 
-	      in the form of the annotation-driven <link
-	      linkend="testcontext-framework">Spring TestContext Framework</link>.
-	      The TestContext Framework is agnostic of the actual testing framework
-	      in use, thus allowing
-	      instrumentation of tests in various environments including JUnit 3.8,
-	      JUnit 4.5, TestNG, etc.
-      </para>
-      
+      <para>Since Spring 2.5, unit and integration testing support is provided
+      in the form of the annotation-driven <link
+      linkend="testcontext-framework">Spring TestContext Framework</link>. The
+      TestContext Framework is agnostic of the actual testing framework in
+      use, thus allowing instrumentation of tests in various environments
+      including JUnit 3.8, JUnit 4.5, TestNG, etc.</para>
+
       <note>
-      	<title>Legacy JUnit 3.8 class hierarchy is deprecated</title>
-      	<para>
-			As of Spring 3.0, the legacy JUnit 3.8 base class hierarchy (e.g.,
-			<classname>AbstractDependencyInjectionSpringContextTests</classname>,
-			<classname>AbstractTransactionalDataSourceSpringContextTests</classname>,
-			etc.) is officially deprecated and will be removed in a later release.
-			Thus any code which depends on the legacy JUnit 3.8 support should be
-			migrated to the <link
-			linkend="testcontext-framework">Spring TestContext Framework</link>.
-       	</para>
+        <title>Legacy JUnit 3.8 class hierarchy is deprecated</title>
+
+        <para>As of Spring 3.0, the legacy JUnit 3.8 base class hierarchy
+        (e.g.,
+        <classname>AbstractDependencyInjectionSpringContextTests</classname>,
+        <classname>AbstractTransactionalDataSourceSpringContextTests</classname>,
+        etc.) is officially deprecated and will be removed in a later release.
+        Thus any code which depends on the legacy JUnit 3.8 support should be
+        migrated to the <link linkend="testcontext-framework">Spring
+        TestContext Framework</link>.</para>
       </note>
     </section>
 
     <section id="integration-testing-goals">
       <title>Goals</title>
 
-      <para>The following bullet points highlight the fundamental goals of Spring's
-      integration testing support:</para>
+      <para>The following bullet points highlight the fundamental goals of
+      Spring's integration testing support:</para>
 
       <itemizedlist>
         <listitem>
@@ -227,32 +224,31 @@
         </listitem>
       </itemizedlist>
 
-      <para>In the next few sections each of the above goals is discussed
-      in greater detail, and at the end of each section you will find a direct
+      <para>In the next few sections each of the above goals is discussed in
+      greater detail, and at the end of each section you will find a direct
       link to implementation and configuration details pertaining to that
       particular goal.</para>
 
       <section id="testing-ctx-management">
         <title>Context management and caching</title>
 
-        <para>The Spring TestContext Framework provides consistent
-        loading of Spring <classname>ApplicationContext</classname>s and
-        caching of those contexts. Support for the caching of loaded contexts
-        is important, because if you are working on a large project, startup
-        time may become an issue - not because of the overhead of Spring
-        itself, but because the objects instantiated by the Spring container
-        will themselves take time to instantiate. For example, a project with
-        50-100 Hibernate mapping files might take 10-20 seconds to load the
-        mapping files, and incurring that cost before running every single
-        test in every single test fixture will lead to slower overall test
-        runs that could reduce productivity.</para>
+        <para>The Spring TestContext Framework provides consistent loading of
+        Spring <classname>ApplicationContext</classname>s and caching of those
+        contexts. Support for the caching of loaded contexts is important,
+        because if you are working on a large project, startup time may become
+        an issue - not because of the overhead of Spring itself, but because
+        the objects instantiated by the Spring container will themselves take
+        time to instantiate. For example, a project with 50-100 Hibernate
+        mapping files might take 10-20 seconds to load the mapping files, and
+        incurring that cost before running every single test in every single
+        test fixture will lead to slower overall test runs that could reduce
+        productivity.</para>
 
-        <para>Test classes provide an array containing the
-        resource locations of XML configuration metadata - typically on the
-        classpath - used to configure the application. This will be the same,
-        or nearly the same, as the list of configuration locations specified
-        in <literal>web.xml</literal> or other deployment
-        configuration.</para>
+        <para>Test classes provide an array containing the resource locations
+        of XML configuration metadata - typically on the classpath - used to
+        configure the application. This will be the same, or nearly the same,
+        as the list of configuration locations specified in
+        <literal>web.xml</literal> or other deployment configuration.</para>
 
         <para>By default, once loaded, the configured
         <interfacename>ApplicationContext</interfacename> will be reused for
@@ -264,22 +260,21 @@
         a mechanism to cause the test fixture to reload the configurations and
         rebuild the application context before executing the next test.</para>
 
-        <para>
-        	See: context management and caching with the 
-        	<link linkend="testcontext-ctx-management">TestContext Framework</link>.
-        </para>
+        <para>See: context management and caching with the <link
+        linkend="testcontext-ctx-management">TestContext
+        Framework</link>.</para>
       </section>
 
       <section id="testing-fixture-di">
         <title>Dependency Injection of test fixtures</title>
 
-        <para>When the TestContext framework loads your
-        application context, it can optionally configure instances of your
-        test classes via Dependency Injection. This provides a convenient
-        mechanism for setting up test fixtures using pre-configured beans from
-        your application context. A strong benefit here is that you can reuse
-        application contexts across various testing scenarios (e.g., for
-        configuring Spring-managed object graphs, transactional proxies,
+        <para>When the TestContext framework loads your application context,
+        it can optionally configure instances of your test classes via
+        Dependency Injection. This provides a convenient mechanism for setting
+        up test fixtures using pre-configured beans from your application
+        context. A strong benefit here is that you can reuse application
+        contexts across various testing scenarios (e.g., for configuring
+        Spring-managed object graphs, transactional proxies,
         <classname>DataSource</classname>s, etc.), thus avoiding the need to
         duplicate complex test fixture set up for individual test
         cases.</para>
@@ -311,10 +306,8 @@
           </listitem>
         </itemizedlist>
 
-        <para>
-        	See: dependency injection of test fixtures with the 
-        	<link linkend="testcontext-fixture-di">TestContext Framework</link>.
-        </para>
+        <para>See: dependency injection of test fixtures with the <link
+        linkend="testcontext-fixture-di">TestContext Framework</link>.</para>
       </section>
 
       <section id="testing-tx">
@@ -323,47 +316,42 @@
         <para>One common issue in tests that access a real database is their
         affect on the state of the persistence store. Even when you're using a
         development database, changes to the state may affect future tests.
-        Also, many operations - such as inserting or modifying persistent
-        data - cannot be performed (or verified) outside a transaction.</para>
+        Also, many operations - such as inserting or modifying persistent data
+        - cannot be performed (or verified) outside a transaction.</para>
 
-        <para>The TestContext framework addresses this issue. By default,
-        the framework will create and roll back a transaction for each
-        test. You simply write code that can assume the existence of a
-        transaction. If you call transactionally proxied objects in your
-        tests, they will behave correctly, according to their transactional
-        semantics. In addition, if test methods delete the contents of
-        selected tables while running within a transaction, the transaction
-        will roll back by default, and the database will return to its state
-        prior to execution of the test. Transactional support is provided to
-        your test class via a
-        <classname>PlatformTransactionManager</classname> bean defined in the
-        test's application context.</para>
+        <para>The TestContext framework addresses this issue. By default, the
+        framework will create and roll back a transaction for each test. You
+        simply write code that can assume the existence of a transaction. If
+        you call transactionally proxied objects in your tests, they will
+        behave correctly, according to their transactional semantics. In
+        addition, if test methods delete the contents of selected tables while
+        running within a transaction, the transaction will roll back by
+        default, and the database will return to its state prior to execution
+        of the test. Transactional support is provided to your test class via
+        a <classname>PlatformTransactionManager</classname> bean defined in
+        the test's application context.</para>
 
         <para>If you want a transaction to commit - unusual, but occasionally
         useful when you want a particular test to populate or modify the
-        database - the TestContext framework can be
-        instructed to cause the transaction to commit instead of roll back
-        via the
-        <link linkend="integration-testing-annotations"><interfacename>@TransactionConfiguration</interfacename></link>
-        and 
-        <link linkend="integration-testing-annotations"><interfacename>@Rollback</interfacename></link>
+        database - the TestContext framework can be instructed to cause the
+        transaction to commit instead of roll back via the <link
+        linkend="integration-testing-annotations"><interfacename>@TransactionConfiguration</interfacename></link>
+        and <link
+        linkend="integration-testing-annotations"><interfacename>@Rollback</interfacename></link>
         annotations.</para>
 
-        <para>
-	        See: transaction management with the 
-        	<link linkend="testcontext-tx">TestContext Framework</link>.
-		</para>
+        <para>See: transaction management with the <link
+        linkend="testcontext-tx">TestContext Framework</link>.</para>
       </section>
 
       <section id="testing-support-classes">
         <title>Integration testing support classes</title>
 
-        <para>The Spring TestContext Framework provides
-        several <literal>abstract</literal> support classes that can simplify
-        writing integration tests. These base test classes provide well
-        defined hooks into the testing framework as well as convenient
-        instance variables and methods, allowing access to such things
-        as:</para>
+        <para>The Spring TestContext Framework provides several
+        <literal>abstract</literal> support classes that can simplify writing
+        integration tests. These base test classes provide well defined hooks
+        into the testing framework as well as convenient instance variables
+        and methods, allowing access to such things as:</para>
 
         <itemizedlist>
           <listitem>
@@ -373,10 +361,10 @@
           </listitem>
 
           <listitem>
-            <para>A <classname>SimpleJdbcTemplate</classname>: useful for querying to
-            confirm state. For example, you might query before and after
-            testing application code that creates an object and persists it
-            using an ORM tool, to verify that the data appears in the
+            <para>A <classname>SimpleJdbcTemplate</classname>: useful for
+            querying to confirm state. For example, you might query before and
+            after testing application code that creates an object and persists
+            it using an ORM tool, to verify that the data appears in the
             database. (Spring will ensure that the query runs in the scope of
             the same transaction.) You will need to tell your ORM tool to
             'flush' its changes for this to work correctly, for example using
@@ -385,16 +373,14 @@
           </listitem>
         </itemizedlist>
 
-        <para>
-        In addition, you may find it desirable to provide your own custom,
-        application-wide superclass for integration tests that provides
-        further useful instance variables and
-        methods specific to your project.</para>
+        <para>In addition, you may find it desirable to provide your own
+        custom, application-wide superclass for integration tests that
+        provides further useful instance variables and methods specific to
+        your project.</para>
 
-        <para>
-        	See: support classes for the 
-        	<link linkend="testcontext-support-classes">TestContext Framework</link>.
-		</para>
+        <para>See: support classes for the <link
+        linkend="testcontext-support-classes">TestContext
+        Framework</link>.</para>
       </section>
     </section>
 
@@ -420,37 +406,36 @@
       <!-- =============================================================== -->
 
       <para>The Spring Framework provides the following set of
-      <emphasis>Spring-specific</emphasis> annotations that you
-      can use in your unit and integration tests in conjunction with the 
-      TestContext framework. Refer to the respective JavaDoc for
-      further information, including default attribute values, etc.</para>
+      <emphasis>Spring-specific</emphasis> annotations that you can use in
+      your unit and integration tests in conjunction with the TestContext
+      framework. Refer to the respective JavaDoc for further information,
+      including default attribute values, etc.</para>
 
       <itemizedlist>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@ContextConfiguration</interfacename></emphasis></para>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@ContextConfiguration</interfacename></emphasis></para>
+          <para>Defines class-level metadata which is used to determine how to
+          load and configure an
+          <interfacename>ApplicationContext</interfacename>. Specifically,
+          @ContextConfiguration defines the application context resource
+          <literal>locations</literal> to load as well as the
+          <interfacename>ContextLoader</interfacename> strategy to use for
+          loading the context.</para>
 
-            <para>Defines class-level metadata which is used to determine how
-            to load and configure an
-            <interfacename>ApplicationContext</interfacename>. Specifically,
-            @ContextConfiguration defines the application context resource
-            <literal>locations</literal> to load as well as the
-            <interfacename>ContextLoader</interfacename> strategy to use for
-            loading the context.</para>
-
-            <programlisting language="java">@ContextConfiguration(locations={"example/test-context.xml"}, loader=CustomContextLoader.class)
+          <programlisting language="java">@ContextConfiguration(locations={"example/test-context.xml"}, loader=CustomContextLoader.class)
 public class CustomConfiguredApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-            <para>Note: <interfacename>@ContextConfiguration</interfacename>
-            provides support for <emphasis>inherited</emphasis> resource
-            locations by default. See the <link
-            linkend="testcontext-ctx-management">Context management and
-            caching</link> section and JavaDoc for an example and further
-            details.</para>
-          </listitem>
+          <para>Note: <interfacename>@ContextConfiguration</interfacename>
+          provides support for <emphasis>inherited</emphasis> resource
+          locations by default. See the <link
+          linkend="testcontext-ctx-management">Context management and
+          caching</link> section and JavaDoc for an example and further
+          details.</para>
+        </listitem>
 
         <listitem>
           <para><emphasis
@@ -468,51 +453,51 @@ public void testProcessWhichDirtiesAppCtx() {
     <lineannotation>// some logic that results in the Spring container being dirtied</lineannotation>
 }</programlisting>
         </listitem>
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@TestExecutionListeners</interfacename></emphasis></para>
 
-            <para>Defines class-level metadata for configuring which
-            <interfacename>TestExecutionListener</interfacename>s should be
-            registered with a <classname>TestContextManager</classname>.
-            Typically, <interfacename>@TestExecutionListeners</interfacename>
-            will be used in conjunction with
-            <interfacename>@ContextConfiguration</interfacename>.</para>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@TestExecutionListeners</interfacename></emphasis></para>
 
-            <programlisting language="java">@ContextConfiguration
+          <para>Defines class-level metadata for configuring which
+          <interfacename>TestExecutionListener</interfacename>s should be
+          registered with a <classname>TestContextManager</classname>.
+          Typically, <interfacename>@TestExecutionListeners</interfacename>
+          will be used in conjunction with
+          <interfacename>@ContextConfiguration</interfacename>.</para>
+
+          <programlisting language="java">@ContextConfiguration
 @TestExecutionListeners({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
 public class CustomTestExecutionListenerTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-            <para>Note: <interfacename>@TestExecutionListeners</interfacename>
-            provides support for <emphasis>inherited</emphasis> listeners by
-            default. See the JavaDoc for an example and further
-            details.</para>
-          </listitem>
+          <para>Note: <interfacename>@TestExecutionListeners</interfacename>
+          provides support for <emphasis>inherited</emphasis> listeners by
+          default. See the JavaDoc for an example and further details.</para>
+        </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@TransactionConfiguration</interfacename></emphasis></para>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@TransactionConfiguration</interfacename></emphasis></para>
 
-            <para>Defines class-level metadata for configuring transactional
-            tests. Specifically, the bean name of the
-            <interfacename>PlatformTransactionManager</interfacename> that is
-            to be used to drive transactions can be explicitly configured if
-            the bean name of the desired PlatformTransactionManager is not
-            "transactionManager". In addition, the
-            <literal>defaultRollback</literal> flag can optionally be changed
-            to <literal>false</literal>. Typically,
-            <interfacename>@TransactionConfiguration</interfacename> will be
-            used in conjunction with
-            <interfacename>@ContextConfiguration</interfacename>.</para>
+          <para>Defines class-level metadata for configuring transactional
+          tests. Specifically, the bean name of the
+          <interfacename>PlatformTransactionManager</interfacename> that is to
+          be used to drive transactions can be explicitly configured if the
+          bean name of the desired PlatformTransactionManager is not
+          "transactionManager". In addition, the
+          <literal>defaultRollback</literal> flag can optionally be changed to
+          <literal>false</literal>. Typically,
+          <interfacename>@TransactionConfiguration</interfacename> will be
+          used in conjunction with
+          <interfacename>@ContextConfiguration</interfacename>.</para>
 
-            <programlisting language="java">@ContextConfiguration
+          <programlisting language="java">@ContextConfiguration
 @TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)
 public class CustomConfiguredTransactionalTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
-          </listitem>
+        </listitem>
 
         <listitem>
           <para><emphasis
@@ -532,37 +517,37 @@ public void testProcessWithoutRollback() {
 }</programlisting>
         </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@BeforeTransaction</interfacename></emphasis></para>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@BeforeTransaction</interfacename></emphasis></para>
 
-            <para>Indicates that the annotated <literal>public void</literal>
-            method should be executed <emphasis>before</emphasis> a
-            transaction is started for test methods configured to run within a
-            transaction via the <interfacename>@Transactional</interfacename>
-            annotation.</para>
+          <para>Indicates that the annotated <literal>public void</literal>
+          method should be executed <emphasis>before</emphasis> a transaction
+          is started for test methods configured to run within a transaction
+          via the <interfacename>@Transactional</interfacename>
+          annotation.</para>
 
-            <programlisting language="java">@BeforeTransaction
+          <programlisting language="java">@BeforeTransaction
 public void beforeTransaction() {
     <lineannotation>// logic to be executed before a transaction is started</lineannotation>
 }</programlisting>
-          </listitem>
+        </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@AfterTransaction</interfacename></emphasis></para>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@AfterTransaction</interfacename></emphasis></para>
 
-            <para>Indicates that the annotated <literal>public void</literal>
-            method should be executed <emphasis>after</emphasis> a transaction
-            has been ended for test methods configured to run within a
-            transaction via the <interfacename>@Transactional</interfacename>
-            annotation.</para>
+          <para>Indicates that the annotated <literal>public void</literal>
+          method should be executed <emphasis>after</emphasis> a transaction
+          has been ended for test methods configured to run within a
+          transaction via the <interfacename>@Transactional</interfacename>
+          annotation.</para>
 
-            <programlisting language="java">@AfterTransaction
+          <programlisting language="java">@AfterTransaction
 public void afterTransaction() {
     <lineannotation>// logic to be executed after a transaction has ended</lineannotation>
 }</programlisting>
-          </listitem>
+        </listitem>
 
         <listitem>
           <para><emphasis
@@ -578,199 +563,194 @@ public void testProcessWithoutTransaction() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
         </listitem>
+      </itemizedlist>
 
-        </itemizedlist>
+      <!-- =============================================================== -->
 
-        <!-- =============================================================== -->
+      <para>The following annotations are <emphasis>only</emphasis> supported
+      when used in conjunction with JUnit (i.e., with the <link
+      linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link> or
+      the <link linkend="testcontext-support-classes-junit38">JUnit 3.8</link>
+      and <link linkend="testcontext-support-classes-junit45">JUnit 4.5</link>
+      support classes.</para>
 
-        <para>The following annotations are <emphasis>only</emphasis>
-        supported when used in conjunction with JUnit (i.e., with the <link
-        linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link> or
-        the <link linkend="testcontext-support-classes-junit38">JUnit
-        3.8</link> and <link
-        linkend="testcontext-support-classes-junit45">JUnit 4.5</link> support
-        classes.</para>
+      <itemizedlist>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@IfProfileValue</interfacename></emphasis></para>
 
-        <itemizedlist>
-	        <listitem>
-	          <para><emphasis
-	          role="bold"><interfacename>@IfProfileValue</interfacename></emphasis></para>
-	
-	          <para>Indicates that the annotated test is enabled for a specific
-	          testing environment. If the configured
-	          <classname>ProfileValueSource</classname> returns a matching
-	          <literal>value</literal> for the provided <literal>name</literal>,
-	          the test will be enabled. This annotation can be applied to an
-	          entire class or individual methods.</para>
-	
-	          <programlisting language="java">@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
+          <para>Indicates that the annotated test is enabled for a specific
+          testing environment. If the configured
+          <classname>ProfileValueSource</classname> returns a matching
+          <literal>value</literal> for the provided <literal>name</literal>,
+          the test will be enabled. This annotation can be applied to an
+          entire class or individual methods.</para>
+
+          <programlisting language="java">@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
 @Test
 public void testProcessWhichRunsOnlyOnSunJvm() {
     <lineannotation>// some logic that should run only on Java VMs from Sun Microsystems</lineannotation>
 }</programlisting>
-	
-	          <para>Alternatively <interfacename>@IfProfileValue</interfacename>
-	          may be configured with a list of <literal>values</literal> (with
-	          <emphasis>OR</emphasis> semantics) to achieve TestNG-like support
-	          for <emphasis>test groups</emphasis> in a JUnit environment.
-	          Consider the following example:</para>
-	
-	          <programlisting language="java">@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
+
+          <para>Alternatively <interfacename>@IfProfileValue</interfacename>
+          may be configured with a list of <literal>values</literal> (with
+          <emphasis>OR</emphasis> semantics) to achieve TestNG-like support
+          for <emphasis>test groups</emphasis> in a JUnit environment.
+          Consider the following example:</para>
+
+          <programlisting language="java">@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
 @Test
 public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
     <lineannotation>// some logic that should run only for unit and integration test groups</lineannotation>
 }</programlisting>
-	        </listitem>
+        </listitem>
 
-	        <listitem>
-	          <para><emphasis
-	          role="bold"><interfacename>@ProfileValueSourceConfiguration</interfacename></emphasis></para>
-	
-	          <para>Class-level annotation which is used to specify what type of
-	          <literal>ProfileValueSource</literal> to use when retrieving
-	          <emphasis>profile values</emphasis> configured via the
-	          <interfacename>@IfProfileValue</interfacename> annotation. If
-	          <interfacename>@ProfileValueSourceConfiguration</interfacename> is
-	          not declared for a test,
-	          <classname>SystemProfileValueSource</classname> will be used by
-	          default.</para>
-	
-	          <programlisting language="java">@ProfileValueSourceConfiguration(CustomProfileValueSource.class)
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@ProfileValueSourceConfiguration</interfacename></emphasis></para>
+
+          <para>Class-level annotation which is used to specify what type of
+          <literal>ProfileValueSource</literal> to use when retrieving
+          <emphasis>profile values</emphasis> configured via the
+          <interfacename>@IfProfileValue</interfacename> annotation. If
+          <interfacename>@ProfileValueSourceConfiguration</interfacename> is
+          not declared for a test,
+          <classname>SystemProfileValueSource</classname> will be used by
+          default.</para>
+
+          <programlisting language="java">@ProfileValueSourceConfiguration(CustomProfileValueSource.class)
 public class CustomProfileValueSourceTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
-	        </listitem>
+        </listitem>
 
-	        <listitem>
-	          <para><emphasis
-	          role="bold"><interfacename>@ExpectedException</interfacename></emphasis></para>
-	
-	          <para>Indicates that the annotated test method is expected to throw
-	          an exception during execution. The type of the expected exception is
-	          provided in the annotation, and if an instance of the exception is
-	          thrown during the test method execution then the test passes.
-	          Likewise if an instance of the exception is <emphasis>not</emphasis>
-	          thrown during the test method execution then the test fails.</para>
-	
-	          <programlisting language="java">@ExpectedException(SomeBusinessException.class)
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@ExpectedException</interfacename></emphasis></para>
+
+          <para>Indicates that the annotated test method is expected to throw
+          an exception during execution. The type of the expected exception is
+          provided in the annotation, and if an instance of the exception is
+          thrown during the test method execution then the test passes.
+          Likewise if an instance of the exception is <emphasis>not</emphasis>
+          thrown during the test method execution then the test fails.</para>
+
+          <programlisting language="java">@ExpectedException(SomeBusinessException.class)
 public void testProcessRainyDayScenario() {
     <lineannotation>// some logic that should result in an <classname>Exception</classname> being thrown</lineannotation>
 }</programlisting>
 
-            <para>Using Spring's
-            <interfacename>@ExpectedException</interfacename> annotation in
-            conjunction with JUnit 4's
-            <interfacename>@Test(expected=...)</interfacename> configuration
-            would lead to an unresolvable conflict. Developers must therefore
-            choose one or the other when integrating with JUnit 4, in which
-            case it is generally preferable to use the explicit JUnit 4
-            configuration.</para>
-          </listitem>
+          <para>Using Spring's
+          <interfacename>@ExpectedException</interfacename> annotation in
+          conjunction with JUnit 4's
+          <interfacename>@Test(expected=...)</interfacename> configuration
+          would lead to an unresolvable conflict. Developers must therefore
+          choose one or the other when integrating with JUnit 4, in which case
+          it is generally preferable to use the explicit JUnit 4
+          configuration.</para>
+        </listitem>
 
-	        <listitem>
-	          <para><emphasis
-	          role="bold"><interfacename>@Timed</interfacename></emphasis></para>
-	
-	          <para>Indicates that the annotated test method has to finish
-	          execution in a specified time period (in milliseconds). If the text
-	          execution time takes longer than the specified time period, the test
-	          fails.</para>
-	
-	          <para>Note that the time period includes execution of the test
-	          method itself, any repetitions of the test (see
-	          <interfacename>@Repeat</interfacename>), as well as any
-	          <emphasis>set up</emphasis> or <emphasis>tear down</emphasis> of the
-	          test fixture.</para>
-	
-	          <programlisting language="java">@Timed(millis=1000)
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@Timed</interfacename></emphasis></para>
+
+          <para>Indicates that the annotated test method has to finish
+          execution in a specified time period (in milliseconds). If the text
+          execution time takes longer than the specified time period, the test
+          fails.</para>
+
+          <para>Note that the time period includes execution of the test
+          method itself, any repetitions of the test (see
+          <interfacename>@Repeat</interfacename>), as well as any
+          <emphasis>set up</emphasis> or <emphasis>tear down</emphasis> of the
+          test fixture.</para>
+
+          <programlisting language="java">@Timed(millis=1000)
 public void testProcessWithOneSecondTimeout() {
     <lineannotation>// some logic that should not take longer than 1 second to execute</lineannotation>
 }</programlisting>
 
-            <para>Spring's <interfacename>@Timed</interfacename> annotation
-            has different semantics than JUnit 4's
-            <interfacename>@Test(timeout=...)</interfacename> support.
-            Specifically, due to the manner in which JUnit 4 handles test
-            execution timeouts (i.e., by executing the test method in a
-            separate <classname>Thread</classname>),
-            <interfacename>@Test(timeout=...)</interfacename> applies to
-            <emphasis>each iteration</emphasis> in the case of repetitions
-            and preemptively fails the test if the test takes too long.
-            Spring's <interfacename>@Timed</interfacename>, on the other hand,
-            times the <emphasis>total</emphasis> test execution time
-            (including all repetitions) and does not preemptively fail the test
-            but rather waits for the test to actually complete before failing.</para>
-          </listitem>
+          <para>Spring's <interfacename>@Timed</interfacename> annotation has
+          different semantics than JUnit 4's
+          <interfacename>@Test(timeout=...)</interfacename> support.
+          Specifically, due to the manner in which JUnit 4 handles test
+          execution timeouts (i.e., by executing the test method in a separate
+          <classname>Thread</classname>),
+          <interfacename>@Test(timeout=...)</interfacename> applies to
+          <emphasis>each iteration</emphasis> in the case of repetitions and
+          preemptively fails the test if the test takes too long. Spring's
+          <interfacename>@Timed</interfacename>, on the other hand, times the
+          <emphasis>total</emphasis> test execution time (including all
+          repetitions) and does not preemptively fail the test but rather
+          waits for the test to actually complete before failing.</para>
+        </listitem>
 
-	        <listitem>
-	          <para><emphasis
-	          role="bold"><interfacename>@Repeat</interfacename></emphasis></para>
-	
-	          <para>Indicates that the annotated test method must be executed
-	          repeatedly. The number of times that the test method is to be
-	          executed is specified in the annotation.</para>
-	
-	          <para>Note that the scope of execution to be repeated includes
-	          execution of the test method itself as well as any <emphasis>set
-	          up</emphasis> or <emphasis>tear down</emphasis> of the test
-	          fixture.</para>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@Repeat</interfacename></emphasis></para>
 
-	          <programlisting language="java">@Repeat(10)
+          <para>Indicates that the annotated test method must be executed
+          repeatedly. The number of times that the test method is to be
+          executed is specified in the annotation.</para>
+
+          <para>Note that the scope of execution to be repeated includes
+          execution of the test method itself as well as any <emphasis>set
+          up</emphasis> or <emphasis>tear down</emphasis> of the test
+          fixture.</para>
+
+          <programlisting language="java">@Repeat(10)
 @Test
 public void testProcessRepeatedly() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
-	        </listitem>
+        </listitem>
+      </itemizedlist>
 
-        </itemizedlist>
+      <!-- =============================================================== -->
 
-        <!-- =============================================================== -->
+      <para>The following non-test-specific annotations are supported with
+      standard semantics for all configurations of the Spring TestContext
+      Framework.</para>
 
-        <para>
-            The following non-test-specific annotations are supported with
-            standard semantics for all
-            configurations of the Spring TestContext Framework.
-        </para>
+      <itemizedlist>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@Autowired</interfacename></emphasis></para>
+        </listitem>
 
-        <itemizedlist>
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Autowired</interfacename></emphasis></para>
-          </listitem>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@Qualifier</interfacename></emphasis></para>
+        </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Qualifier</interfacename></emphasis></para>
-          </listitem>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@Resource</interfacename></emphasis>
+          (javax.annotation) <emphasis>if JSR-250 is present</emphasis></para>
+        </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Resource</interfacename></emphasis> (javax.annotation)
-            <emphasis>if JSR-250 is present</emphasis></para>
-          </listitem>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@PersistenceContext</interfacename></emphasis>
+          (javax.persistence) <emphasis>if JPA is present</emphasis></para>
+        </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@PersistenceContext</interfacename></emphasis>
-            (javax.persistence) <emphasis>if JPA is present</emphasis></para>
-          </listitem>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@PersistenceUnit</interfacename></emphasis>
+          (javax.persistence) <emphasis>if JPA is present</emphasis></para>
+        </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@PersistenceUnit</interfacename></emphasis>
-            (javax.persistence) <emphasis>if JPA is present</emphasis></para>
-          </listitem>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@Required</interfacename></emphasis></para>
+        </listitem>
 
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Required</interfacename></emphasis></para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Transactional</interfacename></emphasis></para>
-          </listitem>
-        </itemizedlist>
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@Transactional</interfacename></emphasis></para>
+        </listitem>
+      </itemizedlist>
     </section>
 
     <section id="testcontext-framework">
@@ -894,15 +874,15 @@ public void testProcessRepeatedly() {
         therefore provide this functionality out-of-the-box.</para>
 
         <tip>
-        	<title>@Autowired ApplicationContext</title>
-			<para>
-				As an alternative to implementing the
-				<interfacename>ApplicationContextAware</interfacename> interface,
-				your test class can have its application context injected via the
-				<interfacename>@Autowired</interfacename> annotation on either a
-				field or setter method, for example:
-			</para>
-        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+          <title>@Autowired ApplicationContext</title>
+
+          <para>As an alternative to implementing the
+          <interfacename>ApplicationContextAware</interfacename> interface,
+          your test class can have its application context injected via the
+          <interfacename>@Autowired</interfacename> annotation on either a
+          field or setter method, for example:</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class MyTest {
     <emphasis role="bold">@Autowired</emphasis>
@@ -912,20 +892,20 @@ public class MyTest {
 }</programlisting>
         </tip>
 
-        <para>In contrast to the now deprecated JUnit 3.8 legacy class hierarchy,
-        test classes which use the TestContext framework do not need to override
-        any <literal>protected</literal> instance methods to configure their
-        application context. Rather, configuration is achieved merely by
-        declaring the <interfacename>@ContextConfiguration</interfacename>
-        annotation at the class level. If your test class does not explicitly
-        declare any application context resource <literal>locations</literal>,
-        the configured <interfacename>ContextLoader</interfacename> will
-        determine how and whether or not to load a context from a default set
-        of locations. For example,
-        <classname>GenericXmlContextLoader</classname> - which is the default
-        <interfacename>ContextLoader</interfacename> - will generate a default
-        location based on the name of the test class. If your class is named
-        <literal>com.example.MyTest</literal>,
+        <para>In contrast to the now deprecated JUnit 3.8 legacy class
+        hierarchy, test classes which use the TestContext framework do not
+        need to override any <literal>protected</literal> instance methods to
+        configure their application context. Rather, configuration is achieved
+        merely by declaring the
+        <interfacename>@ContextConfiguration</interfacename> annotation at the
+        class level. If your test class does not explicitly declare any
+        application context resource <literal>locations</literal>, the
+        configured <interfacename>ContextLoader</interfacename> will determine
+        how and whether or not to load a context from a default set of
+        locations. For example, <classname>GenericXmlContextLoader</classname>
+        - which is the default <interfacename>ContextLoader</interfacename> -
+        will generate a default location based on the name of the test class.
+        If your class is named <literal>com.example.MyTest</literal>,
         <classname>GenericXmlContextLoader</classname> will load your
         application context from
         <literal>"classpath:/com/example/MyTest-context.xml"</literal>.</para>
@@ -960,16 +940,16 @@ public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-        <para><interfacename>@ContextConfiguration</interfacename> supports
-        an alias for the <literal>locations</literal> attribute via the
-        standard <literal>value</literal> attribute. Thus, if you do not need
-        to configure a custom <interfacename>ContextLoader</interfacename>, you
+        <para><interfacename>@ContextConfiguration</interfacename> supports an
+        alias for the <literal>locations</literal> attribute via the standard
+        <literal>value</literal> attribute. Thus, if you do not need to
+        configure a custom <interfacename>ContextLoader</interfacename>, you
         can omit the declaration of the <literal>locations</literal> attribute
-        name and declare the resource locations using the shorthand format 
+        name and declare the resource locations using the shorthand format
         demonstrated in the following example.
-        <interfacename>@ContextConfiguration</interfacename> also
-        supports a boolean <literal>inheritLocations</literal> attribute which
-        denotes whether or not resource locations from superclasses should be
+        <interfacename>@ContextConfiguration</interfacename> also supports a
+        boolean <literal>inheritLocations</literal> attribute which denotes
+        whether or not resource locations from superclasses should be
         <emphasis>inherited</emphasis>. The default value is
         <literal>true</literal>, which means that an annotated class will
         <emphasis>inherit</emphasis> the resource locations defined by an
@@ -1037,8 +1017,8 @@ public class ExtendedTest extends BaseTest {
         consistency with the annotation support introduced in Spring 2.5, you
         may choose either Spring's <interfacename>@Autowired</interfacename>
         annotation or the <interfacename>@Resource</interfacename> annotation
-        from JSR 250. The semantics for both are consistent throughout the Spring
-        Framework. For example, if you prefer <link
+        from JSR 250. The semantics for both are consistent throughout the
+        Spring Framework. For example, if you prefer <link
         linkend="beans-factory-autowire"><emphasis>autowiring by
         type</emphasis></link>, annotate your setter methods or fields with
         <interfacename>@Autowired</interfacename>. On the other hand, if you
@@ -1063,9 +1043,8 @@ public class ExtendedTest extends BaseTest {
         <classname>ApplicationContext</classname>, you can perform an explicit
         lookup using (for example) a call to
         <methodname>applicationContext.getBean("titleDao")</methodname>. A
-        third option is to use <interfacename>@Autowired</interfacename>
-        in conjunction with <interfacename>@Qualifier</interfacename>.
-        </para>
+        third option is to use <interfacename>@Autowired</interfacename> in
+        conjunction with <interfacename>@Qualifier</interfacename>.</para>
 
         <para>If you don't want dependency injection applied to your test
         instances, simply don't annotate any fields or setter methods with
@@ -1079,14 +1058,14 @@ public class ExtendedTest extends BaseTest {
 
         <para>Consider the scenario where we have a class,
         <classname>HibernateTitleDao</classname> (as outlined in the <link
-        linkend="testing-fixture-di">Goals</link> section). First,
-        let's look at a JUnit 4.5 based implementation of the test class
-        itself which uses <interfacename>@Autowired</interfacename> for field
-        injection (we will look at the application context configuration after
-        all sample code listings). <emphasis>Note: The dependency injection
-        behavior in the following code listings is not in any way specific to
-        JUnit 4.5. The same DI techniques can be used in conjunction with any
-        testing framework.</emphasis></para>
+        linkend="testing-fixture-di">Goals</link> section). First, let's look
+        at a JUnit 4.5 based implementation of the test class itself which
+        uses <interfacename>@Autowired</interfacename> for field injection (we
+        will look at the application context configuration after all sample
+        code listings). <emphasis>Note: The dependency injection behavior in
+        the following code listings is not in any way specific to JUnit 4.5.
+        The same DI techniques can be used in conjunction with any testing
+        framework.</emphasis></para>
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
@@ -1200,12 +1179,14 @@ public final class HibernateTitleDaoTests {
 &lt;/beans&gt;</programlisting>
 
         <note>
-          <para>If you are extending from a Spring-provided test base class that happens
-          to use <interfacename>@Autowired</interfacename> on one of its setters methods,
-          you might have multiple beans of the affected type defined in your application context:
-          e.g. multiple <interfacename>DataSource</interfacename> beans. In such a case,
-          you may override the setter and use the <interfacename>@Qualifier</interfacename>
-          annotation to indicate a specific target bean as follows:</para>
+          <para>If you are extending from a Spring-provided test base class
+          that happens to use <interfacename>@Autowired</interfacename> on one
+          of its setters methods, you might have multiple beans of the
+          affected type defined in your application context: e.g. multiple
+          <interfacename>DataSource</interfacename> beans. In such a case, you
+          may override the setter and use the
+          <interfacename>@Qualifier</interfacename> annotation to indicate a
+          specific target bean as follows:</para>
 
           <programlisting language="java">...
     @Override @Autowired
@@ -1215,22 +1196,23 @@ public final class HibernateTitleDaoTests {
 ...</programlisting>
 
           <para>The specified qualifier value indicates the specific
-          <interfacename>DataSource</interfacename> bean to inject,
-          narrowing the set of type matches to a specific bean.
-          Its value is matched against <literal>&lt;qualifier&gt;</literal>
-          declarations within the corresponding <literal>&lt;bean&gt;</literal>
-          definitions. The bean name is used as a fallback qualifier value,
-          so you may effectively also point to a specific bean by name there
-          (as shown above, assuming that "myDataSource" is the bean id).
-          If there is only one <interfacename>DataSource</interfacename> bean
-          to begin with, then the qualifier will simply not have any effect
-          - independent from the bean name of that single matching bean.</para>
+          <interfacename>DataSource</interfacename> bean to inject, narrowing
+          the set of type matches to a specific bean. Its value is matched
+          against <literal>&lt;qualifier&gt;</literal> declarations within the
+          corresponding <literal>&lt;bean&gt;</literal> definitions. The bean
+          name is used as a fallback qualifier value, so you may effectively
+          also point to a specific bean by name there (as shown above,
+          assuming that "myDataSource" is the bean id). If there is only one
+          <interfacename>DataSource</interfacename> bean to begin with, then
+          the qualifier will simply not have any effect - independent from the
+          bean name of that single matching bean.</para>
 
-          <para>Alternatively, consider using the <interfacename>@Resource</interfacename>
-          annotation on such an overridden setter methods, defining the
-          target bean name explicitly - with no type matching semantics.
-          Note that this always points to a bean with that specific name,
-          no matter whether there is one or more beans of the given type.</para>
+          <para>Alternatively, consider using the
+          <interfacename>@Resource</interfacename> annotation on such an
+          overridden setter methods, defining the target bean name explicitly
+          - with no type matching semantics. Note that this always points to a
+          bean with that specific name, no matter whether there is one or more
+          beans of the given type.</para>
 
           <programlisting language="java">...
     @Override <emphasis role="bold">@Resource("myDataSource")</emphasis>
@@ -1263,8 +1245,8 @@ public final class HibernateTitleDaoTests {
         <para>For class-level transaction configuration (i.e., setting the
         bean name for the transaction manager and the default rollback flag),
         see the <interfacename>@TransactionConfiguration</interfacename> entry
-        in the <link linkend="integration-testing-annotations">annotation support</link>
-        section.</para>
+        in the <link linkend="integration-testing-annotations">annotation
+        support</link> section.</para>
 
         <para>There are several options for configuring transactions for
         individual test methods. If transactions are not enabled for the
@@ -1318,9 +1300,9 @@ public final class HibernateTitleDaoTests {
         <para>The following JUnit 4 based example displays a fictitious
         integration testing scenario highlighting several of the
         transaction-related annotations. Consult the <link
-        linkend="integration-testing-annotations">annotation
-        support</link> section of the reference manual for further information
-        and configuration examples.</para>
+        linkend="integration-testing-annotations">annotation support</link>
+        section of the reference manual for further information and
+        configuration examples.</para>
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -1635,7 +1617,6 @@ public class SimpleTest {
       </section>
 
       <!-- ================================================================= -->
-
     </section>
 
     <!-- === PetClinic Example ================================================= -->
@@ -1756,7 +1737,8 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       pooling and transaction infrastructure. If you are deploying to a
       full-blown application server, you will probably use its connection pool
       (available through JNDI) and JTA implementation. Thus in production you
-      will use a <classname>JndiObjectFactoryBean</classname> for the
+      will use a <classname>JndiObjectFactoryBean</classname> /
+      <literal>&lt;jee:jndi-lookup&gt;</literal> for the
       <classname>DataSource</classname> and
       <classname>JtaTransactionManager</classname>. JNDI and JTA will not be
       available in out-of-container integration tests, so you should use a
@@ -1777,56 +1759,57 @@ public class HibernateClinicTests extends AbstractClinicTests { }
   <section id="testing-resources">
     <title>Further Resources</title>
 
-    <para>This section contains links to further resources about testing in general.</para>
+    <para>This section contains links to further resources about testing in
+    general.</para>
 
     <itemizedlist>
       <listitem>
-        <para><ulink url="http://www.junit.org/">JUnit</ulink>:
-        the Spring Framework's unit and integration test suite is written using
-        JUnit 3.8 and JUnit 4.5 as the testing framework.</para>
+        <para><ulink url="http://www.junit.org/">JUnit</ulink>: the Spring
+        Framework's unit and integration test suite is written using JUnit 3.8
+        and JUnit 4.5 as the testing framework.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://testng.org/">TestNG</ulink>:
-        a testing framework inspired by JUnit 3.8 with added support
-        for Java 5 annotations, test groups, data-driven testing, distributed
-        testing, etc.</para>
+        <para><ulink url="http://testng.org/">TestNG</ulink>: a testing
+        framework inspired by JUnit 3.8 with added support for Java 5
+        annotations, test groups, data-driven testing, distributed testing,
+        etc.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://www.mockobjects.com/">MockObjects.com</ulink>:
-        a website dedicated to mock objects, a technique for improving the design
-        of code within Test-Driven Development.</para>
+        <para><ulink
+        url="http://www.mockobjects.com/">MockObjects.com</ulink>: a website
+        dedicated to mock objects, a technique for improving the design of
+        code within Test-Driven Development.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://en.wikipedia.org/wiki/Mock_Object">"Mock Objects"</ulink>:
-        article at Wikipedia.</para>
+        <para><ulink url="http://en.wikipedia.org/wiki/Mock_Object">"Mock
+        Objects"</ulink>: article at Wikipedia.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://www.easymock.org/">EasyMock</ulink>:
-        the Spring Framework uses EasyMock extensively in its test suite.</para>
+        <para><ulink url="http://www.easymock.org/">EasyMock</ulink>: the
+        Spring Framework uses EasyMock extensively in its test suite.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://www.jmock.org/">JMock</ulink>:
-        a library that supports test-driven development of Java code
-        with mock objects.</para>
+        <para><ulink url="http://www.jmock.org/">JMock</ulink>: a library that
+        supports test-driven development of Java code with mock
+        objects.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://dbunit.sourceforge.net/">DbUnit</ulink>:
-        a JUnit extension (also usable with Ant and Maven) targeted for database-driven
-        projects that, among other things, puts your database into a known state
-        between test runs.</para>
+        <para><ulink url="http://dbunit.sourceforge.net/">DbUnit</ulink>: a
+        JUnit extension (also usable with Ant and Maven) targeted for
+        database-driven projects that, among other things, puts your database
+        into a known state between test runs.</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://grinder.sourceforge.net/">Grinder</ulink>:
-        a Java load testing framework.</para>
+        <para><ulink url="http://grinder.sourceforge.net/">Grinder</ulink>: a
+        Java load testing framework.</para>
       </listitem>
     </itemizedlist>
-
   </section>
 </chapter>

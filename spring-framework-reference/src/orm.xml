@@ -286,15 +286,14 @@ public class ProductDaoImpl implements ProductDao {
 
       <programlisting language="xml">&lt;beans&gt;
 
-  &lt;bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-    &lt;property name="jndiName" value="java:comp/env/jdbc/myds"/&gt;
-  &lt;/bean&gt;
+  &lt;jee:jndi-lookup id="myDataSource" jndi-name="java:comp/env/jdbc/myds"/&gt;
 
 &lt;/beans&gt;</programlisting>
 
       <para>You can also access a JNDI-located
       <interfacename>SessionFactory</interfacename>, using Spring's
-      <classname>JndiObjectFactoryBean</classname> to retrieve and expose it.
+      <classname>JndiObjectFactoryBean</classname> /
+      <literal>&lt;jee:jndi-lookup&gt;</literal> to retrieve and expose it.
       However, that is typically not common outside of an EJB context.</para>
     </section>
 
@@ -618,13 +617,9 @@ public class ProductDaoImpl implements ProductDao {
 
       <programlisting language="xml">&lt;beans&gt;
 
-  &lt;bean id="myDataSource1" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-    &lt;property name="jndiName value="java:comp/env/jdbc/myds1"/&gt;
-  &lt;/bean&gt;
+  &lt;jee:jndi-lookup id="dataSource1" jndi-name="java:comp/env/jdbc/myds1"/&gt;
 
-  &lt;bean id="myDataSource2" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
-    &lt;property name="jndiName" value="java:comp/env/jdbc/myds2"/&gt;
-  &lt;/bean&gt;
+  &lt;jee:jndi-lookup id="dataSource2" jndi-name="java:comp/env/jdbc/myds2"/&gt;
 
   &lt;bean id="mySessionFactory1" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
     &lt;property name="dataSource" ref="myDataSource1"/&gt;
@@ -795,7 +790,8 @@ public class ProductDaoImpl implements ProductDao {
           <para>If in your application context you are already directly
           obtaining the JTA
           <interfacename>PlatformTransactionManager</interfacename> object
-          (presumably from JNDI via <literal>JndiObjectFactoryBean</literal>)
+          (presumably from JNDI via
+          <literal>JndiObjectFactoryBean/<literal>&lt;jee:jndi-lookup&gt;</literal></literal>)
           and feeding it for example to Spring's
           <classname>JtaTransactionManager</classname>, then the easiest way
           is to simply specify a reference to this as the value of
@@ -953,12 +949,13 @@ public class ProductDaoImpl implements ProductDao {
       <para>A JDO <interfacename>PersistenceManagerFactory</interfacename> can
       also be set up in the JNDI environment of a J2EE application server,
       usually through the JCA connector provided by the particular JDO
-      implementation. Spring's standard
-      <literal>JndiObjectFactoryBean</literal> can be used to retrieve and
-      expose such a <interfacename>PersistenceManagerFactory</interfacename>.
-      However, outside an EJB context, there is often no compelling benefit in
-      holding the <interfacename>PersistenceManagerFactory</interfacename> in
-      JNDI: only choose such setup for a good reason. See "container resources
+      implementation. Spring's standard <literal>JndiObjectFactoryBean /
+      <literal>&lt;jee:jndi-lookup&gt;</literal></literal> can be used to
+      retrieve and expose such a
+      <interfacename>PersistenceManagerFactory</interfacename>. However,
+      outside an EJB context, there is often no compelling benefit in holding
+      the <interfacename>PersistenceManagerFactory</interfacename> in JNDI:
+      only choose such setup for a good reason. See "container resources
       versus local resources" in the Hibernate section for a discussion; the
       arguments there apply to JDO as well.</para>
     </section>
