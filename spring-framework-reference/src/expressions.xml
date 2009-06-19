@@ -122,24 +122,22 @@
     <para>The following code introduces the SpEL API to evaluate the literal
     string expression 'Hello World'</para>
 
-    <para><programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+    <para><programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'</emphasis>");
 String message = (String) exp.getValue();</programlisting>The value of the
     message variable is simply 'Hello World'.</para>
 
     <para>The SpEL classes and interfaces you are most likely to use are
     located in the packages <package>org.springframework.expression</package>
-    and its sub packages <package>spel.antlr</package> and
-    <package>spel.support</package>.</para>
+    and its sub package and <package>spel.support</package>.</para>
 
-    <para>The expression language is based on a grammar and uses ANTLR to
-    construct the lexer and parser. The interface
-    <interfacename>ExpressionParser</interfacename> is responsible for parsing
-    an expression string. In this example the expression string is a string
-    literal denoted by the surrounding single quotes. The interface
-    <interfacename>Expression</interfacename> is responsible for evaluating
-    the previously defined expression string. There are two exceptions that
-    can be thrown, <classname>ParseException</classname> and
+    <para>The interface <interfacename>ExpressionParser</interfacename> is
+    responsible for parsing an expression string. In this example the
+    expression string is a string literal denoted by the surrounding single
+    quotes. The interface <interfacename>Expression</interfacename> is
+    responsible for evaluating the previously defined expression string. There
+    are two exceptions that can be thrown,
+    <classname>ParseException</classname> and
     <classname>EvaluationException</classname> when calling
     '<literal>parser.parseExpression</literal>' and
     '<literal>exp.getValue</literal>' respectfully.</para>
@@ -150,7 +148,7 @@ String message = (String) exp.getValue();</programlisting>The value of the
     <para>As an example of method invocation, we call the 'concat' method on
     the string literal</para>
 
-    <programlisting lang="" language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting lang="" language="java">ExpressionParser parser = new SpelExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.concat('!')</emphasis>");
 String message = (String) exp.getValue();</programlisting>
 
@@ -159,7 +157,7 @@ String message = (String) exp.getValue();</programlisting>
     <para>As an example of calling a JavaBean property, the String property
     'Bytes' can be called as shown below</para>
 
-    <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
 // invokes 'getBytes()'
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes</emphasis>");  
@@ -171,7 +169,7 @@ byte[] bytes = (byte[]) exp.getValue();</programlisting>
 
     <para>Public fields may also be accessed</para>
 
-    <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
 // invokes 'getBytes().length'
 Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes.length</emphasis>");  
@@ -181,7 +179,7 @@ int length = (Integer) exp.getValue();</programlisting>
     <para>The String's constructor can be called instead of using a string
     literal</para>
 
-    <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+    <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">new String('hello world').toUpperCase()</emphasis>");
 String message = exp.getValue(String.class);</programlisting>
 
@@ -204,7 +202,7 @@ c.set(1856, 7, 9);
 //  The constructor arguments are name, birthday, and nationaltiy.
 Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 
-ExpressionParser parser = new SpelAntlrExpressionParser();
+ExpressionParser parser = new SpelExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">name</emphasis>");
 
 EvaluationContext context = new StandardEvaluationContext();
@@ -244,8 +242,9 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
 
       <para>The <classname>StandardEvaluationContext</classname> is where you
       specify the root object to evaluate against via the method
-      <methodname>setRootObject</methodname> . You can also specify variables
-      and functions that will be used in the expression using the methods
+      <methodname>setRootObject</methodname> or passing the root object into
+      the constructor. . You can also specify variables and functions that
+      will be used in the expression using the methods
       <methodname>setVariable</methodname> and
       <methodname>registerFunction</methodname>. The use of variables and
       functions are described in the language reference sections <link
@@ -446,7 +445,7 @@ Boolean b = simple.booleanList.get(0);
       as part of a more complex expression, for example using a literal on one
       side of a logical comparison operator.</para>
 
-      <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+      <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
 // evals to "Hello World"
 String helloWorld = (String) parser.parseExpression("'Hello World'").getValue(); 
@@ -486,11 +485,10 @@ String city = (String) parser.parseExpression("placeOfBirth.City").getValue(cont
       names. The contents of arrays and lists are obtained using square
       bracket notation.</para>
 
-      <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+      <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
 // Inventions Array
-StandardEvaluationContext teslaContext = new StandardEvaluationContext();
-teslaContext.setRootObject(tesla);
+StandardEvaluationContext teslaContext = new StandardEvaluationContext(tesla);
 
 // evaluates to "Induction motor"
 String invention = parser.parseExpression("inventions[3]").getValue(teslaContext, 
@@ -498,8 +496,7 @@ String invention = parser.parseExpression("inventions[3]").getValue(teslaContext
 
 
 // Members List
-StandardEvaluationContext societyContext = new StandardEvaluationContext();
-societyContext.setRootObject(ieee);
+StandardEvaluationContext societyContext = new StandardEvaluationContext(ieee);
 
 // evaluates to "Nikola Tesla"
 String name = parser.parseExpression("Members[0].Name").getValue(societyContext, String.class);
@@ -665,8 +662,7 @@ int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); 
       <literal>getValue</literal></para>
 
       <programlisting language="java">Inventor inventor = new Inventor();		
-StandardEvaluationContext inventorContext = new StandardEvaluationContext();
-inventorContext.setRootObject(inventor);
+StandardEvaluationContext inventorContext = new StandardEvaluationContext(inventor);
 
 parser.parseExpression("Name").setValue(inventorContext, "Alexander Seovic2");
 
@@ -728,11 +724,8 @@ p.parseExpression("Members.add(new org.spring.samples.spel.inventor.Inventor('Al
       StandardEvaluationContext.</para>
 
       <programlisting language="java">Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-StandardEvaluationContext context = new StandardEvaluationContext();
+StandardEvaluationContext context = new StandardEvaluationContext(tesla);
 context.setVariable("newName", "Mike Tesla");
-
-
-context.setRootObject(tesla);
 
 parser.parseExpression("Name = #newName").getValue(context);
 
@@ -750,7 +743,7 @@ List&lt;Integer&gt; primes = new ArrayList&lt;Integer&gt;();
 primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
 
 // create parser and set variable 'primes' as the array of integers
-ExpressionParser parser = new SpelAntlrExpressionParser();
+ExpressionParser parser = new SpelExpressionParser();
 StandardEvaluationContext context = new StandardEvaluationContext();
 context.setVariable("primes",primes);
 
@@ -810,7 +803,7 @@ List&lt;Integer&gt; primesGreaterThanTen =
       <para>This method is then registered with the evaluation context and can
       be used within an expression string</para>
 
-      <programlisting language="java">ExpressionParser parser = new SpelAntlrExpressionParser();
+      <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 StandardEvaluationContext context = new StandardEvaluationContext();
 
 context.registerFunction("reverseString", 
@@ -842,6 +835,78 @@ expression = "isMember(#queryName)? #queryName + ' is a member of the ' " +
 String queryResultString = 
                     parser.parseExpression(expression).getValue(societyContext, String.class);
 // queryResultString = "Nikola Tesla is a member of the IEEE Society"</programlisting>
+
+      <para>Also see the next section on the Elvis operator for an even
+      shorter syntax for the ternary operator</para>
+    </section>
+
+    <section>
+      <title>The Elvis Operator</title>
+
+      <para>The Elvis operator is a shortening of the ternary operator syntax
+      and is used in the <ulink
+      url="http://groovy.codehaus.org/Operators#Operators-ElvisOperator(%3F%3A)">Groovy</ulink>
+      language. The ternary operator syntax you usually have to repeat a
+      variable twice, for example</para>
+
+      <programlisting>String name = "Elvis Presley";
+String displayName = name != null ? name : "Unknown";</programlisting>
+
+      <para>Instead you can use the Elvis operator, named for the resemblance
+      to Elvis' hair style. </para>
+
+      <programlisting>ExpressionParser parser = new SpelExpressionParser();
+
+String name = parser.parseExpression("null?:'Unknown'").getValue(String.class);
+
+System.out.println(name);  // 'Unknown'
+
+</programlisting>
+
+      <para>Here is a more complex example </para>
+
+      <programlisting>ExpressionParser parser = new SpelExpressionParser();
+
+Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
+StandardEvaluationContext context = new StandardEvaluationContext(tesla);
+
+String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+
+System.out.println(name); // Mike Tesla
+
+tesla.setName(null);
+
+name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
+
+System.out.println(name); // Elvis Presley</programlisting>
+    </section>
+
+    <section>
+      <title>Safe Navigation operator</title>
+
+      <para>The Safe Navigation operator is used to avoid a
+      <literal>NullPointerException</literal> and comes from the <ulink
+      url="http://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)">Groovy</ulink>
+      language. Typically when you have a reference to an object you might
+      need to verify that it is not null before accessing methods or
+      properties of the object. To avoid this, the safe navigation operator
+      will simply return null instead of throwing an exception.</para>
+
+      <programlisting>ExpressionParser parser = new SpelExpressionParser();
+
+Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
+tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
+
+StandardEvaluationContext context = new StandardEvaluationContext(tesla);
+
+String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, String.class);
+System.out.println(city); // Smiljan
+
+tesla.setPlaceOfBirth(null);
+
+city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, String.class);
+
+System.out.println(city); // null - does not throw NullPointerException!!!</programlisting>
     </section>
 
     <section>
