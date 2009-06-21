@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Allows for configuration of individual bean property values from a property resource,
- * i.e. a properties file. Useful for custom config files targetted at system
+ * i.e. a properties file. Useful for custom config files targeted at system
  * administrators that override bean properties configured in the application context.
  *
  * <p>Two concrete implementations are provided in the distribution:
