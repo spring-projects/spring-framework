@@ -10,7 +10,7 @@ Import-Package:
  org.hsqldb;version="[1.0.0, 2.0.0)";resolution:=optional,
  org.jboss.resource.adapter.jdbc;version="0";resolution:=optional,
  weblogic.jdbc.extensions;version="0";resolution:=optional
-Import-Template:
+Import-Template: 
  com.mchange.v2.c3p0.*;version="[0.9.1, 2.0.0)";resolution:=optional,
  com.sun.rowset.*;version="[1.0.1, 2.0.0)";resolution:=optional,
  javax.naming.*;version="0";resolution:=optional,
