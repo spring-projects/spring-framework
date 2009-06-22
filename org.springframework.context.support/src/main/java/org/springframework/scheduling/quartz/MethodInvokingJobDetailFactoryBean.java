@@ -261,7 +261,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		@Override
 		protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 			try {
-				this.methodInvoker.invoke();
+				context.setResult(this.methodInvoker.invoke());
 			}
 			catch (InvocationTargetException ex) {
 				if (ex.getTargetException() instanceof JobExecutionException) {
