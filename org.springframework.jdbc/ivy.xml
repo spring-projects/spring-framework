@@ -32,7 +32,7 @@
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="optional->compile"/>
 		<dependency org="com.h2database" name="com.springsource.org.h2" rev="1.0.71" conf="optional->compile"/>
-		<dependency org="org.apache.derby" name="com.springsource.org.apache.derby" rev="10.5.1000001.764942" />
+		<dependency org="org.apache.derby" name="com.springsource.org.apache.derby" rev="10.5.1000001.764942" conf="optional->compile"/>
 		<!-- test dependencies -->
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
