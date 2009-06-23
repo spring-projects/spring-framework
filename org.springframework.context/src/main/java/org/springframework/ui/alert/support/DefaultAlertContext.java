@@ -34,7 +34,7 @@ import org.springframework.util.CachingMapDecorator;
 public class DefaultAlertContext implements AlertContext {
 
 	@SuppressWarnings("serial")
-	private Map<String, List<Alert>> alertsByElement = new CachingMapDecorator<String, List<Alert>>(new LinkedHashMap<String, List<Alert>>()) {
+	private Map<String, List<Alert>> alerts = new CachingMapDecorator<String, List<Alert>>(new LinkedHashMap<String, List<Alert>>()) {
 		protected List<Alert> create(String element) {
 			return new ArrayList<Alert>();
 		}
@@ -43,11 +43,11 @@ public class DefaultAlertContext implements AlertContext {
 	// implementing AlertContext
 
 	public Map<String, List<Alert>> getAlerts() {
-		return Collections.unmodifiableMap(alertsByElement);
+		return Collections.unmodifiableMap(alerts);
 	}
 	
 	public List<Alert> getAlerts(String element) {
-		List<Alert> messages = alertsByElement.get(element);
+		List<Alert> messages = alerts.get(element);
 		if (messages.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -55,12 +55,12 @@ public class DefaultAlertContext implements AlertContext {
 	}
 
 	public void add(Alert alert) {
-		List<Alert> alerts = alertsByElement.get(alert.getElement());
+		List<Alert> alerts = this.alerts.get(alert.getElement());
 		alerts.add(alert);
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("alertsByElement", alertsByElement).toString();
+		return new ToStringCreator(this).append("alerts", alerts).toString();
 	}
 
 }

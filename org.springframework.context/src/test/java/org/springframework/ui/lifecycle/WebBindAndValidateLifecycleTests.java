@@ -12,11 +12,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
+import org.springframework.ui.binding.Bound;
+import org.springframework.ui.binding.Model;
 import org.springframework.ui.binding.support.GenericFormatterRegistry;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.IntegerFormatter;
 
-public class WebBindAndLifecycleTests {
+public class WebBindAndValidateLifecycleTests {
 
 	private WebBindAndValidateLifecycle lifecycle;
 
@@ -66,6 +68,37 @@ public class WebBindAndLifecycleTests {
 		assertEquals(1, alertContext.getAlerts().size());
 		assertEquals(Severity.ERROR, alertContext.getAlerts("integer").get(0).getSeverity());
 		assertEquals("Failed to bind to property 'integer'; the user value 'bogus' has an invalid format and could no be parsed", alertContext.getAlerts("integer").get(0).getMessage());
+	}
+	
+	@Test
+	public void testExecuteLifecycleAnnotatedModel() {
+		TestAnnotatedBean model = new TestAnnotatedBean();
+		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
+		Map<String, Object> userMap = new HashMap<String, Object>();
+		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(new IntegerFormatter(), Integer.class);
+		lifecycle.setFormatterRegistry(registry);
+		userMap.put("editable", "foo");
+		lifecycle.execute(userMap);
+		assertEquals(0, alertContext.getAlerts().size());
+		assertEquals("foo", model.getEditable());
+	}
+
+	@Test
+	public void testExecuteLifecycleAnnotatedModelNonEditableBindingAttempt() {
+		TestAnnotatedBean model = new TestAnnotatedBean();
+		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
+		Map<String, Object> userMap = new HashMap<String, Object>();
+		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(new IntegerFormatter(), Integer.class);
+		lifecycle.setFormatterRegistry(registry);
+		userMap.put("editable", "foo");
+		userMap.put("nonEditable", "whatev");
+		lifecycle.execute(userMap);
+		assertEquals(1, alertContext.getAlerts().size());
+		assertEquals("foo", model.getEditable());
+		assertEquals(null, model.getNotEditable());
+		assertEquals("noSuchBinding", alertContext.getAlerts("nonEditable").get(0).getCode());
 	}
 
 	public static enum FooEnum {
@@ -187,5 +220,32 @@ public class WebBindAndLifecycleTests {
 			this.country = country;
 		}
 
+	}
+	
+	@Model(value="testBean", strictBinding=true)
+	public class TestAnnotatedBean {
+
+		private String editable;
+		
+		private String notEditable;
+		
+		@Bound
+		public String getEditable() {
+			return editable;
+		}
+		
+		public void setEditable(String editable) {
+			this.editable = editable;
+		}
+		
+		public String getNotEditable() {
+			return notEditable;
+		}
+		
+		public void setNotEditable(String notEditable) {
+			this.notEditable = notEditable;
+		}
+		
+		
 	}
 }

@@ -107,6 +107,10 @@ public class GenericBinder implements Binder {
 		return model;
 	}
 
+	public boolean isStrict() {
+		return strict;
+	}
+
 	public void setStrict(boolean strict) {
 		this.strict = strict;
 	}
@@ -148,7 +152,11 @@ public class GenericBinder implements Binder {
 		ArrayListBindingResults results = new ArrayListBindingResults(values.size());
 		for (UserValue value : values) {
 			BindingImpl binding = (BindingImpl) getBinding(value.getProperty());
-			results.add(binding.setValue(value.getValue()));
+			if (binding != null) {
+				results.add(binding.setValue(value.getValue()));
+			} else {
+				results.add(new NoSuchBindingResult(value));
+			}
 		}
 		return results;
 	}
@@ -449,6 +457,47 @@ public class GenericBinder implements Binder {
 		}
 	}
 
+	static class NoSuchBindingResult implements BindingResult {
+		private UserValue userValue;
+		
+		public NoSuchBindingResult(UserValue userValue) {
+			this.userValue = userValue;
+		}
+		
+		public String getProperty() {
+			return userValue.getProperty();
+		}
+
+		public Object getUserValue() {
+			return userValue.getValue();
+		}
+
+		public boolean isFailure() {
+			return true;
+		}
+
+		public Alert getAlert() {
+			return new AbstractAlert() {
+				public String getElement() {
+					// TODO append model first? e.g. model.property
+					return getProperty();
+				}
+
+				public String getCode() {
+					return "noSuchBinding";
+				}
+
+				public Severity getSeverity() {
+					return Severity.WARNING;
+				}
+
+				public String getMessage() {
+					return "Failed to bind to property '" + userValue.getProperty() + "'; no binding has been added for the property";
+				}
+			};
+		}		
+	}
+	
 	static class InvalidFormatResult implements BindingResult {
 
 		private String property;
@@ -473,7 +522,7 @@ public class GenericBinder implements Binder {
 		}
 
 		public Alert getAlert() {
-			return new Alert() {
+			return new AbstractAlert() {
 				public String getElement() {
 					// TODO append model first? e.g. model.property
 					return getProperty();
@@ -523,7 +572,7 @@ public class GenericBinder implements Binder {
 		}
 
 		public Alert getAlert() {
-			return new Alert() {
+			return new AbstractAlert() {
 				public String getElement() {
 					// TODO append model first? e.g. model.property
 					return getProperty();
@@ -611,7 +660,7 @@ public class GenericBinder implements Binder {
 		}
 		
 		public Alert getAlert() {
-			return new Alert() {
+			return new AbstractAlert() {
 				public String getElement() {
 					// TODO append model first? e.g. model.property					
 					return getProperty();
@@ -631,5 +680,11 @@ public class GenericBinder implements Binder {
 			};
 		}
 
+	}
+	
+	static abstract class AbstractAlert implements Alert {
+		public String toString() {
+			return getElement() + ":" + getCode() + " - " + getMessage();
+		}
 	}
 }

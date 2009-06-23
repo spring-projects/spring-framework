@@ -20,6 +20,6 @@ public @interface Model {
 	 * Configures strict model binding.
 	 * @see Binder#setStrict(boolean)
 	 */
-	boolean strict() default false;
+	boolean strictBinding() default false;
 
 }
