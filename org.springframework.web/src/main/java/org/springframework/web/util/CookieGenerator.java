@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,6 @@ public class CookieGenerator {
 	 */
 	public static final String DEFAULT_COOKIE_PATH = "/";
 
-	/**
-	 * Default maximum age of cookies: maximum integer value, i.e. forever.
-	 */
-	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -58,7 +53,7 @@ public class CookieGenerator {
 
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
-	private int cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
+	private Integer cookieMaxAge = null;
 
 	private boolean cookieSecure = false;
 
@@ -118,7 +113,7 @@ public class CookieGenerator {
 	/**
 	 * Return the maximum age for cookies created by this generator.
 	 */
-	public int getCookieMaxAge() {
+	public Integer getCookieMaxAge() {
 		return cookieMaxAge;
 	}
 
@@ -154,7 +149,10 @@ public class CookieGenerator {
 	 */
 	public void addCookie(HttpServletResponse response, String cookieValue) {
 		Cookie cookie = createCookie(cookieValue);
-		cookie.setMaxAge(getCookieMaxAge());
+		Integer maxAge = getCookieMaxAge();
+		if (maxAge != null) {
+			cookie.setMaxAge(maxAge);
+		}
 		if (isCookieSecure()) {
 			cookie.setSecure(true);
 		}
