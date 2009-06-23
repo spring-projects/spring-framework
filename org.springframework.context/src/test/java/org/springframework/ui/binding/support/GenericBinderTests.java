@@ -170,6 +170,25 @@ public class GenericBinderTests {
 	}
 
 	@Test
+	public void bindStrictNoMappingBindings() {
+		binder.setStrict(true);
+		binder.add(new BindingConfiguration("integer", null));
+		UserValues values = new UserValues();
+		values.add("integer", "3");
+		values.add("foo", "BAR");
+		BindingResults results = binder.bind(values);
+		assertEquals(2, results.size());
+		
+		assertEquals("integer", results.get(0).getProperty());
+		assertFalse(results.get(0).isFailure());
+		assertEquals("3", results.get(0).getUserValue());
+
+		assertEquals("foo", results.get(1).getProperty());
+		assertTrue(results.get(1).isFailure());
+		assertEquals("BAR", results.get(1).getUserValue());
+	}
+
+	@Test
 	public void getBindingCustomFormatter() {
 		binder.add(new BindingConfiguration("currency", new CurrencyFormatter()));
 		Binding b = binder.getBinding("currency");
