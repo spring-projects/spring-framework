@@ -21,9 +21,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.springframework.http.HttpInputMessage;
@@ -38,7 +36,7 @@ import org.springframework.util.Assert;
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that can read
  * and write JSON using <a href="http://jackson.codehaus.org/">Jackson's</a> {@link ObjectMapper}.
  *
- * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances. 
+ * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the {@link
  * #setSupportedMediaTypes(List) supportedMediaTypes} property, and overriding the {@link #getContentType(Object)}
@@ -51,13 +49,9 @@ public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
-	private JsonFactory jsonFactory = new MappingJsonFactory();
-
 	private JsonEncoding encoding = JsonEncoding.UTF8;
 
-	/**
-	 * Construct a new {@code BindingJacksonHttpMessageConverter},
-	 */
+	/** Construct a new {@code BindingJacksonHttpMessageConverter}, */
 	public BindingJacksonHttpMessageConverter() {
 		super(new MediaType("application", "json"));
 	}
@@ -71,16 +65,9 @@ public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 		this.objectMapper = objectMapper;
 	}
 
-	/** Sets the {@code JsonFactory} for this converter. By default, a {@link MappingJsonFactory} is used. */
-	public void setJsonFactory(JsonFactory jsonFactory) {
-		Assert.notNull(jsonFactory, "'jsonFactory' must not be null");
-		this.jsonFactory = jsonFactory;
-	}
-
-	/**
-	 * Sets the {@code JsonEncoding} for this converter. By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used.
-	 */
+	/** Sets the {@code JsonEncoding} for this converter. By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used. */
 	public void setEncoding(JsonEncoding encoding) {
+		Assert.notNull(encoding, "'encoding' must not be null");
 		this.encoding = encoding;
 	}
 
@@ -103,7 +90,8 @@ public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 	@Override
 	protected void writeInternal(T t, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
-		JsonGenerator jsonGenerator = jsonFactory.createJsonGenerator(outputMessage.getBody(), encoding);
+		JsonGenerator jsonGenerator =
+				objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
 		objectMapper.writeValue(jsonGenerator, t);
 	}
 }
