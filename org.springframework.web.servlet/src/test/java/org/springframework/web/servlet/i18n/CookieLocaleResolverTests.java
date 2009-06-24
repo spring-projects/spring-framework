@@ -56,7 +56,6 @@ public class CookieLocaleResolverTests extends TestCase {
 		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_NAME, cookie.getName());
 		assertEquals(null, cookie.getDomain());
 		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_PATH, cookie.getPath());
-		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_MAX_AGE, cookie.getMaxAge());
 		assertFalse(cookie.getSecure());
 
 		request = new MockHttpServletRequest();
