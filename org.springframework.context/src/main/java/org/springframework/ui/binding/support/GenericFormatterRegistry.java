@@ -42,14 +42,6 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
-	public Formatter<?> getFormatter(Class<?> propertyType) {
-		if (propertyType.isAnnotation()) {
-			return annotationFormatters.get(propertyType).getFormatter(null);
-		} else {
-			return typeFormatters.get(propertyType);
-		}
-	}
-
 	public Formatter<?> getFormatter(TypeDescriptor<?> propertyType) {
 		Formatter<?> formatter = typeFormatters.get(propertyType.getType());
 		if (formatter != null) {
