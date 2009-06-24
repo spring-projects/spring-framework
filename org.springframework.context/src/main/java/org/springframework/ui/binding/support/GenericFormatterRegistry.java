@@ -32,7 +32,7 @@ import org.springframework.ui.format.Formatter;
  * A generic implementation of {@link FormatterRegistry} suitable for use in most binding environments.
  * @author Keith Donald
  * @since 3.0
- * @see #add(Formatter, Class)
+ * @see #add(Class, Formatter)
  * @see #add(AnnotationFormatterFactory)
  */
 @SuppressWarnings("unchecked")
@@ -58,7 +58,7 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		}
 	}
 
-	public void add(Formatter<?> formatter, Class<?> propertyType) {
+	public void add(Class<?> propertyType, Formatter<?> formatter) {
 		if (propertyType.isAnnotation()) {
 			annotationFormatters.put(propertyType, new SimpleAnnotationFormatterFactory(formatter));
 		} else {

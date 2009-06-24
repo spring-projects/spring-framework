@@ -25,7 +25,7 @@ import org.springframework.ui.format.Formatter;
  * @author Keith Donald
  * @since 3.0
  * @param <M> The kind of model object this binder binds to
- * @see #add(BindingConfiguration)
+ * @see #configureBinding(BindingConfiguration)
  * @see #bind(UserValues)
  */
 public interface Binder {
@@ -37,7 +37,7 @@ public interface Binder {
 	Object getModel();
 	
 	/**
-	 * Configures if this binder is <i>strict</i>; a strict binder requires all bindings to be registered explicitly using {@link #add(BindingConfiguration)}.
+	 * Configures if this binder is <i>strict</i>; a strict binder requires all bindings to be registered explicitly using {@link #configureBinding(BindingConfiguration)}.
 	 * An <i>optimistic</i> binder will implicitly create bindings as required to support {@link #bind(UserValues)} operations.
 	 * Default is optimistic.
 	 * @param strict strict binder status
@@ -46,23 +46,23 @@ public interface Binder {
 
 	/**
 	 * Adds a new binding.
-	 * @param binding the binding configuration
+	 * @param configuration the binding configuration
 	 * @return the new binding created from the configuration provided
 	 */
-	Binding add(BindingConfiguration binding);
+	Binding configureBinding(BindingConfiguration configuration);
 
 	/**
 	 * Adds a Formatter that will format property values of type <code>propertyType</coe>.
-	 * @param formatter the formatter
 	 * @param propertyType the property type
+	 * @param formatter the formatter
 	 */
-	void add(Formatter<?> formatter, Class<?> propertyType);
+	void registerFormatter(Class<?> propertyType, Formatter<?> formatter);
 
 	/**
 	 * Adds a AnnotationFormatterFactory that will format values of properties annotated with a specific annotation.
 	 * @param factory the annotation formatter factory
 	 */
-	void add(AnnotationFormatterFactory<?, ?> factory);
+	void registerFormatterFactory(AnnotationFormatterFactory<?, ?> factory);
 
 	/**
 	 * Returns the binding for the property.

@@ -40,8 +40,8 @@ public class WebBinderTests {
 	
 	@Test
 	public void bindUserValuesCreatedFromUserMap() throws ParseException {
-		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
-		binder.add(new BindingConfiguration("date", new DateFormatter()));
+		binder.registerFormatter(CurrencyFormat.class, new CurrencyFormatter());
+		binder.configureBinding(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
 		userMap.put("string", "test");
 		userMap.put("_integer", "doesn't matter");

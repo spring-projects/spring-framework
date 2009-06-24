@@ -91,34 +91,34 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValuePropertyFormatter() throws ParseException {
-		binder.add(new BindingConfiguration("date", new DateFormatter()));
+		binder.configureBinding(new BindingConfiguration("date", new DateFormatter()));
 		binder.bind(UserValues.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
-		binder.add(new BindingConfiguration("date", new DateFormatter()));
+		binder.configureBinding(new BindingConfiguration("date", new DateFormatter()));
 		binder.bind(UserValues.single("date", "bogus"));
 	}
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
-		binder.add(new DateFormatter(), Date.class);
+		binder.registerFormatter(Date.class, new DateFormatter());
 		binder.bind(UserValues.single("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 	
 	@Test
 	public void bindSingleValueWithFormatterRegisteredByAnnotation() throws ParseException {
-		binder.add(new CurrencyFormatter(), CurrencyFormat.class);
+		binder.registerFormatter(CurrencyFormat.class, new CurrencyFormatter());
 		binder.bind(UserValues.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}
 	
 	@Test
 	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
-		binder.add(new CurrencyAnnotationFormatterFactory());
+		binder.registerFormatterFactory(new CurrencyAnnotationFormatterFactory());
 		binder.bind(UserValues.single("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}
@@ -160,7 +160,7 @@ public class GenericBinderTests {
 		binder.setStrict(true);
 		Binding b = binder.getBinding("integer");
 		assertNull(b);
-		binder.add(new BindingConfiguration("integer", null));
+		binder.configureBinding(new BindingConfiguration("integer", null));
 		b = binder.getBinding("integer");
 		assertFalse(b.isCollection());
 		assertEquals("0", b.getValue());
@@ -172,7 +172,7 @@ public class GenericBinderTests {
 	@Test
 	public void bindStrictNoMappingBindings() {
 		binder.setStrict(true);
-		binder.add(new BindingConfiguration("integer", null));
+		binder.configureBinding(new BindingConfiguration("integer", null));
 		UserValues values = new UserValues();
 		values.add("integer", "3");
 		values.add("foo", "BAR");
@@ -190,7 +190,7 @@ public class GenericBinderTests {
 
 	@Test
 	public void getBindingCustomFormatter() {
-		binder.add(new BindingConfiguration("currency", new CurrencyFormatter()));
+		binder.configureBinding(new BindingConfiguration("currency", new CurrencyFormatter()));
 		Binding b = binder.getBinding("currency");
 		assertFalse(b.isCollection());
 		assertEquals("", b.getValue());
@@ -201,7 +201,7 @@ public class GenericBinderTests {
 	@Test
 	public void getBindingCustomFormatterRequiringTypeCoersion() {
 		// IntegerFormatter formats Longs, so conversion from Integer -> Long is performed
-		binder.add(new BindingConfiguration("integer", new IntegerFormatter()));
+		binder.configureBinding(new BindingConfiguration("integer", new IntegerFormatter()));
 		Binding b = binder.getBinding("integer");
 		b.setValue("2,300");
 		assertEquals("2,300", b.getValue());
@@ -270,7 +270,7 @@ public class GenericBinderTests {
 
 	@Test
 	public void formatPossibleValue() {
-		binder.add(new BindingConfiguration("currency", new CurrencyFormatter()));
+		binder.configureBinding(new BindingConfiguration("currency", new CurrencyFormatter()));
 		Binding b = binder.getBinding("currency");
 		assertEquals("$5.00", b.format(new BigDecimal("5")));
 	}

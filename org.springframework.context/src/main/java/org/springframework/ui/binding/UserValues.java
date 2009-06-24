@@ -22,6 +22,7 @@ import java.util.List;
 
 /**
  * A holder for a list of UserValues.
+ * TODO just use a map here
  * @author Keith Donald
  * @since 3.0
  * @see Binder#bind(UserValues)

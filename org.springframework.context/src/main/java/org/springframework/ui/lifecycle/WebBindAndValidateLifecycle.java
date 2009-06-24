@@ -109,7 +109,7 @@ public class WebBindAndValidateLifecycle {
 				Bound b = AnnotationUtils.getAnnotation(getter, Bound.class);
 				if (b != null) {
 					// TODO should we wire formatter here if using a format annotation - an optimization?
-					binder.add(new BindingConfiguration(prop.getName(), null));
+					binder.configureBinding(new BindingConfiguration(prop.getName(), null));
 				}
 			}
 			// TODO @Bound fields

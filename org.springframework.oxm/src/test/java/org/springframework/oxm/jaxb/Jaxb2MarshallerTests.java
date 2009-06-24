@@ -66,7 +66,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		FlightType flight = new FlightType();
 		flight.setNumber(42L);
 		flights = new Flights();
-		flights.getFlight().add(flight);
+		flights.getFlight().configureBinding(flight);
 		return flights;
 	}
 
