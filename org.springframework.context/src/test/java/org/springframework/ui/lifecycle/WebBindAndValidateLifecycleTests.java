@@ -59,7 +59,7 @@ public class WebBindAndValidateLifecycleTests {
 	public void testExecuteLifecycleInvalidFormatBindingErrors() {
 		Map<String, Object> userMap = new HashMap<String, Object>();
 		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(new IntegerFormatter(), Integer.class);
+		registry.add(Integer.class, new IntegerFormatter());
 		lifecycle.setFormatterRegistry(registry);
 		userMap.put("string", "test");
 		userMap.put("integer", "bogus");
@@ -76,7 +76,7 @@ public class WebBindAndValidateLifecycleTests {
 		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
 		Map<String, Object> userMap = new HashMap<String, Object>();
 		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(new IntegerFormatter(), Integer.class);
+		registry.add(Integer.class, new IntegerFormatter());
 		lifecycle.setFormatterRegistry(registry);
 		userMap.put("editable", "foo");
 		lifecycle.execute(userMap);
@@ -90,7 +90,7 @@ public class WebBindAndValidateLifecycleTests {
 		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
 		Map<String, Object> userMap = new HashMap<String, Object>();
 		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(new IntegerFormatter(), Integer.class);
+		registry.add(Integer.class, new IntegerFormatter());
 		lifecycle.setFormatterRegistry(registry);
 		userMap.put("editable", "foo");
 		userMap.put("nonEditable", "whatev");

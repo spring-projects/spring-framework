@@ -43,6 +43,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * invalidFormat=The #{label} must be in format #{format}.
  * mathForm.decimalField=Decimal Field
  * </pre>
+ * TODO favor MessageBuilder accepting message source
  * @author Keith Donald
  * @since 3.0
  * @see #code(String)

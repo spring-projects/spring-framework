@@ -26,10 +26,10 @@ public interface FormatterRegistry {
 	 * <p>
 	 * Note the Formatter's formatted object type does not have to equal the associated property type.
 	 * When the property type differs from the formatted object type, the caller of the Formatter is expected to coerse a property value to the type expected by the Formatter.  
-	 * @param formatter the formatter
 	 * @param propertyType the type
+	 * @param formatter the formatter
 	 */
-	void add(Formatter<?> formatter, Class<?> propertyType);
+	void add(Class<?> propertyType, Formatter<?> formatter);
 
 	/**
 	 * Adds a AnnotationFormatterFactory that will format values of properties annotated with a specific annotation.

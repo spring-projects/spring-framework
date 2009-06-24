@@ -22,7 +22,7 @@ import org.springframework.ui.format.Formatter;
  * Configuration used to create a new {@link Binding} registered with a {@link GenericBinder}.
  * @author Keith Donald
  * @since 3.0
- * @see GenericBinder#add(BindingConfiguration)
+ * @see GenericBinder#configureBinding(BindingConfiguration)
  */
 public class BindingConfiguration {
 	

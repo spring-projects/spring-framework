@@ -67,7 +67,7 @@ import org.springframework.util.Assert;
  * TODO - localization of alert messages using MessageResolver/MesageSource
  * @author Keith Donald
  * @since 3.0
- * @see #add(BindingConfiguration)
+ * @see #configureBinding(BindingConfiguration)
  * @see #bind(UserValues)
  */
 @SuppressWarnings("unchecked")
@@ -120,29 +120,29 @@ public class GenericBinder implements Binder {
 		this.formatterRegistry = formatterRegistry;
 	}
 
-	public Binding add(BindingConfiguration binding) {
-		Binding newBinding;
+	public Binding configureBinding(BindingConfiguration configuration) {
+		Binding binding;
 		try {
-			newBinding = new BindingImpl(binding);
+			binding = new BindingImpl(configuration);
 		} catch (org.springframework.expression.ParseException e) {
 			throw new IllegalArgumentException(e);
 		}
-		bindings.put(binding.getProperty(), newBinding);
-		return newBinding;
+		bindings.put(configuration.getProperty(), binding);
+		return binding;
 	}
 
-	public void add(Formatter<?> formatter, Class<?> propertyType) {
-		formatterRegistry.add(formatter, propertyType);
+	public void registerFormatter(Class<?> propertyType, Formatter<?> formatter) {
+		formatterRegistry.add(propertyType, formatter);
 	}
 
-	public void add(AnnotationFormatterFactory<?, ?> factory) {
+	public void registerFormatterFactory(AnnotationFormatterFactory<?, ?> factory) {
 		formatterRegistry.add(factory);
 	}
 
 	public Binding getBinding(String property) {
 		Binding binding = bindings.get(property);
 		if (binding == null && !strict) {
-			return add(new BindingConfiguration(property, null));
+			return configureBinding(new BindingConfiguration(property, null));
 		} else {
 			return binding;
 		}
