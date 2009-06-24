@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  * method.
  *
  * @author Arjen Poutsma
+ * @see org.springframework.web.servlet.view.json.BindingJacksonJsonView
  * @since 3.0
  */
 public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageConverter<T> {
@@ -51,24 +52,46 @@ public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 
 	private JsonEncoding encoding = JsonEncoding.UTF8;
 
-	/** Construct a new {@code BindingJacksonHttpMessageConverter}, */
+	private boolean prefixJson = false;
+
+	/**
+	 * Construct a new {@code BindingJacksonHttpMessageConverter},
+	 */
 	public BindingJacksonHttpMessageConverter() {
 		super(new MediaType("application", "json"));
 	}
 
 	/**
-	 * Sets the {@code ObjectMapper} for this converter. By default, a default {@link ObjectMapper#ObjectMapper()
-	 * ObjectMapper} is used.
+	 * Sets the {@code ObjectMapper} for this view. If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper}
+	 * is used.
+	 *
+	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON serialization
+	 * process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory} can be configured that provides
+	 * custom serializers for specific types. The other option for refining the serialization process is to use Jackson's
+	 * provided annotations on the types to be serialized, in which case a custom-configured ObjectMapper is unnecessary.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "'objectMapper' must not be null");
 		this.objectMapper = objectMapper;
 	}
 
-	/** Sets the {@code JsonEncoding} for this converter. By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used. */
+	/**
+	 * Sets the {@code JsonEncoding} for this converter. By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used.
+	 */
 	public void setEncoding(JsonEncoding encoding) {
 		Assert.notNull(encoding, "'encoding' must not be null");
 		this.encoding = encoding;
+	}
+
+	/**
+	 * Indicates whether the JSON output by this view should be prefixed with "{} &&". Default is false.
+	 *
+	 * <p> Prefixing the JSON string in this manner is used to help prevent JSON Hijacking. The prefix renders the string
+	 * syntactically invalid as a script so that it cannot be hijacked. This prefix does not affect the evaluation of JSON,
+	 * but if JSON validation is performed on the string, the prefix would need to be ignored.
+	 */
+	public void setPrefixJson(boolean prefixJson) {
+		this.prefixJson = prefixJson;
 	}
 
 	public boolean supports(Class<? extends T> clazz) {
@@ -92,6 +115,9 @@ public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 			throws IOException, HttpMessageNotWritableException {
 		JsonGenerator jsonGenerator =
 				objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
+		if (prefixJson) {
+			jsonGenerator.writeRaw("{} && ");
+		}
 		objectMapper.writeValue(jsonGenerator, t);
 	}
 }
