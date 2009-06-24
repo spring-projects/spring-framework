@@ -152,9 +152,22 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Deprecated
+	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
+		return queryForObject(sql, (RowMapper<T>) rm, args);
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, RowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Deprecated
+	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException {
+		return queryForObject(sql, (RowMapper<T>) rm, args);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -165,8 +178,20 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Deprecated
+	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
+		return queryForObject(sql, (RowMapper<T>)rm, args);
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> List<T> query(String sql, RowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().query(sql, args, rm);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Deprecated
+	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args) throws DataAccessException {
+		return query(sql, (RowMapper<T>)rm, args);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -176,10 +201,23 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Deprecated
+	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException {
+		return query(sql, (RowMapper<T>)rm, args);
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> List<T> query(String sql, RowMapper<T> rm, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().query(sql, rm) :
 				getJdbcOperations().query(sql, getArguments(args), rm));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Deprecated
+	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
+		return query(sql, (RowMapper<T>)rm, args);
 	}
 
 	@SuppressWarnings("unchecked")
