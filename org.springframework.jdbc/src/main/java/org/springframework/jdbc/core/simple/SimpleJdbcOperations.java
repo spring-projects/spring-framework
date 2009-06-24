@@ -151,11 +151,11 @@ public interface SimpleJdbcOperations {
 
 	/**
 	 * Query for an object of type <code>T</code> using the supplied
-	 * {@link ParameterizedRowMapper} to the query results to the object.
+	 * {@link RowMapper} to the query results to the object.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL query to run
-	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
+	 * @param rm the @{@link RowMapper} to use for result mapping
 	 * @param args the map containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
@@ -170,11 +170,58 @@ public interface SimpleJdbcOperations {
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
+	 * @param args the map containing the arguments for the query
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 * @deprecated as of Spring 3.0: Use the method using the newly genericized RowMapper interface
+	 * instead since the RowMapper and ParameterizedRowMapper interfaces are equivalent now.
+	 */
+	@Deprecated
+	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args)
+			throws DataAccessException;
+
+	/**
+	 * Query for an object of type <code>T</code> using the supplied
+	 * {@link RowMapper} to the query results to the object.
+	 * Uses sql with the named parameter support provided by the
+	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
+	 * @param sql the SQL query to run
+	 * @param rm the @{@link RowMapper} to use for result mapping
 	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
 	<T> T queryForObject(String sql, RowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException;
+
+	/**
+	 * Query for an object of type <code>T</code> using the supplied
+	 * {@link ParameterizedRowMapper} to the query results to the object.
+	 * Uses sql with the named parameter support provided by the
+	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
+	 * @param sql the SQL query to run
+	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 * @deprecated as of Spring 3.0: Use the method using the newly genericized RowMapper interface
+	 * instead since the RowMapper and ParameterizedRowMapper interfaces are equivalent now.
+	 */
+	@Deprecated
+	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException;
+
+	/**
+	 * Query for an object of type <code>T</code> using the supplied
+	 * {@link RowMapper} to the query results to the object.
+	 * Uses sql with the standard '?' placeholders for parameters
+	 * @param sql the SQL query to run
+	 * @param rm the @{@link RowMapper} to use for result mapping
+	 * @param args the variable number of arguments for the query
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 */
+	<T> T queryForObject(String sql, RowMapper<T> rm, Object... args)
 			throws DataAccessException;
 
 	/**
@@ -186,17 +233,20 @@ public interface SimpleJdbcOperations {
 	 * @param args the variable number of arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 * @deprecated as of Spring 3.0: Use the method using the newly genericized RowMapper interface
+	 * instead since the RowMapper and ParameterizedRowMapper interfaces are equivalent now.
 	 */
-	<T> T queryForObject(String sql, RowMapper<T> rm, Object... args)
+	@Deprecated
+	<T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args)
 			throws DataAccessException;
 
 	/**
 	 * Query for a {@link List} of <code>Objects</code> of type <code>T</code> using
-	 * the supplied {@link ParameterizedRowMapper} to the query results to the object.
+	 * the supplied {@link RowMapper} to the query results to the object.
 	 * Uses sql with the named parameter support provided by the
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL query to run
-	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
+	 * @param rm the @{@link RowMapper} to use for result mapping
 	 * @param args the map containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
@@ -211,11 +261,58 @@ public interface SimpleJdbcOperations {
 	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL query to run
 	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
+	 * @param args the map containing the arguments for the query
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 * @deprecated as of Spring 3.0: Use the method using the newly genericized RowMapper interface
+	 * instead since the RowMapper and ParameterizedRowMapper interfaces are equivalent now.
+	 */
+	@Deprecated
+	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map<String, Object> args)
+			throws DataAccessException;
+
+	/**
+	 * Query for a {@link List} of <code>Objects</code> of type <code>T</code> using
+	 * the supplied {@link RowMapper} to the query results to the object.
+	 * Uses sql with the named parameter support provided by the
+	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
+	 * @param sql the SQL query to run
+	 * @param rm the @{@link RowMapper} to use for result mapping
 	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
 	 */
 	<T> List<T> query(String sql, RowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException;
+
+	/**
+	 * Query for a {@link List} of <code>Objects</code> of type <code>T</code> using
+	 * the supplied {@link ParameterizedRowMapper} to the query results to the object.
+	 * Uses sql with the named parameter support provided by the
+	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
+	 * @param sql the SQL query to run
+	 * @param rm the @{@link ParameterizedRowMapper} to use for result mapping
+	 * @param args the <code>SqlParameterSource</code> containing the arguments for the query
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 * @deprecated as of Spring 3.0: Use the method using the newly genericized RowMapper interface
+	 * instead since the RowMapper and ParameterizedRowMapper interfaces are equivalent now.
+	 */
+	@Deprecated
+	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException;
+
+	/**
+	 * Query for a {@link List} of <code>Objects</code> of type <code>T</code> using
+	 * the supplied {@link RowMapper} to the query results to the object.
+	 * Uses sql with the standard '?' placeholders for parameters
+	 * @param sql the SQL query to run
+	 * @param rm the @{@link RowMapper} to use for result mapping
+	 * @param args the variable number of arguments for the query
+	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
+	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 */
+	<T> List<T> query(String sql, RowMapper<T> rm, Object... args)
 			throws DataAccessException;
 
 	/**
@@ -227,8 +324,11 @@ public interface SimpleJdbcOperations {
 	 * @param args the variable number of arguments for the query
 	 * @see JdbcOperations#queryForObject(String, org.springframework.jdbc.core.RowMapper)
 	 * @see JdbcOperations#queryForObject(String, Object[], org.springframework.jdbc.core.RowMapper)
+	 * @deprecated as of Spring 3.0: Use the method using the newly genericized RowMapper interface
+	 * instead since the RowMapper and ParameterizedRowMapper interfaces are equivalent now.
 	 */
-	<T> List<T> query(String sql, RowMapper<T> rm, Object... args)
+	@Deprecated
+	<T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args)
 			throws DataAccessException;
 
 	/**
