@@ -136,9 +136,8 @@ public class BindingJacksonJsonView extends AbstractView {
 	 */
 	protected Map<String, Object> filterModel(Map<String, Object> model) {
 		Map<String, Object> result = new HashMap<String, Object>(model.size());
-		if (CollectionUtils.isEmpty(renderedAttributes)) {
-			renderedAttributes = model.keySet();
-		}
+		Set<String> renderedAttributes =
+				!CollectionUtils.isEmpty(this.renderedAttributes) ? this.renderedAttributes : model.keySet();
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			if (!(entry instanceof BindingResult) && renderedAttributes.contains(entry.getKey())) {
 				result.put(entry.getKey(), entry.getValue());
