@@ -1898,34 +1898,19 @@ txManager.commit(status);]]></programlisting>
 
     <section id="transaction-application-server-integration-websphere">
       <title>IBM WebSphere</title>
-      <para>On WebSphere 6.0 and above, the recommended Spring JTA transaction
+      <para>On WebSphere 6.1.0.9 and above, the recommended Spring JTA transaction
       manager to use is <classname>WebSphereUowTransactionManager</classname>.
       This special adapter leverages IBM's <interfacename>UOWManager</interfacename>
       API which is available in WebSphere Application Server 6.0.2.19 or above
       and 6.1.0.9 or above. With this adapter, Spring-driven transaction suspension
       (suspend/resume as initiated by <literal>PROPAGATION_REQUIRES_NEW</literal>)
       is officially supported by IBM!</para>
-      <para>In a WebSphere 5.1 environment, you may wish to use
-      Spring's <classname>WebSphereTransactionManagerFactoryBean</classname>
-      class. This is a factory bean which retrieves the JTA
-      <interfacename>TransactionManager</interfacename> in a WebSphere environment, which
-      is done via WebSphere's <literal>static</literal> access methods.
-      Once the JTA <interfacename>TransactionManager</interfacename> instance has
-      been obtained via this factory bean, Spring's
-      <classname>JtaTransactionManager</classname> may be configured with a
-      reference to it, for enhanced transaction semantics over the use of only
-      the JTA <interfacename>UserTransaction</interfacename> object.
-      Please see the Javadocs for full details.</para>
-      <para><emphasis>Note that <classname>WebSphereTransactionManagerFactoryBean</classname>
-      usage is known to work on WAS 5.1 and 6.0 but is not officially supported
-      by IBM.</emphasis> Prefer <classname>WebSphereUowTransactionManager</classname>
-      when running on WAS 6.0 or higher (see above).</para>
     </section>
 
     <section id="transaction-application-server-integration-weblogic">
       <title>BEA WebLogic</title>
-      <para>On WebLogic 8.1 or above, you will generally prefer to use
-			the <classname>WebLogicJtaTransactionManager</classname> instead
+      <para>On WebLogic 9.0 or above, you will generally prefer to use
+      the <classname>WebLogicJtaTransactionManager</classname> instead
       of the stock <classname>JtaTransactionManager</classname> class.
       This special WebLogic-specific subclass of the normal
       <classname>JtaTransactionManager</classname> supports the full power of
@@ -1937,7 +1922,7 @@ txManager.commit(status);]]></programlisting>
     <section id="transaction-application-server-integration-oc4j">
       <title>Oracle OC4J</title>
       <para>Spring ships a special adapter class for OC4J 10.1.3 or above:
-			<classname>OC4JJtaTransactionManager</classname>. This is analogous to
+      <classname>OC4JJtaTransactionManager</classname>. This is analogous to
       the <classname>WebLogicJtaTransactionManager</classname> class discussed
       in the previous section, providing similar value-adds on OC4J:
       transaction names and per-transaction isolation levels.</para>
