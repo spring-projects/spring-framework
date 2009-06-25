@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.ui.binding.FormatterRegistry;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 

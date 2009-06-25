@@ -26,7 +26,7 @@ import java.util.Map;
  * @see #setDefaultPrefix(String)
  * @see #setPresentPrefix(String)
  */
-public class WebBinder extends GenericBinder {
+class WebBinder extends GenericBinder {
 
 	private String defaultPrefix = "!";
 

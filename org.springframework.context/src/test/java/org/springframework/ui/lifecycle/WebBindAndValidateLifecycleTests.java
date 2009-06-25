@@ -14,9 +14,8 @@ import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
 import org.springframework.ui.binding.Bound;
 import org.springframework.ui.binding.Model;
-import org.springframework.ui.binding.support.GenericFormatterRegistry;
+import org.springframework.ui.binding.support.WebBinderFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
-import org.springframework.ui.format.number.IntegerFormatter;
 
 public class WebBindAndValidateLifecycleTests {
 
@@ -30,7 +29,7 @@ public class WebBindAndValidateLifecycleTests {
 	public void setUp() {
 		model = new TestBean();
 		alertContext = new DefaultAlertContext();
-		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
+		lifecycle = new WebBindAndValidateLifecycle(new WebBinderFactory().getBinder(model), alertContext);
 	}
 
 	@Test
@@ -55,52 +54,6 @@ public class WebBindAndValidateLifecycleTests {
 		assertEquals("Failed to bind to property 'integer'; user value 'bogus' could not be converted to property type [java.lang.Integer]", alertContext.getAlerts("integer").get(0).getMessage());
 	}
 	
-	@Test
-	public void testExecuteLifecycleInvalidFormatBindingErrors() {
-		Map<String, Object> userMap = new HashMap<String, Object>();
-		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(Integer.class, new IntegerFormatter());
-		lifecycle.setFormatterRegistry(registry);
-		userMap.put("string", "test");
-		userMap.put("integer", "bogus");
-		userMap.put("foo", "BAR");
-		lifecycle.execute(userMap);
-		assertEquals(1, alertContext.getAlerts().size());
-		assertEquals(Severity.ERROR, alertContext.getAlerts("integer").get(0).getSeverity());
-		assertEquals("Failed to bind to property 'integer'; the user value 'bogus' has an invalid format and could no be parsed", alertContext.getAlerts("integer").get(0).getMessage());
-	}
-	
-	@Test
-	public void testExecuteLifecycleAnnotatedModel() {
-		TestAnnotatedBean model = new TestAnnotatedBean();
-		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
-		Map<String, Object> userMap = new HashMap<String, Object>();
-		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(Integer.class, new IntegerFormatter());
-		lifecycle.setFormatterRegistry(registry);
-		userMap.put("editable", "foo");
-		lifecycle.execute(userMap);
-		assertEquals(0, alertContext.getAlerts().size());
-		assertEquals("foo", model.getEditable());
-	}
-
-	@Test
-	public void testExecuteLifecycleAnnotatedModelNonEditableBindingAttempt() {
-		TestAnnotatedBean model = new TestAnnotatedBean();
-		lifecycle = new WebBindAndValidateLifecycle(model, alertContext);
-		Map<String, Object> userMap = new HashMap<String, Object>();
-		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(Integer.class, new IntegerFormatter());
-		lifecycle.setFormatterRegistry(registry);
-		userMap.put("editable", "foo");
-		userMap.put("nonEditable", "whatev");
-		lifecycle.execute(userMap);
-		assertEquals(1, alertContext.getAlerts().size());
-		assertEquals("foo", model.getEditable());
-		assertEquals(null, model.getNotEditable());
-		assertEquals("noSuchBinding", alertContext.getAlerts("nonEditable").get(0).getCode());
-	}
-
 	public static enum FooEnum {
 		BAR, BAZ, BOOP;
 	}

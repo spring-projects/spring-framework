@@ -15,34 +15,17 @@
  */
 package org.springframework.ui.binding;
 
-import java.util.Map;
-
 /**
- * Binds user-entered values to properties of a model object.
+ * A factory for model Binders.
  * @author Keith Donald
  * @since 3.0
- * @see #bind(Map)
  */
-public interface Binder {
-
+public interface BinderFactory {
+	
 	/**
-	 * The model object this binder binds to.
-	 * @return the model object
+	 * Get the Binder for the model
+	 * @param model the model
+	 * @return the binder
 	 */
-	Object getModel();
-
-	/**
-	 * Returns the binding for the property.
-	 * @param property the property path
-	 * @return the binding
-	 */
-	Binding getBinding(String property);
-
-	/**
-	 * Bind source values in the map to the properties of the model object.
-	 * @param sourceValues the source values to bind
-	 * @return the results of the binding operation
-	 */
-	BindingResults bind(Map<String, ? extends Object> sourceValues);
-
+	Binder getBinder(Object model);
 }
