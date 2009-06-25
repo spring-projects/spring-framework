@@ -15,24 +15,13 @@
  */
 package org.springframework.ui.lifecycle;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ui.alert.AlertContext;
-import org.springframework.ui.binding.BindingConfiguration;
+import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
-import org.springframework.ui.binding.Bound;
-import org.springframework.ui.binding.FormatterRegistry;
-import org.springframework.ui.binding.Model;
-import org.springframework.ui.binding.support.WebBinder;
 import org.springframework.ui.validation.Validator;
-import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the bind and validate lifecycle for web (HTTP) environments.
@@ -41,7 +30,7 @@ import org.springframework.util.StringUtils;
  */
 public class WebBindAndValidateLifecycle {
 
-	private final WebBinder binder;
+	private final Binder binder;
 
 	private final AlertContext alertContext;
 
@@ -49,19 +38,13 @@ public class WebBindAndValidateLifecycle {
 
 	private Validator validator;
 
-	public WebBindAndValidateLifecycle(Object model, AlertContext alertContext) {
-		this.binder = new WebBinder(model);
-		// TODO this doesn't belong in here
-		configure(binder, model);
+	public WebBindAndValidateLifecycle(Binder binder, AlertContext alertContext) {
+		this.binder = binder;
 		this.alertContext = alertContext;
 	}
 
-	public void setFormatterRegistry(FormatterRegistry registry) {
-		binder.setFormatterRegistry(registry);
-	}
-
-	public void execute(Map<String, ? extends Object> userMap) {
-		BindingResults bindingResults = binder.bind(userMap);
+	public void execute(Map<String, ? extends Object> sourceValues) {
+		BindingResults bindingResults = binder.bind(sourceValues);
 		if (validator != null && validationDecider.shouldValidateAfter(bindingResults)) {
 			// TODO get validation results
 			validator.validate(binder.getModel(), bindingResults.successes().properties());
@@ -82,36 +65,5 @@ public class WebBindAndValidateLifecycle {
 			}
 		};
 	}
-
-	// internal helpers
-
-	private void configure(WebBinder binder, Object model) {
-		Model m = AnnotationUtils.findAnnotation(model.getClass(), Model.class);
-		if (m != null) {
-			if (StringUtils.hasText(m.value())) {
-				// TODO model name setting
-				//binder.setModelName(m.value());					
-			}
-			binder.setStrict(m.strictBinding());
-		}
-		if (binder.isStrict()) {
-			BeanInfo beanInfo;
-			try {
-				beanInfo = Introspector.getBeanInfo(model.getClass());
-			} catch (IntrospectionException e) {
-				throw new IllegalStateException("Unable to introspect model " + model, e);
-			}
-			// TODO do we have to still flush introspector cache here?
-			for (PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
-				Method getter = prop.getReadMethod();
-				Bound b = AnnotationUtils.getAnnotation(getter, Bound.class);
-				if (b != null) {
-					// TODO should we wire formatter here if using a format annotation - an optimization?
-					binder.configureBinding(new BindingConfiguration(prop.getName(), null));
-				}
-			}
-			// TODO @Bound fields
-		}
- 	}
 
 }

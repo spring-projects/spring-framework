@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.format.AnnotationFormatterFactory;
@@ -104,21 +103,27 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
-		binder.registerFormatter(Date.class, new DateFormatter());
+		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(Date.class, new DateFormatter());
+		binder.setFormatterRegistry(registry);
 		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 	
 	@Test
 	public void bindSingleValueWithFormatterRegisteredByAnnotation() throws ParseException {
-		binder.registerFormatter(CurrencyFormat.class, new CurrencyFormatter());
+		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(CurrencyFormat.class, new CurrencyFormatter());
+		binder.setFormatterRegistry(registry);
 		binder.bind(Collections.singletonMap("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}
 	
 	@Test
 	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
-		binder.registerFormatterFactory(new CurrencyAnnotationFormatterFactory());
+		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(new CurrencyAnnotationFormatterFactory());
+		binder.setFormatterRegistry(registry);
 		binder.bind(Collections.singletonMap("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}

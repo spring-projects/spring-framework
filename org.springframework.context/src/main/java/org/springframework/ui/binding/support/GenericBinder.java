@@ -53,11 +53,8 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
-import org.springframework.ui.binding.FormatterRegistry;
-import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
@@ -109,14 +106,30 @@ public class GenericBinder implements Binder {
 		return model;
 	}
 
+	/**
+	 * Is this binder strict?
+	 * A strict binder requires all bindings to be registered explicitly using {@link #configureBinding(BindingConfiguration)}.
+	 */
 	public boolean isStrict() {
 		return strict;
 	}
-
+	
+	/**
+	 * Configures if this binder is <i>strict</i>.
+	 * A strict binder requires all bindings to be registered explicitly using {@link #configureBinding(BindingConfiguration)}.
+	 * An <i>optimistic</i> binder will implicitly create bindings as required to support {@link #bind(UserValues)} operations.
+	 * Default is optimistic.
+	 * @param strict strict binder status
+	 */
 	public void setStrict(boolean strict) {
 		this.strict = strict;
 	}
 
+	/**
+	 * Configures the registry of Formatters to query when no explicit Formatter has been registered for a Binding.
+	 * Allows Formatters to be applied by property type and by property annotation.
+	 * @param registry the formatter registry
+	 */
 	public void setFormatterRegistry(FormatterRegistry formatterRegistry) {
 		Assert.notNull(formatterRegistry, "The FormatterRegistry is required");
 		this.formatterRegistry = formatterRegistry;
@@ -127,6 +140,7 @@ public class GenericBinder implements Binder {
 	 * @param messageSource the message source
 	 */
 	public void setMessageSource(MessageSource messageSource) {
+		Assert.notNull(messageSource, "The MessageSource is required");
 		this.messageSource = messageSource;
 	}
 	
@@ -138,9 +152,15 @@ public class GenericBinder implements Binder {
 	 * @see EvaluationContext#getTypeConverter()
 	 */
 	public void setTypeConverter(TypeConverter typeConverter) {
+		Assert.notNull(messageSource, "The TypeConverter is required");
 		this.typeConverter = typeConverter;
 	}
 
+	/**
+	 * Configures a new binding on this binder.
+	 * @param configuration the binding configuration
+	 * @return the new binding created from the configuration provided
+	 */
 	public Binding configureBinding(BindingConfiguration configuration) {
 		Binding binding;
 		try {
@@ -150,14 +170,6 @@ public class GenericBinder implements Binder {
 		}
 		bindings.put(configuration.getProperty(), binding);
 		return binding;
-	}
-
-	public void registerFormatter(Class<?> propertyType, Formatter<?> formatter) {
-		formatterRegistry.add(propertyType, formatter);
-	}
-
-	public void registerFormatterFactory(AnnotationFormatterFactory<?, ?> factory) {
-		formatterRegistry.add(factory);
 	}
 
 	public Binding getBinding(String property) {

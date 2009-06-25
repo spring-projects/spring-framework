@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding;
+package org.springframework.ui.binding.support;
 
-import org.springframework.ui.binding.support.GenericBinder;
+import org.springframework.ui.binding.Binding;
 import org.springframework.ui.format.Formatter;
 
 /**

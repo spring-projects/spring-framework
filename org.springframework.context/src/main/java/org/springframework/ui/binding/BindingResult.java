@@ -21,7 +21,7 @@ import org.springframework.ui.alert.Alert;
  * The result of a bind operation.
  * @author Keith Donald
  * @since 3.0
- * @see Binder#bind(UserValues)
+ * @see Binder#bind(Map)
  * @see Binding#setValue(Object)
  */
 public interface BindingResult {

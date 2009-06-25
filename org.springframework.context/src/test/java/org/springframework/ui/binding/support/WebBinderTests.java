@@ -14,8 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.binding.Binder;
-import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
@@ -25,7 +23,7 @@ public class WebBinderTests {
 
 	TestBean bean = new TestBean();
 	
-	Binder binder = new WebBinder(bean);
+	WebBinder binder = new WebBinder(bean);
 
 	@Before
 	public void setUp() {
@@ -39,7 +37,9 @@ public class WebBinderTests {
 	
 	@Test
 	public void bindUserValuesCreatedFromUserMap() throws ParseException {
-		binder.registerFormatter(CurrencyFormat.class, new CurrencyFormatter());
+		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(CurrencyFormat.class, new CurrencyFormatter());
+		binder.setFormatterRegistry(registry);
 		binder.configureBinding(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
 		userMap.put("string", "test");
