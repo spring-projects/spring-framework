@@ -20,7 +20,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
@@ -31,12 +30,13 @@ import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
+import org.springframework.ui.message.MockMessageSource;
 
 public class GenericBinderTests {
 
 	private TestBean bean;
 	
-	private Binder binder;
+	private GenericBinder binder;
 	
 	@Before
 	public void setUp() {
@@ -205,7 +205,18 @@ public class GenericBinderTests {
 		b.setValue("2,300");
 		assertEquals("2,300", b.getValue());
 	}
-	
+
+	@Test
+	public void invalidFormatBindingResultCustomAlertMessage() {
+		MockMessageSource messages = new MockMessageSource();
+		messages.addMessage("invalidFormat", Locale.US, "Please enter an integer in format ### for the #{label} field; you entered #{value}");
+		binder.setMessageSource(messages);
+		binder.configureBinding(new BindingConfiguration("integer", new IntegerFormatter()));
+		Binding b = binder.getBinding("integer");
+		BindingResult result = b.setValue("bogus");
+		assertEquals("Please enter an integer in format ### for the integer field; you entered bogus", result.getAlert().getMessage());
+	}
+
 	@Test
 	public void getBindingMultiValued() {
 		Binding b = binder.getBinding("foos");
@@ -231,7 +242,7 @@ public class GenericBinderTests {
 		assertTrue(result.isFailure());
 		assertEquals("conversionFailed", result.getAlert().getCode());
 	}
-
+	
 	@Test
 	public void bindHandleNullValueInNestedPath() {
 		Map<String, String> values = new LinkedHashMap<String, String>();
