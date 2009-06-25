@@ -65,7 +65,11 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @since 3.0
  * @see #configureBinding(BindingConfiguration)
- * @see #bind(UserValues)
+ * @see #setFormatterRegistry(FormatterRegistry)
+ * @see #setMessageSource(MessageSource)
+ * @see #setStrict(boolean)
+ * @see #setTypeConverter(TypeConverter)
+ * @see #bind(Map)
  */
 @SuppressWarnings("unchecked")
 public class GenericBinder implements Binder {
