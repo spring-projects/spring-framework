@@ -975,13 +975,24 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void bindingCookieValue() throws ServletException, IOException {
+		initServlet(BindingCookieValueController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.setCookies(new Cookie("date", "2008-11-18"));
+		MockHttpServletResponse response  = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-1226962800000", response.getContentAsString());
+	}
+
+	@Test
 	public void ambiguousParams() throws ServletException, IOException {
 		initServlet(AmbiguousParamsController.class);
 
-		MockHttpServletRequest request;// = new MockHttpServletRequest("GET", "/test");
-		MockHttpServletResponse response;// = new MockHttpServletResponse();
-//		servlet.service(request, response);
-//		assertEquals("noParams", response.getContentAsString());
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		MockHttpServletResponse response  = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("noParams", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/test");
 		request.addParameter("myParam", "42");
@@ -1678,6 +1689,28 @@ public class ServletAnnotationControllerTests {
 		}
 
 	}
+
+	@Controller
+	@RequestMapping("/test*")
+	public static class BindingCookieValueController {
+
+		@InitBinder
+		public void initBinder(WebDataBinder binder) {
+			binder.initBeanPropertyAccess();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+
+		@RequestMapping(method = RequestMethod.GET)
+		public void handle(@CookieValue("date") Date date, Writer writer)
+				throws IOException {
+			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
+			writer.write("test-" + date.getTime());
+		}
+
+	}
+
 
 
 }
