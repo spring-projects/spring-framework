@@ -343,10 +343,12 @@ public class AppConfig{
 
     @Bean
     public SessionFactory sessionFactory() {
-        // wire up a session factory using
-        // AnnotationSessionFactoryBean
+        // wire up a session factory
+        AnnotationSessionFactoryBean asFactoryBean = 
+            new AnnotationSessionFactoryBean();
         asFactoryBean.setDataSource(dataSource());
-        return (SessionFactory) asFactoryBean.getObject();
+        // additional config
+        return asFactoryBean.getObject();
     }
 
     @Bean
