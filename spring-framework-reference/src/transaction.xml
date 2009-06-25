@@ -1957,6 +1957,11 @@ txManager.commit(status);]]></programlisting>
 		<para>Find below links to further resources about the Spring Framework's transaction support.</para>
 		<itemizedlist>
 			<listitem>
+				<para><ulink url="http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html">Distributed transactions in Spring, with and without XA</ulink>
+				is a JavaWorld feature where SpringSource's David Syer guides you through seven patterns for distributed transactions in Spring applications, three of them with XA 
+				and four without.</para>
+			</listitem>
+			<listitem>
 				<para><ulink url="http://www.infoq.com/minibooks/JTDS">Java Transaction Design Strategies</ulink>
 				is a book available from <ulink url="http://www.infoq.com/">InfoQ</ulink> that provides a well-paced
 				introduction to transactions in Java. It also includes side-by-side examples of how to configure and use
