@@ -56,15 +56,13 @@ import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.FormatterRegistry;
-import org.springframework.ui.binding.UserValue;
-import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 import org.springframework.util.Assert;
 
 /**
  * A generic {@link Binder binder} suitable for use in most environments.
- * TODO - localization of alert messages using MessageResolver/MesageSource
+ * TODO - localization of alert messages using MessageResolver/MessageSource
  * @author Keith Donald
  * @since 3.0
  * @see #configureBinding(BindingConfiguration)
@@ -94,7 +92,7 @@ public class GenericBinder implements Binder {
 	 * @param model the model object containing properties this binder will bind to
 	 */
 	public GenericBinder(Object model) {
-		Assert.notNull(model, "The model Object is reqyured");
+		Assert.notNull(model, "The model Object is required");
 		this.model = model;
 		bindings = new HashMap<String, Binding>();
 		int parserConfig = SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull
@@ -148,25 +146,31 @@ public class GenericBinder implements Binder {
 		}
 	}
 
-	public BindingResults bind(UserValues values) {
-		ArrayListBindingResults results = new ArrayListBindingResults(values.size());
-		for (UserValue value : values) {
-			BindingImpl binding = (BindingImpl) getBinding(value.getProperty());
+	public BindingResults bind(Map<String, ? extends Object> sourceValues) {
+		sourceValues = filter(sourceValues);
+		ArrayListBindingResults results = new ArrayListBindingResults(sourceValues.size());
+		for (Map.Entry<String, ? extends Object> sourceValue : sourceValues.entrySet()) {
+			String property = sourceValue.getKey();
+			Object value = sourceValue.getValue();
+			BindingImpl binding = (BindingImpl) getBinding(property);
 			if (binding != null) {
-				results.add(binding.setValue(value.getValue()));
+				results.add(binding.setValue(value));
 			} else {
-				results.add(new NoSuchBindingResult(value));
+				results.add(new NoSuchBindingResult(property, value));
 			}
-		}
+		}		
 		return results;
 	}
-
-	public UserValues createUserValues(Map<String, ? extends Object> userMap) {
-		UserValues values = new UserValues(userMap.size());
-		for (Map.Entry<String, ? extends Object> entry : userMap.entrySet()) {
-			values.add(entry.getKey(), entry.getValue());
-		}
-		return values;
+	
+	// subclassing hooks
+	
+	/**
+	 * Hook subclasses may use to filter the source values to bind.
+	 * @param sourceValues the original source values map provided by the caller
+	 * @return the filtered source values map that will be used to bind
+	 */
+	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> sourceValues) {
+		return sourceValues;
 	}
 
 	// internal helpers
@@ -458,18 +462,21 @@ public class GenericBinder implements Binder {
 	}
 
 	static class NoSuchBindingResult implements BindingResult {
-		private UserValue userValue;
+		private String property;
 		
-		public NoSuchBindingResult(UserValue userValue) {
-			this.userValue = userValue;
+		private Object sourceValue;
+		
+		public NoSuchBindingResult(String property, Object sourceValue) {
+			this.property = property;
+			this.sourceValue = sourceValue;
 		}
 		
 		public String getProperty() {
-			return userValue.getProperty();
+			return property;
 		}
 
-		public Object getUserValue() {
-			return userValue.getValue();
+		public Object getSourceValue() {
+			return sourceValue;
 		}
 
 		public boolean isFailure() {
@@ -492,7 +499,7 @@ public class GenericBinder implements Binder {
 				}
 
 				public String getMessage() {
-					return "Failed to bind to property '" + userValue.getProperty() + "'; no binding has been added for the property";
+					return "Failed to bind to property '" + property + "'; no binding has been added for the property";
 				}
 			};
 		}		
@@ -513,7 +520,7 @@ public class GenericBinder implements Binder {
 			return property;
 		}
 
-		public Object getUserValue() {
+		public Object getSourceValue() {
 			return formatted;
 		}
 
@@ -563,7 +570,7 @@ public class GenericBinder implements Binder {
 			return property;
 		}
 
-		public Object getUserValue() {
+		public Object getSourceValue() {
 			return formatted;
 		}
 
@@ -651,7 +658,7 @@ public class GenericBinder implements Binder {
 			return property;
 		}
 		
-		public Object getUserValue() {
+		public Object getSourceValue() {
 			return formatted;
 		}
 		

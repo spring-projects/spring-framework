@@ -24,7 +24,6 @@ import org.springframework.ui.format.Formatter;
  * Binds user-entered values to properties of a model object.
  * @author Keith Donald
  * @since 3.0
- * @param <M> The kind of model object this binder binds to
  * @see #configureBinding(BindingConfiguration)
  * @see #bind(UserValues)
  */
@@ -35,7 +34,7 @@ public interface Binder {
 	 * @return the model object
 	 */
 	Object getModel();
-	
+
 	/**
 	 * Configures if this binder is <i>strict</i>; a strict binder requires all bindings to be registered explicitly using {@link #configureBinding(BindingConfiguration)}.
 	 * An <i>optimistic</i> binder will implicitly create bindings as required to support {@link #bind(UserValues)} operations.
@@ -65,6 +64,13 @@ public interface Binder {
 	void registerFormatterFactory(AnnotationFormatterFactory<?, ?> factory);
 
 	/**
+	 * Configures the registry of Formatters to query when no explicit Formatter has been registered for a Binding.
+	 * Allows Formatters to be applied by property type and by property annotation.
+	 * @param registry the formatter registry
+	 */
+	void setFormatterRegistry(FormatterRegistry registry);
+
+	/**
 	 * Returns the binding for the property.
 	 * @param property the property path
 	 * @return the binding
@@ -72,20 +78,10 @@ public interface Binder {
 	Binding getBinding(String property);
 
 	/**
-	 * Bind values in the map to the properties of the model object.
-	 * @param values user-entered values to bind
+	 * Bind source values in the map to the properties of the model object.
+	 * @param values the source values to bind
 	 * @return the results of the binding operation
 	 */
-	BindingResults bind(UserValues values);
-	
-	/**
-	 * Creates a {@link UserValue} list from a Map of user-submitted fields.
-	 * The Binder may apply transformations as part of the creation process.
-	 * For example, a Binder might insert empty or default values for fields that are not present.
-	 * As another example, a Binder might collapse multiple fields into a single {@link UserValue} object.
-	 * @param userMap the map of user-submitted fields
-	 * @return the UserValue list that can be passed to {@link #bind(UserValues)}.
-	 */
-	UserValues createUserValues(Map<String, ? extends Object> userMap);
+	BindingResults bind(Map<String, ? extends Object> sourceValues);
 
 }

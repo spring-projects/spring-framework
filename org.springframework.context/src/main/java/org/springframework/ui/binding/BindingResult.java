@@ -32,11 +32,11 @@ public interface BindingResult {
 	String getProperty();
 
 	/**
-	 * The raw user-entered value for which binding was attempted.
+	 * The raw source value for which binding was attempted.
 	 * If not a failure, this value was successfully bound to the model.
 	 * @see #isFailure()
 	 */
-	Object getUserValue();
+	Object getSourceValue();
 	
 	/**
 	 * Indicates if the binding failed.

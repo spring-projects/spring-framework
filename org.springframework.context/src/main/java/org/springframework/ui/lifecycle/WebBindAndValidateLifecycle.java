@@ -30,7 +30,6 @@ import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.Bound;
 import org.springframework.ui.binding.FormatterRegistry;
 import org.springframework.ui.binding.Model;
-import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.binding.support.WebBinder;
 import org.springframework.ui.validation.Validator;
 import org.springframework.util.StringUtils;
@@ -62,8 +61,7 @@ public class WebBindAndValidateLifecycle {
 	}
 
 	public void execute(Map<String, ? extends Object> userMap) {
-		UserValues values = binder.createUserValues(userMap);
-		BindingResults bindingResults = binder.bind(values);
+		BindingResults bindingResults = binder.bind(userMap);
 		if (validator != null && validationDecider.shouldValidateAfter(bindingResults)) {
 			// TODO get validation results
 			validator.validate(binder.getModel(), bindingResults.successes().properties());

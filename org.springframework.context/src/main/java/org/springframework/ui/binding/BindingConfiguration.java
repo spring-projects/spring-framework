@@ -48,7 +48,7 @@ public class BindingConfiguration {
 	}
 
 	/**
-	 * THe Formatter to use to format bound property values.
+	 * The Formatter to use to format bound property values.
 	 */
 	public Formatter<?> getFormatter() {
 		return formatter;
