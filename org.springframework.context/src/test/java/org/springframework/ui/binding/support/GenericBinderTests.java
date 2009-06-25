@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,7 +25,6 @@ import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
-import org.springframework.ui.binding.UserValues;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.date.DateFormatter;
@@ -52,24 +52,24 @@ public class GenericBinderTests {
 	
 	@Test
 	public void bindSingleValuesWithDefaultTypeConverterConversion() {
-		UserValues values = new UserValues();
-		values.add("string", "test");
-		values.add("integer", "3");
-		values.add("foo", "BAR");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("string", "test");
+		values.put("integer", "3");
+		values.put("foo", "BAR");
 		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 		
 		assertEquals("string", results.get(0).getProperty());
 		assertFalse(results.get(0).isFailure());
-		assertEquals("test", results.get(0).getUserValue());
+		assertEquals("test", results.get(0).getSourceValue());
 
 		assertEquals("integer", results.get(1).getProperty());
 		assertFalse(results.get(1).isFailure());
-		assertEquals("3", results.get(1).getUserValue());
+		assertEquals("3", results.get(1).getSourceValue());
 
 		assertEquals("foo", results.get(2).getProperty());
 		assertFalse(results.get(2).isFailure());
-		assertEquals("BAR", results.get(2).getUserValue());
+		assertEquals("BAR", results.get(2).getSourceValue());
 		
 		assertEquals("test", bean.getString());
 		assertEquals(3, bean.getInteger());
@@ -78,11 +78,11 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValuesWithDefaultTypeCoversionFailure() {
-		UserValues values = new UserValues();
-		values.add("string", "test");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("string", "test");
 		// bad value
-		values.add("integer", "bogus");
-		values.add("foo", "BAR");
+		values.put("integer", "bogus");
+		values.put("foo", "BAR");
 		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 		assertTrue(results.get(1).isFailure());
@@ -92,40 +92,40 @@ public class GenericBinderTests {
 	@Test
 	public void bindSingleValuePropertyFormatter() throws ParseException {
 		binder.configureBinding(new BindingConfiguration("date", new DateFormatter()));
-		binder.bind(UserValues.single("date", "2009-06-01"));
+		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
 		binder.configureBinding(new BindingConfiguration("date", new DateFormatter()));
-		binder.bind(UserValues.single("date", "bogus"));
+		binder.bind(Collections.singletonMap("date", "bogus"));
 	}
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
 		binder.registerFormatter(Date.class, new DateFormatter());
-		binder.bind(UserValues.single("date", "2009-06-01"));
+		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 	
 	@Test
 	public void bindSingleValueWithFormatterRegisteredByAnnotation() throws ParseException {
 		binder.registerFormatter(CurrencyFormat.class, new CurrencyFormatter());
-		binder.bind(UserValues.single("currency", "$23.56"));
+		binder.bind(Collections.singletonMap("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}
 	
 	@Test
 	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
 		binder.registerFormatterFactory(new CurrencyAnnotationFormatterFactory());
-		binder.bind(UserValues.single("currency", "$23.56"));
+		binder.bind(Collections.singletonMap("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}
 	
 	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
-		BindingResults results = binder.bind(UserValues.single("bogus", "2009-06-01"));
+		BindingResults results = binder.bind(Collections.singletonMap("bogus", "2009-06-01"));
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isFailure());
 		assertEquals("propertyNotFound", results.get(0).getAlert().getCode());
@@ -136,11 +136,10 @@ public class GenericBinderTests {
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
 		userMap.put("string", "test");
 		userMap.put("integer", "3");
-		UserValues values = binder.createUserValues(userMap);
-		BindingResults results = binder.bind(values);
+		BindingResults results = binder.bind(userMap);
 		assertEquals(2, results.size());
-		assertEquals("test", results.get(0).getUserValue());
-		assertEquals("3", results.get(1).getUserValue());
+		assertEquals("test", results.get(0).getSourceValue());
+		assertEquals("3", results.get(1).getSourceValue());
 		assertEquals("test", bean.getString());
 		assertEquals(3, bean.getInteger());		
 	}
@@ -173,19 +172,19 @@ public class GenericBinderTests {
 	public void bindStrictNoMappingBindings() {
 		binder.setStrict(true);
 		binder.configureBinding(new BindingConfiguration("integer", null));
-		UserValues values = new UserValues();
-		values.add("integer", "3");
-		values.add("foo", "BAR");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("integer", "3");
+		values.put("foo", "BAR");
 		BindingResults results = binder.bind(values);
 		assertEquals(2, results.size());
 		
 		assertEquals("integer", results.get(0).getProperty());
 		assertFalse(results.get(0).isFailure());
-		assertEquals("3", results.get(0).getUserValue());
+		assertEquals("3", results.get(0).getSourceValue());
 
 		assertEquals("foo", results.get(1).getProperty());
 		assertTrue(results.get(1).isFailure());
-		assertEquals("BAR", results.get(1).getUserValue());
+		assertEquals("BAR", results.get(1).getSourceValue());
 	}
 
 	@Test
@@ -235,7 +234,7 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindHandleNullValueInNestedPath() {
-		UserValues values = new UserValues();
+		Map<String, String> values = new LinkedHashMap<String, String>();
 		
 		// EL configured with some options from SpelExpressionParserConfiguration:
 		// (see where Binder creates the parser)
@@ -244,22 +243,22 @@ public class GenericBinderTests {
 		//   are new instances of the type of the list entry, they are not null.
 		// not currently doing anything for maps or arrays
 		
-		values.add("addresses[0].street", "4655 Macy Lane");
-		values.add("addresses[0].city", "Melbourne");
-		values.add("addresses[0].state", "FL");
-		values.add("addresses[0].zip", "35452");
+		values.put("addresses[0].street", "4655 Macy Lane");
+		values.put("addresses[0].city", "Melbourne");
+		values.put("addresses[0].state", "FL");
+		values.put("addresses[0].zip", "35452");
 
 		// Auto adds new Address at 1
-		values.add("addresses[1].street", "1234 Rostock Circle");
-		values.add("addresses[1].city", "Palm Bay");
-		values.add("addresses[1].state", "FL");
-		values.add("addresses[1].zip", "32901");
+		values.put("addresses[1].street", "1234 Rostock Circle");
+		values.put("addresses[1].city", "Palm Bay");
+		values.put("addresses[1].state", "FL");
+		values.put("addresses[1].zip", "32901");
 
 		// Auto adds new Address at 5 (plus intermediates 2,3,4)
-		values.add("addresses[5].street", "1234 Rostock Circle");
-		values.add("addresses[5].city", "Palm Bay");
-		values.add("addresses[5].state", "FL");
-		values.add("addresses[5].zip", "32901");
+		values.put("addresses[5].street", "1234 Rostock Circle");
+		values.put("addresses[5].city", "Palm Bay");
+		values.put("addresses[5].state", "FL");
+		values.put("addresses[5].zip", "32901");
 
 		BindingResults results = binder.bind(values);
 		Assert.assertEquals(6, bean.addresses.size());

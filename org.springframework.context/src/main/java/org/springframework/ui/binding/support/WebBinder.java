@@ -15,10 +15,8 @@
  */
 package org.springframework.ui.binding.support;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.springframework.ui.binding.UserValue;
-import org.springframework.ui.binding.UserValues;
 
 /**
  * A binder designed for use in HTTP (web) environments.
@@ -61,27 +59,27 @@ public class WebBinder extends GenericBinder {
 	}
 
 	@Override
-	public UserValues createUserValues(Map<String, ? extends Object> userMap) {
-		UserValues values = new UserValues();
-		for (Map.Entry<String, ? extends Object> entry : userMap.entrySet()) {
+	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> sourceValues) {
+		LinkedHashMap<String, Object> filteredValues = new LinkedHashMap<String, Object>();
+		for (Map.Entry<String, ? extends Object> entry : sourceValues.entrySet()) {
 			String field = entry.getKey();
 			Object value = entry.getValue();
 			if (field.startsWith(defaultPrefix)) {
 				field = field.substring(defaultPrefix.length());
-				if (!userMap.containsKey(field)) {
-					values.add(field, value);
+				if (!sourceValues.containsKey(field)) {
+					filteredValues.put(field, value);
 				}
 			} else if (field.startsWith(presentPrefix)) {
 				field = field.substring(presentPrefix.length());
-				if (!userMap.containsKey(field) && !userMap.containsKey(defaultPrefix + field)) {
+				if (!sourceValues.containsKey(field) && !sourceValues.containsKey(defaultPrefix + field)) {
 					value = getEmptyValue((BindingImpl) getBinding(field));
-					values.add(field, value);
+					filteredValues.put(field, value);
 				}
 			} else {
-				values.add(entry.getKey(), entry.getValue());
+				filteredValues.put(entry.getKey(), entry.getValue());
 			}
 		}
-		return values;
+		return filteredValues;
 	}
 
 	protected Object getEmptyValue(BindingImpl binding) {

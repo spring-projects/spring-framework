@@ -56,7 +56,7 @@ public interface Binding {
 	/**
 	 * The type of the underlying property associated with this binding.
 	 */
-	Class<?>getType();
+	Class<?> getType();
 
 
 }
