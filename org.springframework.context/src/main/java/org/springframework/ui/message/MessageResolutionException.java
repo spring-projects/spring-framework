@@ -26,6 +26,14 @@ public class MessageResolutionException extends RuntimeException {
 	/**
 	 * Creates a new message resolution exception.
 	 * @param message a messaging describing the failure
+	 */
+	public MessageResolutionException(String message) {
+		super(message);
+	}
+	
+	/**
+	 * Creates a new message resolution exception.
+	 * @param message a messaging describing the failure
 	 * @param cause the cause of the failure
 	 */
 	public MessageResolutionException(String message, Throwable cause) {

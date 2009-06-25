@@ -20,8 +20,7 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 
 /**
- * A factory for a localized message.
- * TODO - consider putting this abstraction together with MessageSource; does it need to be in its own package?
+ * A factory for a localized message resolved from a MessageSource.
  * @author Keith Donald
  * @since 3.0
  * @see MessageSource

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.GenericTypeResolver;
@@ -58,11 +59,12 @@ import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.FormatterRegistry;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
+import org.springframework.ui.message.MessageBuilder;
+import org.springframework.ui.message.ResolvableArgument;
 import org.springframework.util.Assert;
 
 /**
  * A generic {@link Binder binder} suitable for use in most environments.
- * TODO - localization of alert messages using MessageResolver/MessageSource
  * @author Keith Donald
  * @since 3.0
  * @see #configureBinding(BindingConfiguration)
@@ -86,6 +88,8 @@ public class GenericBinder implements Binder {
 	private boolean strict = false;
 
 	private static Formatter defaultFormatter = new DefaultFormatter();
+
+	private MessageSource messageSource;
 
 	/**
 	 * Creates a new binder for the model object.
@@ -116,6 +120,25 @@ public class GenericBinder implements Binder {
 	public void setFormatterRegistry(FormatterRegistry formatterRegistry) {
 		Assert.notNull(formatterRegistry, "The FormatterRegistry is required");
 		this.formatterRegistry = formatterRegistry;
+	}
+
+	/**
+	 * Configure the MessageSource that resolves localized {@link BindingResult} alert messages.
+	 * @param messageSource the message source
+	 */
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
+	
+	/**
+	 * Configure the TypeConverter that converts values as required by Binding setValue and getValue attempts.
+	 * For a setValue attempt, the TypeConverter will be asked to perform a conversion if the value parsed by the Binding's Formatter is not assignable to the target property type.
+	 * For a getValue attempt, the TypeConverter will be asked to perform a conversion if the property type does not match the type T required by the Binding's Formatter.
+	 * @param typeConverter the type converter used by the binding system, which is based on Spring EL
+	 * @see EvaluationContext#getTypeConverter()
+	 */
+	public void setTypeConverter(TypeConverter typeConverter) {
+		this.typeConverter = typeConverter;
 	}
 
 	public Binding configureBinding(BindingConfiguration configuration) {
@@ -158,14 +181,17 @@ public class GenericBinder implements Binder {
 			} else {
 				results.add(new NoSuchBindingResult(property, value));
 			}
-		}		
+		}
 		return results;
 	}
-	
+
 	// subclassing hooks
-	
+
 	/**
 	 * Hook subclasses may use to filter the source values to bind.
+ 	 * This hook allows the binder to pre-process the source values before binding occurs. 
+-    * For example, a Binder might insert empty or default values for fields that are not present.
+-    * As another example, a Binder might collapse multiple source values into a single source value. 
 	 * @param sourceValues the original source values map provided by the caller
 	 * @return the filtered source values map that will be used to bind
 	 */
@@ -334,7 +360,7 @@ public class GenericBinder implements Binder {
 			try {
 				formatter = getFormatter();
 			} catch (EvaluationException e) {
-				// could occur the property was not found or is not readable
+				// could occur if the property was not found or is not readable
 				// TODO probably should not handle all EL failures, only type conversion & property not found?
 				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
 			}
@@ -352,7 +378,7 @@ public class GenericBinder implements Binder {
 			try {
 				formatter = getFormatter();
 			} catch (EvaluationException e) {
-				// could occur the property was not found or is not readable
+				// could occur if the property was not found or is not readable
 				// TODO probably should not handle all EL failures, only type conversion & property not found?
 				return new ExpressionEvaluationErrorResult(property.getExpressionString(), formatted, e);
 			}
@@ -461,16 +487,17 @@ public class GenericBinder implements Binder {
 		}
 	}
 
-	static class NoSuchBindingResult implements BindingResult {
+	class NoSuchBindingResult implements BindingResult {
+		
 		private String property;
-		
+
 		private Object sourceValue;
-		
+
 		public NoSuchBindingResult(String property, Object sourceValue) {
 			this.property = property;
 			this.sourceValue = sourceValue;
 		}
-		
+
 		public String getProperty() {
 			return property;
 		}
@@ -486,7 +513,6 @@ public class GenericBinder implements Binder {
 		public Alert getAlert() {
 			return new AbstractAlert() {
 				public String getElement() {
-					// TODO append model first? e.g. model.property
 					return getProperty();
 				}
 
@@ -499,21 +525,30 @@ public class GenericBinder implements Binder {
 				}
 
 				public String getMessage() {
-					return "Failed to bind to property '" + property + "'; no binding has been added for the property";
+					MessageBuilder builder = new MessageBuilder(messageSource);
+					builder.code(getCode());
+					builder.arg("label", new ResolvableArgument(property));
+					builder.arg("value", sourceValue);
+					builder.defaultMessage("Failed to bind to property '" + property
+							+ "'; no binding has been added for the property");
+					return builder.build();
 				}
 			};
-		}		
+		}
 	}
-	
-	static class InvalidFormatResult implements BindingResult {
+
+	class InvalidFormatResult implements BindingResult {
 
 		private String property;
 
-		private Object formatted;
+		private Object sourceValue;
 
-		public InvalidFormatResult(String property, Object formatted, ParseException e) {
+		private ParseException cause;
+
+		public InvalidFormatResult(String property, Object sourceValue, ParseException cause) {
 			this.property = property;
-			this.formatted = formatted;
+			this.sourceValue = sourceValue;
+			this.cause = cause;
 		}
 
 		public String getProperty() {
@@ -521,7 +556,7 @@ public class GenericBinder implements Binder {
 		}
 
 		public Object getSourceValue() {
-			return formatted;
+			return sourceValue;
 		}
 
 		public boolean isFailure() {
@@ -531,7 +566,6 @@ public class GenericBinder implements Binder {
 		public Alert getAlert() {
 			return new AbstractAlert() {
 				public String getElement() {
-					// TODO append model first? e.g. model.property
 					return getProperty();
 				}
 
@@ -544,26 +578,31 @@ public class GenericBinder implements Binder {
 				}
 
 				public String getMessage() {
-					return "Failed to bind to property '" + property + "'; the user value "
-							+ StylerUtils.style(formatted) + " has an invalid format and could no be parsed";
+					MessageBuilder builder = new MessageBuilder(messageSource);
+					builder.code(getCode());
+					builder.arg("label", new ResolvableArgument(property));
+					builder.arg("value", sourceValue);
+					builder.arg("errorOffset", cause.getErrorOffset());
+					builder.defaultMessage("Failed to bind to property '" + property + "'; the user value "
+							+ StylerUtils.style(sourceValue) + " has an invalid format and could no be parsed");
+					return builder.build();
 				}
 			};
 		}
 	}
 
-	// TODO the if branching in here is not very clean
-	static class ExpressionEvaluationErrorResult implements BindingResult {
+	class ExpressionEvaluationErrorResult implements BindingResult {
 
 		private String property;
 
-		private Object formatted;
+		private Object sourceValue;
 
-		private EvaluationException e;
+		private EvaluationException cause;
 
-		public ExpressionEvaluationErrorResult(String property, Object formatted, EvaluationException e) {
+		public ExpressionEvaluationErrorResult(String property, Object sourceValue, EvaluationException cause) {
 			this.property = property;
-			this.formatted = formatted;
-			this.e = e;
+			this.sourceValue = sourceValue;
+			this.cause = cause;
 		}
 
 		public String getProperty() {
@@ -571,7 +610,7 @@ public class GenericBinder implements Binder {
 		}
 
 		public Object getSourceValue() {
-			return formatted;
+			return sourceValue;
 		}
 
 		public boolean isFailure() {
@@ -581,95 +620,97 @@ public class GenericBinder implements Binder {
 		public Alert getAlert() {
 			return new AbstractAlert() {
 				public String getElement() {
-					// TODO append model first? e.g. model.property
 					return getProperty();
 				}
 
 				public String getCode() {
-					return getFailureCode();
+					SpelMessage spelCode = ((SpelEvaluationException) cause).getMessageCode();
+					if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+						return "conversionFailed";
+					} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+						return "propertyNotFound";
+					} else {
+						return "couldNotSetValue";
+					}
 				}
-				
+
 				public Severity getSeverity() {
-					return getFailureSeverity();
+					SpelMessage spelCode = ((SpelEvaluationException) cause).getMessageCode();
+					if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+						return Severity.FATAL;
+					} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+						return Severity.WARNING;
+					} else {
+						return Severity.FATAL;
+					}
 				}
 
 				public String getMessage() {
-					return getFailureMessage();
+					SpelMessage spelCode = ((SpelEvaluationException) cause).getMessageCode();
+					if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+						AccessException accessException = (AccessException) cause.getCause();
+						if (accessException.getCause() != null) {
+							Throwable cause = accessException.getCause();
+							if (cause instanceof SpelEvaluationException
+									&& ((SpelEvaluationException) cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
+								ConversionFailedException failure = (ConversionFailedException) cause.getCause();
+								MessageBuilder builder = new MessageBuilder(messageSource);
+								builder.code("conversionFailed");
+								builder.arg("label", new ResolvableArgument(property));
+								builder.arg("value", sourceValue);
+								builder.defaultMessage("Failed to bind to property '" + property + "'; user value "
+										+ StylerUtils.style(sourceValue) + " could not be converted to property type ["
+										+ failure.getTargetType().getName() + "]");
+								return builder.build();
+							}
+						}
+					} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+						MessageBuilder builder = new MessageBuilder(messageSource);
+						builder.code(getCode());
+						builder.arg("label", new ResolvableArgument(property));
+						builder.arg("value", sourceValue);
+						builder.defaultMessage("Failed to bind to property '" + property + "'; no such property exists on model");
+						return builder.build();
+					}
+					MessageBuilder builder = new MessageBuilder(messageSource);
+					builder.code("couldNotSetValue");
+					builder.arg("label", new ResolvableArgument(property));
+					builder.arg("value", sourceValue);
+					builder.defaultMessage("Failed to bind to property '" + property + "'; reason = " + cause.getLocalizedMessage());
+					return builder.build();
 				}
+				
 			};
 		}
 
-		public String getFailureCode() {
-			SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
-			if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
-				return "typeConversionFailure";
-			} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
-				return "propertyNotFound";
-			} else {
-				// TODO return more specific code based on underlying EvaluationException error code
-				return "couldNotSetValue";
-			}
-		}
-		
-		public Severity getFailureSeverity() {
-			SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
-			if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
-				return Severity.FATAL;
-			} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
-				return Severity.WARNING;
-			} else {
-				return Severity.FATAL;
-			}
-		}
-
-		public String getFailureMessage() {
-			SpelMessage spelCode = ((SpelEvaluationException) e).getMessageCode();
-			if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
-				AccessException accessException = (AccessException) e.getCause();
-				if (accessException.getCause() != null) {
-					Throwable cause = accessException.getCause();
-					if (cause instanceof SpelEvaluationException
-							&& ((SpelEvaluationException) cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
-						ConversionFailedException failure = (ConversionFailedException) cause.getCause();
-						return "Failed to bind to property '" + property + "'; user value "
-								+ StylerUtils.style(formatted) + " could not be converted to property type ["
-								+ failure.getTargetType().getName() + "]";
-					}
-				}
-			} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
-				return "Failed to bind to property '" + property + "'; no such property exists on model";
-			}
-			return "Failed to bind to property '" + property + "'; reason = " + e.getLocalizedMessage();
-		}
 	}
 
-	static class SuccessResult implements BindingResult {
+	class SuccessResult implements BindingResult {
 
 		private String property;
 
-		private Object formatted;
+		private Object sourceValue;
 
-		public SuccessResult(String property, Object formatted) {
+		public SuccessResult(String property, Object sourceValue) {
 			this.property = property;
-			this.formatted = formatted;
+			this.sourceValue = sourceValue;
 		}
 
 		public String getProperty() {
 			return property;
 		}
-		
+
 		public Object getSourceValue() {
-			return formatted;
+			return sourceValue;
 		}
-		
+
 		public boolean isFailure() {
 			return false;
 		}
-		
+
 		public Alert getAlert() {
 			return new AbstractAlert() {
 				public String getElement() {
-					// TODO append model first? e.g. model.property					
 					return getProperty();
 				}
 
@@ -682,13 +723,18 @@ public class GenericBinder implements Binder {
 				}
 
 				public String getMessage() {
-					return "Sucessfully bound user value " + StylerUtils.style(formatted) + "to property '" + property + "'";
+					MessageBuilder builder = new MessageBuilder(messageSource);
+					builder.code("bindSuccess");
+					builder.arg("label", new ResolvableArgument(property));
+					builder.arg("value", sourceValue);
+					builder.defaultMessage("Successfully bound user value " + StylerUtils.style(sourceValue) + "to property '" + property + "'");
+					return builder.build();	
 				}
 			};
 		}
 
 	}
-	
+
 	static abstract class AbstractAlert implements Alert {
 		public String toString() {
 			return getElement() + ":" + getCode() + " - " + getMessage();
