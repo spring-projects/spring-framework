@@ -36,10 +36,10 @@ public interface Binding {
 	
 	/**
 	 * Formats a candidate model property value for display in the user interface.
-	 * @param selectableValue a possible value
+	 * @param potentialValue a possible value
 	 * @return the formatted value to display in the user interface
 	 */
-	String format(Object selectableValue);
+	String format(Object potentialValue);
 
 	/**
 	 * Is this binding associated with a collection or array property?
