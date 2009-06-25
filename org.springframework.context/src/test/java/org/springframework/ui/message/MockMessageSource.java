@@ -8,7 +8,7 @@ import java.util.Map;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.util.Assert;
 
-class MockMessageSource extends AbstractMessageSource {
+public class MockMessageSource extends AbstractMessageSource {
 
 	/** Map from 'code + locale' keys to message Strings */
 	private final Map<String, String> messages = new HashMap<String, String>();
