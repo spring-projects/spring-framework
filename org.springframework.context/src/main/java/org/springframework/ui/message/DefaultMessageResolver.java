@@ -39,7 +39,7 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 
 	private Map<String, Object> args;
 
-	private String defaultText;
+	private String defaultMessage;
 
 	private ExpressionParser expressionParser;
 
@@ -47,18 +47,25 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 			ExpressionParser expressionParser) {
 		this.codes = codes;
 		this.args = args;
-		this.defaultText = defaultText;
+		this.defaultMessage = defaultText;
 		this.expressionParser = expressionParser;
 	}
 
 	// implementing MessageResolver
 
 	public String resolveMessage(MessageSource messageSource, Locale locale) {
+		if (messageSource == null) {
+			if (defaultMessage != null) {
+				return defaultMessage;
+			} else {
+				throw new MessageResolutionException("Unable to resolve message; MessagSource argument is null and no defaultMessage is configured");
+			}
+		}
 		String messageString;
 		try {
 			messageString = messageSource.getMessage(this, locale);
 		} catch (NoSuchMessageException e) {
-			throw new MessageResolutionException("Unable to resolve message in MessageSource [" + messageSource + "]", e);
+			throw new MessageResolutionException("Unable to resolve message in" + messageSource, e);
 		}
 		Expression message;
 		try {
@@ -88,11 +95,11 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 	}
 
 	public String getDefaultMessage() {
-		return defaultText;
+		return defaultMessage;
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("codes", codes).append("defaultText", defaultText).toString();
+		return new ToStringCreator(this).append("codes", codes).append("defaultText", defaultMessage).toString();
 	}
 
 	@SuppressWarnings("unchecked")

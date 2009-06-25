@@ -79,7 +79,7 @@ public interface Binder {
 
 	/**
 	 * Bind source values in the map to the properties of the model object.
-	 * @param values the source values to bind
+	 * @param sourceValues the source values to bind
 	 * @return the results of the binding operation
 	 */
 	BindingResults bind(Map<String, ? extends Object> sourceValues);

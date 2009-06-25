@@ -86,7 +86,7 @@ public class GenericBinderTests {
 		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 		assertTrue(results.get(1).isFailure());
-		assertEquals("typeConversionFailure", results.get(1).getAlert().getCode());
+		assertEquals("conversionFailed", results.get(1).getAlert().getCode());
 	}
 
 	@Test
@@ -229,7 +229,7 @@ public class GenericBinderTests {
 		assertEquals(0, b.getCollectionValues().length);
 		BindingResult result = b.setValue(new String[] { "BAR", "BOGUS", "BOOP" });
 		assertTrue(result.isFailure());
-		assertEquals("typeConversionFailure", result.getAlert().getCode());
+		assertEquals("conversionFailed", result.getAlert().getCode());
 	}
 
 	@Test
