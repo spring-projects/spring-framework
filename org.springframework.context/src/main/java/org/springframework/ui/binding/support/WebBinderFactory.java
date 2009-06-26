@@ -20,6 +20,7 @@ import org.springframework.ui.binding.BinderFactory;
 
 /**
  * Factory for Binders suited for use in web environments.
+ * TODO - BinderConfiguration objects indexed by model class?
  * @author Keith Donald
  * @since 3.0
  */
