@@ -1339,7 +1339,7 @@ public class ExampleBean {
         url="http://www.springsource.com/products/sts">SpringSource Tool
         Suite</ulink> (STS) that support automatic property completion when
         defining bean definitions. The use of such IDE assistance is highly
-        recommended. </para>
+        recommended.</para>
 
         <para>If you are reading this reference manual straight through from
         top to bottom (wow!) then we are getting slightly ahead of ourselves
@@ -1559,18 +1559,8 @@ public class ExampleBean {
   <lineannotation>&lt;!-- results in a setSomeMap(<interfacename>java.util.Map</interfacename>) call --&gt;</lineannotation>
   &lt;property name="someMap"&gt;
     &lt;map&gt;
-        &lt;entry&gt;
-            &lt;key&gt;
-                &lt;value&gt;an entry&lt;/value&gt;
-            &lt;/key&gt;
-            &lt;value&gt;just some string&lt;/value&gt;
-        &lt;/entry&gt;
-        &lt;entry&gt;
-            &lt;key&gt;
-                &lt;value&gt;a ref&lt;/value&gt;
-            &lt;/key&gt;
-            &lt;ref bean="myDataSource" /&gt;
-        &lt;/entry&gt;
+        &lt;entry key="an entry" value="just some string"/&gt;
+        &lt;entry key ="a ref" value-ref="myDataSource"/&gt;
     &lt;/map&gt;
   &lt;/property&gt;
   <lineannotation>&lt;!-- results in a setSomeSet(java.util.Set) call --&gt;</lineannotation>
@@ -4231,8 +4221,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         DataSource:</para>
 
         <programlisting language="xml">&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
-    &lt;property name="locations"&gt;
-        &lt;value&gt;classpath:com/foo/jdbc.properties&lt;/value&gt;
+    &lt;property name="locations" value="classpath:com/foo/jdbc.properties"/&gt;
     &lt;/property&gt;
 &lt;/bean&gt;
 
