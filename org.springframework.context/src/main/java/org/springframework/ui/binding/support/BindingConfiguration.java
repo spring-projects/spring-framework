@@ -24,7 +24,7 @@ import org.springframework.ui.format.Formatter;
  * @since 3.0
  * @see GenericBinder#configureBinding(BindingConfiguration)
  */
-public class BindingConfiguration {
+public final class BindingConfiguration {
 	
 	private String property;
 	

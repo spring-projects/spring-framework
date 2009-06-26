@@ -31,7 +31,7 @@ public class BindAndValidateLifecycleTests {
 		model = new TestBean();
 		alertContext = new DefaultAlertContext();
 		Binder binder = new WebBinderFactory().getBinder(model);
-		lifecycle = new BindAndValidateLifecycle(binder, alertContext);
+		lifecycle = new BindAndValidateLifecycle(binder, null, alertContext);
 	}
 
 	@Test
