@@ -25,7 +25,7 @@ public class DefaultAlertContextTests {
 			}
 
 			public String getMessage() {
-				return "Please enter a value in format yyy-dd-mm";
+				return "Please enter a value in format yyyy-dd-mm";
 			}
 
 			public Severity getSeverity() {
