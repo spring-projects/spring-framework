@@ -97,7 +97,7 @@ public final class Alerts {
 		}
 		
 		public String toString() {
-			return getSeverity() + ":" + getMessage();
+			return getSeverity() + ": " + getMessage();
 		}
 	}
 
