@@ -28,7 +28,7 @@ import org.springframework.ui.validation.Validator;
  * @author Keith Donald
  * @since 3.0
  */
-public class WebBindAndValidateLifecycle {
+public class BindAndValidateLifecycle {
 
 	private final Binder binder;
 
@@ -38,7 +38,7 @@ public class WebBindAndValidateLifecycle {
 
 	private Validator validator;
 
-	public WebBindAndValidateLifecycle(Binder binder, AlertContext alertContext) {
+	public BindAndValidateLifecycle(Binder binder, AlertContext alertContext) {
 		this.binder = binder;
 		this.alertContext = alertContext;
 	}

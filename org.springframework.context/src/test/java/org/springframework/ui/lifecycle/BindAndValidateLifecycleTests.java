@@ -12,14 +12,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
+import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Bound;
 import org.springframework.ui.binding.Model;
 import org.springframework.ui.binding.support.WebBinderFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
 
-public class WebBindAndValidateLifecycleTests {
+public class BindAndValidateLifecycleTests {
 
-	private WebBindAndValidateLifecycle lifecycle;
+	private BindAndValidateLifecycle lifecycle;
 
 	private TestBean model;
 	
@@ -29,7 +30,8 @@ public class WebBindAndValidateLifecycleTests {
 	public void setUp() {
 		model = new TestBean();
 		alertContext = new DefaultAlertContext();
-		lifecycle = new WebBindAndValidateLifecycle(new WebBinderFactory().getBinder(model), alertContext);
+		Binder binder = new WebBinderFactory().getBinder(model);
+		lifecycle = new BindAndValidateLifecycle(binder, alertContext);
 	}
 
 	@Test
