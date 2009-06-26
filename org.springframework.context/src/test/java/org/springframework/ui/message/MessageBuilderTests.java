@@ -15,7 +15,7 @@ public class MessageBuilderTests {
 		messageSource.addMessage("mathForm.decimalField", Locale.US, "Decimal Field");
 		MessageBuilder builder = new MessageBuilder(messageSource);
 		String message = builder.code("invalidFormat").arg("label", new ResolvableArgument("mathForm.decimalField"))
-				.arg("format", "#,###.##").defaultMessage("Field must be in format #,###.##").build();
+				.arg("format", "#,###.##").locale(Locale.US).defaultMessage("Field must be in format #,###.##").build();
 		assertEquals("Decimal Field must be in format #,###.##", message);
 	}
 }
