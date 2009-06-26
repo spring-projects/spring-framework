@@ -103,9 +103,7 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
-		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(Date.class, new DateFormatter());
-		binder.setFormatterRegistry(registry);
+		binder.registerFormatter(Date.class, new DateFormatter());
 		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
@@ -121,9 +119,7 @@ public class GenericBinderTests {
 	
 	@Test
 	public void bindSingleValueWithnAnnotationFormatterFactoryRegistered() throws ParseException {
-		GenericFormatterRegistry registry = new GenericFormatterRegistry();
-		registry.add(new CurrencyAnnotationFormatterFactory());
-		binder.setFormatterRegistry(registry);
+		binder.registerFormatterFactory(new CurrencyAnnotationFormatterFactory());
 		binder.bind(Collections.singletonMap("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}

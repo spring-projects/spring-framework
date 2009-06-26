@@ -19,7 +19,7 @@ package org.springframework.ui.alert;
  * A static factory for conveniently constructing Alerts.
  * Usage example:
  * <pre>
- *    static import org.springframework.ui.alert.Alerts;
+ *    import static org.springframework.ui.alert.Alerts;
  *    
  *    public void example() {
  *        info("An info alert");
@@ -40,7 +40,7 @@ public final class Alerts {
 	 * @see Severity#INFO
 	 */
 	public static Alert info(String message) {
-		return new GenericAlert(Severity.INFO, null, message);
+		return new GenericAlert(Severity.INFO, message);
 	}
 
 	/**
@@ -50,7 +50,7 @@ public final class Alerts {
 	 * @see Severity#WARNING
 	 */
 	public static Alert warning(String message) {
-		return new GenericAlert(Severity.WARNING, null, message);
+		return new GenericAlert(Severity.WARNING, message);
 	}
 
 	/**
@@ -60,7 +60,7 @@ public final class Alerts {
 	 * @see Severity#ERROR
 	 */
 	public static Alert error(String message) {
-		return new GenericAlert(Severity.ERROR, null, message);
+		return new GenericAlert(Severity.ERROR, message);
 	}
 
 	/**
@@ -70,41 +70,34 @@ public final class Alerts {
 	 * @see Severity#ERROR
 	 */
 	public static Alert fatal(String message) {
-		return new GenericAlert(Severity.FATAL, null, message);
+		return new GenericAlert(Severity.FATAL, message);
 	}
 
 	private static class GenericAlert implements Alert {
 
 		private Severity severity;
 		
-		private String code;
-		
 		private String message;
 
-		public GenericAlert(Severity severity, String code, String message) {
+		public GenericAlert(Severity severity, String message) {
 			this.severity = severity;
-			this.code = code;
 			this.message = message;
+		}
+
+		public String getCode() {
+			return null;
 		}
 
 		public Severity getSeverity() {
 			return severity;
 		}
 		
-		public String getCode() {
-			return code;
-		}
-
 		public String getMessage() {
 			return message;
 		}
 		
 		public String toString() {
-			if (getCode() != null) {
-				return getCode() + " - " + getMessage();
-			} else {
-				return getMessage();
-			}
+			return getSeverity() + ":" + getMessage();
 		}
 	}
 
