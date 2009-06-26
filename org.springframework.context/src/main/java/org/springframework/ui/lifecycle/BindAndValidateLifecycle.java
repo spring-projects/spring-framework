@@ -50,7 +50,7 @@ public class BindAndValidateLifecycle {
 			validator.validate(binder.getModel(), bindingResults.successes().properties());
 		}
 		for (BindingResult result : bindingResults.failures()) {
-			alertContext.add(result.getAlert());
+			alertContext.add(result.getProperty(), result.getAlert());
 		}
 		// TODO translate validation results into messages
 	}

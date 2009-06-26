@@ -18,16 +18,10 @@ package org.springframework.ui.alert;
 /**
  * Communicates an event of interest to the user.
  * For example, an alert may inform a user of a web application a business rule was violated.
- * TODO - should we introduce detail messages here
  * @author Keith Donald
  * @since 3.0
  */
 public interface Alert {
-
-	/**
-	 * The user interface element this alert is associated with; for example, "registration.password"
-	 */
-	public String getElement();
 
 	/**
 	 * The code uniquely identifying this kind of alert; for example, "weakPassword".
