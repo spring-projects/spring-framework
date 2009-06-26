@@ -55,6 +55,7 @@ import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
@@ -174,6 +175,26 @@ public class GenericBinder implements Binder {
 		}
 		bindings.put(configuration.getProperty(), binding);
 		return binding;
+	}
+
+	/**
+	 * Register a Formatter to format the model properties of a specific property type.
+	 * Convenience method that calls {@link FormatterRegistry#add(Class, Formatter)} internally.
+	 * The type may be a marker annotation type; if so, the Formatter will be used on properties having that marker annotation.
+	 * @param propertyType the model property type
+	 * @param formatter the formatter
+	 */
+	public void registerFormatter(Class<?> propertyType, Formatter<?> formatter) {
+		formatterRegistry.add(propertyType, formatter);
+	}
+
+	/**
+	 * Register a FormatterFactory that creates Formatter instances as required to format model properties annotated with a specific annotation.
+	 * Convenience method that calls {@link FormatterRegistry#add(AnnotationFormatterFactory)} internally.
+	 * @param factory the formatter factory
+	 */
+	public void registerFormatterFactory(AnnotationFormatterFactory<?, ?> factory) {
+		formatterRegistry.add(factory);
 	}
 
 	public Binding getBinding(String property) {
@@ -528,10 +549,6 @@ public class GenericBinder implements Binder {
 
 		public Alert getAlert() {
 			return new AbstractAlert() {
-				public String getElement() {
-					return getProperty();
-				}
-
 				public String getCode() {
 					return "noSuchBinding";
 				}
@@ -581,10 +598,6 @@ public class GenericBinder implements Binder {
 
 		public Alert getAlert() {
 			return new AbstractAlert() {
-				public String getElement() {
-					return getProperty();
-				}
-
 				public String getCode() {
 					return "invalidFormat";
 				}
@@ -635,10 +648,6 @@ public class GenericBinder implements Binder {
 
 		public Alert getAlert() {
 			return new AbstractAlert() {
-				public String getElement() {
-					return getProperty();
-				}
-
 				public String getCode() {
 					SpelMessage spelCode = ((SpelEvaluationException) cause).getMessageCode();
 					if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
@@ -726,10 +735,6 @@ public class GenericBinder implements Binder {
 
 		public Alert getAlert() {
 			return new AbstractAlert() {
-				public String getElement() {
-					return getProperty();
-				}
-
 				public String getCode() {
 					return "bindSuccess";
 				}
@@ -753,7 +758,7 @@ public class GenericBinder implements Binder {
 
 	static abstract class AbstractAlert implements Alert {
 		public String toString() {
-			return getElement() + ":" + getCode() + " - " + getMessage();
+			return getCode() + " - " + getMessage();
 		}
 	}
 }

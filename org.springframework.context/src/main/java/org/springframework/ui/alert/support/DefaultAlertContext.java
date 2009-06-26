@@ -54,8 +54,8 @@ public class DefaultAlertContext implements AlertContext {
 		return Collections.unmodifiableList(messages);
 	}
 
-	public void add(Alert alert) {
-		List<Alert> alerts = this.alerts.get(alert.getElement());
+	public void add(String element, Alert alert) {
+		List<Alert> alerts = this.alerts.get(element);
 		alerts.add(alert);
 	}
 

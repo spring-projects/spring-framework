@@ -41,8 +41,9 @@ public interface AlertContext {
 
 	/**
 	 * Add an alert to this context.
+	 * @param the element this alert is associated with
 	 * @param alert the alert to add
 	 */
-	public void add(Alert alert);
+	public void add(String element, Alert alert);
 
 }
