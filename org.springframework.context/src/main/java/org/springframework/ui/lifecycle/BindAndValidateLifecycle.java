@@ -24,7 +24,7 @@ import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.validation.Validator;
 
 /**
- * Implementation of the model bind and validate lifecycle lifecycle.
+ * Implementation of the model bind and validate lifecycle.
  * @author Keith Donald
  * @since 3.0
  */
