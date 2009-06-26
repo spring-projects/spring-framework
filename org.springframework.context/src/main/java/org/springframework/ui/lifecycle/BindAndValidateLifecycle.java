@@ -24,23 +24,38 @@ import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.validation.Validator;
 
 /**
- * Implementation of the bind and validate lifecycle for web (HTTP) environments.
+ * Implementation of the model bind and validate lifecycle lifecycle.
  * @author Keith Donald
  * @since 3.0
  */
-public class BindAndValidateLifecycle {
+public final class BindAndValidateLifecycle {
 
-	private final Binder binder;
-
-	private final AlertContext alertContext;
-
-	private ValidationDecider validationDecider = ValidationDecider.ALWAYS_VALIDATE;
+	private Binder binder;
 
 	private Validator validator;
 
-	public BindAndValidateLifecycle(Binder binder, AlertContext alertContext) {
+	private ValidationDecider validationDecider = ValidationDecider.ALWAYS_VALIDATE;
+
+	private final AlertContext alertContext;
+
+	/**
+	 * Create a new bind and validate lifecycle.
+	 * @param binder the binder to use for model binding
+	 * @param validator the validator to use for model validation
+	 * @param alertContext a context for adding binding and validation-related alerts
+	 */
+	public BindAndValidateLifecycle(Binder binder, Validator validator, AlertContext alertContext) {
 		this.binder = binder;
+		this.validator = validator;
 		this.alertContext = alertContext;
+	}
+	
+	/**
+	 * Configures the strategy that determines if validation should execute after binding.
+	 * @param validationDecider the validation decider
+	 */
+	public void setValidationDecider(ValidationDecider validationDecider) {
+		this.validationDecider = validationDecider;
 	}
 
 	public void execute(Map<String, ? extends Object> sourceValues) {
@@ -50,20 +65,10 @@ public class BindAndValidateLifecycle {
 			validator.validate(binder.getModel(), bindingResults.successes().properties());
 		}
 		for (BindingResult result : bindingResults.failures()) {
+			// TODO - you may want to ignore some alerts like propertyNotFound
 			alertContext.add(result.getProperty(), result.getAlert());
 		}
 		// TODO translate validation results into messages
-	}
-
-	interface ValidationDecider {
-
-		boolean shouldValidateAfter(BindingResults results);
-
-		static final ValidationDecider ALWAYS_VALIDATE = new ValidationDecider() {
-			public boolean shouldValidateAfter(BindingResults results) {
-				return true;
-			}
-		};
 	}
 
 }

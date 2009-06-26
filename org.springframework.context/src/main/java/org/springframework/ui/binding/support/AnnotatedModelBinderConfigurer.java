@@ -10,7 +10,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ui.binding.Bound;
 import org.springframework.ui.binding.Model;
 
-class AnnotatedModelBinderConfigurer {
+final class AnnotatedModelBinderConfigurer {
 
 	public void configure(GenericBinder binder) {
 		Class<?> modelClass = binder.getModel().getClass();

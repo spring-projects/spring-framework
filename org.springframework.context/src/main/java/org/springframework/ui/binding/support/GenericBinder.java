@@ -169,6 +169,7 @@ public class GenericBinder implements Binder {
 	public Binding configureBinding(BindingConfiguration configuration) {
 		Binding binding;
 		try {
+			// TODO should probably only allow binding to be created if property exists on model
 			binding = new BindingImpl(configuration);
 		} catch (org.springframework.expression.ParseException e) {
 			throw new IllegalArgumentException(e);
@@ -653,6 +654,7 @@ public class GenericBinder implements Binder {
 					if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
 						return "conversionFailed";
 					} else if (spelCode == SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE) {
+						// TODO should probably force property exists before even creating binding
 						return "propertyNotFound";
 					} else {
 						return "couldNotSetValue";
