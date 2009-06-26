@@ -1,4 +1,4 @@
-package org.springframework.ui.alert;
+package org.springframework.ui.alert.support;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,7 +8,7 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
 
-public class DefaultMessageContextTests {
+public class DefaultAlertContextTests {
 	
 	private DefaultAlertContext context;
 
@@ -20,10 +20,6 @@ public class DefaultMessageContextTests {
 	@Test
 	public void addAlert() {
 		Alert alert = new Alert() {
-			public String getElement() {
-				return "form.property";
-			}
-
 			public String getCode() {
 				return "invalidFormat";
 			}
@@ -36,7 +32,7 @@ public class DefaultMessageContextTests {
 				return Severity.ERROR;
 			}
 		};
-		context.add(alert);
+		context.add("form.property", alert);
 		assertEquals(1, context.getAlerts().size());
 		assertEquals("invalidFormat", context.getAlerts("form.property").get(0).getCode());
 	}
