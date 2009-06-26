@@ -1814,66 +1814,21 @@ public class ProductDaoImpl implements ProductDao {
       a non-invasiveness perspective, and might feel more natural to JPA
       developers.</para>
     </section>
-  </section>
 
-  <section id="orm-jpa-dialect">
-    <title><interfacename>JpaDialect</interfacename></title>
+    <section id="orm-jpa-tx">
+      <title>Transaction Management</title>
 
-    <para>As an advanced feature <classname>JpaTemplate</classname>,
-    <classname>JpaTransactionManager</classname> and subclasses of
-    <classname>AbstractEntityManagerFactoryBean</classname> support a custom
-    <interfacename>JpaDialect</interfacename>, to be passed into the
-    "jpaDialect" bean property. In such a scenario, the DAOs won't receive an
-    <interfacename>EntityManagerFactory</interfacename> reference but rather a
-    full <classname>JpaTemplate</classname> instance instead (for example,
-    passed into <classname>JpaDaoSupport</classname>'s "jpaTemplate"
-    property). A <interfacename>JpaDialect</interfacename> implementation can
-    enable some advanced features supported by Spring, usually in a
-    vendor-specific manner:</para>
+      <para>To execute service operations within transactions, you can use
+      Spring's common declarative transaction facilities. For example:</para>
 
-    <itemizedlist>
-      <listitem>
-        <para>applying specific transaction semantics (such as custom
-        isolation level or transaction timeout)</para>
-      </listitem>
+      <note>
+        <para>You are <emphasis>strongly</emphasis> encouraged to read the
+        section entitled <xref linkend="transaction-declarative" /> if you
+        have not done so to get a more detailed coverage of Spring's
+        declarative transaction support.</para>
+      </note>
 
-      <listitem>
-        <para>retrieving the transactional JDBC
-        <interfacename>Connection</interfacename> (for exposure to JDBC-based
-        DAOs)</para>
-      </listitem>
-
-      <listitem>
-        <para>advanced translation of <literal>PersistenceExceptions</literal>
-        to Spring <literal>DataAccessExceptions</literal></para>
-      </listitem>
-    </itemizedlist>
-
-    <para>This is particularly valuable for special transaction semantics and
-    for advanced translation of exception. Note that the default
-    implementation used (<classname>DefaultJpaDialect</classname>) doesn't
-    provide any special capabilities and if the above features are required,
-    the appropriate dialect has to be specified.</para>
-
-    <para>See the <interfacename>JpaDialect</interfacename> Javadoc for more
-    details of its operations and how they are used within Spring's JPA
-    support.</para>
-  </section>
-
-  <section id="orm-jpa-tx">
-    <title>Transaction Management</title>
-
-    <para>To execute service operations within transactions, you can use
-    Spring's common declarative transaction facilities. For example:</para>
-
-    <note>
-      <para>You are <emphasis>strongly</emphasis> encouraged to read the
-      section entitled <xref linkend="transaction-declarative" /> if you have
-      not done so to get a more detailed coverage of Spring's declarative
-      transaction support.</para>
-    </note>
-
-    <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
@@ -1909,15 +1864,61 @@ public class ProductDaoImpl implements ProductDao {
 
 &lt;/beans&gt;</programlisting>
 
-    <para>Spring JPA allows a configured
-    <classname>JpaTransactionManager</classname> to expose a JPA transaction
-    to JDBC access code that accesses the same JDBC
-    <interfacename>DataSource</interfacename>, provided that the registered
-    <interfacename>JpaDialect</interfacename> supports retrieval of the
-    underlying JDBC <interfacename>Connection</interfacename>. Out of the box,
-    Spring provides dialects for the Toplink, Hibernate and OpenJPA JPA
-    implementations. See the next section for details on the
-    <interfacename>JpaDialect</interfacename> mechanism.</para>
+      <para>Spring JPA allows a configured
+      <classname>JpaTransactionManager</classname> to expose a JPA transaction
+      to JDBC access code that accesses the same JDBC
+      <interfacename>DataSource</interfacename>, provided that the registered
+      <interfacename>JpaDialect</interfacename> supports retrieval of the
+      underlying JDBC <interfacename>Connection</interfacename>. Out of the
+      box, Spring provides dialects for the Toplink, Hibernate and OpenJPA JPA
+      implementations. See the next section for details on the
+      <interfacename>JpaDialect</interfacename> mechanism.</para>
+    </section>
+
+    <section id="orm-jpa-dialect">
+      <title><interfacename>JpaDialect</interfacename></title>
+
+      <para>As an advanced feature <classname>JpaTemplate</classname>,
+      <classname>JpaTransactionManager</classname> and subclasses of
+      <classname>AbstractEntityManagerFactoryBean</classname> support a custom
+      <interfacename>JpaDialect</interfacename>, to be passed into the
+      "jpaDialect" bean property. In such a scenario, the DAOs won't receive
+      an <interfacename>EntityManagerFactory</interfacename> reference but
+      rather a full <classname>JpaTemplate</classname> instance instead (for
+      example, passed into <classname>JpaDaoSupport</classname>'s
+      "jpaTemplate" property). A <interfacename>JpaDialect</interfacename>
+      implementation can enable some advanced features supported by Spring,
+      usually in a vendor-specific manner:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>applying specific transaction semantics (such as custom
+          isolation level or transaction timeout)</para>
+        </listitem>
+
+        <listitem>
+          <para>retrieving the transactional JDBC
+          <interfacename>Connection</interfacename> (for exposure to
+          JDBC-based DAOs)</para>
+        </listitem>
+
+        <listitem>
+          <para>advanced translation of
+          <literal>PersistenceExceptions</literal> to Spring
+          <literal>DataAccessExceptions</literal></para>
+        </listitem>
+      </itemizedlist>
+
+      <para>This is particularly valuable for special transaction semantics
+      and for advanced translation of exception. Note that the default
+      implementation used (<classname>DefaultJpaDialect</classname>) doesn't
+      provide any special capabilities and if the above features are required,
+      the appropriate dialect has to be specified.</para>
+
+      <para>See the <interfacename>JpaDialect</interfacename> Javadoc for more
+      details of its operations and how they are used within Spring's JPA
+      support.</para>
+    </section>
   </section>
 
   <section id="orm-ibatis">
