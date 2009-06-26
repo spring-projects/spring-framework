@@ -19,7 +19,7 @@ package org.springframework.ui.alert;
  * A static factory for conveniently constructing Alerts.
  * Usage example:
  * <pre>
- *    import static org.springframework.ui.alert.Alerts;
+ *    import static org.springframework.ui.alert.Alerts.*;
  *    
  *    public void example() {
  *        info("An info alert");
