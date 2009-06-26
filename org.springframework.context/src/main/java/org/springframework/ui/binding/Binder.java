@@ -39,7 +39,7 @@ public interface Binder {
 	Binding getBinding(String property);
 
 	/**
-	 * Bind source values in the map to the properties of the model object.
+	 * Bind the source values to the properties of the model.
 	 * @param sourceValues the source values to bind
 	 * @return the results of the binding operation
 	 */
