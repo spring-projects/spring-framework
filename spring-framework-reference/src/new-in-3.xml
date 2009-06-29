@@ -46,14 +46,6 @@
   <section id="new-in-3-improved-docs">
     <title>Improved documentation</title>
 
-    <sidebar id="new-in-3-intro-work-in-progress">
-      <title>Note:</title>
-
-      <para>The current documentation is a <emphasis>*** WORK IN PROGRESS
-      ***</emphasis> and is currently being re-written to reflect all the
-      changes in the framework and from now relying on Java 5 features.</para>
-    </sidebar>
-
     <para>The Spring reference documentation has also substantially been
     updated to reflect all of the changes and new features for Spring 3.0.
     While every effort has been made to ensure that there are no errors in
@@ -72,6 +64,13 @@
     can be found at the <ulink
     url="http://www.springsource.org/documentation"> Spring
     Documentation</ulink> page.</para>
+
+    <sidebar id="new-in-3-intro-work-in-progress">
+      <title>Note:</title>
+
+      <para>This document is not yet available as of Spring 3.0 RC1. It will
+      be avaialabe for the Spring 3.0 final release.</para>
+    </sidebar>
   </section>
 
   <section id="new-in-3-modules-build">
