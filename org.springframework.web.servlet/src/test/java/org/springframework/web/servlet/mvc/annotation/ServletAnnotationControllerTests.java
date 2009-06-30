@@ -982,7 +982,7 @@ public class ServletAnnotationControllerTests {
 		request.setCookies(new Cookie("date", "2008-11-18"));
 		MockHttpServletResponse response  = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-1226962800000", response.getContentAsString());
+		assertEquals("test-108", response.getContentAsString());
 	}
 
 	@Test
@@ -1706,7 +1706,7 @@ public class ServletAnnotationControllerTests {
 		public void handle(@CookieValue("date") Date date, Writer writer)
 				throws IOException {
 			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
-			writer.write("test-" + date.getTime());
+			writer.write("test-" + date.getYear());
 		}
 
 	}
