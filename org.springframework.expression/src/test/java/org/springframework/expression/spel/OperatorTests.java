@@ -153,9 +153,10 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0f + 5.0f", 8.0d, Double.class);
 		evaluate("3.0d + 5.0d", 8.0d, Double.class);
 
-		evaluateAndCheckError("'ab' + 2", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluateAndCheckError("2+'a' ", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		evaluateAndCheckError("2+'ab'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
+		evaluate("'ab' + 2", "ab2", String.class);
+		evaluate("2 + 'a'", "2a", String.class);
+		evaluate("'ab' + null", "abnull", String.class);
+		evaluate("null + 'ab'", "nullab", String.class);
 		
 		// AST:
 		SpelExpression expr = (SpelExpression)parser.parseExpression("+3");
