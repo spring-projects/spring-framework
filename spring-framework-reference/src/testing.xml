@@ -885,6 +885,7 @@ public void testProcessRepeatedly() {
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class MyTest {
+
     <emphasis role="bold">@Autowired</emphasis>
     private ApplicationContext applicationContext;
 
@@ -935,7 +936,7 @@ public class MyTest {
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"/applicationContext.xml"</literal> and <literal>"/applicationContext-test.xml"</literal></lineannotation>
 <lineannotation>// in the root of the classpath</lineannotation>
-<emphasis role="bold">@ContextConfiguration(locations={"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
+<emphasis role="bold">@ContextConfiguration({"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
 public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -1797,6 +1798,12 @@ public class HibernateClinicTests extends AbstractClinicTests { }
         <para><ulink url="http://www.jmock.org/">JMock</ulink>: a library that
         supports test-driven development of Java code with mock
         objects.</para>
+      </listitem>
+
+      <listitem>
+        <para><ulink url="http://mockito.org/">Mockito</ulink>: a Java mock
+        library based on the <ulink url="http://xunitpatterns.com/Test%20Spy.html">test spy</ulink>
+        pattern.</para>
       </listitem>
 
       <listitem>
