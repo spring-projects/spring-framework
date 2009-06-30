@@ -73,6 +73,14 @@ public class OpPlus extends Operator {
 				}
 			} else if (operandOne instanceof String && operandTwo instanceof String) {
 				return new TypedValue(new StringBuilder((String) operandOne).append((String) operandTwo).toString(),STRING_TYPE_DESCRIPTOR);
+			} else if (operandOne instanceof String) {
+				StringBuilder result = new StringBuilder((String)operandOne);
+				result.append((operandTwo==null?"null":operandTwo.toString()));
+				return new TypedValue(result.toString(),STRING_TYPE_DESCRIPTOR);				
+			} else if (operandTwo instanceof String) {
+				StringBuilder result = new StringBuilder((operandOne==null?"null":operandOne.toString()));
+				result.append((String)operandTwo);
+				return new TypedValue(result.toString(),STRING_TYPE_DESCRIPTOR);								
 			}
 			return state.operate(Operation.ADD, operandOne, operandTwo);
 		}
