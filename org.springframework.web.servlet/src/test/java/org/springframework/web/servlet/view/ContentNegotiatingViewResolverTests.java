@@ -18,23 +18,26 @@ package org.springframework.web.servlet.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class ContentNegotiatingViewResolverTests {
 
 	private ContentNegotiatingViewResolver viewResolver;
@@ -109,7 +112,45 @@ public class ContentNegotiatingViewResolverTests {
 
 		verify(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
 	}
-	
+
+	@Test
+	public void resolveViewNameAcceptHeaderDefaultView() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addHeader("Accept", "application/json");
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+		ViewResolver viewResolverMock1 = createMock(ViewResolver.class);
+		ViewResolver viewResolverMock2 = createMock(ViewResolver.class);
+		List<ViewResolver> viewResolverMocks = new ArrayList<ViewResolver>();
+		viewResolverMocks.add(viewResolverMock1);
+		viewResolverMocks.add(viewResolverMock2);
+		viewResolver.setViewResolvers(viewResolverMocks);
+
+		View viewMock1 = createMock("application_xml", View.class);
+		View viewMock2 = createMock("text_html", View.class);
+		View viewMock3 = createMock("application_json", View.class);
+
+		List<View> defaultViews = new ArrayList<View>();
+		defaultViews.add(viewMock3);
+		viewResolver.setDefaultViews(defaultViews);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
+		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
+		expect(viewMock1.getContentType()).andReturn("application/xml");
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
+		expect(viewMock3.getContentType()).andReturn("application/json");
+
+		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2, viewMock3);
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertSame("Invalid view", viewMock3, result);
+
+		verify(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2, viewMock3);
+	}
+
 	@Test
 	public void resolveViewNameFilename() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test.html");
@@ -139,6 +180,47 @@ public class ContentNegotiatingViewResolverTests {
 		assertSame("Invalid view", viewMock2, result);
 
 		verify(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
+	}
+
+	@Test
+	public void resolveViewNameFilenameDefaultView() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test.json");
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+		Map<String, String> mediaTypes = new HashMap<String, String>();
+		mediaTypes.put("json", "application/json");
+		viewResolver.setMediaTypes(mediaTypes);
+
+		ViewResolver viewResolverMock1 = createMock(ViewResolver.class);
+		ViewResolver viewResolverMock2 = createMock(ViewResolver.class);
+		List<ViewResolver> viewResolverMocks = new ArrayList<ViewResolver>();
+		viewResolverMocks.add(viewResolverMock1);
+		viewResolverMocks.add(viewResolverMock2);
+		viewResolver.setViewResolvers(viewResolverMocks);
+
+		View viewMock1 = createMock("application_xml", View.class);
+		View viewMock2 = createMock("text_html", View.class);
+		View viewMock3 = createMock("application_json", View.class);
+
+		List<View> defaultViews = new ArrayList<View>();
+		defaultViews.add(viewMock3);
+		viewResolver.setDefaultViews(defaultViews);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
+		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
+		expect(viewMock1.getContentType()).andReturn("application/xml");
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
+		expect(viewMock3.getContentType()).andReturn("application/json");
+
+		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2, viewMock3);
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertSame("Invalid view", viewMock3, result);
+
+		verify(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2, viewMock3);
 	}
 
 }

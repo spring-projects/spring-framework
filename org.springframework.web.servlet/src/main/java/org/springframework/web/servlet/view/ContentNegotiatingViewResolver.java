@@ -37,9 +37,10 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -73,7 +74,11 @@ import org.springframework.web.util.WebUtils;
  * {@code text/html} content type (based on the {@code html} file extension). A request for {@code /view} with a {@code
  * text/html} request {@code Accept} header has the same result.
  *
+ * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property, allowing you to
+ * override the views provided by the view resolvers.
+ *
  * @author Arjen Poutsma
+ * @author Jeremy Grelle
  * @see ViewResolver
  * @see InternalResourceViewResolver
  * @see BeanNameViewResolver
@@ -93,6 +98,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
 	private ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
+
+	private List<View> defaultViews;
 
 	private List<ViewResolver> viewResolvers;
 
@@ -129,6 +136,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			MediaType mediaType = MediaType.parseMediaType(entry.getValue());
 			this.mediaTypes.put(extension, mediaType);
 		}
+	}
+
+	/**
+	 * Sets the default views to use when a more specific view can not be obtained from the {@link ViewResolver} chain.
+	 */
+	public void setDefaultViews(List<View> defaultViews) {
+		this.defaultViews = defaultViews;
 	}
 
 	/**
@@ -235,16 +249,23 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		Collections.sort(requestedMediaTypes);
 
 		SortedMap<MediaType, View> views = new TreeMap<MediaType, View>();
+		List<View> candidateViews = new ArrayList<View>();
 		for (ViewResolver viewResolver : viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
 			if (view != null) {
-				MediaType viewMediaType = MediaType.parseMediaType(view.getContentType());
-				for (MediaType requestedMediaType : requestedMediaTypes) {
-					if (requestedMediaType.includes(viewMediaType)) {
-						if (!views.containsKey(requestedMediaType)) {
-							views.put(requestedMediaType, view);
-							break;
-						}
+				candidateViews.add(view);
+			}
+		}
+		if (!CollectionUtils.isEmpty(defaultViews)) {
+			candidateViews.addAll(defaultViews);
+		}
+		for (View candidateView : candidateViews) {
+			MediaType viewMediaType = MediaType.parseMediaType(candidateView.getContentType());
+			for (MediaType requestedMediaType : requestedMediaTypes) {
+				if (requestedMediaType.includes(viewMediaType)) {
+					if (!views.containsKey(requestedMediaType)) {
+						views.put(requestedMediaType, candidateView);
+						break;
 					}
 				}
 			}
