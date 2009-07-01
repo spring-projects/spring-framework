@@ -139,7 +139,7 @@ public class BindingJacksonJsonView extends AbstractView {
 		Set<String> renderedAttributes =
 				!CollectionUtils.isEmpty(this.renderedAttributes) ? this.renderedAttributes : model.keySet();
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
-			if (!(entry instanceof BindingResult) && renderedAttributes.contains(entry.getKey())) {
+			if (!(entry.getValue() instanceof BindingResult) && renderedAttributes.contains(entry.getKey())) {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}

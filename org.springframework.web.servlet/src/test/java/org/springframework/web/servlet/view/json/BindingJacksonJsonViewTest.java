@@ -31,6 +31,7 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerFactory;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.ser.BeanSerializerFactory;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +41,7 @@ import org.mozilla.javascript.ScriptableObject;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.validation.BindingResult;
 
 /**
  * @author Jeremy Grelle
@@ -72,6 +74,7 @@ public class BindingJacksonJsonViewTest {
 	public void renderSimpleMap() throws Exception {
 
 		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("bindingResult", createMock("binding_result", BindingResult.class));
 		model.put("foo", "bar");
 
 		view.render(model, request, response);
@@ -95,6 +98,7 @@ public class BindingJacksonJsonViewTest {
 
 		Object bean = new TestBeanSimple();
 		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("bindingResult", createMock("binding_result", BindingResult.class));
 		model.put("foo", bean);
 
 		view.render(model, request, response);
