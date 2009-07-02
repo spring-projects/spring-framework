@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,10 +65,17 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public final class AspectJAutoProxyCreatorTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
+
+	private static void assertStopWatchTimeLimit(final StopWatch sw, final long maxTimeMillis) {
+		final long totalTimeMillis = sw.getTotalTimeMillis();
+		assertTrue("'" + sw.getLastTaskName() + "' took too long: expected less than<" + maxTimeMillis
+				+ "> ms, actual<" + totalTimeMillis + "> ms.", totalTimeMillis < maxTimeMillis);
+	}
 
 	@Test
 	public void testAspectsAreApplied() {
@@ -110,7 +117,7 @@ public final class AspectJAutoProxyCreatorTests {
 		}
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		StopWatch sw = new StopWatch();
-		sw.start("prototype");
+		sw.start("Prototype Creation");
 		for (int i = 0; i < 10000; i++) {
 			ITestBean shouldBeWeaved = (ITestBean) ac.getBean("adrian2");
 			if (i < 10) {
@@ -118,11 +125,10 @@ public final class AspectJAutoProxyCreatorTests {
 			}
 		}
 		sw.stop();
-		long totalTimeMillis = sw.getTotalTimeMillis();
-		// System.out.println(totalTimeMillis);
-		// How was it decided that 4 seconds is a reasonable maximum time?
-		int maxTimeMillis = 5000; // 4000;
-		assertTrue("Prototype creation took too long: " + totalTimeMillis, totalTimeMillis < maxTimeMillis);
+
+		// What's a reasonable expectation for _any_ server load?
+		// 4 seconds? 7 seconds?
+		assertStopWatchTimeLimit(sw, 7000);
 	}
 
 	@Test
@@ -133,7 +139,7 @@ public final class AspectJAutoProxyCreatorTests {
 		}
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		StopWatch sw = new StopWatch();
-		sw.start("prototype");
+		sw.start("Prototype Creation");
 		for (int i = 0; i < 100000; i++) {
 			INestedTestBean shouldNotBeWeaved = (INestedTestBean) ac.getBean("i21");
 			if (i < 10) {
@@ -141,11 +147,10 @@ public final class AspectJAutoProxyCreatorTests {
 			}
 		}
 		sw.stop();
-		long totalTimeMillis = sw.getTotalTimeMillis();
-		// System.out.println(totalTimeMillis);
-		// How was it decided that 3 seconds is a reasonable maximum time?
-		int maxTimeMillis = 3000;
-		assertTrue("Prototype creation took too long: " + totalTimeMillis, totalTimeMillis < maxTimeMillis);
+
+		// What's a reasonable expectation for _any_ server load?
+		// 3 seconds? 7 seconds?
+		assertStopWatchTimeLimit(sw, 3000);
 	}
 
 	@Test
@@ -161,14 +166,13 @@ public final class AspectJAutoProxyCreatorTests {
 			ac.registerBeanDefinition("singleton" + i, new RootBeanDefinition(NestedTestBean.class));
 		}
 		StopWatch sw = new StopWatch();
-		sw.start("singleton");
+		sw.start("Singleton Creation");
 		ac.refresh();
 		sw.stop();
-		long totalTimeMillis = sw.getTotalTimeMillis();
-		// System.out.println(totalTimeMillis);
-		// How was it decided that 4 seconds is a reasonable maximum time?
-		int maxTimeMillis = 5000; // 4000;
-		assertTrue("Singleton creation took too long: " + totalTimeMillis, totalTimeMillis < maxTimeMillis);
+
+		// What's a reasonable expectation for _any_ server load?
+		// 4 seconds? 7 seconds?
+		assertStopWatchTimeLimit(sw, 7000);
 	}
 
 	@Test
