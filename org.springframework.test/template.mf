@@ -17,7 +17,7 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.apache.taglibs.standard.*;version="[1.1.0, 2.0.0)";resolution:=optional,
  org.aspectj.weaver.*;version="[1.5.4, 2.0.0)";resolution:=optional,
- org.junit.*;version="[4.5.0, 5.0.0)";resolution:=optional,
+ org.junit.*;version="[4.6.0, 5.0.0)";resolution:=optional,
  org.springframework.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.testng.*;version="[5.9.0, 6.0.0)";resolution:=optional,
  org.w3c.dom.*;version="0";resolution:=optional

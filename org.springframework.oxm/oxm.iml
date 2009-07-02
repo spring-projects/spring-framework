@@ -152,11 +152,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-4.5.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-4.6.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.5.0/com.springsource.org.junit-sources-4.5.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-sources-4.6.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
