@@ -35,6 +35,7 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since May 2, 2001
  */
 public class StopWatch {
@@ -66,7 +67,6 @@ public class StopWatch {
 	/** Total running time */
 	private long totalTimeMillis;
 
-
 	/**
 	 * Construct a new stop watch. Does not start any task.
 	 */
@@ -93,7 +93,6 @@ public class StopWatch {
 	public void setKeepTaskList(boolean keepTaskList) {
 		this.keepTaskList = keepTaskList;
 	}
-
 
 	/**
 	 * Start an unnamed task. The results are undefined if {@link #stop()}
@@ -147,7 +146,6 @@ public class StopWatch {
 		return this.running;
 	}
 
-
 	/**
 	 * Return the time taken by the last task.
 	 */
@@ -156,6 +154,16 @@ public class StopWatch {
 			throw new IllegalStateException("No tests run: can't get last interval");
 		}
 		return this.lastTaskInfo.getTimeMillis();
+	}
+
+	/**
+	 * Return the name of the last task.
+	 */
+	public String getLastTaskName() throws IllegalStateException {
+		if (this.lastTaskInfo == null) {
+			throw new IllegalStateException("No tests run: can't get last interval");
+		}
+		return this.lastTaskInfo.getTaskName();
 	}
 
 	/**
@@ -189,7 +197,6 @@ public class StopWatch {
 		return this.taskList.toArray(new TaskInfo[this.taskList.size()]);
 	}
 
-
 	/**
 	 * Return a short description of the total running time.
 	 */
@@ -206,8 +213,7 @@ public class StopWatch {
 		sb.append('\n');
 		if (!this.keepTaskList) {
 			sb.append("No task info kept");
-		}
-		else {
+		} else {
 			sb.append("-----------------------------------------\n");
 			sb.append("ms     %     Task name\n");
 			sb.append("-----------------------------------------\n");
@@ -239,13 +245,11 @@ public class StopWatch {
 				long percent = Math.round((100.0 * task.getTimeSeconds()) / getTotalTimeSeconds());
 				sb.append(" = ").append(percent).append("%");
 			}
-		}
-		else {
+		} else {
 			sb.append("; no task info kept");
 		}
 		return sb.toString();
 	}
-
 
 	/**
 	 * Inner class to hold data about one task executed within the stop watch.
