@@ -24,7 +24,7 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
 /**
- * Strategy interface that specifies a converter can convert from and to HTTP requests and responses.
+ * Strategy interface that specifies a converter that can convert from and to HTTP requests and responses.
  *
  * @author Arjen Poutsma
  * @since 3.0
