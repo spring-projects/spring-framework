@@ -95,7 +95,7 @@
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.5.0" conf="test->runtime"/>
-		<dependency org="org.testng" name="com.springsource.org.testng" rev="5.8.0" conf="test->compile"/>
+		<dependency org="org.testng" name="com.springsource.org.testng" rev="5.9.0" conf="test->compile"/>
 	</dependencies>
 
 </ivy-module>

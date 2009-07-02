@@ -434,11 +434,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.testng/com.springsource.org.testng/5.8.0/com.springsource.org.testng-5.8.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.testng/com.springsource.org.testng/5.9.0/com.springsource.org.testng-5.9.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.testng/com.springsource.org.testng/5.8.0/com.springsource.org.testng-sources-5.8.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.testng/com.springsource.org.testng/5.9.0/com.springsource.org.testng-sources-5.9.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
