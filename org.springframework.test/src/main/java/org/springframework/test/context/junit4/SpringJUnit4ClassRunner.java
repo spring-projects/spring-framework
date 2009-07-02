@@ -220,11 +220,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		}
 	}
 
-	private EachTestNotifier makeNotifier(FrameworkMethod frameworkMethod, RunNotifier notifier) {
-		Description description = describeChild(frameworkMethod);
-		return new EachTestNotifier(notifier, description);
-	}
-
 	/**
 	 * Augments the default JUnit behavior
 	 * {@link #withPotentialRepeat(FrameworkMethod, Object, Statement) with
