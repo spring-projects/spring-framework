@@ -118,8 +118,11 @@ public final class AspectJAutoProxyCreatorTests {
 			}
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		long totalTimeMillis = sw.getTotalTimeMillis();
+		// System.out.println(totalTimeMillis);
+		// How was it decided that 4 seconds is a reasonable maximum time?
+		int maxTimeMillis = 5000; // 4000;
+		assertTrue("Prototype creation took too long: " + totalTimeMillis, totalTimeMillis < maxTimeMillis);
 	}
 
 	@Test
@@ -138,8 +141,11 @@ public final class AspectJAutoProxyCreatorTests {
 			}
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
+		long totalTimeMillis = sw.getTotalTimeMillis();
+		// System.out.println(totalTimeMillis);
+		// How was it decided that 3 seconds is a reasonable maximum time?
+		int maxTimeMillis = 3000;
+		assertTrue("Prototype creation took too long: " + totalTimeMillis, totalTimeMillis < maxTimeMillis);
 	}
 
 	@Test
@@ -149,8 +155,8 @@ public final class AspectJAutoProxyCreatorTests {
 			return;
 		}
 		GenericApplicationContext ac = new GenericApplicationContext();
-		new XmlBeanDefinitionReader(ac).loadBeanDefinitions(
-				new ClassPathResource(qName("aspectsPlusAdvisor.xml"), getClass()));
+		new XmlBeanDefinitionReader(ac).loadBeanDefinitions(new ClassPathResource(qName("aspectsPlusAdvisor.xml"),
+				getClass()));
 		for (int i = 0; i < 10000; i++) {
 			ac.registerBeanDefinition("singleton" + i, new RootBeanDefinition(NestedTestBean.class));
 		}
@@ -158,8 +164,11 @@ public final class AspectJAutoProxyCreatorTests {
 		sw.start("singleton");
 		ac.refresh();
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Singleton creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		long totalTimeMillis = sw.getTotalTimeMillis();
+		// System.out.println(totalTimeMillis);
+		// How was it decided that 4 seconds is a reasonable maximum time?
+		int maxTimeMillis = 5000; // 4000;
+		assertTrue("Singleton creation took too long: " + totalTimeMillis, totalTimeMillis < maxTimeMillis);
 	}
 
 	@Test
@@ -168,12 +177,12 @@ public final class AspectJAutoProxyCreatorTests {
 		GenericApplicationContext childAc = new GenericApplicationContext(ac);
 		// Create a child factory with a bean that should be weaved                                              
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian")).
-				addPropertyValue(new PropertyValue("age", new Integer(34)));
+		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian")).addPropertyValue(
+				new PropertyValue("age", new Integer(34)));
 		childAc.registerBeanDefinition("adrian2", bd);
 		// Register the advisor auto proxy creator with subclass
-		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(),
-				new RootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class));
+		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(
+				AnnotationAwareAspectJAutoProxyCreator.class));
 		childAc.refresh();
 
 		ITestBean beanFromChildContextThatShouldBeWeaved = (ITestBean) childAc.getBean("adrian2");
@@ -355,7 +364,6 @@ public final class AspectJAutoProxyCreatorTests {
 
 }
 
-
 @Aspect("pertarget(execution(* *.getSpouse()))")
 class PerTargetAspect implements Ordered {
 
@@ -392,7 +400,8 @@ class AdviceUsingThisJoinPoint {
 	}
 
 	@Pointcut("execution(* *(..))")
-	public void methodExecution() {}
+	public void methodExecution() {
+	}
 
 	@Before("methodExecution()")
 	public void entryTrace(JoinPoint jp) {
@@ -400,7 +409,6 @@ class AdviceUsingThisJoinPoint {
 	}
 
 }
-
 
 @Aspect
 class DummyAspect {
@@ -412,7 +420,6 @@ class DummyAspect {
 
 }
 
-
 @Aspect
 class DummyAspectWithParameter {
 
@@ -422,7 +429,6 @@ class DummyAspectWithParameter {
 	}
 
 }
-
 
 class DummyFactoryBean implements FactoryBean<Object> {
 
@@ -440,7 +446,6 @@ class DummyFactoryBean implements FactoryBean<Object> {
 
 }
 
-
 @Aspect
 @Order(10)
 class IncreaseReturnValue {
@@ -452,7 +457,6 @@ class IncreaseReturnValue {
 	}
 
 }
-
 
 @Aspect
 class MultiplyReturnValue {
@@ -478,7 +482,6 @@ class MultiplyReturnValue {
 
 }
 
-
 @Aspect
 class RetryAspect {
 
@@ -487,7 +490,6 @@ class RetryAspect {
 	private int commitCalls;
 
 	private int rollbackCalls;
-
 
 	@Pointcut("execution(public * UnreliableBean.*(..))")
 	public void execOfPublicMethod() {
@@ -507,19 +509,16 @@ class RetryAspect {
 				try {
 					o = jp.proceed();
 					this.commitCalls++;
-				}
-				catch (RetryableException e) {
+				} catch (RetryableException e) {
 					this.rollbackCalls++;
 					throw e;
 				}
-			}
-			catch (RetryableException re) {
+			} catch (RetryableException re) {
 				retry = true;
 			}
 		}
 		return o;
 	}
-
 
 	public int getBeginCalls() {
 		return this.beginCalls;
@@ -535,7 +534,6 @@ class RetryAspect {
 
 }
 
-
 @SuppressWarnings("serial")
 class RetryableException extends NestedRuntimeException {
 
@@ -548,27 +546,25 @@ class RetryableException extends NestedRuntimeException {
 	}
 }
 
-
 class UnreliableBean {
 
 	private int calls;
 
 	public int unreliable() {
 		this.calls++;
-		 if (this.calls % 2 != 0) {
-			 throw new RetryableException("foo");
-		 }
+		if (this.calls % 2 != 0) {
+			throw new RetryableException("foo");
+		}
 		return this.calls;
 	}
 
 }
 
-
 @SuppressWarnings("serial")
 class TestBeanAdvisor extends StaticMethodMatcherPointcutAdvisor {
-	
+
 	public int count;
-	
+
 	public TestBeanAdvisor() {
 		setAdvice(new MethodBeforeAdvice() {
 			public void before(Method method, Object[] args, Object target) throws Throwable {
