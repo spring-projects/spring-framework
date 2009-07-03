@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.transaction.support;
 
+import static org.easymock.EasyMock.createMock;
+
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.transaction.jta.JtaTransactionManager;
@@ -32,28 +33,29 @@ import org.springframework.util.SerializationTestUtils;
 public class JtaTransactionManagerSerializationTests extends TestCase {
 
 	public void testSerializable() throws Exception {
-		MockControl utMock = MockControl.createControl(UserTransaction.class);
-		UserTransaction ut = (UserTransaction) utMock.getMock();
-		MockControl ut2Mock = MockControl.createControl(UserTransaction.class);
-		UserTransaction ut2 = (UserTransaction) ut2Mock.getMock();
-		MockControl tmMock = MockControl.createControl(TransactionManager.class);
-		TransactionManager tm = (TransactionManager) tmMock.getMock();
+		UserTransaction ut1 = createMock(UserTransaction.class);
+		UserTransaction ut2 = createMock(UserTransaction.class);
+		TransactionManager tm = createMock(TransactionManager.class);
 
 		JtaTransactionManager jtam = new JtaTransactionManager();
-		jtam.setUserTransaction(ut);
+		jtam.setUserTransaction(ut1);
 		jtam.setTransactionManager(tm);
 		jtam.setRollbackOnCommitFailure(true);
 		jtam.afterPropertiesSet();
 
-		SimpleNamingContextBuilder jndiEnv = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+		SimpleNamingContextBuilder jndiEnv = SimpleNamingContextBuilder
+				.emptyActivatedContextBuilder();
 		jndiEnv.bind(JtaTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut2);
-		JtaTransactionManager serializedJtatm =
-				(JtaTransactionManager) SerializationTestUtils.serializeAndDeserialize(jtam);
-		
+		JtaTransactionManager serializedJtatm = (JtaTransactionManager) SerializationTestUtils
+				.serializeAndDeserialize(jtam);
+
 		// should do client-side lookup
-		assertNotNull("Logger must survive serialization", serializedJtatm.logger);
-		assertTrue("UserTransaction looked up on client", serializedJtatm.getUserTransaction() == ut2);
-		assertNull("TransactionManager didn't survive", serializedJtatm.getTransactionManager());
+		assertNotNull("Logger must survive serialization",
+				serializedJtatm.logger);
+		assertTrue("UserTransaction looked up on client", serializedJtatm
+				.getUserTransaction() == ut2);
+		assertNull("TransactionManager didn't survive", serializedJtatm
+				.getTransactionManager());
 		assertEquals(true, serializedJtatm.isRollbackOnCommitFailure());
 	}
 

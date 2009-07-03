@@ -16,8 +16,13 @@
 
 package org.springframework.jca.cci;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.SQLException;
 
@@ -58,7 +63,8 @@ public class CciTemplateTests {
 
 		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
 
-		expect(recordFactory.createIndexedRecord("name")).andReturn(indexedRecord);
+		expect(recordFactory.createIndexedRecord("name")).andReturn(
+				indexedRecord);
 
 		replay(connectionFactory, recordFactory);
 
@@ -76,7 +82,8 @@ public class CciTemplateTests {
 
 		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
 
-		expect(recordFactory.createMappedRecord("name")).andReturn(mappedRecord);
+		expect(recordFactory.createMappedRecord("name"))
+				.andReturn(mappedRecord);
 
 		replay(connectionFactory, recordFactory);
 
@@ -101,7 +108,8 @@ public class CciTemplateTests {
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord))
+				.andReturn(true);
 
 		interaction.close();
 
@@ -116,7 +124,8 @@ public class CciTemplateTests {
 	}
 
 	@Test
-	public void testTemplateExecuteWithCreatorAndRecordFactoryNotSupported() throws ResourceException {
+	public void testTemplateExecuteWithCreatorAndRecordFactoryNotSupported()
+			throws ResourceException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		Connection connection = createMock(Connection.class);
 		Interaction interaction = createMock(Interaction.class);
@@ -128,11 +137,13 @@ public class CciTemplateTests {
 
 		expect(connectionFactory.getConnection()).andReturn(connection);
 
-		expect(connectionFactory.getRecordFactory()).andThrow(new NotSupportedException("not supported"));
+		expect(connectionFactory.getRecordFactory()).andThrow(
+				new NotSupportedException("not supported"));
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord))
+				.andReturn(true);
 
 		interaction.close();
 
@@ -151,9 +162,10 @@ public class CciTemplateTests {
 
 		verify(connectionFactory, connection, interaction);
 	}
-	
+
 	@Test
-	public void testTemplateExecuteInputTrueWithCreator2() throws ResourceException {
+	public void testTemplateExecuteInputTrueWithCreator2()
+			throws ResourceException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		RecordFactory recordFactory = createMock(RecordFactory.class);
 		Connection connection = createMock(Connection.class);
@@ -173,7 +185,8 @@ public class CciTemplateTests {
 
 		expect(creator.createRecord(recordFactory)).andReturn(outputRecord);
 
-		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord))
+				.andReturn(true);
 
 		interaction.close();
 
@@ -203,7 +216,8 @@ public class CciTemplateTests {
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(outputRecord);
+		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(
+				outputRecord);
 
 		interaction.close();
 
@@ -217,13 +231,15 @@ public class CciTemplateTests {
 		verify(connectionFactory, connection, interaction);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testTemplateExecuteInputExtractorTrueWithCreator() throws ResourceException, SQLException {
+	public void testTemplateExecuteInputExtractorTrueWithCreator()
+			throws ResourceException, SQLException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		RecordFactory recordFactory = createMock(RecordFactory.class);
 		Connection connection = createMock(Connection.class);
 		Interaction interaction = createMock(Interaction.class);
-		RecordExtractor<?> extractor = createMock(RecordExtractor.class);
+		RecordExtractor<Object> extractor = createMock(RecordExtractor.class);
 		RecordCreator creator = createMock(RecordCreator.class);
 
 		Record inputRecord = createMock(Record.class);
@@ -239,7 +255,8 @@ public class CciTemplateTests {
 
 		expect(creator.createRecord(recordFactory)).andReturn(outputRecord);
 
-		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord))
+				.andReturn(true);
 
 		expect(extractor.extractData(outputRecord)).andStubReturn(new Object());
 
@@ -256,12 +273,14 @@ public class CciTemplateTests {
 		verify(connectionFactory, connection, interaction, extractor, creator);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testTemplateExecuteInputExtractorFalse() throws ResourceException, SQLException {
+	public void testTemplateExecuteInputExtractorFalse()
+			throws ResourceException, SQLException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		Connection connection = createMock(Connection.class);
 		Interaction interaction = createMock(Interaction.class);
-		RecordExtractor<?> extractor = createMock(RecordExtractor.class);
+		RecordExtractor<Object> extractor = createMock(RecordExtractor.class);
 
 		Record inputRecord = createMock(Record.class);
 		Record outputRecord = createMock(Record.class);
@@ -272,7 +291,8 @@ public class CciTemplateTests {
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(outputRecord);
+		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(
+				outputRecord);
 
 		expect(extractor.extractData(outputRecord)).andStubReturn(new Object());
 
@@ -289,7 +309,8 @@ public class CciTemplateTests {
 	}
 
 	@Test
-	public void testTemplateExecuteInputGeneratorTrueWithCreator() throws ResourceException {
+	public void testTemplateExecuteInputGeneratorTrueWithCreator()
+			throws ResourceException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		RecordFactory recordFactory = createMock(RecordFactory.class);
 		Connection connection = createMock(Connection.class);
@@ -314,7 +335,8 @@ public class CciTemplateTests {
 
 		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
 
-		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord))
+				.andReturn(true);
 
 		interaction.close();
 
@@ -328,9 +350,10 @@ public class CciTemplateTests {
 
 		verify(connectionFactory, connection, interaction, generator, creator);
 	}
-	
+
 	@Test
-	public void testTemplateExecuteInputGeneratorFalse() throws ResourceException {
+	public void testTemplateExecuteInputGeneratorFalse()
+			throws ResourceException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		RecordFactory recordFactory = createMock(RecordFactory.class);
 		Connection connection = createMock(Connection.class);
@@ -343,14 +366,15 @@ public class CciTemplateTests {
 		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
 		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
-		
+
 		expect(connectionFactory.getConnection()).andReturn(connection);
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
 		expect(generator.createRecord(recordFactory)).andReturn(inputRecord);
 
-		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(outputRecord);
+		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(
+				outputRecord);
 
 		interaction.close();
 
@@ -364,21 +388,23 @@ public class CciTemplateTests {
 		verify(connectionFactory, connection, interaction, generator);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testTemplateExecuteInputGeneratorExtractorTrueWithCreator() throws ResourceException, SQLException {
+	public void testTemplateExecuteInputGeneratorExtractorTrueWithCreator()
+			throws ResourceException, SQLException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		RecordFactory recordFactory = createMock(RecordFactory.class);
 		Connection connection = createMock(Connection.class);
 		Interaction interaction = createMock(Interaction.class);
 		RecordCreator generator = createMock(RecordCreator.class);
-		RecordExtractor<?> extractor = createMock(RecordExtractor.class);
+		RecordExtractor<Object> extractor = createMock(RecordExtractor.class);
 		RecordCreator creator = createMock(RecordCreator.class);
 
 		Record inputRecord = createMock(Record.class);
 		Record outputRecord = createMock(Record.class);
-		
+
 		Object obj = new Object();
-		
+
 		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
 		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
@@ -393,7 +419,8 @@ public class CciTemplateTests {
 
 		expect(generator.createRecord(recordFactory)).andReturn(inputRecord);
 
-		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord))
+				.andReturn(true);
 
 		expect(extractor.extractData(outputRecord)).andStubReturn(obj);
 
@@ -401,27 +428,31 @@ public class CciTemplateTests {
 
 		connection.close();
 
-		replay(connectionFactory, connection, interaction, generator, creator, extractor);
+		replay(connectionFactory, connection, interaction, generator, creator,
+				extractor);
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
 		ct.setOutputRecordCreator(creator);
 		assertEquals(obj, ct.execute(interactionSpec, generator, extractor));
 
-		verify(connectionFactory, connection, interaction, generator, creator, extractor);
+		verify(connectionFactory, connection, interaction, generator, creator,
+				extractor);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testTemplateExecuteInputGeneratorExtractorFalse() throws ResourceException, SQLException {
+	public void testTemplateExecuteInputGeneratorExtractorFalse()
+			throws ResourceException, SQLException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		RecordFactory recordFactory = createMock(RecordFactory.class);
 		Connection connection = createMock(Connection.class);
 		Interaction interaction = createMock(Interaction.class);
 		RecordCreator generator = createMock(RecordCreator.class);
-		RecordExtractor<?> extractor = createMock(RecordExtractor.class);
+		RecordExtractor<Object> extractor = createMock(RecordExtractor.class);
 
 		Record inputRecord = createMock(Record.class);
 		Record outputRecord = createMock(Record.class);
-		
+
 		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
 		expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
@@ -432,7 +463,8 @@ public class CciTemplateTests {
 
 		expect(generator.createRecord(recordFactory)).andReturn(inputRecord);
 
-		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(outputRecord);
+		expect(interaction.execute(interactionSpec, inputRecord)).andReturn(
+				outputRecord);
 
 		expect(extractor.extractData(outputRecord)).andStubReturn(new Object());
 
@@ -449,7 +481,8 @@ public class CciTemplateTests {
 	}
 
 	@Test
-	public void testTemplateExecuteInputOutputConnectionSpec() throws ResourceException {
+	public void testTemplateExecuteInputOutputConnectionSpec()
+			throws ResourceException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		ConnectionSpec connectionSpec = createMock(ConnectionSpec.class);
 		Connection connection = createMock(Connection.class);
@@ -457,15 +490,16 @@ public class CciTemplateTests {
 
 		Record inputRecord = createMock(Record.class);
 		Record outputRecord = createMock(Record.class);
-		
-		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
-		
 
-		expect(connectionFactory.getConnection(connectionSpec)).andReturn(connection);
+		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
+
+		expect(connectionFactory.getConnection(connectionSpec)).andReturn(
+				connection);
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputRecord, outputRecord)).andReturn(true);
+		expect(interaction.execute(interactionSpec, inputRecord, outputRecord))
+				.andReturn(true);
 
 		interaction.close();
 
@@ -482,8 +516,10 @@ public class CciTemplateTests {
 		verify(connectionFactory, connection, interaction);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testTemplateExecuteInputOutputResultsSetFalse() throws ResourceException, SQLException {
+	public void testTemplateExecuteInputOutputResultsSetFalse()
+			throws ResourceException, SQLException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		RecordFactory recordFactory = createMock(RecordFactory.class);
 		Connection connection = createMock(Connection.class);
@@ -491,7 +527,7 @@ public class CciTemplateTests {
 		Record record = createMock(Record.class);
 		ResultSet resultset = createMock(ResultSet.class);
 		RecordCreator generator = createMock(RecordCreator.class);
-		RecordExtractor<?> extractor = createMock(RecordExtractor.class);
+		RecordExtractor<Object> extractor = createMock(RecordExtractor.class);
 
 		InteractionSpec interactionSpec = createMock(InteractionSpec.class);
 
@@ -503,7 +539,8 @@ public class CciTemplateTests {
 
 		expect(generator.createRecord(recordFactory)).andReturn(record);
 
-		expect(interaction.execute(interactionSpec, record)).andReturn(resultset);
+		expect(interaction.execute(interactionSpec, record)).andReturn(
+				resultset);
 
 		expect(extractor.extractData(resultset)).andStubReturn(new Object());
 
@@ -513,23 +550,28 @@ public class CciTemplateTests {
 
 		connection.close();
 
-		replay(connectionFactory, connection, interaction, generator, extractor, resultset);
+		replay(connectionFactory, connection, interaction, generator,
+				extractor, resultset);
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
 		ct.execute(interactionSpec, generator, extractor);
 
-		verify(connectionFactory, connection, interaction, generator, extractor, resultset);
+		verify(connectionFactory, connection, interaction, generator,
+				extractor, resultset);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testTemplateExecuteConnectionCallback() throws ResourceException, SQLException {
+	public void testTemplateExecuteConnectionCallback()
+			throws ResourceException, SQLException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		Connection connection = createMock(Connection.class);
-		ConnectionCallback<?> connectionCallback = createMock(ConnectionCallback.class);
+		ConnectionCallback<Object> connectionCallback = createMock(ConnectionCallback.class);
 
 		expect(connectionFactory.getConnection()).andReturn(connection);
 
-		expect(connectionCallback.doInConnection(connection, connectionFactory)).andStubReturn(new Object());
+		expect(connectionCallback.doInConnection(connection, connectionFactory))
+				.andStubReturn(new Object());
 
 		connection.close();
 
@@ -541,18 +583,22 @@ public class CciTemplateTests {
 		verify(connectionFactory, connection, connectionCallback);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testTemplateExecuteInteractionCallback() throws ResourceException, SQLException {
+	public void testTemplateExecuteInteractionCallback()
+			throws ResourceException, SQLException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		Connection connection = createMock(Connection.class);
 		Interaction interaction = createMock(Interaction.class);
-		InteractionCallback<?> interactionCallback = createMock(InteractionCallback.class);
+		InteractionCallback<Object> interactionCallback = createMock(InteractionCallback.class);
 
 		expect(connectionFactory.getConnection()).andReturn(connection);
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interactionCallback.doInInteraction(interaction, connectionFactory)).andStubReturn(new Object());
+		expect(
+				interactionCallback.doInInteraction(interaction,
+						connectionFactory)).andStubReturn(new Object());
 
 		interaction.close();
 
@@ -567,7 +613,8 @@ public class CciTemplateTests {
 	}
 
 	@Test
-	public void testTemplateExecuteInputTrueTrueWithCreator() throws ResourceException {
+	public void testTemplateExecuteInputTrueTrueWithCreator()
+			throws ResourceException {
 		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
 		Connection connection = createMock(Connection.class);
 		Interaction interaction = createMock(Interaction.class);
@@ -581,7 +628,9 @@ public class CciTemplateTests {
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputOutputRecord, inputOutputRecord)).andReturn(true);
+		expect(
+				interaction.execute(interactionSpec, inputOutputRecord,
+						inputOutputRecord)).andReturn(true);
 
 		interaction.close();
 
@@ -610,10 +659,12 @@ public class CciTemplateTests {
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputOutputRecord, inputOutputRecord)).andReturn(true);
+		expect(
+				interaction.execute(interactionSpec, inputOutputRecord,
+						inputOutputRecord)).andReturn(true);
 
 		interaction.close();
-		
+
 		connection.close();
 
 		replay(connectionFactory, connection, interaction);
@@ -638,7 +689,8 @@ public class CciTemplateTests {
 
 		expect(connection.createInteraction()).andReturn(interaction);
 
-		expect(interaction.execute(interactionSpec, inputOutputRecord)).andReturn(null);
+		expect(interaction.execute(interactionSpec, inputOutputRecord))
+				.andReturn(null);
 
 		interaction.close();
 
@@ -647,7 +699,8 @@ public class CciTemplateTests {
 		replay(connectionFactory, connection, interaction);
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
-		Record tmpOutputRecord = (Record) ct.execute(interactionSpec, inputOutputRecord);
+		Record tmpOutputRecord = (Record) ct.execute(interactionSpec,
+				inputOutputRecord);
 		assertNull(tmpOutputRecord);
 
 		verify(connectionFactory, connection, interaction);

@@ -11,7 +11,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.transaction"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-4.6.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-sources-4.6.0.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-2.3.0.jar" sourcepath="/IVY_CACHE/org.easymock/com.springsource.org.easymock/2.3.0/com.springsource.org.easymock-sources-2.3.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-2.5.1.jar" sourcepath="/IVY_CACHE/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-sources-2.5.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.jms/com.springsource.javax.jms/1.1.0/com.springsource.javax.jms-1.1.0.jar" sourcepath="/IVY_CACHE/javax.jms/com.springsource.javax.jms/1.1.0/com.springsource.javax.jms-sources-1.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar" sourcepath="/IVY_CACHE/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-sources-1.5.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar" sourcepath="/IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-sources-1.1.0.jar"/>
