@@ -70,7 +70,7 @@
                     conf="test->runtime"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.6.0" conf="test->runtime"/>
 		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.1.3" conf="test->compile"/>
-		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.mortbay.jetty" name="com.springsource.org.mortbay.jetty.server" rev="6.1.9"
                     conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0"

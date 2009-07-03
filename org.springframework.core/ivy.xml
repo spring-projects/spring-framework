@@ -33,7 +33,7 @@
 		<!-- test dependencies -->
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.6.0" conf="test->runtime"/>
-		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0"
 					conf="test->compile"/>
 		<dependency org="org.codehaus.woodstox" name="com.springsource.com.ctc.wstx" rev="3.2.7" conf="test->compile"/>

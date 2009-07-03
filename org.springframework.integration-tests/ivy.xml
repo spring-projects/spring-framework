@@ -65,8 +65,6 @@
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.3.RELEASE" conf="test->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.5.1" conf="test->compile"/>
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
-		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
-		<dependency org="org.easymock" name="com.springsource.org.easymock.classextension" rev="2.3.0" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.15" conf="test->compile"/>
@@ -93,7 +91,8 @@
 		<!-- test dependencies -->
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
-		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.3.0" conf="test->compile"/>
+		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
+		<dependency org="org.easymock" name="com.springsource.org.easymock.classextension" rev="2.3.0" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.6.0" conf="test->runtime"/>
 		<dependency org="org.testng" name="com.springsource.org.testng" rev="5.9.0" conf="test->compile"/>
 	</dependencies>
