@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 
-import org.junit.Ignore;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -44,13 +43,13 @@ import org.testng.annotations.Test;
  * individual tests. DirtiesContextTransactionalTestNGSpringContextTests
  * therefore verifies the expected behavior and correct semantics.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
-@Ignore // renamed to Tests_ to avoid being picked up by junit. Spring Build support for TestNG is pending.
+@org.junit.Ignore("TestNG tests should not be run by JUnit")
 @ContextConfiguration
-public class DirtiesContextTransactionalTestNGSpringContextTests_ extends AbstractTransactionalTestNGSpringContextTests {
+public class DirtiesContextTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests {
 
 	private ApplicationContext dirtiedApplicationContext;
 
@@ -58,9 +57,9 @@ public class DirtiesContextTransactionalTestNGSpringContextTests_ extends Abstra
 	private void performCommonAssertions() {
 		assertInTransaction(true);
 		assertNotNull(super.applicationContext,
-				"The application context should have been set due to ApplicationContextAware semantics.");
+			"The application context should have been set due to ApplicationContextAware semantics.");
 		assertNotNull(super.simpleJdbcTemplate,
-				"The SimpleJdbcTemplate should have been created in setDataSource() via DI for the DataSource.");
+			"The SimpleJdbcTemplate should have been created in setDataSource() via DI for the DataSource.");
 	}
 
 	@Test
@@ -74,13 +73,13 @@ public class DirtiesContextTransactionalTestNGSpringContextTests_ extends Abstra
 	public void verifyContextWasDirtied() {
 		performCommonAssertions();
 		assertNotSame(super.applicationContext, this.dirtiedApplicationContext,
-				"The application context should have been 'dirtied'.");
+			"The application context should have been 'dirtied'.");
 		this.dirtiedApplicationContext = super.applicationContext;
 	}
 
 	@Test(dependsOnMethods = { "verifyContextWasDirtied" })
 	public void verifyContextWasNotDirtied() {
 		assertSame(this.applicationContext, this.dirtiedApplicationContext,
-				"The application context should NOT have been 'dirtied'.");
+			"The application context should NOT have been 'dirtied'.");
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import static org.testng.Assert.assertTrue;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -48,35 +47,25 @@ import org.testng.annotations.Test;
 /**
  * Combined unit test for {@link AbstractTestNGSpringContextTests} and
  * {@link AbstractTransactionalTestNGSpringContextTests}.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
-@Ignore // renamed to Tests_ to avoid being picked up by junit. Spring Build support for TestNG is pending.
+@org.junit.Ignore("TestNG tests should not be run by JUnit")
 @ContextConfiguration
-public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTransactionalTestNGSpringContextTests
+public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests
 		implements BeanNameAware, InitializingBean {
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	private static final String BOB = "bob";
 	private static final String JANE = "jane";
 	private static final String SUE = "sue";
 	private static final String YODA = "yoda";
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	private static int numSetUpCalls = 0;
 	private static int numSetUpCallsInTransaction = 0;
 	private static int numTearDownCalls = 0;
 	private static int numTearDownCallsInTransaction = 0;
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	private boolean beanInitialized = false;
@@ -97,8 +86,6 @@ public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTran
 	protected String bar;
 
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	private static int clearPersonTable(SimpleJdbcTemplate simpleJdbcTemplate) {
@@ -127,8 +114,6 @@ public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTran
 	}
 
 	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
@@ -152,7 +137,7 @@ public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTran
 
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
 		assertEquals(countRowsInPersonTable(this.simpleJdbcTemplate), expectedNumRows,
-				"Verifying the number of rows in the person table (" + testState + ").");
+			"Verifying the number of rows in the person table (" + testState + ").");
 	}
 
 	private void assertAddPerson(final String name) {
@@ -182,7 +167,7 @@ public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTran
 	public void verifyApplicationContextSet() {
 		assertInTransaction(false);
 		assertNotNull(super.applicationContext,
-				"The application context should have been set due to ApplicationContextAware semantics.");
+			"The application context should have been set due to ApplicationContextAware semantics.");
 		Employee employeeBean = (Employee) super.applicationContext.getBean("employee");
 		assertEquals(employeeBean.getName(), "John Smith", "Verifying employee's name.");
 	}
@@ -192,7 +177,7 @@ public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTran
 	public void verifyBeanInitialized() {
 		assertInTransaction(false);
 		assertTrue(this.beanInitialized,
-				"This test instance should have been initialized due to InitializingBean semantics.");
+			"This test instance should have been initialized due to InitializingBean semantics.");
 	}
 
 	@Test
@@ -200,7 +185,7 @@ public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTran
 	public void verifyBeanNameSet() {
 		assertInTransaction(false);
 		assertEquals(this.beanName, getClass().getName(),
-				"The bean name of this test instance should have been set due to BeanNameAware semantics.");
+			"The bean name of this test instance should have been set due to BeanNameAware semantics.");
 	}
 
 	@Test
@@ -275,8 +260,6 @@ public class ConcreteTransactionalTestNGSpringContextTests_ extends AbstractTran
 	}
 
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	public static class DatabaseSetup {
