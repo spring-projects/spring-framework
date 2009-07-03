@@ -48,7 +48,7 @@ import org.springframework.test.context.junit4.statements.SpringRepeat;
  * <p>
  * <code>SpringJUnit4ClassRunner</code> is a custom extension of
  * {@link BlockJUnit4ClassRunner} which provides functionality of the
- * <em>Spring TestContext Framework</em> to standard JUnit 4.5+ tests by means
+ * <em>Spring TestContext Framework</em> to standard JUnit 4.6+ tests by means
  * of the {@link TestContextManager} and associated support classes and
  * annotations.
  * </p>
@@ -74,7 +74,7 @@ import org.springframework.test.context.junit4.statements.SpringRepeat;
  * </ul>
  * <p>
  * <b>NOTE:</b> As of Spring 3.0, <code>SpringJUnit4ClassRunner</code> requires
- * JUnit 4.5.
+ * JUnit 4.6.
  * </p>
  * 
  * @author Sam Brannen
