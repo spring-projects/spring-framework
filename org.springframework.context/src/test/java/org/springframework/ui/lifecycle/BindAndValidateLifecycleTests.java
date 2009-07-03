@@ -3,13 +3,17 @@ package org.springframework.ui.lifecycle;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ui.alert.Alert;
+import org.springframework.ui.alert.Alerts;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
 import org.springframework.ui.binding.Binder;
@@ -17,6 +21,12 @@ import org.springframework.ui.binding.Bound;
 import org.springframework.ui.binding.Model;
 import org.springframework.ui.binding.support.WebBinderFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
+import org.springframework.ui.validation.ValidationResult;
+import org.springframework.ui.validation.ValidationResults;
+import org.springframework.ui.validation.Validator;
+import org.springframework.ui.validation.constraint.Impact;
+import org.springframework.ui.validation.constraint.Message;
+import org.springframework.ui.validation.constraint.ValidationConstraint;
 
 public class BindAndValidateLifecycleTests {
 
@@ -31,7 +41,112 @@ public class BindAndValidateLifecycleTests {
 		model = new TestBean();
 		alertContext = new DefaultAlertContext();
 		Binder binder = new WebBinderFactory().getBinder(model);
-		lifecycle = new BindAndValidateLifecycle(binder, null, alertContext);
+		Validator<TestBean> validator = new TestBeanValidator();
+		lifecycle = new BindAndValidateLifecycle(binder, validator, alertContext);
+	}
+	
+	static class TestBeanValidator implements Validator<TestBean> {
+		public ValidationResults validate(TestBean model, List<String> properties) {
+			TestValidationResults results = new TestValidationResults();
+			RequiredConstraint required = new RequiredConstraint();
+			boolean valid = required.validate(model.getString());
+			if (!valid) {
+				
+			}
+			return results;
+		}		
+	}
+	
+	@Message({"en=#{label} is required", "es=#{label} es necesario"})
+	static class RequiredConstraint implements ValidationConstraint<Object> {
+		public boolean validate(Object value) {
+			if (value != null) {
+				return value instanceof String ? ((String) value).length() > 0 : true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	@Message("#{label} is a weak password")
+	@Impact(Severity.WARNING)
+	static class StrongPasswordConstraint implements ValidationConstraint<String> {		
+		public boolean validate(String password) {
+			if (password.length() > 6) {
+				return true;
+			} else {
+				return false;
+			}
+		}		
+	}
+	
+	@Message("#{label} could not be confirmed; #{value} must match #{model.confirmPassword}")
+	static class ConfirmedPasswordConstraint implements ValidationConstraint<SignupForm> {
+		public boolean validate(SignupForm form) {
+			if (form.password.equals(form.confirmPassword)) {
+				return true;
+			} else {
+				return false;
+			}
+		}		
+	}
+	
+	@Message("#{label} must be between #{this.min} and #{this.max}")
+	static class RangeConstraint implements ValidationConstraint<Number> {
+		private Long min;
+		
+		private Long max;
+		
+		public RangeConstraint(Long min, Long max) {
+			this.min = min;
+			this.max = max;
+		}
+		
+		public boolean validate(Number value) {
+			Long longValue = value.longValue();
+			if (longValue >= min && longValue <= max) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	static class TestValidationResults implements ValidationResults {
+		private List<ValidationResult> results = new ArrayList<ValidationResult>();
+
+		public void add(ValidationResult result) {
+			results.add(result);
+		}
+		
+		public Iterator<ValidationResult> iterator() {
+			return results.iterator();
+		}
+		
+	}
+	
+	static class TestValidationFailure implements ValidationResult {
+
+		private String property;
+		
+		private String message;
+		
+		public TestValidationFailure(String property, String message) {
+			this.property = property;
+		}
+
+		public String getProperty() {
+			return property;
+		}
+
+		public Alert getAlert() {
+			return Alerts.error(message);
+		}
+
+		public boolean isFailure() {
+			return true;
+		}
+		
 	}
 
 	@Test
@@ -200,7 +315,12 @@ public class BindAndValidateLifecycleTests {
 		public void setNotEditable(String notEditable) {
 			this.notEditable = notEditable;
 		}
-		
-		
+			
+	}
+	
+	public static class SignupForm {
+		private String username;
+		private String password;
+		private String confirmPassword;
 	}
 }
