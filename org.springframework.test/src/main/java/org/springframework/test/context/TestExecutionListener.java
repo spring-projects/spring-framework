@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,20 +44,23 @@ public interface TestExecutionListener {
 
 	/**
 	 * Prepares the {@link Object test instance} of the supplied
-	 * {@link TestContext test context}, for example for injecting
+	 * {@link TestContext test context}, for example by injecting
 	 * dependencies.
-	 * <p>This method should be called immediately after instantiation but prior to
-	 * any framework-specific lifecycle callbacks.
+	 * <p>This method should be called immediately after instantiation 
+	 * of the test instance but prior to any framework-specific lifecycle
+	 * callbacks.
 	 * @param testContext the test context for the test (never <code>null</code>)
 	 * @throws Exception allows any exception to propagate
 	 */
 	void prepareTestInstance(TestContext testContext) throws Exception;
 
 	/**
-	 * Pre-processes a test just <em>before</em> execution of the
+	 * Pre-processes a test <em>before</em> execution of the
 	 * {@link java.lang.reflect.Method test method} in the supplied
-	 * {@link TestContext test context}, for example for setting up test
+	 * {@link TestContext test context}, for example by setting up test
 	 * fixtures.
+	 * <p>This method should be called immediately prior to any
+	 * framework-specific <em>before</em> lifecycle callbacks.
 	 * @param testContext the test context in which the test method will be
 	 * executed (never <code>null</code>)
 	 * @throws Exception allows any exception to propagate
@@ -65,10 +68,12 @@ public interface TestExecutionListener {
 	void beforeTestMethod(TestContext testContext) throws Exception;
 
 	/**
-	 * Post-processes a test just <em>after</em> execution of the
+	 * Post-processes a test <em>after</em> execution of the
 	 * {@link java.lang.reflect.Method test method} in the supplied
-	 * {@link TestContext test context}, for example for tearing down test
+	 * {@link TestContext test context}, for example by tearing down test
 	 * fixtures.
+	 * <p>This method should be called immediately after any
+	 * framework-specific <em>after</em> lifecycle callbacks.
 	 * @param testContext the test context in which the test method was
 	 * executed (never <code>null</code>)
 	 * @throws Exception allows any exception to propagate
