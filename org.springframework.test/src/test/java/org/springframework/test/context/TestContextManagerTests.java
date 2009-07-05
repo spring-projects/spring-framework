@@ -31,15 +31,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * JUnit 4 based unit test for {@link TestContextManager}, which verifies
- * proper <em>execution order</em> of registered
- * {@link TestExecutionListener TestExecutionListeners}.
- *
+ * JUnit 4 based unit test for {@link TestContextManager}, which verifies proper
+ * <em>execution order</em> of registered {@link TestExecutionListener
+ * TestExecutionListeners}.
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
@@ -58,10 +57,10 @@ public class TestContextManagerTests {
 
 
 	/**
-	 * Asserts the <em>execution order</em> of 'before' and 'after' test
-	 * method calls on {@link TestExecutionListener listeners} registered for
-	 * the configured {@link TestContextManager}.
-	 *
+	 * Asserts the <em>execution order</em> of 'before' and 'after' test method
+	 * calls on {@link TestExecutionListener listeners} registered for the
+	 * configured {@link TestContextManager}.
+	 * 
 	 * @see #beforeTestMethodCalls
 	 * @see #afterTestMethodCalls
 	 */
@@ -85,9 +84,9 @@ public class TestContextManagerTests {
 		}
 
 		assertTrue("Verifying execution order of 'before' listeners' (" + usageContext + ").",
-				expectedBeforeTestMethodCalls.equals(beforeTestMethodCalls));
+			expectedBeforeTestMethodCalls.equals(beforeTestMethodCalls));
 		assertTrue("Verifying execution order of 'after' listeners' (" + usageContext + ").",
-				expectedAfterTestMethodCalls.equals(afterTestMethodCalls));
+			expectedAfterTestMethodCalls.equals(afterTestMethodCalls));
 	}
 
 	@BeforeClass
@@ -104,7 +103,7 @@ public class TestContextManagerTests {
 	@AfterClass
 	public static void verifyListenerExecutionOrderAfterClass() throws Exception {
 		assertExecutionOrder(Arrays.<String> asList(FIRST, SECOND, THIRD),
-				Arrays.<String> asList(THIRD, SECOND, FIRST), "AfterClass");
+			Arrays.<String> asList(THIRD, SECOND, FIRST), "AfterClass");
 	}
 
 	@Before
@@ -113,10 +112,10 @@ public class TestContextManagerTests {
 		final Method testMethod = ExampleTestCase.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
 		this.testContextManager = new TestContextManager(ExampleTestCase.class);
 		this.testContextManager.registerTestExecutionListeners(new NamedTestExecutionListener(FIRST),
-				new NamedTestExecutionListener(SECOND), new NamedTestExecutionListener(THIRD));
+			new NamedTestExecutionListener(SECOND), new NamedTestExecutionListener(THIRD));
 
 		assertEquals("Verifying the number of registered TestExecutionListeners.", 6,
-				this.testContextManager.getTestExecutionListeners().size());
+			this.testContextManager.getTestExecutionListeners().size());
 
 		this.testContextManager.beforeTestMethod(new ExampleTestCase(), testMethod);
 	}
@@ -124,7 +123,7 @@ public class TestContextManagerTests {
 	/**
 	 * Verifies the expected {@link TestExecutionListener}
 	 * <em>execution order</em> within a test method.
-	 *
+	 * 
 	 * @see #verifyListenerExecutionOrderAfterClass()
 	 */
 	@Test
@@ -143,6 +142,7 @@ public class TestContextManagerTests {
 	@ContextConfiguration
 	private static class ExampleTestCase {
 
+		@SuppressWarnings("unused")
 		public void exampleTestMethod() {
 			assertTrue(true);
 		}
