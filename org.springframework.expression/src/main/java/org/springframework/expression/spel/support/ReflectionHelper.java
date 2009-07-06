@@ -57,19 +57,26 @@ public class ReflectionHelper {
 			Class suppliedArg = suppliedArgTypes[i];
 			Class expectedArg = expectedArgTypes[i];
 			if (expectedArg != suppliedArg) {
-				if (ClassUtils.isAssignable(expectedArg, suppliedArg)
-				/* || isWidenableTo(expectedArg, suppliedArg) */) {
-					if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
-						match = ArgsMatchKind.CLOSE;
-					} 
-				} else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
-					if (argsRequiringConversion == null) {
-						argsRequiringConversion = new ArrayList<Integer>();
+				// The user may supply null - and that will be ok unless a primitive is expected
+				if (suppliedArg==null) {
+					if (expectedArg.isPrimitive()) {
+						match=null;
 					}
-					argsRequiringConversion.add(i);
-					match = ArgsMatchKind.REQUIRES_CONVERSION;
 				} else {
-					match = null;
+					if (ClassUtils.isAssignable(expectedArg, suppliedArg)
+					/* || isWidenableTo(expectedArg, suppliedArg) */) {
+						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+							match = ArgsMatchKind.CLOSE;
+						} 
+					} else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
+						if (argsRequiringConversion == null) {
+							argsRequiringConversion = new ArrayList<Integer>();
+						}
+						argsRequiringConversion.add(i);
+						match = ArgsMatchKind.REQUIRES_CONVERSION;
+					} else {
+						match = null;
+					}
 				}
 			}
 		}
@@ -113,23 +120,29 @@ public class ReflectionHelper {
 		for (int i = 0; i < argCountUpToVarargs && match != null; i++) {
 			Class suppliedArg = suppliedArgTypes[i];
 			Class<?> expectedArg = expectedArgTypes[i];
-			if (expectedArg != suppliedArg) {
-				if (expectedArg.isAssignableFrom(suppliedArg) || ClassUtils.isAssignableValue(expectedArg, suppliedArg)) {
-					if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
-						match = ArgsMatchKind.CLOSE;
+			if (suppliedArg==null) {
+				if (expectedArg.isPrimitive()) {
+					match=null;
+				}
+			} else {
+				if (expectedArg != suppliedArg) {
+					if (expectedArg.isAssignableFrom(suppliedArg) || ClassUtils.isAssignableValue(expectedArg, suppliedArg)) {
+						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+							match = ArgsMatchKind.CLOSE;
+						}
+					} else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
+						if (argsRequiringConversion == null) {
+							argsRequiringConversion = new ArrayList<Integer>();
+						}
+						argsRequiringConversion.add(i);
+						match = ArgsMatchKind.REQUIRES_CONVERSION;
+					} else {
+						match = null;
 					}
-				} else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
-					if (argsRequiringConversion == null) {
-						argsRequiringConversion = new ArrayList<Integer>();
-					}
-					argsRequiringConversion.add(i);
-					match = ArgsMatchKind.REQUIRES_CONVERSION;
-				} else {
-					match = null;
 				}
 			}
 		}
-		// If already confirmed it cannot be a match, then returnW
+		// If already confirmed it cannot be a match, then return
 		if (match == null) {
 			return null;
 		}
@@ -147,19 +160,24 @@ public class ReflectionHelper {
 			for (int i = expectedArgTypes.length - 1; i < suppliedArgTypes.length; i++) {
 				Class suppliedArg = suppliedArgTypes[i];
 				if (varargsParameterType != suppliedArg) {
-					if (ClassUtils.isAssignable(varargsParameterType, suppliedArg)) {
-						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
-							match = ArgsMatchKind.CLOSE;
+					if (suppliedArg==null) {
+						if (varargsParameterType.isPrimitive()) {
+							match=null;
 						}
-					} else if (typeConverter.canConvert(suppliedArg, varargsParameterType)) {
-						if (argsRequiringConversion == null) {
-							argsRequiringConversion = new ArrayList<Integer>();
+					} else {
+						if (ClassUtils.isAssignable(varargsParameterType, suppliedArg)) {
+							if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+								match = ArgsMatchKind.CLOSE;
+							}
+						} else if (typeConverter.canConvert(suppliedArg, varargsParameterType)) {
+							if (argsRequiringConversion == null) {
+								argsRequiringConversion = new ArrayList<Integer>();
+							}
+							argsRequiringConversion.add(i);
+							match = ArgsMatchKind.REQUIRES_CONVERSION;
+						} else {
+							match = null;
 						}
-						argsRequiringConversion.add(i);
-						match = ArgsMatchKind.REQUIRES_CONVERSION;
-					}
-					else {
-						match = null;
 					}
 				}
 			}
@@ -167,8 +185,7 @@ public class ReflectionHelper {
 
 		if (match == null) {
 			return null;
-		}
-		else {
+		} else {
 			if (match == ArgsMatchKind.REQUIRES_CONVERSION) {
 				int[] argsArray = new int[argsRequiringConversion.size()];
 				for (int i = 0; i < argsRequiringConversion.size(); i++) {
