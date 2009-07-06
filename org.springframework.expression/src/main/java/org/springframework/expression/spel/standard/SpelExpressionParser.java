@@ -267,10 +267,10 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 
 	// unaryExpression: (PLUS^ | MINUS^ | BANG^) unaryExpression | primaryExpression ;
 	private SpelNodeImpl eatUnaryExpression() {
-		if (peekToken(TokenKind.PLUS,TokenKind.MINUS,TokenKind.BANG)) {
+		if (peekToken(TokenKind.PLUS,TokenKind.MINUS,TokenKind.NOT)) {
 			Token t = nextToken();
 			SpelNodeImpl expr = eatUnaryExpression();
-			if (t.kind==TokenKind.BANG) {
+			if (t.kind==TokenKind.NOT) {
 				return new OperatorNot(toPos(t),expr);
 			} else if (t.kind==TokenKind.PLUS) {
 				return new OpPlus(toPos(t),expr);

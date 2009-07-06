@@ -48,6 +48,15 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("5.0d < 3.0d", false, Boolean.class);
 		evaluate("'abc' < 'def'",true,Boolean.class);
 		evaluate("'def' < 'abc'",false,Boolean.class);
+
+		evaluate("3 lt 5", true, Boolean.class);
+		evaluate("5 lt 3", false, Boolean.class);
+		evaluate("3L lt 5L", true, Boolean.class);
+		evaluate("5L lt 3L", false, Boolean.class);
+		evaluate("3.0d lT 5.0d", true, Boolean.class);
+		evaluate("5.0d Lt 3.0d", false, Boolean.class);
+		evaluate("'abc' LT 'def'",true,Boolean.class);
+		evaluate("'def' lt 'abc'",false,Boolean.class);
 	}
 
 	@Test
@@ -64,6 +73,19 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("'abc' <= 'def'",true,Boolean.class);
 		evaluate("'def' <= 'abc'",false,Boolean.class);
 		evaluate("'abc' <= 'abc'",true,Boolean.class);
+
+		evaluate("3 le 5", true, Boolean.class);
+		evaluate("5 le 3", false, Boolean.class);
+		evaluate("6 Le 6", true, Boolean.class);
+		evaluate("3L lE 5L", true, Boolean.class);
+		evaluate("5L LE 3L", false, Boolean.class);
+		evaluate("5L le 5L", true, Boolean.class);
+		evaluate("3.0d LE 5.0d", true, Boolean.class);
+		evaluate("5.0d lE 3.0d", false, Boolean.class);
+		evaluate("5.0d Le 5.0d", true, Boolean.class);
+		evaluate("'abc' Le 'def'",true,Boolean.class);
+		evaluate("'def' LE 'abc'",false,Boolean.class);
+		evaluate("'abc' le 'abc'",true,Boolean.class);
 	}
 
 	@Test
@@ -74,6 +96,13 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0f == 5.0f", false, Boolean.class);
 		evaluate("3.0f == 3.0f", true, Boolean.class);
 		evaluate("'abc' == null", false, Boolean.class);
+
+		evaluate("3 eq 5", false, Boolean.class);
+		evaluate("5 eQ 3", false, Boolean.class);
+		evaluate("6 Eq 6", true, Boolean.class);
+		evaluate("3.0f eq 5.0f", false, Boolean.class);
+		evaluate("3.0f EQ 3.0f", true, Boolean.class);
+		evaluate("'abc' EQ null", false, Boolean.class);
 	}
 
 	@Test
@@ -83,6 +112,12 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("6 != 6", false, Boolean.class);
 		evaluate("3.0f != 5.0f", true, Boolean.class);
 		evaluate("3.0f != 3.0f", false, Boolean.class);
+
+		evaluate("3 ne 5", true, Boolean.class);
+		evaluate("5 nE 3", true, Boolean.class);
+		evaluate("6 Ne 6", false, Boolean.class);
+		evaluate("3.0f NE 5.0f", true, Boolean.class);
+		evaluate("3.0f ne 3.0f", false, Boolean.class);
 	}
 
 	@Test
@@ -100,6 +135,10 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("'def' >= 'abc'",true,Boolean.class);
 		evaluate("'abc' >= 'abc'",true,Boolean.class);
 
+		evaluate("3 GE 5", false, Boolean.class);
+		evaluate("5 gE 3", true, Boolean.class);
+		evaluate("6 Ge 6", true, Boolean.class);		
+		evaluate("3L ge 5L", false, Boolean.class);
 	}
 
 	@Test
@@ -112,6 +151,11 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("5.0d > 3.0d", true, Boolean.class);
 		evaluate("'abc' > 'def'",false,Boolean.class);
 		evaluate("'def' > 'abc'",true,Boolean.class);
+
+		evaluate("3.0d gt 5.0d", false, Boolean.class);
+		evaluate("5.0d gT 3.0d", true, Boolean.class);
+		evaluate("'abc' Gt 'def'",false,Boolean.class);
+		evaluate("'def' GT 'abc'",true,Boolean.class);
 	}
 
 	@Test
@@ -145,6 +189,10 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3 * 5f", 15d, Double.class);
 		evaluate("3 / 1", 3, Integer.class);
 		evaluate("3 % 2", 1, Integer.class);
+		evaluate("3 mod 2", 1, Integer.class);
+		evaluate("3 mOd 2", 1, Integer.class);
+		evaluate("3 Mod 2", 1, Integer.class);
+		evaluate("3 MOD 2", 1, Integer.class);
 	}
 	
 	@Test
@@ -207,6 +255,8 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testDivide() {
 		evaluate("3.0f / 5.0f", 0.6d, Double.class);
 		evaluate("4L/2L",2L,Long.class);
+		evaluate("3.0f div 5.0f", 0.6d, Double.class);
+		evaluate("4L DIV 2L",2L,Long.class);
 		evaluateAndCheckError("'abc'/'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 	

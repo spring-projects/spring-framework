@@ -16,6 +16,7 @@
  package org.springframework.expression.spel.standard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.expression.spel.SpelMessage;
@@ -102,7 +103,7 @@ public class Tokenizer {
 					} else if (isTwoCharToken(TokenKind.PROJECT)) {
 						pushPairToken(TokenKind.PROJECT);
 					} else {
-						pushCharToken(TokenKind.BANG);
+						pushCharToken(TokenKind.NOT);
 					}
 					break;
 				case '=':
@@ -329,13 +330,26 @@ public class Tokenizer {
 		}
 	}
 	
+	// if this is changed, it must remain sorted
+	private static final String[] alternativeOperatorNames = { "DIV","EQ","GE","GT","LE","LT","MOD","NE","NOT"};
 	
 	private void lexIdentifier() {
 		int start = pos;
 		do {
 			pos++;
 		} while (isIdentifier(toProcess[pos]));
-		tokens.add(new Token(TokenKind.IDENTIFIER,subarray(start,pos),start,pos));
+		char[] subarray = subarray(start,pos);
+		
+		// Check if this is the alternative (textual) representation of an operator (see alternativeOperatorNames)
+		if ((pos-start)==2 || (pos-start)==3) {
+			String asString = new String(subarray).toUpperCase();
+			int idx = Arrays.binarySearch(alternativeOperatorNames,asString);
+			if (idx>=0) {
+				pushOneCharOrTwoCharToken(TokenKind.valueOf(asString),start);
+				return;
+			}
+		}
+		tokens.add(new Token(TokenKind.IDENTIFIER,subarray,start,pos));
 	}
 	
 	private void pushIntToken(char[] data,boolean isLong, int start, int end) {
@@ -398,6 +412,10 @@ public class Tokenizer {
 	private void pushPairToken(TokenKind kind) {
 		tokens.add(new Token(kind,pos,pos+2));
 		pos+=2;
+	}
+	
+	private void pushOneCharOrTwoCharToken(TokenKind kind, int pos) {
+		tokens.add(new Token(kind,pos,pos+kind.getLength()));
 	}
 
 	//	ID:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|DOT_ESCAPED)*;
