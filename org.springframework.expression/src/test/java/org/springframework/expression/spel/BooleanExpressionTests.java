@@ -55,6 +55,9 @@ public class BooleanExpressionTests extends ExpressionTestCase {
 	public void testNot() {
 		evaluate("!false", Boolean.TRUE, Boolean.class);
 		evaluate("!true", Boolean.FALSE, Boolean.class);
+
+		evaluate("not false", Boolean.TRUE, Boolean.class);
+		evaluate("NoT true", Boolean.FALSE, Boolean.class);
 	}
 
 	@Test

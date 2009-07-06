@@ -274,9 +274,9 @@ public class SpelParserTests {
 	
 	@Test
 	public void testTokenKind() {
-		TokenKind tk = TokenKind.BANG;
+		TokenKind tk = TokenKind.NOT;
 		Assert.assertFalse(tk.hasPayload());
-		Assert.assertEquals("BANG(!)",tk.toString());
+		Assert.assertEquals("NOT(!)",tk.toString());
 
 		tk = TokenKind.MINUS;
 		Assert.assertFalse(tk.hasPayload());
@@ -289,11 +289,11 @@ public class SpelParserTests {
 
 	@Test
 	public void testToken() {
-		Token token = new Token(TokenKind.BANG,0,3);
-		Assert.assertEquals(TokenKind.BANG,token.kind);
+		Token token = new Token(TokenKind.NOT,0,3);
+		Assert.assertEquals(TokenKind.NOT,token.kind);
 		Assert.assertEquals(0,token.startpos);
 		Assert.assertEquals(3,token.endpos);
-		Assert.assertEquals("[BANG(!)](0,3)",token.toString());
+		Assert.assertEquals("[NOT(!)](0,3)",token.toString());
 
 		token = new Token(TokenKind.LITERAL_STRING,"abc".toCharArray(),0,3);
 		Assert.assertEquals(TokenKind.LITERAL_STRING,token.kind);
