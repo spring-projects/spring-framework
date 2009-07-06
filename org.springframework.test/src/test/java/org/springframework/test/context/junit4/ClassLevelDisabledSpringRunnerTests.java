@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.test.context.junit4;
 
 import static org.junit.Assert.fail;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
@@ -27,6 +27,7 @@ import org.springframework.test.context.TestExecutionListeners;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners(ClassLevelDisabledSpringRunnerTests.CustomTestExecutionListener.class)
@@ -41,6 +42,10 @@ public class ClassLevelDisabledSpringRunnerTests {
 
 	public static class CustomTestExecutionListener implements TestExecutionListener {
 
+		public void beforeTestClass(TestContext testContext) throws Exception {
+			fail("A listener method for a disabled test should never be executed!");
+		}
+
 		public void prepareTestInstance(TestContext testContext) throws Exception {
 			fail("A listener method for a disabled test should never be executed!");
 		}
@@ -52,6 +57,9 @@ public class ClassLevelDisabledSpringRunnerTests {
 		public void afterTestMethod(TestContext testContext) throws Exception {
 			fail("A listener method for a disabled test should never be executed!");
 		}
-	}
 
+		public void afterTestClass(TestContext testContext) throws Exception {
+			fail("A listener method for a disabled test should never be executed!");
+		}
+	}
 }

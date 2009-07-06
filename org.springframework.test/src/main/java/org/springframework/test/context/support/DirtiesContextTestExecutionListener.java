@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 
 /**
- * <code>TestExecutionListener</code> which processes test methods configured
- * with the {@link DirtiesContext @DirtiesContext} annotation.
- *
+ * <code>TestExecutionListener</code> which processes test classes and test
+ * methods configured with the {@link DirtiesContext &#064;DirtiesContext}
+ * annotation.
+ * 
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -41,14 +41,27 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 
 	/**
-	 * If the current test method of the supplied
-	 * {@link TestContext test context} has been annotated with
-	 * {@link DirtiesContext @DirtiesContext}, the
-	 * {@link ApplicationContext application context} of the test context will
-	 * be {@link TestContext#markApplicationContextDirty() marked as dirty},
-	 * and the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * will be set to <code>true</code> in the test context.
+	 * Marks the {@link ApplicationContext application context} of the supplied
+	 * {@link TestContext test context} as
+	 * {@link TestContext#markApplicationContextDirty() dirty}, and sets the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to <code>true</code>
+	 * .
+	 */
+	protected void dirtyContext(TestContext testContext) {
+		testContext.markApplicationContextDirty();
+		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
+	}
+
+	/**
+	 * If the current test method of the supplied {@link TestContext test
+	 * context} is annotated with {@link DirtiesContext &#064;DirtiesContext},
+	 * the {@link ApplicationContext application context} of the test context
+	 * will be {@link TestContext#markApplicationContextDirty() marked as dirty}
+	 * , and the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
+	 * <code>true</code>.
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
@@ -59,11 +72,32 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		if (logger.isDebugEnabled()) {
 			logger.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
-
 		if (dirtiesContext) {
-			testContext.markApplicationContextDirty();
-			testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE,
-					Boolean.TRUE);
+			dirtyContext(testContext);
+		}
+	}
+
+	/**
+	 * If the test class of the supplied {@link TestContext test context} is
+	 * annotated with {@link DirtiesContext &#064;DirtiesContext}, the
+	 * {@link ApplicationContext application context} of the test context will
+	 * be {@link TestContext#markApplicationContextDirty() marked as dirty} ,
+	 * and the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
+	 * <code>true</code>.
+	 */
+	@Override
+	public void afterTestClass(TestContext testContext) throws Exception {
+		Class<?> testClass = testContext.getTestClass();
+		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
+
+		boolean dirtiesContext = testClass.isAnnotationPresent(DirtiesContext.class);
+		if (logger.isDebugEnabled()) {
+			logger.debug("After test class: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
+		}
+		if (dirtiesContext) {
+			dirtyContext(testContext);
 		}
 	}
 
