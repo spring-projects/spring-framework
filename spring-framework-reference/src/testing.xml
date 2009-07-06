@@ -409,7 +409,7 @@
       <emphasis>Spring-specific</emphasis> annotations that you can use in
       your unit and integration tests in conjunction with the TestContext
       framework. Refer to the respective JavaDoc for further information,
-      including default attribute values, etc.</para>
+      including default attribute values, attribute aliases, etc.</para>
 
       <itemizedlist>
         <listitem>
@@ -419,10 +419,10 @@
           <para>Defines class-level metadata which is used to determine how to
           load and configure an
           <interfacename>ApplicationContext</interfacename>. Specifically,
-          @ContextConfiguration defines the application context resource
-          <literal>locations</literal> to load as well as the
-          <interfacename>ContextLoader</interfacename> strategy to use for
-          loading the context.</para>
+          <interfacename>@ContextConfiguration</interfacename> defines the
+          application context resource <literal>locations</literal> to
+          load as well as the <interfacename>ContextLoader</interfacename>
+          strategy to use for loading the context.</para>
 
           <programlisting language="java">@ContextConfiguration(locations={"example/test-context.xml"}, loader=CustomContextLoader.class)
 public class CustomConfiguredApplicationContextTests {
@@ -442,16 +442,37 @@ public class CustomConfiguredApplicationContextTests {
           role="bold"><interfacename>@DirtiesContext</interfacename></emphasis></para>
 
           <para>The presence of this annotation on a test method indicates
-          that the underlying Spring container is 'dirtied' during the
-          execution of the test method, and thus must be rebuilt after the
-          test method finishes execution (regardless of whether the test
-          passed or not).</para>
+          that the underlying Spring container has been <emphasis>dirtied</emphasis>
+          during the execution of the test method and thus must be closed after the
+          test method finishes execution (regardless of whether the annotated test
+          passed or not). Similarly, if a test class is annotated with 
+          <interfacename>@DirtiesContext</interfacename>, the underlying
+          Spring container will be marked as dirty after all tests in the
+          class have completed execution.</para>
+
+          <programlisting language="java">@DirtiesContext
+public class ContextDirtyingTests {
+    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
+}</programlisting>
 
           <programlisting language="java">@DirtiesContext
 @Test
 public void testProcessWhichDirtiesAppCtx() {
     <lineannotation>// some logic that results in the Spring container being dirtied</lineannotation>
 }</programlisting>
+
+          <para>Whenever an application context is marked as
+          <emphasis>dirty</emphasis>, it will be removed from the testing
+          framework's cache and closed; thus the underlying Spring container will be
+          rebuilt for any subsequent test which requires a context with the
+          same set of resource locations.</para>
+
+	      <note>
+	      	<title>Limitations of <interfacename>@DirtiesContext</interfacename> with JUnit 3.8</title>
+	        <para>In a JUnit 3.8 environment <interfacename>@DirtiesContext</interfacename>
+	         is only supported on methods and thus not at the class level.</para>
+	      </note>
+
         </listitem>
 
         <listitem>
