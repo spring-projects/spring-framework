@@ -441,16 +441,46 @@ public class CustomConfiguredApplicationContextTests {
           <para><emphasis
           role="bold"><interfacename>@DirtiesContext</interfacename></emphasis></para>
 
-          <para>The presence of this annotation on a test method indicates
-          that the underlying Spring container has been <emphasis>dirtied</emphasis>
-          during the execution of the test method and thus must be closed after the
-          test method finishes execution (regardless of whether the annotated test
-          passed or not). Similarly, if a test class is annotated with 
-          <interfacename>@DirtiesContext</interfacename>, the underlying
-          Spring container will be marked as dirty after all tests in the
-          class have completed execution.</para>
+          <para>Indicates that the underlying Spring
+          <interfacename>ApplicationContext</interfacename> has been
+          <emphasis>dirtied</emphasis> during the execution of a test and
+          should be closed (regardless of whether the test passed or not):</para>
+          
+          <itemizedlist>
+          	<listitem>
+          		<para>after the current test class, when declared on a
+          		class with class mode set to <literal>AFTER_CLASS</literal>,
+          		which is the default class mode</para>
+          	</listitem>
+          	<listitem>
+          		<para>after each test method in the current test class,
+          		when declared on a class with class mode set to
+          		<literal>AFTER_EACH_TEST_METHOD</literal></para>
+          	</listitem>
+          	<listitem>
+          		<para>after the current test, when declared on a method</para>
+          	</listitem>
+          </itemizedlist>
+          
+          <para>Use this annotation if a test has modified the context
+          (for example, by replacing a bean definition). Subsequent tests
+          will be supplied a new context.</para>
+          
+          <para><interfacename>@DirtiesContext</interfacename> may be used
+          as a class-level and method-level annotation within the same class.
+          In such scenarios, the <interfacename>ApplicationContext</interfacename>
+          will be marked as <emphasis>dirty</emphasis> after any such
+          annotated method as well as after the entire class. If the
+          <classname>ClassMode</classname> is set to
+          <literal>AFTER_EACH_TEST_METHOD</literal>, the context will be
+          marked dirty after each test method in the class.</para>
 
           <programlisting language="java">@DirtiesContext
+public class ContextDirtyingTests {
+    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
+}</programlisting>
+
+          <programlisting language="java">@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class ContextDirtyingTests {
     <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
 }</programlisting>
