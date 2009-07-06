@@ -54,6 +54,10 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately before framework-specific
 	 * <em>before class</em> lifecycle callbacks.
+	 * <p>
+	 * If a given testing framework (e.g., JUnit 3.8) does not support
+	 * <em>before class</em> lifecycle callbacks, this method will not be called
+	 * for that framework.
 	 * 
 	 * @param testContext the test context for the test; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
@@ -108,6 +112,10 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately after framework-specific
 	 * <em>after class</em> lifecycle callbacks.
+	 * <p>
+	 * If a given testing framework (e.g., JUnit 3.8) does not support
+	 * <em>after class</em> lifecycle callbacks, this method will not be called
+	 * for that framework.
 	 * 
 	 * @param testContext the test context for the test; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
