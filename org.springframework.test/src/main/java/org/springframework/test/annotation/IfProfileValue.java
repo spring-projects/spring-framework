@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * test will be enabled.
  * </p>
  * <p>
- * Note: {@link IfProfileValue @IfProfileValue} can be applied at either the
+ * Note: <code>&#064;IfProfileValue</code> can be applied at either the
  * class or method level.
  * </p>
  * <p>
@@ -41,24 +41,24 @@ import java.lang.annotation.Target;
  * </p>
  *
  * <pre class="code">
- * {@link IfProfileValue @IfProfileValue}(name=&quot;java.vendor&quot;, value=&quot;Sun Microsystems Inc.&quot;)
- * testSomething() {
+ * &#064;IfProfileValue(name=&quot;java.vendor&quot;, value=&quot;Sun Microsystems Inc.&quot;)
+ * public void testSomething() {
  *     // ...
  * }
  * </pre>
  *
  * <p>
- * You can alternatively configure {@link IfProfileValue @IfProfileValue} with
+ * You can alternatively configure <code>&#064;IfProfileValue</code> with
  * <em>OR</em> semantics for multiple {@link #values() values} as follows
  * (assuming a {@link ProfileValueSource} has been appropriately configured for
  * the &quot;test-groups&quot; name):
  * </p>
  *
  * <pre class="code">
- * {@link IfProfileValue @IfProfileValue}(name=&quot;test-groups&quot;, values={&quot;unit-tests&quot;, &quot;integration-tests&quot;})
- *  public void testWhichRunsForUnitOrIntegrationTestGroups() {
- *      // ...
- *  }
+ * &#064;IfProfileValue(name=&quot;test-groups&quot;, values={&quot;unit-tests&quot;, &quot;integration-tests&quot;})
+ * public void testWhichRunsForUnitOrIntegrationTestGroups() {
+ *     // ...
+ * }
  * </pre>
  *
  * @author Rod Johnson
