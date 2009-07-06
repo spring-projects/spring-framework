@@ -22,13 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 
 /**
- * <code>TestExecutionListener</code> which processes test classes and test
- * methods configured with the {@link DirtiesContext &#064;DirtiesContext}
- * annotation.
+ * <code>TestExecutionListener</code> which provides support for marking the
+ * <code>ApplicationContext</code> associated with a test as <em>dirty</em> for
+ * both test classes and test methods configured with the {@link DirtiesContext
+ * &#064;DirtiesContext} annotation.
  * 
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -56,23 +58,37 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	/**
 	 * If the current test method of the supplied {@link TestContext test
 	 * context} is annotated with {@link DirtiesContext &#064;DirtiesContext},
-	 * the {@link ApplicationContext application context} of the test context
-	 * will be {@link TestContext#markApplicationContextDirty() marked as dirty}
-	 * , and the
+	 * or if the test class is annotated with {@link DirtiesContext
+	 * &#064;DirtiesContext} and the {@link DirtiesContext#classMode() class
+	 * mode} is set to {@link ClassMode#AFTER_EACH_TEST_METHOD
+	 * AFTER_EACH_TEST_METHOD}, the {@link ApplicationContext application
+	 * context} of the test context will be
+	 * {@link TestContext#markApplicationContextDirty() marked as dirty} and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
 	 * <code>true</code>.
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
+		Class<?> testClass = testContext.getTestClass();
+		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 		Method testMethod = testContext.getTestMethod();
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		boolean dirtiesContext = testMethod.isAnnotationPresent(DirtiesContext.class);
+		final Class<DirtiesContext> annotationType = DirtiesContext.class;
+
+		boolean methodDirtiesContext = testMethod.isAnnotationPresent(annotationType);
+		boolean classDirtiesContext = testClass.isAnnotationPresent(annotationType);
+		DirtiesContext classDirtiesContextAnnotation = testClass.getAnnotation(annotationType);
+		ClassMode classMode = classDirtiesContext ? classDirtiesContextAnnotation.classMode() : null;
+
 		if (logger.isDebugEnabled()) {
-			logger.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
+			logger.debug("After test method: context [" + testContext + "], class-level dirtiesContext ["
+					+ classDirtiesContext + "], class mode [" + classMode + "], method-level dirtiesContext ["
+					+ methodDirtiesContext + "].");
 		}
-		if (dirtiesContext) {
+
+		if (methodDirtiesContext || (classDirtiesContext && classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
 			dirtyContext(testContext);
 		}
 	}
