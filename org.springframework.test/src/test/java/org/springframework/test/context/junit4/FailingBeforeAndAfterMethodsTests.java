@@ -37,13 +37,23 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 
 /**
  * <p>
- * JUnit 4 based unit test for verifying that '<em>before</em>' and '
- * <em>after</em>' methods of {@link TestExecutionListener
- * TestExecutionListeners} as well as {@link BeforeTransaction
- * &#064;BeforeTransaction} and {@link AfterTransaction &#064;AfterTransaction}
- * methods can fail a test in a JUnit 4.4 environment, as requested in <a
+ * JUnit 4 based unit test for verifying that '<i>before</i>' and '<i>after</i>'
+ * methods of {@link TestExecutionListener TestExecutionListeners} as well as
+ * {@link BeforeTransaction &#064;BeforeTransaction} and
+ * {@link AfterTransaction &#064;AfterTransaction} methods can fail a test in a
+ * JUnit 4.4 environment, as requested in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3960"
  * target="_blank">SPR-3960</a>.
+ * </p>
+ * <p>
+ * Indirectly, this class also verifies that all {@link TestExecutionListener}
+ * lifecycle callbacks are called.
+ * </p>
+ * <p>
+ * As of Spring 3.0, this class also tests support for the new
+ * {@link TestExecutionListener#beforeTestClass(TestContext) beforeTestClass()}
+ * and {@link TestExecutionListener#afterTestClass(TestContext)
+ * afterTestClass()} lifecycle callback methods.
  * </p>
  * 
  * @author Sam Brannen
@@ -63,10 +73,13 @@ public class FailingBeforeAndAfterMethodsTests {
 	public static Collection<Object[]> testData() {
 		return Arrays.asList(new Object[][] {//
 		//
+			{ AlwaysFailingBeforeTestClassTestCase.class },//
+			{ AlwaysFailingAfterTestClassTestCase.class },//
+			{ AlwaysFailingPrepareTestInstanceTestCase.class },//
 			{ AlwaysFailingBeforeTestMethodTestCase.class },//
 			{ AlwaysFailingAfterTestMethodTestCase.class },//
-			{ FailingBeforeTransactionalTestCase.class },//
-			{ FailingAfterTransactionalTestCase.class } //
+			{ FailingBeforeTransactionTestCase.class },//
+			{ FailingAfterTransactionTestCase.class } //
 		});
 	}
 
@@ -77,9 +90,36 @@ public class FailingBeforeAndAfterMethodsTests {
 		notifier.addListener(listener);
 
 		new SpringJUnit4ClassRunner(this.clazz).run(notifier);
-		assertEquals("Verifying number of failures for test class [" + this.clazz + "].", 1, listener.getTestFailureCount());
+		assertEquals("Verifying number of failures for test class [" + this.clazz + "].", 1,
+			listener.getTestFailureCount());
 	}
 
+
+	// -------------------------------------------------------------------
+
+	static class AlwaysFailingBeforeTestClassTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public void beforeTestClass(TestContext testContext) {
+			fail("always failing beforeTestClass()");
+		}
+	}
+
+	static class AlwaysFailingAfterTestClassTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public void afterTestClass(TestContext testContext) {
+			fail("always failing afterTestClass()");
+		}
+	}
+
+	static class AlwaysFailingPrepareTestInstanceTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public void prepareTestInstance(TestContext testContext) throws Exception {
+			fail("always failing prepareTestInstance()");
+		}
+	}
 
 	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
@@ -97,24 +137,37 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@TestExecutionListeners(value = { AlwaysFailingBeforeTestMethodTestExecutionListener.class }, inheritListeners = false)
-	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractJUnit4SpringContextTests {
+	@RunWith(SpringJUnit4ClassRunner.class)
+	@TestExecutionListeners( {})
+	public static class BaseTestCase {
 
 		@Test
 		public void testNothing() {
 		}
 	}
 
-	@TestExecutionListeners(value = { AlwaysFailingAfterTestMethodTestExecutionListener.class }, inheritListeners = false)
-	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractJUnit4SpringContextTests {
-
-		@Test
-		public void testNothing() {
-		}
+	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
+	public static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
 	}
 
-	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
-	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalJUnit4SpringContextTests {
+	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
+	public static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
+	public static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
+	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
+	public static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
+	}
+
+	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
+	public static class FailingBeforeTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 
 		@Test
 		public void testNothing() {
@@ -126,8 +179,8 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
-	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalJUnit4SpringContextTests {
+	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
+	public static class FailingAfterTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 
 		@Test
 		public void testNothing() {
