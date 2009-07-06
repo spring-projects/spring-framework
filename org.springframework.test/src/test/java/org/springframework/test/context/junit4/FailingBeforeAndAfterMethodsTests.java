@@ -139,7 +139,7 @@ public class FailingBeforeAndAfterMethodsTests {
 
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners( {})
-	public static class BaseTestCase {
+	public static abstract class BaseTestCase {
 
 		@Test
 		public void testNothing() {

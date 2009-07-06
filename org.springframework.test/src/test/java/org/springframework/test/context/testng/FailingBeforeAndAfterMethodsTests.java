@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
-import org.testng.TestNG;
-
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
@@ -37,18 +32,32 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.testng.ITestContext;
+import org.testng.ITestListener;
+import org.testng.ITestResult;
+import org.testng.TestNG;
 
 /**
  * <p>
- * JUnit 4 based unit test for verifying that '<em>before</em>' and '<em>after</em>'
+ * JUnit 4 based unit test for verifying that '<i>before</i>' and '<i>after</i>'
  * methods of {@link TestExecutionListener TestExecutionListeners} as well as
- * {@link BeforeTransaction @BeforeTransaction} and
- * {@link AfterTransaction @AfterTransaction} methods can fail a test in a
+ * {@link BeforeTransaction &#064;BeforeTransaction} and
+ * {@link AfterTransaction &#064;AfterTransaction} methods can fail a test in a
  * TestNG environment, as requested in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3960"
  * target="_blank">SPR-3960</a>.
  * </p>
- *
+ * <p>
+ * Indirectly, this class also verifies that all {@link TestExecutionListener}
+ * lifecycle callbacks are called.
+ * </p>
+ * <p>
+ * As of Spring 3.0, this class also tests support for the new
+ * {@link TestExecutionListener#beforeTestClass(TestContext) beforeTestClass()}
+ * and {@link TestExecutionListener#afterTestClass(TestContext)
+ * afterTestClass()} lifecycle callback methods.
+ * </p>
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
@@ -74,16 +83,15 @@ public class FailingBeforeAndAfterMethodsTests {
 
 	@Parameters
 	public static Collection<Object[]> testData() {
-		return Arrays.asList(new Object[][] {
-
-		{ AlwaysFailingBeforeTestMethodTestCase.class, 1, 0, 0, 1 },
-
-		{ AlwaysFailingAfterTestMethodTestCase.class, 1, 1, 0, 1 },
-
-		{ FailingBeforeTransactionalTestCase.class, 1, 0, 0, 1 },
-
-		{ FailingAfterTransactionalTestCase.class, 1, 1, 0, 1 }
-
+		return Arrays.asList(new Object[][] {//
+		//
+			{ AlwaysFailingBeforeTestClassTestCase.class, 1, 0, 0, 1 },//
+			{ AlwaysFailingAfterTestClassTestCase.class, 1, 1, 0, 1 },//
+			{ AlwaysFailingPrepareTestInstanceTestCase.class, 1, 0, 0, 1 },//
+			{ AlwaysFailingBeforeTestMethodTestCase.class, 1, 0, 0, 1 },//
+			{ AlwaysFailingAfterTestMethodTestCase.class, 1, 1, 0, 1 },//
+			{ FailingBeforeTransactionTestCase.class, 1, 0, 0, 1 },//
+			{ FailingAfterTransactionTestCase.class, 1, 1, 0, 1 } //
 		});
 	}
 
@@ -97,13 +105,13 @@ public class FailingBeforeAndAfterMethodsTests {
 		testNG.run();
 
 		assertEquals("Verifying number of test starts for test class [" + this.clazz + "].",
-				this.expectedTestStartCount, listener.testStartCount);
+			this.expectedTestStartCount, listener.testStartCount);
 		assertEquals("Verifying number of successful tests for test class [" + this.clazz + "].",
-				this.expectedTestSuccessCount, listener.testSuccessCount);
+			this.expectedTestSuccessCount, listener.testSuccessCount);
 		assertEquals("Verifying number of failures for test class [" + this.clazz + "].", this.expectedFailureCount,
-				listener.testFailureCount);
+			listener.testFailureCount);
 		assertEquals("Verifying number of failed configurations for test class [" + this.clazz + "].",
-				this.expectedFailedConfigurationsCount, listener.failedConfigurationsCount);
+			this.expectedFailedConfigurationsCount, listener.failedConfigurationsCount);
 	}
 
 
@@ -141,6 +149,31 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	// -------------------------------------------------------------------
+
+	static class AlwaysFailingBeforeTestClassTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public void beforeTestClass(TestContext testContext) {
+			org.testng.Assert.fail("always failing beforeTestClass()");
+		}
+	}
+
+	static class AlwaysFailingAfterTestClassTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public void afterTestClass(TestContext testContext) {
+			org.testng.Assert.fail("always failing afterTestClass()");
+		}
+	}
+
+	static class AlwaysFailingPrepareTestInstanceTestExecutionListener extends AbstractTestExecutionListener {
+
+		@Override
+		public void prepareTestInstance(TestContext testContext) throws Exception {
+			org.testng.Assert.fail("always failing prepareTestInstance()");
+		}
+	}
 
 	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
@@ -158,27 +191,38 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	// -------------------------------------------------------------------
 
-	@TestExecutionListeners(value = { AlwaysFailingBeforeTestMethodTestExecutionListener.class }, inheritListeners = false)
-	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractTestNGSpringContextTests {
-
-		@org.testng.annotations.Test
-		public void testNothing() {
-		}
-	}
-
-
-	@TestExecutionListeners(value = { AlwaysFailingAfterTestMethodTestExecutionListener.class }, inheritListeners = false)
-	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractTestNGSpringContextTests {
+	@TestExecutionListeners(value = {}, inheritListeners = false)
+	public static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
 		public void testNothing() {
 		}
 	}
 
+	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
+	public static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
+	}
 
-	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
-	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalTestNGSpringContextTests {
+	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
+	public static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
+	public static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
+	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
+	public static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
+	}
+
+	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
+	public static class FailingBeforeTransactionTestCase extends AbstractTransactionalTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
 		public void testNothing() {
@@ -190,9 +234,8 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-
-	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
-	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalTestNGSpringContextTests {
+	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
+	public static class FailingAfterTransactionTestCase extends AbstractTransactionalTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
 		public void testNothing() {
