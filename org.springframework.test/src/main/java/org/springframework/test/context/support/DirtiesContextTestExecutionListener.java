@@ -83,8 +83,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		ClassMode classMode = classDirtiesContext ? classDirtiesContextAnnotation.classMode() : null;
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("After test method: context [" + testContext + "], class-level dirtiesContext ["
-					+ classDirtiesContext + "], class mode [" + classMode + "], method-level dirtiesContext ["
+			logger.debug("After test method: context [" + testContext + "], class dirties context ["
+					+ classDirtiesContext + "], class mode [" + classMode + "], method dirties context ["
 					+ methodDirtiesContext + "].");
 		}
 

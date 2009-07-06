@@ -95,6 +95,8 @@ public class ClassLevelDirtiesContextTests {
 		ContextCache contextCache = TestContextManager.contextCache;
 		contextCache.clear();
 		contextCache.clearStatistics();
+		cacheHits.set(0);
+		cacheMisses.set(0);
 		assertCacheStats("BeforeClass", 0, cacheHits.get(), cacheMisses.get());
 	}
 
