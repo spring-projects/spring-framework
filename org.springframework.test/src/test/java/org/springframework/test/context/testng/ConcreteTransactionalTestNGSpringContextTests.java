@@ -51,7 +51,6 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 2.5
  */
-@org.junit.Ignore("TestNG tests should not be run by JUnit")
 @ContextConfiguration
 public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests
 		implements BeanNameAware, InitializingBean {

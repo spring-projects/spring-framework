@@ -39,8 +39,10 @@ import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
-import org.springframework.test.context.junit4.statements.RunSpringTestContextAfters;
-import org.springframework.test.context.junit4.statements.RunSpringTestContextBefores;
+import org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks;
+import org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks;
+import org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks;
+import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
 
@@ -143,20 +145,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	}
 
 	/**
-	 * Delegates to the parent implementation for creating the test instance and
-	 * then allows the {@link #getTestContextManager() TestContextManager} to
-	 * prepare the test instance before returning it.
-	 * 
-	 * @see TestContextManager#prepareTestInstance(Object)
-	 */
-	@Override
-	protected Object createTest() throws Exception {
-		Object testInstance = super.createTest();
-		getTestContextManager().prepareTestInstance(testInstance);
-		return testInstance;
-	}
-
-	/**
 	 * Returns a description suitable for an ignored test class if the test is
 	 * disabled via <code>&#064;IfProfileValue</code> at the class-level, and
 	 * otherwise delegates to the parent implementation.
@@ -189,6 +177,47 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 			return;
 		}
 		super.run(notifier);
+	}
+
+	/**
+	 * Wraps the {@link Statement} returned by the parent implementation with a
+	 * {@link RunBeforeTestClassCallbacks} statement, thus preserving the
+	 * default functionality but adding support for the Spring TestContext
+	 * Framework.
+	 * 
+	 * @see RunBeforeTestClassCallbacks
+	 */
+	@Override
+	protected Statement withBeforeClasses(Statement statement) {
+		Statement junitBeforeClasses = super.withBeforeClasses(statement);
+		return new RunBeforeTestClassCallbacks(junitBeforeClasses, getTestContextManager());
+	}
+
+	/**
+	 * Wraps the {@link Statement} returned by the parent implementation with a
+	 * {@link RunAfterTestClassCallbacks} statement, thus preserving the default
+	 * functionality but adding support for the Spring TestContext Framework.
+	 * 
+	 * @see RunAfterTestClassCallbacks
+	 */
+	@Override
+	protected Statement withAfterClasses(Statement statement) {
+		Statement junitAfterClasses = super.withAfterClasses(statement);
+		return new RunAfterTestClassCallbacks(junitAfterClasses, getTestContextManager());
+	}
+
+	/**
+	 * Delegates to the parent implementation for creating the test instance and
+	 * then allows the {@link #getTestContextManager() TestContextManager} to
+	 * prepare the test instance before returning it.
+	 * 
+	 * @see TestContextManager#prepareTestInstance(Object)
+	 */
+	@Override
+	protected Object createTest() throws Exception {
+		Object testInstance = super.createTest();
+		getTestContextManager().prepareTestInstance(testInstance);
+		return testInstance;
 	}
 
 	/**
@@ -393,30 +422,31 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	/**
 	 * Wraps the {@link Statement} returned by the parent implementation with a
-	 * {@link RunSpringTestContextBefores} statement, thus preserving the
+	 * {@link RunBeforeTestMethodCallbacks} statement, thus preserving the
 	 * default functionality but adding support for the Spring TestContext
 	 * Framework.
 	 * 
-	 * @see RunSpringTestContextBefores
+	 * @see RunBeforeTestMethodCallbacks
 	 */
 	@Override
 	protected Statement withBefores(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitBefores = super.withBefores(frameworkMethod, testInstance, statement);
-		return new RunSpringTestContextBefores(junitBefores, testInstance, frameworkMethod.getMethod(),
+		return new RunBeforeTestMethodCallbacks(junitBefores, testInstance, frameworkMethod.getMethod(),
 			getTestContextManager());
 	}
 
 	/**
 	 * Wraps the {@link Statement} returned by the parent implementation with a
-	 * {@link RunSpringTestContextAfters} statement, thus preserving the default
-	 * functionality but adding support for the Spring TestContext Framework.
+	 * {@link RunAfterTestMethodCallbacks} statement, thus preserving the
+	 * default functionality but adding support for the Spring TestContext
+	 * Framework.
 	 * 
-	 * @see RunSpringTestContextAfters
+	 * @see RunAfterTestMethodCallbacks
 	 */
 	@Override
 	protected Statement withAfters(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitAfters = super.withAfters(frameworkMethod, testInstance, statement);
-		return new RunSpringTestContextAfters(junitAfters, testInstance, frameworkMethod.getMethod(),
+		return new RunAfterTestMethodCallbacks(junitAfters, testInstance, frameworkMethod.getMethod(),
 			getTestContextManager());
 	}
 

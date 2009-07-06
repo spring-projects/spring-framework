@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.test.context.ClassLevelDirtiesContextTests;
 import org.springframework.test.context.SpringRunnerContextCacheTests;
 
 /**
@@ -59,6 +60,7 @@ StandardJUnit4FeaturesTests.class,//
 	PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,//
 	CustomDefaultContextLoaderClassSpringRunnerTests.class,//
 	SpringRunnerContextCacheTests.class,//
+	ClassLevelDirtiesContextTests.class,//
 	ParameterizedDependencyInjectionTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//
 	MethodLevelTransactionalSpringRunnerTests.class,//

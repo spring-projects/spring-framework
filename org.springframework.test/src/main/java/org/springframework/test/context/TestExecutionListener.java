@@ -31,11 +31,17 @@ package org.springframework.test.context;
  * Spring provides the following out-of-the-box implementations:
  * </p>
  * <ul>
- * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener DependencyInjectionTestExecutionListener}</li>
- * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener DirtiesContextTestExecutionListener}</li>
- * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener TransactionalTestExecutionListener}</li>
+ * <li>
+ * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+ * DependencyInjectionTestExecutionListener}</li>
+ * <li>
+ * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
+ * DirtiesContextTestExecutionListener}</li>
+ * <li>
+ * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * TransactionalTestExecutionListener}</li>
  * </ul>
- *
+ * 
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -43,13 +49,25 @@ package org.springframework.test.context;
 public interface TestExecutionListener {
 
 	/**
+	 * Pre-processes a test class <em>before</em> execution of all tests within
+	 * the class.
+	 * <p>
+	 * This method should be called immediately before framework-specific
+	 * <em>before class</em> lifecycle callbacks.
+	 * 
+	 * @param testContext the test context for the test; never <code>null</code>
+	 * @throws Exception allows any exception to propagate
+	 */
+	void beforeTestClass(TestContext testContext) throws Exception;
+
+	/**
 	 * Prepares the {@link Object test instance} of the supplied
-	 * {@link TestContext test context}, for example by injecting
-	 * dependencies.
-	 * <p>This method should be called immediately after instantiation 
-	 * of the test instance but prior to any framework-specific lifecycle
-	 * callbacks.
-	 * @param testContext the test context for the test (never <code>null</code>)
+	 * {@link TestContext test context}, for example by injecting dependencies.
+	 * <p>
+	 * This method should be called immediately after instantiation of the test
+	 * instance but prior to any framework-specific lifecycle callbacks.
+	 * 
+	 * @param testContext the test context for the test; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
 	 */
 	void prepareTestInstance(TestContext testContext) throws Exception;
@@ -59,10 +77,12 @@ public interface TestExecutionListener {
 	 * {@link java.lang.reflect.Method test method} in the supplied
 	 * {@link TestContext test context}, for example by setting up test
 	 * fixtures.
-	 * <p>This method should be called immediately prior to any
-	 * framework-specific <em>before</em> lifecycle callbacks.
+	 * <p>
+	 * This method should be called immediately prior to framework-specific
+	 * <em>before</em> lifecycle callbacks.
+	 * 
 	 * @param testContext the test context in which the test method will be
-	 * executed (never <code>null</code>)
+	 * executed; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
 	 */
 	void beforeTestMethod(TestContext testContext) throws Exception;
@@ -72,12 +92,26 @@ public interface TestExecutionListener {
 	 * {@link java.lang.reflect.Method test method} in the supplied
 	 * {@link TestContext test context}, for example by tearing down test
 	 * fixtures.
-	 * <p>This method should be called immediately after any
-	 * framework-specific <em>after</em> lifecycle callbacks.
+	 * <p>
+	 * This method should be called immediately after framework-specific
+	 * <em>after</em> lifecycle callbacks.
+	 * 
 	 * @param testContext the test context in which the test method was
-	 * executed (never <code>null</code>)
+	 * executed; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
 	 */
 	void afterTestMethod(TestContext testContext) throws Exception;
+
+	/**
+	 * Post-processes a test class <em>after</em> execution of all tests within
+	 * the class.
+	 * <p>
+	 * This method should be called immediately after framework-specific
+	 * <em>after class</em> lifecycle callbacks.
+	 * 
+	 * @param testContext the test context for the test; never <code>null</code>
+	 * @throws Exception allows any exception to propagate
+	 */
+	void afterTestClass(TestContext testContext) throws Exception;
 
 }

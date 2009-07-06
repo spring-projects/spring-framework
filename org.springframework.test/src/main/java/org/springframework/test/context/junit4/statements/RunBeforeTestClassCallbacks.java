@@ -16,61 +16,48 @@
 
 package org.springframework.test.context.junit4.statements;
 
-import java.lang.reflect.Method;
-
 import org.junit.runners.model.Statement;
 import org.springframework.test.context.TestContextManager;
 
 /**
- * <code>RunSpringTestContextBefores</code> is a custom JUnit 4.5+
+ * <code>RunBeforeTestClassCallbacks</code> is a custom JUnit 4.5+
  * {@link Statement} which allows the <em>Spring TestContext Framework</em> to
  * be plugged into the JUnit execution chain by calling
- * {@link TestContextManager#beforeTestMethod(Object, Method)
- * beforeTestMethod()} on the supplied {@link TestContextManager}.
+ * {@link TestContextManager#beforeTestClass() beforeTestClass()} on the
+ * supplied {@link TestContextManager}.
  * 
  * @see #evaluate()
- * @see RunSpringTestContextAfters
+ * @see RunAfterTestMethodCallbacks
  * @author Sam Brannen
  * @since 3.0
  */
-public class RunSpringTestContextBefores extends Statement {
+public class RunBeforeTestClassCallbacks extends Statement {
 
 	private final Statement next;
-
-	private final Object testInstance;
-
-	private final Method testMethod;
 
 	private final TestContextManager testContextManager;
 
 
 	/**
-	 * Constructs a new <code>RunSpringTestContextBefores</code> statement.
+	 * Constructs a new <code>RunBeforeTestClassCallbacks</code> statement.
 	 * 
 	 * @param next the next <code>Statement</code> in the execution chain
-	 * @param testInstance the current test instance (never <code>null</code>)
-	 * @param testMethod the test method which is about to be executed on the
-	 * test instance
 	 * @param testContextManager the TestContextManager upon which to call
-	 * <code>beforeTestMethod()</code>
+	 * <code>beforeTestClass()</code>
 	 */
-	public RunSpringTestContextBefores(Statement next, Object testInstance, Method testMethod,
-			TestContextManager testContextManager) {
+	public RunBeforeTestClassCallbacks(Statement next, TestContextManager testContextManager) {
 		this.next = next;
-		this.testInstance = testInstance;
-		this.testMethod = testMethod;
 		this.testContextManager = testContextManager;
 	}
 
 	/**
-	 * Calls {@link TestContextManager#beforeTestMethod(Object, Method)} and
-	 * then invokes the next {@link Statement} in the execution chain (typically
-	 * an instance of {@link org.junit.internal.runners.statements.RunBefores
-	 * RunBefores} ).
+	 * Calls {@link TestContextManager#beforeTestClass()} and then invokes the
+	 * next {@link Statement} in the execution chain (typically an instance of
+	 * {@link org.junit.internal.runners.statements.RunBefores RunBefores}).
 	 */
 	@Override
 	public void evaluate() throws Throwable {
-		this.testContextManager.beforeTestMethod(this.testInstance, this.testMethod);
+		this.testContextManager.beforeTestClass();
 		this.next.evaluate();
 	}
 

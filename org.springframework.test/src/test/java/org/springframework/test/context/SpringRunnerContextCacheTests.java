@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,47 +25,49 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * JUnit 4 based unit test which verifies correct
- * {@link ContextCache application context caching} in conjunction with the
- * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext} annotation.
- *
+ * JUnit 4 based unit test which verifies correct {@link ContextCache
+ * application context caching} in conjunction with the
+ * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext
+ * &#064;DirtiesContext} annotation at the method level.
+ * 
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
-public class SpringRunnerContextCacheTests implements ApplicationContextAware {
+@ContextConfiguration("/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
+public class SpringRunnerContextCacheTests {
 
 	private static ApplicationContext dirtiedApplicationContext;
 
+	@Autowired
 	protected ApplicationContext applicationContext;
 
 
 	/**
 	 * Asserts the statistics of the supplied context cache.
+	 * 
 	 * @param usageScenario the scenario in which the statistics are used
 	 * @param expectedSize the expected number of contexts in the cache
 	 * @param expectedHitCount the expected hit count
 	 * @param expectedMissCount the expected miss count
 	 */
-	public static final void assertContextCacheStatistics(String usageScenario, int expectedSize,
-			int expectedHitCount, int expectedMissCount) {
+	public static final void assertContextCacheStatistics(String usageScenario, int expectedSize, int expectedHitCount,
+			int expectedMissCount) {
 
 		ContextCache contextCache = TestContextManager.contextCache;
 		assertEquals("Verifying number of contexts in cache (" + usageScenario + ").", expectedSize,
-				contextCache.size());
+			contextCache.size());
 		assertEquals("Verifying number of cache hits (" + usageScenario + ").", expectedHitCount,
-				contextCache.getHitCount());
+			contextCache.getHitCount());
 		assertEquals("Verifying number of cache misses (" + usageScenario + ").", expectedMissCount,
-				contextCache.getMissCount());
+			contextCache.getMissCount());
 	}
 
 	@BeforeClass
@@ -82,37 +84,29 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 		assertContextCacheStatistics("AfterClass", 1, 1, 2);
 	}
 
-
-	public final void setApplicationContext(final ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
 	@Test
 	@DirtiesContext
 	public void dirtyContext() {
 		assertContextCacheStatistics("dirtyContext()", 1, 0, 1);
-		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				this.applicationContext);
+		assertNotNull("The application context should have been autowired.", this.applicationContext);
 		SpringRunnerContextCacheTests.dirtiedApplicationContext = this.applicationContext;
 	}
 
 	@Test
 	public void verifyContextWasDirtied() {
 		assertContextCacheStatistics("verifyContextWasDirtied()", 1, 0, 2);
-		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				this.applicationContext);
+		assertNotNull("The application context should have been autowired.", this.applicationContext);
 		assertNotSame("The application context should have been 'dirtied'.",
-				SpringRunnerContextCacheTests.dirtiedApplicationContext, this.applicationContext);
+			SpringRunnerContextCacheTests.dirtiedApplicationContext, this.applicationContext);
 		SpringRunnerContextCacheTests.dirtiedApplicationContext = this.applicationContext;
 	}
 
 	@Test
 	public void verifyContextWasNotDirtied() {
 		assertContextCacheStatistics("verifyContextWasNotDirtied()", 1, 1, 2);
-		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				this.applicationContext);
+		assertNotNull("The application context should have been autowired.", this.applicationContext);
 		assertSame("The application context should NOT have been 'dirtied'.",
-				SpringRunnerContextCacheTests.dirtiedApplicationContext, this.applicationContext);
+			SpringRunnerContextCacheTests.dirtiedApplicationContext, this.applicationContext);
 	}
 
 }

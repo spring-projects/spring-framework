@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
  * TestNG based unit test to assess the claim in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3880"
  * target="_blank">SPR-3880</a> that a &quot;context marked dirty using
- * {@link DirtiesContext @DirtiesContext} in [a] TestNG based test is not
+ * {@link DirtiesContext &#064;DirtiesContext} in [a] TestNG based test is not
  * reloaded in subsequent tests&quot;.
  * </p>
  * <p>
@@ -47,7 +47,6 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 2.5
  */
-@org.junit.Ignore("TestNG tests should not be run by JUnit")
 @ContextConfiguration
 public class DirtiesContextTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests {
 
@@ -82,4 +81,5 @@ public class DirtiesContextTransactionalTestNGSpringContextTests extends Abstrac
 		assertSame(this.applicationContext, this.dirtiedApplicationContext,
 			"The application context should NOT have been 'dirtied'.");
 	}
+
 }

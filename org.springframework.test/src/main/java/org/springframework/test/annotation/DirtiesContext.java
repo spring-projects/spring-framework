@@ -23,14 +23,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Test annotation to indicate that a test method <em>dirties</em> the context
- * for the current test.
- *
+ * Test annotation which indicates that the
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * associated with a test is <em>dirty</em> and should be closed:
+ * <ul>
+ * <li>after the current test, when declared at the method level, or</li>
+ * <li>after the current test class, when declared at the class level.</li>
+ * </ul>
+ * <p>
+ * Use this annotation if a test has modified the context (for example, by
+ * replacing a bean definition). Subsequent tests will be supplied a new
+ * context.
+ * </p>
+ * <p>
+ * <code>&#064;DirtiesContext</code> may be used as a class-level and
+ * method-level annotation within the same class. In such scenarios, the
+ * <code>ApplicationContext</code> will be marked as <em>dirty</em> after any
+ * such annotated method as well as after the entire class.
+ * </p>
+ * 
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
  */
-@Target({ElementType.METHOD})
+@Target( { ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface DirtiesContext {

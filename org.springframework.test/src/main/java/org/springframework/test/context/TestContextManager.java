@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,6 +237,39 @@ public class TestContextManager {
 	}
 
 	/**
+	 * Hook for pre-processing a test class <em>before</em> execution of any
+	 * tests within the class. Should be called prior to any framework-specific
+	 * <em>before class methods</em> (e.g., methods annotated with JUnit's
+	 * {@link org.junit.BeforeClass &#064;BeforeClass}).
+	 * <p>
+	 * An attempt will be made to give each registered
+	 * {@link TestExecutionListener} a chance to pre-process the test class
+	 * execution. If a listener throws an exception, however, the remaining
+	 * registered listeners will <strong>not</strong> be called.
+	 * 
+	 * @throws Exception if a registered TestExecutionListener throws an
+	 * exception
+	 * @see #getTestExecutionListeners()
+	 */
+	public void beforeTestClass() throws Exception {
+		final Class<?> testClass = getTestContext().getTestClass();
+		if (logger.isTraceEnabled()) {
+			logger.trace("beforeTestClass(): class [" + testClass + "]");
+		}
+
+		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+			try {
+				testExecutionListener.beforeTestClass(getTestContext());
+			}
+			catch (Exception ex) {
+				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
+						+ "] to process 'before class' callback for test class [" + testClass + "]", ex);
+				throw ex;
+			}
+		}
+	}
+
+	/**
 	 * Hook for preparing a test instance prior to execution of any individual
 	 * test methods, for example for injecting dependencies, etc. Should be
 	 * called immediately after instantiation of the test instance.
@@ -279,7 +312,7 @@ public class TestContextManager {
 	 * {@link Method test method}, for example for setting up test fixtures,
 	 * starting a transaction, etc. Should be called prior to any
 	 * framework-specific <em>before methods</em> (e.g., methods annotated with
-	 * JUnit's {@link org.junit.Before &#064;Before} ).
+	 * JUnit's {@link org.junit.Before &#064;Before}).
 	 * <p>
 	 * The managed {@link TestContext} will be updated with the supplied
 	 * <code>testInstance</code> and <code>testMethod</code>.
@@ -374,6 +407,53 @@ public class TestContextManager {
 		}
 		if (afterTestMethodException != null) {
 			throw afterTestMethodException;
+		}
+	}
+
+	/**
+	 * Hook for post-processing a test class <em>after</em> execution of all
+	 * tests within the class. Should be called after any framework-specific
+	 * <em>after class methods</em> (e.g., methods annotated with JUnit's
+	 * {@link org.junit.AfterClass &#064;AfterClass}).
+	 * <p>
+	 * Each registered {@link TestExecutionListener} will be given a chance to
+	 * post-process the test class. If a listener throws an exception, the
+	 * remaining registered listeners will still be called, but the first
+	 * exception thrown will be tracked and rethrown after all listeners have
+	 * executed. Note that registered listeners will be executed in the opposite
+	 * order in which they were registered.
+	 * 
+	 * @throws Exception if a registered TestExecutionListener throws an
+	 * exception
+	 * @see #getTestExecutionListeners()
+	 */
+	public void afterTestClass() throws Exception {
+		final Class<?> testClass = getTestContext().getTestClass();
+		if (logger.isTraceEnabled()) {
+			logger.trace("afterTestClass(): class [" + testClass + "]");
+		}
+
+		// Traverse the TestExecutionListeners in reverse order to ensure proper
+		// "wrapper"-style execution of listeners.
+		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
+			getTestExecutionListeners());
+		Collections.reverse(listenersReversed);
+
+		Exception afterTestClassException = null;
+		for (TestExecutionListener testExecutionListener : listenersReversed) {
+			try {
+				testExecutionListener.afterTestClass(getTestContext());
+			}
+			catch (Exception ex) {
+				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
+						+ "] to process 'after class' callback for test class [" + testClass + "]", ex);
+				if (afterTestClassException == null) {
+					afterTestClassException = ex;
+				}
+			}
+		}
+		if (afterTestClassException != null) {
+			throw afterTestClassException;
 		}
 	}
 
