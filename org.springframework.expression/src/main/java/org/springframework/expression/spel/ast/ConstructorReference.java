@@ -81,7 +81,7 @@ public class ConstructorReference extends SpelNodeImpl {
 			TypedValue childValue = children[i + 1].getValueInternal(state);
 			Object value = childValue.getValue();
 			arguments[i] = value;
-			argumentTypes[i] = (value==null?Object.class:value.getClass());
+			argumentTypes[i] = (value==null?null:value.getClass());
 		}
 
 		ConstructorExecutor executorToUse = this.cachedExecutor;

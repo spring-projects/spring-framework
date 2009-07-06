@@ -21,11 +21,14 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectivePropertyResolver;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeLocator;
 
 /**
  * Tests based on Jiras up to the release of Spring 3.0.0
@@ -38,6 +41,148 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	public void testNPE_SPR5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
 	}
+	
+	@Test
+	public void testSPR5899() throws Exception {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
+		Expression expr = new SpelExpressionParser().parse("tryToInvokeWithNull(12)");
+		Assert.assertEquals(12,expr.getValue(eContext));
+		expr = new SpelExpressionParser().parse("tryToInvokeWithNull(null)");
+		Assert.assertEquals(null,expr.getValue(eContext));
+		try {
+			expr = new SpelExpressionParser().parse("tryToInvokeWithNull2(null)");
+			expr.getValue();
+			Assert.fail("Should have failed to find a method to which it could pass null");
+		} catch (EvaluationException see) {
+			// success
+		}
+		eContext.setTypeLocator(new MyTypeLocator());
+		
+		// varargs
+		expr = new SpelExpressionParser().parse("tryToInvokeWithNull3(null,'a','b')");
+		Assert.assertEquals("ab",expr.getValue(eContext));
+		
+		// varargs 2 - null is packed into the varargs
+		expr = new SpelExpressionParser().parse("tryToInvokeWithNull3(12,'a',null,'c')");
+		Assert.assertEquals("anullc",expr.getValue(eContext));
+		
+		// check we can find the ctor ok
+		expr = new SpelExpressionParser().parse("new Spr5899Class().toString()");
+		Assert.assertEquals("instance",expr.getValue(eContext));
+
+		expr = new SpelExpressionParser().parse("new Spr5899Class(null).toString()");
+		Assert.assertEquals("instance",expr.getValue(eContext));
+
+		// ctor varargs
+		expr = new SpelExpressionParser().parse("new Spr5899Class(null,'a','b').toString()");
+		Assert.assertEquals("instance",expr.getValue(eContext));
+
+		// ctor varargs 2
+		expr = new SpelExpressionParser().parse("new Spr5899Class(null,'a', null, 'b').toString()");
+		Assert.assertEquals("instance",expr.getValue(eContext));
+	}
+	
+	static class MyTypeLocator extends StandardTypeLocator {
+
+		public Class<?> findType(String typename) throws EvaluationException {
+			if (typename.equals("Spr5899Class")) {
+				return Spr5899Class.class;
+			}
+			return super.findType(typename);
+		}
+	}
+
+	static class Spr5899Class {
+		 public Spr5899Class() {}
+		 public Spr5899Class(Integer i) {  }
+		 public Spr5899Class(Integer i, String... s) {  }
+		 
+		 public Integer tryToInvokeWithNull(Integer value) { return value; }
+		 public Integer tryToInvokeWithNull2(int i) { return new Integer(i); }
+		 public String tryToInvokeWithNull3(Integer value,String... strings) { 
+			 StringBuilder sb = new StringBuilder();
+			 for (int i=0;i<strings.length;i++) {
+				 if (strings[i]==null) {
+					 sb.append("null");
+				 } else {
+					 sb.append(strings[i]);
+				 }
+			 }
+			 return sb.toString();
+		 }
+		 
+		 public String toString() {
+			 return "instance";
+		 }
+	}
+
+	// work in progress tests:
+//	@Test
+//	public void testSPR5804() throws ParseException, EvaluationException {
+//		Map m  = new HashMap();
+//		m.put("foo",null);
+//		StandardEvaluationContext eContext = new StandardEvaluationContext(m);
+//		eContext.addPropertyAccessor(new MapAccessor());
+//		Expression expr = new SpelExpressionParser().parse("foo");
+//		Object o = expr.getValue(eContext);
+//	}
+//	
+////	jdbcProperties.username
+//	
+//	@Test
+//	public void testSPR5847() throws ParseException, EvaluationException {
+//		StandardEvaluationContext eContext = new StandardEvaluationContext(new TestProperties2());
+//		Expression expr = new SpelExpressionParser().parse("jdbcProperties['username']");
+//		eContext.addPropertyAccessor(new MapAccessor());
+//		String name = expr.getValue(eContext,String.class);
+//		Assert.assertEquals("Dave",name);
+////		System.out.println(o);
+//		
+//		
+////		Map m  = new HashMap();
+////		m.put("jdbcProperties",new TestProperties());
+////		StandardEvaluationContext eContext = new StandardEvaluationContext(m);
+//////		eContext.addPropertyAccessor(new MapAccessor());
+////		Expression expr = new SpelExpressionParser().parse("jdbcProperties.username");
+////		Object o = expr.getValue(eContext);
+////		System.out.println(o);
+//	}
+//	
+//	static class TestProperties {
+//		public String username = "Dave";
+//	}
+//	
+//	static class TestProperties2 {
+//		public Map jdbcProperties = new HashMap();
+//		TestProperties2() {
+//			jdbcProperties.put("username","Dave");
+//		}
+//	}
+//
+//	static class MapAccessor implements PropertyAccessor {
+//
+//		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+//			return (((Map) target).containsKey(name));
+//		}
+//
+//		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+//			return new TypedValue(((Map) target).get(name),CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR);
+//		}
+//
+//		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+//			return true;
+//		}
+//
+//		@SuppressWarnings("unchecked")
+//		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+//			((Map) target).put(name, newValue);
+//		}
+//
+//		public Class[] getSpecificTargetClasses() {
+//			return new Class[] {Map.class};
+//		}
+//		
+//	}
 	
 	@Test
 	public void testNPE_SPR5673() throws Exception {

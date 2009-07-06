@@ -92,7 +92,7 @@ public class MethodReference extends SpelNodeImpl {
 	private Class<?>[] getTypes(Object... arguments) {
 		Class<?>[] argumentTypes = new Class[arguments.length];
 		for (int i = 0; i < arguments.length; i++) {
-			argumentTypes[i] = (arguments[i]==null?Object.class:arguments[i].getClass());
+			argumentTypes[i] = (arguments[i]==null?null:arguments[i].getClass());
 		}
 		return argumentTypes;
 	}
