@@ -99,6 +99,9 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			if (typename.equals("Spr5899Class")) {
 				return Spr5899Class.class;
 			}
+			if (typename.equals("Outer")) {
+				return Outer.class;
+			}
 			return super.findType(typename);
 		}
 	}
@@ -125,6 +128,31 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		 public String toString() {
 			 return "instance";
 		 }
+	}
+	
+	@Test
+	public void testSPR5905_InnerTypeReferences() throws Exception {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
+		Expression expr = new SpelExpressionParser().parse("T(java.util.Map$Entry)");
+		Assert.assertEquals(Map.Entry.class,expr.getValue(eContext));
+
+		expr = new SpelExpressionParser().parse("T(org.springframework.expression.spel.SpringEL300Tests$Outer$Inner).run()");
+		Assert.assertEquals(12,expr.getValue(eContext));
+
+		expr = new SpelExpressionParser().parse("new org.springframework.expression.spel.SpringEL300Tests$Outer$Inner().run2()");
+		Assert.assertEquals(13,expr.getValue(eContext));
+}
+	
+	static class Outer {
+		static class Inner {
+			public Inner() {}
+			public static int run() {
+				return 12;
+			}
+			public int run2() {
+				return 13;
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
