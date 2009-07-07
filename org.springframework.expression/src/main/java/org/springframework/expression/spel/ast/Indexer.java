@@ -57,8 +57,15 @@ public class Indexer extends SpelNodeImpl {
 			index = reference.getName();
 			indexValue = new TypedValue(index,CommonTypeDescriptors.STRING_TYPE_DESCRIPTOR);
 		} else {
-			indexValue = children[0].getValueInternal(state);
-			index = indexValue.getValue();
+			// In case the map key is unqualified, we want it evaluated against the root object so 
+			// temporarily push that on whilst evaluating the key
+			try {
+				state.pushActiveContextObject(state.getRootContextObject());
+				indexValue = children[0].getValueInternal(state);
+				index = indexValue.getValue();
+			} finally {
+				state.popActiveContextObject();
+			}
 		}
 
 		// Indexing into a Map
