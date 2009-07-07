@@ -152,17 +152,35 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
 
+		// MapAccessor required for this to work
 		expr = new SpelExpressionParser().parse("jdbcProperties.username");
 		eContext.addPropertyAccessor(new MapAccessor());
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
+		
+		// --- dotted property names
+
+		// lookup foo on the root, then bar on that, then use that as the key into jdbcProperties
+		expr = new SpelExpressionParser().parse("jdbcProperties[foo.bar]"); 
+		eContext.addPropertyAccessor(new MapAccessor());
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("Dave2",name);
+
+		// key is foo.bar
+		expr = new SpelExpressionParser().parse("jdbcProperties['foo.bar']");
+		eContext.addPropertyAccessor(new MapAccessor());
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("Elephant",name);	
 	}
 	
 	static class TestProperties {
 		public Properties jdbcProperties = new Properties();
+		public Properties foo = new Properties();
 		TestProperties() {
 			jdbcProperties.put("username","Dave");
-			jdbcProperties.put("foo.bar","Dave");
+			jdbcProperties.put("alias","Dave2");
+			jdbcProperties.put("foo.bar","Elephant");
+			foo.put("bar","alias");
 		}
 	}
 
