@@ -452,7 +452,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 			}
 			nextToken();
 			eatToken(TokenKind.LPAREN);
-			SpelNodeImpl node = eatPossiblyQualifiedId();
+			SpelNodeImpl node = eatPossiblyQualifiedId(true);
 			// dotted qualified id
 			eatToken(TokenKind.RPAREN);
 			constructedNodes.push(new TypeReference(toPos(typeName),node));
@@ -515,13 +515,26 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 		return true;
 	}
 
-	private SpelNodeImpl eatPossiblyQualifiedId() {
+	/**
+	 * Eat an identifier, possibly qualified (meaning that it is dotted).  If the dollarAllowed parameter is true then
+	 * it will process any dollar characters found between names, and this allows it to support inner type references
+	 * correctly.  For example 'com.foo.bar.Outer$Inner' will produce the identifier sequence com, foo, bar, Outer, $Inner,
+	 * note that the $ has been prefixed onto the Inner identifier.  The code in TypeReference which reforms this into
+	 * a typename copes with the $ prefixed identifiers.
+	 * TODO AndyC Could create complete identifiers (a.b.c) here rather than a sequence of them? (a, b, c)
+	 */
+	private SpelNodeImpl eatPossiblyQualifiedId(boolean dollarAllowed) {
 		List<SpelNodeImpl> qualifiedIdPieces = new ArrayList<SpelNodeImpl>();
 		Token startnode = eatToken(TokenKind.IDENTIFIER);
 		qualifiedIdPieces.add(new Identifier(startnode.stringValue(),toPos(startnode)));
-		while (peekToken(TokenKind.DOT,true)) {
+		boolean dollar = false;
+		while (peekToken(TokenKind.DOT,true) || (dollarAllowed && (dollar = peekToken(TokenKind.DOLLAR,true)))) {
 			Token node = eatToken(TokenKind.IDENTIFIER);
-			qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));			
+			if (dollar) {
+				qualifiedIdPieces.add(new Identifier("$"+node.stringValue(),((node.startpos-1)<<16)+node.endpos));			
+			} else {
+				qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));							
+			}
 		}
 		return new QualifiedIdentifier(toPos(startnode.startpos,qualifiedIdPieces.get(qualifiedIdPieces.size()-1).getEndPosition()),qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
 	}
@@ -549,7 +562,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	private boolean maybeEatConstructorReference() {
 		if (peekIdentifierToken("new")) {
 			Token newToken = nextToken();
-			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId();
+			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId(true);
 			List<SpelNodeImpl> nodes = new ArrayList<SpelNodeImpl>();
 			nodes.add(possiblyQualifiedConstructorName);
 			eatConstructorArgs(nodes);

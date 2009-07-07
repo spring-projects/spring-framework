@@ -43,10 +43,11 @@ public class QualifiedIdentifier extends SpelNodeImpl {
 		if (this.value == null) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < getChildCount(); i++) {
-				if (i > 0) {
+				Object value = children[i].getValueInternal(state).getValue();
+				if (i > 0 && !value.toString().startsWith("$")) {
 					sb.append(".");
 				}
-				sb.append(children[i].getValueInternal(state).getValue());
+				sb.append(value);
 			}
 			this.value = new TypedValue(sb.toString(),STRING_TYPE_DESCRIPTOR);
 		}
