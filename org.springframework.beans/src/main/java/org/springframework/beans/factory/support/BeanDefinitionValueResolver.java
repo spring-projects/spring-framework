@@ -167,10 +167,10 @@ class BeanDefinitionValueResolver {
 				Object propKey = propEntry.getKey();
 				Object propValue = propEntry.getValue();
 				if (propKey instanceof TypedStringValue) {
-					propKey = ((TypedStringValue) propKey).getValue();
+					propKey = evaluate(((TypedStringValue) propKey).getValue());
 				}
 				if (propValue instanceof TypedStringValue) {
-					propValue = ((TypedStringValue) propValue).getValue();
+					propValue = evaluate(((TypedStringValue) propValue).getValue());
 				}
 				copy.put(propKey, propValue);
 			}
