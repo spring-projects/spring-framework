@@ -125,6 +125,10 @@ public class Inventor {
 	public String sayHelloTo(String person) {
 		return "hello " + person;
 	}
+	
+	public String printDouble(Double d) {
+		return d.toString();
+	}
 
 	public String joinThreeStrings(String a, String b, String c) {
 		return a + b + c;

@@ -16,6 +16,10 @@
 
 package org.springframework.expression.spel;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -25,6 +29,8 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectivePropertyResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -41,6 +47,11 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	public void testNPE_SPR5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
 	}
+
+//	@Test
+//	public void testSWF1086() {
+//		evaluate("printDouble(T(java.math.BigDecimal).valueOf(14.35))", "anullc", String.class);
+//	}
 	
 	@Test
 	public void testSPR5899() throws Exception {
@@ -116,73 +127,69 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		 }
 	}
 
-	// work in progress tests:
-//	@Test
-//	public void testSPR5804() throws ParseException, EvaluationException {
-//		Map m  = new HashMap();
-//		m.put("foo",null);
-//		StandardEvaluationContext eContext = new StandardEvaluationContext(m);
-//		eContext.addPropertyAccessor(new MapAccessor());
-//		Expression expr = new SpelExpressionParser().parse("foo");
-//		Object o = expr.getValue(eContext);
-//	}
-//	
-////	jdbcProperties.username
-//	
-//	@Test
-//	public void testSPR5847() throws ParseException, EvaluationException {
-//		StandardEvaluationContext eContext = new StandardEvaluationContext(new TestProperties2());
-//		Expression expr = new SpelExpressionParser().parse("jdbcProperties['username']");
-//		eContext.addPropertyAccessor(new MapAccessor());
-//		String name = expr.getValue(eContext,String.class);
-//		Assert.assertEquals("Dave",name);
-////		System.out.println(o);
-//		
-//		
-////		Map m  = new HashMap();
-////		m.put("jdbcProperties",new TestProperties());
-////		StandardEvaluationContext eContext = new StandardEvaluationContext(m);
-//////		eContext.addPropertyAccessor(new MapAccessor());
-////		Expression expr = new SpelExpressionParser().parse("jdbcProperties.username");
-////		Object o = expr.getValue(eContext);
-////		System.out.println(o);
-//	}
-//	
-//	static class TestProperties {
-//		public String username = "Dave";
-//	}
-//	
-//	static class TestProperties2 {
-//		public Map jdbcProperties = new HashMap();
-//		TestProperties2() {
-//			jdbcProperties.put("username","Dave");
-//		}
-//	}
-//
-//	static class MapAccessor implements PropertyAccessor {
-//
-//		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-//			return (((Map) target).containsKey(name));
-//		}
-//
-//		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-//			return new TypedValue(((Map) target).get(name),CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR);
-//		}
-//
-//		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
-//			return true;
-//		}
-//
-//		@SuppressWarnings("unchecked")
-//		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-//			((Map) target).put(name, newValue);
-//		}
-//
-//		public Class[] getSpecificTargetClasses() {
-//			return new Class[] {Map.class};
-//		}
-//		
-//	}
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSPR5804() throws Exception {
+		Map m = new HashMap();
+		m.put("foo", "bar");
+		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
+		eContext.addPropertyAccessor(new MapAccessor());
+		Expression expr = new SpelExpressionParser().parseExpression("['foo']");
+		Assert.assertEquals("bar", expr.getValue(eContext));
+	}
+	
+	@Test
+	public void testSPR5847() throws Exception {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new TestProperties());
+		String name = null;
+		Expression expr = null;
+		
+		expr = new SpelExpressionParser().parse("jdbcProperties['username']");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("Dave",name);
+		
+		expr = new SpelExpressionParser().parse("jdbcProperties[username]");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("Dave",name);
+
+		expr = new SpelExpressionParser().parse("jdbcProperties.username");
+		eContext.addPropertyAccessor(new MapAccessor());
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("Dave",name);
+	}
+	
+	static class TestProperties {
+		public Properties jdbcProperties = new Properties();
+		TestProperties() {
+			jdbcProperties.put("username","Dave");
+			jdbcProperties.put("foo.bar","Dave");
+		}
+	}
+
+	static class MapAccessor implements PropertyAccessor {
+
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+			return (((Map) target).containsKey(name));
+		}
+
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+			return new TypedValue(((Map) target).get(name),CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR);
+		}
+
+		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+			return true;
+		}
+
+		@SuppressWarnings("unchecked")
+		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+			((Map) target).put(name, newValue);
+		}
+
+		public Class[] getSpecificTargetClasses() {
+			return new Class[] {Map.class};
+		}
+		
+	}
 	
 	@Test
 	public void testNPE_SPR5673() throws Exception {
