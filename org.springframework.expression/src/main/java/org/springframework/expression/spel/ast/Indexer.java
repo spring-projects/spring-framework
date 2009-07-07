@@ -48,14 +48,29 @@ public class Indexer extends SpelNodeImpl {
 		TypedValue context = state.getActiveContextObject();
 		Object targetObject = context.getValue();
 		TypeDescriptor targetObjectTypeDescriptor = context.getTypeDescriptor();
-		TypedValue indexValue =  children[0].getValueInternal(state);
-		Object index = indexValue.getValue();
+		TypedValue indexValue =  null;
+		Object index = null;
+		
+		// This first part of the if clause prevents a 'double dereference' of the property (SPR-5847)
+		if (targetObject instanceof Map && (children[0] instanceof PropertyOrFieldReference)) {
+			PropertyOrFieldReference reference = (PropertyOrFieldReference)children[0];
+			index = reference.getName();
+			indexValue = new TypedValue(index,CommonTypeDescriptors.STRING_TYPE_DESCRIPTOR);
+		} else {
+			indexValue = children[0].getValueInternal(state);
+			index = indexValue.getValue();
+		}
 
 		// Indexing into a Map
 		if (targetObject instanceof Map) {
-			Object possiblyConvertedKey = state.convertValue(indexValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+			Object possiblyConvertedKey = index;
+			if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
+				possiblyConvertedKey = state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+			}
 			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-			return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+			TypeDescriptor resultDescriptor = targetObjectTypeDescriptor.isMapEntryTypeKnown()?
+					TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()):CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR;
+			return new TypedValue(o,resultDescriptor);
 		}
 
 		int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
@@ -131,8 +146,12 @@ public class Indexer extends SpelNodeImpl {
 		// Indexing into a Map
 		if (targetObjectTypeDescriptor.isMap()) {
 			Map map = (Map)targetObject;
-			Object possiblyConvertedKey = state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
-			Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+			Object possiblyConvertedKey = index;
+			Object possiblyConvertedValue = newValue;
+			if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
+			  possiblyConvertedKey = state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+			  possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+			}
 			map.put(possiblyConvertedKey,possiblyConvertedValue);
 			return;
 		}

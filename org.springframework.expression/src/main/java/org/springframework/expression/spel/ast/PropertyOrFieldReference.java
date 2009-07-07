@@ -18,10 +18,12 @@ package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -52,7 +54,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws SpelEvaluationException {
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue result = readProperty(state, this.name);
 		if (result.getValue()==null && state.configuredToCreateCollection() && result.getTypeDescriptor().getType().equals(List.class) && nextChildIs(Indexer.class)) {
 			// Create a new list ready for the indexer
@@ -93,11 +95,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	 * @return the value of the property
 	 * @throws SpelEvaluationException if any problem accessing the property or it cannot be found
 	 */
-	private TypedValue readProperty(ExpressionState state, String name) throws SpelEvaluationException {
+	private TypedValue readProperty(ExpressionState state, String name) throws EvaluationException {
 		TypedValue contextObject = state.getActiveContextObject();
 		EvaluationContext eContext = state.getEvaluationContext();
+		Object targetObject = contextObject.getValue();
 
-		if (contextObject.getValue() == null && nullSafe) {
+		if (targetObject == null && nullSafe) {
 			return TypedValue.NULL_TYPED_VALUE;
 		}
 
@@ -244,6 +247,10 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		resolvers.addAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;
+	}
+	
+	String getName() {
+		return name;
 	}
 
 }
