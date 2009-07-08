@@ -191,7 +191,7 @@ public class TypeDescriptor<T> {
 		} else if (methodParameter != null) {
 			return methodParameter.getMethod().getAnnotations();
 		} else {
-			return null;
+			return new Annotation[0];
 		}
 	}
 
