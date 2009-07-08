@@ -31,10 +31,4 @@ public @interface Model {
 	 */
 	String value() default "";
 
-	/**
-	 * Configures strict model binding.
-	 * @see Binder#setStrict(boolean)
-	 */
-	boolean strictBinding() default false;
-
 }

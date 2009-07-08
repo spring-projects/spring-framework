@@ -16,16 +16,21 @@
 package org.springframework.ui.binding;
 
 /**
- * A factory for model Binders.
+ * A factory for model property bindings.
  * @author Keith Donald
- * @since 3.0
  */
-public interface BinderFactory {
-	
+public interface BindingFactory {
+
 	/**
-	 * Get the Binder for the model
-	 * @param model the model
-	 * @return the binder
+	 * The model object for which property bindings may be accessed.
 	 */
-	Binder getBinder(Object model);
+	Object getModel();
+
+	/**
+	 * Get a binding to a model property..
+	 * @param property the property path
+	 * @throws NoSuchBindingException if no binding to the property exists
+	 */
+	Binding getBinding(String property);
+
 }

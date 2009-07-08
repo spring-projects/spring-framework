@@ -27,7 +27,8 @@ import org.springframework.ui.alert.Alert;
 public interface BindingResult {
 
 	/**
-	 * The name of the model property associated with this binding result.
+	 * The model property this binding result is for.
+	 * @see Binder#getBinding(String)
 	 */
 	String getProperty();
 

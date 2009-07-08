@@ -23,14 +23,21 @@ package org.springframework.ui.binding;
 public interface Binding {
 
 	/**
-	 * The formatted value to display in the user interface.
+	 * The name of the bound model property.
+	 */
+	String getProperty();
+	
+	/**
+	 * The formatted property value to display in the user interface.
 	 */
 	String getValue();
 
 	/**
-	 * Set the property associated with this binding to the value provided.
+	 * Set the property to the value provided.
 	 * The value may be a formatted String, a formatted String[] if a collection binding, or an Object of a type that can be coersed to the underlying property type.
 	 * @param value the new value to bind
+	 * @return a summary of the result of the binding
+	 * @throws BindException if an unrecoverable exception occurs 
 	 */
 	BindingResult setValue(Object value);
 	
@@ -57,6 +64,5 @@ public interface Binding {
 	 * The type of the underlying property associated with this binding.
 	 */
 	Class<?> getType();
-
 
 }
