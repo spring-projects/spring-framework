@@ -104,10 +104,10 @@ public interface PathMatcher {
 	Map<String, String> extractUriTemplateVariables(String pattern, String path);
 
 	/**
-	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
+	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness for that path.
 	 * <p>The full algorithm used depends on the underlying implementation, but generally, the returned
 	 * <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List, java.util.Comparator) sort} a
-	 * list so that more specific patterns come before generic patterns.
+	 * list so that more specific patterns (for that come before generic patterns.
 	 *
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
