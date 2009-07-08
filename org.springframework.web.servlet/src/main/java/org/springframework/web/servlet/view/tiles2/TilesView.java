@@ -16,14 +16,20 @@
 
 package org.springframework.web.servlet.view.tiles2;
 
+import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.tiles.TilesApplicationContext;
 import org.apache.tiles.TilesContainer;
-import org.apache.tiles.access.TilesAccess;
+import org.apache.tiles.context.TilesRequestContext;
+import org.apache.tiles.impl.BasicTilesContainer;
+import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
+import org.apache.tiles.servlet.context.ServletTilesRequestContext;
+import org.apache.tiles.servlet.context.ServletUtil;
 
 import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
@@ -49,9 +55,21 @@ import org.springframework.web.util.WebUtils;
 public class TilesView extends AbstractUrlBasedView {
 
 	@Override
-	public boolean checkResource() throws Exception {
-		TilesContainer container = TilesAccess.getContainer(getServletContext());
-		return container.isValidDefinition(getUrl());
+	public boolean checkResource(final Locale locale) throws Exception {
+		TilesContainer container = ServletUtil.getContainer(getServletContext());
+		if (!(container instanceof BasicTilesContainer)) {
+			// Cannot check properly - let's assume it's there.
+			return true;
+		}
+		BasicTilesContainer basicContainer = (BasicTilesContainer) container;
+		TilesApplicationContext appContext = new ServletTilesApplicationContext(getServletContext());
+		TilesRequestContext requestContext = new ServletTilesRequestContext(appContext, null, null) {
+			@Override
+			public Locale getRequestLocale() {
+				return locale;
+			}
+		};
+		return (basicContainer.getDefinitionsFactory().getDefinition(getUrl(), requestContext) != null);
 	}
 
 	@Override
@@ -59,7 +77,7 @@ public class TilesView extends AbstractUrlBasedView {
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		ServletContext servletContext = getServletContext();
-		TilesContainer container = TilesAccess.getContainer(servletContext);
+		TilesContainer container = ServletUtil.getContainer(servletContext);
 		if (container == null) {
 			throw new ServletException("Tiles container is not initialized. " +
 					"Have you added a TilesConfigurer to your web application context?");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Locale;
-
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.PageContext;
 
 import org.apache.tiles.context.TilesRequestContext;
+import org.apache.tiles.jsp.context.JspTilesRequestContext;
 import org.apache.tiles.locale.impl.DefaultLocaleResolver;
+import org.apache.tiles.servlet.context.ServletTilesRequestContext;
 
 import org.springframework.web.servlet.support.RequestContextUtils;
 
@@ -42,8 +44,12 @@ public class SpringLocaleResolver extends DefaultLocaleResolver {
 
 	@Override
 	public Locale resolveLocale(TilesRequestContext context) {
-		if (context.getRequest() instanceof HttpServletRequest) {
-			return RequestContextUtils.getLocale((HttpServletRequest) context.getRequest());
+		if (context instanceof ServletTilesRequestContext) {
+			return RequestContextUtils.getLocale(((ServletTilesRequestContext) context).getRequest());
+		}
+		else if (context instanceof JspTilesRequestContext) {
+			PageContext pc = ((JspTilesRequestContext) context).getPageContext();
+			return RequestContextUtils.getLocale((HttpServletRequest) pc.getRequest());
 		}
 		else {
 			return super.resolveLocale(context);
