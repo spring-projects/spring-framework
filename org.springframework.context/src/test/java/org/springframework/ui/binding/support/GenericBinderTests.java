@@ -17,6 +17,7 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.Binding;
@@ -222,6 +223,21 @@ public class GenericBinderTests {
 		BindingResult result = b.setValue(new String[] { "BAR", "BOGUS", "BOOP" });
 		assertTrue(result.isFailure());
 		assertEquals("conversionFailed", result.getAlert().getCode());
+	}
+	
+	@Test
+	@Ignore
+	public void bindToList() {
+		binder.addBinding("addresses");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("addresses[0]", "4655 Macy Lane, Melbourne FL 35452");		
+		values.put("addresses[1]", "1234 Rostock Circle, Palm Bay FL 32901");	
+		values.put("addresses[5]", "1977 Bel Aire Estates, Coker AL 12345");
+		BindingResults results = binder.bind(values);
+		assertEquals(3, results.size());		
+		System.out.println(results);
+		Assert.assertEquals(6, bean.addresses.size());
+		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 	}
 
 	@Test

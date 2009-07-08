@@ -576,6 +576,9 @@ public class GenericBinder implements Binder {
 			return results.size();
 		}
 
+		public String toString() {
+			return "[BindingResults = " + results.toString() + "]";
+		}
 	}
 
 	class InvalidFormat implements BindingResult {
@@ -626,6 +629,11 @@ public class GenericBinder implements Binder {
 				}
 			};
 		}
+
+		public String toString() {
+			return getAlert().toString();
+		}
+
 	}
 
 	class Success implements BindingResult {
@@ -671,6 +679,10 @@ public class GenericBinder implements Binder {
 					return builder.build();
 				}
 			};
+		}
+		
+		public String toString() {
+			return getAlert().toString();
 		}
 
 	}
@@ -746,6 +758,10 @@ public class GenericBinder implements Binder {
 				}
 
 			};
+		}
+		
+		public String toString() {
+			return getAlert().toString();
 		}
 
 	}
