@@ -357,6 +357,9 @@ public class AntPathMatcher implements PathMatcher {
 	 * <li><code>/hotels/{hotel}</code></li> <li><code>/hotels/*</code></li> </ol> the returned comparator will sort this
 	 * list so that the order will be as indicated.
 	 *
+	 * <p>The full path given as parameter is used to test for exact matches. So when the given path is {@code /hotels/2},
+	 * the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
+	 *
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
 	 */
