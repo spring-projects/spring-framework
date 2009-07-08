@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
@@ -17,7 +18,6 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.Binding;
@@ -26,6 +26,7 @@ import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.MissingSourceValuesException;
 import org.springframework.ui.binding.NoSuchBindingException;
 import org.springframework.ui.format.AnnotationFormatterFactory;
+import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
@@ -226,7 +227,6 @@ public class GenericBinderTests {
 	}
 	
 	@Test
-	@Ignore
 	public void bindToList() {
 		binder.addBinding("addresses");
 		Map<String, String> values = new LinkedHashMap<String, String>();
@@ -234,10 +234,8 @@ public class GenericBinderTests {
 		values.put("addresses[1]", "1234 Rostock Circle, Palm Bay FL 32901");	
 		values.put("addresses[5]", "1977 Bel Aire Estates, Coker AL 12345");
 		BindingResults results = binder.bind(values);
-		assertEquals(3, results.size());		
 		System.out.println(results);
 		Assert.assertEquals(6, bean.addresses.size());
-		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 	}
 
 	@Test
@@ -359,6 +357,20 @@ public class GenericBinderTests {
 
 	}
 
+	public static class AddressFormatter implements Formatter<Address> {
+
+		public String format(Address address, Locale locale) {
+			return address.getStreet() + " " + address.getCity() + ", " + address.getState() + " " + address.getZip();
+		}
+
+		public Address parse(String formatted, Locale locale) throws ParseException {
+			Address address = new Address();
+			return address;
+		}
+		
+	}
+	
+	@Formatted(AddressFormatter.class)
 	public static class Address {
 		private String street;
 		private String city;

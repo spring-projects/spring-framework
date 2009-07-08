@@ -21,10 +21,13 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.ui.format.AnnotationFormatterFactory;
+import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
 
 /**
@@ -37,7 +40,7 @@ import org.springframework.ui.format.Formatter;
 @SuppressWarnings("unchecked")
 public class GenericFormatterRegistry implements FormatterRegistry {
 
-	private Map<Class, Formatter> typeFormatters = new HashMap<Class, Formatter>();
+	private Map<Class, Formatter> typeFormatters = new ConcurrentHashMap<Class, Formatter>();
 
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
@@ -53,8 +56,22 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		if (formatter != null) {
 			return formatter;
 		} else {
-			// TODO check class-level @Formatted annotation
-			return null;
+			Formatted formatted = AnnotationUtils.findAnnotation(propertyType.getType(), Formatted.class);
+			if (formatted != null) {
+				Class formatterClass = formatted.value();
+				try {
+					formatter = (Formatter) formatterClass.newInstance();
+				} catch (InstantiationException e) {
+					// TODO better runtime exception
+					throw new IllegalStateException(e);
+				} catch (IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+				typeFormatters.put(propertyType.getType(), formatter);
+				return formatter;
+			} else {
+				return null;
+			}
 		}
 	}
 
