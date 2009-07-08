@@ -502,8 +502,11 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 
 		// Expose current RequestAttributes to current thread.
 		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
-		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
-		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
+		PortletRequestAttributes requestAttributes = null;
+		if (previousRequestAttributes == null || previousRequestAttributes.getClass().equals(PortletRequestAttributes.class)) {
+			requestAttributes = new PortletRequestAttributes(request);
+			RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
+		}
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Bound request context to thread: " + request);
@@ -541,12 +544,12 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 		}
 
 		finally {
-			// Reset thread-bound context.
-			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
+			// Clear request attributes and reset thread-bound context.
 			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
-
-			// Clear request attributes.
-			requestAttributes.requestCompleted();
+			if (requestAttributes != null) {
+				RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
+				requestAttributes.requestCompleted();
+			}
 			if (logger.isTraceEnabled()) {
 				logger.trace("Cleared thread-bound resource request context: " + request);
 			}
