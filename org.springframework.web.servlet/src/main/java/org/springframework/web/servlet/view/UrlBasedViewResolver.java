@@ -418,7 +418,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		AbstractUrlBasedView view = buildView(viewName);
 		View result = (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
-		return (view.checkResource() ? result : null);
+		return (view.checkResource(locale) ? result : null);
 	}
 
 	/**
