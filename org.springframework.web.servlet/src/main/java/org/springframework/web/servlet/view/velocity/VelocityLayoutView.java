@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view.velocity;
 
 import java.io.StringWriter;
+import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.Template;
@@ -118,8 +119,8 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * can be changed which may invalidate any early checking done here.
 	 */
 	@Override
-	public boolean checkResource() throws Exception {
-		if (!super.checkResource()) {
+	public boolean checkResource(Locale locale) throws Exception {
+		if (!super.checkResource(locale)) {
 			return false;
 		}
 

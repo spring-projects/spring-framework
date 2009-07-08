@@ -197,10 +197,10 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * multiple templates to be rendered into a single view.
 	 */
 	@Override
-	public boolean checkResource() throws Exception {
+	public boolean checkResource(Locale locale) throws Exception {
 		try {
 			// Check that we can get the template, even if we might subsequently get it again.
-			getTemplate(getUrl(), getConfiguration().getLocale());
+			getTemplate(getUrl(), locale);
 			return true;
 		}
 		catch (FileNotFoundException ex) {

@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.view;
 
+import java.util.Locale;
+
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -78,11 +80,12 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 	/**
 	 * Check whether the underlying resource that the configured URL points to
 	 * actually exists.
+	 * @param locale the desired Locale that we're looking for
 	 * @return <code>true</code> if the resource exists (or is assumed to exist);
 	 * <code>false</code> if we know that it does not exist
 	 * @throws Exception if the resource exists but is invalid (e.g. could not be parsed)
 	 */
-	public boolean checkResource() throws Exception {
+	public boolean checkResource(Locale locale) throws Exception {
 		return true;
 	}
 
