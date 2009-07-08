@@ -15,12 +15,15 @@
  */
 package org.springframework.ui.lifecycle;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.ui.alert.AlertContext;
 import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.validation.ValidationFailure;
 import org.springframework.ui.validation.Validator;
 
 /**
@@ -58,17 +61,28 @@ public final class BindAndValidateLifecycle {
 		this.validationDecider = validationDecider;
 	}
 
+	/**
+	 * Execute the bind and validate lifecycle.
+	 * Any bind or validation errors are recorded as alerts against the {@link AlertContext}.
+	 * @param sourceValues the source values to bind and validate
+	 */
 	public void execute(Map<String, ? extends Object> sourceValues) {
 		BindingResults bindingResults = binder.bind(sourceValues);
-		if (validator != null && validationDecider.shouldValidateAfter(bindingResults)) {
-			// TODO get validation results
-			validator.validate(binder.getModel(), bindingResults.successes().properties());
-		}
+		List<ValidationFailure> validationFailures = validate(bindingResults);
 		for (BindingResult result : bindingResults.failures()) {
-			// TODO - you may want to ignore some alerts like propertyNotFound
 			alertContext.add(result.getProperty(), result.getAlert());
 		}
-		// TODO translate validation results into messages
+		for (ValidationFailure failure : validationFailures) {
+			alertContext.add(failure.getProperty(), failure.getAlert());
+		}		
+	}
+	
+	private List<ValidationFailure> validate(BindingResults bindingResults) {
+		if (validator != null && validationDecider.shouldValidateAfter(bindingResults)) {
+			return validator.validate(binder.getModel(), bindingResults.successes().properties());
+		} else {
+			return Collections.emptyList();
+		}
 	}
 
 }

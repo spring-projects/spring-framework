@@ -23,25 +23,14 @@ import java.util.Map;
  * @since 3.0
  * @see #bind(Map)
  */
-public interface Binder {
-
-	/**
-	 * The model object this binder binds to.
-	 * @return the model object
-	 */
-	Object getModel();
-
-	/**
-	 * Returns the binding for the property.
-	 * @param property the property path
-	 * @return the binding
-	 */
-	Binding getBinding(String property);
+public interface Binder extends BindingFactory {
 
 	/**
 	 * Bind the source values to the properties of the model.
+	 * A result is returned for each registered {@link Binding}.
 	 * @param sourceValues the source values to bind
 	 * @return the results of the binding operation
+	 * @throws MissingSourceValuesException when the sourceValues Map is missing entries for required bindings
 	 */
 	BindingResults bind(Map<String, ? extends Object> sourceValues);
 

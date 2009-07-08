@@ -3,10 +3,8 @@ package org.springframework.ui.lifecycle;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,17 +14,17 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Alerts;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
-import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Bound;
 import org.springframework.ui.binding.Model;
-import org.springframework.ui.binding.support.WebBinderFactory;
+import org.springframework.ui.binding.support.WebBinder;
 import org.springframework.ui.format.number.CurrencyFormat;
-import org.springframework.ui.validation.ValidationResult;
-import org.springframework.ui.validation.ValidationResults;
+import org.springframework.ui.validation.ValidationFailure;
 import org.springframework.ui.validation.Validator;
 import org.springframework.ui.validation.constraint.Impact;
 import org.springframework.ui.validation.constraint.Message;
 import org.springframework.ui.validation.constraint.ValidationConstraint;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class BindAndValidateLifecycleTests {
 
@@ -40,20 +38,23 @@ public class BindAndValidateLifecycleTests {
 	public void setUp() {
 		model = new TestBean();
 		alertContext = new DefaultAlertContext();
-		Binder binder = new WebBinderFactory().getBinder(model);
-		Validator<TestBean> validator = new TestBeanValidator();
+		WebBinder binder = new WebBinder(model);
+		binder.addBinding("string");
+		binder.addBinding("integer");
+		binder.addBinding("foo");
+		Validator validator = new TestBeanValidator();
 		lifecycle = new BindAndValidateLifecycle(binder, validator, alertContext);
 	}
 	
-	static class TestBeanValidator implements Validator<TestBean> {
-		public ValidationResults validate(TestBean model, List<String> properties) {
-			TestValidationResults results = new TestValidationResults();
+	static class TestBeanValidator implements Validator {
+		public List<ValidationFailure> validate(Object model, List<String> properties) {
+			TestBean bean = (TestBean) model;
 			RequiredConstraint required = new RequiredConstraint();
-			boolean valid = required.validate(model.getString());
+			boolean valid = required.validate(bean);
 			if (!valid) {
 				
 			}
-			return results;
+			return Collections.emptyList();
 		}		
 	}
 	
@@ -111,21 +112,9 @@ public class BindAndValidateLifecycleTests {
 			}
 		}
 	}
-	
-	static class TestValidationResults implements ValidationResults {
-		private List<ValidationResult> results = new ArrayList<ValidationResult>();
 
-		public void add(ValidationResult result) {
-			results.add(result);
-		}
-		
-		public Iterator<ValidationResult> iterator() {
-			return results.iterator();
-		}
-		
-	}
 	
-	static class TestValidationFailure implements ValidationResult {
+	static class TestValidationFailure implements ValidationFailure {
 
 		private String property;
 		
@@ -143,10 +132,6 @@ public class BindAndValidateLifecycleTests {
 			return Alerts.error(message);
 		}
 
-		public boolean isFailure() {
-			return true;
-		}
-		
 	}
 
 	@Test
@@ -292,7 +277,7 @@ public class BindAndValidateLifecycleTests {
 
 	}
 	
-	@Model(value="testBean", strictBinding=true)
+	@Model(value="testBean")
 	public class TestAnnotatedBean {
 
 		private String editable;

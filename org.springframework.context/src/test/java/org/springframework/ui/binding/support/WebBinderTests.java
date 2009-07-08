@@ -37,10 +37,15 @@ public class WebBinderTests {
 	
 	@Test
 	public void bindUserValuesCreatedFromUserMap() throws ParseException {
+		binder.addBinding("string");
+		binder.addBinding("integer");
+		binder.addBinding("date").formatWith(new DateFormatter());
+		binder.addBinding("bool");
+		binder.addBinding("currency");
+		binder.addBinding("addresses");
 		GenericFormatterRegistry registry = new GenericFormatterRegistry();
 		registry.add(CurrencyFormat.class, new CurrencyFormatter());
 		binder.setFormatterRegistry(registry);
-		binder.configureBinding(new BindingConfiguration("date", new DateFormatter()));
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
 		userMap.put("string", "test");
 		userMap.put("_integer", "doesn't matter");

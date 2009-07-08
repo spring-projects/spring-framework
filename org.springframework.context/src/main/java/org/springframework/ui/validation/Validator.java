@@ -17,6 +17,18 @@ package org.springframework.ui.validation;
 
 import java.util.List;
 
-public interface Validator<M> {
-	ValidationResults validate(M model, List<String> properties);
+/**
+ * Validates a model object.
+ * @author Keith Donald
+ * @param <M> the type of model object this validator supports
+ */
+public interface Validator {
+	
+	/**
+	 * Validate the properties of the model object.
+	 * @param model the model object
+	 * @param properties the properties to validate
+	 * @return a list of validation failures, empty if there were no failures
+	 */
+	List<ValidationFailure> validate(Object model, List<String> properties);
 }

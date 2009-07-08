@@ -15,43 +15,33 @@
  */
 package org.springframework.ui.binding.support;
 
-import org.springframework.ui.binding.Binding;
 import org.springframework.ui.format.Formatter;
 
 /**
- * Configuration used to create a new {@link Binding} registered with a {@link GenericBinder}.
+ * A fluent interface for configuring a newly added binding to a property path.
  * @author Keith Donald
- * @since 3.0
- * @see GenericBinder#configureBinding(BindingConfiguration)
+ * @see GenericBinder#addBinding(String)
  */
-public final class BindingConfiguration {
-	
-	private String property;
-	
-	private Formatter<?> formatter;
+public interface BindingConfiguration {
 	
 	/**
-	 * Creates a new Binding configuration.
-	 * @param property the property to bind to
-	 * @param formatter the formatter to use to format property values
+	 * Set the Formatter to use to format bound property values.
+	 * If a collection property, the formatter is used to format collection element values.
+	 * Default is null.
 	 */
-	public BindingConfiguration(String property, Formatter<?> formatter) {
-		this.property = property;
-		this.formatter = formatter;
-	}
+	BindingConfiguration formatWith(Formatter<?> formatter);
 
 	/**
-	 * The name of the model property to bind to.
+	 * Mark the binding as required.
+	 * A required binding will generate an exception if no sourceValue is provided to a bind invocation.
+	 * This attribute is used to detect client configuration errors.
+	 * It is not intended to be used as a user data validation constraint.
+	 * Examples:
+	 * <pre>
+	 * name=required - will generate an exception if 'name' is not contained in the source values map.
+	 * addresses=required - will generate an exception if 'addresses[n]' is not contained in the source value map for at least one n.
+	 * addresses.city=required - will generate an exception if 'addresses[n].city' is not present in the source values map, for every address[n].
+	 * </pre>
 	 */
-	public String getProperty() {
-		return property;
-	}
-
-	/**
-	 * The Formatter to use to format bound property values.
-	 */
-	public Formatter<?> getFormatter() {
-		return formatter;
-	}
-
+	BindingConfiguration required();
 }
