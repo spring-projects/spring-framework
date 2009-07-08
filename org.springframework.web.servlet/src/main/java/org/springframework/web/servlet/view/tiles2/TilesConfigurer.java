@@ -23,17 +23,18 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tiles.TilesContainer;
 import org.apache.tiles.TilesException;
-import org.apache.tiles.access.TilesAccess;
-import org.apache.tiles.context.ChainedTilesContextFactory;
-import org.apache.tiles.definition.UrlDefinitionsFactory;
+import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
+import org.apache.tiles.definition.DefinitionsFactory;
 import org.apache.tiles.definition.digester.DigesterDefinitionsReader;
+import org.apache.tiles.evaluator.el.ELAttributeEvaluator;
 import org.apache.tiles.factory.TilesContainerFactory;
-import org.apache.tiles.impl.BasicTilesContainer;
-import org.apache.tiles.jsp.context.JspTilesContextFactory;
 import org.apache.tiles.preparer.BasicPreparerFactory;
-import org.apache.tiles.servlet.context.ServletTilesContextFactory;
+import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
+import org.apache.tiles.servlet.context.ServletUtil;
+import org.apache.tiles.servlet.context.wildcard.WildcardServletTilesApplicationContextFactory;
+import org.apache.tiles.startup.BasicTilesInitializer;
+import org.apache.tiles.startup.TilesInitializer;
 import org.apache.tiles.web.util.ServletContextAdapter;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -49,7 +50,9 @@ import org.springframework.web.context.ServletContextAware;
  * mechanism for JSP-based web applications.
  *
  * <p>The TilesConfigurer simply configures a TilesContainer using a set of files
- * containing definitions, to be accessed by {@link TilesView} instances.
+ * containing definitions, to be accessed by {@link TilesView} instances. This is a
+ * Spring-based alternative (for usage in Spring configuration) to the Tiles-provided
+ * {@link org.apache.tiles.web.startup.TilesListener} (for usage in <code>web.xml</code>).
  *
  * <p>TilesViews can be managed by any {@link org.springframework.web.servlet.ViewResolver}.
  * For simple convention-based view resolution, consider using {@link TilesViewResolver}.
@@ -69,12 +72,12 @@ import org.springframework.web.context.ServletContextAware;
  *   &lt;/property>
  * &lt;/bean></pre>
  *
- * The values in the list are the actual files containing the definitions.
+ * The values in the list are the actual Tiles XML files containing the definitions.
  *
  * @author Juergen Hoeller
  * @since 2.5
  * @see TilesView
- * @see org.springframework.web.servlet.view.UrlBasedViewResolver
+ * @see TilesViewResolver
  */
 public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
 
@@ -86,24 +89,16 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 
 	public TilesConfigurer() {
-		this.tilesPropertyMap.put(
-				TilesContainerFactory.CONTAINER_FACTORY_INIT_PARAM,
-				TilesContainerFactory.class.getName());
-		this.tilesPropertyMap.put(
-				TilesContainerFactory.CONTEXT_FACTORY_INIT_PARAM,
-				ChainedTilesContextFactory.class.getName());
-		this.tilesPropertyMap.put(
-				TilesContainerFactory.DEFINITIONS_FACTORY_INIT_PARAM,
-				UrlDefinitionsFactory.class.getName());
-		this.tilesPropertyMap.put(
-				TilesContainerFactory.PREPARER_FACTORY_INIT_PARAM,
+		this.tilesPropertyMap.put(AbstractTilesApplicationContextFactory.APPLICATION_CONTEXT_FACTORY_INIT_PARAM,
+				WildcardServletTilesApplicationContextFactory.class.getName());
+		this.tilesPropertyMap.put(TilesContainerFactory.PREPARER_FACTORY_INIT_PARAM,
 				BasicPreparerFactory.class.getName());
-		this.tilesPropertyMap.put(
-				ChainedTilesContextFactory.FACTORY_CLASS_NAMES,
-				ServletTilesContextFactory.class.getName() + "," + JspTilesContextFactory.class.getName());
-		this.tilesPropertyMap.put(
-				UrlDefinitionsFactory.LOCALE_RESOLVER_IMPL_PROPERTY,
+		this.tilesPropertyMap.put(DefinitionsFactory.LOCALE_RESOLVER_IMPL_PROPERTY,
 				SpringLocaleResolver.class.getName());
+		this.tilesPropertyMap.put(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM,
+				ELAttributeEvaluator.class.getName());
+		this.tilesPropertyMap.put(TilesContainerFactory.CONTAINER_FACTORY_MUTABLE_INIT_PARAM,
+				Boolean.toString(false));
 	}
 
 
@@ -117,7 +112,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			if (logger.isInfoEnabled()) {
 				logger.info("TilesConfigurer: adding definitions [" + defs + "]");
 			}
-			this.tilesPropertyMap.put(BasicTilesContainer.DEFINITIONS_CONFIG, defs);
+			this.tilesPropertyMap.put(DefinitionsFactory.DEFINITIONS_CONFIG, defs);
 		}
 	}
 
@@ -190,24 +185,23 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 
 	/**
-	 * Creates and exposes a TilesContainer for this web application.
+	 * Creates and exposes a TilesContainer for this web application,
+	 * delegating to the TilesInitializer.
 	 * @throws TilesException in case of setup failure
+	 * @see #createTilesInitializer()
 	 */
 	public void afterPropertiesSet() throws TilesException {
-		TilesContainer container = createTilesContainer(this.servletContext);
-		TilesAccess.setContainer(this.servletContext, container);
+		ServletContextAdapter adaptedContext = new ServletContextAdapter(new DelegatingServletConfig());
+		createTilesInitializer().initialize(new ServletTilesApplicationContext(adaptedContext));
 	}
 
 	/**
-	 * Create a TilesContainer for this web application.
-	 * @param context this web application's ServletContext
-	 * @return the TilesContainer to expose
-	 * @throws TilesException in case of setup failure
+	 * Creates a new instance of {@link org.apache.tiles.startup.BasicTilesInitializer}.
+	 * Override it to use a different initializer.
+	 * @see org.apache.tiles.web.startup.TilesListener#createTilesInitializer()
 	 */
-	protected TilesContainer createTilesContainer(ServletContext context) throws TilesException {
-		ServletContextAdapter adaptedContext = new ServletContextAdapter(new DelegatingServletConfig());
-		TilesContainerFactory factory = TilesContainerFactory.getFactory(adaptedContext);
-		return factory.createContainer(adaptedContext);
+	protected TilesInitializer createTilesInitializer() {
+		return new BasicTilesInitializer();
 	}
 
 	/**
@@ -215,7 +209,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * @throws TilesException in case of cleanup failure
 	 */
 	public void destroy() throws TilesException {
-		TilesAccess.setContainer(this.servletContext, null);
+		ServletUtil.setContainer(this.servletContext, null);
 	}
 
 

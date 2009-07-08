@@ -43,20 +43,11 @@ public abstract class AbstractSpringPreparerFactory implements PreparerFactory {
 		WebApplicationContext webApplicationContext = (WebApplicationContext) context.getRequestScope().get(
 				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (webApplicationContext == null) {
-			/* as of Tiles 2.1:
 			webApplicationContext = (WebApplicationContext) context.getApplicationContext().getApplicationScope().get(
 					WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 			if (webApplicationContext == null) {
 				throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
 			}
-			*/
-			if (!(context instanceof ServletTilesRequestContext)) {
-				throw new IllegalStateException(
-						 getClass().getSimpleName() + " requires a ServletTilesRequestContext to operate on");
-			}
-			ServletTilesRequestContext servletRequestContext = (ServletTilesRequestContext) context;
-			webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(
-					servletRequestContext.getServletContext());
 		}
 		return getPreparer(name, webApplicationContext);
 	}
