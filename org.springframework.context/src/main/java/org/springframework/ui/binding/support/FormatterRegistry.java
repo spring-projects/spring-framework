@@ -21,6 +21,7 @@ import org.springframework.ui.format.Formatter;
 
 /**
  * A centralized registry of Formatters indexed by property types.
+ * TODO - consider moving to ui.format
  * @author Keith Donald
  * @since 3.0
  */
