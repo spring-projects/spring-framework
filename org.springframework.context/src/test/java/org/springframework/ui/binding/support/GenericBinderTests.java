@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Collections;
@@ -225,21 +224,37 @@ public class GenericBinderTests {
 		assertTrue(result.isFailure());
 		assertEquals("conversionFailed", result.getAlert().getCode());
 	}
-	
+
 	@Test
 	public void bindToList() {
 		binder.addBinding("addresses");
-		Map<String, String> values = new LinkedHashMap<String, String>();
-		values.put("addresses[0]", "4655 Macy Lane, Melbourne FL 35452");		
-		values.put("addresses[1]", "1234 Rostock Circle, Palm Bay FL 32901");	
-		values.put("addresses[5]", "1977 Bel Aire Estates, Coker AL 12345");
-		BindingResults results = binder.bind(values);
-		System.out.println(results);
-		Assert.assertEquals(6, bean.addresses.size());
+		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
+		values.put("addresses", new String[] { "4655 Macy Lane:Melbourne:FL:35452", "1234 Rostock Circle:Palm Bay:FL:32901", "1977 Bel Aire Estates:Coker:AL:12345" });		
+		binder.bind(values);
+		Assert.assertEquals(3, bean.addresses.size());
+		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
+		assertEquals("Melbourne", bean.addresses.get(0).city);
+		assertEquals("FL", bean.addresses.get(0).state);
+		assertEquals("35452", bean.addresses.get(0).zip);
 	}
 
 	@Test
-	public void bindHandleNullValueInNestedPath() {
+	public void bindToListElements() {
+		binder.addBinding("addresses");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("addresses[0]", "4655 Macy Lane:Melbourne:FL:35452");		
+		values.put("addresses[1]", "1234 Rostock Circle:Palm Bay:FL:32901");	
+		values.put("addresses[5]", "1977 Bel Aire Estates:Coker:AL:12345");
+		binder.bind(values);
+		Assert.assertEquals(6, bean.addresses.size());
+		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
+		assertEquals("Melbourne", bean.addresses.get(0).city);
+		assertEquals("FL", bean.addresses.get(0).state);
+		assertEquals("35452", bean.addresses.get(0).zip);
+	}
+
+	@Test
+	public void bindToListHandleNullValueInNestedPath() {
 		binder.addBinding("addresses.street");
 		binder.addBinding("addresses.city");
 		binder.addBinding("addresses.state");
@@ -289,6 +304,10 @@ public class GenericBinderTests {
 		BAR, BAZ, BOOP;
 	}
 
+	public static enum FoodGroup {
+		DAIRY, VEG, FRUIT, BREAD, MEAT
+	}
+	
 	public static class TestBean {
 		private String string;
 		private int integer;
@@ -297,7 +316,8 @@ public class GenericBinderTests {
 		private BigDecimal currency;
 		private List<FooEnum> foos;
 		private List<Address> addresses;
-
+		private Map<FoodGroup, String> favoriteFoodsByGroup;
+		
 		public String getString() {
 			return string;
 		}
@@ -355,16 +375,29 @@ public class GenericBinderTests {
 			this.addresses = addresses;
 		}
 
+		public Map<FoodGroup, String> getFavoriteFoodsByGroup() {
+			return favoriteFoodsByGroup;
+		}
+
+		public void setFavoriteFoodsByGroup(Map<FoodGroup, String> favoriteFoodsByGroup) {
+			this.favoriteFoodsByGroup = favoriteFoodsByGroup;
+		}
+
 	}
 
 	public static class AddressFormatter implements Formatter<Address> {
 
 		public String format(Address address, Locale locale) {
-			return address.getStreet() + " " + address.getCity() + ", " + address.getState() + " " + address.getZip();
+			return address.getStreet() + ":" + address.getCity() + ":" + address.getState() + ":" + address.getZip();
 		}
 
 		public Address parse(String formatted, Locale locale) throws ParseException {
 			Address address = new Address();
+			String[] fields = formatted.split(":");
+			address.setStreet(fields[0]);
+			address.setCity(fields[1]);
+			address.setState(fields[2]);
+			address.setZip(fields[3]);
 			return address;
 		}
 		

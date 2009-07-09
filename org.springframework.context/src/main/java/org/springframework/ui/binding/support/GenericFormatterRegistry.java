@@ -52,11 +52,12 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 				return factory.getFormatter(a);
 			}
 		}
-		Formatter<?> formatter = typeFormatters.get(propertyType.getType());
+		Class<?> type = getType(propertyType);
+		Formatter<?> formatter = typeFormatters.get(type);
 		if (formatter != null) {
 			return formatter;
 		} else {
-			Formatted formatted = AnnotationUtils.findAnnotation(propertyType.getType(), Formatted.class);
+			Formatted formatted = AnnotationUtils.findAnnotation(type, Formatted.class);
 			if (formatted != null) {
 				Class formatterClass = formatted.value();
 				try {
@@ -67,7 +68,7 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 				} catch (IllegalAccessException e) {
 					throw new IllegalStateException(e);
 				}
-				typeFormatters.put(propertyType.getType(), formatter);
+				typeFormatters.put(type, formatter);
 				return formatter;
 			} else {
 				return null;
@@ -106,6 +107,14 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		throw new IllegalArgumentException(
 				"Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
 						+ factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
+	}
+	
+	private Class getType(TypeDescriptor descriptor) {
+		if (descriptor.isArray() || descriptor.isCollection()) {
+			return descriptor.getElementType();
+		} else {
+			return descriptor.getType();
+		}
 	}
 	
 	private Class getParameterClass(Type parameterType, Class converterClass) {

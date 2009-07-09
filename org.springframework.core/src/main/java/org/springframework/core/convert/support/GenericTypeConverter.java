@@ -37,10 +37,7 @@ import org.springframework.util.Assert;
 
 /**
  * Base implementation of a conversion service. Initially empty, e.g. no converters are registered by default.
- * 
  * TODO - object to collection/map converters
- * TODO - allow registration of converters to apply on presence of annotation values on setter or field
- * 
  * @author Keith Donald
  */
 @SuppressWarnings("unchecked")
