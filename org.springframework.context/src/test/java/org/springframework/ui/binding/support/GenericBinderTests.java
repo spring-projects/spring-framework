@@ -261,7 +261,6 @@ public class GenericBinderTests {
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("addresses", "4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");		
 		BindingResults results = binder.bind(values);
-		System.out.println(results);
 		Assert.assertEquals(3, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
@@ -278,8 +277,9 @@ public class GenericBinderTests {
 	}
 	
 	@Test
-	public void getCollectionAsSingleValue() {
-		binder.addBinding("addresses").formatWith(new AddressListFormatter());
+	public void getListAsSingleValue() {
+		binder.addBinding("addresses");
+		binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
 		Address address1 = new Address();
 		address1.setStreet("s1");
 		address1.setCity("c1");

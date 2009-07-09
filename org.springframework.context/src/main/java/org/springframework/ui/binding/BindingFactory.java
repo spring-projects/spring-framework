@@ -18,6 +18,7 @@ package org.springframework.ui.binding;
 /**
  * A factory for model property bindings.
  * @author Keith Donald
+ * @since 3.0
  */
 public interface BindingFactory {
 

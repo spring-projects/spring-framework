@@ -42,6 +42,8 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 	private Map<Class, Formatter> typeFormatters = new ConcurrentHashMap<Class, Formatter>();
 
+	private Map<GenericCollectionPropertyType, Formatter> collectionTypeFormatters = new ConcurrentHashMap<GenericCollectionPropertyType, Formatter>();
+
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
 	public Formatter<?> getFormatter(TypeDescriptor<?> propertyType) {
@@ -52,8 +54,19 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 				return factory.getFormatter(a);
 			}
 		}
-		Class<?> type = getType(propertyType);
-		Formatter<?> formatter = typeFormatters.get(type);
+		Formatter<?> formatter = null;
+		Class<?> type;
+		if (propertyType.isCollection()) {
+			formatter = collectionTypeFormatters.get(new GenericCollectionPropertyType(propertyType.getType(), propertyType.getElementType()));
+			if (formatter != null) {
+				return formatter;
+			} else {
+				type = propertyType.getElementType();
+			}
+		} else {
+			type = propertyType.getType();
+		}
+		formatter = typeFormatters.get(type);
 		if (formatter != null) {
 			return formatter;
 		} else {
@@ -84,6 +97,10 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		}
 	}
 
+	public void add(GenericCollectionPropertyType propertyType, Formatter<?> formatter) {
+		collectionTypeFormatters.put(propertyType, formatter);
+	}
+	
 	public void add(AnnotationFormatterFactory<?, ?> factory) {
 		annotationFormatters.put(getAnnotationType(factory), factory);
 	}
@@ -107,14 +124,6 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		throw new IllegalArgumentException(
 				"Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
 						+ factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
-	}
-	
-	private Class getType(TypeDescriptor descriptor) {
-		if (descriptor.isArray() || descriptor.isCollection()) {
-			return descriptor.getElementType();
-		} else {
-			return descriptor.getType();
-		}
 	}
 	
 	private Class getParameterClass(Type parameterType, Class converterClass) {

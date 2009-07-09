@@ -3,6 +3,7 @@ package org.springframework.ui.binding;
 /**
  * Thrown by a BindingFactory when no binding to a property exists.
  * @author Keith Donald
+ * @since 3.0
  * @see BindingFactory#getBinding(String)
  */
 public class NoSuchBindingException extends RuntimeException {
