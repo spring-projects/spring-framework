@@ -44,16 +44,17 @@ public class SpringLocaleResolver extends DefaultLocaleResolver {
 
 	@Override
 	public Locale resolveLocale(TilesRequestContext context) {
-		if (context instanceof ServletTilesRequestContext) {
-			return RequestContextUtils.getLocale(((ServletTilesRequestContext) context).getRequest());
-		}
-		else if (context instanceof JspTilesRequestContext) {
+		if (context instanceof JspTilesRequestContext) {
 			PageContext pc = ((JspTilesRequestContext) context).getPageContext();
 			return RequestContextUtils.getLocale((HttpServletRequest) pc.getRequest());
 		}
-		else {
-			return super.resolveLocale(context);
+		else if (context instanceof ServletTilesRequestContext) {
+			HttpServletRequest request = ((ServletTilesRequestContext) context).getRequest();
+			if (request != null) {
+				return RequestContextUtils.getLocale(request);
+			}
 		}
+		return super.resolveLocale(context);
 	}
 
 }
