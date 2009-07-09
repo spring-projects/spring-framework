@@ -39,6 +39,11 @@
       <id>EclipseLink Repo</id>
       <url>http://mirror.cc.vt.edu/pub/eclipse/rt/eclipselink/maven.repo/</url>
     </repository>
+    <!-- for rome 1.0 -->
+    <repository>
+      <id>sun-repo-2</id>
+      <url>http://download.java.net/maven/2/</url>
+    </repository>    
     <!-- fallback to S2 bundle repo for com.ibm.websphere.uow, oracle.classloader, com.sun.enterprise.loader -->
     <repository>
       <id>com.springsource.repository.bundles.release</id>
@@ -64,6 +69,18 @@
             <artifactId>jsr181</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.5</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>2.3</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -161,6 +178,7 @@
             <exclude>**/Abstract*.java</exclude>
           </excludes>
           <junitArtifactName>junit:junit</junitArtifactName>
+	  <argLine>-Xmx512m</argLine>
         </configuration>
       </plugin>
     </plugins>

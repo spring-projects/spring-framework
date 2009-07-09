@@ -56,9 +56,9 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-	  <groupId>hsqldb</groupId>
-	  <artifactId>hsqldb</artifactId>
-	  <version>1.8.0.7</version>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>1.8.0.7</version>
       <scope>compile</scope>
       <optional>true</optional>      
     </dependency>
@@ -68,18 +68,21 @@
       <version>1.0.71</version>
       <scope>compile</scope>
       <optional>true</optional>      
-    </dependency>        
+    </dependency>    
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.4.2.0</version>
+      <scope>compile</scope>
+      <optional>true</optional>      
+    </dependency>   
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.3</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>

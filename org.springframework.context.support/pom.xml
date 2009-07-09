@@ -20,14 +20,9 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>quartz</groupId>
+      <groupId>opensymphony</groupId>
       <artifactId>quartz</artifactId>
       <version>1.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>opensymphony</groupId>
-      <artifactId>quartz-all</artifactId>
-      <version>1.6.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
