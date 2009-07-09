@@ -242,7 +242,7 @@ public class GenericBinderTests {
 		assertEquals("FL", bean.addresses.get(0).state);
 		assertEquals("35452", bean.addresses.get(0).zip);
 	}
-
+	
 	@Test
 	public void bindToListElements() {
 		binder.addBinding("addresses");
@@ -280,7 +280,7 @@ public class GenericBinderTests {
 	}
 	
 	@Test
-	public void getListAsSingleValue() {
+	public void getListAsSingleString() {
 		binder.addBinding("addresses");
 		binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
 		Address address1 = new Address();
@@ -339,6 +339,63 @@ public class GenericBinderTests {
 		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 		Assert.assertNotNull(bean.addresses.get(2));
 		assertEquals(12, results.size());
+	}
+
+	@Test
+	@Ignore
+	public void bindToMap() {
+		binder.addBinding("favoriteFoodsByGroup");
+		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
+		values.put("favoriteFoodsByGroup", new String[] { "DAIRY=Milk", "FRUIT=Peaches", "MEAT=Ham" });		
+		BindingResults results = binder.bind(values);
+		System.out.println(results);
+		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
+		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
+		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
+		assertEquals("Ham", bean.favoriteFoodsByGroup.get(FoodGroup.MEAT));
+	}
+
+	@Test
+	@Ignore
+	public void bindToMapElements() {
+		binder.addBinding("favoriteFoodsByGroup");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("favoriteFoodsByGroup[DAIRY]", "Milk");
+		values.put("favoriteFoodsByGroup[FRUIT]", "Peaches");
+		values.put("favoriteFoodsByGroup[MEAT]", "Ham");
+		BindingResults results = binder.bind(values);
+		System.out.println(results);
+		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
+		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
+		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
+		assertEquals("Ham", bean.favoriteFoodsByGroup.get(FoodGroup.MEAT));
+	}
+	
+	@Test
+	@Ignore
+	public void bindToMapSingleString() {
+		binder.addBinding("favoriteFoodsByGroup");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("favoriteFoodsByGroup", "DAIRY=Milk FRUIT=Peaches MEAT=Ham");
+		BindingResults results = binder.bind(values);
+		System.out.println(results);
+		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
+		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
+		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
+		assertEquals("Ham", bean.favoriteFoodsByGroup.get(FoodGroup.MEAT));
+	}
+	
+	@Test
+	@Ignore
+	public void getMapAsSingleString() {
+		binder.addBinding("favoriteFoodsByGroup");
+		Map<FoodGroup, String> foods = new LinkedHashMap<FoodGroup, String>();
+		foods.put(FoodGroup.DAIRY, "Milk");
+		foods.put(FoodGroup.FRUIT, "Peaches");
+		foods.put(FoodGroup.MEAT, "Ham");
+		bean.favoriteFoodsByGroup = foods;
+		String value = binder.getBinding("favoriteFoodsByGroup").getValue();
+		assertEquals("DAIRY=Milk FRUIT=Peaches MEAT=Ham", value);
 	}
 
 	@Test
