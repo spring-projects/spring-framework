@@ -112,7 +112,10 @@ public class GenericBinderTests {
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
 		binder.addBinding("date").formatWith(new DateFormatter());
-		binder.bind(Collections.singletonMap("date", "bogus"));
+		BindingResults results = binder.bind(Collections.singletonMap("date", "bogus"));
+		assertEquals(1, results.size());
+		assertTrue(results.get(0).isFailure());
+		assertEquals("invalidFormat", results.get(0).getAlert().getCode());		
 	}
 
 	@Test
