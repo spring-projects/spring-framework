@@ -86,22 +86,18 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-asm</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
+      <groupId>org.objectweb.asm</groupId>
+      <artifactId>org.springframework.asm</artifactId>
+      <version>2.2.3</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.3</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>

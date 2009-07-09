@@ -56,6 +56,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>taglibs</groupId>
+      <artifactId>standard</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+    <dependency>
       <groupId>net.sourceforge.jexcelapi</groupId>
       <artifactId>jxl</artifactId>
       <version>2.6.3</version>
@@ -111,7 +116,7 @@
     </dependency>
     <dependency>
       <groupId>velocity-tools</groupId>
-      <artifactId>velocity-tools-generic</artifactId>
+      <artifactId>velocity-tools-view</artifactId>
       <version>1.4</version>
       <optional>true</optional>
     </dependency>
@@ -147,6 +152,12 @@
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
+      <artifactId>spring-orm</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -154,20 +165,16 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.3</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-asm</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
+      <groupId>org.objectweb.asm</groupId>
+      <artifactId>org.springframework.asm</artifactId>
+      <version>2.2.3</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>xmlunit</groupId>
@@ -192,6 +199,20 @@
       <artifactId>cglib-nodep</artifactId>
       <version>2.1_3</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>3.3.1.GA</version>
+      <scope>test</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jta_1.1_spec</artifactId>
+      <version>1.1</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>
