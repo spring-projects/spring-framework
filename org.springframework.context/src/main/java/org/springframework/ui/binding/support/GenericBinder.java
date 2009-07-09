@@ -29,6 +29,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -350,7 +352,7 @@ public class GenericBinder implements Binder {
 
 		public String format(Object selectableValue) {
 			Formatter formatter = getFormatter();
-			Class<?> formattedType = getFormattedObjectType(formatter);
+			Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 			selectableValue = typeConverter.convert(selectableValue, formattedType);
 			return formatter.format(selectableValue, LocaleContextHolder.getLocale());
 		}
@@ -404,7 +406,8 @@ public class GenericBinder implements Binder {
 		private BindingResult setStringValue(String formatted) {
 			Object parsed;
 			try {
-				parsed = getFormatter().parse(formatted, LocaleContextHolder.getLocale());
+				Formatter formatter = getFormatter();
+				parsed = formatter.parse(formatted, LocaleContextHolder.getLocale());
 			} catch (ParseException e) {
 				return new InvalidFormat(property.getExpressionString(), formatted, e);
 			}
@@ -413,7 +416,7 @@ public class GenericBinder implements Binder {
 
 		private BindingResult setStringValues(String[] formatted) {
 			Formatter formatter = getFormatter();
-			Class parsedType = getFormattedObjectType(formatter);
+			Class parsedType = getFormattedObjectType(formatter.getClass());
 			if (parsedType == null) {
 				parsedType = String.class;
 			}
@@ -466,18 +469,31 @@ public class GenericBinder implements Binder {
 				return new EvaluationError(property.getExpressionString(), userValue, e);
 			}
 		}
-
-		private Class getFormattedObjectType(Formatter formatter) {
+		
+		private Class getFormattedObjectType(Class formatterClass) {
 			// TODO consider caching this info
-			Class classToIntrospect = formatter.getClass();
+			Class classToIntrospect = formatterClass;
 			while (classToIntrospect != null) {
-				Type[] genericInterfaces = classToIntrospect.getGenericInterfaces();
-				for (Type genericInterface : genericInterfaces) {
-					if (genericInterface instanceof ParameterizedType) {
-						ParameterizedType pInterface = (ParameterizedType) genericInterface;
-						if (Formatter.class.isAssignableFrom((Class) pInterface.getRawType())) {
-							return getParameterClass(pInterface.getActualTypeArguments()[0], formatter.getClass());
+				Type[] ifcs = classToIntrospect.getGenericInterfaces();
+				for (Type ifc : ifcs) {
+					if (ifc instanceof ParameterizedType) {
+						ParameterizedType paramIfc = (ParameterizedType) ifc;
+						Type rawType = paramIfc.getRawType();
+						if (Formatter.class.equals(rawType)) {
+							Type arg = paramIfc.getActualTypeArguments()[0];
+							if (arg instanceof TypeVariable) {
+								arg = GenericTypeResolver.resolveTypeVariable((TypeVariable) arg, formatterClass);
+							}
+							if (arg instanceof Class) {
+								return (Class) arg;
+							}
 						}
+						else if (ApplicationListener.class.isAssignableFrom((Class) rawType)) {
+							return getFormattedObjectType((Class) rawType);
+						}
+					}
+					else if (ApplicationListener.class.isAssignableFrom((Class) ifc)) {
+						return getFormattedObjectType((Class) ifc);
 					}
 				}
 				classToIntrospect = classToIntrospect.getSuperclass();
@@ -485,17 +501,6 @@ public class GenericBinder implements Binder {
 			return null;
 		}
 
-		private Class getParameterClass(Type parameterType, Class converterClass) {
-			if (parameterType instanceof TypeVariable) {
-				parameterType = GenericTypeResolver.resolveTypeVariable((TypeVariable) parameterType, converterClass);
-			}
-			if (parameterType instanceof Class) {
-				return (Class) parameterType;
-			}
-			throw new IllegalArgumentException("Unable to obtain the java.lang.Class for parameterType [" + parameterType
-					+ "] on Formatter [" + converterClass.getName() + "]");
-		}
-		
 	}
 
 	static class DefaultFormatter implements Formatter {
@@ -736,6 +741,8 @@ public class GenericBinder implements Binder {
 							Throwable cause = accessException.getCause();
 							if (cause instanceof SpelEvaluationException
 									&& ((SpelEvaluationException) cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
+								// TODO this could be a ConverterExecutorNotFoundException if no suitable converter was found
+								cause.getCause().printStackTrace();
 								ConversionFailedException failure = (ConversionFailedException) cause.getCause();
 								MessageBuilder builder = new MessageBuilder(messageSource);
 								builder.code("conversionFailed");

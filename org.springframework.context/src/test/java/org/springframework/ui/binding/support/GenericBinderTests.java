@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -17,6 +18,7 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.Binding;
@@ -254,6 +256,49 @@ public class GenericBinderTests {
 	}
 
 	@Test
+	public void bindToListSingleString() {
+		binder.addBinding("addresses").formatWith(new AddressListFormatter());
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("addresses", "4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");		
+		BindingResults results = binder.bind(values);
+		System.out.println(results);
+		Assert.assertEquals(3, bean.addresses.size());
+		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
+		assertEquals("Melbourne", bean.addresses.get(0).city);
+		assertEquals("FL", bean.addresses.get(0).state);
+		assertEquals("35452", bean.addresses.get(0).zip);
+		assertEquals("1234 Rostock Circle", bean.addresses.get(1).street);
+		assertEquals("Palm Bay", bean.addresses.get(1).city);
+		assertEquals("FL", bean.addresses.get(1).state);
+		assertEquals("32901", bean.addresses.get(1).zip);
+		assertEquals("1977 Bel Aire Estates", bean.addresses.get(2).street);
+		assertEquals("Coker", bean.addresses.get(2).city);
+		assertEquals("AL", bean.addresses.get(2).state);
+		assertEquals("12345", bean.addresses.get(2).zip);
+	}
+	
+	@Test
+	public void getCollectionAsSingleValue() {
+		binder.addBinding("addresses").formatWith(new AddressListFormatter());
+		Address address1 = new Address();
+		address1.setStreet("s1");
+		address1.setCity("c1");
+		address1.setState("st1");
+		address1.setZip("z1");
+		Address address2 = new Address();
+		address2.setStreet("s2");
+		address2.setCity("c2");
+		address2.setState("st2");
+		address2.setZip("z2");
+		List<Address> addresses = new ArrayList<Address>(2);
+		addresses.add(address1);
+		addresses.add(address2);
+		bean.addresses = addresses;
+		String value = binder.getBinding("addresses").getValue();
+		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2,", value);
+	}
+	
+	@Test
 	public void bindToListHandleNullValueInNestedPath() {
 		binder.addBinding("addresses.street");
 		binder.addBinding("addresses.city");
@@ -399,6 +444,28 @@ public class GenericBinderTests {
 			address.setState(fields[2]);
 			address.setZip(fields[3]);
 			return address;
+		}
+		
+	}
+	
+	public static class AddressListFormatter implements Formatter<List<Address>> {
+
+		public String format(List<Address> addresses, Locale locale) {
+			StringBuilder builder = new StringBuilder();
+			for (Address address : addresses) {
+				builder.append(new AddressFormatter().format(address, locale));
+				builder.append(",");
+			}
+			return builder.toString();
+		}
+
+		public List<Address> parse(String formatted, Locale locale) throws ParseException {
+			String[] fields = formatted.split(",");
+			List<Address> addresses = new ArrayList<Address>(fields.length);
+			for (String field : fields) {
+				addresses.add(new AddressFormatter().parse(field, locale));
+			}
+			return addresses;
 		}
 		
 	}
