@@ -509,8 +509,8 @@ public class SingleConnectionFactory
 			}
 			else if (method.getName().equals("start")) {
 				// Handle start method: track started state.
-				this.target.start();
 				synchronized (connectionMonitor) {
+					this.target.start();
 					started = true;
 				}
 				return null;
