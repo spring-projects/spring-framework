@@ -23,8 +23,20 @@ import java.util.Map;
  * @since 3.0
  * @see #bind(Map)
  */
-public interface Binder extends BindingFactory {
+public interface Binder {
 
+	/**
+	 * The model object for which property bindings may be accessed.
+	 */
+	Object getModel();
+
+	/**
+	 * Get a binding to a model property..
+	 * @param property the property path
+	 * @throws NoSuchBindingException if no binding to the property exists
+	 */
+	Binding getBinding(String property);
+	
 	/**
 	 * Bind the source values to the properties of the model.
 	 * A result is returned for each registered {@link Binding}.
