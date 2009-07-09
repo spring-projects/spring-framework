@@ -29,7 +29,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.expression.MapAccessor;
@@ -145,6 +144,17 @@ public class GenericBinder implements Binder {
 	public void registerFormatter(Class<?> propertyType, Formatter<?> formatter) {
 		formatterRegistry.add(propertyType, formatter);
 	}
+	
+	/**
+	 * Register a Formatter to format the model properties of a specific property type.
+	 * Convenience method that calls {@link FormatterRegistry#add(GenericCollectionPropertyType, Formatter)} internally.
+	 * @param propertyType the model property type
+	 * @param formatter the formatter
+	 */
+	public void registerFormatter(GenericCollectionPropertyType propertyType, Formatter<?> formatter) {
+		formatterRegistry.add(propertyType, formatter);
+	}
+
 
 	/**
 	 * Register a FormatterFactory that creates Formatter instances as required to format model properties annotated with a specific annotation.
@@ -337,6 +347,7 @@ public class GenericBinder implements Binder {
 			} catch (ExpressionException e) {
 				throw new IllegalStateException("Failed to get property expression value - this should not happen", e);
 			}
+			// TODO if collection we want to format as a single string, need collection formatter
 			return format(value);
 		}
 
@@ -406,6 +417,9 @@ public class GenericBinder implements Binder {
 		private BindingResult setStringValue(String formatted) {
 			Object parsed;
 			try {
+				// if binding to a collection we may want collection formatter to convert String to Collection
+				// alternatively, we could map value to a single element e.g. String -> Address via AddressFormatter, which would bind to addresses[0]
+				// probably want to give preference to collection formatter if one is registered
 				Formatter formatter = getFormatter();
 				parsed = formatter.parse(formatted, LocaleContextHolder.getLocale());
 			} catch (ParseException e) {

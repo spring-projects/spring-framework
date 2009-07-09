@@ -22,6 +22,7 @@ import java.util.Map;
  * Exception thrown by a Binder when a required source value is missing unexpectedly from the sourceValues map.
  * Indicates a client configuration error. 
  * @author Keith Donald
+ * @since 3.0
  * @see Binder#bind(Map)
  */
 public class MissingSourceValuesException extends RuntimeException {

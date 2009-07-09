@@ -22,6 +22,7 @@ import org.springframework.ui.format.Formatter;
 /**
  * A centralized registry of Formatters indexed by property types.
  * TODO - consider moving to ui.format
+ * TODO - consider a general add(Formatter) method for simplicity
  * @author Keith Donald
  * @since 3.0
  */
@@ -46,6 +47,13 @@ public interface FormatterRegistry {
 	 * @param formatter the formatter
 	 */
 	void add(Class<?> propertyType, Formatter<?> formatter);
+
+	/**
+	 * Adds a Formatter that will format the values of properties of the provided type.
+	 * @param propertyType the type
+	 * @param formatter the formatter
+	 */
+	void add(GenericCollectionPropertyType propertyType, Formatter<?> formatter);
 
 	/**
 	 * Adds a AnnotationFormatterFactory that will format values of properties annotated with a specific annotation.
