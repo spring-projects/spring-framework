@@ -21,6 +21,7 @@ import java.util.Map;
  * Binds user-entered values to properties of a model object.
  * @author Keith Donald
  * @since 3.0
+ * @see #getBinding(String)
  * @see #bind(Map)
  */
 public interface Binder {
