@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -40,7 +41,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	@Test
 	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
-		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
 		Expression expression = parser.parseExpression("list[0]");
 		TestClass testClass = new TestClass();
 		Object o = null;
@@ -60,15 +61,68 @@ public class EvaluationTests extends ExpressionTestCase {
 		Assert.assertEquals(4, testClass.getFoo().size());
 	}
 	
+	@Test
+	public void testCreateMapsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
+		TestClass testClass = new TestClass();
+		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
+		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		Object o = null;
+		o = parser.parseExpression("map['a']").getValue(ctx);
+		Assert.assertNull(o);
+		o = parser.parseExpression("map").getValue(ctx);
+		Assert.assertNotNull(o);
+		
+		try {
+			o = parser.parseExpression("map2['a']").getValue(ctx);
+			// fail!
+			Assert.fail("map2 should be null, there is no setter");
+		} catch (Exception e) {
+			// success!
+		}
+	}
+
+	@Test
+	public void testCreateObjectsOnAttemptToReferenceNull() throws EvaluationException, ParseException {
+		TestClass testClass = new TestClass();
+		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
+		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		Object o = null;
+		o = parser.parseExpression("wibble.bar").getValue(ctx);
+		Assert.assertEquals("hello",o);
+		o = parser.parseExpression("wibble").getValue(ctx);
+		Assert.assertNotNull(o);
+		
+		try {
+			o = parser.parseExpression("wibble2.bar").getValue(ctx);
+			// fail!
+			Assert.fail("wibble2 should be null (cannot be initialized dynamically), there is no setter");
+		} catch (Exception e) {
+			// success!
+		}
+	}
+	
 	static class TestClass {
+		
+		public Foo wibble;
+		private Foo wibble2;
+		public Map map;
+		public Map<String,Integer> mapStringToInteger;
 		public List<String> list;
 		public List list2;
+		private Map map2;
 		
+		public Map getMap2() { return this.map2; }
+		public Foo getWibble2() { return this.wibble2; }
+//		public void setMap2(Map m) { this.map2 = m; }
 		private List<String> foo;
 		public List<String> getFoo() { return this.foo; }
 		public void setFoo(List<String> newfoo) { this.foo = newfoo; }
 	}
-	
+
+	public static class Foo {
+		public Foo() {}
+		public String bar = "hello";
+	}
 	
 	@Test
 	public void testElvis01() {
