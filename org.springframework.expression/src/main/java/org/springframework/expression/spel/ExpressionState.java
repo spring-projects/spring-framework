@@ -217,8 +217,8 @@ public class ExpressionState {
 		return (configuration & SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize)!=0;
 	}
 
-	public boolean configuredToCreateCollection() {
-		return (configuration & SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull)!=0;
+	public boolean configuredToCreateCollectionOrMap() {
+		return (configuration & SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull)!=0;
 	}
 
 }
