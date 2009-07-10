@@ -635,7 +635,8 @@ public void testProcessWithoutTransaction() {
           <classname>ProfileValueSource</classname> returns a matching
           <literal>value</literal> for the provided <literal>name</literal>,
           the test will be enabled. This annotation can be applied to an
-          entire class or individual methods.</para>
+          entire class or individual methods. Class-level usage overrides
+          method-level usage.</para>
 
           <programlisting language="java">@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
 @Test
