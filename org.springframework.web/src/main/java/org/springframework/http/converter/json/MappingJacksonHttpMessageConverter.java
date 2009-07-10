@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.web.servlet.view.json.BindingJacksonJsonView
  * @since 3.0
  */
-public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageConverter<T> {
+public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageConverter<T> {
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -57,7 +57,7 @@ public class BindingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 	/**
 	 * Construct a new {@code BindingJacksonHttpMessageConverter},
 	 */
-	public BindingJacksonHttpMessageConverter() {
+	public MappingJacksonHttpMessageConverter() {
 		super(new MediaType("application", "json"));
 	}
 

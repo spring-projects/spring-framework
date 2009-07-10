@@ -31,13 +31,13 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
 /** @author Arjen Poutsma */
-public class BindingJacksonHttpMessageConverterTest {
+public class MappingJacksonHttpMessageConverterTest {
 
-	private BindingJacksonHttpMessageConverter<MyBean> converter;
+	private MappingJacksonHttpMessageConverter<MyBean> converter;
 
 	@Before
 	public void setUp() {
-		converter = new BindingJacksonHttpMessageConverter<MyBean>();
+		converter = new MappingJacksonHttpMessageConverter<MyBean>();
 	}
 	
 	@Test
@@ -63,7 +63,7 @@ public class BindingJacksonHttpMessageConverterTest {
 	@Test
 	@SuppressWarnings({"unchecked"})
 	public void readUntyped() throws IOException {
-		BindingJacksonHttpMessageConverter<HashMap> converter = new BindingJacksonHttpMessageConverter<HashMap>();
+		MappingJacksonHttpMessageConverter<HashMap> converter = new MappingJacksonHttpMessageConverter<HashMap>();
 		String body =
 				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
