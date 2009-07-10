@@ -34,12 +34,6 @@ class StringArrayToMap implements ConversionExecutor {
 
 	private EntryConverter entryConverter;
 
-	/**
-	 * Creates a new map-to-map converter
-	 * @param sourceType the source map type
-	 * @param targetType the target map type
-	 * @param conversionService the conversion service
-	 */
 	public StringArrayToMap(TypeDescriptor sourceType, TypeDescriptor targetType, GenericTypeConverter conversionService) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;

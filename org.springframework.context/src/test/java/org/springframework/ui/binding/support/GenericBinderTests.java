@@ -372,7 +372,6 @@ public class GenericBinderTests {
 	}
 	
 	@Test
-	@Ignore
 	public void bindToMapSingleString() {
 		binder.addBinding("favoriteFoodsByGroup");
 		Map<String, String> values = new LinkedHashMap<String, String>();
