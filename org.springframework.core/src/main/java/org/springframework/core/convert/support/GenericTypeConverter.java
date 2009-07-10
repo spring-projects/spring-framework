@@ -220,7 +220,11 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 		}
 		if (targetType.isMap()) {
 			// object to map
-			return null;
+			if (sourceType.getType().equals(String.class)) {
+				return new StringToMap(sourceType, targetType, this);
+			} else {
+				return null;
+			}
 		}
 		if (sourceType.isAssignableTo(targetType)) {
 			return NoOpConversionExecutor.INSTANCE;
