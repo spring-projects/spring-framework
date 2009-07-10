@@ -104,7 +104,7 @@ public class GenericBinder implements Binder {
 		Assert.notNull(model, "The model to bind to is required");
 		this.model = model;
 		bindingFactories = new LinkedHashSet<BindingFactory>();
-		int parserConfig = SpelExpressionParserConfiguration.CreateListsOnAttemptToIndexIntoNull
+		int parserConfig = SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull
 				| SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize;
 		expressionParser = new SpelExpressionParser(parserConfig);
 		typeConverter = new DefaultTypeConverter();

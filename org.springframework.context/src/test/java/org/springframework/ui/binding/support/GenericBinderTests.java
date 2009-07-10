@@ -357,7 +357,6 @@ public class GenericBinderTests {
 	}
 
 	@Test
-	@Ignore
 	public void bindToMapElements() {
 		binder.addBinding("favoriteFoodsByGroup");
 		Map<String, String> values = new LinkedHashMap<String, String>();
@@ -401,7 +400,6 @@ public class GenericBinderTests {
 	}
 
 	@Test
-	@Ignore
 	public void bindToNullObjectPath() {
 		binder.addBinding("primaryAddress.street");
 		binder.addBinding("primaryAddress.city");
