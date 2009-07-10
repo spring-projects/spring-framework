@@ -43,10 +43,10 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
- * @see org.springframework.http.converter.json.BindingJacksonHttpMessageConverter
+ * @see org.springframework.http.converter.json.MappingJacksonHttpMessageConverter
  * @since 3.0
  */
-public class BindingJacksonJsonView extends AbstractView {
+public class MappingJacksonJsonView extends AbstractView {
 
 	/**
 	 * Default content type. Overridable as bean property.
@@ -64,7 +64,7 @@ public class BindingJacksonJsonView extends AbstractView {
 	/**
 	 * Construct a new {@code JacksonJsonView}, setting the content type to {@code application/json}.
 	 */
-	public BindingJacksonJsonView() {
+	public MappingJacksonJsonView() {
 		setContentType(DEFAULT_CONTENT_TYPE);
 	}
 

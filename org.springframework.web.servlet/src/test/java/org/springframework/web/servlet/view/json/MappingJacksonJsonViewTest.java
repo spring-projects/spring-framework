@@ -47,9 +47,9 @@ import org.springframework.validation.BindingResult;
  * @author Jeremy Grelle
  * @author Arjen Poutsma
  */
-public class BindingJacksonJsonViewTest {
+public class MappingJacksonJsonViewTest {
 
-	private BindingJacksonJsonView view;
+	private MappingJacksonJsonView view;
 
 	private MockHttpServletRequest request;
 
@@ -67,7 +67,7 @@ public class BindingJacksonJsonViewTest {
 		jsContext = ContextFactory.getGlobal().enterContext();
 		jsScope = jsContext.initStandardObjects();
 
-		view = new BindingJacksonJsonView();
+		view = new MappingJacksonJsonView();
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class BindingJacksonJsonViewTest {
 
 		view.render(model, request, response);
 
-		assertEquals(BindingJacksonJsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
+		assertEquals(MappingJacksonJsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
