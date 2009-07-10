@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,19 @@
 package org.springframework.test.context.junit4;
 
 import org.junit.BeforeClass;
-
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 
 /**
  * <p>
- * Verifies proper handling of JUnit's {@link org.junit.Ignore @Ignore} and
- * Spring's
- * {@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}
- * and {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
- * (with an <em>explicit, custom defined {@link ProfileValueSource}</em>)
- * annotations in conjunction with the {@link SpringJUnit4ClassRunner}.
+ * Verifies proper handling of JUnit's {@link org.junit.Ignore &#064;Ignore} and
+ * Spring's {@link org.springframework.test.annotation.IfProfileValue
+ * &#064;IfProfileValue} and {@link ProfileValueSourceConfiguration
+ * &#064;ProfileValueSourceConfiguration} (with an
+ * <em>explicit, custom defined {@link ProfileValueSource}</em>) annotations in
+ * conjunction with the {@link SpringJUnit4ClassRunner}.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see EnabledAndIgnoredSpringRunnerTests
