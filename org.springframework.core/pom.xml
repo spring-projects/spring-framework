@@ -20,9 +20,9 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.objectweb.asm</groupId>
-      <artifactId>org.springframework.asm</artifactId>
-      <version>2.2.3</version>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-asm</artifactId>
+      <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
