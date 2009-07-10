@@ -24,7 +24,13 @@ package org.springframework.expression.spel.standard;
  */
 public interface SpelExpressionParserConfiguration {
 
-	static final int CreateListsOnAttemptToIndexIntoNull = 0x0001;
+	/**
+	 * This option applies to maps/collections and regular objects.  If the initial part of an expression evaluates to null and then an
+	 * attempt is made to resolve an index '[]' or property against it, and this option is set, then the relevant object will be constructed so that
+	 * the index/property resolution can proceed.
+	 */
+	static final int CreateObjectIfAttemptToReferenceNull = 0x0001;
+	
 	static final int GrowListsOnIndexBeyondSize   = 0x0002;
 	
 }

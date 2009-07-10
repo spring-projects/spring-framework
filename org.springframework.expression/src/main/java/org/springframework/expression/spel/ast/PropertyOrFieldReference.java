@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,18 +57,50 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue result = readProperty(state, this.name);
-		if (result.getValue()==null && state.configuredToCreateCollection() && result.getTypeDescriptor().getType().equals(List.class) && nextChildIs(Indexer.class)) {
-			// Create a new list ready for the indexer
-			try {
-				if (isWritable(state)) {
-					List newList = ArrayList.class.newInstance();
-					writeProperty(state, name, newList);
-					result = readProperty(state, this.name);
+		TypeDescriptor resultDescriptor = result.getTypeDescriptor();
+		// Dynamically create the objects if the user has requested that optional behaviour
+		if (result.getValue()==null && state.configuredToCreateCollectionOrMap() && nextChildIs(Indexer.class,PropertyOrFieldReference.class)) {
+			// Creating lists and maps
+			if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
+				// Create a new collection or map ready for the indexer
+				if (resultDescriptor.getType().equals(List.class)) {
+					try { 
+						if (isWritable(state)) {
+							List newList = ArrayList.class.newInstance();
+							writeProperty(state, name, newList);
+							result = readProperty(state, this.name);
+						}
+					} catch (InstantiationException e) {
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+					} catch (IllegalAccessException e) {
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+					}
+				} else {
+					try { 
+						if (isWritable(state)) {
+							Map newMap = HashMap.class.newInstance();
+							writeProperty(state, name, newMap);
+							result = readProperty(state, this.name);
+						}
+					} catch (InstantiationException e) {
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+					} catch (IllegalAccessException e) {
+						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+					}
 				}
-			} catch (InstantiationException e) {
-				throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
-			} catch (IllegalAccessException e) {
-				throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+			} else {
+				// 'simple' object
+				try { 
+					if (isWritable(state)) {
+						Object newObject  = result.getTypeDescriptor().getType().newInstance();
+						writeProperty(state, name, newObject);
+						result = readProperty(state, this.name);
+					}
+				} catch (InstantiationException e) {
+					throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT,result.getTypeDescriptor().getType());
+				} catch (IllegalAccessException e) {
+					throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT,result.getTypeDescriptor().getType());
+				}				
 			}
 		}
 		return result;

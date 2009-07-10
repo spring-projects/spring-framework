@@ -69,7 +69,16 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		// Indexing into a Map
-		if (targetObject instanceof Map) {
+		if (targetObjectTypeDescriptor.isMap()) {
+			if (targetObject == null) {
+			    // Current decision: attempt to index into null map == exception and does not just return null
+				throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+//				if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
+//					return new TypedValue(null,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+//				} else {
+//					return new TypedValue(null,TypeDescriptor.NULL);				
+//				}
+			}
 			Object possiblyConvertedKey = index;
 			if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
 				possiblyConvertedKey = state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));

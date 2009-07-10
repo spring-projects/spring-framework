@@ -62,12 +62,25 @@ public abstract class SpelNodeImpl implements SpelNode, CommonTypeDescriptors {
 		return result;
 	}
 	
-	protected boolean nextChildIs(Class clazz) {
+	/**
+     * @return true if the next child is one of the specified classes
+     */
+	protected boolean nextChildIs(Class... clazzes) {
 		if (parent!=null) {
 			SpelNodeImpl[] peers = parent.children;
 			for (int i=0,max=peers.length;i<max;i++) {
 				if (peers[i]==this) {
-					return (i+1)<max && peers[i+1].getClass().equals(clazz);
+					if ((i+1)>=max) {
+						return false;
+					} else {
+						Class clazz = peers[i+1].getClass();
+						for (Class desiredClazz: clazzes) {
+							if (clazz.equals(desiredClazz)) {
+								return true;
+							}
+						}
+						return false;
+					}
 				}
 			}
 		}
