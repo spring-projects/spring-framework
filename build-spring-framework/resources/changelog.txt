@@ -19,6 +19,10 @@ Changes in version 3.0.0.RC1 (2009-06-10)
 * @Transactional supports qualifier value for choosing between multiple transaction managers
 * added spring-jdbc config schema with embedded-database tag (supporting HSQL, H2, and Derby)
 * Velocity/FreeMarker/TilesViewResolver only return a view if the target resource exists now
+* upgraded to JUnit 4.6, TestNG 5.9, and EasyMock 2.5.1
+* @DirtiesContext is now supported at the test class level with configurable class modes
+* added beforeTestClass() and afterTestClass() to the TestExecutionListener API
+* ProfileValueUtils now enforces class-level overrides for @IfProfileValue
 
 
 Changes in version 3.0.0.M3 (2009-05-06)
