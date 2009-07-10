@@ -361,10 +361,11 @@ public class GenericBinderTests {
 	public void bindToMapElements() {
 		binder.addBinding("favoriteFoodsByGroup");
 		Map<String, String> values = new LinkedHashMap<String, String>();
-		values.put("favoriteFoodsByGroup[DAIRY]", "Milk");
-		values.put("favoriteFoodsByGroup[FRUIT]", "Peaches");
-		values.put("favoriteFoodsByGroup[MEAT]", "Ham");
+		values.put("favoriteFoodsByGroup['DAIRY']", "Milk");
+		values.put("favoriteFoodsByGroup['FRUIT']", "Peaches");
+		values.put("favoriteFoodsByGroup['MEAT']", "Ham");
 		BindingResults results = binder.bind(values);
+		System.out.println(results);
 		System.out.println(results);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
@@ -400,6 +401,19 @@ public class GenericBinderTests {
 	}
 
 	@Test
+	@Ignore
+	public void bindToNullObjectPath() {
+		binder.addBinding("primaryAddress.street");
+		binder.addBinding("primaryAddress.city");
+		binder.addBinding("primaryAddress.state");
+		binder.addBinding("primaryAddress.zip");
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("primaryAddress.city", "Melbourne");
+		binder.bind(values);
+		Assert.assertEquals("Melbourne", bean.primaryAddress.city);
+	}
+	
+	@Test
 	public void formatPossibleValue() {
 		binder.addBinding("currency").formatWith(new CurrencyFormatter());
 		Binding b = binder.getBinding("currency");
@@ -423,6 +437,10 @@ public class GenericBinderTests {
 		private List<FooEnum> foos;
 		private List<Address> addresses;
 		private Map<FoodGroup, String> favoriteFoodsByGroup;
+		private Address primaryAddress;
+		
+		public TestBean() {
+		}
 		
 		public String getString() {
 			return string;
@@ -489,6 +507,14 @@ public class GenericBinderTests {
 			this.favoriteFoodsByGroup = favoriteFoodsByGroup;
 		}
 
+		public Address getPrimaryAddress() {
+			return primaryAddress;
+		}
+
+		public void setPrimaryAddress(Address primaryAddress) {
+			this.primaryAddress = primaryAddress;
+		}
+		
 	}
 
 	public static class AddressFormatter implements Formatter<Address> {

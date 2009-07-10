@@ -6,6 +6,7 @@ package org.springframework.ui.binding;
  * @since 3.0
  * @see BindingFactory#getBinding(String)
  */
+@SuppressWarnings("serial")
 public class NoSuchBindingException extends RuntimeException {
 	
 	/** 
