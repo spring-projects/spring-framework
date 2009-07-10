@@ -162,7 +162,7 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 			} else if (targetType.isMap()) {
 				if (sourceType.getElementType().equals(String.class)) {
 					// string array to map; with string element values in format foo=bar
-					return null;
+					return new StringArrayToMap(sourceType, targetType, this);
 				} else {
 					return null;
 				}
@@ -232,7 +232,7 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 			return null;
 		}
 	}
-
+	
 	// internal helpers
 
 	private List getRequiredTypeInfo(Object converter) {
