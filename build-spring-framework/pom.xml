@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+  <!--
+    
+    This POM cannot be used to build Spring; it is a work in progress and should only be used as
+    part of a Maven repository upload bundle using artifacts created by the spring build system. 
+    
+  -->
+  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.springframework</groupId>
+  <artifactId>spring</artifactId>
+  <packaging>pom</packaging>
+  <version>3.0.0.BUILD-SNAPSHOT</version>
+  <name>Spring Framework</name>
+  <description>Spring is a layered Java/J2EE application platform, based on code published in Expert
+  One-on-One J2EE Design and Development by Rod Johnson (Wrox, 2002). </description>
+  <url>http://www.springframework.org</url>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://jira.springframework.org/browse/SPR</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Bamboo</system>
+    <url>https://build.springframework.org/browse/SPR</url>
+  </ciManagement>
+  <inceptionYear>2003</inceptionYear>
+  <organization>
+    <name>SpringSource</name>
+    <url>http://www.springsource.com</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://fisheye.springframework.org/browse/spring-framework</url>
+    <connection>scm:svn:https://src.springframework.org/svn/spring-framework/trunk</connection>
+    <developerConnection>scm:svn:https://src.springframework.org/svn/spring-framework/trunk</developerConnection>
+  </scm>
+  <mailingLists>
+    <mailingList>
+      <name>        Spring Forum
+      </name>
+      <post>http://forum.springframework.org</post>
+      <archive>http://forum.springframework.org</archive>
+    </mailingList>
+  </mailingLists>
+  
+  <modules>
+    <module>../org.springframework.spring-parent</module>
+    <module>../org.springframework.instrument</module>
+    <module>../org.springframework.instrument.classloading</module>
+    <module>../org.springframework.asm</module>
+    <module>../org.springframework.core</module>
+    <module>../org.springframework.expression</module>
+    <module>../org.springframework.beans</module>
+    <module>../org.springframework.aop</module>
+    <module>../org.springframework.context</module>
+    <module>../org.springframework.transaction</module>
+    <module>../org.springframework.oxm</module>
+    <module>../org.springframework.jms</module>
+    <module>../org.springframework.aspects</module>
+    <module>../org.springframework.jdbc</module>
+    <module>../org.springframework.web</module>
+    <module>../org.springframework.orm</module>
+    <module>../org.springframework.context.support</module>
+    <module>../org.springframework.web.servlet</module>
+    <module>../org.springframework.web.portlet</module>
+    <module>../org.springframework.test</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>staging</id>
+      <distributionManagement>
+        <site>
+          <id>staging</id>
+          <url>file:///${user.dir}/target/staging</url>
+        </site>
+        <repository>
+          <id>staging</id>
+          <url>file:///${user.dir}/target/staging</url>
+        </repository>
+        <snapshotRepository>
+          <id>staging</id>
+          <url>file:///${user.dir}/target/staging</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+
+
+</project>
