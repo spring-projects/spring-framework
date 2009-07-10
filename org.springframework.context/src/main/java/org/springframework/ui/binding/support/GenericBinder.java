@@ -295,12 +295,6 @@ public class GenericBinder implements Binder {
 						"Unable to get model binding; cannot parse property expression from property string ["
 								+ property + "]", e);
 			}
-			try {
-				propertyExpression.getValueType(createEvaluationContext());
-			} catch (EvaluationException e) {
-				throw new IllegalArgumentException("Unable to get model binding; cannot access property '"
-						+ propertyExpression.getExpressionString() + "'", e);
-			}
 			return new BindingImpl(propertyExpression, configuration.getFormatter());
 		}
 
@@ -694,7 +688,7 @@ public class GenericBinder implements Binder {
 					builder.arg("label", new ResolvableArgument(property));
 					builder.arg("value", sourceValue);
 					builder.defaultMessage("Successfully bound user value " + StylerUtils.style(sourceValue)
-							+ "to property '" + property + "'");
+							+ " to property '" + property + "'");
 					return builder.build();
 				}
 			};

@@ -159,28 +159,68 @@ public class GenericTypeConverter implements TypeConverter, ConverterRegistry {
 							+ "request an interface or concrete implementation instead");
 				}
 				return new ArrayToCollection(sourceType, targetType, this);
-			}
-		}
-		if (targetType.isArray()) {
-			if (sourceType.isCollection()) {
-				return new CollectionToArray(sourceType, targetType, this);
+			} else if (targetType.isMap()) {
+				if (sourceType.getElementType().equals(String.class)) {
+					// string array to map; with string element values in format foo=bar
+					return null;
+				} else {
+					return null;
+				}
 			} else {
+				// array to object
 				return null;
 			}
 		}
 		if (sourceType.isCollection()) {
-			if (targetType.isCollection()) {
+			if (targetType.isCollection()) {	
 				return new CollectionToCollection(sourceType, targetType, this);
+			} else if (targetType.isArray()) {
+				return new CollectionToArray(sourceType, targetType, this);
+			} else if (targetType.isMap()) {
+				if (sourceType.getElementType().equals(String.class)) {
+					// string collection to map; with string element values in format foo=bar
+					return null;
+				} else {
+					return null;
+				}
 			} else {
+				// collection to object
 				return null;
 			}
 		}
 		if (sourceType.isMap()) {
 			if (targetType.isMap()) {
 				return new MapToMap(sourceType, targetType, this);
+			} else if (targetType.isArray()) {
+				if (targetType.getElementType().equals(String.class)) {
+					// map to string array; with string element values in format foo=bar
+					return null;
+				} else {
+					return null;
+				}				
+			} else if (targetType.isCollection()) {
+				if (targetType.getElementType().equals(String.class)) {
+					// map to string collection; with string element values in format foo=bar
+					return null;
+				} else {
+					return null;
+				}				
 			} else {
+				// map to object
 				return null;
 			}
+		}
+		if (targetType.isArray()) {
+			// object to array
+			return null;
+		}
+		if (targetType.isCollection()) {
+			// object to collection
+			return null;
+		}
+		if (targetType.isMap()) {
+			// object to map
+			return null;
 		}
 		if (sourceType.isAssignableTo(targetType)) {
 			return NoOpConversionExecutor.INSTANCE;
