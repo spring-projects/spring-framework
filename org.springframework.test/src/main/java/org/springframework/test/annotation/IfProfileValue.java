@@ -31,62 +31,64 @@ import java.lang.annotation.Target;
  * test will be enabled.
  * </p>
  * <p>
- * Note: <code>&#064;IfProfileValue</code> can be applied at either the
- * class or method level.
+ * Note: <code>&#064;IfProfileValue</code> can be applied at the class level,
+ * the method level, or both. <code>&#064;IfProfileValue</code> at the class
+ * level overrides method-level usage of <code>&#064;IfProfileValue</code> for
+ * any methods within that class.
  * </p>
  * <p>
  * Examples: when using {@link SystemProfileValueSource} as the
  * {@link ProfileValueSource} implementation, you can configure a test method to
  * run only on Java VMs from Sun Microsystems as follows:
  * </p>
- *
+ * 
  * <pre class="code">
- * &#064;IfProfileValue(name=&quot;java.vendor&quot;, value=&quot;Sun Microsystems Inc.&quot;)
+ * &#064;IfProfileValue(name = &quot;java.vendor&quot;, value = &quot;Sun Microsystems Inc.&quot;)
  * public void testSomething() {
- *     // ...
+ * 	// ...
  * }
  * </pre>
- *
  * <p>
  * You can alternatively configure <code>&#064;IfProfileValue</code> with
  * <em>OR</em> semantics for multiple {@link #values() values} as follows
  * (assuming a {@link ProfileValueSource} has been appropriately configured for
  * the &quot;test-groups&quot; name):
  * </p>
- *
+ * 
  * <pre class="code">
- * &#064;IfProfileValue(name=&quot;test-groups&quot;, values={&quot;unit-tests&quot;, &quot;integration-tests&quot;})
+ * &#064;IfProfileValue(name = &quot;test-groups&quot;, values = { &quot;unit-tests&quot;, &quot;integration-tests&quot; })
  * public void testWhichRunsForUnitOrIntegrationTestGroups() {
- *     // ...
+ * 	// ...
  * }
  * </pre>
- *
+ * 
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
  * @see ProfileValueSource
  * @see ProfileValueSourceConfiguration
  * @see ProfileValueUtils
- * @see AbstractAnnotationAwareTransactionalTests
  * @see org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target( { ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface IfProfileValue {
 
 	/**
-	 * The <code>name</code> of the <em>profile value</em> against which to test.
+	 * The <code>name</code> of the <em>profile value</em> against which to
+	 * test.
 	 */
 	String name();
 
 	/**
 	 * A single, permissible <code>value</code> of the <em>profile value</em>
 	 * for the given {@link #name() name}.
-	 * <p>Note: Assigning values to both {@link #value()} and {@link #values()}
+	 * <p>
+	 * Note: Assigning values to both {@link #value()} and {@link #values()}
 	 * will lead to a configuration conflict.
 	 */
 	String value() default "";
@@ -94,7 +96,8 @@ public @interface IfProfileValue {
 	/**
 	 * A list of all permissible <code>values</code> of the
 	 * <em>profile value</em> for the given {@link #name() name}.
-	 * <p>Note: Assigning values to both {@link #value()} and {@link #values()}
+	 * <p>
+	 * Note: Assigning values to both {@link #value()} and {@link #values()}
 	 * will lead to a configuration conflict.
 	 */
 	String[] values() default {};
