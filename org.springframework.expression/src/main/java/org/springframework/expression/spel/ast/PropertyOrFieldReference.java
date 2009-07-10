@@ -59,7 +59,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		TypedValue result = readProperty(state, this.name);
 		TypeDescriptor resultDescriptor = result.getTypeDescriptor();
 		// Dynamically create the objects if the user has requested that optional behaviour
-		if (result.getValue()==null && state.configuredToCreateCollectionOrMap() && nextChildIs(Indexer.class,PropertyOrFieldReference.class)) {
+		if (result.getValue()==null && state.configuredToDynamicallyCreateNullObjects() && nextChildIs(Indexer.class,PropertyOrFieldReference.class)) {
 			// Creating lists and maps
 			if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
 				// Create a new collection or map ready for the indexer
