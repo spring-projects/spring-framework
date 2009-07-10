@@ -264,7 +264,7 @@ public class GenericBinderTests {
 		binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("addresses", "4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");		
-		binder.bind(values);
+		BindingResults results = binder.bind(values);
 		Assert.assertEquals(3, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
