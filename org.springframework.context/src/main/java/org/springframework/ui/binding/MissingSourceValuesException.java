@@ -25,6 +25,7 @@ import java.util.Map;
  * @since 3.0
  * @see Binder#bind(Map)
  */
+@SuppressWarnings("serial")
 public class MissingSourceValuesException extends RuntimeException {
 
 	private List<String> missing;
