@@ -129,17 +129,6 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals("Class name did not match", "ClassUtilsTests.InnerClass", className);
 	}
 
-	@Ignore
-	public void ignoreTestGetShortNameForCglibClass() {
-//		TestBean tb = new TestBean();
-//		ProxyFactory pf = new ProxyFactory();
-//		pf.setTarget(tb);
-//		pf.setProxyTargetClass(true);
-//		TestBean proxy = (TestBean) pf.getProxy();
-//		String className = ClassUtils.getShortName(proxy.getClass());
-//		assertEquals("Class name did not match", "TestBean", className);
-	}
-
 	public void testGetShortNameAsProperty() {
 		String shortName = ClassUtils.getShortNameAsProperty(this.getClass());
 		assertEquals("Class name did not match", "classUtilsTests", shortName);

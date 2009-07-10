@@ -23,6 +23,7 @@
 		<conf name="poi" extends="runtime" description="JARs needed to create beans for Poi"/>
 		<conf name="tiles" extends="runtime" description="JARs neeeded to create beans for Tiles"/>
 		<conf name="velocity" extends="runtime" description="JARs needed to create beans for Velocity"/>
+		<conf name="hibernate" extends="runtime" description="JARs needed to use Hibernate"/>
 	</configurations>
 
 	<publications>
@@ -90,7 +91,13 @@
 		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.1.3" conf="test->compile"/>
 		<dependency org="org.mozilla.javascript" name="com.springsource.org.mozilla.javascript" rev="1.7.0.R2"
                     conf="test->runtime"/>
-
+		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration"
+                    conf="test->compile"/>
+		<dependency org="org.springframework" name="org.springframework.orm" rev="latest.integration"
+                    conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" 
+		    conf="test->compile"/>
+		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
 	</dependencies>
 
 </ivy-module>
