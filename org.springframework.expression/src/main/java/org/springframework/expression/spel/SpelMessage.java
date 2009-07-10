@@ -90,7 +90,9 @@ public enum SpelMessage {
 	RUN_OUT_OF_ARGUMENTS(Kind.ERROR,1051,"Unexpected ran out of arguments"),//
 	UNABLE_TO_GROW_COLLECTION(Kind.ERROR,1052,"Unable to grow collection"),//
 	UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE(Kind.ERROR,1053,"Unable to grow collection: unable to determine list element type"),//
-	UNABLE_TO_CREATE_LIST_FOR_INDEXING(Kind.ERROR,1054,"Unable to create a List for the following indexer"),//
+	UNABLE_TO_CREATE_LIST_FOR_INDEXING(Kind.ERROR,1054,"Unable to dynamically create a List to replace a null value"),//
+	UNABLE_TO_CREATE_MAP_FOR_INDEXING(Kind.ERROR,1055,"Unable to dynamically create a Map to replace a null value"),//
+	UNABLE_TO_DYNAMICALLY_CREATE_OBJECT(Kind.ERROR,1056,"Unable to dynamically create instance of ''{0}'' to replace a null value"),//
 	;
 
 	private Kind kind;
