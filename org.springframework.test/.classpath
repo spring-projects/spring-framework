@@ -27,6 +27,10 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-1.6.2.RELEASE.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.el/com.springsource.javax.el/1.0.0/com.springsource.javax.el-1.0.0.jar" sourcepath="/IVY_CACHE/javax.el/com.springsource.javax.el/1.0.0/com.springsource.javax.el-sources-1.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-3.2.0.jar" sourcepath="/IVY_CACHE/org.apache.commons/com.springsource.org.apache.commons.collections/3.2.0/com.springsource.org.apache.commons.collections-sources-3.2.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-3.3.1.GA.jar" sourcepath="/IVY_CACHE/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-sources-3.3.1.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-1.8.0.9.jar" sourcepath="/IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-sources-1.8.0.9.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.slf4j/com.springsource.slf4j.api/1.5.3/com.springsource.slf4j.api-1.5.3.jar" sourcepath="/IVY_CACHE/org.slf4j/com.springsource.slf4j.api/1.5.3/com.springsource.slf4j.api-sources-1.5.3.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-1.5.3.jar" sourcepath="/IVY_CACHE/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-sources-1.5.3.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-2.7.6.jar" sourcepath="/IVY_CACHE/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-sources-2.7.6.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

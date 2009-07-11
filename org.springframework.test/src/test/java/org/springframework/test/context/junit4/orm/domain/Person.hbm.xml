@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+		"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="true" default-lazy="false">
+
+	<class name="org.springframework.test.context.junit4.orm.domain.Person" table="person">
+		<id name="id" column="id">
+			<generator class="identity" />
+		</id>
+		<property name="name" column="name" />
+		<many-to-one name="driversLicense" class="org.springframework.test.context.junit4.orm.domain.DriversLicense"
+			column="drivers_license_id" unique="true" />
+	</class>
+
+</hibernate-mapping>
