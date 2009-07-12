@@ -231,20 +231,22 @@ public class GenericTypeConverterTests {
 	}
 
 	@Test
-	public void convertObjectToArray() {
+	public void convertStringToArray() {
 		String[] result = (String[]) converter.convert("1,2,3", String[].class);
 		assertEquals(3, result.length);
 		assertEquals("1", result[0]);
 		assertEquals("2", result[1]);
 		assertEquals("3", result[2]);
 	}
-
+	
 	@Test
-	public void convertObjectToArrayWithElementConversion() {
-		converter.add(new StringToInteger());
-		Integer[] result = converter.convert("123", Integer[].class);
-		assertEquals(1, result.length);
-		assertEquals(new Integer(123), result[0]);
+	public void convertStringToArrayWithElementConversion() {
+		converter.add(new StringToInteger());		
+		Integer[] result = (Integer[]) converter.convert("1,2,3", Integer[].class);
+		assertEquals(3, result.length);
+		assertEquals(new Integer(1), result[0]);
+		assertEquals(new Integer(2), result[1]);
+		assertEquals(new Integer(3), result[2]);
 	}
 
 	public static enum FooEnum {
