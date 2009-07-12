@@ -26,11 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 
 public class GenericTypeConverterTests {
@@ -112,22 +111,6 @@ public class GenericTypeConverterTests {
 		});
 		Integer result = converter.convert("3", Integer.class);
 		assertEquals(new Integer(3), result);
-	}
-
-	@Test
-	@Ignore
-	public void convertNoSuperTargetType() {
-		converter.add(new Converter<CharSequence, Number>() {
-			public Integer convert(CharSequence source) throws Exception {
-				return Integer.valueOf(source.toString());
-			}
-		});
-		try {
-			converter.convert("3", Integer.class);
-			fail("Should have failed");
-		} catch (ConverterNotFoundException e) {
-
-		}
 	}
 
 	@Test
