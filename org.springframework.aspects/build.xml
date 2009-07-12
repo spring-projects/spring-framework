@@ -34,4 +34,10 @@
 		<test-run classpath.id="test.run.classpath"/>
 	</target>
 
+	<target name="clover.instrument" depends="ivy.init, resolve.test, compile.init, clover.init">
+		<!--
+		Override to avoid build failure. Created SPR-5921 to fix this propertly
+		-->
+	</target>
+	
 </project>
