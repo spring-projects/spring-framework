@@ -18,6 +18,18 @@ package org.springframework.core.convert.support;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 
+/**
+ * Converts a String to a map.
+ * The String should be in the format:
+ * <pre>
+ * key=value
+ * key=value
+ * key=value
+ * key=value
+ * </pre>
+ * @author Keith Donald
+ * @since 3.0
+ */
 @SuppressWarnings("unchecked")
 class StringToMap implements ConversionExecutor {
 

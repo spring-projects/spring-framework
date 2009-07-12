@@ -22,9 +22,10 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * A converter that can convert from one collection type to another.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
+@SuppressWarnings("unchecked")
 class CollectionToCollection extends AbstractCollectionConverter {
 	
 	public CollectionToCollection(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType,
@@ -33,10 +34,9 @@ class CollectionToCollection extends AbstractCollectionConverter {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Object doExecute(Object source) throws Exception {
 		Collection sourceCollection = (Collection) source;
-		Class implClass = CollectionConversionUtils.getImpl(getTargetCollectionType());
+		Class implClass = ConversionUtils.getCollectionImpl((Class<? extends Collection>) getTargetCollectionType());
 		Collection targetCollection = (Collection) implClass.newInstance();
 		ConversionExecutor elementConverter = getElementConverter(sourceCollection);
 		Iterator it = sourceCollection.iterator();

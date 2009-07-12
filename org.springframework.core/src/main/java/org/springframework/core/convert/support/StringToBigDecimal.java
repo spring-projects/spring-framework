@@ -21,8 +21,8 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts a String to a BigDecimal using {@link BigDecimal#BigDecimal(String).
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToBigDecimal implements Converter<String, BigDecimal> {
 	public BigDecimal convert(String source) {

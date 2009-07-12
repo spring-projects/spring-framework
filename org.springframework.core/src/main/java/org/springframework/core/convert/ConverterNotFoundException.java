@@ -17,8 +17,8 @@ package org.springframework.core.convert;
 
 /**
  * Thrown when a suitable converter could not be found in a conversion service.
- * 
  * @author Keith Donald
+ * @since 3.0 
  */
 public class ConverterNotFoundException extends ConvertException {
 

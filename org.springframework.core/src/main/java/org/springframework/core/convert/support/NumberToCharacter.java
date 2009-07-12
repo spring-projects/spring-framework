@@ -20,7 +20,7 @@ import org.springframework.util.NumberUtils;
 
 /**
  * Converts from any JDK-standard Number implementation to a Character.
- * 
+ * @author Keith Donald
  * @see java.lang.Character
  * @see java.lang.Short
  * @see java.lang.Integer
@@ -30,8 +30,7 @@ import org.springframework.util.NumberUtils;
  * @see java.lang.Double
  * @see java.math.BigDecimal
  * @see NumberUtils
- * 
- * @author Keith Donald
+ * @since 3.0
  */
 public class NumberToCharacter implements Converter<Number, Character> {
 	public Character convert(Number source) {

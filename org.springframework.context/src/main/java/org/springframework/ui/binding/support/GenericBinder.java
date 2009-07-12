@@ -750,6 +750,7 @@ public class GenericBinder implements Binder {
 							if (cause instanceof SpelEvaluationException
 									&& ((SpelEvaluationException) cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
 								// TODO this could be a ConverterExecutorNotFoundException if no suitable converter was found
+								cause.getCause().printStackTrace();
 								ConversionFailedException failure = (ConversionFailedException) cause.getCause();
 								MessageBuilder builder = new MessageBuilder(messageSource);
 								builder.code("conversionFailed");

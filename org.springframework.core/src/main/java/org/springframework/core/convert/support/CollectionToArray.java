@@ -23,14 +23,15 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special converter that converts from target collection to a source array.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
+@SuppressWarnings("unchecked")
 class CollectionToArray extends AbstractCollectionConverter {
 
-	public CollectionToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetCollectionType,
+	public CollectionToArray(TypeDescriptor sourceCollectionType, TypeDescriptor targetArrayType,
 			GenericTypeConverter conversionService) {
-		super(sourceArrayType, targetCollectionType, conversionService);
+		super(sourceCollectionType, targetArrayType, conversionService);
 	}
 
 	@Override

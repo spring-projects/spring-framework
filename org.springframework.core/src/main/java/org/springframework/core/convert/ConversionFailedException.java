@@ -19,8 +19,8 @@ import org.springframework.core.style.StylerUtils;
 
 /**
  * Thrown when an attempt to execute a type conversion fails.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class ConversionFailedException extends ConvertException {
 

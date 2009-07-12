@@ -19,8 +19,8 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts a String to Float using {@link Float#valueOf(String)}.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToFloat implements Converter<String, Float> {
 	public Float convert(String source) {

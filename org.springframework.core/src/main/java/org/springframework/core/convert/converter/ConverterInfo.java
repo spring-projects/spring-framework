@@ -19,9 +19,12 @@ import org.springframework.core.convert.TypeConverter;
 
 /**
  * A meta interface a Converter may implement to describe what types he can convert between.
- * Implementing this interface is required for converters that do not declare their parameterized types S and T and expect to be registered with a {@link TypeConverter}.
+ * Implementing this interface is required when registering converters that do not declare their parameterized types S and T with a {@link TypeConverter}.
+ * Such Converters are often dynamically created by a {@link ConverterFactory}.
+ * @author Keith Donald
+ * @since 3.0
  * @see Converter
- * @see SuperConverter
+ * @see ConverterFactory
  */
 public interface ConverterInfo {
 

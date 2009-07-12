@@ -219,7 +219,6 @@ public class GenericTypeConverterTests {
 	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
 
 	@Test
-	@Ignore
 	public void convertMapToMap() throws Exception {
 		Map<String, String> foo = new HashMap<String, String>();
 		foo.put("1", "BAR");
@@ -231,15 +230,15 @@ public class GenericTypeConverterTests {
 		assertEquals(map.get(2), FooEnum.BAZ);
 	}
 
-	@Ignore
 	@Test
 	public void convertObjectToArray() {
 		String[] result = (String[]) converter.convert("1,2,3", String[].class);
-		assertEquals(1, result.length);
-		assertEquals("1,2,3", result[0]);
+		assertEquals(3, result.length);
+		assertEquals("1", result[0]);
+		assertEquals("2", result[1]);
+		assertEquals("3", result[2]);
 	}
 
-	@Ignore
 	@Test
 	public void convertObjectToArrayWithElementConversion() {
 		converter.add(new StringToInteger());

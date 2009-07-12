@@ -18,6 +18,7 @@ package org.springframework.core.convert.converter;
 /**
  * For registering converters with a type conversion system.
  * @author Keith Donald
+ * @since 3.0
  */
 public interface ConverterRegistry {
 	

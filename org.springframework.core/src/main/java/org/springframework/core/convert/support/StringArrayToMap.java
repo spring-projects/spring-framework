@@ -15,14 +15,18 @@
  */
 package org.springframework.core.convert.support;
 
-import java.util.HashMap;
+import java.lang.reflect.Array;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 
+/**
+ * Converts a String array to a Map.
+ * Each element in the array must be formatted as key=value.
+ * @author Keith Donald
+ * @since 3.0
+ */
 @SuppressWarnings("unchecked")
 class StringArrayToMap implements ConversionExecutor {
 
@@ -32,7 +36,7 @@ class StringArrayToMap implements ConversionExecutor {
 
 	private GenericTypeConverter conversionService;
 
-	private EntryConverter entryConverter;
+	private MapEntryConverter entryConverter;
 
 	public StringArrayToMap(TypeDescriptor sourceType, TypeDescriptor targetType, GenericTypeConverter conversionService) {
 		this.sourceType = sourceType;
@@ -41,24 +45,25 @@ class StringArrayToMap implements ConversionExecutor {
 		this.entryConverter = createEntryConverter();
 	}
 
-	private EntryConverter createEntryConverter() {
+	private MapEntryConverter createEntryConverter() {
 		if (targetType.isMapEntryTypeKnown()) {
 			ConversionExecutor keyConverter = conversionService.getConversionExecutor(String.class,
 					TypeDescriptor.valueOf(targetType.getMapKeyType()));
 			ConversionExecutor valueConverter = conversionService.getConversionExecutor(String.class,
 					TypeDescriptor.valueOf(targetType.getMapValueType()));
-			return new EntryConverter(keyConverter, valueConverter);
+			return new MapEntryConverter(keyConverter, valueConverter);
 		} else {
-			return EntryConverter.NO_OP_INSTANCE;
+			return MapEntryConverter.NO_OP_INSTANCE;
 		}
 	}
 
 	public Object execute(Object source) throws ConversionFailedException {
 		try {
-			Map targetMap = (Map) getImpl(targetType.getType()).newInstance();
-			String[] array = (String[]) source;
-			for (String string : array) {
-				String[] fields = string.split("=");
+			Map targetMap = (Map) ConversionUtils.getMapImpl(targetType.getType()).newInstance();
+			int length = Array.getLength(source);
+			for (int i = 0; i < length; i++) {
+				String property = (String) Array.get(source, i);
+				String[] fields = property.split("=");
 				String key = fields[0];
 				String value = fields[1];
 				targetMap.put(entryConverter.convertKey(key), entryConverter.convertValue(value));
@@ -67,55 +72,6 @@ class StringArrayToMap implements ConversionExecutor {
 		} catch (Exception e) {
 			throw new ConversionFailedException(source, sourceType.getType(), targetType.getType(), e);
 		}
-	}
-
-	static Class<?> getImpl(Class<?> targetClass) {
-		if (targetClass.isInterface()) {
-			if (Map.class.equals(targetClass)) {
-				return HashMap.class;
-			} else if (SortedMap.class.equals(targetClass)) {
-				return TreeMap.class;
-			} else {
-				throw new IllegalArgumentException("Unsupported Map interface [" + targetClass.getName() + "]");
-			}
-		} else {
-			return targetClass;
-		}
-	}
-
-	private static class EntryConverter {
-
-		public static final EntryConverter NO_OP_INSTANCE = new EntryConverter();
-
-		private ConversionExecutor keyConverter;
-
-		private ConversionExecutor valueConverter;
-
-		private EntryConverter() {
-
-		}
-
-		public EntryConverter(ConversionExecutor keyConverter, ConversionExecutor valueConverter) {
-			this.keyConverter = keyConverter;
-			this.valueConverter = valueConverter;
-		}
-
-		public Object convertKey(Object key) {
-			if (keyConverter != null) {
-				return keyConverter.execute(key);
-			} else {
-				return key;
-			}
-		}
-
-		public Object convertValue(Object value) {
-			if (valueConverter != null) {
-				return valueConverter.execute(value);
-			} else {
-				return value;
-			}
-		}
-
 	}
 
 }

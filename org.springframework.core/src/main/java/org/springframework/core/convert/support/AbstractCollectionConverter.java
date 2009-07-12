@@ -21,7 +21,9 @@ import org.springframework.core.convert.TypeDescriptor;
 /**
  * Base class for converters that convert to and from collection types (arrays and java.util.Collection types)
  * @author Keith Donald
+ * @since 3.0
  */
+@SuppressWarnings("unchecked")
 abstract class AbstractCollectionConverter implements ConversionExecutor {
 
 	private GenericTypeConverter conversionService;

@@ -21,8 +21,8 @@ import org.springframework.core.convert.ConversionFailedException;
  * A command parameterized with the information necessary to perform a conversion of a source input to a
  * target output. Encapsulates knowledge about how to convert source objects to a specific target type using a specific
  * converter.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public interface ConversionExecutor {
 

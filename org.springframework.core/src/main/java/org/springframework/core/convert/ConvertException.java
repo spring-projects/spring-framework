@@ -17,8 +17,8 @@ package org.springframework.core.convert;
 
 /**
  * Base class for exceptions thrown by the convert system.
- * 
  * @author Keith Donald
+ * @since 3.0 
  */
 public abstract class ConvertException extends RuntimeException {
 

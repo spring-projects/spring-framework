@@ -20,6 +20,7 @@ import org.springframework.core.convert.converter.Converter;
 /**
  * Converts a String to a Short using {@link Short#valueOf(String)}.
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToShort implements Converter<String, Short> {
 	public Short convert(String source) {

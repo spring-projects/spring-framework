@@ -25,6 +25,7 @@ import org.springframework.core.convert.TypeConverter;
  * invoked behind a {@link TypeConverter}.  They typically should not be called directly.
  * </p>
  * @author Keith Donald
+ * @since 3.0
  */
 public interface Converter<S, T> {
 

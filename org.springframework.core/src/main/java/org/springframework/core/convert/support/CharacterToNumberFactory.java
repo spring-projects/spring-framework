@@ -21,10 +21,11 @@ import org.springframework.util.NumberUtils;
 
 /**
  * Converts from a Character to any JDK-standard Number implementation.
- * 
+ * <p>
  * Support Number classes including Byte, Short, Integer, Float, Double, Long, BigInteger, BigDecimal. This class
  * delegates to {@link NumberUtils#convertNumberToTargetClass(Number, Class)} to perform the conversion.
- * 
+ * @author Keith Donald
+ * @since 3.0
  * @see java.lang.Byte
  * @see java.lang.Short
  * @see java.lang.Integer
@@ -33,9 +34,7 @@ import org.springframework.util.NumberUtils;
  * @see java.lang.Float
  * @see java.lang.Double
  * @see java.math.BigDecimal
- * @see NumberUtils
- * 
- * @author Keith Donald
+ * @see NumberUtils 
  */
 public class CharacterToNumberFactory implements ConverterFactory<Character, Number> {
 
