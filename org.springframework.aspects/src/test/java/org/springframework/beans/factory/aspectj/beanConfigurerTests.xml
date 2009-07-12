@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<context:spring-configured/>
+
+	<context:annotation-config/>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$WireArbitraryExistingPojo"
+			factory-method="aspectOf"/>
+
+	<bean id="beanOne" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ShouldBeConfiguredBySpring"
+			lazy-init="true">
+		<property name="name" value="Rod"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ShouldBeConfiguredBySpringUsingTypeNameAsBeanName"
+			lazy-init="true">
+		<property name="name" value="Rob"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$SubBean"
+			lazy-init="true">
+		<property name="name" value="Ramnivas"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$SubBeanPreConstruction"
+			lazy-init="true">
+		<property name="name" value="Ramnivas"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$SubSerializableBean"
+			lazy-init="true">
+		<property name="name" value="Ramnivas"/>
+	</bean>
+	
+	<bean id="circular" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$CircularFactoryBean"
+			autowire-candidate="false"/>
+	
+	<!-- Used as a target for autowiring by type -->
+	<bean id="ramnivas" class="org.springframework.beans.TestBean" depends-on="circular">
+		<property name="name" value="Ramnivas"/>
+		<property name="spouse" ref="circular"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ArbitraryExistingPojo">
+		<property name="friend" ref="ramnivas"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PreConstructionConfiguredBean">
+		<property name="name" value="ramnivas"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PostConstructionConfiguredBean">
+		<property name="name" value="ramnivas"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$GenericParameterConfigurableBean" scope="prototype">
+		<property name="testService" ref="testService"/>
+	</bean>
+
+	<bean id="testService" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$TestService"/>
+	<bean id="paymentService" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PaymentService"/>
+
+</beans>
