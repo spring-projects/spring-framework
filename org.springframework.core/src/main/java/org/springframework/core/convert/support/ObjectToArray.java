@@ -22,6 +22,7 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Converts an object to a single-element array.
+ * TODO - this class throws cryptic exception if it can't convert to required target array element type.
  * @author Keith Donald
  * @since 3.0
  */
@@ -39,8 +40,9 @@ class ObjectToArray implements ConversionExecutor {
 	}
 
 	public Object execute(Object source) throws ConversionFailedException {
-		Object array = Array.newInstance(targetArrayType.getType(), 1);
-		Array.set(array, 0, elementConverter.execute(source));		
+		Object array = Array.newInstance(targetArrayType.getElementType(), 1);
+		Object element = elementConverter.execute(source);
+		Array.set(array, 0, element);		
 		return array;
 	}
 
