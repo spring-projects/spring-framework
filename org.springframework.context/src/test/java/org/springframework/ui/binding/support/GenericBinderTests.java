@@ -324,7 +324,29 @@ public class GenericBinderTests {
 		String value = binder.getBinding("addresses").getValue();
 		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2,", value);
 	}
-	
+
+	@Test
+	@Ignore
+	public void getListAsSingleStringNoFormatter() {
+		binder.addBinding("addresses");
+		Address address1 = new Address();
+		address1.setStreet("s1");
+		address1.setCity("c1");
+		address1.setState("st1");
+		address1.setZip("z1");
+		Address address2 = new Address();
+		address2.setStreet("s2");
+		address2.setCity("c2");
+		address2.setState("st2");
+		address2.setZip("z2");
+		List<Address> addresses = new ArrayList<Address>(2);
+		addresses.add(address1);
+		addresses.add(address2);
+		bean.addresses = addresses;
+		String value = binder.getBinding("addresses").getValue();
+		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2,", value);
+	}
+
 	@Test
 	public void bindToListHandleNullValueInNestedPath() {
 		binder.addBinding("addresses.street");
