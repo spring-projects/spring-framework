@@ -17,23 +17,30 @@ package org.springframework.core.convert.support;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Util code shared by collection converters extending from {@link AbstractCollectionConverter}.
+ * Conversion utility code shared by internal conversion executors in this package.
+ * @author Keith Donald
+ * @since 3.0
  */
-class CollectionConversionUtils {
+class ConversionUtils {
 
 	/**
 	 * Get the java.util.Collection implementation class that should be used for the given target collection type.
 	 * @param targetCollectionType the target collection type, may be an interface
 	 * @return the collection impl to use
 	 */
-	public static Class<?> getImpl(Class<?> targetCollectionType) {
+	@SuppressWarnings("unchecked")
+	public static Class<? extends Collection> getCollectionImpl(Class<? extends Collection> targetCollectionType) {
 		if (targetCollectionType.isInterface()) {
 			if (List.class.equals(targetCollectionType)) {
 				return ArrayList.class;
@@ -48,6 +55,26 @@ class CollectionConversionUtils {
 			}
 		} else {
 			return targetCollectionType;
+		}
+	}
+
+	/**
+	 * Get the java.util.Map implementation class that should be used for the given target map type.
+	 * @param targetMapType the target map type, may be an interface
+	 * @return the map impl to use
+	 */
+	@SuppressWarnings("unchecked")
+	public static Class<? extends Map> getMapImpl(Class<? extends Map> targetMapType) {
+		if (targetMapType.isInterface()) {
+			if (Map.class.equals(targetMapType)) {
+				return HashMap.class;
+			} else if (SortedMap.class.equals(targetMapType)) {
+				return TreeMap.class;
+			} else {
+				throw new IllegalArgumentException("Unsupported Map interface [" + targetMapType.getName() + "]");
+			}
+		} else {
+			return targetMapType;
 		}
 	}
 
