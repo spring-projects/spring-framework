@@ -194,6 +194,13 @@ public class BeanConfigurerTests extends TestCase {
 		assertNotNull("Interface driven injection didn't occur for direct construction", testOrder.mailSender);
 	}
 
+	public void testGenericInterfaceDrivenDependencyInjection() {
+		PricingStrategy injectedPricingStrategy = new PricingStrategy();
+		PricingStrategyDependencyInjectionAspect.aspectOf().setPricingStrategy(injectedPricingStrategy);
+		LineItem testLineItem = new LineItem();
+		assertSame("Generic interface driven injection didn't occur for direct construction", injectedPricingStrategy, testLineItem.pricingStrategy);
+	}
+	
 	public void testInterfaceDrivenDependencyInjectionMultipleInterfaces() {
 		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
 		PaymentProcessorDependencyInjectionAspect.aspectOf().setPaymentProcessor(new PaymentProcessor());
@@ -509,6 +516,18 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+	private static aspect PricingStrategyDependencyInjectionAspect extends GenericInterfaceDrivenDependencyInjectionAspect<PricingStrategyClient> {
+		private PricingStrategy pricingStrategy;
+		
+		public void configure(PricingStrategyClient bean) {
+			bean.setPricingStrategy(pricingStrategy);
+		}
+		
+		public void setPricingStrategy(PricingStrategy pricingStrategy) {
+			this.pricingStrategy = pricingStrategy;
+		}
+	}
+	
 	public static interface MailSenderClient {
 		public void setMailSender(MailSender mailSender);
 	}
@@ -519,6 +538,22 @@ public class BeanConfigurerTests extends TestCase {
 	
 	public static class PaymentProcessor {
 		
+	}
+	
+	public static interface PricingStrategyClient {
+		public void setPricingStrategy(PricingStrategy pricingStrategy);
+	}
+	
+	public static class PricingStrategy {
+		
+	}
+	
+	public static class LineItem implements PricingStrategyClient {
+		private PricingStrategy pricingStrategy;
+		
+		public void setPricingStrategy(PricingStrategy pricingStrategy) {
+			this.pricingStrategy = pricingStrategy;
+		}
 	}
 	
 	public static class Order implements MailSenderClient, Serializable {
