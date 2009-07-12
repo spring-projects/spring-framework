@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 /**
  * Converts a String to a Locale using {@link StringUtils#parseLocaleString(String)}.
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToLocale implements Converter<String, Locale> {
 	public Locale convert(String source) {

@@ -20,8 +20,8 @@ package org.springframework.core.convert;
  * <p>
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.<br>
  * Call {@link #convert(Object, TypeDescriptor)} to perform a conversion with additional context about the targetType to convert to.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public interface TypeConverter {
 

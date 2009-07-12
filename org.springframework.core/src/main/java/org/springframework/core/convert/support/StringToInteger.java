@@ -20,6 +20,7 @@ import org.springframework.core.convert.converter.Converter;
 /**
  * Converts a String to an Integer using {@link Integer#valueOf(String)}.
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToInteger implements Converter<String, Integer> {
 	public Integer convert(String source) {

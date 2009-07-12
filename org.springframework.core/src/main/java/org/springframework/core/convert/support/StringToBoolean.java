@@ -20,9 +20,9 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts String to a Boolean.  The trueString and falseStrings are configurable.
- * 
- * @see #StringToBoolean(String, String)
  * @author Keith Donald
+ * @see #StringToBoolean(String, String)
+ * @since 3.0
  */
 public class StringToBoolean implements Converter<String, Boolean> {
 

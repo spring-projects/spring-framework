@@ -24,9 +24,10 @@ import org.springframework.core.convert.TypeDescriptor;
  * Special converter that converts from a source array to a target collection. Supports the selection of an
  * "approximate" collection implementation when a target collection interface such as <code>List.class</code> is
  * specified. Supports type conversion of array elements when a parameterized target collection type descriptor is provided.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
+@SuppressWarnings("unchecked")
 class ArrayToCollection extends AbstractCollectionConverter {
 
 	public ArrayToCollection(TypeDescriptor sourceArrayType, TypeDescriptor targetCollectionType,
@@ -35,9 +36,8 @@ class ArrayToCollection extends AbstractCollectionConverter {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Object doExecute(Object sourceArray) throws Exception {
-		Class implClass = CollectionConversionUtils.getImpl(getTargetCollectionType());
+		Class implClass = ConversionUtils.getCollectionImpl((Class<? extends Collection>) getTargetCollectionType());
 		Collection collection = (Collection) implClass.newInstance();
 		int length = Array.getLength(sourceArray);
 		ConversionExecutor elementConverter = getElementConverter();

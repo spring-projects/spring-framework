@@ -19,8 +19,8 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts a String to a Character and back.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToCharacter implements Converter<String, Character> {
 	public Character convert(String source) {

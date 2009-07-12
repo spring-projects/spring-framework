@@ -19,8 +19,8 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts a String to a Byte and back.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToByte implements Converter<String, Byte> {
 	public Byte convert(String source) {

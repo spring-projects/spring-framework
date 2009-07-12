@@ -281,6 +281,29 @@ public class GenericBinderTests {
 	}
 	
 	@Test
+	@Ignore
+	public void bindToListSingleStringNoListFormatter() {
+		binder.addBinding("addresses");
+		//binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
+		Map<String, String> values = new LinkedHashMap<String, String>();
+		values.put("addresses", "4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");		
+		BindingResults results = binder.bind(values);
+		Assert.assertEquals(3, bean.addresses.size());
+		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
+		assertEquals("Melbourne", bean.addresses.get(0).city);
+		assertEquals("FL", bean.addresses.get(0).state);
+		assertEquals("35452", bean.addresses.get(0).zip);
+		assertEquals("1234 Rostock Circle", bean.addresses.get(1).street);
+		assertEquals("Palm Bay", bean.addresses.get(1).city);
+		assertEquals("FL", bean.addresses.get(1).state);
+		assertEquals("32901", bean.addresses.get(1).zip);
+		assertEquals("1977 Bel Aire Estates", bean.addresses.get(2).street);
+		assertEquals("Coker", bean.addresses.get(2).city);
+		assertEquals("AL", bean.addresses.get(2).state);
+		assertEquals("12345", bean.addresses.get(2).zip);
+	}
+	
+	@Test
 	public void getListAsSingleString() {
 		binder.addBinding("addresses");
 		binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
@@ -348,7 +371,6 @@ public class GenericBinderTests {
 		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
 		values.put("favoriteFoodsByGroup", new String[] { "DAIRY=Milk", "FRUIT=Peaches", "MEAT=Ham" });		
 		BindingResults results = binder.bind(values);
-		System.out.println(results);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
@@ -363,8 +385,6 @@ public class GenericBinderTests {
 		values.put("favoriteFoodsByGroup['FRUIT']", "Peaches");
 		values.put("favoriteFoodsByGroup['MEAT']", "Ham");
 		BindingResults results = binder.bind(values);
-		System.out.println(results);
-		System.out.println(results);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
@@ -377,7 +397,6 @@ public class GenericBinderTests {
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("favoriteFoodsByGroup", "DAIRY=Milk FRUIT=Peaches MEAT=Ham");
 		BindingResults results = binder.bind(values);
-		System.out.println(results);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));

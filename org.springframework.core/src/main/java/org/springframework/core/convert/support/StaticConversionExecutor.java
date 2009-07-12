@@ -23,6 +23,7 @@ import org.springframework.core.style.ToStringCreator;
 /**
  * Default conversion executor implementation for converters.
  * @author Keith Donald
+ * @since 3.0
  */
 @SuppressWarnings("unchecked")
 class StaticConversionExecutor implements ConversionExecutor {

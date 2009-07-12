@@ -20,6 +20,7 @@ import org.springframework.core.convert.converter.Converter;
 /**
  * Converts a String to a Long using {@link Long#valueOf(String)}.
  * @author Keith Donald
+ * @since 3.0
  */
 public class StringToLong implements Converter<String, Long> {
 	public Long convert(String source) {

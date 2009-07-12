@@ -24,9 +24,10 @@ import org.springframework.core.convert.TypeDescriptor;
  * Special one-way converter that converts from a source array to a target array. Supports type conversion of the
  * individual array elements; for example, the ability to convert a String[] to an Integer[]. Mainly used internally by
  * {@link TypeConverter} implementations.
- * 
  * @author Keith Donald
+ * @since 3.0
  */
+@SuppressWarnings("unchecked")
 class ArrayToArray extends AbstractCollectionConverter {
 
 	public ArrayToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetArrayType, GenericTypeConverter conversionService) {

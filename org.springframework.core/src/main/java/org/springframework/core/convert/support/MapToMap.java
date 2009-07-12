@@ -15,11 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -27,6 +24,7 @@ import org.springframework.core.convert.TypeDescriptor;
 /**
  * Converts from one map to another map, with support for converting individual map elements based on generic type information.
  * @author Keith Donald
+ * @since 3.0
  */
 @SuppressWarnings("unchecked")
 class MapToMap implements ConversionExecutor {
@@ -37,7 +35,7 @@ class MapToMap implements ConversionExecutor {
 
 	private GenericTypeConverter conversionService;
 
-	private EntryConverter entryConverter;
+	private MapEntryConverter entryConverter;
 
 	/**
 	 * Creates a new map-to-map converter
@@ -52,23 +50,23 @@ class MapToMap implements ConversionExecutor {
 		this.entryConverter = createEntryConverter();
 	}
 
-	private EntryConverter createEntryConverter() {
+	private MapEntryConverter createEntryConverter() {
 		if (sourceType.isMapEntryTypeKnown() && targetType.isMapEntryTypeKnown()) {
 			ConversionExecutor keyConverter = conversionService.getConversionExecutor(sourceType.getMapKeyType(),
 					TypeDescriptor.valueOf(targetType.getMapKeyType()));
 			ConversionExecutor valueConverter = conversionService.getConversionExecutor(sourceType.getMapValueType(),
 					TypeDescriptor.valueOf(targetType.getMapValueType()));
-			return new EntryConverter(keyConverter, valueConverter);
+			return new MapEntryConverter(keyConverter, valueConverter);
 		} else {
-			return EntryConverter.NO_OP_INSTANCE;
+			return MapEntryConverter.NO_OP_INSTANCE;
 		}
 	}
 
 	public Object execute(Object source) throws ConversionFailedException {
 		try {
 			Map map = (Map) source;
-			Map targetMap = (Map) getImpl(targetType.getType()).newInstance();
-			EntryConverter converter = getEntryConverter(map);
+			Map targetMap = (Map) ConversionUtils.getMapImpl(targetType.getType()).newInstance();
+			MapEntryConverter converter = getEntryConverter(map);
 			Iterator<Map.Entry<?, ?>> it = map.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = it.next();
@@ -80,9 +78,9 @@ class MapToMap implements ConversionExecutor {
 		}
 	}
 
-	private EntryConverter getEntryConverter(Map<?, ?> map) {
-		EntryConverter entryConverter = this.entryConverter;
-		if (entryConverter == EntryConverter.NO_OP_INSTANCE) {
+	private MapEntryConverter getEntryConverter(Map<?, ?> map) {
+		MapEntryConverter entryConverter = this.entryConverter;
+		if (entryConverter == MapEntryConverter.NO_OP_INSTANCE) {
 			Class<?> targetKeyType = targetType.getMapKeyType();
 			Class<?> targetValueType = targetType.getMapValueType();
 			if (targetKeyType != null && targetValueType != null) {
@@ -105,59 +103,10 @@ class MapToMap implements ConversionExecutor {
 						break;
 					}
 				}
-				entryConverter = new EntryConverter(keyConverter, valueConverter);
+				entryConverter = new MapEntryConverter(keyConverter, valueConverter);
 			}
 		}
 		return entryConverter;
 	}
-
-	static Class<?> getImpl(Class<?> targetClass) {
-		if (targetClass.isInterface()) {
-			if (Map.class.equals(targetClass)) {
-				return HashMap.class;
-			} else if (SortedMap.class.equals(targetClass)) {
-				return TreeMap.class;
-			} else {
-				throw new IllegalArgumentException("Unsupported Map interface [" + targetClass.getName() + "]");
-			}
-		} else {
-			return targetClass;
-		}
-	}
-
-	private static class EntryConverter {
-
-		public static final EntryConverter NO_OP_INSTANCE = new EntryConverter();
-
-		private ConversionExecutor keyConverter;
-
-		private ConversionExecutor valueConverter;
-
-		private EntryConverter() {
-
-		}
-
-		public EntryConverter(ConversionExecutor keyConverter, ConversionExecutor valueConverter) {
-			this.keyConverter = keyConverter;
-			this.valueConverter = valueConverter;
-		}
-
-		public Object convertKey(Object key) {
-			if (keyConverter != null) {
-				return keyConverter.execute(key);
-			} else {
-				return key;
-			}
-		}
-
-		public Object convertValue(Object value) {
-			if (valueConverter != null) {
-				return valueConverter.execute(value);
-			} else {
-				return value;
-			}
-		}
-
-	}
-
+	
 }

@@ -25,11 +25,11 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 
-// TODO doesn't support more than depth of one (eg. Map<String,List<Foo>> or List<String>[])
 /**
  * Context about a type to convert to.
  * @author Keith Donald
  * @author Andy Clement
+ * @since 3.0 
  */
 public class TypeDescriptor<T> {
 
