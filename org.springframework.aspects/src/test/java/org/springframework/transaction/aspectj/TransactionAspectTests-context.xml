@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="transactionManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
+
+	<bean class="org.springframework.transaction.aspectj.AnnotationTransactionAspect" factory-method="aspectOf">
+		<property name="transactionManager" ref="transactionManager"/>
+	</bean>
+
+	<bean class="org.springframework.transaction.aspectj.TransactionalAnnotationOnlyOnClassWithNoInterface"/>
+
+	<bean class="org.springframework.transaction.aspectj.ClassWithProtectedAnnotatedMember"/>
+
+	<bean class="org.springframework.transaction.aspectj.ClassWithPrivateAnnotatedMember"/>
+
+</beans>
