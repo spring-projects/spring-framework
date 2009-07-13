@@ -14,8 +14,6 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Alerts;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
-import org.springframework.ui.binding.Bound;
-import org.springframework.ui.binding.Model;
 import org.springframework.ui.binding.support.WebBinder;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.validation.ValidationFailure;
@@ -277,14 +275,12 @@ public class BindAndValidateLifecycleTests {
 
 	}
 	
-	@Model(value="testBean")
 	public class TestAnnotatedBean {
 
 		private String editable;
 		
 		private String notEditable;
 		
-		@Bound
 		public String getEditable() {
 			return editable;
 		}
@@ -292,7 +288,7 @@ public class BindAndValidateLifecycleTests {
 		public void setEditable(String editable) {
 			this.editable = editable;
 		}
-		
+
 		public String getNotEditable() {
 			return notEditable;
 		}
