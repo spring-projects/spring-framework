@@ -66,6 +66,17 @@ public class ContentNegotiatingViewResolverTests {
 		assertEquals("Invalid content type", Collections.singletonList(new MediaType("application", "xhtml+xml")),
 				result);
 	}
+	
+	@Test
+	public void getMediaTypeParameter() {
+		viewResolver.setFavorParameter(true);
+		viewResolver.setMediaTypes(Collections.singletonMap("html", "application/xhtml+xml"));
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addParameter("format", "html");
+		List<MediaType> result = viewResolver.getMediaTypes(request);
+		assertEquals("Invalid content type", Collections.singletonList(new MediaType("application", "xhtml+xml")),
+				result);
+	}
 
 	@Test
 	public void getMediaTypeAcceptHeader() {
