@@ -26,7 +26,12 @@ public interface Binding {
 	 * The name of the bound model property.
 	 */
 	String getProperty();
-	
+
+	/**
+	 * The type of the underlying property associated with this binding.
+	 */
+	Class<?> getType();
+
 	/**
 	 * The formatted property value to display in the user interface.
 	 */
@@ -49,20 +54,20 @@ public interface Binding {
 	String format(Object potentialValue);
 
 	/**
-	 * Is this binding associated with a collection or array property?
-	 * If so, a client should call {@link #getCollectionValues()} to display property values in the user interface.
-	 * A client should call {@link #setValues(String[])} to set model property values from user-entered/selected values.
+	 * Is this a collection binding?
+	 * If so, a client may call {@link #getCollectionValues()} to get the collection element values for display in the user interface.
+	 * In this case, the client typically allocates one indexed field to each value.
+	 * A client may then call {@link #setValues(String[])} to update model property values from those fields.
+	 * Alternatively, a client may call {@link #getValue()} to render the collection as a single value for display in a single field, such as a large text area.
+	 * The client would then call {@link #setValue(Object)} to update that single value from the field.
 	 */
 	boolean isCollection();
 
 	/**
 	 * When a collection binding, the formatted values to display in the user interface.
+	 * If not a collection binding, throws an IllegalStateException.
+	 * @throws IllegalStateException
 	 */
 	String[] getCollectionValues();
-
-	/**
-	 * The type of the underlying property associated with this binding.
-	 */
-	Class<?> getType();
 
 }
