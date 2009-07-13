@@ -18,9 +18,12 @@ package org.springframework.http;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -51,24 +55,43 @@ import org.springframework.util.StringUtils;
  */
 public class HttpHeaders implements MultiValueMap<String, String> {
 
-	private static String ACCEPT = "Accept";
+	private static final String ACCEPT = "Accept";
 
-	private static String ACCEPT_CHARSET = "Accept-Charset";
+	private static final String ACCEPT_CHARSET = "Accept-Charset";
 
-	private static String ALLOW = "Allow";
+	private static final String ALLOW = "Allow";
 
-	private static String CONTENT_LENGTH = "Content-Length";
+	private static final String CONTENT_LENGTH = "Content-Length";
 
-	private static String CONTENT_TYPE = "Content-Type";
+	private static final String CONTENT_TYPE = "Content-Type";
 
-	private static String LOCATION = "Location";
+	private static final String DATE = "Date";
+
+	private static final String ETAG = "ETag";
+
+	private static final String EXPIRES = "Expires";
+
+	private static final String IF_NONE_MATCH = "If-None-Match";
+
+	private static final String LAST_MODIFIED = "Last-Modified";
+
+	private static final String LOCATION = "Location";
+
+
+	private static final String[] DATE_FORMATS = new String[] {
+		"EEE, dd MMM yyyy HH:mm:ss zzz",
+        "EEE, dd-MMM-yy HH:mm:ss zzz",
+        "EEE MMM dd HH:mm:ss yyyy"
+	};
+
+	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	private final Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<List<String>>(8);
 
 
 	/**
-	 * Set the list of acceptable {@linkplain MediaType media types}, as specified by the <code>Accept</code> header.
+	 * Set the list of acceptable {@linkplain MediaType media types}, as specified by the {@code Accept} header.
 	 * @param acceptableMediaTypes the acceptable media types
 	 */
 	public void setAccept(List<MediaType> acceptableMediaTypes) {
@@ -76,7 +99,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Return the list of acceptable {@linkplain MediaType media types}, as specified by the <code>Accept</code> header.
+	 * Return the list of acceptable {@linkplain MediaType media types}, as specified by the {@code Accept} header.
 	 * <p>Returns an empty list when the acceptable media types are unspecified.
 	 * @return the acceptable media types
 	 */
@@ -86,7 +109,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Set the list of acceptable {@linkplain Charset charsets}, as specified by the <code>Accept-Charset</code> header.
+	 * Set the list of acceptable {@linkplain Charset charsets}, as specified by the {@code Accept-Charset} header.
 	 * @param acceptableCharsets the acceptable charsets
 	 */
 	public void setAcceptCharset(List<Charset> acceptableCharsets) {
@@ -102,7 +125,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Return the list of acceptable {@linkplain Charset charsets}, as specified by the <code>Accept-Charset</code>
+	 * Return the list of acceptable {@linkplain Charset charsets}, as specified by the {@code Accept-Charset}
 	 * header.
 	 * @return the acceptable charsets
 	 */
@@ -125,7 +148,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified by the <code>Allow</code> header.
+	 * Set the set of allowed {@link HttpMethod HTTP methods}, as specified by the {@code Allow} header.
 	 * @param allowedMethods the allowed methods
 	 */
 	public void setAllow(Set<HttpMethod> allowedMethods) {
@@ -133,7 +156,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Return the set of allowed {@link HttpMethod HTTP methods}, as specified by the <code>Allow</code> header.
+	 * Return the set of allowed {@link HttpMethod HTTP methods}, as specified by the {@code Allow} header.
 	 * <p>Returns an empty set when the allowed methods are unspecified.
 	 * @return the allowed methods
 	 */
@@ -153,7 +176,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Set the length of the body in bytes, as specified by the <code>Content-Length</code> header.
+	 * Set the length of the body in bytes, as specified by the {@code Content-Length} header.
 	 * @param contentLength the content length
 	 */
 	public void setContentLength(long contentLength) {
@@ -161,7 +184,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Return the length of the body in bytes, as specified by the <code>Content-Length</code> header.
+	 * Return the length of the body in bytes, as specified by the {@code Content-Length} header.
 	 * <p>Returns -1 when the content-length is unknown.
 	 * @return the content length
 	 */
@@ -171,7 +194,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Set the {@linkplain MediaType media type} of the body, as specified by the <code>Content-Type</code> header.
+	 * Set the {@linkplain MediaType media type} of the body, as specified by the {@code Content-Type} header.
 	 * @param mediaType the media type
 	 */
 	public void setContentType(MediaType mediaType) {
@@ -181,8 +204,8 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Return the {@linkplain MediaType media type} of the body, as specified by the <code>Content-Type</code> header.
-	 * <p>Returns <code>null</code> when the content-type is unknown.
+	 * Return the {@linkplain MediaType media type} of the body, as specified by the {@code Content-Type} header.
+	 * <p>Returns {@code null} when the content-type is unknown.
 	 * @return the content type
 	 */
 	public MediaType getContentType() {
@@ -191,7 +214,119 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Set the (new) location of a resource, as specified by the <code>Location</code> header.
+	 * Sets the date and time at which the message was created, as specified by the {@code Date} header.
+	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
+	 * @param date the date
+	 */
+	public void setDate(long date) {
+		setDate(DATE, date);
+	}
+
+	/**
+	 * Returns the date and time at which the message was created, as specified by the {@code Date} header.
+	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @return the creation date/time
+	 * @throws IllegalArgumentException if the value can't be converted to a date
+	 */
+	public long getDate() {
+		return getFirstDate(DATE);
+	}
+
+	/**
+	 * Sets the (new) entity tag of the body, as specified by the {@code ETag} header.
+	 * @param eTag the new entity tag
+	 */
+	public void setETag(String eTag) {
+		set(ETAG, quote(eTag));
+	}
+
+	/**
+	 * Returns the entity tag of the body, as specified by the {@code ETag} header.
+	 * @return the entity tag
+	 */
+	public String getETag() {
+		return unquote(getFirst(ETAG));
+	}
+
+	/**
+	 * Sets the date and time at which the message is no longer valid, as specified by the {@code Expires} header.
+	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
+	 * @param expires the new expires header value
+	 */
+	public void setExpires(long expires) {
+		setDate(EXPIRES, expires);
+	}
+
+	/**
+	 * Returns the date and time at which the message is no longer valid, as specified by the {@code Expires} header.
+	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @return the expires value
+	 */
+	public long getExpires() {
+		return getFirstDate(EXPIRES);
+	}
+
+	/**
+	 * Sets the (new) value of the {@code If-None-Match} header.
+	 * @param ifNoneMatch the new value of the header
+	 */
+	public void setIfNoneMatch(String ifNoneMatch) {
+		set(IF_NONE_MATCH, quote(ifNoneMatch));
+	}
+
+	/**
+	 * Sets the (new) values of the {@code If-None-Match} header.
+	 * @param ifNoneMatchList the new value of the header
+	 */
+	public void setIfNoneMatch(List<String> ifNoneMatchList) {
+		StringBuilder builder = new StringBuilder();
+		for (Iterator<String> iterator = ifNoneMatchList.iterator(); iterator.hasNext();) {
+			String ifNoneMatch = iterator.next();
+			builder.append(quote(ifNoneMatch));
+			if (iterator.hasNext()) {
+				builder.append(", ");
+			}
+		}
+		set(IF_NONE_MATCH, builder.toString());
+	}
+
+	/**
+	 * Returns the value of the {@code If-None-Match} header.
+	 * @return the header value
+	 */
+	public List<String> getIfNoneMatch() {
+		List<String> result = new ArrayList<String>();
+
+		String value = getFirst(IF_NONE_MATCH);
+		if (value != null) {
+			String[] tokens = value.split(",\\s*");
+			for (String token : tokens) {
+				result.add(unquote(token));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Sets the time the resource was last changed, as specified by the {@code Last-Modified} header.
+	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
+	 * @param lastModified the last modified date
+	 */
+	public void setLastModified(long lastModified) {
+		setDate(LAST_MODIFIED, lastModified);
+	}
+
+	/**
+	 * Returns the time the resource was last changed, as specified by the {@code Last-Modified} header.
+	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @return the last modified date
+	 */
+	public long getLastModified() {
+		return getFirstDate(LAST_MODIFIED);
+	}
+
+	/**
+	 * Set the (new) location of a resource, as specified by the {@code Location} header.
 	 * @param location the location
 	 */
 	public void setLocation(URI location) {
@@ -199,8 +334,8 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Return the (new) location of a resource, as specified by the <code>Location</code> header.
-	 * <p>Returns <code>null</code> when the location is unknown.
+	 * Return the (new) location of a resource, as specified by the {@code Location} header.
+	 * <p>Returns {@code null} when the location is unknown.
 	 * @return the location
 	 */
 	public URI getLocation() {
@@ -208,13 +343,64 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 		return (value != null ? URI.create(value) : null);
 	}
 
+	// Utility methods
+
+	private String quote(String s) {
+		Assert.notNull(s);
+		if (!s.startsWith("\"")) {
+			s = "\"" + s;
+		}
+		if (!s.endsWith("\"")) {
+			s = s + "\"";
+		}
+		return s;
+	}
+
+	private String unquote(String s) {
+		if (s == null) {
+			return null;
+		}
+		if (s.startsWith("\"")) {
+			s = s.substring(1);
+		}
+		if (s.endsWith("\"")) {
+			s = s.substring(0, s.length() - 1);
+		}
+		return s;
+	}
+
+
+	private long getFirstDate(String headerName) {
+		String headerValue = getFirst(headerName);
+		if (headerValue == null) {
+			return -1;
+		}
+		for (String dateFormat : DATE_FORMATS) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+			simpleDateFormat.setTimeZone(GMT);
+			try {
+				return simpleDateFormat.parse(headerValue).getTime();
+			}
+			catch (ParseException e) {
+				// ignore
+			}
+		}
+		throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
+				"\" for \"" + headerName + "\" header");
+	}
+
+	private void setDate(String headerName, long date) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMATS[0]);
+		dateFormat.setTimeZone(GMT);
+		set(headerName, dateFormat.format(new Date(date)));
+	}
 
 	// Single string methods
 
 	/**
 	 * Return the first header value for the given header name, if any.
 	 * @param headerName the header name
-	 * @return the first header value; or <code>null</code>
+	 * @return the first header value; or {@code null}
 	 */
 	public String getFirst(String headerName) {
 		List<String> headerValues = headers.get(headerName);
