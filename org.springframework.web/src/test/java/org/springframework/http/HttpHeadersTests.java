@@ -20,14 +20,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.EnumSet;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.http.MediaType;
 
 /**
  * @author Arjen Poutsma
@@ -96,4 +97,74 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Location header", location, headers.getLocation());
 		assertEquals("Invalid Location header", "http://www.example.com/hotels", headers.getFirst("Location"));
 	}
+
+	@Test
+	public void eTag() {
+		String eTag = "v2.6";
+		headers.setETag(eTag);
+		assertEquals("Invalid ETag header", eTag, headers.getETag());
+		assertEquals("Invalid ETag header", "\"v2.6\"", headers.getFirst("ETag"));
+	}
+
+	@Test
+	public void ifNoneMatch() {
+		String ifNoneMatch = "v2.6";
+		headers.setIfNoneMatch(ifNoneMatch);
+		assertEquals("Invalid If-None-Match header", ifNoneMatch, headers.getIfNoneMatch().get(0));
+		assertEquals("Invalid If-None-Match header", "\"v2.6\"", headers.getFirst("If-None-Match"));
+	}
+
+	@Test
+	public void ifNoneMatchList() {
+		String ifNoneMatch1 = "v2.6";
+		String ifNoneMatch2 = "v2.7";
+		List<String> ifNoneMatchList = new ArrayList<String>(2);
+		ifNoneMatchList.add(ifNoneMatch1);
+		ifNoneMatchList.add(ifNoneMatch2);
+		headers.setIfNoneMatch(ifNoneMatchList);
+		assertEquals("Invalid If-None-Match header", ifNoneMatchList, headers.getIfNoneMatch());
+		assertEquals("Invalid If-None-Match header", "\"v2.6\", \"v2.7\"", headers.getFirst("If-None-Match"));
+	}
+
+
+	@Test
+	public void date() {
+		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
+		long date = calendar.getTimeInMillis();
+		headers.setDate(date);
+		assertEquals("Invalid Date header", date, headers.getDate());
+		assertEquals("Invalid Date header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("date"));
+
+		// RFC 850
+		headers.set("Date", "Thursday, 18-Dec-08 11:20:00 CET");
+		assertEquals("Invalid Date header", date, headers.getDate());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void dateInvalid() {
+		headers.set("Date", "Foo Bar Baz");
+		headers.getDate();
+	}
+
+	@Test
+	public void lastModified() {
+		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
+		long date = calendar.getTimeInMillis();
+		headers.setLastModified(date);
+		assertEquals("Invalid Last-Modified header", date, headers.getLastModified());
+		assertEquals("Invalid Last-Modified header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("last-modified"));
+	}
+	
+	@Test
+	public void expires() {
+		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
+		long date = calendar.getTimeInMillis();
+		headers.setExpires(date);
+		assertEquals("Invalid Expires header", date, headers.getExpires());
+		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
+	}
+
 }
