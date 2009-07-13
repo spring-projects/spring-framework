@@ -405,7 +405,7 @@ public class AntPathMatcher implements PathMatcher {
 				return 1;
 			}
 			int bracketCount1 = StringUtils.countOccurrencesOf(pattern1, "{");
-			int bracketCount2 = StringUtils.countOccurrencesOf(pattern1, "{");
+			int bracketCount2 = StringUtils.countOccurrencesOf(pattern2, "{");
 			if (bracketCount1 < bracketCount2) {
 				return -1;
 			}
