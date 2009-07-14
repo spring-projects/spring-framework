@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding.support;
+package org.springframework.ui.binding;
 
+import org.springframework.ui.binding.support.GenericBinder;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A fluent interface for configuring a newly added binding to a property path.
+ * A fluent interface for configuring a newly added binding.
  * @author Keith Donald
  * @see GenericBinder#addBinding(String)
  */

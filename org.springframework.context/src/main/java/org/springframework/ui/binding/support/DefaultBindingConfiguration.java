@@ -15,6 +15,7 @@
  */
 package org.springframework.ui.binding.support;
 
+import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.format.Formatter;
 
 final class DefaultBindingConfiguration implements BindingConfiguration {
