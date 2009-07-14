@@ -61,6 +61,8 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 
 	private static final String ALLOW = "Allow";
 
+	private static final String CACHE_CONTROL = "Cache-Control";
+
 	private static final String CONTENT_LENGTH = "Content-Length";
 
 	private static final String CONTENT_TYPE = "Content-Type";
@@ -71,11 +73,15 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 
 	private static final String EXPIRES = "Expires";
 
+	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+
 	private static final String IF_NONE_MATCH = "If-None-Match";
 
 	private static final String LAST_MODIFIED = "Last-Modified";
 
 	private static final String LOCATION = "Location";
+
+	private static final String PRAGMA = "Pragma";
 
 
 	private static final String[] DATE_FORMATS = new String[] {
@@ -176,6 +182,22 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
+	 * Sets the (new) value of the {@code Cache-Control} header.
+	 * @param cacheControl the value of the header
+	 */
+	public void setCacheControl(String cacheControl) {
+		set(CACHE_CONTROL, cacheControl);
+	}
+
+	/**
+	 * Returns the value of the {@code Cache-Control} header.
+	 * @return the value of the header
+	 */
+	public String getCacheControl() {
+		return getFirst(CACHE_CONTROL);
+	}
+
+	/**
 	 * Set the length of the body in bytes, as specified by the {@code Content-Length} header.
 	 * @param contentLength the content length
 	 */
@@ -267,6 +289,24 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
+	 * Sets the (new) value of the {@code If-Modified-Since} header.
+	 * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
+	 * @param ifModifiedSince the new value of the header
+	 */
+	public void setIfModifiedSince(long ifModifiedSince) {
+		setDate(IF_MODIFIED_SINCE, ifModifiedSince);
+	}
+
+	/**
+	 * Returns the value of the {@code IfModifiedSince} header.
+	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * @return the header value
+	 */
+	public long getIfNotModifiedSince() {
+		return getFirstDate(IF_MODIFIED_SINCE);
+	}
+
+	/**
 	 * Sets the (new) value of the {@code If-None-Match} header.
 	 * @param ifNoneMatch the new value of the header
 	 */
@@ -341,6 +381,22 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	public URI getLocation() {
 		String value = getFirst(LOCATION);
 		return (value != null ? URI.create(value) : null);
+	}
+
+	/**
+	 * Sets the (new) value of the {@code Pragma} header.
+	 * @param pragma the value of the header
+	 */
+	public void setPragma(String pragma) {
+		set(PRAGMA, pragma);
+	}
+
+	/**
+	 * Returns the value of the {@code Pragma} header.
+	 * @return the value of the header
+	 */
+	public String getPragma() {
+		return getFirst(PRAGMA);
 	}
 
 	// Utility methods

@@ -167,4 +167,32 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
 	}
 
+	@Test
+	public void ifModifiedSince() {
+		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
+		long date = calendar.getTimeInMillis();
+		headers.setIfModifiedSince(date);
+		assertEquals("Invalid If-Modified-Since header", date, headers.getIfNotModifiedSince());
+		assertEquals("Invalid If-Modified-Since header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("if-modified-since"));
+	}
+
+	@Test
+	public void pragma() {
+		String pragma = "no-cache";
+		headers.setPragma(pragma);
+		assertEquals("Invalid Pragma header", pragma, headers.getPragma());
+		assertEquals("Invalid Pragma header", "no-cache", headers.getFirst("pragma"));
+	}
+
+	@Test
+	public void cacheControl() {
+		String cacheControl = "no-cache";
+		headers.setCacheControl(cacheControl);
+		assertEquals("Invalid Cache-Control header", cacheControl, headers.getCacheControl());
+		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
+	}
+
+
+
 }
