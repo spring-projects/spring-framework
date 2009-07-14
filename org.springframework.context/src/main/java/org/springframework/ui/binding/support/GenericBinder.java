@@ -55,6 +55,7 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.BindingConfiguration;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.MissingSourceValuesException;
@@ -84,7 +85,7 @@ public class GenericBinder implements Binder {
 
 	private Object model;
 
-	private Set<BindingFactory> bindingFactories;
+	public Set<BindingFactory> bindingFactories;
 
 	private FormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 
@@ -269,7 +270,7 @@ public class GenericBinder implements Binder {
 		return context;
 	}
 
-	class BindingFactory {
+	public class BindingFactory {
 
 		private DefaultBindingConfiguration configuration;
 		
