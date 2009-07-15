@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,9 +79,14 @@ public class FileEditor extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
+		if (!StringUtils.hasText(text)) {
+			setValue(null);
+			return;
+		}
+
 		// Check whether we got an absolute file path without "file:" prefix.
 		// For backwards compatibility, we'll consider those as straight file path.
-		if (StringUtils.hasText(text) && !ResourceUtils.isUrl(text)) {
+		if (!ResourceUtils.isUrl(text)) {
 			File file = new File(text);
 			if (file.isAbsolute()) {
 				setValue(file);
@@ -92,10 +97,11 @@ public class FileEditor extends PropertyEditorSupport {
 		// Proceed with standard resource location parsing.
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
-		// Non URLs will be treated as relative paths if the resource was not found
-		if(ResourceUtils.isUrl(text) || resource.exists()) {
+
+		// If it's a URL or a path pointing to an existing resource, use it as-is.
+		if (ResourceUtils.isUrl(text) || resource.exists()) {
 			try {
-				setValue(resource != null ? resource.getFile() : null);
+				setValue(resource.getFile());
 			}
 			catch (IOException ex) {
 				throw new IllegalArgumentException(
@@ -103,9 +109,8 @@ public class FileEditor extends PropertyEditorSupport {
 			}
 		}
 		else {
-			// Create a relative File reference and hope for the best
-			File file = new File(text);
-			setValue(file);
+			// Create a relative File reference and hope for the best.
+			setValue(new File(text));
 		}
 	}
 
