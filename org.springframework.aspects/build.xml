@@ -45,5 +45,11 @@
 		Override to avoid build failure. Created SPR-5921 to fix this propertly
 		-->
 	</target>
+	
+	<target name="clover.do">
+		<!--
+		Override to avoid build failure. Created SPR-5921 to fix this propertly
+		-->
+	</target>
 
 </project>
