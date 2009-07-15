@@ -117,7 +117,8 @@ class ConfigurationClassEnhancer {
 	 */
 	private Class<?> createClass(Enhancer enhancer) {
 		Class<?> subclass = enhancer.createClass();
-		Enhancer.registerCallbacks(subclass, this.callbackInstances.toArray(new Callback[this.callbackInstances.size()]));
+		// registering callbacks statically (as opposed to threadlocal) is critical for usage in an OSGi env (SPR-5932)
+		Enhancer.registerStaticCallbacks(subclass, this.callbackInstances.toArray(new Callback[this.callbackInstances.size()]));
 		return subclass;
 	}
 
