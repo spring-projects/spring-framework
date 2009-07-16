@@ -226,6 +226,12 @@ class ConstructorResolver {
 					argsToUse = args.arguments;
 					minTypeDiffWeight = typeDiffWeight;
 				}
+				else if (typeDiffWeight < Integer.MAX_VALUE && typeDiffWeight == minTypeDiffWeight &&
+						!mbd.isLenientConstructorResolution()) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+							"Ambiguous constructor matches found in bean '" + beanName + "' " +
+							"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
+				}
 			}
 
 			if (constructorToUse == null) {
@@ -561,21 +567,24 @@ class ConstructorResolver {
 				// We found a potential match - let's give it a try.
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
-				args.rawArguments[paramIndex] = valueHolder.getValue();
+				ConstructorArgumentValues.ValueHolder sourceHolder =
+						(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();
+				Object originalValue = valueHolder.getValue();
+				Object sourceValue = sourceHolder.getValue();
 				if (valueHolder.isConverted()) {
 					Object convertedValue = valueHolder.getConvertedValue();
+					args.rawArguments[paramIndex] =
+							(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
 					args.arguments[paramIndex] = convertedValue;
 					args.preparedArguments[paramIndex] = convertedValue;
 				}
 				else {
 					try {
-						Object originalValue = valueHolder.getValue();
 						Object convertedValue = converter.convertIfNecessary(originalValue, paramType,
 								MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
+						args.rawArguments[paramIndex] =
+								(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
 						args.arguments[paramIndex] = convertedValue;
-						ConstructorArgumentValues.ValueHolder sourceHolder =
-								(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();
-						Object sourceValue = sourceHolder.getValue();
 						if (originalValue == sourceValue || sourceValue instanceof TypedStringValue) {
 							// Either a converted value or still the original one: store converted value.
 							sourceHolder.setConvertedValue(convertedValue);
