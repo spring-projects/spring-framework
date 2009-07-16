@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -144,6 +143,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private ConstructorArgumentValues constructorArgumentValues;
 
+	private boolean lenientConstructorResolution = true;
+
 	private MutablePropertyValues propertyValues;
 
 	private MethodOverrides methodOverrides = new MethodOverrides();
@@ -167,7 +168,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private String description;
 
 	private Resource resource;
-
 
 	/**
 	 * Create a new AbstractBeanDefinition with default settings.
@@ -226,6 +226,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
 			copyQualifiersFrom(originalAbd);
 			setPrimary(originalAbd.isPrimary());
+			setLenientConstructorResolution(originalAbd.isLenientConstructorResolution());
 			setInitMethodName(originalAbd.getInitMethodName());
 			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
 			setDestroyMethodName(originalAbd.getDestroyMethodName());
@@ -297,6 +298,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setPrimary(otherAbd.isPrimary());
 			setDependencyCheck(otherAbd.getDependencyCheck());
 			setDependsOn(otherAbd.getDependsOn());
+			setLenientConstructorResolution(otherAbd.isLenientConstructorResolution());
 			if (otherAbd.getInitMethodName() != null) {
 				setInitMethodName(otherAbd.getInitMethodName());
 				setEnforceInitMethod(otherAbd.isEnforceInitMethod());
@@ -642,7 +644,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Copy the qualifiers from the supplied AbstractBeanDefinition to this bean definition.
 	 * @param source the AbstractBeanDefinition to copy from
 	 */
-	protected void copyQualifiersFrom(AbstractBeanDefinition source) {
+	public void copyQualifiersFrom(AbstractBeanDefinition source) {
 		Assert.notNull(source, "Source must not be null");
 		this.qualifiers.putAll(source.qualifiers);
 	}
@@ -668,6 +670,23 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public boolean hasConstructorArgumentValues() {
 		return !this.constructorArgumentValues.isEmpty();
+	}
+
+	/**
+	 * Specify whether to resolve constructors in lenient mode (<code>true</code>,
+	 * which is the default) or to switch to strict resolution (throwing an exception
+	 * in case of ambigious constructors that all match when converting the arguments,
+	 * whereas lenient mode would use the one with the 'closest' type matches).
+	 */
+	public void setLenientConstructorResolution(boolean lenientConstructorResolution) {
+		this.lenientConstructorResolution = lenientConstructorResolution;
+	}
+
+	/**
+	 * Return whether to resolve constructors in lenient mode or in strict mode.
+	 */
+	public boolean isLenientConstructorResolution() {
+		return this.lenientConstructorResolution;
 	}
 
 	/**

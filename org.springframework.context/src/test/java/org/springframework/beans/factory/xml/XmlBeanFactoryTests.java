@@ -56,6 +56,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
@@ -1363,6 +1364,21 @@ public final class XmlBeanFactoryTests {
 		assertEquals(Boolean.TRUE, bean.boolean2);
 	}
 
+	public @Test void testDoubleBooleanNoType() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("beanWithDoubleBooleanNoType");
+		bd.setLenientConstructorResolution(false);
+		try {
+			xbf.getBean("beanWithDoubleBooleanNoType");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			ex.printStackTrace();
+			assertTrue(ex.getMostSpecificCause().getMessage().contains("Ambiguous"));
+		}
+	}
+
 	public @Test void testPrimitiveConstructorArray() {
 		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArray");
@@ -1602,6 +1618,10 @@ public final class XmlBeanFactoryTests {
 		public DoubleBooleanConstructorBean(Boolean b1, Boolean b2) {
 			this.boolean1 = b1;
 			this.boolean2 = b2;
+		}
+
+		public DoubleBooleanConstructorBean(String s1, String s2) {
+			throw new IllegalStateException("Don't pick this constructor");
 		}
 	}
 
