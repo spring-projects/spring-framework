@@ -142,7 +142,8 @@ class ConstructorResolver {
 			if (candidates == null) {
 				Class beanClass = mbd.getBeanClass();
 				try {
-					candidates = beanClass.getDeclaredConstructors();
+					candidates = (mbd.isNonPublicAccessAllowed() ?
+							beanClass.getDeclaredConstructors() : beanClass.getConstructors());
 				}
 				catch (Throwable ex) {
 					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
@@ -354,7 +355,8 @@ class ConstructorResolver {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
-			Method[] rawCandidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+			Method[] rawCandidates = (mbd.isNonPublicAccessAllowed() ?
+					ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&

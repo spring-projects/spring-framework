@@ -141,9 +141,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private final Map<String, AutowireCandidateQualifier> qualifiers =
 			new LinkedHashMap<String, AutowireCandidateQualifier>();
 
-	private ConstructorArgumentValues constructorArgumentValues;
+	private boolean nonPublicAccessAllowed = true;
 
 	private boolean lenientConstructorResolution = true;
+
+	private ConstructorArgumentValues constructorArgumentValues;
 
 	private MutablePropertyValues propertyValues;
 
@@ -226,6 +228,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
 			copyQualifiersFrom(originalAbd);
 			setPrimary(originalAbd.isPrimary());
+			setNonPublicAccessAllowed(originalAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(originalAbd.isLenientConstructorResolution());
 			setInitMethodName(originalAbd.getInitMethodName());
 			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
@@ -298,6 +301,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setPrimary(otherAbd.isPrimary());
 			setDependencyCheck(otherAbd.getDependencyCheck());
 			setDependsOn(otherAbd.getDependsOn());
+			setNonPublicAccessAllowed(otherAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(otherAbd.isLenientConstructorResolution());
 			if (otherAbd.getInitMethodName() != null) {
 				setInitMethodName(otherAbd.getInitMethodName());
@@ -651,6 +655,44 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 
 	/**
+	 * Specify whether to allow access to non-public constructors and methods,
+	 * for the case of externalized metadata pointing to those.
+	 * <p>This applies to constructor resolution, factory method resolution,
+	 * and also init/destroy methods. Bean property accessors have to be public
+	 * in any case and are not affected by this setting.
+	 * <p>Note that annotation-driven configuration will still access non-public
+	 * members as far as they have been annotated. This setting applies to
+	 * externalized metadata in this bean definition only.
+	 */
+	public void setNonPublicAccessAllowed(boolean nonPublicAccessAllowed) {
+		this.nonPublicAccessAllowed = nonPublicAccessAllowed;
+	}
+
+	/**
+	 * Return whether to allow access to non-public constructors and methods.
+	 */
+	public boolean isNonPublicAccessAllowed() {
+		return this.nonPublicAccessAllowed;
+	}
+
+	/**
+	 * Specify whether to resolve constructors in lenient mode (<code>true</code>,
+	 * which is the default) or to switch to strict resolution (throwing an exception
+	 * in case of ambigious constructors that all match when converting the arguments,
+	 * whereas lenient mode would use the one with the 'closest' type matches).
+	 */
+	public void setLenientConstructorResolution(boolean lenientConstructorResolution) {
+		this.lenientConstructorResolution = lenientConstructorResolution;
+	}
+
+	/**
+	 * Return whether to resolve constructors in lenient mode or in strict mode.
+	 */
+	public boolean isLenientConstructorResolution() {
+		return this.lenientConstructorResolution;
+	}
+
+	/**
 	 * Specify constructor argument values for this bean.
 	 */
 	public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
@@ -670,23 +712,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public boolean hasConstructorArgumentValues() {
 		return !this.constructorArgumentValues.isEmpty();
-	}
-
-	/**
-	 * Specify whether to resolve constructors in lenient mode (<code>true</code>,
-	 * which is the default) or to switch to strict resolution (throwing an exception
-	 * in case of ambigious constructors that all match when converting the arguments,
-	 * whereas lenient mode would use the one with the 'closest' type matches).
-	 */
-	public void setLenientConstructorResolution(boolean lenientConstructorResolution) {
-		this.lenientConstructorResolution = lenientConstructorResolution;
-	}
-
-	/**
-	 * Return whether to resolve constructors in lenient mode or in strict mode.
-	 */
-	public boolean isLenientConstructorResolution() {
-		return this.lenientConstructorResolution;
 	}
 
 	/**
@@ -976,6 +1001,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (!ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers)) return false;
 		if (this.primary != that.primary) return false;
 
+		if (this.nonPublicAccessAllowed != that.nonPublicAccessAllowed) return false;
+		if (this.lenientConstructorResolution != that.lenientConstructorResolution) return false;
 		if (!ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides)) return false;

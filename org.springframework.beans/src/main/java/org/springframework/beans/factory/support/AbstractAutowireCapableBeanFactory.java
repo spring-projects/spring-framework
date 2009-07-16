@@ -1388,10 +1388,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			((InitializingBean) bean).afterPropertiesSet();
 		}
 
-		String initMethodName = (mbd != null ? mbd.getInitMethodName() : null);
-		if (initMethodName != null && !(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) &&
-				!mbd.isExternallyManagedInitMethod(initMethodName)) {
-			invokeCustomInitMethod(beanName, bean, initMethodName, mbd.isEnforceInitMethod());
+		if (mbd != null) {
+			String initMethodName = mbd.getInitMethodName();
+			if (initMethodName != null && !(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) &&
+					!mbd.isExternallyManagedInitMethod(initMethodName)) {
+				invokeCustomInitMethod(beanName, bean, mbd);
+			}
 		}
 	}
 
@@ -1406,12 +1408,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param enforceInitMethod indicates whether the defined init method needs to exist
 	 * @see #invokeInitMethods
 	 */
-	protected void invokeCustomInitMethod(
-			String beanName, Object bean, String initMethodName, boolean enforceInitMethod) throws Throwable {
-
-		Method initMethod = BeanUtils.findMethod(bean.getClass(), initMethodName, null);
+	protected void invokeCustomInitMethod(String beanName, Object bean, RootBeanDefinition mbd) throws Throwable {
+		String initMethodName = mbd.getInitMethodName();
+		Method initMethod = (mbd.isNonPublicAccessAllowed() ?
+				BeanUtils.findMethod(bean.getClass(), initMethodName) :
+				ClassUtils.getMethodIfAvailable(bean.getClass(), initMethodName));
 		if (initMethod == null) {
-			if (enforceInitMethod) {
+			if (mbd.isEnforceInitMethod()) {
 				throw new BeanDefinitionValidationException("Couldn't find an init method named '" +
 						initMethodName + "' on bean with name '" + beanName + "'");
 			}
