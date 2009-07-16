@@ -542,6 +542,17 @@ public abstract class ClassUtils {
 		}
 	}
 
+	/**
+	 * Check whether the given class matches the user-specified type name.
+	 * @param clazz the class to check
+	 * @param typeName the type name to match
+	 */
+	public static boolean matchesTypeName(Class clazz, String typeName) {
+		return (typeName != null &&
+				(typeName.equals(clazz.getName()) || typeName.equals(clazz.getSimpleName()) ||
+				(clazz.isArray() && typeName.equals(getQualifiedNameForArray(clazz)))));
+	}
+
 
 	/**
 	 * Determine whether the given class has a constructor with the given signature.
@@ -806,6 +817,7 @@ public abstract class ClassUtils {
 	 * @return the corresponding fully qualified class name
 	 */
 	public static String convertResourcePathToClassName(String resourcePath) {
+		Assert.notNull(resourcePath, "Resource path must not be null");
 		return resourcePath.replace('/', '.');
 	}
 
@@ -815,6 +827,7 @@ public abstract class ClassUtils {
 	 * @return the corresponding resource path, pointing to the class
 	 */
 	public static String convertClassNameToResourcePath(String className) {
+		Assert.notNull(className, "Class name must not be null");
 		return className.replace('.', '/');
 	}
 
