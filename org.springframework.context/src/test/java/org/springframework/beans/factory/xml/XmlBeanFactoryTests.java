@@ -53,10 +53,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
@@ -805,6 +805,7 @@ public final class XmlBeanFactoryTests {
 			fail("Must have thrown a FatalBeanException");
 		}
 		catch (FatalBeanException expected) {
+			// expected
 		}
 
 		DependenciesBean rod5 = (DependenciesBean) xbf.getBean("rod5");
@@ -1377,6 +1378,14 @@ public final class XmlBeanFactoryTests {
 			ex.printStackTrace();
 			assertTrue(ex.getMostSpecificCause().getMessage().contains("Ambiguous"));
 		}
+	}
+
+	public @Test void testStringConstructor() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("string");
+		bd.setLenientConstructorResolution(false);
+		String str = (String) xbf.getBean("string");
+		assertEquals("test", str);
 	}
 
 	public @Test void testPrimitiveConstructorArray() {
