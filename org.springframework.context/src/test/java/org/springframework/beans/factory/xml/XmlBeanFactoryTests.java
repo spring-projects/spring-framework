@@ -1363,6 +1363,22 @@ public final class XmlBeanFactoryTests {
 		assertEquals(Boolean.TRUE, bean.boolean2);
 	}
 
+	public @Test void testPrimitiveConstructorArray() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArray");
+		assertTrue(bean.array instanceof int[]);
+		assertEquals(1, ((int[]) bean.array).length);
+		assertEquals(1, ((int[]) bean.array)[0]);
+	}
+
+	public @Test void testIndexedPrimitiveConstructorArray() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("indexedConstructorArray");
+		assertTrue(bean.array instanceof int[]);
+		assertEquals(1, ((int[]) bean.array).length);
+		assertEquals(1, ((int[]) bean.array)[0]);
+	}
+
 	public @Test void testWithDuplicateName() throws Exception {
 		try {
 			new XmlBeanFactory(TEST_WITH_DUP_NAMES_CONTEXT);
@@ -1586,6 +1602,24 @@ public final class XmlBeanFactoryTests {
 		public DoubleBooleanConstructorBean(Boolean b1, Boolean b2) {
 			this.boolean1 = b1;
 			this.boolean2 = b2;
+		}
+	}
+
+
+	public static class ConstructorArrayTestBean {
+
+		public final Object array;
+
+		public ConstructorArrayTestBean(int[] array) {
+			this.array = array;
+		}
+
+		public ConstructorArrayTestBean(float[] array) {
+			this.array = array;
+		}
+
+		public ConstructorArrayTestBean(short[] array) {
+			this.array = array;
 		}
 	}
 

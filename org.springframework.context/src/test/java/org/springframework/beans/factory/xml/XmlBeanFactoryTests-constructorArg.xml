@@ -158,12 +158,32 @@
 		<constructor-arg value="false"/>
 	</bean>
 
+	<bean id="nan" class="java.lang.Double" factory-method="valueOf">
+		<constructor-arg value="NaN" type="double"/>
+	</bean>
+
 	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype">
 		<constructor-arg type="java.lang.Boolean"><value>true</value></constructor-arg>
 	</bean>
 
 	<bean id="beanWithDoubleBooleanAndIndex" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype">
 		<constructor-arg index="1"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="constructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean">
+		<constructor-arg type="int[]">
+			<array value-type="int">
+				<value>1</value>
+			</array>
+		</constructor-arg>
+	</bean>
+
+	<bean id="indexedConstructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean">
+		<constructor-arg index="0" type="int[]">
+			<array value-type="int">
+				<value>1</value>
+			</array>
+		</constructor-arg>
 	</bean>
 
 </beans>
