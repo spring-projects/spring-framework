@@ -573,20 +573,15 @@ class ConstructorResolver {
 						(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();
 				Object originalValue = valueHolder.getValue();
 				Object sourceValue = sourceHolder.getValue();
+				Object convertedValue;
 				if (valueHolder.isConverted()) {
-					Object convertedValue = valueHolder.getConvertedValue();
-					args.rawArguments[paramIndex] =
-							(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
-					args.arguments[paramIndex] = convertedValue;
+					convertedValue = valueHolder.getConvertedValue();
 					args.preparedArguments[paramIndex] = convertedValue;
 				}
 				else {
 					try {
-						Object convertedValue = converter.convertIfNecessary(originalValue, paramType,
+						convertedValue = converter.convertIfNecessary(originalValue, paramType,
 								MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
-						args.rawArguments[paramIndex] =
-								(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
-						args.arguments[paramIndex] = convertedValue;
 						if (originalValue == sourceValue || sourceValue instanceof TypedStringValue) {
 							// Either a converted value or still the original one: store converted value.
 							sourceHolder.setConvertedValue(convertedValue);
@@ -604,6 +599,15 @@ class ConstructorResolver {
 								ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
 								"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
 					}
+				}
+				args.arguments[paramIndex] = convertedValue;
+				if (mbd.isLenientConstructorResolution()) {
+					args.rawArguments[paramIndex] = originalValue;
+				}
+				else {
+					args.rawArguments[paramIndex] =
+							((sourceValue instanceof TypedStringValue && !((TypedStringValue) sourceValue).hasTargetType()) ?
+							convertedValue : originalValue);
 				}
 			}
 			else {

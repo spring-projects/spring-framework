@@ -175,6 +175,10 @@
 		<constructor-arg index="1"><value>true</value></constructor-arg>
 	</bean>
 
+	<bean id="string" class="java.lang.String" autowire-candidate="false">
+		<constructor-arg><value type="java.lang.String">test</value></constructor-arg>
+	</bean>
+
 	<bean id="constructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean">
 		<constructor-arg type="int[]">
 			<array value-type="int">
