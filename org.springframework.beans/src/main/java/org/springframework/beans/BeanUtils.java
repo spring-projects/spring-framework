@@ -158,7 +158,7 @@ public abstract class BeanUtils {
 	 * @see java.lang.Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
-	public static Method findMethod(Class clazz, String methodName, Class[] paramTypes) {
+	public static Method findMethod(Class clazz, String methodName, Class... paramTypes) {
 		try {
 			return clazz.getMethod(methodName, paramTypes);
 		}
@@ -195,7 +195,7 @@ public abstract class BeanUtils {
 	 * declared on the given class or one of its superclasses. Prefers public methods,
 	 * but will return a protected, package access, or private method too.
 	 * <p>Checks <code>Class.getMethods</code> first, falling back to
-	 * <code>findDeclaredMethodWithMinimalParameters</code>. This allows to find public
+	 * <code>findDeclaredMethodWithMinimalParameters</code>. This allows for finding public
 	 * methods without issues even in environments with restricted Java security settings.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
@@ -208,7 +208,7 @@ public abstract class BeanUtils {
 	public static Method findMethodWithMinimalParameters(Class clazz, String methodName)
 			throws IllegalArgumentException {
 
-		Method targetMethod = doFindMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
+		Method targetMethod = findMethodWithMinimalParameters(clazz.getMethods(), methodName);
 		if (targetMethod == null) {
 			targetMethod = findDeclaredMethodWithMinimalParameters(clazz, methodName);
 		}
@@ -230,7 +230,7 @@ public abstract class BeanUtils {
 	public static Method findDeclaredMethodWithMinimalParameters(Class clazz, String methodName)
 			throws IllegalArgumentException {
 
-		Method targetMethod = doFindMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
+		Method targetMethod = findMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
 		if (targetMethod == null && clazz.getSuperclass() != null) {
 			targetMethod = findDeclaredMethodWithMinimalParameters(clazz.getSuperclass(), methodName);
 		}
@@ -246,7 +246,7 @@ public abstract class BeanUtils {
 	 * @throws IllegalArgumentException if methods of the given name were found but
 	 * could not be resolved to a unique method with minimal parameters
 	 */
-	private static Method doFindMethodWithMinimalParameters(Method[] methods, String methodName)
+	public static Method findMethodWithMinimalParameters(Method[] methods, String methodName)
 			throws IllegalArgumentException {
 
 		Method targetMethod = null;
