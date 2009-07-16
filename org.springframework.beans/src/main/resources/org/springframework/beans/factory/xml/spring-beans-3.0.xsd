@@ -531,6 +531,7 @@
 					<xsd:element ref="idref"/>
 					<xsd:element ref="value"/>
 					<xsd:element ref="null"/>
+					<xsd:element ref="array"/>
 					<xsd:element ref="list"/>
 					<xsd:element ref="set"/>
 					<xsd:element ref="map"/>
@@ -1012,6 +1013,7 @@
 				<xsd:element ref="idref"/>
 				<xsd:element ref="value"/>
 				<xsd:element ref="null"/>
+				<xsd:element ref="array"/>
 				<xsd:element ref="list"/>
 				<xsd:element ref="set"/>
 				<xsd:element ref="map"/>
