@@ -72,7 +72,7 @@ public class WebBinder extends GenericBinder {
 			} else if (field.startsWith(presentPrefix)) {
 				field = field.substring(presentPrefix.length());
 				if (!sourceValues.containsKey(field) && !sourceValues.containsKey(defaultPrefix + field)) {
-					value = getEmptyValue((BindingImpl) getBinding(field));
+					value = getEmptyValue((PropertyBinding) getBinding(field));
 					filteredValues.put(field, value);
 				}
 			} else {
@@ -82,8 +82,8 @@ public class WebBinder extends GenericBinder {
 		return filteredValues;
 	}
 
-	protected Object getEmptyValue(BindingImpl binding) {
-		Class<?> type = binding.getType();
+	protected Object getEmptyValue(PropertyBinding binding) {
+		Class<?> type = binding.getModel().getValueType();
 		if (boolean.class.equals(type) || Boolean.class.equals(type)) {
 			return Boolean.FALSE;
 		} else {

@@ -15,59 +15,128 @@
  */
 package org.springframework.ui.binding;
 
+import org.springframework.ui.alert.Alert;
+
 /**
- * A binding between a user interface element and a model property.
+ * A binding between a source element and a model property.
  * @author Keith Donald
  * @since 3.0
  */
 public interface Binding {
 
 	/**
-	 * The name of the bound model property.
+	 * The bound value to display in the UI.
+	 * Is the formatted model value if not dirty.
+	 * Is the buffered value if dirty.
 	 */
-	String getProperty();
+	Object getValue();
 
 	/**
-	 * The type of the underlying property associated with this binding.
+	 * If this Binding is read-only.
+	 * A read-only Binding cannot have source values applied and cannot be committed.
 	 */
-	Class<?> getType();
-
-	/**
-	 * The formatted property value to display in the user interface.
-	 */
-	String getValue();
-
-	/**
-	 * Set the property to the value provided.
-	 * The value may be a formatted String, a formatted String[] if a collection binding, or an Object of a type that can be coersed to the underlying property type.
-	 * @param value the new value to bind
-	 * @return a summary of the result of the binding
-	 * @throws BindException if an unrecoverable exception occurs 
-	 */
-	BindingResult setValue(Object value);
+	boolean isReadOnly();
 	
 	/**
-	 * Formats a candidate model property value for display in the user interface.
-	 * @param potentialValue a possible value
-	 * @return the formatted value to display in the user interface
+	 * Apply the source value to this binding.
+	 * The source value is parsed, validated, and stored in the binding's value buffer.
+	 * Sets 'dirty' status to true.
+	 * Sets 'valid' status to false if the source value is not valid.
+	 * @param sourceValue
+	 * @throws IllegalStateException if read only
 	 */
-	String format(Object potentialValue);
+	void applySourceValue(Object sourceValue);
+	
+	/**
+	 * True if there is an uncommitted value in the binding buffer.
+	 * Set to true after applying a source value.
+	 * Set to false after a commit.
+	 */
+	boolean isDirty();
+	
+	/**
+	 * False if dirty and the buffered value is invalid.
+	 * False if dirty and the buffered value appears valid but could not be committed.
+	 * True otherwise.
+	 */
+	boolean isValid();
+	
+	/**
+	 * Commit the buffered value to the model.
+	 * @throws IllegalStateException if not dirty, not valid, or read-only
+	 */
+	void commit();
 
 	/**
-	 * Is this a collection binding?
-	 * If so, a client may call {@link #getCollectionValues()} to get the collection element values for display in the user interface.
-	 * In this case, the client typically allocates one indexed field to each value.
-	 * A client may then call {@link #setValues(String[])} to update model property values from those fields.
-	 * Alternatively, a client may call {@link #getValue()} to render the collection as a single value for display in a single field, such as a large text area.
-	 * The client would then call {@link #setValue(Object)} to update that single value from the field.
+	 * An Alert that communicates the current status of this Binding.
 	 */
-	boolean isCollection();
+	Alert getStatusAlert();
+	
+	/**
+	 * Access raw model values.
+	 */
+	Model getModel();
+	
+	/**
+	 * Get a Binding to a nested property value.
+	 * @param nestedProperty the nested property name, such as "foo"; should not be a property path like "foo.bar"
+	 * @return the binding to the nested property
+	 */
+	Binding getBinding(String nestedProperty);
 
 	/**
-	 * When a collection binding, the formatted values to display in the user interface.
-	 * If not a collection binding, throws an IllegalStateException.
-	 * @throws IllegalStateException
+	 * If bound to an indexable Collection, either a {@link java.util.List} or an array.
 	 */
-	String[] getCollectionValues();
+	boolean isIndexable();
 
+	/**
+	 * If a List, get a Binding to a element in the List.
+	 * @param index the element index
+	 * @return the indexed binding
+	 */
+	Binding getIndexedBinding(int index);
+
+	/**
+	 * If bound to a {@link java.util.Map}.
+	 */
+	boolean isMap();
+
+	/**
+	 * If a Map, get a Binding to a value in the Map.
+	 * @param key the map key
+	 * @return the keyed binding
+	 */
+	Binding getKeyedBinding(Object key);
+
+	/**
+	 * Format a potential model value for display.
+	 * If an indexable binding, expects the model value to be a potential collection element & uses the configured element formatter.
+	 * If a map binding, expects the model value to be a potential map value & uses the configured map value formatter.
+	 * @param potentialValue the potential value
+	 * @return the formatted string
+	 */
+	String formatValue(Object potentialModelValue);
+	
+	/**
+	 * For accessing the raw bound model object.
+	 * @author Keith Donald
+	 */
+	public interface Model {
+		
+		/**
+		 * Read the raw model value.
+		 */
+		Object getValue();
+		
+		/**
+		 * The model value type.
+		 */
+		Class<?> getValueType();		
+
+		/**
+		 * Set the model value.
+		 * @throws IllegalStateException if this binding is read-only
+		 */
+		void setValue(Object value);
+	}
 }

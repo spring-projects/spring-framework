@@ -21,7 +21,7 @@ import java.util.Map;
  * Binds user-entered values to properties of a model object.
  * @author Keith Donald
  * @since 3.0
- * @see #addBinding(String)
+ * @see #bind(String)
  * @see #getBinding(String)
  * @see #bind(Map)
  */
@@ -32,26 +32,6 @@ public interface Binder {
 	 */
 	Object getModel();
 
-	/**
-	 * Add a binding to a model property.
-	 * The property may be a path to a member property like "name", or a nested property like "address.city" or "addresses.city".
-	 * If the property path is nested and traverses a collection or Map, do not use indexes.
-	 * The property path should express the model-class property structure like addresses.city, not an object structure like addresses[0].city.
-	 * Examples:
-	 * <pre>
-	 * name - bind to property 'name'
-	 * addresses - bind to property 'addresses', presumably a List&lt;Address&gt; e.g. allowing property expressions like addresses={ 12345 Macy Lane, 1977 Bel Aire Estates } and addresses[0]=12345 Macy Lane
-	 * addresses.city - bind to property 'addresses.city', for all indexed addresses in the collection e.g. allowing property expressions like addresses[0].city=Melbourne
-	 * address.city - bind to property 'address.city'
-	 * favoriteFoodByFoodGroup - bind to property 'favoriteFoodByFoodGroup', presumably a Map<FoodGroup, Food>; e.g. allowing favoriteFoodByFoodGroup={ DAIRY=Milk, MEAT=Steak } and favoriteFoodByFoodGroup['DAIRY']=Milk
-	 * favoriteFoodByFoodGroup.name - bind to property 'favoriteFoodByFoodGroup.name', for all keyed Foods in the map; e.g. allowing favoriteFoodByFoodGroup['DAIRY'].name=Milk
-	 * </pre>
-	 * @param propertyPath the model property path
-	 * @return a BindingConfiguration object, allowing additional configuration of the newly added binding
-	 * @throws IllegalArgumentException if no such property path exists on the model
-	 */
-	public BindingConfiguration addBinding(String propertyPath);
-	
 	/**
 	 * Get a binding to a model property..
 	 * @param property the property path
