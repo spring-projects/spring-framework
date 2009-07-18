@@ -13,25 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding;
+package org.springframework.ui.binding.config;
 
-import org.springframework.ui.binding.support.GenericBinder;
 import org.springframework.ui.format.Formatter;
 
 /**
  * A fluent interface for configuring a newly added binding.
  * @author Keith Donald
- * @see GenericBinder#addBinding(String)
  */
-public interface BindingConfiguration {
+public interface BindingRuleConfiguration {
 	
 	/**
 	 * Set the Formatter to use to format bound property values.
-	 * If a collection property, the formatter is used to format collection element values.
+	 * If a collection property, this formatter is used to format the Collection as a String.
 	 * Default is null.
 	 */
-	BindingConfiguration formatWith(Formatter<?> formatter);
+	BindingRuleConfiguration formatWith(Formatter<?> formatter);
 
+	/**
+	 * If a collection property, set the Formatter to use to format indexed collection elements.
+	 * Default is null.
+	 */
+	BindingRuleConfiguration formatElementsWith(Formatter<?> formatter);
+	
 	/**
 	 * Mark the binding as required.
 	 * A required binding will generate an exception if no sourceValue is provided to a bind invocation.
@@ -44,5 +48,6 @@ public interface BindingConfiguration {
 	 * addresses.city=required - will generate an exception if 'addresses[n].city' is not present in the source values map, for every address[n].
 	 * </pre>
 	 */
-	BindingConfiguration required();
+	BindingRuleConfiguration required();
+
 }

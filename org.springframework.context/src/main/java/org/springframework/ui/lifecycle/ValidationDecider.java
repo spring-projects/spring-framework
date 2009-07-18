@@ -21,7 +21,7 @@ import org.springframework.ui.binding.BindingResults;
  * Decides if validation should run for an execution of the bind and validate lifecycle.
  * @author Keith Donald
  * @since 3.0
- * @see BindAndValidateLifecycle#execute(java.util.Map)
+ * @see BindAndValidateLifecycleImpl#execute(java.util.Map)
  */
 interface ValidationDecider {
 
