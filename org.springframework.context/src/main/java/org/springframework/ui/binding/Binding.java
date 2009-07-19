@@ -45,7 +45,7 @@ public interface Binding {
 	 * Sets to {@link BindingStatus#DIRTY} if succeeds.
 	 * Sets to {@link BindingStatus#INVALID_SOURCE_VALUE} if fails.
 	 * @param sourceValue
-	 * @throws IllegalStateException if read only
+	 * @throws IllegalStateException if {@link #isReadOnly()}
 	 */
 	void applySourceValue(Object sourceValue);
 	
@@ -70,9 +70,9 @@ public interface Binding {
 	
 	/**
 	 * Commit the buffered value to the model.
-	 * Sets to {@link BindingStatus#CLEAN} if succeeds.
+	 * Sets to {@link BindingStatus#COMMITTED} if succeeds.
 	 * Sets to {@link BindingStatus#COMMIT_FAILURE} if fails.
-	 * @throws IllegalStateException if not {@link BindingStatus#DIRTY} or read-only
+	 * @throws IllegalStateException if not {@link BindingStatus#DIRTY} or {@link #isReadOnly()}
 	 */
 	void commit();
 	
@@ -128,7 +128,7 @@ public interface Binding {
 	public interface Model {
 		
 		/**
-		 * Read the raw model value.
+		 * The model value.
 		 */
 		Object getValue();
 		
@@ -139,7 +139,7 @@ public interface Binding {
 
 		/**
 		 * Set the model value.
-		 * @throws IllegalStateException if this binding is read-only
+		 * @throws IllegalStateException if this binding is read only
 		 */
 		void setValue(Object value);
 	}
