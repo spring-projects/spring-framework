@@ -7,37 +7,22 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
-import org.springframework.ui.binding.MissingSourceValuesException;
-import org.springframework.ui.binding.NoSuchBindingException;
-import org.springframework.ui.binding.config.BindingRulesBuilder;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
-import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
-import org.springframework.ui.format.number.IntegerFormatter;
-import org.springframework.ui.message.MockMessageSource;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class GenericBinderTests {
 
@@ -59,7 +44,6 @@ public class GenericBinderTests {
 		
 	}
 	
-	/*
 	@Test
 	public void bindSingleValuesWithDefaultTypeConverterConversion() {
 		GenericBinder binder = new GenericBinder(bean);
@@ -71,6 +55,7 @@ public class GenericBinderTests {
 		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 
+		System.out.println(results);
 		assertEquals("string", results.get(0).getProperty());
 		assertFalse(results.get(0).isFailure());
 		assertEquals("test", results.get(0).getSourceValue());
@@ -99,9 +84,10 @@ public class GenericBinderTests {
 		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 		assertTrue(results.get(1).isFailure());
-		assertEquals("conversionFailed", results.get(1).getAlert().getCode());
+		assertEquals("typeMismatch", results.get(1).getAlert().getCode());
 	}
 
+	/*
 	@Test
 	public void bindSingleValuePropertyFormatter() throws ParseException {
 		BindingRulesBuilder builder = new BindingRulesBuilder(TestBean.class);

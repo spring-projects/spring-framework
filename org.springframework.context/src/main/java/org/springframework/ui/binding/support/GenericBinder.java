@@ -25,6 +25,7 @@ import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.binding.Binding.BindingStatus;
 import org.springframework.util.Assert;
 
 /**
@@ -138,7 +139,7 @@ public class GenericBinder implements Binder {
 			return new PropertyNotWriteableResult(property, value, messageSource);
 		} else {
 			binding.applySourceValue(value);
-			if (binding.isValid()) {
+			if (binding.getStatus() == BindingStatus.DIRTY) {
 				binding.commit();
 			}
 			return new BindingStatusResult(property, value, binding.getStatusAlert());
