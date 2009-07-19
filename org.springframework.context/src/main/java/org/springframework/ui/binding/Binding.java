@@ -16,6 +16,7 @@
 package org.springframework.ui.binding;
 
 import org.springframework.ui.alert.Alert;
+import org.springframework.ui.alert.Severity;
 
 /**
  * A binding between a source element and a model property.
@@ -25,9 +26,10 @@ import org.springframework.ui.alert.Alert;
 public interface Binding {
 
 	/**
-	 * The bound value to display in the UI.
-	 * Is the formatted model value if not dirty.
-	 * Is the buffered value if dirty.
+	 * The value to display in the UI.
+	 * Is the formatted model value if {@link BindingStatus#CLEAN} or {@link BindingStatus#COMMITTED}.
+	 * Is the formatted buffered value if {@link BindingStatus#DIRTY} or {@link BindingStatus#COMMIT_FAILURE}.
+	 * Is the source value if {@link BindingStatus#INVALID_SOURCE_VALUE}.
 	 */
 	Object getValue();
 
@@ -39,38 +41,40 @@ public interface Binding {
 	
 	/**
 	 * Apply the source value to this binding.
-	 * The source value is parsed, validated, and stored in the binding's value buffer.
-	 * Sets 'dirty' status to true.
-	 * Sets 'valid' status to false if the source value is not valid.
+	 * The source value is parsed and stored in the binding's value buffer.
+	 * Sets to {@link BindingStatus#DIRTY} if succeeds.
+	 * Sets to {@link BindingStatus#INVALID_SOURCE_VALUE} if fails.
 	 * @param sourceValue
 	 * @throws IllegalStateException if read only
 	 */
 	void applySourceValue(Object sourceValue);
 	
 	/**
-	 * True if there is an uncommitted value in the binding buffer.
-	 * Set to true after applying a source value.
-	 * Set to false after a commit.
+	 * The current binding status.
+	 * Initially {@link BindingStatus#CLEAN clean}.
+	 * Is {@link BindingStatus#DIRTY} after applying a source value to the value buffer.
+	 * Is {@link BindingStatus#COMMITTED} after successfully committing the buffered value.
+	 * Is {@link BindingStatus#INVALID_SOURCE_VALUE} if a source value could not be applied.
+	 * Is {@link BindingStatus#COMMIT_FAILURE} if a buffered value could not be committed.
 	 */
-	boolean isDirty();
+	BindingStatus getStatus();
 	
 	/**
-	 * False if dirty and the buffered value is invalid.
-	 * False if dirty and the buffered value appears valid but could not be committed.
-	 * True otherwise.
+	 * An alert that communicates the details of a BindingStatus change to the user.
+	 * Returns <code>null</code> if the BindingStatus has never changed.
+	 * Returns a {@link Severity#INFO} Alert with code <code>bindSuccess</code> after a successful commit.
+	 * Returns a {@link Severity#ERROR} Alert with code <code>typeMismatch</code> if the source value could not be converted to type required by the Model.
+	 * Returns a {@link Severity#FATAL} Alert with code <code>internalError</code> if the buffered value could not be committed due to a unexpected runtime exception.
 	 */
-	boolean isValid();
+	Alert getStatusAlert();
 	
 	/**
 	 * Commit the buffered value to the model.
-	 * @throws IllegalStateException if not dirty, not valid, or read-only
+	 * Sets to {@link BindingStatus#CLEAN} if succeeds.
+	 * Sets to {@link BindingStatus#COMMIT_FAILURE} if fails.
+	 * @throws IllegalStateException if not {@link BindingStatus#DIRTY} or read-only
 	 */
 	void commit();
-
-	/**
-	 * An Alert that communicates the current status of this Binding.
-	 */
-	Alert getStatusAlert();
 	
 	/**
 	 * Access raw model values.
@@ -138,5 +142,37 @@ public interface Binding {
 		 * @throws IllegalStateException if this binding is read-only
 		 */
 		void setValue(Object value);
+	}
+	
+	/**
+	 * The states of a Binding.
+	 * @author Keith Donald
+	 */
+	public enum BindingStatus {
+		
+		/**
+		 * Initial state: No value is buffered, and there is a direct channel to the model value.
+		 */
+		CLEAN,
+		
+		/**
+		 * An invalid source value is applied.
+		 */
+		INVALID_SOURCE_VALUE,
+		
+		/**
+		 * The binding buffer contains a valid value that has not been committed.
+		 */
+		DIRTY,
+
+		/**
+		 * The buffered value has been committed.
+		 */
+		COMMITTED,
+		
+		/**
+		 * The buffered value failed to commit.
+		 */
+		COMMIT_FAILURE
 	}
 }

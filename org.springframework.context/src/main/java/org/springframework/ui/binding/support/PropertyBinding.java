@@ -20,9 +20,11 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.ui.alert.Alert;
+import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.format.Formatter;
 import org.springframework.util.ReflectionUtils;
@@ -46,39 +48,49 @@ public class PropertyBinding implements Binding {
 
 	private Object sourceValue;
 	
-	// TODO make a ValueBuffer
-	private Object bufferedValue;
+	@SuppressWarnings("unused")
+	private ParseException sourceValueParseException;
+	
+	private ValueBuffer buffer;
+	
+	private BindingStatus bindingStatus;
 	
 	public PropertyBinding(String property, Object model, TypeConverter typeConverter) {
 		this.propertyDescriptor = findPropertyDescriptor(property, model);
 		this.property = property;
 		this.model = model;
 		this.typeConverter = typeConverter;
+		this.buffer = new ValueBuffer(getModel());
+		bindingStatus = BindingStatus.CLEAN;
 	}
 
 	public Object getValue() {
-		if (isDirty()) {
-			// TODO null check isn't good enough
-			if (bufferedValue != null) {
-				return formatValue(bufferedValue);
-			} else {
-				return sourceValue;
-			}
+		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
+			return sourceValue;
+		} else if (bindingStatus == BindingStatus.DIRTY || bindingStatus == BindingStatus.COMMIT_FAILURE) {
+			return formatValue(buffer.getValue());
 		} else {
 			return formatValue(getModel().getValue());
 		}
 	}
 
+	public boolean isReadOnly() {
+		return propertyDescriptor.getWriteMethod() == null || markedNotEditable();
+	}
+	
 	public void applySourceValue(Object sourceValue) {
 		if (isReadOnly()) {
-			throw new IllegalStateException("Property is read-only");
+			throw new IllegalStateException("Property is read only");
 		}
-		this.sourceValue = sourceValue;
 		if (sourceValue instanceof String) {
 			try { 
-				this.bufferedValue = valueFormatter.parse((String) sourceValue, getLocale());
+				buffer.setValue(valueFormatter.parse((String) sourceValue, getLocale()));
+				sourceValue = null;
+				bindingStatus = BindingStatus.DIRTY;
 			} catch (ParseException e) {
-				
+				this.sourceValue = sourceValue;
+				sourceValueParseException = e;
+				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
 			}
 		} else if (sourceValue instanceof String[]) {
 			String[] sourceValues = (String[]) sourceValue;
@@ -87,50 +99,103 @@ public class PropertyBinding implements Binding {
 				parsedType = String.class;
 			}
 			Object parsed = Array.newInstance(parsedType, sourceValues.length);
-			boolean parseError = false;
 			for (int i = 0; i < sourceValues.length; i++) {
 				Object parsedValue;
 				try {
 					parsedValue = indexedValueFormatter.parse(sourceValues[i], LocaleContextHolder.getLocale());
 					Array.set(parsed, i, parsedValue);
 				} catch (ParseException e) {
-					parseError = true;
+					this.sourceValue = sourceValue;
+					sourceValueParseException = e;
+					bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+					break;
 				}
 			}
-			if (!parseError) {
-				bufferedValue = parsed;
+			if (bindingStatus != BindingStatus.INVALID_SOURCE_VALUE) {
+				buffer.setValue(parsed);
+				sourceValue = null;
+				bindingStatus = BindingStatus.DIRTY;
 			}
 		}
 	}
-
-	public boolean isDirty() {
-		return sourceValue != null || bufferedValue != null;
+	
+	public BindingStatus getStatus() {
+		return bindingStatus;
 	}
+	
+	public Alert getStatusAlert() {
+		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
+			return new Alert() {
+				public String getCode() {
+					return "typeMismatch";
+				}
 
-	public boolean isValid() {
-		if (!isDirty()) {
-			return true;
-		} else {
-			if (bufferedValue == null) {
-				return false;
+				public String getMessage() {
+					return "Could not parse source value";
+				}
+
+				public Severity getSeverity() {
+					return Severity.ERROR;
+				}				
+			};
+		} else if (bindingStatus == BindingStatus.COMMIT_FAILURE) {
+			if (buffer.getFlushException() instanceof ConversionFailedException) {
+				return new Alert() {
+					public String getCode() {
+						return "typeMismatch";
+					}
+
+					public String getMessage() {
+						return "Could not convert source value";
+					}
+
+					public Severity getSeverity() {
+						return Severity.ERROR;
+					}				
+				};				
 			} else {
-				return true;
+				return new Alert() {
+					public String getCode() {
+						return "internalError";
+					}
+
+					public String getMessage() {
+						return "Internal error occurred";
+					}
+
+					public Severity getSeverity() {
+						return Severity.FATAL;
+					}				
+				};				
 			}
+		} else if (bindingStatus == BindingStatus.COMMITTED) {
+			return new Alert() {
+				public String getCode() {
+					return "bindSucces";
+				}
+
+				public String getMessage() {
+					return "Binding successful";
+				}
+
+				public Severity getSeverity() {
+					return Severity.INFO;
+				}				
+			};			
+		} else {
+			return null;
 		}
 	}
 
 	public void commit() {
-		if (!isDirty()) {
+		if (bindingStatus != BindingStatus.DIRTY) {
 			throw new IllegalStateException("Binding not dirty; nothing to commit");
 		}
-		if (!isValid()) {
-			throw new IllegalStateException("Binding is invalid; only commit valid bindings");
-		}
-		try {
-			getModel().setValue(bufferedValue);
-			this.bufferedValue = null;
-		} catch (Exception e) {
-			
+		buffer.flush();
+		if (buffer.flushFailed()) {
+			bindingStatus = BindingStatus.COMMIT_FAILURE;
+		} else {
+			bindingStatus = BindingStatus.COMMITTED;
 		}
 	}
 
@@ -155,10 +220,6 @@ public class PropertyBinding implements Binding {
 				ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), model, value);
 			}
 		};
-	}
-
-	public Alert getStatusAlert() {
-		return null;
 	}
 
 	public Binding getBinding(String nestedProperty) {
@@ -196,14 +257,16 @@ public class PropertyBinding implements Binding {
 		return null;
 	}
 
-	public boolean isReadOnly() {
-		return propertyDescriptor.getWriteMethod() != null && !markedNotEditable();
-	}
-
 	public String formatValue(Object value) {
-		Class<?> formattedType = getFormattedObjectType(valueFormatter.getClass());
+		Formatter formatter;
+		if (isIndexable() || isMap()) {
+			formatter = indexedValueFormatter;
+		} else {
+			formatter = valueFormatter;
+		}
+		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = typeConverter.convert(value, formattedType);
-		return valueFormatter.format(value, getLocale());
+		return formatter.format(value, getLocale());
 	}
 
 	// internal helpers
@@ -304,4 +367,60 @@ public class PropertyBinding implements Binding {
 		return false;
 	}
 
+	static class ValueBuffer {
+
+		private Object value;
+		
+		private boolean hasValue;
+		
+		private Model model;
+		
+		private boolean flushFailed;
+		
+		private Exception flushFailureCause;
+		
+		public ValueBuffer(Model model) {
+			this.model = model;
+		}
+		
+		public boolean hasValue() {
+			return hasValue;
+		}
+		
+		public Object getValue() {
+			if (!hasValue()) {
+				throw new IllegalStateException("No value in buffer");
+			}
+			return value;
+		}
+		
+		public void setValue(Object value) {
+			this.value = value;
+			hasValue = true;
+		}
+		
+		public void flush() {
+			try {
+				model.setValue(value);
+				clear();
+			} catch (Exception e) {
+				flushFailed = true;
+				flushFailureCause = e;
+			}
+		}
+
+		public void clear() {
+			value = null;
+			hasValue = false;
+			flushFailed = false;
+		}
+		
+		public boolean flushFailed() {
+			return flushFailed;
+		}
+		
+		public Exception getFlushException() {
+			return flushFailureCause;
+		}
+	}
 }
