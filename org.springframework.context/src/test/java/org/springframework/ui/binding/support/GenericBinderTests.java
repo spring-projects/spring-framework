@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -16,23 +17,33 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.binding.MissingSourceValuesException;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
+import org.springframework.ui.format.number.IntegerFormatter;
+import org.springframework.ui.message.MockMessageSource;
+import org.springframework.util.Assert;
 
 public class GenericBinderTests {
 
+	private GenericBinder binder;
+	
 	private TestBean bean;
 
 	@Before
 	public void setUp() {
 		bean = new TestBean();
+		binder = new GenericBinder(bean);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
@@ -77,7 +88,6 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValuesWithDefaultTypeConversionFailure() {
-		GenericBinder binder = new GenericBinder(bean);
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("string", "test");
 		// bad value
@@ -91,7 +101,6 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValuePropertyFormatter() throws ParseException {
-		GenericBinder binder = new GenericBinder(bean);
 		binder.bindingRule("date").formatWith(new DateFormatter());
 		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
@@ -99,7 +108,6 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
-		GenericBinder binder = new GenericBinder(bean);
 		binder.bindingRule("date").formatWith(new DateFormatter());
 		BindingResults results = binder.bind(Collections.singletonMap("date", "bogus"));
 		assertEquals(1, results.size());
@@ -109,8 +117,6 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
-		GenericBinder binder = new GenericBinder(bean);
-		
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 		formatterRegistry.add(Date.class, new DateFormatter());
 		binder.setFormatterRegistry(formatterRegistry);
@@ -119,40 +125,46 @@ public class GenericBinderTests {
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
-	/*
 	@Test
 	public void bindSingleValueWithAnnotationFormatterFactoryRegistered() throws ParseException {
-		binder.addBinding("currency");
-		binder.registerFormatterFactory(new CurrencyAnnotationFormatterFactory());
+		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
+		formatterRegistry.add(new CurrencyAnnotationFormatterFactory());
+		binder.setFormatterRegistry(formatterRegistry);
+
 		binder.bind(Collections.singletonMap("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}
 
-	@Test(expected = NoSuchBindingException.class)
+	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
-		binder.bind(Collections.singletonMap("bogus", "2009-06-01"));
+		BindingResults results = binder.bind(Collections.singletonMap("bogus", "2009-06-01"));
+		assertEquals("bogus", results.get(0).getProperty());
+		assertTrue(results.get(0).isFailure());
+		assertEquals("propertyNotFound", results.get(0).getAlert().getCode());
 	}
 
 	@Test(expected=MissingSourceValuesException.class)
 	public void bindMissingRequiredSourceValue() {
-		binder.addBinding("string");
-		binder.addBinding("integer").required();
-		Map<String, String> userMap = new LinkedHashMap<String, String>();
-		userMap.put("string", "test");
-		// missing "integer"
-		binder.bind(userMap);
+		binder.setRequired(new String[] {
+			"integer"
+		});
+		// missing "integer" - violated bind contract
+		binder.bind(Collections.singletonMap("string", "test"));
 	}
 
 	@Test
 	public void getBindingCustomFormatter() {
-		binder.addBinding("currency").formatWith(new CurrencyFormatter());		
 		Binding b = binder.getBinding("currency");
-		assertFalse(b.isIndexable());
+		assertFalse(b.isList());
+		assertFalse(b.isMap());
 		assertEquals("", b.getValue());
-		b.setValue("$23.56");
+		b.applySourceValue("$23.56");
+		assertEquals("$23.56", b.getValue());
+		b.commit();
 		assertEquals("$23.56", b.getValue());
 	}
 
+	/*
 	@Test
 	public void getBindingCustomFormatterRequiringTypeCoersion() {
 		// IntegerFormatter formats Longs, so conversion from Integer -> Long is performed
