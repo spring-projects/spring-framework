@@ -15,6 +15,7 @@
  */
 package org.springframework.ui.binding;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 
@@ -26,7 +27,7 @@ import org.springframework.ui.alert.Severity;
 public interface Binding {
 
 	/**
-	 * The value to display in the UI.
+	 * The model value formatted for display in a single field in the UI.
 	 * Is the formatted model value if {@link BindingStatus#CLEAN} or {@link BindingStatus#COMMITTED}.
 	 * Is the formatted buffered value if {@link BindingStatus#DIRTY} or {@link BindingStatus#COMMIT_FAILURE}.
 	 */
@@ -128,6 +129,11 @@ public interface Binding {
 		 * The model value type.
 		 */
 		Class<?> getValueType();		
+
+		/**
+		 * The model value type descriptor.
+		 */
+		TypeDescriptor<?> getValueTypeDescriptor();		
 
 		/**
 		 * Set the model value.
