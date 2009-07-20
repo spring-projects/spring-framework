@@ -19,18 +19,20 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.TypeConverter;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.binding.MissingSourceValuesException;
 import org.springframework.ui.binding.Binding.BindingStatus;
 import org.springframework.ui.binding.config.BindingRuleConfiguration;
 import org.springframework.ui.binding.config.Condition;
@@ -57,6 +59,8 @@ public class GenericBinder implements Binder {
 
 	private MessageSource messageSource;
 
+	private String[] requiredProperties = new String[0];
+	
 	/**
 	 * Creates a new binder for the model object.
 	 * @param model the model object containing properties this binder will bind to
@@ -140,10 +144,15 @@ public class GenericBinder implements Binder {
 
 	public BindingResults bind(Map<String, ? extends Object> sourceValues) {
 		sourceValues = filter(sourceValues);
+		checkRequired(sourceValues);
 		ArrayListBindingResults results = new ArrayListBindingResults(sourceValues.size());
 		for (Map.Entry<String, ? extends Object> sourceValue : sourceValues.entrySet()) {
-			Binding binding = getBinding(sourceValue.getKey());
-			results.add(bind(sourceValue, binding));
+			try {
+				Binding binding = getBinding(sourceValue.getKey());
+				results.add(bind(sourceValue, binding));
+			} catch (PropertyNotFoundException e) {
+				results.add(new PropertyNotFoundResult(sourceValue.getKey(), sourceValue.getValue(), messageSource));
+			}
 		}
 		return results;
 	}
@@ -163,6 +172,24 @@ public class GenericBinder implements Binder {
 	}
 
 	// internal helpers
+
+	private void checkRequired(Map<String, ? extends Object> sourceValues) {
+		List<String> missingRequired = new ArrayList<String>();
+		for (String required : requiredProperties) {
+			boolean found = false;
+			for (String property : sourceValues.keySet()) {
+				if (property.equals(required)) {
+					found = true;
+				}
+			}
+			if (!found) {
+				missingRequired.add(required);
+			}
+		}
+		if (!missingRequired.isEmpty()) {
+			throw new MissingSourceValuesException(missingRequired, sourceValues);
+		}
+	}
 	
 	private GenericBindingRule getBindingRule(String property) {
 		GenericBindingRule rule = bindingRules.get(property);
@@ -217,6 +244,10 @@ public class GenericBinder implements Binder {
 		
 		// implementing BindingContext
 
+		public MessageSource getMessageSource() {
+			return messageSource;
+		}
+		
 		public TypeConverter getTypeConverter() {
 			return typeConverter;
 		}	
@@ -326,8 +357,7 @@ public class GenericBinder implements Binder {
 					return propDesc;
 				}
 			}
-			throw new IllegalArgumentException("No property '" + property + "' found on model ["
-					+ modelClass.getName() + "]");
+			throw new PropertyNotFoundException(property, modelClass);
 		}
 
 		private BeanInfo getBeanInfo(Class<?> clazz) {
@@ -340,6 +370,8 @@ public class GenericBinder implements Binder {
 	}
 	
 	public interface BindingContext {
+		
+		MessageSource getMessageSource();
 		
 		TypeConverter getTypeConverter();
 
@@ -360,6 +392,10 @@ public class GenericBinder implements Binder {
 		@SuppressWarnings("unchecked")
 		Formatter getKeyFormatter();
 
+	}
+
+	public void setRequired(String[] propertyPaths) {
+		this.requiredProperties = propertyPaths;
 	}
 
 }
