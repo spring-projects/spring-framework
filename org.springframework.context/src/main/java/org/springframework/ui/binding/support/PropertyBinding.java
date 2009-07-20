@@ -20,11 +20,14 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.support.GenericBinder.BindingContext;
 import org.springframework.ui.format.Formatter;
+import org.springframework.ui.message.MessageBuilder;
+import org.springframework.ui.message.ResolvableArgument;
 import org.springframework.util.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
@@ -38,8 +41,7 @@ public class PropertyBinding implements Binding {
 
 	private Object sourceValue;
 
-	@SuppressWarnings("unused")
-	private ParseException sourceValueParseException;
+	private Exception invalidSourceValueCause;
 
 	private ValueBuffer buffer;
 
@@ -49,18 +51,24 @@ public class PropertyBinding implements Binding {
 		this.property = property;
 		this.object = object;
 		this.bindingContext = bindingContext;
-		this.buffer = new ValueBuffer(getModel());
+		buffer = new ValueBuffer(getModel());
 		status = BindingStatus.CLEAN;
 	}
 
+	public String getRenderValue() {
+		return format(getValue(), bindingContext.getFormatter());
+	}
+
 	public Object getValue() {
-		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
-			return sourceValue;
-		} else if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
-			return formatValue(buffer.getValue());
+		if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
+			return buffer.getValue();
 		} else {
-			return formatValue(getModel().getValue());
+			return getModel().getValue();
 		}
+	}
+
+	public Class<?> getValueType() {
+		return getModel().getValueType();
 	}
 
 	public boolean isEditable() {
@@ -80,12 +88,17 @@ public class PropertyBinding implements Binding {
 		assertEnabled();
 		if (sourceValue instanceof String) {
 			try {
-				buffer.setValue(bindingContext.getFormatter().parse((String) sourceValue, getLocale()));
+				Object parsed = bindingContext.getFormatter().parse((String) sourceValue, getLocale());
+				buffer.setValue(coerseToValueType(parsed));
 				sourceValue = null;
 				status = BindingStatus.DIRTY;
 			} catch (ParseException e) {
 				this.sourceValue = sourceValue;
-				sourceValueParseException = e;
+				invalidSourceValueCause = e;
+				status = BindingStatus.INVALID_SOURCE_VALUE;
+			} catch (ConversionFailedException e) {
+				this.sourceValue = sourceValue;
+				invalidSourceValueCause = e;
 				status = BindingStatus.INVALID_SOURCE_VALUE;
 			}
 		} else if (sourceValue instanceof String[]) {
@@ -98,22 +111,34 @@ public class PropertyBinding implements Binding {
 			for (int i = 0; i < sourceValues.length; i++) {
 				Object parsedValue;
 				try {
-					parsedValue = bindingContext.getElementFormatter().parse(sourceValues[i],
-							LocaleContextHolder.getLocale());
+					parsedValue = bindingContext.getElementFormatter().parse(sourceValues[i], getLocale());
 					Array.set(parsed, i, parsedValue);
 				} catch (ParseException e) {
 					this.sourceValue = sourceValue;
-					sourceValueParseException = e;
+					invalidSourceValueCause = e;
 					status = BindingStatus.INVALID_SOURCE_VALUE;
 					break;
 				}
 			}
 			if (status != BindingStatus.INVALID_SOURCE_VALUE) {
-				buffer.setValue(parsed);
+				try {
+					buffer.setValue(coerseToValueType(parsed));
+				} catch (ConversionFailedException e) {
+					this.sourceValue = sourceValue;
+					invalidSourceValueCause = e;
+					status = BindingStatus.INVALID_SOURCE_VALUE;
+				}
 				sourceValue = null;
 				status = BindingStatus.DIRTY;
 			}
 		}
+	}
+
+	public Object getInvalidSourceValue() {
+		if (status != BindingStatus.INVALID_SOURCE_VALUE) {
+			throw new IllegalStateException("No invalid source value");
+		}
+		return sourceValue;
 	}
 
 	public BindingStatus getStatus() {
@@ -128,7 +153,25 @@ public class PropertyBinding implements Binding {
 				}
 
 				public String getMessage() {
-					return "Could not parse source value";
+					MessageBuilder builder = new MessageBuilder(bindingContext.getMessageSource());
+					builder.code(getCode());
+					if (invalidSourceValueCause instanceof ParseException) {
+						ParseException e = (ParseException) invalidSourceValueCause;
+						builder.arg("label", new ResolvableArgument(property.getName()));
+						builder.arg("value", sourceValue);
+						builder.arg("errorOffset", e.getErrorOffset());
+						builder.defaultMessage("Failed to bind to property '" + property + "'; the user value "
+								+ StylerUtils.style(sourceValue) + " has an invalid format and could no be parsed");
+					} else {
+						ConversionFailedException e = (ConversionFailedException) invalidSourceValueCause;
+						builder.arg("label", new ResolvableArgument(property.getName()));
+						builder.arg("value", sourceValue);
+						builder.defaultMessage("Failed to bind to property '" + property + "'; the user value "
+								+ StylerUtils.style(sourceValue) + " has could not be converted to "
+								+ e.getTargetType().getName());
+
+					}
+					return builder.build();
 				}
 
 				public Severity getSeverity() {
@@ -136,35 +179,19 @@ public class PropertyBinding implements Binding {
 				}
 			};
 		} else if (status == BindingStatus.COMMIT_FAILURE) {
-			if (buffer.getFlushException() instanceof ConversionFailedException) {
-				return new AbstractAlert() {
-					public String getCode() {
-						return "typeMismatch";
-					}
-
-					public String getMessage() {
-						return "Could not convert source value";
-					}
-
-					public Severity getSeverity() {
-						return Severity.ERROR;
-					}
-				};
-			} else {
 				return new AbstractAlert() {
 					public String getCode() {
 						return "internalError";
 					}
 
 					public String getMessage() {
-						return "Internal error occurred " + buffer.getFlushException();
+						return "Internal error occurred; message = [" + buffer.getFlushException().getMessage() + "]";
 					}
 
 					public Severity getSeverity() {
 						return Severity.FATAL;
 					}
-				};
-			}
+				};				
 		} else if (status == BindingStatus.COMMITTED) {
 			return new AbstractAlert() {
 				public String getCode() {
@@ -202,7 +229,7 @@ public class PropertyBinding implements Binding {
 	public void revert() {
 		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
 			sourceValue = null;
-			sourceValueParseException = null;
+			invalidSourceValueCause = null;
 			status = BindingStatus.CLEAN;
 		} else if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
 			buffer.clear();
@@ -223,11 +250,6 @@ public class PropertyBinding implements Binding {
 			}
 
 			public void setValue(Object value) {
-				TypeDescriptor targetType = new TypeDescriptor(new MethodParameter(property.getWriteMethod(), 0));
-				TypeConverter converter = bindingContext.getTypeConverter();
-				if (value != null && converter.canConvert(value.getClass(), targetType)) {
-					value = converter.convert(value, targetType);
-				}
 				ReflectionUtils.invokeMethod(property.getWriteMethod(), object, value);
 			}
 		};
@@ -275,6 +297,10 @@ public class PropertyBinding implements Binding {
 		} else {
 			formatter = bindingContext.getFormatter();
 		}
+		return format(value, formatter);
+	}
+	
+	private String format(Object value, Formatter formatter) {
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = bindingContext.getTypeConverter().convert(value, formattedType);
 		return formatter.format(value, getLocale());
@@ -325,6 +351,16 @@ public class PropertyBinding implements Binding {
 			classToIntrospect = classToIntrospect.getSuperclass();
 		}
 		return null;
+	}
+
+	private Object coerseToValueType(Object parsed) {
+		TypeDescriptor targetType = new TypeDescriptor(new MethodParameter(property.getWriteMethod(), 0));
+		TypeConverter converter = bindingContext.getTypeConverter();
+		if (parsed != null && converter.canConvert(parsed.getClass(), targetType)) {
+			return converter.convert(parsed, targetType);
+		} else {
+			return parsed;
+		}
 	}
 
 	@SuppressWarnings("unused")

@@ -29,10 +29,19 @@ public interface Binding {
 	 * The value to display in the UI.
 	 * Is the formatted model value if {@link BindingStatus#CLEAN} or {@link BindingStatus#COMMITTED}.
 	 * Is the formatted buffered value if {@link BindingStatus#DIRTY} or {@link BindingStatus#COMMIT_FAILURE}.
-	 * Is the source value if {@link BindingStatus#INVALID_SOURCE_VALUE}.
+	 */
+	String getRenderValue();
+
+	/**
+	 * The bound model value.
 	 */
 	Object getValue();
-
+	
+	/**
+	 * The bound model value type.
+	 */
+	Class<?> getValueType();	
+	
 	/**
 	 * If this Binding is editable.
 	 * Used to determine if the user can edit the field value.
@@ -62,6 +71,13 @@ public interface Binding {
 	 * @throws IllegalStateException if not editable or not enabled
 	 */
 	void applySourceValue(Object sourceValue);
+	
+	/**
+	 * If {@link BindingStatus#INVALID_SOURCE_VALUE}, returns the invalid source value.
+	 * Returns null otherwise.
+	 * @return the invalid source value
+	 */
+	Object getInvalidSourceValue();
 	
 	/**
 	 * The current binding status.
@@ -96,12 +112,29 @@ public interface Binding {
 	 * @throws IllegalStateException if BindingStatus is CLEAN or COMMITTED.
 	 */
 	void revert();
-	
+
 	/**
-	 * Access raw model values.
+	 * For accessing the raw bound model object.
+	 * @author Keith Donald
 	 */
-	Model getModel();
-	
+	public interface Model {
+		
+		/**
+		 * The model value.
+		 */
+		Object getValue();
+		
+		/**
+		 * The model value type.
+		 */
+		Class<?> getValueType();		
+
+		/**
+		 * Set the model value.
+		 */
+		void setValue(Object value);
+	}
+
 	/**
 	 * Get a Binding to a nested property value.
 	 * @param property the nested property name, such as "foo"; should not be a property path like "foo.bar"
@@ -144,28 +177,6 @@ public interface Binding {
 	 * @return the formatted string
 	 */
 	String formatValue(Object potentialModelValue);
-	
-	/**
-	 * For accessing the raw bound model object.
-	 * @author Keith Donald
-	 */
-	public interface Model {
-		
-		/**
-		 * The model value.
-		 */
-		Object getValue();
-		
-		/**
-		 * The model value type.
-		 */
-		Class<?> getValueType();		
-
-		/**
-		 * Set the model value.
-		 */
-		void setValue(Object value);
-	}
 	
 	/**
 	 * Binding states.
