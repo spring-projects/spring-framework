@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.MissingSourceValuesException;
@@ -365,13 +366,14 @@ public class GenericBinderTests {
 		values.put("addresses[1].zip", "32901");
 
 		// Auto adds new Address at 5 (plus intermediates 2,3,4)
-		values.put("addresses[5].street", "1234 Rostock Circle");
+		values.put("addresses[5].street", "7891 Rostock Circle");
 		values.put("addresses[5].city", "Palm Bay");
 		values.put("addresses[5].state", "FL");
 		values.put("addresses[5].zip", "32901");
 
 		BindingResults results = binder.bind(values);
 		System.out.println(results);
+		System.out.println(bean);
 		Assert.assertEquals(6, bean.addresses.size());
 		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 		Assert.assertNotNull(bean.addresses.get(2));
@@ -537,6 +539,9 @@ public class GenericBinderTests {
 			this.primaryAddress = primaryAddress;
 		}
 		
+		public String toString() {
+			return new ToStringCreator(this).append("addressses", addresses).toString();
+		}
 	}
 
 	public static class AddressFormatter implements Formatter<Address> {
@@ -627,6 +632,9 @@ public class GenericBinderTests {
 			this.country = country;
 		}
 
+		public String toString() {
+			return new ToStringCreator(this).append("street", street).append("city", city).append("state", state).append("zip", zip).toString();
+		}
 	}
 
 	public static class CurrencyAnnotationFormatterFactory implements
