@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -17,13 +16,12 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.MissingSourceValuesException;
+import org.springframework.ui.binding.Binding.BindingStatus;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
@@ -32,7 +30,6 @@ import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
 import org.springframework.ui.message.MockMessageSource;
-import org.springframework.util.Assert;
 
 public class GenericBinderTests {
 
@@ -154,56 +151,66 @@ public class GenericBinderTests {
 
 	@Test
 	public void getBindingCustomFormatter() {
+		binder.bindingRule("currency").formatWith(new CurrencyFormatter());
 		Binding b = binder.getBinding("currency");
 		assertFalse(b.isList());
 		assertFalse(b.isMap());
-		assertEquals("", b.getValue());
+		assertEquals(null, b.getValue());
+		assertEquals("", b.getRenderValue());
 		b.applySourceValue("$23.56");
-		assertEquals("$23.56", b.getValue());
+		assertEquals(BindingStatus.DIRTY, b.getStatus());
+		assertEquals(new BigDecimal("23.56"), b.getValue());
+		assertEquals("$23.56", b.getRenderValue());
 		b.commit();
-		assertEquals("$23.56", b.getValue());
+		assertEquals(new BigDecimal("23.56"), b.getValue());
+		assertEquals("$23.56", b.getRenderValue());
+		assertEquals(BindingStatus.COMMITTED, b.getStatus());
 	}
 
-	/*
 	@Test
 	public void getBindingCustomFormatterRequiringTypeCoersion() {
 		// IntegerFormatter formats Longs, so conversion from Integer -> Long is performed
-		binder.addBinding("integer").formatWith(new IntegerFormatter());
+		binder.bindingRule("integer").formatWith(new IntegerFormatter());
 		Binding b = binder.getBinding("integer");
-		b.setValue("2,300");
-		assertEquals("2,300", b.getValue());
+		b.applySourceValue("2,300");
+		assertEquals("2,300", b.getRenderValue());
+		b.commit();
+		assertEquals(BindingStatus.COMMITTED, b.getStatus());
+		assertEquals("2,300", b.getRenderValue());
 	}
 
 	@Test
 	public void invalidFormatBindingResultCustomAlertMessage() {
 		MockMessageSource messages = new MockMessageSource();
-		messages.addMessage("invalidFormat", Locale.US,
+		messages.addMessage("typeMismatch", Locale.US,
 				"Please enter an integer in format ### for the #{label} field; you entered #{value}");
 		binder.setMessageSource(messages);
-		binder.addBinding("integer").formatWith(new IntegerFormatter());
+		binder.bindingRule("integer").formatWith(new IntegerFormatter());
 		Binding b = binder.getBinding("integer");
-		BindingResult result = b.setValue("bogus");
-		assertEquals("Please enter an integer in format ### for the integer field; you entered bogus", result
-				.getAlert().getMessage());
+		b.applySourceValue("bogus");
+		assertEquals("Please enter an integer in format ### for the integer field; you entered bogus", b.getStatusAlert().getMessage());
 	}
 
 	@Test
 	public void getBindingMultiValued() {
-		binder.addBinding("foos");
 		Binding b = binder.getBinding("foos");
-		assertTrue(b.isIndexable());
-		assertEquals(0, b.getCollectionValues().length);
-		b.setValue(new String[] { "BAR", "BAZ", "BOOP" });
+		assertTrue(b.isList());
+		assertEquals(null, b.getValue());
+		assertEquals("", b.getRenderValue());
+		b.applySourceValue(new String[] { "BAR", "BAZ", "BOOP" });
+		b.commit();
 		assertEquals(FooEnum.BAR, bean.getFoos().get(0));
 		assertEquals(FooEnum.BAZ, bean.getFoos().get(1));
 		assertEquals(FooEnum.BOOP, bean.getFoos().get(2));
-		String[] values = b.getCollectionValues();
-		assertEquals(3, values.length);
-		assertEquals("BAR", values[0]);
-		assertEquals("BAZ", values[1]);
-		assertEquals("BOOP", values[2]);
+		String asString = b.getRenderValue();
+		assertEquals("BAR,BAZ,BOOP", asString);
+		List<FooEnum> value = (List<FooEnum>) b.getValue();
+		assertEquals(FooEnum.BAR, value.get(0));
+		assertEquals(FooEnum.BAZ, value.get(1));
+		assertEquals(FooEnum.BOOP, value.get(2));
 	}
 
+	/*
 	@Test
 	public void getBindingMultiValuedIndexAccess() {
 		binder.addBinding("foos");

@@ -300,11 +300,17 @@ public class GenericBinder implements Binder {
 		}
 
 		public BindingRuleConfiguration formatElementsWith(Formatter<?> formatter) {
+			if (!List.class.isAssignableFrom(modelClass) || modelClass.isArray()) {
+				throw new IllegalStateException("Bound property is not a List or an array; cannot set a element formatter");
+			}
 			elementFormatter = formatter;
 			return this;
 		}
 
 		public BindingRuleConfiguration formatKeysWith(Formatter<?> formatter) {
+			if (!Map.class.isAssignableFrom(modelClass)) {
+				throw new IllegalStateException("Bound property is not a Map; cannot set a key formatter");
+			}
 			keyFormatter = formatter;
 			return this;
 		}

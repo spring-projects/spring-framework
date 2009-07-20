@@ -59,12 +59,12 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		}
 		Formatter<?> formatter = null;
 		Class<?> type;
-		if (propertyType.isCollection()) {
+		if (propertyType.isCollection() || propertyType.isArray()) {
 			formatter = collectionTypeFormatters.get(new GenericCollectionPropertyType(propertyType.getType(), propertyType.getElementType()));
 			if (formatter != null) {
 				return formatter;
 			} else {
-				type = propertyType.getElementType();
+				return DefaultFormatter.COLLECTION_FORMATTER;
 			}
 		} else {
 			type = propertyType.getType();
