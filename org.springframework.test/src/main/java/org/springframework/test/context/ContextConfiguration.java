@@ -87,6 +87,10 @@ public @interface ContextConfiguration {
 	/**
 	 * The type of {@link ContextLoader} to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
+	 * <p>If not specified, the loader will be inherited from the first superclass
+	 * which is annotated with <code>&#064;ContextConfiguration</code> and specifies
+	 * an explicit loader. If no class in the hierarchy specifies an explicit
+	 * loader, a default loader will be used instead.
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
 
