@@ -97,32 +97,29 @@ public class GenericBinderTests {
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
-	/*
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
-		BindingRulesBuilder builder = new BindingRulesBuilder(TestBean.class);
-		builder.bind("date").formatWith(new DateFormatter());
-		GenericBinder binder = new GenericBinder(bean, builder.getBindingRules());
-
+		GenericBinder binder = new GenericBinder(bean);
+		binder.bindingRule("date").formatWith(new DateFormatter());
 		BindingResults results = binder.bind(Collections.singletonMap("date", "bogus"));
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isFailure());
-		assertEquals("invalidFormat", results.get(0).getAlert().getCode());		
+		assertEquals("typeMismatch", results.get(0).getAlert().getCode());		
 	}
 
 	@Test
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
-		BindingRulesBuilder builder = new BindingRulesBuilder(TestBean.class);
-		builder.bind("date").formatWith(new DateFormatter());
-		GenericBinder binder = new GenericBinder(bean, builder.getBindingRules());
+		GenericBinder binder = new GenericBinder(bean);
 		
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 		formatterRegistry.add(Date.class, new DateFormatter());
+		binder.setFormatterRegistry(formatterRegistry);
 		
 		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
+	/*
 	@Test
 	public void bindSingleValueWithAnnotationFormatterFactoryRegistered() throws ParseException {
 		binder.addBinding("currency");

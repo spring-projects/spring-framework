@@ -37,4 +37,8 @@ class BindingStatusResult implements BindingResult {
 		return bindingStatusAlert;
 	}
 	
+	public String toString() {
+		return getAlert().toString();
+	}
+	
 }
