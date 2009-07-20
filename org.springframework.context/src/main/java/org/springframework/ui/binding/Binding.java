@@ -50,7 +50,6 @@ public interface Binding {
 	/**
 	 * If this Binding is visible.
 	 * Used to determine if the user can see the field.
-	 * A Binding that is not visible cannot have source values applied and cannot be committed. 
 	 */
 	boolean isVisible();
 	
