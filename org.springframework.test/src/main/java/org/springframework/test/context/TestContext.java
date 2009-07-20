@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,6 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @param defaultContextLoaderClassName the name of the default
 	 * <code>ContextLoader</code> class to use (may be <code>null</code>)
 	 */
-	@SuppressWarnings("unchecked")
 	TestContext(Class<?> testClass, ContextCache contextCache, String defaultContextLoaderClassName) {
 		Assert.notNull(testClass, "Test class must not be null");
 		Assert.notNull(contextCache, "ContextCache must not be null");
@@ -119,23 +118,8 @@ public class TestContext extends AttributeAccessorSupport {
 						+ "]");
 			}
 
-			Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
-			if (ContextLoader.class.equals(contextLoaderClass)) {
-				try {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Using default ContextLoader class [" + defaultContextLoaderClassName
-								+ "] for @ContextConfiguration [" + contextConfiguration + "] and class [" + testClass
-								+ "]");
-					}
-					contextLoaderClass = (Class<? extends ContextLoader>) getClass().getClassLoader().loadClass(
-						defaultContextLoaderClassName);
-				}
-				catch (ClassNotFoundException ex) {
-					throw new IllegalStateException("Could not load default ContextLoader class ["
-							+ defaultContextLoaderClassName + "]. Specify @ContextConfiguration's 'loader' "
-							+ "attribute or make the default loader class available.");
-				}
-			}
+			Class<? extends ContextLoader> contextLoaderClass = retrieveContextLoaderClass(testClass,
+				defaultContextLoaderClassName);
 			contextLoader = (ContextLoader) BeanUtils.instantiateClass(contextLoaderClass);
 			locations = retrieveContextLocations(contextLoader, testClass);
 		}
@@ -144,6 +128,80 @@ public class TestContext extends AttributeAccessorSupport {
 		this.contextCache = contextCache;
 		this.contextLoader = contextLoader;
 		this.locations = locations;
+	}
+
+	/**
+	 * <p>
+	 * Retrieve the {@link ContextLoader} {@link Class} to use for the supplied
+	 * {@link Class test class}.
+	 * <ol>
+	 * <li>If the {@link ContextConfiguration#loader() loader} attribute of
+	 * {@link ContextConfiguration &#064;ContextConfiguration} is configured
+	 * with an explicit class, that class will be returned.</li>
+	 * <li>If a <code>loader</code> class is not specified, the class hierarchy
+	 * will be traversed to find a parent class annotated with
+	 * <code>&#064;ContextConfiguration</code>; go to step #1.</li>
+	 * </ol>
+	 * <p>
+	 * If no explicit <code>loader</code> class is found after traversing the
+	 * class hierarchy, an attempt will be made to load and return the class
+	 * with the supplied <code>defaultContextLoaderClassName</code>.
+	 * 
+	 * @param clazz the class for which to retrieve <code>ContextLoader</code>
+	 * class; must not be <code>null</code>
+	 * @param defaultContextLoaderClassName the name of the default
+	 * <code>ContextLoader</code> class to use; must not be <code>null</code> or
+	 * empty
+	 * @return the <code>ContextLoader</code> class to use for the specified
+	 * class
+	 * @throws IllegalArgumentException if {@link ContextConfiguration
+	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
+	 */
+	@SuppressWarnings("unchecked")
+	private Class<? extends ContextLoader> retrieveContextLoaderClass(Class<?> clazz,
+			String defaultContextLoaderClassName) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.hasText(defaultContextLoaderClassName, "Default ContextLoader class name must not be null or empty");
+
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
+		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
+				+ annotationType + "] and class [" + clazz + "]");
+
+		while (declaringClass != null) {
+			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Processing ContextLoader for @ContextConfiguration [" + contextConfiguration
+						+ "] and declaring class [" + declaringClass + "]");
+			}
+
+			Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
+			if (!ContextLoader.class.equals(contextLoaderClass)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found explicit ContextLoader [" + contextLoaderClass
+							+ "] for @ContextConfiguration [" + contextConfiguration + "] and declaring class ["
+							+ declaringClass + "]");
+				}
+				return contextLoaderClass;
+			}
+
+			declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType,
+				declaringClass.getSuperclass());
+		}
+
+		try {
+			ContextConfiguration contextConfiguration = clazz.getAnnotation(ContextConfiguration.class);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using default ContextLoader class [" + defaultContextLoaderClassName
+						+ "] for @ContextConfiguration [" + contextConfiguration + "] and class [" + clazz + "]");
+			}
+			return (Class<? extends ContextLoader>) getClass().getClassLoader().loadClass(defaultContextLoaderClassName);
+		}
+		catch (ClassNotFoundException ex) {
+			throw new IllegalStateException("Could not load default ContextLoader class ["
+					+ defaultContextLoaderClassName + "]. Specify @ContextConfiguration's 'loader' "
+					+ "attribute or make the default loader class available.");
+		}
 	}
 
 	/**
@@ -157,10 +215,10 @@ public class TestContext extends AttributeAccessorSupport {
 	 * &#064;ContextConfiguration} will be taken into consideration.
 	 * Specifically, if the <code>inheritLocations</code> flag is set to
 	 * <code>true</code>, locations defined in the annotated class will be
-	 * appended to the locations defined in superclasses. &#064;param
-	 * contextLoader the ContextLoader to use for processing the locations (must
-	 * not be <code>null</code>)
+	 * appended to the locations defined in superclasses.
 	 * 
+	 * @param contextLoader the ContextLoader to use for processing the
+	 * locations (must not be <code>null</code>)
 	 * @param clazz the class for which to retrieve the resource locations (must
 	 * not be <code>null</code>)
 	 * @return the list of ApplicationContext resource locations for the
