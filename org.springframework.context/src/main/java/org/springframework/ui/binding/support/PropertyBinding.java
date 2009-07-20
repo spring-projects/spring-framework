@@ -3,9 +3,6 @@
  */
 package org.springframework.ui.binding.support;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
@@ -26,36 +23,32 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.support.GenericBinder.BindingContext;
 import org.springframework.ui.format.Formatter;
 import org.springframework.util.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
 public class PropertyBinding implements Binding {
 
-	private String property;
+	private PropertyDescriptor property;
 
-	private Object model;
+	private Object object;
 
-	private TypeConverter typeConverter;
-
-	private BindingRule bindingRule;
-	
-	private PropertyDescriptor propertyDescriptor;
+	private BindingContext bindingContext;
 
 	private Object sourceValue;
-	
+
 	@SuppressWarnings("unused")
 	private ParseException sourceValueParseException;
-	
+
 	private ValueBuffer buffer;
-	
+
 	private BindingStatus status;
-	
-	public PropertyBinding(String property, Object model, TypeConverter typeConverter, BindingRule bindingRule) {
-		initProperty(property, model);
-		this.model = model;
-		this.typeConverter = typeConverter;
-		this.bindingRule = bindingRule;
+
+	public PropertyBinding(PropertyDescriptor property, Object object, BindingContext bindingContext) {
+		this.property = property;
+		this.object = object;
+		this.bindingContext = bindingContext;
 		this.buffer = new ValueBuffer(getModel());
 		status = BindingStatus.CLEAN;
 	}
@@ -71,23 +64,23 @@ public class PropertyBinding implements Binding {
 	}
 
 	public boolean isEditable() {
-		return isWriteableProperty() && bindingRule.getEditableCondition().isTrue();
+		return isWriteableProperty() && bindingContext.getEditableCondition().isTrue();
 	}
-	
+
 	public boolean isEnabled() {
-		return bindingRule.getEnabledCondition().isTrue();
+		return bindingContext.getEnabledCondition().isTrue();
 	}
-	
+
 	public boolean isVisible() {
-		return bindingRule.getVisibleCondition().isTrue();
+		return bindingContext.getVisibleCondition().isTrue();
 	}
-	
+
 	public void applySourceValue(Object sourceValue) {
 		assertEditable();
 		assertEnabled();
 		if (sourceValue instanceof String) {
-			try { 
-				buffer.setValue(bindingRule.getFormatter().parse((String) sourceValue, getLocale()));
+			try {
+				buffer.setValue(bindingContext.getFormatter().parse((String) sourceValue, getLocale()));
 				sourceValue = null;
 				status = BindingStatus.DIRTY;
 			} catch (ParseException e) {
@@ -97,7 +90,7 @@ public class PropertyBinding implements Binding {
 			}
 		} else if (sourceValue instanceof String[]) {
 			String[] sourceValues = (String[]) sourceValue;
-			Class<?> parsedType = getFormattedObjectType(bindingRule.getElementFormatter().getClass());
+			Class<?> parsedType = getFormattedObjectType(bindingContext.getElementFormatter().getClass());
 			if (parsedType == null) {
 				parsedType = String.class;
 			}
@@ -105,7 +98,8 @@ public class PropertyBinding implements Binding {
 			for (int i = 0; i < sourceValues.length; i++) {
 				Object parsedValue;
 				try {
-					parsedValue = bindingRule.getElementFormatter().parse(sourceValues[i], LocaleContextHolder.getLocale());
+					parsedValue = bindingContext.getElementFormatter().parse(sourceValues[i],
+							LocaleContextHolder.getLocale());
 					Array.set(parsed, i, parsedValue);
 				} catch (ParseException e) {
 					this.sourceValue = sourceValue;
@@ -121,14 +115,14 @@ public class PropertyBinding implements Binding {
 			}
 		}
 	}
-	
+
 	public BindingStatus getStatus() {
 		return status;
 	}
-	
+
 	public Alert getStatusAlert() {
 		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
-			return new Alert() {
+			return new AbstractAlert() {
 				public String getCode() {
 					return "typeMismatch";
 				}
@@ -139,11 +133,11 @@ public class PropertyBinding implements Binding {
 
 				public Severity getSeverity() {
 					return Severity.ERROR;
-				}				
+				}
 			};
 		} else if (status == BindingStatus.COMMIT_FAILURE) {
 			if (buffer.getFlushException() instanceof ConversionFailedException) {
-				return new Alert() {
+				return new AbstractAlert() {
 					public String getCode() {
 						return "typeMismatch";
 					}
@@ -154,25 +148,25 @@ public class PropertyBinding implements Binding {
 
 					public Severity getSeverity() {
 						return Severity.ERROR;
-					}				
-				};				
+					}
+				};
 			} else {
-				return new Alert() {
+				return new AbstractAlert() {
 					public String getCode() {
 						return "internalError";
 					}
 
 					public String getMessage() {
-						return "Internal error occurred";
+						return "Internal error occurred " + buffer.getFlushException();
 					}
 
 					public Severity getSeverity() {
 						return Severity.FATAL;
-					}				
-				};				
+					}
+				};
 			}
 		} else if (status == BindingStatus.COMMITTED) {
-			return new Alert() {
+			return new AbstractAlert() {
 				public String getCode() {
 					return "bindSucces";
 				}
@@ -183,8 +177,8 @@ public class PropertyBinding implements Binding {
 
 				public Severity getSeverity() {
 					return Severity.INFO;
-				}				
-			};			
+				}
+			};
 		} else {
 			return null;
 		}
@@ -204,7 +198,7 @@ public class PropertyBinding implements Binding {
 			throw new IllegalStateException("Binding is not dirty; nothing to commit");
 		}
 	}
-	
+
 	public void revert() {
 		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
 			sourceValue = null;
@@ -212,28 +206,29 @@ public class PropertyBinding implements Binding {
 			status = BindingStatus.CLEAN;
 		} else if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
 			buffer.clear();
-			status = BindingStatus.CLEAN;			
+			status = BindingStatus.CLEAN;
 		} else {
 			throw new IllegalStateException("Nothing to revert");
 		}
 	}
 
 	public Model getModel() {
-		return new Model() {		
+		return new Model() {
 			public Object getValue() {
-				return ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(), model);
+				return ReflectionUtils.invokeMethod(property.getReadMethod(), object);
 			}
 
 			public Class<?> getValueType() {
-				return propertyDescriptor.getPropertyType();
+				return property.getPropertyType();
 			}
-			
+
 			public void setValue(Object value) {
-				TypeDescriptor targetType = new TypeDescriptor(new MethodParameter(propertyDescriptor.getWriteMethod(), 0));
-				if (value != null && typeConverter.canConvert(value.getClass(), targetType)) {
-					value = typeConverter.convert(value, targetType);					
+				TypeDescriptor targetType = new TypeDescriptor(new MethodParameter(property.getWriteMethod(), 0));
+				TypeConverter converter = bindingContext.getTypeConverter();
+				if (value != null && converter.canConvert(value.getClass(), targetType)) {
+					value = converter.convert(value, targetType);
 				}
-				ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), model, value);
+				ReflectionUtils.invokeMethod(property.getWriteMethod(), object, value);
 			}
 		};
 	}
@@ -243,7 +238,7 @@ public class PropertyBinding implements Binding {
 		if (getValue() == null) {
 			createValue();
 		}
-		return bindingRule.getBinding(property, getValue());
+		return bindingContext.getBinding(property, getValue());
 	}
 
 	public boolean isList() {
@@ -264,7 +259,7 @@ public class PropertyBinding implements Binding {
 		assertMapProperty();
 		if (key instanceof String) {
 			try {
-				key = bindingRule.getKeyFormatter().parse((String) key, getLocale());
+				key = bindingContext.getKeyFormatter().parse((String) key, getLocale());
 			} catch (ParseException e) {
 				throw new IllegalArgumentException("Invald key", e);
 			}
@@ -276,40 +271,16 @@ public class PropertyBinding implements Binding {
 	public String formatValue(Object value) {
 		Formatter formatter;
 		if (isList() || isMap()) {
-			formatter = bindingRule.getElementFormatter();
+			formatter = bindingContext.getElementFormatter();
 		} else {
-			formatter = bindingRule.getFormatter();
+			formatter = bindingContext.getFormatter();
 		}
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
-		value = typeConverter.convert(value, formattedType);
+		value = bindingContext.getTypeConverter().convert(value, formattedType);
 		return formatter.format(value, getLocale());
 	}
 
 	// internal helpers
-
-	private void initProperty(String property, Object model) {
-		this.propertyDescriptor = findPropertyDescriptor(property, model);
-		this.property = property;
-	}
-	
-	private PropertyDescriptor findPropertyDescriptor(String property, Object model) {
-		PropertyDescriptor[] propDescs = getBeanInfo(model.getClass()).getPropertyDescriptors();
-		for (PropertyDescriptor propDesc : propDescs) {
-			if (propDesc.getName().equals(property)) {
-				return propDesc;
-			}
-		}
-		throw new IllegalArgumentException("No property '" + property + "' found on model ["
-				+ model.getClass().getName() + "]");
-	}
-
-	private BeanInfo getBeanInfo(Class<?> clazz) {
-		try {
-			return Introspector.getBeanInfo(clazz);
-		} catch (IntrospectionException e) {
-			throw new IllegalStateException("Unable to introspect model type " + clazz);
-		}
-	}
 
 	private Locale getLocale() {
 		return LocaleContextHolder.getLocale();
@@ -320,11 +291,11 @@ public class PropertyBinding implements Binding {
 			Object value = getModel().getValueType().newInstance();
 			getModel().setValue(value);
 		} catch (InstantiationException e) {
-			throw new IllegalStateException("Could not lazily instantiate model of type [" + getModel().getValueType().getName()
-					+ "] to access property" + property, e);
+			throw new IllegalStateException("Could not lazily instantiate object of type ["
+					+ getModel().getValueType().getName() + "] to access property" + property, e);
 		} catch (IllegalAccessException e) {
-			throw new IllegalStateException("Could not lazily instantiate model of type [" + getModel().getValueType().getName()
-					+ "] to access property" + property, e);
+			throw new IllegalStateException("Could not lazily instantiate object of type ["
+					+ getModel().getValueType().getName() + "] to access property" + property, e);
 		}
 	}
 
@@ -358,8 +329,7 @@ public class PropertyBinding implements Binding {
 
 	@SuppressWarnings("unused")
 	private CollectionTypeDescriptor getCollectionTypeDescriptor() {
-		Class<?> elementType = GenericCollectionTypeResolver.getCollectionReturnType(propertyDescriptor
-				.getReadMethod());
+		Class<?> elementType = GenericCollectionTypeResolver.getCollectionReturnType(property.getReadMethod());
 		return new CollectionTypeDescriptor(getModel().getValueType(), elementType);
 	}
 
@@ -383,7 +353,7 @@ public class PropertyBinding implements Binding {
 			throw new IllegalStateException("Not a Map property binding");
 		}
 	}
-	
+
 	private void assertEditable() {
 		if (!isEditable()) {
 			throw new IllegalStateException("Binding is not editable");
@@ -397,6 +367,13 @@ public class PropertyBinding implements Binding {
 	}
 
 	private boolean isWriteableProperty() {
-		return propertyDescriptor.getWriteMethod() != null;
+		return property.getWriteMethod() != null;
 	}
+
+	static abstract class AbstractAlert implements Alert {
+		public String toString() {
+			return getCode() + " - " + getMessage();
+		}
+	}
+
 }

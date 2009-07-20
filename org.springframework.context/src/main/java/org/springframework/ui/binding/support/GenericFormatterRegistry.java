@@ -15,6 +15,7 @@
  */
 package org.springframework.ui.binding.support;
 
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.ui.format.AnnotationFormatterFactory;
@@ -46,7 +48,8 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
-	public Formatter<?> getFormatter(TypeDescriptor<?> propertyType) {
+	public Formatter<?> getFormatter(PropertyDescriptor property) {
+		TypeDescriptor<?> propertyType = new TypeDescriptor(new MethodParameter(property.getReadMethod(), -1));
 		Annotation[] annotations = propertyType.getAnnotations();
 		for (Annotation a : annotations) {
 			AnnotationFormatterFactory factory = annotationFormatters.get(a.annotationType());
@@ -66,7 +69,11 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		} else {
 			type = propertyType.getType();
 		}
-		formatter = typeFormatters.get(type);
+		return getFormatter(type);
+	}
+	
+	public Formatter<?> getFormatter(Class<?> type) {
+		Formatter formatter = typeFormatters.get(type);
 		if (formatter != null) {
 			return formatter;
 		} else {
@@ -84,10 +91,11 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 				typeFormatters.put(type, formatter);
 				return formatter;
 			} else {
-				return null;
+				return DefaultFormatter.INSTANCE;
 			}
-		}
+		}		
 	}
+
 
 	public void add(Class<?> propertyType, Formatter<?> formatter) {
 		if (propertyType.isAnnotation()) {

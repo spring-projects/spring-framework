@@ -15,7 +15,8 @@
  */
 package org.springframework.ui.binding.support;
 
-import org.springframework.core.convert.TypeDescriptor;
+import java.beans.PropertyDescriptor;
+
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatter;
 
@@ -28,13 +29,14 @@ import org.springframework.ui.format.Formatter;
  */
 public interface FormatterRegistry {
 
+	Formatter<?> getFormatter(PropertyDescriptor property);
+
 	/**
-	 * Get the Formatter for the property type.
-	 * @param propertyType the property type descriptor, which provides additional property metadata.
+	 * Get the Formatter for the type.
 	 * @return the Formatter, or <code>null</code> if none is registered
 	 */
-	Formatter<?> getFormatter(TypeDescriptor<?> propertyType);
-	
+	Formatter<?> getFormatter(Class<?> type);
+
 	/**
 	 * Adds a Formatter that will format the values of properties of the provided type.
 	 * The type should generally be a concrete class for a scalar value, such as BigDecimal, and not a collection value.
