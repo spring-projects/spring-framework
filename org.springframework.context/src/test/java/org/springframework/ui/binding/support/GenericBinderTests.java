@@ -15,8 +15,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.Binding;
@@ -50,11 +53,6 @@ public class GenericBinderTests {
 		LocaleContextHolder.setLocale(null);
 	}
 
-	@Test
-	public void testPlaceholder() {
-		
-	}
-	
 	@Test
 	public void bindSingleValuesWithDefaultTypeConverterConversion() {
 		GenericBinder binder = new GenericBinder(bean);
@@ -192,6 +190,7 @@ public class GenericBinderTests {
 		assertEquals("Please enter an integer in format ### for the integer field; you entered bogus", b.getStatusAlert().getMessage());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void getBindingMultiValued() {
 		Binding b = binder.getBinding("foos");
@@ -223,25 +222,22 @@ public class GenericBinderTests {
 		assertEquals(FooEnum.BAZ, b.getValue());
 	}
 
-	/*
 	@Test
 	public void getBindingMultiValuedTypeConversionFailure() {
-		binder.addBinding("foos");
 		Binding b = binder.getBinding("foos");
-		assertTrue(b.isIndexable());
-		assertEquals(0, b.getCollectionValues().length);
-		BindingResult result = b.setValue(new String[] { "BAR", "BOGUS", "BOOP" });
-		assertTrue(result.isFailure());
-		assertEquals("conversionFailed", result.getAlert().getCode());
+		assertTrue(b.isList());
+		assertEquals(null, b.getValue());
+		b.applySourceValue(new String[] { "BAR", "BOGUS", "BOOP" });
+		assertEquals(BindingStatus.INVALID_SOURCE_VALUE, b.getStatus());
+		assertEquals("typeMismatch", b.getStatusAlert().getCode());
 	}
 
 	@Test
 	public void bindToList() {
-		binder.addBinding("addresses");
 		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
 		values.put("addresses", new String[] { "4655 Macy Lane:Melbourne:FL:35452", "1234 Rostock Circle:Palm Bay:FL:32901", "1977 Bel Aire Estates:Coker:AL:12345" });		
 		binder.bind(values);
-		Assert.assertEquals(3, bean.addresses.size());
+		assertEquals(3, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
 		assertEquals("FL", bean.addresses.get(0).state);
@@ -250,7 +246,6 @@ public class GenericBinderTests {
 	
 	@Test
 	public void bindToListElements() {
-		binder.addBinding("addresses");
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("addresses[0]", "4655 Macy Lane:Melbourne:FL:35452");		
 		values.put("addresses[1]", "1234 Rostock Circle:Palm Bay:FL:32901");	
@@ -265,11 +260,12 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindToListSingleString() {
-		binder.addBinding("addresses");
-		binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
+		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
+		formatterRegistry.add(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
+		binder.setFormatterRegistry(formatterRegistry);
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("addresses", "4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");		
-		BindingResults results = binder.bind(values);
+		binder.bind(values);
 		Assert.assertEquals(3, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
@@ -288,8 +284,6 @@ public class GenericBinderTests {
 	@Test
 	@Ignore
 	public void bindToListSingleStringNoListFormatter() {
-		binder.addBinding("addresses");
-		//binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("addresses", "4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");		
 		BindingResults results = binder.bind(values);
@@ -310,8 +304,9 @@ public class GenericBinderTests {
 	
 	@Test
 	public void getListAsSingleString() {
-		binder.addBinding("addresses");
-		binder.registerFormatter(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
+		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
+		formatterRegistry.add(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
+		binder.setFormatterRegistry(formatterRegistry);
 		Address address1 = new Address();
 		address1.setStreet("s1");
 		address1.setCity("c1");
@@ -326,14 +321,13 @@ public class GenericBinderTests {
 		addresses.add(address1);
 		addresses.add(address2);
 		bean.addresses = addresses;
-		String value = binder.getBinding("addresses").getValue();
+		String value = binder.getBinding("addresses").getRenderValue();
 		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2,", value);
 	}
 
 	@Test
 	@Ignore
 	public void getListAsSingleStringNoFormatter() {
-		binder.addBinding("addresses");
 		Address address1 = new Address();
 		address1.setStreet("s1");
 		address1.setCity("c1");
@@ -348,26 +342,17 @@ public class GenericBinderTests {
 		addresses.add(address1);
 		addresses.add(address2);
 		bean.addresses = addresses;
-		String value = binder.getBinding("addresses").getValue();
+		String value = binder.getBinding("addresses").getRenderValue();
 		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2,", value);
 	}
 
 	@Test
+	@Ignore
 	public void bindToListHandleNullValueInNestedPath() {
-		binder.addBinding("addresses.street");
-		binder.addBinding("addresses.city");
-		binder.addBinding("addresses.state");
-		binder.addBinding("addresses.zip");
-
 		Map<String, String> values = new LinkedHashMap<String, String>();
-
-		// EL configured with some options from SpelExpressionParserConfiguration:
-		// (see where Binder creates the parser)
 		// - new addresses List is created if null
 		// - new entries automatically built if List is currently too short - all new entries
 		//   are new instances of the type of the list entry, they are not null.
-		// not currently doing anything for maps or arrays
-
 		values.put("addresses[0].street", "4655 Macy Lane");
 		values.put("addresses[0].city", "Melbourne");
 		values.put("addresses[0].state", "FL");
@@ -386,6 +371,7 @@ public class GenericBinderTests {
 		values.put("addresses[5].zip", "32901");
 
 		BindingResults results = binder.bind(values);
+		System.out.println(results);
 		Assert.assertEquals(6, bean.addresses.size());
 		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 		Assert.assertNotNull(bean.addresses.get(2));
@@ -393,8 +379,8 @@ public class GenericBinderTests {
 	}
 
 	@Test
+	@Ignore
 	public void bindToMap() {
-		binder.addBinding("favoriteFoodsByGroup");
 		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
 		values.put("favoriteFoodsByGroup", new String[] { "DAIRY=Milk", "FRUIT=Peaches", "MEAT=Ham" });		
 		BindingResults results = binder.bind(values);
@@ -405,8 +391,8 @@ public class GenericBinderTests {
 	}
 
 	@Test
+	@Ignore
 	public void bindToMapElements() {
-		binder.addBinding("favoriteFoodsByGroup");
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("favoriteFoodsByGroup['DAIRY']", "Milk");
 		values.put("favoriteFoodsByGroup['FRUIT']", "Peaches");
@@ -420,7 +406,6 @@ public class GenericBinderTests {
 	
 	@Test
 	public void bindToMapSingleString() {
-		binder.addBinding("favoriteFoodsByGroup");
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("favoriteFoodsByGroup", "DAIRY=Milk FRUIT=Peaches MEAT=Ham");
 		BindingResults results = binder.bind(values);
@@ -433,22 +418,17 @@ public class GenericBinderTests {
 	@Test
 	@Ignore
 	public void getMapAsSingleString() {
-		binder.addBinding("favoriteFoodsByGroup");
 		Map<FoodGroup, String> foods = new LinkedHashMap<FoodGroup, String>();
 		foods.put(FoodGroup.DAIRY, "Milk");
 		foods.put(FoodGroup.FRUIT, "Peaches");
 		foods.put(FoodGroup.MEAT, "Ham");
 		bean.favoriteFoodsByGroup = foods;
-		String value = binder.getBinding("favoriteFoodsByGroup").getValue();
+		String value = binder.getBinding("favoriteFoodsByGroup").getRenderValue();
 		assertEquals("DAIRY=Milk FRUIT=Peaches MEAT=Ham", value);
 	}
 
 	@Test
 	public void bindToNullObjectPath() {
-		binder.addBinding("primaryAddress.street");
-		binder.addBinding("primaryAddress.city");
-		binder.addBinding("primaryAddress.state");
-		binder.addBinding("primaryAddress.zip");
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("primaryAddress.city", "Melbourne");
 		binder.bind(values);
@@ -457,11 +437,10 @@ public class GenericBinderTests {
 	
 	@Test
 	public void formatPossibleValue() {
-		binder.addBinding("currency").formatWith(new CurrencyFormatter());
+		binder.bindingRule("currency").formatWith(new CurrencyFormatter());
 		Binding b = binder.getBinding("currency");
-		assertEquals("$5.00", b.format(new BigDecimal("5")));
+		assertEquals("$5.00", b.formatValue(new BigDecimal("5")));
 	}
-	*/
 	
 	public static enum FooEnum {
 		BAR, BAZ, BOOP;

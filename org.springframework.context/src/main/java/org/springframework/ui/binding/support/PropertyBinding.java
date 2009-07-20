@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.springframework.ui.binding.support;
 
 import java.beans.PropertyDescriptor;
@@ -9,6 +6,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -51,7 +49,7 @@ public class PropertyBinding implements Binding {
 	private Map<Integer, ListElementBinding> listElementBindings;
 
 	private Class<?> elementType;
-	
+
 	public PropertyBinding(PropertyDescriptor property, Object object, BindingContext bindingContext) {
 		this.property = property;
 		this.object = object;
@@ -148,7 +146,7 @@ public class PropertyBinding implements Binding {
 			} catch (ConversionFailedException e) {
 				this.sourceValue = sourceValue;
 				invalidSourceValueCause = e;
-				status = BindingStatus.INVALID_SOURCE_VALUE;				
+				status = BindingStatus.INVALID_SOURCE_VALUE;
 			}
 		}
 	}
@@ -267,7 +265,7 @@ public class PropertyBinding implements Binding {
 			public Class<?> getValueType() {
 				return property.getPropertyType();
 			}
-			
+
 			public TypeDescriptor<?> getValueTypeDescriptor() {
 				return new TypeDescriptor(new MethodParameter(property.getReadMethod(), -1));
 			}
@@ -281,7 +279,7 @@ public class PropertyBinding implements Binding {
 	public Binding getBinding(String property) {
 		assertScalarProperty();
 		if (getValue() == null) {
-			createValue();
+			getModel().setValue(newValue(getValueType()));
 		}
 		return bindingContext.getBinding(property, getValue());
 	}
@@ -292,6 +290,10 @@ public class PropertyBinding implements Binding {
 
 	public Binding getListElementBinding(int index) {
 		assertListProperty();
+		if (index < 0) {
+			throw new IllegalArgumentException("Invalid index " + index);
+		}
+		growListIfNecessary(index);
 		ListElementBinding binding = listElementBindings.get(index);
 		if (binding == null) {
 			binding = new ListElementBinding(index);
@@ -327,35 +329,24 @@ public class PropertyBinding implements Binding {
 		return format(value, formatter);
 	}
 
+	// subclassing hooks
+
+	protected Formatter getFormatter() {
+		return bindingContext.getFormatter();
+	}
+
+	// internal helpers
+	
 	private String format(Object value, Formatter formatter) {
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = bindingContext.getTypeConverter().convert(value, formattedType);
 		return formatter.format(value, getLocale());
 	}
 
-	// internal helpers
-
-	protected Formatter getFormatter() {
-		return bindingContext.getFormatter();
-	}
-	
 	private Locale getLocale() {
 		return LocaleContextHolder.getLocale();
 	}
-
-	private void createValue() {
-		try {
-			Object value = getModel().getValueType().newInstance();
-			getModel().setValue(value);
-		} catch (InstantiationException e) {
-			throw new IllegalStateException("Could not lazily instantiate object of type ["
-					+ getModel().getValueType().getName() + "] to access property" + property, e);
-		} catch (IllegalAccessException e) {
-			throw new IllegalStateException("Could not lazily instantiate object of type ["
-					+ getModel().getValueType().getName() + "] to access property" + property, e);
-		}
-	}
-
+	
 	private Class getFormattedObjectType(Class formatterClass) {
 		Class classToIntrospect = formatterClass;
 		while (classToIntrospect != null) {
@@ -431,12 +422,43 @@ public class PropertyBinding implements Binding {
 		return property.getWriteMethod() != null;
 	}
 
+	private void growListIfNecessary(int index) {
+		List list = (List) getValue();
+		if (list == null) {
+			getModel().setValue(newListValue(getValueType()));
+			list = (List) getValue();
+		}
+		if (index >= list.size()) {
+			for (int i = list.size(); i <= index; i++) {
+				list.add(newValue(elementType));
+			}
+		}
+	}
+
+	private Object newListValue(Class<?> type) {
+		if (type.isInterface()) {
+			return newValue(ArrayList.class);
+		} else {
+			return newValue(type);
+		}
+	}
+	
+	private Object newValue(Class<?> type) {
+		try {
+			return type.newInstance();
+		} catch (InstantiationException e) {
+			throw new IllegalStateException("Could not instantiate element of type [" + type.getName() + "]", e);
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException("Could not instantiate element of type [" + type.getName() + "]", e);
+		}		
+	}
+	
 	static abstract class AbstractAlert implements Alert {
 		public String toString() {
 			return getCode() + " - " + getMessage();
 		}
 	}
-	
+
 	class ListElementBinding extends PropertyBinding {
 
 		private int index;
@@ -444,13 +466,12 @@ public class PropertyBinding implements Binding {
 		public ListElementBinding(int index) {
 			super(property, object, bindingContext);
 			this.index = index;
-			growListIfNecessary();
 		}
 
 		protected Formatter getFormatter() {
 			return bindingContext.getElementFormatter();
 		}
-			
+
 		public Model getModel() {
 			return new Model() {
 				public Object getValue() {
@@ -464,7 +485,7 @@ public class PropertyBinding implements Binding {
 						return getValue().getClass();
 					}
 				}
-				
+
 				public TypeDescriptor<?> getValueTypeDescriptor() {
 					return TypeDescriptor.valueOf(getValueType());
 				}
@@ -474,34 +495,12 @@ public class PropertyBinding implements Binding {
 				}
 			};
 		}
-		
+
 		// internal helpers
-		
-		private void growListIfNecessary() {
-			if (index >= getList().size()) {
-				for (int i = getList().size(); i <= index; i++) {
-					addValue();
-				}
-			}
-		}
-		
+
 		private List getList() {
 			return (List) PropertyBinding.this.getValue();
 		}
-
-		private void addValue() {
-			try {
-				Object value = getValueType().newInstance();
-				getList().add(value);
-			} catch (InstantiationException e) {
-				throw new IllegalStateException("Could not lazily instantiate model of type ["
-						+ getValueType().getName() + "] to grow List", e);
-			} catch (IllegalAccessException e) {
-				throw new IllegalStateException("Could not lazily instantiate model of type ["
-						+ getValueType().getName() + "] to grow List", e);
-			}
-		}
-
 	}
 
 }

@@ -240,6 +240,7 @@ public class GenericBinder implements Binder {
 		public GenericBindingRule(String property, Class modelClass) {
 			this.modelClass = modelClass;
 			this.property = findPropertyDescriptor(property);
+			nestedBindingRules = new HashMap<String, GenericBindingRule>();
 		}
 		
 		// implementing BindingContext
