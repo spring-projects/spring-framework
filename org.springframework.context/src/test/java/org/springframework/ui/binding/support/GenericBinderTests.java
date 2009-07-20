@@ -55,6 +55,7 @@ public class GenericBinderTests {
 		values.put("integer", "3");
 		values.put("foo", "BAR");
 		BindingResults results = binder.bind(values);
+		System.out.println(results);
 		assertEquals(3, results.size());
 
 		assertEquals("string", results.get(0).getProperty());

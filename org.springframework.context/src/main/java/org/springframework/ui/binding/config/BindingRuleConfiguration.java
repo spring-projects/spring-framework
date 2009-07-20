@@ -25,27 +25,31 @@ public interface BindingRuleConfiguration {
 	
 	/**
 	 * Set the Formatter to use to format bound property values.
-	 * If a collection property, this formatter is used to format the Collection as a String.
-	 * Default is null.
 	 */
 	BindingRuleConfiguration formatWith(Formatter<?> formatter);
 
 	/**
-	 * If a indexable map property, set the Formatter to use to format map key indexes.
-	 * Default is null.
+	 * If a map property, set the Formatter to use to format map keys.
 	 */
 	BindingRuleConfiguration formatKeysWith(Formatter<?> formatter);
 
 	/**
-	 * If an indexable list or map property, set the Formatter to use to format indexed elements.
-	 * Default is null.
+	 * If an list or map property, set the Formatter to use to format indexed elements.
 	 */
 	BindingRuleConfiguration formatElementsWith(Formatter<?> formatter);
-	
-	/**
-	 * Mark the binding as read only.
-	 * A read-only binding cannot have source values applied and cannot be committed.
-	 */
-	BindingRuleConfiguration readOnly();
 
+	/**
+	 * Set when the binding is editable.
+	 */
+	BindingRuleConfiguration editableWhen(Condition condition);
+
+	/**
+	 * Set when the binding is enabled.
+	 */
+	BindingRuleConfiguration enabledWhen(Condition condition);
+
+	/**
+	 * Set when the binding is visible.
+	 */
+	BindingRuleConfiguration visibleWhen(Condition condition);
 }

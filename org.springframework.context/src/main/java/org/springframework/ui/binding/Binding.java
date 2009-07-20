@@ -42,7 +42,7 @@ public interface Binding {
 	
 	/**
 	 * If this Binding is enabled.
-	 * Used to determine if the user can interact with the field.
+	 * Used to determine if the user can interact with the field at all.
 	 * A Binding that is not enabled cannot have source values applied and cannot be committed.
 	 */
 	boolean isEnabled();
@@ -59,7 +59,7 @@ public interface Binding {
 	 * Sets to {@link BindingStatus#DIRTY} if succeeds.
 	 * Sets to {@link BindingStatus#INVALID_SOURCE_VALUE} if fails.
 	 * @param sourceValue
-	 * @throws IllegalStateException if {@link #isEditable()}
+	 * @throws IllegalStateException if not editable or not enabled
 	 */
 	void applySourceValue(Object sourceValue);
 	
@@ -87,7 +87,7 @@ public interface Binding {
 	 * Commit the buffered value to the model.
 	 * Sets to {@link BindingStatus#COMMITTED} if succeeds.
 	 * Sets to {@link BindingStatus#COMMIT_FAILURE} if fails.
-	 * @throws IllegalStateException if not {@link BindingStatus#DIRTY} or {@link #isEditable()}
+	 * @throws IllegalStateException if not editable, not enabled, or not dirty
 	 */
 	void commit();
 	
@@ -104,10 +104,11 @@ public interface Binding {
 	
 	/**
 	 * Get a Binding to a nested property value.
-	 * @param nestedProperty the nested property name, such as "foo"; should not be a property path like "foo.bar"
+	 * @param property the nested property name, such as "foo"; should not be a property path like "foo.bar"
 	 * @return the binding to the nested property
+	 * @throws IllegalStateException if not a bean
 	 */
-	Binding getBinding(String nestedProperty);
+	Binding getBinding(String property);
 
 	/**
 	 * If bound to an indexable Collection, either a {@link java.util.List} or an array.
@@ -118,6 +119,7 @@ public interface Binding {
 	 * If a List, get a Binding to a element in the List.
 	 * @param index the element index
 	 * @return the indexed binding
+	 * @throws IllegalStateException if not a list
 	 */
 	Binding getListElementBinding(int index);
 
@@ -130,6 +132,7 @@ public interface Binding {
 	 * If a Map, get a Binding to a value in the Map.
 	 * @param key the map key
 	 * @return the keyed binding
+	 * @throws IllegalStateException if not a map 
 	 */
 	Binding getMapValueBinding(Object key);
 
@@ -160,7 +163,6 @@ public interface Binding {
 
 		/**
 		 * Set the model value.
-		 * @throws IllegalStateException if this binding is read only
 		 */
 		void setValue(Object value);
 	}
