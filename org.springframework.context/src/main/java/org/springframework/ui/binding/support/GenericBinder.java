@@ -133,7 +133,7 @@ public class GenericBinder implements Binder {
 				} else if (binding.isList()) {
 					binding = binding.getListElementBinding(element.getIntValue());
 				} else {
-					throw new IllegalArgumentException("Attempted to index a property that is not a Collection or Map");
+					throw new IllegalArgumentException("Attempted to index a property that is not a List or Map");
 				}
 			} else {
 				binding = binding.getBinding(element.getValue());
@@ -290,7 +290,7 @@ public class GenericBinder implements Binder {
 		}
 		
 		public Binding getBinding(String property, Object model) {
-			return getBindingRule(property).getBinding(model);
+			return getBindingRule(property, model.getClass()).getBinding(model);
 		}
 
 		// implementing BindingRuleConfiguration
@@ -342,9 +342,13 @@ public class GenericBinder implements Binder {
 		}
 
 		GenericBindingRule getBindingRule(String property) {
+			return getBindingRule(property, this.property.getPropertyType());
+		}
+		
+		GenericBindingRule getBindingRule(String property, Class modelClass) {
 			GenericBindingRule rule = nestedBindingRules.get(property);
 			if (rule == null) {
-				rule = new GenericBindingRule(property, this.property.getPropertyType());
+				rule = new GenericBindingRule(property, modelClass);
 				nestedBindingRules.put(property, rule);
 			}
 			return rule;
