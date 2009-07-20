@@ -32,7 +32,7 @@ import java.util.TreeSet;
  * @author Keith Donald
  * @since 3.0
  */
-class ConversionUtils {
+public class ConversionUtils {
 
 	/**
 	 * Get the java.util.Collection implementation class that should be used for the given target collection type.
