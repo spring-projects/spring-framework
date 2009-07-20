@@ -19,9 +19,11 @@ public class PropertyPath implements Iterable<PropertyPathElement> {
 			props = new String[] { propertyPath };
 		}
 		for (String prop : props) {
-			if (prop.startsWith("[")) {
-				int end = prop.indexOf(']');
-				String index = prop.substring(0, end);
+			if (prop.contains("[")) {
+				int start = prop.indexOf('[');
+				int end = prop.indexOf(']', start);
+				String index = prop.substring(start + 1, end);
+				elements.add(new PropertyPathElement(prop.substring(0, start), true));
 				elements.add(new PropertyPathElement(index, true));
 			} else {
 				elements.add(new PropertyPathElement(prop, false));
@@ -35,7 +37,7 @@ public class PropertyPath implements Iterable<PropertyPathElement> {
 
 	public List<PropertyPathElement> getNestedElements() {
 		if (elements.size() > 1) {
-			return elements.subList(1, elements.size() - 1);
+			return elements.subList(1, elements.size());
 		} else {
 			return Collections.emptyList();
 		}

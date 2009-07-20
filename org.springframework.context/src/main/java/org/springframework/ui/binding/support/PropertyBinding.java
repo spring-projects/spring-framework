@@ -9,6 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,16 +48,24 @@ public class PropertyBinding implements Binding {
 
 	private BindingStatus status;
 
+	private Map<Integer, ListElementBinding> listElementBindings;
+
+	private Class<?> elementType;
+	
 	public PropertyBinding(PropertyDescriptor property, Object object, BindingContext bindingContext) {
 		this.property = property;
 		this.object = object;
 		this.bindingContext = bindingContext;
 		buffer = new ValueBuffer(getModel());
 		status = BindingStatus.CLEAN;
+		if (isList()) {
+			listElementBindings = new HashMap<Integer, ListElementBinding>();
+			elementType = GenericCollectionTypeResolver.getCollectionReturnType(property.getReadMethod());
+		}
 	}
 
 	public String getRenderValue() {
-		return format(getValue(), bindingContext.getFormatter());
+		return format(getValue(), getFormatter());
 	}
 
 	public Object getValue() {
@@ -88,7 +97,7 @@ public class PropertyBinding implements Binding {
 		assertEnabled();
 		if (sourceValue instanceof String) {
 			try {
-				Object parsed = bindingContext.getFormatter().parse((String) sourceValue, getLocale());
+				Object parsed = getFormatter().parse((String) sourceValue, getLocale());
 				buffer.setValue(coerseToValueType(parsed));
 				sourceValue = null;
 				status = BindingStatus.DIRTY;
@@ -123,13 +132,23 @@ public class PropertyBinding implements Binding {
 			if (status != BindingStatus.INVALID_SOURCE_VALUE) {
 				try {
 					buffer.setValue(coerseToValueType(parsed));
+					sourceValue = null;
+					status = BindingStatus.DIRTY;
 				} catch (ConversionFailedException e) {
 					this.sourceValue = sourceValue;
 					invalidSourceValueCause = e;
 					status = BindingStatus.INVALID_SOURCE_VALUE;
 				}
+			}
+		} else {
+			try {
+				buffer.setValue(coerseToValueType(sourceValue));
 				sourceValue = null;
 				status = BindingStatus.DIRTY;
+			} catch (ConversionFailedException e) {
+				this.sourceValue = sourceValue;
+				invalidSourceValueCause = e;
+				status = BindingStatus.INVALID_SOURCE_VALUE;				
 			}
 		}
 	}
@@ -179,19 +198,19 @@ public class PropertyBinding implements Binding {
 				}
 			};
 		} else if (status == BindingStatus.COMMIT_FAILURE) {
-				return new AbstractAlert() {
-					public String getCode() {
-						return "internalError";
-					}
+			return new AbstractAlert() {
+				public String getCode() {
+					return "internalError";
+				}
 
-					public String getMessage() {
-						return "Internal error occurred; message = [" + buffer.getFlushException().getMessage() + "]";
-					}
+				public String getMessage() {
+					return "Internal error occurred; message = [" + buffer.getFlushException().getMessage() + "]";
+				}
 
-					public Severity getSeverity() {
-						return Severity.FATAL;
-					}
-				};				
+				public Severity getSeverity() {
+					return Severity.FATAL;
+				}
+			};
 		} else if (status == BindingStatus.COMMITTED) {
 			return new AbstractAlert() {
 				public String getCode() {
@@ -248,6 +267,10 @@ public class PropertyBinding implements Binding {
 			public Class<?> getValueType() {
 				return property.getPropertyType();
 			}
+			
+			public TypeDescriptor<?> getValueTypeDescriptor() {
+				return new TypeDescriptor(new MethodParameter(property.getReadMethod(), -1));
+			}
 
 			public void setValue(Object value) {
 				ReflectionUtils.invokeMethod(property.getWriteMethod(), object, value);
@@ -264,17 +287,21 @@ public class PropertyBinding implements Binding {
 	}
 
 	public boolean isList() {
-		return getModel().getValueType().isArray() || List.class.isAssignableFrom(getModel().getValueType());
+		return List.class.isAssignableFrom(getValueType());
 	}
 
 	public Binding getListElementBinding(int index) {
 		assertListProperty();
-		//return new IndexedBinding(index, (List) getValue(), getCollectionTypeDescriptor(), typeConverter);
-		return null;
+		ListElementBinding binding = listElementBindings.get(index);
+		if (binding == null) {
+			binding = new ListElementBinding(index);
+			listElementBindings.put(index, binding);
+		}
+		return binding;
 	}
 
 	public boolean isMap() {
-		return Map.class.isAssignableFrom(getModel().getValueType());
+		return Map.class.isAssignableFrom(getValueType());
 	}
 
 	public Binding getMapValueBinding(Object key) {
@@ -299,7 +326,7 @@ public class PropertyBinding implements Binding {
 		}
 		return format(value, formatter);
 	}
-	
+
 	private String format(Object value, Formatter formatter) {
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = bindingContext.getTypeConverter().convert(value, formattedType);
@@ -308,6 +335,10 @@ public class PropertyBinding implements Binding {
 
 	// internal helpers
 
+	protected Formatter getFormatter() {
+		return bindingContext.getFormatter();
+	}
+	
 	private Locale getLocale() {
 		return LocaleContextHolder.getLocale();
 	}
@@ -354,19 +385,13 @@ public class PropertyBinding implements Binding {
 	}
 
 	private Object coerseToValueType(Object parsed) {
-		TypeDescriptor targetType = new TypeDescriptor(new MethodParameter(property.getWriteMethod(), 0));
+		TypeDescriptor targetType = getModel().getValueTypeDescriptor();
 		TypeConverter converter = bindingContext.getTypeConverter();
 		if (parsed != null && converter.canConvert(parsed.getClass(), targetType)) {
 			return converter.convert(parsed, targetType);
 		} else {
 			return parsed;
 		}
-	}
-
-	@SuppressWarnings("unused")
-	private CollectionTypeDescriptor getCollectionTypeDescriptor() {
-		Class<?> elementType = GenericCollectionTypeResolver.getCollectionReturnType(property.getReadMethod());
-		return new CollectionTypeDescriptor(getModel().getValueType(), elementType);
 	}
 
 	private void assertScalarProperty() {
@@ -410,6 +435,73 @@ public class PropertyBinding implements Binding {
 		public String toString() {
 			return getCode() + " - " + getMessage();
 		}
+	}
+	
+	class ListElementBinding extends PropertyBinding {
+
+		private int index;
+
+		public ListElementBinding(int index) {
+			super(property, object, bindingContext);
+			this.index = index;
+			growListIfNecessary();
+		}
+
+		protected Formatter getFormatter() {
+			return bindingContext.getElementFormatter();
+		}
+			
+		public Model getModel() {
+			return new Model() {
+				public Object getValue() {
+					return getList().get(index);
+				}
+
+				public Class<?> getValueType() {
+					if (elementType != null) {
+						return elementType;
+					} else {
+						return getValue().getClass();
+					}
+				}
+				
+				public TypeDescriptor<?> getValueTypeDescriptor() {
+					return TypeDescriptor.valueOf(getValueType());
+				}
+
+				public void setValue(Object value) {
+					getList().set(index, value);
+				}
+			};
+		}
+		
+		// internal helpers
+		
+		private void growListIfNecessary() {
+			if (index >= getList().size()) {
+				for (int i = getList().size(); i <= index; i++) {
+					addValue();
+				}
+			}
+		}
+		
+		private List getList() {
+			return (List) PropertyBinding.this.getValue();
+		}
+
+		private void addValue() {
+			try {
+				Object value = getValueType().newInstance();
+				getList().add(value);
+			} catch (InstantiationException e) {
+				throw new IllegalStateException("Could not lazily instantiate model of type ["
+						+ getValueType().getName() + "] to grow List", e);
+			} catch (IllegalAccessException e) {
+				throw new IllegalStateException("Could not lazily instantiate model of type ["
+						+ getValueType().getName() + "] to grow List", e);
+			}
+		}
+
 	}
 
 }

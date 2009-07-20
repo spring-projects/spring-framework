@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -210,18 +211,19 @@ public class GenericBinderTests {
 		assertEquals(FooEnum.BOOP, value.get(2));
 	}
 
-	/*
 	@Test
 	public void getBindingMultiValuedIndexAccess() {
-		binder.addBinding("foos");
 		bean.setFoos(Arrays.asList(new FooEnum[] { FooEnum.BAR }));
 		Binding b = binder.getBinding("foos[0]");
-		assertFalse(b.isIndexable());
-		assertEquals("BAR", b.getValue());
-		b.setValue("BAZ");
-		assertEquals("BAZ", b.getValue());
+		assertFalse(b.isList());
+		assertEquals(FooEnum.BAR, b.getValue());
+		assertEquals("BAR", b.getRenderValue());
+		b.applySourceValue("BAZ");
+		assertEquals("BAZ", b.getRenderValue());
+		assertEquals(FooEnum.BAZ, b.getValue());
 	}
 
+	/*
 	@Test
 	public void getBindingMultiValuedTypeConversionFailure() {
 		binder.addBinding("foos");
