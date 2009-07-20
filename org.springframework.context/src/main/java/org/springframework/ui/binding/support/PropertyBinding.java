@@ -53,7 +53,7 @@ public class PropertyBinding implements Binding {
 	
 	private ValueBuffer buffer;
 	
-	private BindingStatus bindingStatus;
+	private BindingStatus status;
 	
 	public PropertyBinding(String property, Object model, TypeConverter typeConverter) {
 		this.propertyDescriptor = findPropertyDescriptor(property, model);
@@ -61,36 +61,43 @@ public class PropertyBinding implements Binding {
 		this.model = model;
 		this.typeConverter = typeConverter;
 		this.buffer = new ValueBuffer(getModel());
-		bindingStatus = BindingStatus.CLEAN;
+		status = BindingStatus.CLEAN;
 	}
 
 	public Object getValue() {
-		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
+		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
 			return sourceValue;
-		} else if (bindingStatus == BindingStatus.DIRTY || bindingStatus == BindingStatus.COMMIT_FAILURE) {
+		} else if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
 			return formatValue(buffer.getValue());
 		} else {
 			return formatValue(getModel().getValue());
 		}
 	}
 
-	public boolean isReadOnly() {
-		return propertyDescriptor.getWriteMethod() == null || markedNotEditable();
+	public boolean isEditable() {
+		return propertyDescriptor.getWriteMethod() != null || !markedNotEditable();
+	}
+	
+	public boolean isEnabled() {
+		return true;
+	}
+	
+	public boolean isVisible() {
+		return true;
 	}
 	
 	public void applySourceValue(Object sourceValue) {
-		if (isReadOnly()) {
-			throw new IllegalStateException("Property is read only");
-		}
+		assertEditable();
+		assertEnabled();
 		if (sourceValue instanceof String) {
 			try { 
 				buffer.setValue(valueFormatter.parse((String) sourceValue, getLocale()));
 				sourceValue = null;
-				bindingStatus = BindingStatus.DIRTY;
+				status = BindingStatus.DIRTY;
 			} catch (ParseException e) {
 				this.sourceValue = sourceValue;
 				sourceValueParseException = e;
-				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+				status = BindingStatus.INVALID_SOURCE_VALUE;
 			}
 		} else if (sourceValue instanceof String[]) {
 			String[] sourceValues = (String[]) sourceValue;
@@ -107,24 +114,24 @@ public class PropertyBinding implements Binding {
 				} catch (ParseException e) {
 					this.sourceValue = sourceValue;
 					sourceValueParseException = e;
-					bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+					status = BindingStatus.INVALID_SOURCE_VALUE;
 					break;
 				}
 			}
-			if (bindingStatus != BindingStatus.INVALID_SOURCE_VALUE) {
+			if (status != BindingStatus.INVALID_SOURCE_VALUE) {
 				buffer.setValue(parsed);
 				sourceValue = null;
-				bindingStatus = BindingStatus.DIRTY;
+				status = BindingStatus.DIRTY;
 			}
 		}
 	}
 	
 	public BindingStatus getStatus() {
-		return bindingStatus;
+		return status;
 	}
 	
 	public Alert getStatusAlert() {
-		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
+		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
 			return new Alert() {
 				public String getCode() {
 					return "typeMismatch";
@@ -138,7 +145,7 @@ public class PropertyBinding implements Binding {
 					return Severity.ERROR;
 				}				
 			};
-		} else if (bindingStatus == BindingStatus.COMMIT_FAILURE) {
+		} else if (status == BindingStatus.COMMIT_FAILURE) {
 			if (buffer.getFlushException() instanceof ConversionFailedException) {
 				return new Alert() {
 					public String getCode() {
@@ -168,7 +175,7 @@ public class PropertyBinding implements Binding {
 					}				
 				};				
 			}
-		} else if (bindingStatus == BindingStatus.COMMITTED) {
+		} else if (status == BindingStatus.COMMITTED) {
 			return new Alert() {
 				public String getCode() {
 					return "bindSucces";
@@ -188,14 +195,30 @@ public class PropertyBinding implements Binding {
 	}
 
 	public void commit() {
-		if (bindingStatus != BindingStatus.DIRTY) {
-			throw new IllegalStateException("Binding not dirty; nothing to commit");
-		}
-		buffer.flush();
-		if (buffer.flushFailed()) {
-			bindingStatus = BindingStatus.COMMIT_FAILURE;
+		assertEditable();
+		assertEnabled();
+		if (status == BindingStatus.DIRTY) {
+			buffer.flush();
+			if (buffer.flushFailed()) {
+				status = BindingStatus.COMMIT_FAILURE;
+			} else {
+				status = BindingStatus.COMMITTED;
+			}
 		} else {
-			bindingStatus = BindingStatus.COMMITTED;
+			throw new IllegalStateException("Binding is not dirty; nothing to commit");
+		}
+	}
+	
+	public void revert() {
+		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
+			sourceValue = null;
+			sourceValueParseException = null;
+			status = BindingStatus.CLEAN;
+		} else if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
+			buffer.clear();
+			status = BindingStatus.CLEAN;			
+		} else {
+			throw new IllegalStateException("Nothing to revert");
 		}
 	}
 
@@ -210,9 +233,6 @@ public class PropertyBinding implements Binding {
 			}
 			
 			public void setValue(Object value) {
-				if (isReadOnly()) {
-					throw new IllegalStateException("Property is read-only");
-				}						
 				TypeDescriptor targetType = new TypeDescriptor(new MethodParameter(propertyDescriptor.getWriteMethod(), 0));
 				if (value != null && typeConverter.canConvert(value.getClass(), targetType)) {
 					value = typeConverter.convert(value, targetType);					
@@ -230,11 +250,11 @@ public class PropertyBinding implements Binding {
 		return new PropertyBinding(nestedProperty, getValue(), typeConverter);
 	}
 
-	public boolean isIndexable() {
+	public boolean isList() {
 		return getModel().getValueType().isArray() || List.class.isAssignableFrom(getModel().getValueType());
 	}
 
-	public Binding getIndexedBinding(int index) {
+	public Binding getListElementBinding(int index) {
 		assertListProperty();
 		//return new IndexedBinding(index, (List) getValue(), getCollectionTypeDescriptor(), typeConverter);
 		return null;
@@ -244,7 +264,7 @@ public class PropertyBinding implements Binding {
 		return Map.class.isAssignableFrom(getModel().getValueType());
 	}
 
-	public Binding getKeyedBinding(Object key) {
+	public Binding getMapValueBinding(Object key) {
 		assertMapProperty();
 		if (key instanceof String) {
 			try {
@@ -259,7 +279,7 @@ public class PropertyBinding implements Binding {
 
 	public String formatValue(Object value) {
 		Formatter formatter;
-		if (isIndexable() || isMap()) {
+		if (isList() || isMap()) {
 			formatter = indexedValueFormatter;
 		} else {
 			formatter = valueFormatter;
@@ -343,7 +363,7 @@ public class PropertyBinding implements Binding {
 	}
 
 	private void assertScalarProperty() {
-		if (isIndexable()) {
+		if (isList()) {
 			throw new IllegalArgumentException("Is a Collection but should be a scalar");
 		}
 		if (isMap()) {
@@ -352,75 +372,30 @@ public class PropertyBinding implements Binding {
 	}
 
 	private void assertListProperty() {
-		if (!isIndexable()) {
+		if (!isList()) {
 			throw new IllegalStateException("Not a List property binding");
 		}
 	}
 
 	private void assertMapProperty() {
-		if (!isIndexable()) {
+		if (!isList()) {
 			throw new IllegalStateException("Not a Map property binding");
+		}
+	}
+	
+	private void assertEditable() {
+		if (!isEditable()) {
+			throw new IllegalStateException("Binding is not editable");
+		}
+	}
+
+	private void assertEnabled() {
+		if (!isEditable()) {
+			throw new IllegalStateException("Binding is not enabled");
 		}
 	}
 
 	private boolean markedNotEditable() {
 		return false;
-	}
-
-	static class ValueBuffer {
-
-		private Object value;
-		
-		private boolean hasValue;
-		
-		private Model model;
-		
-		private boolean flushFailed;
-		
-		private Exception flushFailureCause;
-		
-		public ValueBuffer(Model model) {
-			this.model = model;
-		}
-		
-		public boolean hasValue() {
-			return hasValue;
-		}
-		
-		public Object getValue() {
-			if (!hasValue()) {
-				throw new IllegalStateException("No value in buffer");
-			}
-			return value;
-		}
-		
-		public void setValue(Object value) {
-			this.value = value;
-			hasValue = true;
-		}
-		
-		public void flush() {
-			try {
-				model.setValue(value);
-				clear();
-			} catch (Exception e) {
-				flushFailed = true;
-				flushFailureCause = e;
-			}
-		}
-
-		public void clear() {
-			value = null;
-			hasValue = false;
-			flushFailed = false;
-		}
-		
-		public boolean flushFailed() {
-			return flushFailed;
-		}
-		
-		public Exception getFlushException() {
-			return flushFailureCause;
-		}
 	}
 }

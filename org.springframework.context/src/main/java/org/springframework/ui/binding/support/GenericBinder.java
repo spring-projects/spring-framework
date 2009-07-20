@@ -26,6 +26,7 @@ import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.Binding.BindingStatus;
+import org.springframework.ui.binding.config.BindingRuleConfiguration;
 import org.springframework.util.Assert;
 
 /**
@@ -77,6 +78,15 @@ public class GenericBinder implements Binder {
 		this.typeConverter = typeConverter;
 	}
 
+	/**
+	 * 
+	 * @param propertyPath binding rule property path in format prop.nestedListProp[].nestedMapProp[].nestedProp
+	 * @return
+	 */
+	public BindingRuleConfiguration bindingRule(String propertyPath) {
+		return null;
+	}
+	
 	// implementing Binder
 
 	public Object getModel() {
@@ -93,9 +103,9 @@ public class GenericBinder implements Binder {
 		for (PropertyPathElement element : path.getNestedElements()) {
 			if (element.isIndex()) {
 				if (binding.isMap()) {
-					binding = binding.getKeyedBinding(element.getValue());
-				} else if (binding.isIndexable()) {
-					binding = binding.getIndexedBinding(element.getIntValue());
+					binding = binding.getMapValueBinding(element.getValue());
+				} else if (binding.isList()) {
+					binding = binding.getListElementBinding(element.getIntValue());
 				} else {
 					throw new IllegalArgumentException("Attempted to index a property that is not a Collection or Map");
 				}
@@ -135,7 +145,7 @@ public class GenericBinder implements Binder {
 	private BindingResult bind(Map.Entry<String, ? extends Object> sourceValue, Binding binding) {
 		String property = sourceValue.getKey();
 		Object value = sourceValue.getValue();
-		if (binding.isReadOnly()) {
+		if (binding.isEditable()) {
 			return new PropertyNotWriteableResult(property, value, messageSource);
 		} else {
 			binding.applySourceValue(value);
@@ -145,5 +155,5 @@ public class GenericBinder implements Binder {
 			return new BindingStatusResult(property, value, binding.getStatusAlert());
 		}
 	}
-	
+
 }

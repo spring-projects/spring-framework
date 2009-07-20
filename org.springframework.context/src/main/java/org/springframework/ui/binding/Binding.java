@@ -34,10 +34,25 @@ public interface Binding {
 	Object getValue();
 
 	/**
-	 * If this Binding is read-only.
-	 * A read-only Binding cannot have source values applied and cannot be committed.
+	 * If this Binding is editable.
+	 * Used to determine if the user can edit the field value.
+	 * A Binding that is not editable cannot have source values applied and cannot be committed.
 	 */
-	boolean isReadOnly();
+	boolean isEditable();
+	
+	/**
+	 * If this Binding is enabled.
+	 * Used to determine if the user can interact with the field.
+	 * A Binding that is not enabled cannot have source values applied and cannot be committed.
+	 */
+	boolean isEnabled();
+	
+	/**
+	 * If this Binding is visible.
+	 * Used to determine if the user can see the field.
+	 * A Binding that is not visible cannot have source values applied and cannot be committed. 
+	 */
+	boolean isVisible();
 	
 	/**
 	 * Apply the source value to this binding.
@@ -45,7 +60,7 @@ public interface Binding {
 	 * Sets to {@link BindingStatus#DIRTY} if succeeds.
 	 * Sets to {@link BindingStatus#INVALID_SOURCE_VALUE} if fails.
 	 * @param sourceValue
-	 * @throws IllegalStateException if {@link #isReadOnly()}
+	 * @throws IllegalStateException if {@link #isEditable()}
 	 */
 	void applySourceValue(Object sourceValue);
 	
@@ -60,11 +75,12 @@ public interface Binding {
 	BindingStatus getStatus();
 	
 	/**
-	 * An alert that communicates the details of a BindingStatus change to the user.
-	 * Returns <code>null</code> if the BindingStatus has never changed.
-	 * Returns a {@link Severity#INFO} Alert with code <code>bindSuccess</code> after a successful commit.
-	 * Returns a {@link Severity#ERROR} Alert with code <code>typeMismatch</code> if the source value could not be converted to type required by the Model.
-	 * Returns a {@link Severity#FATAL} Alert with code <code>internalError</code> if the buffered value could not be committed due to a unexpected runtime exception.
+	 * An alert that communicates current status to the user.
+	 * Returns <code>null</code> if {@link BindingStatus#CLEAN} and {@link ValidationStatus#NOT_VALIDATED}.
+	 * Returns a {@link Severity#INFO} Alert with code <code>bindSuccess</code> when {@link BindingStatus#COMMITTED}.
+	 * Returns a {@link Severity#ERROR} Alert with code <code>typeMismatch</code> when {@link BindingStatus#INVALID_SOURCE_VALUE} or {@link BindingStatus#COMMIT_FAILURE} due to a value parse / type conversion error.
+	 * Returns a {@link Severity#FATAL} Alert with code <code>internalError</code> when {@link BindingStatus#COMMIT_FAILURE} due to a unexpected runtime exception.
+	 * Returns a {@link Severity#INFO} Alert describing results of validation if {@link ValidationStatus#VALID} or {@link ValidationStatus#INVALID}.
 	 */
 	Alert getStatusAlert();
 	
@@ -72,9 +88,15 @@ public interface Binding {
 	 * Commit the buffered value to the model.
 	 * Sets to {@link BindingStatus#COMMITTED} if succeeds.
 	 * Sets to {@link BindingStatus#COMMIT_FAILURE} if fails.
-	 * @throws IllegalStateException if not {@link BindingStatus#DIRTY} or {@link #isReadOnly()}
+	 * @throws IllegalStateException if not {@link BindingStatus#DIRTY} or {@link #isEditable()}
 	 */
 	void commit();
+	
+	/**
+	 * Clear the buffered value without committing.
+	 * @throws IllegalStateException if BindingStatus is CLEAN or COMMITTED.
+	 */
+	void revert();
 	
 	/**
 	 * Access raw model values.
@@ -91,14 +113,14 @@ public interface Binding {
 	/**
 	 * If bound to an indexable Collection, either a {@link java.util.List} or an array.
 	 */
-	boolean isIndexable();
+	boolean isList();
 
 	/**
 	 * If a List, get a Binding to a element in the List.
 	 * @param index the element index
 	 * @return the indexed binding
 	 */
-	Binding getIndexedBinding(int index);
+	Binding getListElementBinding(int index);
 
 	/**
 	 * If bound to a {@link java.util.Map}.
@@ -110,11 +132,11 @@ public interface Binding {
 	 * @param key the map key
 	 * @return the keyed binding
 	 */
-	Binding getKeyedBinding(Object key);
+	Binding getMapValueBinding(Object key);
 
 	/**
 	 * Format a potential model value for display.
-	 * If an indexable binding, expects the model value to be a potential collection element & uses the configured element formatter.
+	 * If a list binding, expects the model value to be a potential list element & uses the configured element formatter.
 	 * If a map binding, expects the model value to be a potential map value & uses the configured map value formatter.
 	 * @param potentialValue the potential value
 	 * @return the formatted string
@@ -145,7 +167,7 @@ public interface Binding {
 	}
 	
 	/**
-	 * The states of a Binding.
+	 * Binding states.
 	 * @author Keith Donald
 	 */
 	public enum BindingStatus {
@@ -174,5 +196,27 @@ public interface Binding {
 		 * The buffered value failed to commit.
 		 */
 		COMMIT_FAILURE
+	}
+	
+	/**
+	 * Validation states.
+	 * @author Keith Donald
+	 */
+	public enum ValidationStatus {
+
+		/**
+		 * Initial state: No validation has run.
+		 */
+		NOT_VALIDATED,
+		
+		/**
+		 * Validation has succeeded.
+		 */
+		VALID,
+		
+		/**
+		 * Validation has failed.
+		 */
+		INVALID
 	}
 }
