@@ -141,11 +141,10 @@ public class TestContext extends AttributeAccessorSupport {
 	 * <li>If a <code>loader</code> class is not specified, the class hierarchy
 	 * will be traversed to find a parent class annotated with
 	 * <code>&#064;ContextConfiguration</code>; go to step #1.</li>
+	 * <li>If no explicit <code>loader</code> class is found after traversing
+	 * the class hierarchy, an attempt will be made to load and return the class
+	 * with the supplied <code>defaultContextLoaderClassName</code>.</li>
 	 * </ol>
-	 * <p>
-	 * If no explicit <code>loader</code> class is found after traversing the
-	 * class hierarchy, an attempt will be made to load and return the class
-	 * with the supplied <code>defaultContextLoaderClassName</code>.
 	 * 
 	 * @param clazz the class for which to retrieve <code>ContextLoader</code>
 	 * class; must not be <code>null</code>
@@ -270,16 +269,16 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Build an ApplicationContext for this test context using the configured
-	 * ContextLoader and resource locations.
+	 * Load an <code>ApplicationContext</code> for this test context using the
+	 * configured <code>ContextLoader</code> and resource locations.
 	 * 
-	 * @throws Exception if an error occurs while building the application
+	 * @throws Exception if an error occurs while loading the application
 	 * context
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {
-		Assert.notNull(this.contextLoader, "Can not build an ApplicationContext with a NULL 'contextLoader'. "
+		Assert.notNull(this.contextLoader, "Can not load an ApplicationContext with a NULL 'contextLoader'. "
 				+ "Consider annotating your test class with @ContextConfiguration.");
-		Assert.notNull(this.locations, "Can not build an ApplicationContext with a NULL 'locations' array. "
+		Assert.notNull(this.locations, "Can not load an ApplicationContext with a NULL 'locations' array. "
 				+ "Consider annotating your test class with @ContextConfiguration.");
 		return this.contextLoader.loadContext(this.locations);
 	}
@@ -296,8 +295,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * Get the {@link ApplicationContext application context} for this test
 	 * context, possibly cached.
 	 * 
-	 * @return the application context; may be <code>null</code> if the current
-	 * test context is not configured to use an application context
+	 * @return the application context
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
 	 */
