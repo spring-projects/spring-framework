@@ -18,7 +18,7 @@ package org.springframework.ui.binding.config;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A fluent interface for configuring a newly added binding.
+ * A fluent interface for configuring a newly added binding rule.
  * @author Keith Donald
  */
 public interface BindingRuleConfiguration {
@@ -31,23 +31,21 @@ public interface BindingRuleConfiguration {
 	BindingRuleConfiguration formatWith(Formatter<?> formatter);
 
 	/**
-	 * If a collection property, set the Formatter to use to format indexed collection elements.
+	 * If a indexable map property, set the Formatter to use to format map key indexes.
+	 * Default is null.
+	 */
+	BindingRuleConfiguration formatKeysWith(Formatter<?> formatter);
+
+	/**
+	 * If an indexable list or map property, set the Formatter to use to format indexed elements.
 	 * Default is null.
 	 */
 	BindingRuleConfiguration formatElementsWith(Formatter<?> formatter);
 	
 	/**
-	 * Mark the binding as required.
-	 * A required binding will generate an exception if no sourceValue is provided to a bind invocation.
-	 * This attribute is used to detect client configuration errors.
-	 * It is not intended to be used as a user data validation constraint.
-	 * Examples:
-	 * <pre>
-	 * name=required - will generate an exception if 'name' is not contained in the source values map.
-	 * addresses=required - will generate an exception if 'addresses[n]' is not contained in the source value map for at least one n.
-	 * addresses.city=required - will generate an exception if 'addresses[n].city' is not present in the source values map, for every address[n].
-	 * </pre>
+	 * Mark the binding as read only.
+	 * A read-only binding cannot have source values applied and cannot be committed.
 	 */
-	BindingRuleConfiguration required();
+	BindingRuleConfiguration readOnly();
 
 }
