@@ -27,6 +27,8 @@ import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.binding.BindingResults;
 import org.springframework.ui.binding.Binding.BindingStatus;
 import org.springframework.ui.binding.config.BindingRuleConfiguration;
+import org.springframework.ui.binding.config.Condition;
+import org.springframework.ui.format.Formatter;
 import org.springframework.util.Assert;
 
 /**
@@ -41,8 +43,8 @@ public class GenericBinder implements Binder {
 
 	private Object model;
 
-	private Map<String, Binding> bindings;
-
+	private Map<String, GenericBindingRule> bindingRules;
+	
 	private TypeConverter typeConverter;
 
 	private MessageSource messageSource;
@@ -54,7 +56,7 @@ public class GenericBinder implements Binder {
 	public GenericBinder(Object model) {
 		Assert.notNull(model, "The model to bind to is required");
 		this.model = model;
-		bindings = new HashMap<String, Binding>();
+		bindingRules = new HashMap<String, GenericBindingRule>();
 		typeConverter = new DefaultTypeConverter();
 	}
 
@@ -80,11 +82,16 @@ public class GenericBinder implements Binder {
 
 	/**
 	 * 
-	 * @param propertyPath binding rule property path in format prop.nestedListProp[].nestedMapProp[].nestedProp
+	 * @param propertyPath binding rule property path in format prop.nestedProp
 	 * @return
 	 */
 	public BindingRuleConfiguration bindingRule(String propertyPath) {
-		return null;
+		PropertyPath path = new PropertyPath(propertyPath);
+		GenericBindingRule rule = getBindingRule(path.getFirstElement().getValue());
+		for (PropertyPathElement element : path.getNestedElements()) {
+			rule = rule.getBindingRule(element.getValue());
+		}
+		return rule;
 	}
 	
 	// implementing Binder
@@ -95,11 +102,7 @@ public class GenericBinder implements Binder {
 
 	public Binding getBinding(String property) {
 		PropertyPath path = new PropertyPath(property);
-		Binding binding = bindings.get(path.getFirstElement().getValue());
-		if (binding == null) {
-			binding = new PropertyBinding(path.getFirstElement().getValue(), model, typeConverter);
-			bindings.put(path.getFirstElement().getValue(), binding);
-		}
+		Binding binding = getBindingRule(path.getFirstElement().getValue()).getBinding(model);
 		for (PropertyPathElement element : path.getNestedElements()) {
 			if (element.isIndex()) {
 				if (binding.isMap()) {
@@ -142,11 +145,20 @@ public class GenericBinder implements Binder {
 
 	// internal helpers
 	
+	private GenericBindingRule getBindingRule(String property) {
+		GenericBindingRule rule = bindingRules.get(property);
+		if (rule == null) {
+			rule = new GenericBindingRule(property);
+			bindingRules.put(property, rule);
+		}
+		return rule;
+	}
+	
 	private BindingResult bind(Map.Entry<String, ? extends Object> sourceValue, Binding binding) {
 		String property = sourceValue.getKey();
 		Object value = sourceValue.getValue();
-		if (binding.isEditable()) {
-			return new PropertyNotWriteableResult(property, value, messageSource);
+		if (!binding.isEditable()) {
+			return new PropertyNotEditableResult(property, value, messageSource);
 		} else {
 			binding.applySourceValue(value);
 			if (binding.getStatus() == BindingStatus.DIRTY) {
@@ -154,6 +166,111 @@ public class GenericBinder implements Binder {
 			}
 			return new BindingStatusResult(property, value, binding.getStatusAlert());
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	class GenericBindingRule implements BindingRule, BindingRuleConfiguration {
+
+		private String property;
+		
+		private Formatter formatter = DefaultFormatter.INSTANCE;
+		
+		private Formatter elementFormatter = DefaultFormatter.INSTANCE;
+		
+		private Formatter keyFormatter = DefaultFormatter.INSTANCE;
+		
+		private Condition editableCondition = Condition.ALWAYS_TRUE;
+		
+		private Condition enabledCondition = Condition.ALWAYS_TRUE;
+		
+		private Condition visibleCondition  = Condition.ALWAYS_TRUE;
+		
+		private Map<String, GenericBindingRule> nestedBindingRules;
+		
+		private Binding binding;
+		
+		public GenericBindingRule(String property) {
+			this.property = property;
+		}
+		
+		// implementing BindingRule
+		
+		public Binding getBinding(String property, Object model) {
+			return getBindingRule(property).getBinding(model);
+		}
+
+		public Formatter<?> getFormatter() {
+			return formatter;
+		}
+
+		public Formatter<?> getElementFormatter() {
+			return elementFormatter;
+		}
+
+		public Formatter<?> getKeyFormatter() {
+			return keyFormatter;
+		}
+
+		public Condition getEnabledCondition() {
+			return enabledCondition;
+		}
+
+		public Condition getEditableCondition() {
+			return editableCondition;
+		}
+
+		public Condition getVisibleCondition() {
+			return visibleCondition;
+		}
+		
+		// implementing BindingRuleConfiguration
+		
+		public BindingRuleConfiguration formatWith(Formatter<?> formatter) {
+			this.formatter = formatter;
+			return this;
+		}
+
+		public BindingRuleConfiguration formatElementsWith(Formatter<?> formatter) {
+			elementFormatter = formatter;
+			return this;
+		}
+
+		public BindingRuleConfiguration formatKeysWith(Formatter<?> formatter) {
+			keyFormatter = formatter;
+			return this;
+		}
+
+		public BindingRuleConfiguration editableWhen(Condition condition) {
+			editableCondition = condition;
+			return this;
+		}
+
+		public BindingRuleConfiguration enabledWhen(Condition condition) {
+			enabledCondition = condition;
+			return this;
+		}
+
+		public BindingRuleConfiguration visibleWhen(Condition condition) {
+			visibleCondition = condition;
+			return this;
+		}
+		
+		GenericBindingRule getBindingRule(String property) {
+			GenericBindingRule rule = nestedBindingRules.get(property);
+			if (rule == null) {
+				rule = new GenericBindingRule(property);
+				nestedBindingRules.put(property, rule);
+			}
+			return rule;
+		}
+		
+		Binding getBinding(Object model) {
+			if (binding == null) {
+				binding = new PropertyBinding(property, model, typeConverter, this);
+			}
+			return binding; 
+		}
+
 	}
 
 }

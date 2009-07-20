@@ -11,7 +11,7 @@ import org.springframework.ui.binding.BindingResult;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
 
-class PropertyNotWriteableResult implements BindingResult {
+class PropertyNotEditableResult implements BindingResult {
 
 	private String property;
 
@@ -19,7 +19,7 @@ class PropertyNotWriteableResult implements BindingResult {
 
 	private MessageSource messageSource;
 	
-	public PropertyNotWriteableResult(String property, Object sourceValue, MessageSource messageSource) {
+	public PropertyNotEditableResult(String property, Object sourceValue, MessageSource messageSource) {
 		this.property = property;
 		this.sourceValue = sourceValue;
 		this.messageSource = messageSource;

@@ -36,15 +36,11 @@ public class PropertyBinding implements Binding {
 
 	private Object model;
 
-	private Formatter valueFormatter = DefaultFormatter.INSTANCE;
-
-	private Formatter mapKeyFormatter = DefaultFormatter.INSTANCE;
-
-	private Formatter indexedValueFormatter = DefaultFormatter.INSTANCE;
-
-	private PropertyDescriptor propertyDescriptor;
-
 	private TypeConverter typeConverter;
+
+	private BindingRule bindingRule;
+	
+	private PropertyDescriptor propertyDescriptor;
 
 	private Object sourceValue;
 	
@@ -55,11 +51,11 @@ public class PropertyBinding implements Binding {
 	
 	private BindingStatus status;
 	
-	public PropertyBinding(String property, Object model, TypeConverter typeConverter) {
-		this.propertyDescriptor = findPropertyDescriptor(property, model);
-		this.property = property;
+	public PropertyBinding(String property, Object model, TypeConverter typeConverter, BindingRule bindingRule) {
+		initProperty(property, model);
 		this.model = model;
 		this.typeConverter = typeConverter;
+		this.bindingRule = bindingRule;
 		this.buffer = new ValueBuffer(getModel());
 		status = BindingStatus.CLEAN;
 	}
@@ -75,15 +71,15 @@ public class PropertyBinding implements Binding {
 	}
 
 	public boolean isEditable() {
-		return propertyDescriptor.getWriteMethod() != null || !markedNotEditable();
+		return isWriteableProperty() && bindingRule.getEditableCondition().isTrue();
 	}
 	
 	public boolean isEnabled() {
-		return true;
+		return bindingRule.getEnabledCondition().isTrue();
 	}
 	
 	public boolean isVisible() {
-		return true;
+		return bindingRule.getVisibleCondition().isTrue();
 	}
 	
 	public void applySourceValue(Object sourceValue) {
@@ -91,7 +87,7 @@ public class PropertyBinding implements Binding {
 		assertEnabled();
 		if (sourceValue instanceof String) {
 			try { 
-				buffer.setValue(valueFormatter.parse((String) sourceValue, getLocale()));
+				buffer.setValue(bindingRule.getFormatter().parse((String) sourceValue, getLocale()));
 				sourceValue = null;
 				status = BindingStatus.DIRTY;
 			} catch (ParseException e) {
@@ -101,7 +97,7 @@ public class PropertyBinding implements Binding {
 			}
 		} else if (sourceValue instanceof String[]) {
 			String[] sourceValues = (String[]) sourceValue;
-			Class<?> parsedType = getFormattedObjectType(indexedValueFormatter.getClass());
+			Class<?> parsedType = getFormattedObjectType(bindingRule.getElementFormatter().getClass());
 			if (parsedType == null) {
 				parsedType = String.class;
 			}
@@ -109,7 +105,7 @@ public class PropertyBinding implements Binding {
 			for (int i = 0; i < sourceValues.length; i++) {
 				Object parsedValue;
 				try {
-					parsedValue = indexedValueFormatter.parse(sourceValues[i], LocaleContextHolder.getLocale());
+					parsedValue = bindingRule.getElementFormatter().parse(sourceValues[i], LocaleContextHolder.getLocale());
 					Array.set(parsed, i, parsedValue);
 				} catch (ParseException e) {
 					this.sourceValue = sourceValue;
@@ -242,12 +238,12 @@ public class PropertyBinding implements Binding {
 		};
 	}
 
-	public Binding getBinding(String nestedProperty) {
+	public Binding getBinding(String property) {
 		assertScalarProperty();
 		if (getValue() == null) {
 			createValue();
 		}
-		return new PropertyBinding(nestedProperty, getValue(), typeConverter);
+		return bindingRule.getBinding(property, getValue());
 	}
 
 	public boolean isList() {
@@ -268,7 +264,7 @@ public class PropertyBinding implements Binding {
 		assertMapProperty();
 		if (key instanceof String) {
 			try {
-				key = mapKeyFormatter.parse((String) key, getLocale());
+				key = bindingRule.getKeyFormatter().parse((String) key, getLocale());
 			} catch (ParseException e) {
 				throw new IllegalArgumentException("Invald key", e);
 			}
@@ -280,9 +276,9 @@ public class PropertyBinding implements Binding {
 	public String formatValue(Object value) {
 		Formatter formatter;
 		if (isList() || isMap()) {
-			formatter = indexedValueFormatter;
+			formatter = bindingRule.getElementFormatter();
 		} else {
-			formatter = valueFormatter;
+			formatter = bindingRule.getFormatter();
 		}
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = typeConverter.convert(value, formattedType);
@@ -291,6 +287,11 @@ public class PropertyBinding implements Binding {
 
 	// internal helpers
 
+	private void initProperty(String property, Object model) {
+		this.propertyDescriptor = findPropertyDescriptor(property, model);
+		this.property = property;
+	}
+	
 	private PropertyDescriptor findPropertyDescriptor(String property, Object model) {
 		PropertyDescriptor[] propDescs = getBeanInfo(model.getClass()).getPropertyDescriptors();
 		for (PropertyDescriptor propDesc : propDescs) {
@@ -395,7 +396,7 @@ public class PropertyBinding implements Binding {
 		}
 	}
 
-	private boolean markedNotEditable() {
-		return false;
+	private boolean isWriteableProperty() {
+		return propertyDescriptor.getWriteMethod() != null;
 	}
 }

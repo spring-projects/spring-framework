@@ -5,10 +5,10 @@ package org.springframework.ui.binding.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-
-public class PropertyPath {
+public class PropertyPath implements Iterable<PropertyPathElement> {
 
 	private List<PropertyPathElement> elements = new ArrayList<PropertyPathElement>();
 
@@ -39,6 +39,10 @@ public class PropertyPath {
 		} else {
 			return Collections.emptyList();
 		}
+	}
+
+	public Iterator<PropertyPathElement> iterator() {
+		return elements.iterator();
 	}
 
 }
