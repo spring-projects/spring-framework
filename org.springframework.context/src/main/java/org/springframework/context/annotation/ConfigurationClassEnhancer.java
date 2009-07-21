@@ -72,7 +72,7 @@ class ConfigurationClassEnhancer {
 		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
 		callbackFilter = new CallbackFilter() {
 			public int accept(Method candidateMethod) {
-				return (AnnotationUtils.findAnnotation(candidateMethod, Bean.class) != null) ? 0 : 1;
+				return (AnnotationUtils.findAnnotation(candidateMethod, Bean.class) != null ? 0 : 1);
 			}
 		};
 	}
@@ -149,8 +149,8 @@ class ConfigurationClassEnhancer {
 			String beanName = method.getName();
 
 			// check to see if the user has explicitly set the bean name
-			Bean bean = method.getAnnotation(Bean.class);
-			if(bean != null && bean.name().length > 0) {
+			Bean bean = AnnotationUtils.findAnnotation(method, Bean.class);
+			if (bean != null && bean.name().length > 0) {
 				beanName = bean.name()[0];
 			}
 

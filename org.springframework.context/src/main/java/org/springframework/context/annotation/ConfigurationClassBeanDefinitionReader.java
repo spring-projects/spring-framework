@@ -182,8 +182,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		if (metadata.hasAnnotation(Scope.class.getName())) {
-			Map<String, Object> scopeAttributes = metadata.getAnnotationAttributes(Scope.class.getName());
+		Map<String, Object> scopeAttributes = metadata.getAnnotationAttributes(Scope.class.getName());
+		if (scopeAttributes != null) {
 			beanDef.setScope((String) scopeAttributes.get("value"));
 			proxyMode = (ScopedProxyMode) scopeAttributes.get("proxyMode");
 			if (proxyMode == ScopedProxyMode.DEFAULT) {
@@ -195,7 +195,7 @@ class ConfigurationClassBeanDefinitionReader {
 		BeanDefinition beanDefToRegister = beanDef;
 		if (proxyMode != ScopedProxyMode.NO) {
 			BeanDefinitionHolder proxyDef = ScopedProxyCreator.createScopedProxy(
-					new BeanDefinitionHolder(beanDef, beanName), registry, proxyMode == ScopedProxyMode.TARGET_CLASS);
+					new BeanDefinitionHolder(beanDef, beanName), this.registry, proxyMode == ScopedProxyMode.TARGET_CLASS);
 			beanDefToRegister = proxyDef.getBeanDefinition();
 		}
 

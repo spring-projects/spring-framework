@@ -63,7 +63,7 @@ import org.springframework.beans.factory.annotation.Autowire;
  * @see Primary
  * @see org.springframework.context.annotation.Scope
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Bean {

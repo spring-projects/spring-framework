@@ -57,10 +57,9 @@ public @interface Scope {
 	/**
 	 * Specifies whether a component should be configured as a scoped proxy
 	 * and if so, whether the proxy should be interface-based or subclass-based.
-	 * <p>Defaults to {@link ScopedProxyMode#NO}, indicating no scoped proxy
-	 * should be created.
-	 * <p>Analogous to {@literal <aop:scoped-proxy/>} support in Spring XML. Valid
-	 * only in conjunction with a non-singleton, non-prototype {@link #value()}.
+	 * <p>Defaults to {@link ScopedProxyMode#NO}, indicating that no scoped
+	 * proxy should be created.
+	 * <p>Analogous to {@literal <aop:scoped-proxy/>} support in Spring XML.
 	 */
 	ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT;
 
