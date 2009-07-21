@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ public class SimpleHttpInvokerServiceExporter extends RemoteInvocationSerializin
 			exchange.close();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new IOException("Class not found during deserialization", ex);
+			exchange.sendResponseHeaders(500, -1);
+			logger.error("Class not found during deserialization", ex);
 		}
 	}
 
