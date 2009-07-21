@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,8 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T getProxy() {
-		return (T) createAopProxy().getProxy();
+	public Object getProxy() {
+		return createAopProxy().getProxy();
 	}
 
 	/**
@@ -108,8 +108,8 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T  getProxy(ClassLoader classLoader) {
-		return (T) createAopProxy().getProxy(classLoader);
+	public Object getProxy(ClassLoader classLoader) {
+		return createAopProxy().getProxy(classLoader);
 	}
 
 
@@ -123,8 +123,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 * @see #ProxyFactory(Class, org.aopalliance.intercept.Interceptor)
 	 */
-	public static Object getProxy(Class proxyInterface, Interceptor interceptor) {
-		return new ProxyFactory(proxyInterface, interceptor).getProxy();
+	@SuppressWarnings("unchecked")
+	public static <T> T getProxy(Class<T> proxyInterface, Interceptor interceptor) {
+		return (T) new ProxyFactory(proxyInterface, interceptor).getProxy();
 	}
 
 	/**
@@ -135,8 +136,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 * @see #ProxyFactory(Class, org.springframework.aop.TargetSource)
 	 */
-	public static Object getProxy(Class proxyInterface, TargetSource targetSource) {
-		return new ProxyFactory(proxyInterface, targetSource).getProxy();
+	@SuppressWarnings("unchecked")
+	public static <T> T getProxy(Class<T> proxyInterface, TargetSource targetSource) {
+		return (T) new ProxyFactory(proxyInterface, targetSource).getProxy();
 	}
 
 	/**
