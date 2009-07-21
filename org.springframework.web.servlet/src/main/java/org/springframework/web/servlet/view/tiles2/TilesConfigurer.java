@@ -48,6 +48,7 @@ import org.springframework.web.context.ServletContextAware;
  * <a href="http://tiles.apache.org">http://tiles.apache.org</a>
  * for more information about Tiles, which basically is a templating
  * mechanism for JSP-based web applications.
+ * <b>Note: Spring 3.0 requires Tiles 2.1.2 or above.</b>
  *
  * <p>The TilesConfigurer simply configures a TilesContainer using a set of files
  * containing definitions, to be accessed by {@link TilesView} instances. This is a
