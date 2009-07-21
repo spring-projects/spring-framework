@@ -16,19 +16,21 @@
 
 package org.springframework.beans.factory.support;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
@@ -145,7 +147,28 @@ public class QualifierAnnotationAutowireContextTests {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(QualifiedPerson.class, cavs, null);
+		context.registerBeanDefinition(JUERGEN,
+				ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(person, JUERGEN), context, true).getBeanDefinition());
+		context.registerBeanDefinition("autowired",
+				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		context.refresh();
+		QualifiedMethodParameterTestBean bean =
+				(QualifiedMethodParameterTestBean) context.getBean("autowired");
+		assertEquals(JUERGEN, bean.getPerson().getName());
+	}
+
+	@Test
+	public void testAutowiredMethodParameterWithStaticallyQualifiedCandidateAmongOthers() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
+		cavs.addGenericArgumentValue(JUERGEN);
+		RootBeanDefinition person = new RootBeanDefinition(QualifiedPerson.class, cavs, null);
+		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
+		cavs2.addGenericArgumentValue(MARK);
+		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person);
+		context.registerBeanDefinition(MARK, person2);
 		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
@@ -657,13 +680,13 @@ public class QualifierAnnotationAutowireContextTests {
 
 
 	private static class Person {
-		
+
 		private String name;
-		
+
 		public Person(String name) {
 			this.name = name;
 		}
-		
+
 		public String getName() {
 			return this.name;
 		}
@@ -672,6 +695,10 @@ public class QualifierAnnotationAutowireContextTests {
 
 	@TestQualifier
 	private static class QualifiedPerson extends Person {
+
+		public QualifiedPerson() {
+			super(null);
+		}
 
 		public QualifiedPerson(String name) {
 			super(name);
@@ -692,7 +719,6 @@ public class QualifierAnnotationAutowireContextTests {
 	public static @interface TestQualifierWithDefaultValue {
 
 		String value() default "default";
-
 	}
 
 
@@ -704,7 +730,6 @@ public class QualifierAnnotationAutowireContextTests {
 		String value() default "default";
 
 		int number();
-
 	}
 
 }
