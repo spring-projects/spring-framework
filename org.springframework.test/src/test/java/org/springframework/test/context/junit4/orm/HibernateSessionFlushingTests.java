@@ -24,7 +24,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -34,8 +33,8 @@ import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
 
 /**
- * Transactional integration tests regarding <i>automatic vs. manual</i> session
- * flushing with Hibernate.
+ * Transactional integration tests regarding <i>manual</i> session flushing with
+ * Hibernate.
  * 
  * @author Sam Brannen
  * @since 3.0
@@ -78,7 +77,6 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		assertNotNull("Juergen's ID should have been set", juergen.getId());
 	}
 
-	@Ignore("Disabled until SPR-5699 is resolved")
 	@Test(expected = ConstraintViolationException.class)
 	public void saveJuergenWithNullDriversLicense() {
 		personService.save(new Person(JUERGEN));
@@ -91,19 +89,19 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		personService.save(sam);
 	}
 
-	@Test(expected = GenericJDBCException.class)
-	// @IfProfileValue(name = "spring-compatibility", value = "2.5.6")
-	public void updateSamWithNullDriversLicenseSpring256() {
+	@Test
+	// no expected exception!
+	public void updateSamWithNullDriversLicenseWithoutSessionFlush() {
 		updateSamWithNullDriversLicense();
-		sessionFactory.getCurrentSession().flush();
+		// False positive, since an exception will be thrown once the session is
+		// finally flushed (i.e., in production code)
 	}
 
-	@Ignore("Disabled until SPR-5699 is resolved")
 	@Test(expected = GenericJDBCException.class)
-	// @Test(expected = UncategorizedSQLException.class)
-	// @IfProfileValue(name = "spring-compatibility", value = "3.0.0.M2")
-	public void updateSamWithNullDriversLicenseSpring300() {
+	public void updateSamWithNullDriversLicenseWithSessionFlush() {
 		updateSamWithNullDriversLicense();
+		// Manual flush is required to avoid false positive in test
+		sessionFactory.getCurrentSession().flush();
 	}
 
 }
