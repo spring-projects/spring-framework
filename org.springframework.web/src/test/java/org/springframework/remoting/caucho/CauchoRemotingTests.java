@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,19 @@
 
 package org.springframework.remoting.caucho;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 import com.caucho.burlap.client.BurlapProxyFactory;
 import com.caucho.hessian.client.HessianProxyFactory;
+import com.sun.net.httpserver.HttpServer;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.core.JdkVersion;
 import org.springframework.remoting.RemoteAccessException;
 
 /**
@@ -178,6 +185,36 @@ public class CauchoRemotingTests extends TestCase {
 		}
 		catch (RemoteAccessException ex) {
 			// expected
+		}
+	}
+
+	@Ignore("Using the JDK 1.6 HttpServer breaks when running multiple test methods")
+	public void testSimpleHessianServiceExporter() throws IOException {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
+			return;
+		}
+		TestBean tb = new TestBean("tb");
+		SimpleHessianServiceExporter exporter = new SimpleHessianServiceExporter();
+		exporter.setService(tb);
+		exporter.setServiceInterface(ITestBean.class);
+		exporter.setDebug(true);
+		exporter.prepare();
+		HttpServer server = HttpServer.create(new InetSocketAddress(8889), -1);
+		server.createContext("/hessian", exporter);
+		server.start();
+		try {
+			HessianClientInterceptor client = new HessianClientInterceptor();
+			client.setServiceUrl("http://localhost:8889/hessian");
+			client.setServiceInterface(ITestBean.class);
+			//client.setHessian2(true);
+			client.prepare();
+			ITestBean proxy = ProxyFactory.getProxy(ITestBean.class, client);
+			assertEquals("tb", proxy.getName());
+			proxy.setName("test");
+			assertEquals("test", proxy.getName());
+		}
+		finally {
+			server.stop(Integer.MAX_VALUE);
 		}
 	}
 

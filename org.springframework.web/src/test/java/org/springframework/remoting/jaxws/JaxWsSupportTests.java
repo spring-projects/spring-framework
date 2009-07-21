@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class JaxWsSupportTests extends TestCase {
 		try {
 			ac.refresh();
 
-			OrderService orderService = (OrderService) ac.getBean("client", OrderService.class);
+			OrderService orderService = ac.getBean("client", OrderService.class);
 			assertTrue(orderService instanceof BindingProvider);
 			((BindingProvider) orderService).getRequestContext();
 
@@ -89,7 +89,7 @@ public class JaxWsSupportTests extends TestCase {
 				// expected
 			}
 
-			ServiceAccessor serviceAccessor = (ServiceAccessor) ac.getBean("accessor", ServiceAccessor.class);
+			ServiceAccessor serviceAccessor = ac.getBean("accessor", ServiceAccessor.class);
 			order = serviceAccessor.orderService.getOrder(1000);
 			assertEquals("order 1000", order);
 			try {
