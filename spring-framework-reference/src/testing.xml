@@ -1396,6 +1396,41 @@ public class FictitiousTransactionalTest {
         <lineannotation>// logic which does not modify database state</lineannotation>
     }
 }</programlisting>
+
+        <note>
+          <title>Avoid false positives when testing ORM code</title>
+          <para>When testing code involving an ORM framework such as JPA
+          or Hibernate, it is a good practice to
+          <emphasis>flush</emphasis> the underlying session within test
+          methods which update the state of the session. Failing to flush
+          the ORM framework's underlying session can lead to
+          <emphasis>false positives</emphasis>: your test may pass, but
+          the same code will throw an exception in a live, production
+          environment. In the following Hibernate-based example test case,
+          we have two methods: one which demonstrates a false positive
+          and one which correctly exposes the results of flushing the
+          session.</para>
+
+          <programlisting language="java">...
+@Autowired
+private SessionFactory sessionFactory;
+
+@Test // no expected exception!
+public void falsePositive() {
+    updateEntityInHibernateSession();
+    // False positive: an exception will be thrown once the session is
+    // finally flushed (i.e., in production code)
+}
+
+@Test(expected = GenericJDBCException.class)
+public void updateWithSessionFlush() {
+    updateEntityInHibernateSession();
+    // Manual flush is required to avoid false positive in test
+    sessionFactory.getCurrentSession().flush();
+}
+...</programlisting>
+        </note>
+
       </section>
 
       <!-- ================================================================= -->
