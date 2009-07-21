@@ -37,6 +37,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
@@ -180,6 +181,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
 		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
+		if (autowireCandidateResolver instanceof BeanFactoryAware) {
+			((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(this);
+		}
 		this.autowireCandidateResolver = autowireCandidateResolver;
 	}
 
@@ -414,16 +418,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			beanName = BeanFactoryUtils.transformedBeanName(beanName);
 		}
 
-		if (!containsBeanDefinition(beanName)) {
-			if (containsSingleton(beanName)) {
-				return isAutowireCandidate(beanName, new RootBeanDefinition(getType(beanName)), descriptor);
-			}
-			else if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
-				// No bean definition found in this factory -> delegate to parent.
-				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor);
-			}
+		if (containsBeanDefinition(beanName)) {
+			return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanName), descriptor);
 		}
-		return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanName), descriptor);
+		else if (containsSingleton(beanName)) {
+			return isAutowireCandidate(beanName, new RootBeanDefinition(getType(beanName)), descriptor);
+		}
+		else if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
+			// No bean definition found in this factory -> delegate to parent.
+			return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor);
+		}
+		else {
+			return true;
+		}
 	}
 
 	/**

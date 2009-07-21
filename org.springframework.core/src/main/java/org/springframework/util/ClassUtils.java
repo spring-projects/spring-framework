@@ -368,7 +368,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return the user-defined class
 	 */
-	public static Class getUserClass(Class clazz) {
+	public static Class<?> getUserClass(Class clazz) {
 		return (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR) ?
 				clazz.getSuperclass() : clazz);
 	}
