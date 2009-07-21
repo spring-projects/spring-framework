@@ -23,7 +23,8 @@ Changes in version 3.0.0.RC1 (2009-06-10)
 * @DirtiesContext is now supported at the test class level with configurable class modes
 * added beforeTestClass() and afterTestClass() to the TestExecutionListener API
 * ProfileValueUtils now enforces class-level overrides for @IfProfileValue
-
+* @ContextConfiguration's loader attribute is now inherited if not declared locally
+* TransactionalTestExecutionListener no longer flushes transactions before rolling back
 
 Changes in version 3.0.0.M3 (2009-05-06)
 ----------------------------------------
