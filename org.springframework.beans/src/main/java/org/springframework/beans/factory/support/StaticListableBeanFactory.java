@@ -143,7 +143,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
 	}
 
-	public Class getType(String name) throws NoSuchBeanDefinitionException {
+	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 
 		Object bean = this.beans.get(beanName);

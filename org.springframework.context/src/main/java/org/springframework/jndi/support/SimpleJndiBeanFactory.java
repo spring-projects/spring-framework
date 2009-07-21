@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
@@ -153,7 +152,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
 	}
 
-	public Class getType(String name) throws NoSuchBeanDefinitionException {
+	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		try {
 			return doGetType(name);
 		}

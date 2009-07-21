@@ -473,7 +473,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
-	public Class getType(String name) throws NoSuchBeanDefinitionException {
+	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
 		// Check manually registered singletons.

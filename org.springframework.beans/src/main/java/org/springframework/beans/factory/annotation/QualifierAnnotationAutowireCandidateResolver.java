@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
@@ -47,11 +49,13 @@ import org.springframework.util.ObjectUtils;
  * @see Qualifier
  * @see Value
  */
-public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver {
+public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver, BeanFactoryAware {
 
 	private final Set<Class<? extends Annotation>> qualifierTypes;
 
 	private Class<? extends Annotation> valueAnnotationType = Value.class;
+
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -112,11 +116,15 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		this.valueAnnotationType = valueAnnotationType;
 	}
 
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
 
 	/**
 	 * Determine whether the provided bean definition is an autowire candidate.
 	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
-	 * attribute must not have been set to 'false'. Also if an annotation on
+	 * attribute must not have been set to 'false'. Also, if an annotation on
 	 * the field or parameter to be autowired is recognized by this bean factory
 	 * as a <em>qualifier</em>, the bean must 'match' against the annotation as
 	 * well as any attributes it may contain. The bean definition must contain
@@ -195,10 +203,18 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			if (bd.getResolvedFactoryMethod() != null) {
 				targetAnnotation = bd.getResolvedFactoryMethod().getAnnotation(type);
 			}
-			if (targetAnnotation == null && bd.hasBeanClass()) {
+			if (targetAnnotation == null) {
 				// look for matching annotation on the target class
-				Class<?> beanClass = bd.getBeanClass();
-				targetAnnotation = beanClass.getAnnotation(type);
+				Class<?> beanType = null;
+				if (this.beanFactory != null) {
+					beanType = this.beanFactory.getType(bdHolder.getBeanName());
+				}
+				else if (bd.hasBeanClass()) {
+					beanType = bd.getBeanClass();
+				}
+				if (beanType != null) {
+					targetAnnotation = ClassUtils.getUserClass(beanType).getAnnotation(type);
+				}
 			}
 			if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
 				return true;

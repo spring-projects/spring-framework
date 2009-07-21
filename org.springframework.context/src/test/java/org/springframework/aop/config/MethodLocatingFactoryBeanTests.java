@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.springframework.aop.config;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 
+import static org.easymock.EasyMock.*;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 
 /**
@@ -107,7 +107,7 @@ public final class MethodLocatingFactoryBeanTests {
 
 	@Test
 	public void testSunnyDayPath() throws Exception {
-		expect(beanFactory.getType(BEAN_NAME)).andReturn(String.class);
+		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);
 		
 		factory.setTargetBeanName(BEAN_NAME);
@@ -117,12 +117,12 @@ public final class MethodLocatingFactoryBeanTests {
 		assertNotNull(result);
 		assertTrue(result instanceof Method);
 		Method method = (Method) result;
-		assertEquals("Bingo", method.invoke("Bingo", new Object[]{}));
+		assertEquals("Bingo", method.invoke("Bingo"));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWhereMethodCannotBeResolved() {
-		expect(beanFactory.getType(BEAN_NAME)).andReturn(String.class);
+		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);
 		
 		factory.setTargetBeanName(BEAN_NAME);
