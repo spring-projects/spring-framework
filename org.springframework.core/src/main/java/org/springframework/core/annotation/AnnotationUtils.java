@@ -75,7 +75,17 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 */
 	public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
-		return BridgeMethodResolver.findBridgedMethod(method).getAnnotation(annotationType);
+		Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		A ann = resolvedMethod.getAnnotation(annotationType);
+		if (ann == null) {
+			for (Annotation metaAnn : resolvedMethod.getAnnotations()) {
+				ann = metaAnn.annotationType().getAnnotation(annotationType);
+				if (ann != null) {
+					break;
+				}
+			}
+		}
+		return ann;
 	}
 
 	/**
