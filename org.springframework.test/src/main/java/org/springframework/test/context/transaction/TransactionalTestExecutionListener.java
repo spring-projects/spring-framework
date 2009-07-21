@@ -499,7 +499,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		public void endTransaction(boolean rollback) {
 			if (rollback) {
-				this.transactionStatus.flush();
 				this.transactionManager.rollback(this.transactionStatus);
 			}
 			else {
