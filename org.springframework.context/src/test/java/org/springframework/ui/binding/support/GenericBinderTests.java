@@ -63,7 +63,6 @@ public class GenericBinderTests {
 		values.put("integer", "3");
 		values.put("foo", "BAR");
 		BindingResults results = binder.bind(values);
-		System.out.println(results);
 		assertEquals(3, results.size());
 
 		assertEquals("string", results.get(0).getProperty());
@@ -251,7 +250,7 @@ public class GenericBinderTests {
 		values.put("addresses[0]", "4655 Macy Lane:Melbourne:FL:35452");		
 		values.put("addresses[1]", "1234 Rostock Circle:Palm Bay:FL:32901");	
 		values.put("addresses[5]", "1977 Bel Aire Estates:Coker:AL:12345");
-		binder.bind(values);
+		BindingResults results = binder.bind(values);
 		Assert.assertEquals(6, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);

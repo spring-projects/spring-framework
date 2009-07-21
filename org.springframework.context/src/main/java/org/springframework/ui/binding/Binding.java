@@ -15,7 +15,6 @@
  */
 package org.springframework.ui.binding;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 
@@ -113,33 +112,6 @@ public interface Binding {
 	 * @throws IllegalStateException if BindingStatus is CLEAN or COMMITTED.
 	 */
 	void revert();
-
-	/**
-	 * For accessing the raw bound model object.
-	 * @author Keith Donald
-	 */
-	public interface Model {
-		
-		/**
-		 * The model value.
-		 */
-		Object getValue();
-		
-		/**
-		 * The model value type.
-		 */
-		Class<?> getValueType();		
-
-		/**
-		 * The model value type descriptor.
-		 */
-		TypeDescriptor<?> getValueTypeDescriptor();		
-
-		/**
-		 * Set the model value.
-		 */
-		void setValue(Object value);
-	}
 
 	/**
 	 * Get a Binding to a nested property value.

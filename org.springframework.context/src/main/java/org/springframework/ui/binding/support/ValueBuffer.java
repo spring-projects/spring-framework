@@ -3,7 +3,7 @@
  */
 package org.springframework.ui.binding.support;
 
-import org.springframework.ui.binding.Binding.Model;
+import org.springframework.ui.binding.support.AbstractBinding.ValueModel;
 
 class ValueBuffer {
 
@@ -11,13 +11,13 @@ class ValueBuffer {
 	
 	private boolean hasValue;
 	
-	private Model model;
+	private ValueModel model;
 	
 	private boolean flushFailed;
 	
 	private Exception flushException;
 	
-	public ValueBuffer(Model model) {
+	public ValueBuffer(ValueModel model) {
 		this.model = model;
 	}
 	
