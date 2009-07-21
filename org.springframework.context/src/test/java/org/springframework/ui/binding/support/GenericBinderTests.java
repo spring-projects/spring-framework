@@ -347,7 +347,6 @@ public class GenericBinderTests {
 	}
 
 	@Test
-	@Ignore
 	public void bindToListHandleNullValueInNestedPath() {
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		// - new addresses List is created if null
