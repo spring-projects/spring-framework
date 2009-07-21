@@ -320,6 +320,7 @@ public class ScopingTests {
 			return tb;
 		}
 
+		@Bean
 		@MyProxiedScope
 		public ITestBean scopedProxyInterface() {
 			TestBean tb = new TestBean();
@@ -327,6 +328,7 @@ public class ScopingTests {
 			return tb;
 		}
 
+		@Bean
 		@MyProxiedScope
 		public TestBean scopedProxyClass() {
 			TestBean tb = new TestBean();
@@ -359,7 +361,6 @@ public class ScopingTests {
 
 	@Target({ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Bean
 	@Scope(value=SCOPE, proxyMode=ScopedProxyMode.TARGET_CLASS)
 	@interface MyProxiedScope {
 	}
