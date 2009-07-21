@@ -25,4 +25,8 @@ public class PropertyPathElement {
 	public int getIntValue() {
 		return Integer.parseInt(value);
 	}
+	
+	public String toString() {
+		return value + ";index=" + index;
+	}
 }

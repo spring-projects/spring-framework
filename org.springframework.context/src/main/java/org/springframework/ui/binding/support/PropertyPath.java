@@ -46,5 +46,9 @@ public class PropertyPath implements Iterable<PropertyPathElement> {
 	public Iterator<PropertyPathElement> iterator() {
 		return elements.iterator();
 	}
+	
+	public String toString() {
+		return elements.toString();
+	}
 
 }
