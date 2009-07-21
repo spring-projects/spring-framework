@@ -16,19 +16,12 @@
 
 package org.springframework.remoting.caucho;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
 import com.caucho.burlap.client.BurlapProxyFactory;
 import com.caucho.hessian.client.HessianProxyFactory;
-import com.sun.net.httpserver.HttpServer;
 import junit.framework.TestCase;
-import org.junit.Ignore;
 
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.core.JdkVersion;
 import org.springframework.remoting.RemoteAccessException;
 
 /**
@@ -188,7 +181,7 @@ public class CauchoRemotingTests extends TestCase {
 		}
 	}
 
-	@Ignore("Using the JDK 1.6 HttpServer breaks when running multiple test methods")
+	/** Using the JDK 1.6 HttpServer breaks when running multiple test methods
 	public void testSimpleHessianServiceExporter() throws IOException {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
 			return;
@@ -217,6 +210,7 @@ public class CauchoRemotingTests extends TestCase {
 			server.stop(Integer.MAX_VALUE);
 		}
 	}
+	*/
 
 
 	private static class TestHessianProxyFactory extends HessianProxyFactory {
