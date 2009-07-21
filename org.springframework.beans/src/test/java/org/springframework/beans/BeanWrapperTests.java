@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1687,16 +1687,10 @@ public final class BeanWrapperTests {
 		public void setMyStringss(String string) {}
 	}
 
+
 	private static class Employee extends TestBean {
 
 		private String co;
-
-		/**
-		 * Constructor for Employee.
-		 */
-		public Employee() {
-			super();
-		}
 
 		public String getCompany() {
 			return co;
@@ -1705,8 +1699,8 @@ public final class BeanWrapperTests {
 		public void setCompany(String co) {
 			this.co = co;
 		}
-
 	}
+
 
 	@SuppressWarnings("serial")
 	public static class ReadOnlyMap extends HashMap<Object, Object> {
@@ -1733,7 +1727,7 @@ public final class BeanWrapperTests {
 			}
 		}
 
-		public Set<Entry<Object, Object>> entrySet() {
+		public Set<Map.Entry<Object, Object>> entrySet() {
 			this.accessed = true;
 			return super.entrySet();
 		}

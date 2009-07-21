@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import java.util.Properties;
-
+import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Session;
@@ -53,7 +52,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 
 	private Class activationSpecClass;
 
-	private Properties defaultProperties;
+	private Map<String, String> defaultProperties;
 
 	private DestinationResolver destinationResolver;
 
@@ -72,7 +71,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * listener-specific settings. Allows for configuring vendor-specific properties
 	 * beyond the Spring-defined settings in {@link JmsActivationSpecConfig}.
 	 */
-	public void setDefaultProperties(Properties defaultProperties) {
+	public void setDefaultProperties(Map<String, String> defaultProperties) {
 		this.defaultProperties = defaultProperties;
 	}
 
