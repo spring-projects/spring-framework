@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,6 @@ import org.springframework.util.ClassUtils;
  * Also supports EJB3's {@link javax.ejb.TransactionAttribute} annotation (if present).
  * This class may also serve as base class for a custom TransactionAttributeSource,
  * or get customized through {@link TransactionAnnotationParser} strategies.
- *
- * <p>This is a direct alternative to
- * {@link org.springframework.transaction.interceptor.AttributesTransactionAttributeSource},
- * which is able to read in source-level attributes via Commons Attributes.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
@@ -149,17 +145,6 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	@Override
 	protected boolean allowPublicMethodsOnly() {
 		return this.publicMethodsOnly;
-	}
-
-
-	@Override
-	public boolean equals(Object other) {
-		return (this == other || other instanceof AnnotationTransactionAttributeSource);
-	}
-
-	@Override
-	public int hashCode() {
-		return AnnotationTransactionAttributeSource.class.hashCode();
 	}
 
 }
