@@ -97,6 +97,11 @@ public class StandardMethodMetadata implements MethodMetadata {
 			if (ann.annotationType().getName().equals(annotationType)) {
 				return AnnotationUtils.getAnnotationAttributes(ann, true);
 			}
+			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+				if (metaAnn.annotationType().getName().equals(annotationType)) {
+					return AnnotationUtils.getAnnotationAttributes(metaAnn, true);
+				}
+			}
 		}
 		return null;
 	}
