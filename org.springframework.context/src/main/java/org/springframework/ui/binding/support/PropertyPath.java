@@ -23,7 +23,7 @@ public class PropertyPath implements Iterable<PropertyPathElement> {
 				int start = prop.indexOf('[');
 				int end = prop.indexOf(']', start);
 				String index = prop.substring(start + 1, end);
-				elements.add(new PropertyPathElement(prop.substring(0, start), true));
+				elements.add(new PropertyPathElement(prop.substring(0, start), false));
 				elements.add(new PropertyPathElement(index, true));
 			} else {
 				elements.add(new PropertyPathElement(prop, false));

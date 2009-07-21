@@ -126,7 +126,6 @@ public class GenericBinder implements Binder {
 	public Binding getBinding(String property) {
 		PropertyPath path = new PropertyPath(property);
 		Binding binding = getBindingRule(path.getFirstElement().getValue()).getBinding(model);
-		System.out.println(path);
 		for (PropertyPathElement element : path.getNestedElements()) {
 			if (element.isIndex()) {
 				if (binding.isMap()) {
@@ -303,6 +302,7 @@ public class GenericBinder implements Binder {
 			growListIfNecessary(index);
 			Binding binding = listElementBindings.get(index);
 			if (binding == null) {
+				final Map<String, Binding> nestedBindings = new HashMap<String, Binding>();
 				BindingContext listContext = new BindingContext() {
 					public MessageSource getMessageSource() {
 						return GenericBindingRule.this.getMessageSource();
@@ -313,8 +313,14 @@ public class GenericBinder implements Binder {
 					}
 
 					public Binding getBinding(String property) {
+						GenericBindingRule rule = GenericBindingRule.this.getBindingRule(property, getElementType());
 						Object model = ((List) GenericBindingRule.this.binding.getValue()).get(index);
-						return GenericBindingRule.this.getBindingRule(property, getElementType()).getBinding(model);
+						Binding binding = nestedBindings.get(property);
+						if (binding == null) {
+							binding = new PropertyBinding(rule.property, model, rule);
+							nestedBindings.put(property, binding);
+						}
+						return binding;
 					}
 
 					public Formatter getFormatter() {
