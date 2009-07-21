@@ -24,6 +24,7 @@ import com.ibm.wsspi.uow.UOWAction;
 import com.ibm.wsspi.uow.UOWActionException;
 import com.ibm.wsspi.uow.UOWException;
 import com.ibm.wsspi.uow.UOWManager;
+import com.ibm.wsspi.uow.UOWManagerFactory;
 
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -88,7 +89,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 	private UOWManager uowManager;
 
-	private String uowManagerName = DEFAULT_UOW_MANAGER_NAME;
+	private String uowManagerName;
 
 
 	/**
@@ -139,15 +140,13 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 				this.uowManager = lookupUowManager(this.uowManagerName);
 			}
 			else {
-				throw new IllegalStateException("'uowManager' or 'uowManagerName' is required");
+				this.uowManager = lookupDefaultUowManager();
 			}
 		}
 	}
 
 	/**
 	 * Look up the WebSphere UOWManager in JNDI via the configured name.
-	 * Called by <code>afterPropertiesSet</code> if no direct UOWManager reference was set.
-	 * Can be overridden in subclasses to provide a different UOWManager object.
 	 * @param uowManagerName the JNDI name of the UOWManager
 	 * @return the UOWManager object
 	 * @throws TransactionSystemException if the JNDI lookup failed
@@ -164,6 +163,25 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 		catch (NamingException ex) {
 			throw new TransactionSystemException(
 					"WebSphere UOWManager is not available at JNDI location [" + uowManagerName + "]", ex);
+		}
+	}
+
+	/**
+	 * Obtain the WebSphere UOWManager from the default JNDI location
+	 * "java:comp/websphere/UOWManager".
+	 * @return the UOWManager object
+	 * @throws TransactionSystemException if the JNDI lookup failed
+	 * @see #setJndiTemplate
+	 */
+	protected UOWManager lookupDefaultUowManager() throws TransactionSystemException {
+		try {
+			logger.debug("Retrieving WebSphere UOWManager from default JNDI location [" + DEFAULT_UOW_MANAGER_NAME + "]");
+			return getJndiTemplate().lookup(DEFAULT_UOW_MANAGER_NAME, UOWManager.class);
+		}
+		catch (NamingException ex) {
+			logger.debug("WebSphere UOWManager is not available at default JNDI location [" +
+					DEFAULT_UOW_MANAGER_NAME + "] - falling back to UOWManagerFactory lookup");
+			return UOWManagerFactory.getUOWManager();
 		}
 	}
 
