@@ -16,10 +16,13 @@
 
 package org.springframework.context.annotation.configuration;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.*;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -29,8 +32,8 @@ import test.beans.TestBean;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.ObjectFactory;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
@@ -67,13 +70,13 @@ public class ScopingTests {
 		ctx = null;
 		customScope = null;
 	}
-	
+
 	private GenericApplicationContext createContext(org.springframework.beans.factory.config.Scope customScope, Class<?> configClass) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		if(customScope != null)
+		if (customScope != null) {
 			beanFactory.registerScope(SCOPE, customScope);
-		beanFactory.registerBeanDefinition("config",
-				rootBeanDefinition(configClass).getBeanDefinition());
+		}
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(configClass));
 		GenericApplicationContext ctx = new GenericApplicationContext(beanFactory);
 		ctx.addBeanFactoryPostProcessor(new ConfigurationClassPostProcessor());
 		ctx.refresh();
@@ -187,10 +190,9 @@ public class ScopingTests {
 
 	@Test
 	public void testScopedConfigurationBeanDefinitionCount() throws Exception {
-
 		// count the beans
 		// 6 @Beans + 1 Configuration + 2 scoped proxy
-		assertThat(ctx.getBeanDefinitionCount(), equalTo(9));
+		assertEquals(9, ctx.getBeanDefinitionCount());
 	}
 	
 //	/**
@@ -294,14 +296,16 @@ public class ScopingTests {
 
 	@Configuration
 	public static class InvalidProxyOnPredefinedScopesConfiguration {
+
 		@Bean @Scope(proxyMode=ScopedProxyMode.INTERFACES)
 		public Object invalidProxyOnPredefinedScopes() { return new Object(); }
 	}
 
 	@Configuration
 	public static class ScopedConfigurationClass {
+
 		@Bean
-		@Scope(SCOPE)
+		@MyScope
 		public TestBean scopedClass() {
 			TestBean tb = new TestBean();
 			tb.setName(flag);
@@ -309,23 +313,21 @@ public class ScopingTests {
 		}
 
 		@Bean
-		@Scope(SCOPE)
+		@MyScope
 		public ITestBean scopedInterface() {
 			TestBean tb = new TestBean();
 			tb.setName(flag);
 			return tb;
 		}
 
-		@Bean
-		@Scope(value=SCOPE, proxyMode=ScopedProxyMode.TARGET_CLASS)
+		@MyProxiedScope
 		public ITestBean scopedProxyInterface() {
 			TestBean tb = new TestBean();
 			tb.setName(flag);
 			return tb;
 		}
 
-		@Bean
-		@Scope(value=SCOPE, proxyMode=ScopedProxyMode.TARGET_CLASS)
+		@MyProxiedScope
 		public TestBean scopedProxyClass() {
 			TestBean tb = new TestBean();
 			tb.setName(flag);
@@ -348,6 +350,21 @@ public class ScopingTests {
 	}
 
 
+	@Target({ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Scope(SCOPE)
+	@interface MyScope {
+	}
+
+
+	@Target({ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Bean
+	@Scope(value=SCOPE, proxyMode=ScopedProxyMode.TARGET_CLASS)
+	@interface MyProxiedScope {
+	}
+
+
 	/**
 	 * Simple scope implementation which creates object based on a flag.
 	 * @author Costin Leau
@@ -359,11 +376,6 @@ public class ScopingTests {
 
 		private Map<String, Object> beans = new HashMap<String, Object>();
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.config.Scope#get(java.lang.String,
-		 * org.springframework.beans.factory.ObjectFactory)
-		 */
 		public Object get(String name, ObjectFactory<?> objectFactory) {
 			if (createNewScope) {
 				beans.clear();
@@ -394,7 +406,6 @@ public class ScopingTests {
 		}
 
 		public Object resolveContextualObject(String key) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}
