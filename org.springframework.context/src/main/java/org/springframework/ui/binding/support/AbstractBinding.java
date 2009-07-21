@@ -5,6 +5,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -261,7 +262,7 @@ public abstract class AbstractBinding implements Binding {
 	@SuppressWarnings("unchecked")
 	public String formatValue(Object value) {
 		Formatter formatter;
-		if (isList() || isMap()) {
+		if (Collection.class.isAssignableFrom(getValueType()) || getValueType().isArray() || isMap()) {
 			formatter = getBindingContext().getElementFormatter();
 		} else {
 			formatter = getBindingContext().getFormatter();
