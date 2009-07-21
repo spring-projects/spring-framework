@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aop.scope;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
@@ -56,7 +57,7 @@ public abstract class ScopedProxyUtils {
 		scopedProxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
 		scopedProxyDefinition.setSource(definition.getSource());
 		scopedProxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		
+
 		String targetBeanName = getTargetBeanName(originalBeanName);
 		scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
 
@@ -68,9 +69,15 @@ public abstract class ScopedProxyUtils {
 			scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
 		}
 
+		// Copy autowire settings from original bean definition.
+		if (targetDefinition instanceof AbstractBeanDefinition) {
+			scopedProxyDefinition.copyQualifiersFrom((AbstractBeanDefinition) targetDefinition);
+		}
 		scopedProxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+		scopedProxyDefinition.setPrimary(targetDefinition.isPrimary());
 		// The target bean should be ignored in favor of the scoped proxy.
 		targetDefinition.setAutowireCandidate(false);
+		targetDefinition.setPrimary(false);
 
 		// Register the target bean as separate bean in the factory.
 		registry.registerBeanDefinition(targetBeanName, targetDefinition);
