@@ -15,7 +15,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.binding.binder.BindingResults;
+import org.springframework.ui.binding.binder.WebBinder;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
@@ -23,19 +24,19 @@ import org.springframework.ui.format.number.CurrencyFormatter;
 public class WebBinderTests {
 
 	TestBean bean = new TestBean();
-	
-	WebBinder binder = new WebBinder(bean);
+
+	WebBinder binder = new WebBinder(new GenericBindingFactory(bean));
 
 	@Before
 	public void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
 	}
-	
+
 	@After
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
-	
+
 	@Test
 	@Ignore
 	public void bindUserValuesCreatedFromUserMap() throws ParseException {
@@ -55,10 +56,10 @@ public class WebBinderTests {
 		assertEquals("test", results.get(0).getSourceValue());
 		assertEquals(null, results.get(1).getSourceValue());
 		assertEquals(Boolean.FALSE, results.get(2).getSourceValue());
-		assertEquals("2009-06-10", results.get(3).getSourceValue());		
+		assertEquals("2009-06-10", results.get(3).getSourceValue());
 		assertEquals("$5.00", results.get(4).getSourceValue());
 		assertEquals(null, results.get(5).getSourceValue());
-		
+
 		assertEquals("test", bean.getString());
 		assertEquals(0, bean.getInteger());
 		assertEquals(new DateFormatter().parse("2009-06-10", Locale.US), bean.getDate());
@@ -66,7 +67,7 @@ public class WebBinderTests {
 		assertEquals(new BigDecimal("5.00"), bean.getCurrency());
 		assertEquals(null, bean.getAddresses());
 	}
-	
+
 	public static enum FooEnum {
 		BAR, BAZ, BOOP;
 	}
@@ -80,7 +81,7 @@ public class WebBinderTests {
 		private BigDecimal currency;
 		private List<FooEnum> foos;
 		private List<Address> addresses;
-		
+
 		public String getString() {
 			return string;
 		}
@@ -96,7 +97,7 @@ public class WebBinderTests {
 		public void setInteger(int integer) {
 			this.integer = integer;
 		}
-		
+
 		public boolean isBool() {
 			return bool;
 		}
@@ -145,7 +146,7 @@ public class WebBinderTests {
 		public void setAddresses(List<Address> addresses) {
 			this.addresses = addresses;
 		}
-	
+
 	}
 
 	public static class Address {
@@ -154,46 +155,46 @@ public class WebBinderTests {
 		private String state;
 		private String zip;
 		private String country;
-		
+
 		public String getStreet() {
 			return street;
 		}
-		
+
 		public void setStreet(String street) {
 			this.street = street;
 		}
-		
+
 		public String getCity() {
 			return city;
 		}
-		
+
 		public void setCity(String city) {
 			this.city = city;
 		}
-		
+
 		public String getState() {
 			return state;
 		}
-		
+
 		public void setState(String state) {
 			this.state = state;
 		}
-		
+
 		public String getZip() {
 			return zip;
 		}
-		
+
 		public void setZip(String zip) {
 			this.zip = zip;
 		}
-		
+
 		public String getCountry() {
 			return country;
 		}
-		
+
 		public void setCountry(String country) {
 			this.country = country;
 		}
-		
+
 	}
 }
