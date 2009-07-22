@@ -17,20 +17,31 @@ package org.springframework.ui.binding.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.text.ParseException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.ConversionUtils;
+import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * A generic implementation of {@link FormatterRegistry} suitable for use in most binding environments.
@@ -48,7 +59,14 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
+	private TypeConverter typeConverter = new DefaultTypeConverter();
+	
+	public void setTypeConverter(TypeConverter typeConverter) {
+		this.typeConverter = typeConverter;
+	}
+	
 	public Formatter<?> getFormatter(PropertyDescriptor property) {
+		Assert.notNull(property, "The PropertyDescriptor is required");
 		TypeDescriptor<?> propertyType = new TypeDescriptor(new MethodParameter(property.getReadMethod(), -1));
 		Annotation[] annotations = propertyType.getAnnotations();
 		for (Annotation a : annotations) {
@@ -60,19 +78,22 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		Formatter<?> formatter = null;
 		Class<?> type;
 		if (propertyType.isCollection() || propertyType.isArray()) {
-			formatter = collectionTypeFormatters.get(new GenericCollectionPropertyType(propertyType.getType(), propertyType.getElementType()));
+			GenericCollectionPropertyType collectionType = new GenericCollectionPropertyType(propertyType.getType(),
+					propertyType.getElementType());
+			formatter = collectionTypeFormatters.get(collectionType);
 			if (formatter != null) {
 				return formatter;
 			} else {
-				return DefaultFormatter.COLLECTION_FORMATTER;
+				return new DefaultCollectionFormatter(collectionType, this);
 			}
 		} else {
 			type = propertyType.getType();
 		}
 		return getFormatter(type);
 	}
-	
+
 	public Formatter<?> getFormatter(Class<?> type) {
+		Assert.notNull(type, "The Class of the object to format is required");
 		Formatter formatter = typeFormatters.get(type);
 		if (formatter != null) {
 			return formatter;
@@ -83,19 +104,19 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 				try {
 					formatter = (Formatter) formatterClass.newInstance();
 				} catch (InstantiationException e) {
-					// TODO better runtime exception
-					throw new IllegalStateException(e);
+					throw new IllegalStateException(
+							"Formatter referenced by @Formatted annotation does not have default constructor", e);
 				} catch (IllegalAccessException e) {
-					throw new IllegalStateException(e);
+					throw new IllegalStateException(
+							"Formatter referenced by @Formatted annotation does not have public constructor", e);
 				}
 				typeFormatters.put(type, formatter);
 				return formatter;
 			} else {
-				return DefaultFormatter.INSTANCE;
+				return new DefaultFormatter(type, typeConverter);
 			}
-		}		
+		}
 	}
-
 
 	public void add(Class<?> propertyType, Formatter<?> formatter) {
 		if (propertyType.isAnnotation()) {
@@ -108,13 +129,13 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 	public void add(GenericCollectionPropertyType propertyType, Formatter<?> formatter) {
 		collectionTypeFormatters.put(propertyType, formatter);
 	}
-	
+
 	public void add(AnnotationFormatterFactory<?, ?> factory) {
 		annotationFormatters.put(getAnnotationType(factory), factory);
 	}
 
 	// internal helpers
-	
+
 	private Class getAnnotationType(AnnotationFormatterFactory factory) {
 		Class classToIntrospect = factory.getClass();
 		while (classToIntrospect != null) {
@@ -133,7 +154,7 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 				"Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
 						+ factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
 	}
-	
+
 	private Class getParameterClass(Type parameterType, Class converterClass) {
 		if (parameterType instanceof TypeVariable) {
 			parameterType = GenericTypeResolver.resolveTypeVariable((TypeVariable) parameterType, converterClass);
@@ -144,7 +165,7 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		throw new IllegalArgumentException("Unable to obtain the java.lang.Class for parameterType [" + parameterType
 				+ "] on Formatter [" + converterClass.getName() + "]");
 	}
-	
+
 	static class SimpleAnnotationFormatterFactory implements AnnotationFormatterFactory {
 
 		private Formatter formatter;
@@ -158,5 +179,125 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		}
 
 	}
+
+	private static class DefaultFormatter implements Formatter {
+
+		public static final Formatter DEFAULT_INSTANCE = new DefaultFormatter(null, null);
+		
+		private Class<?> objectType;
+		
+		private TypeConverter typeConverter;
+		
+		public DefaultFormatter(Class<?> objectType, TypeConverter typeConverter) {
+			this.objectType = objectType;
+			this.typeConverter = typeConverter;
+		}
+		
+		public String format(Object object, Locale locale) {
+			if (object == null) {
+				return "";
+			} else {
+				if (typeConverter != null && typeConverter.canConvert(object.getClass(), String.class)) {
+					return typeConverter.convert(object, String.class);
+				} else {
+					return object.toString();
+				}
+			}
+		}
+
+		public Object parse(String formatted, Locale locale) throws ParseException {
+			if (formatted == "") {
+				return null;
+			} else {
+				if (typeConverter != null && typeConverter.canConvert(String.class, objectType)) {
+					try {
+						return typeConverter.convert(formatted, objectType);
+					} catch (ConversionFailedException e) {
+						throw new ParseException(formatted, -1);
+					}
+				} else {
+					return formatted;
+				}
+			}
+		}
+	}
+	
+	private static class DefaultCollectionFormatter implements Formatter {
+
+		private GenericCollectionPropertyType collectionType;
+
+		private Formatter elementFormatter;
+
+		public DefaultCollectionFormatter(GenericCollectionPropertyType collectionType,
+				GenericFormatterRegistry formatterRegistry) {
+			this.collectionType = collectionType;
+			this.elementFormatter = collectionType.getElementType() != null ? formatterRegistry
+					.getFormatter(collectionType.getElementType()) : DefaultFormatter.DEFAULT_INSTANCE;
+		}
+
+		public String format(Object object, Locale locale) {
+			if (object == null) {
+				return "";
+			} else {
+				StringBuffer buffer = new StringBuffer();
+				if (object.getClass().isArray()) {
+					int length = Array.getLength(object);
+					for (int i = 0; i < length; i++) {
+						buffer.append(elementFormatter.format(Array.get(object, i), locale));
+						if (i < length - 1) {
+							buffer.append(",");
+						}
+					}
+				} else if (Collection.class.isAssignableFrom(object.getClass())) {
+					Collection c = (Collection) object;
+					for (Iterator it = c.iterator(); it.hasNext();) {
+						buffer.append(elementFormatter.format(it.next(), locale));
+						if (it.hasNext()) {
+							buffer.append(",");
+						}
+					}
+				}
+				return buffer.toString();
+			}
+		}
+
+		public Object parse(String formatted, Locale locale) throws ParseException {
+			String[] fields = StringUtils.commaDelimitedListToStringArray(formatted);
+			if (collectionType.getCollectionType().isArray()) {
+				Object array = Array.newInstance(getElementType(), fields.length);
+				for (int i = 0; i < fields.length; i++) {
+					Array.set(array, i, elementFormatter.parse(fields[i], locale));
+				}
+				return array;
+			} else {
+				Collection collection = newCollection();
+				for (int i = 0; i < fields.length; i++) {
+					collection.add(elementFormatter.parse(fields[i], locale));
+				}
+				return collection;
+			}
+		}
+
+		private Class<?> getElementType() {
+			if (collectionType.getElementType() != null) {
+				return collectionType.getElementType();
+			} else {
+				return String.class;
+			}
+		}
+
+		private Collection newCollection() {
+			try {
+				Class<? extends Collection> implType = ConversionUtils
+						.getCollectionImpl((Class<? extends Collection>) collectionType.getCollectionType());
+				return (Collection) implType.newInstance();
+			} catch (InstantiationException e) {
+				throw new IllegalStateException("Should not happen", e);
+			} catch (IllegalAccessException e) {
+				throw new IllegalStateException("Should not happen", e);
+			}
+
+		}
+	};
 
 }

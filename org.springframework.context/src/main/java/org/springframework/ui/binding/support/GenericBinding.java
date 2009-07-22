@@ -1,11 +1,27 @@
+/*
+ * Copyright 2004-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.ui.binding.support;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,13 +35,14 @@ import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.support.GenericBinder.BindingContext;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
 
-public abstract class AbstractBinding implements Binding {
+public class GenericBinding implements Binding {
 
+	private ValueModel valueModel;
+	
 	private BindingContext bindingContext;
 
 	private ValueBuffer buffer;
@@ -33,17 +50,18 @@ public abstract class AbstractBinding implements Binding {
 	private BindingStatus status;
 
 	private Object sourceValue;
-	
+
 	private Exception invalidSourceValueCause;
-	
-	public AbstractBinding(BindingContext bindingContext) {
+
+	public GenericBinding(ValueModel valueModel, BindingContext bindingContext) {
+		this.valueModel = valueModel;
 		this.bindingContext = bindingContext;
-		buffer = new ValueBuffer(getValueModel());
-		status = BindingStatus.CLEAN;		
+		buffer = new ValueBuffer(valueModel);
+		status = BindingStatus.CLEAN;
 	}
 
 	// implementing Binding
-	
+
 	public String getRenderValue() {
 		return format(getValue(), bindingContext.getFormatter());
 	}
@@ -52,16 +70,16 @@ public abstract class AbstractBinding implements Binding {
 		if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
 			return buffer.getValue();
 		} else {
-			return getValueModel().getValue();
+			return valueModel.getValue();
 		}
 	}
 
 	public Class<?> getValueType() {
-		return getValueModel().getValueType();
+		return valueModel.getValueType();
 	}
 
 	public boolean isEditable() {
-		return bindingContext.getEditableCondition().isTrue();
+		return valueModel.isWriteable() && bindingContext.getEditableCondition().isTrue();
 	}
 
 	public boolean isEnabled() {
@@ -91,23 +109,44 @@ public abstract class AbstractBinding implements Binding {
 				status = BindingStatus.INVALID_SOURCE_VALUE;
 			}
 		} else if (sourceValue instanceof String[]) {
-			String[] sourceValues = (String[]) sourceValue;
-			Class<?> parsedType = getFormattedObjectType(bindingContext.getElementFormatter().getClass());
-			if (parsedType == null) {
-				parsedType = String.class;
-			}
-			Object parsed = Array.newInstance(parsedType, sourceValues.length);
-			for (int i = 0; i < sourceValues.length; i++) {
-				Object parsedValue;
-				try {
-					parsedValue = bindingContext.getElementFormatter().parse(sourceValues[i], getLocale());
-					Array.set(parsed, i, parsedValue);
-				} catch (ParseException e) {
-					this.sourceValue = sourceValue;
-					invalidSourceValueCause = e;
-					status = BindingStatus.INVALID_SOURCE_VALUE;
-					break;
+			Object parsed;
+			if (isMap()) {
+				String[] sourceValues = (String[]) sourceValue;
+				Formatter keyFormatter = bindingContext.getKeyFormatter();
+				Formatter valueFormatter = bindingContext.getElementFormatter();
+				Map map = new LinkedHashMap(sourceValues.length);
+				for (int i = 0; i < sourceValues.length; i++) {
+					String entryString = sourceValues[i];
+					Object parsedValue;
+					try {
+						String[] keyValue = entryString.split("=");
+						Object parsedMapKey = keyFormatter.parse(keyValue[0], getLocale());
+						Object parsedMapValue = valueFormatter.parse(keyValue[1], getLocale());
+						map.put(parsedMapKey, parsedMapValue);
+					} catch (ParseException e) {
+						this.sourceValue = sourceValue;
+						invalidSourceValueCause = e;
+						status = BindingStatus.INVALID_SOURCE_VALUE;
+						break;
+					}
 				}
+				parsed = map;
+			} else {
+				String[] sourceValues = (String[]) sourceValue;
+				List list = new ArrayList(sourceValues.length);
+				for (int i = 0; i < sourceValues.length; i++) {
+					Object parsedValue;
+					try {
+						parsedValue = bindingContext.getElementFormatter().parse(sourceValues[i], getLocale());
+						list.add(parsedValue);
+					} catch (ParseException e) {
+						this.sourceValue = sourceValue;
+						invalidSourceValueCause = e;
+						status = BindingStatus.INVALID_SOURCE_VALUE;
+						break;
+					}
+				}
+				parsed = list;
 			}
 			if (status != BindingStatus.INVALID_SOURCE_VALUE) {
 				try {
@@ -150,7 +189,7 @@ public abstract class AbstractBinding implements Binding {
 				public String getCode() {
 					return "typeMismatch";
 				}
-	
+
 				public String getMessage() {
 					MessageBuilder builder = new MessageBuilder(bindingContext.getMessageSource());
 					builder.code(getCode());
@@ -168,11 +207,11 @@ public abstract class AbstractBinding implements Binding {
 						builder.defaultMessage("Failed to bind '" + bindingContext.getLabel() + "'; the source value "
 								+ StylerUtils.style(sourceValue) + " has could not be converted to "
 								+ e.getTargetType().getName());
-	
+
 					}
 					return builder.build();
 				}
-	
+
 				public Severity getSeverity() {
 					return Severity.ERROR;
 				}
@@ -182,12 +221,12 @@ public abstract class AbstractBinding implements Binding {
 				public String getCode() {
 					return "internalError";
 				}
-	
+
 				public String getMessage() {
 					buffer.getFlushException().printStackTrace();
 					return "Internal error occurred; message = [" + buffer.getFlushException().getMessage() + "]";
 				}
-	
+
 				public Severity getSeverity() {
 					return Severity.FATAL;
 				}
@@ -197,11 +236,11 @@ public abstract class AbstractBinding implements Binding {
 				public String getCode() {
 					return "bindSuccess";
 				}
-	
+
 				public String getMessage() {
 					return "Binding successful";
 				}
-	
+
 				public Severity getSeverity() {
 					return Severity.INFO;
 				}
@@ -256,6 +295,13 @@ public abstract class AbstractBinding implements Binding {
 	}
 
 	public Binding getMapValueBinding(Object key) {
+		if (key instanceof String) {
+			try {
+				key = bindingContext.getKeyFormatter().parse((String) key, getLocale());
+			} catch (ParseException e) {
+				throw new IllegalArgumentException("Unable to parse map key '" + key + "'", e);
+			}
+		}
 		return bindingContext.getMapValueBinding(key);
 	}
 
@@ -263,29 +309,23 @@ public abstract class AbstractBinding implements Binding {
 	public String formatValue(Object value) {
 		Formatter formatter;
 		if (Collection.class.isAssignableFrom(getValueType()) || getValueType().isArray() || isMap()) {
-			formatter = getBindingContext().getElementFormatter();
+			formatter = bindingContext.getElementFormatter();
 		} else {
-			formatter = getBindingContext().getFormatter();
+			formatter = bindingContext.getFormatter();
 		}
 		return format(value, formatter);
 	}
-	
-	// subclassing hooks
 
-	protected BindingContext getBindingContext() {
-		return bindingContext;
-	}
-
-	protected abstract ValueModel getValueModel();
+	// internal helpers
 	
-	protected Locale getLocale() {
-		return LocaleContextHolder.getLocale();
-	}
-	
-	protected String format(Object value, Formatter formatter) {
+	private String format(Object value, Formatter formatter) {
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = bindingContext.getTypeConverter().convert(value, formattedType);
 		return formatter.format(value, getLocale());
+	}
+
+	private Locale getLocale() {
+		return LocaleContextHolder.getLocale();
 	}
 
 	private Class getFormattedObjectType(Class formatterClass) {
@@ -317,7 +357,7 @@ public abstract class AbstractBinding implements Binding {
 	}
 
 	private Object coerseToValueType(Object parsed) {
-		TypeDescriptor targetType = getValueModel().getValueTypeDescriptor();
+		TypeDescriptor targetType = valueModel.getValueTypeDescriptor();
 		TypeConverter converter = bindingContext.getTypeConverter();
 		if (parsed != null && converter.canConvert(parsed.getClass(), targetType)) {
 			return converter.convert(parsed, targetType);
@@ -338,39 +378,10 @@ public abstract class AbstractBinding implements Binding {
 		}
 	}
 
-	// internal helpers
-	
 	static abstract class AbstractAlert implements Alert {
 		public String toString() {
 			return getCode() + " - " + getMessage();
 		}
-	}
-
-	/**
-	 * For accessing the raw bound model object.
-	 * @author Keith Donald
-	 */
-	public interface ValueModel {
-		
-		/**
-		 * The model value.
-		 */
-		Object getValue();
-		
-		/**
-		 * The model value type.
-		 */
-		Class<?> getValueType();		
-
-		/**
-		 * The model value type descriptor.
-		 */
-		TypeDescriptor<?> getValueTypeDescriptor();		
-
-		/**
-		 * Set the model value.
-		 */
-		void setValue(Object value);
 	}
 
 }

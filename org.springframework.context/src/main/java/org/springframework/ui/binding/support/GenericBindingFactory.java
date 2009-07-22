@@ -21,19 +21,19 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.groovy.binding.PropertyBinding;
 import org.springframework.context.MessageSource;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.support.DefaultTypeConverter;
-import org.springframework.ui.binding.Binder;
 import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.BindingResult;
-import org.springframework.ui.binding.BindingResults;
-import org.springframework.ui.binding.MissingSourceValuesException;
-import org.springframework.ui.binding.Binding.BindingStatus;
+import org.springframework.ui.binding.BindingFactory;
+import org.springframework.ui.binding.binder.Binder;
+import org.springframework.ui.binding.binder.BindingResult;
 import org.springframework.ui.binding.config.BindingRuleConfiguration;
 import org.springframework.ui.binding.config.Condition;
 import org.springframework.ui.format.Formatter;
@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  * @see #setTypeConverter(TypeConverter)
  * @see #bind(Map)
  */
-public class GenericBinder implements Binder {
+public class GenericBindingFactory implements BindingFactory {
 
 	private Object model;
 
@@ -59,13 +59,11 @@ public class GenericBinder implements Binder {
 
 	private MessageSource messageSource;
 
-	private String[] requiredProperties = new String[0];
-
 	/**
 	 * Creates a new binder for the model object.
 	 * @param model the model object containing properties this binder will bind to
 	 */
-	public GenericBinder(Object model) {
+	public GenericBindingFactory(Object model) {
 		Assert.notNull(model, "The model to bind to is required");
 		this.model = model;
 		bindingRules = new HashMap<String, GenericBindingRule>();
@@ -104,9 +102,9 @@ public class GenericBinder implements Binder {
 	}
 
 	/**
-	 * 
+	 * Add a new binding rule for the property at the path specified.
 	 * @param propertyPath binding rule property path in format prop.nestedProp
-	 * @return
+	 * @return a builder for the binding rule
 	 */
 	public BindingRuleConfiguration bindingRule(String propertyPath) {
 		PropertyPath path = new PropertyPath(propertyPath);
@@ -142,55 +140,6 @@ public class GenericBinder implements Binder {
 		return binding;
 	}
 
-	public BindingResults bind(Map<String, ? extends Object> sourceValues) {
-		sourceValues = filter(sourceValues);
-		checkRequired(sourceValues);
-		ArrayListBindingResults results = new ArrayListBindingResults(sourceValues.size());
-		for (Map.Entry<String, ? extends Object> sourceValue : sourceValues.entrySet()) {
-			try {
-				Binding binding = getBinding(sourceValue.getKey());
-				results.add(bind(sourceValue, binding));
-			} catch (PropertyNotFoundException e) {
-				results.add(new PropertyNotFoundResult(sourceValue.getKey(), sourceValue.getValue(), messageSource));
-			}
-		}
-		return results;
-	}
-
-	// subclassing hooks
-
-	/**
-	 * Hook subclasses may use to filter the source values to bind.
-	 * This hook allows the binder to pre-process the source values before binding occurs.
-	 * For example, a Binder might insert empty or default values for fields that are not present.
-	 * As another example, a Binder might collapse multiple source values into a single source value. 
-	 * @param sourceValues the original source values map provided by the caller
-	 * @return the filtered source values map that will be used to bind
-	 */
-	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> sourceValues) {
-		return sourceValues;
-	}
-
-	// internal helpers
-
-	private void checkRequired(Map<String, ? extends Object> sourceValues) {
-		List<String> missingRequired = new ArrayList<String>();
-		for (String required : requiredProperties) {
-			boolean found = false;
-			for (String property : sourceValues.keySet()) {
-				if (property.equals(required)) {
-					found = true;
-				}
-			}
-			if (!found) {
-				missingRequired.add(required);
-			}
-		}
-		if (!missingRequired.isEmpty()) {
-			throw new MissingSourceValuesException(missingRequired, sourceValues);
-		}
-	}
-
 	private GenericBindingRule getBindingRule(String property) {
 		GenericBindingRule rule = bindingRules.get(property);
 		if (rule == null) {
@@ -198,20 +147,6 @@ public class GenericBinder implements Binder {
 			bindingRules.put(property, rule);
 		}
 		return rule;
-	}
-
-	private BindingResult bind(Map.Entry<String, ? extends Object> sourceValue, Binding binding) {
-		String property = sourceValue.getKey();
-		Object value = sourceValue.getValue();
-		if (!binding.isEditable()) {
-			return new PropertyNotEditableResult(property, value, messageSource);
-		} else {
-			binding.applySourceValue(value);
-			if (binding.getStatus() == BindingStatus.DIRTY) {
-				binding.commit();
-			}
-			return new BindingStatusResult(property, value, binding.getStatusAlert());
-		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -223,9 +158,9 @@ public class GenericBinder implements Binder {
 
 		private Formatter formatter;
 
-		private Formatter elementFormatter;
-
 		private Formatter keyFormatter;
+
+		private Formatter elementFormatter;
 
 		private Condition editableCondition = Condition.ALWAYS_TRUE;
 
@@ -239,6 +174,8 @@ public class GenericBinder implements Binder {
 
 		private Map<Integer, Binding> listElementBindings;
 
+		private Map<Object, Binding> mapValueBindings;
+		
 		public GenericBindingRule(String property, Class modelClass) {
 			this.modelClass = modelClass;
 			this.property = findPropertyDescriptor(property);
@@ -262,19 +199,19 @@ public class GenericBinder implements Binder {
 			}
 		}
 
-		public Formatter<?> getElementFormatter() {
-			if (elementFormatter != null) {
-				return formatter;
-			} else {
-				return formatterRegistry.getFormatter(getElementType());
-			}
-		}
-
 		public Formatter<?> getKeyFormatter() {
 			if (keyFormatter != null) {
 				return keyFormatter;
 			} else {
 				return formatterRegistry.getFormatter(getKeyType());
+			}
+		}
+
+		public Formatter<?> getElementFormatter() {
+			if (elementFormatter != null) {
+				return formatter;
+			} else {
+				return formatterRegistry.getFormatter(getElementType());
 			}
 		}
 
@@ -295,79 +232,34 @@ public class GenericBinder implements Binder {
 			return getBindingRule(property, binding.getValueType()).getBinding(binding.getValue());
 		}
 
-		public Binding getListElementBinding(final int index) {
+		public Binding getListElementBinding(int index) {
 			if (listElementBindings == null) {
 				listElementBindings = new HashMap<Integer, Binding>();
 			}
 			growListIfNecessary(index);
 			Binding binding = listElementBindings.get(index);
 			if (binding == null) {
-				final Map<String, Binding> nestedBindings = new HashMap<String, Binding>();
-				BindingContext listContext = new BindingContext() {
-					public MessageSource getMessageSource() {
-						return GenericBindingRule.this.getMessageSource();
-					}
-
-					public TypeConverter getTypeConverter() {
-						return GenericBindingRule.this.getTypeConverter();
-					}
-
-					public Binding getBinding(String property) {
-						GenericBindingRule rule = GenericBindingRule.this.getBindingRule(property, getElementType());
-						Object model = ((List) GenericBindingRule.this.binding.getValue()).get(index);
-						Binding binding = nestedBindings.get(property);
-						if (binding == null) {
-							binding = new PropertyBinding(rule.property, model, rule);
-							nestedBindings.put(property, binding);
-						}
-						return binding;
-					}
-
-					public Formatter getFormatter() {
-						return GenericBindingRule.this.getElementFormatter();
-					}
-
-					public Formatter getElementFormatter() {
-						return null;
-					}
-
-					public Formatter getKeyFormatter() {
-						return null;
-					}
-
-					public Condition getEditableCondition() {
-						return GenericBindingRule.this.getEditableCondition();
-					}
-
-					public Condition getEnabledCondition() {
-						return GenericBindingRule.this.getEnabledCondition();
-					}
-
-					public Condition getVisibleCondition() {
-						return GenericBindingRule.this.getVisibleCondition();
-					}
-
-					public Binding getListElementBinding(int index) {
-						throw new IllegalArgumentException("Not yet supported");
-					}
-
-					public Binding getMapValueBinding(Object key) {
-						throw new IllegalArgumentException("Not yet supported");
-					}
-
-					public String getLabel() {
-						return GenericBindingRule.this.getLabel() + "[" + index + "]";
-					}
-
-				};
-				binding = new ListElementBinding(index, getElementType(), (List) this.binding.getValue(), listContext);
+				BindingContext bindingContext = new ListElementBindingContext(index, this);
+				ValueModel valueModel = new ListElementValueModel(index, getElementType(), (List) this.binding.getValue());
+				binding = new GenericBinding(valueModel, bindingContext);
 				listElementBindings.put(index, binding);
 			}
 			return binding;
 		}
 
 		public Binding getMapValueBinding(Object key) {
-			return null;
+			if (mapValueBindings == null) {
+				mapValueBindings = new HashMap<Object, Binding>();
+			}
+			createMapValueIfNecessary();
+			Binding binding = mapValueBindings.get(key);
+			if (binding == null) {
+				BindingContext bindingContext = new MapValueBindingContext(key, this);
+				ValueModel valueModel = new MapValueValueModel(key, getElementType(), (Map) this.binding.getValue(), bindingContext);
+				binding = new GenericBinding(valueModel, bindingContext);
+				mapValueBindings.put(key, binding);
+			}
+			return binding;
 		}
 
 		public String getLabel() {
@@ -416,7 +308,11 @@ public class GenericBinder implements Binder {
 		// internal helpers
 
 		private Class<?> getElementType() {
-			return GenericCollectionTypeResolver.getCollectionReturnType(property.getReadMethod());
+			if (Map.class.isAssignableFrom(property.getPropertyType())) {
+				return GenericCollectionTypeResolver.getMapValueReturnType(property.getReadMethod());				
+			} else {
+				return GenericCollectionTypeResolver.getCollectionReturnType(property.getReadMethod());				
+			}
 		}
 
 		private Class<?> getKeyType() {
@@ -443,7 +339,8 @@ public class GenericBinder implements Binder {
 
 		Binding getBinding(Object model) {
 			if (binding == null) {
-				binding = new PropertyBinding(property, model, this);
+				PropertyValueModel valueModel = new PropertyValueModel(property, model);
+				binding = new GenericBinding(valueModel, this);
 			}
 			return binding;
 		}
@@ -475,6 +372,15 @@ public class GenericBinder implements Binder {
 			}
 		}
 
+		private void createMapValueIfNecessary() {
+			Object value = binding.getValue();
+			if (value == null) {
+				value = newMapValue(binding.getValueType());
+				binding.applySourceValue(value);
+				binding.commit();
+			}			
+		}
+		
 		private void growListIfNecessary(int index) {
 			List list = (List) binding.getValue();
 			if (list == null) {
@@ -487,6 +393,14 @@ public class GenericBinder implements Binder {
 				for (int i = list.size(); i <= index; i++) {
 					list.add(newValue(getElementType()));
 				}
+			}
+		}
+
+		private Map newMapValue(Class<?> type) {
+			if (type.isInterface()) {
+				return (Map) newValue(LinkedHashMap.class);
+			} else {
+				return (Map) newValue(type);
 			}
 		}
 
@@ -510,36 +424,153 @@ public class GenericBinder implements Binder {
 
 	}
 
-	public interface BindingContext {
+	private static class ListElementBindingContext implements BindingContext {
+		
+		private int index;
 
-		MessageSource getMessageSource();
+		private GenericBindingRule listBindingContext;
+		
+		final Map<String, Binding> nestedBindings = new HashMap<String, Binding>();
+		
+		public ListElementBindingContext(int index, GenericBindingRule listBindingContext) {
+			this.index = index;
+			this.listBindingContext = listBindingContext;
+		}
+		
+		public MessageSource getMessageSource() {
+			return listBindingContext.getMessageSource();
+		}
 
-		TypeConverter getTypeConverter();
+		public TypeConverter getTypeConverter() {
+			return listBindingContext.getTypeConverter();
+		}
 
-		Condition getEditableCondition();
+		public Binding getBinding(String property) {
+			Object model = ((List) listBindingContext.binding.getValue()).get(index);
+			Class<?> elementType = listBindingContext.getElementType();
+			if (elementType == null) {
+				elementType = model.getClass();
+			}
+			GenericBindingRule rule = listBindingContext.getBindingRule(property, elementType);
+			Binding binding = nestedBindings.get(property);
+			if (binding == null) {
+				PropertyValueModel valueModel = new PropertyValueModel(rule.property, model);
+				binding = new GenericBinding(valueModel, rule);
+				nestedBindings.put(property, binding);
+			}
+			return binding;
+		}
 
-		Condition getEnabledCondition();
+		public Formatter getFormatter() {
+			return listBindingContext.getElementFormatter();
+		}
 
-		Condition getVisibleCondition();
+		public Formatter getElementFormatter() {
+			return null;
+		}
 
-		Binding getBinding(String property);
+		public Formatter getKeyFormatter() {
+			return null;
+		}
 
-		Formatter getFormatter();
+		public Condition getEditableCondition() {
+			return listBindingContext.getEditableCondition();
+		}
 
-		Formatter getElementFormatter();
+		public Condition getEnabledCondition() {
+			return listBindingContext.getEnabledCondition();
+		}
 
-		Formatter getKeyFormatter();
+		public Condition getVisibleCondition() {
+			return listBindingContext.getVisibleCondition();
+		}
 
-		Binding getListElementBinding(int index);
+		public Binding getListElementBinding(int index) {
+			throw new IllegalArgumentException("Not yet supported");
+		}
 
-		Binding getMapValueBinding(Object key);
+		public Binding getMapValueBinding(Object key) {
+			throw new IllegalArgumentException("Not yet supported");
+		}
 
-		String getLabel();
+		public String getLabel() {
+			return listBindingContext.getLabel() + "[" + index + "]";
+		}
 
-	}
+	};
+	
+	private static class MapValueBindingContext implements BindingContext {
+		
+		private Object key;
 
-	public void setRequired(String[] propertyPaths) {
-		this.requiredProperties = propertyPaths;
-	}
+		private GenericBindingRule mapBindingContext;
+		
+		final Map<String, Binding> nestedBindings = new HashMap<String, Binding>();
+		
+		public MapValueBindingContext(Object key, GenericBindingRule mapBindingContext) {
+			this.key = key;
+			this.mapBindingContext = mapBindingContext;
+		}
+		
+		public MessageSource getMessageSource() {
+			return mapBindingContext.getMessageSource();
+		}
 
+		public TypeConverter getTypeConverter() {
+			return mapBindingContext.getTypeConverter();
+		}
+
+		public Binding getBinding(String property) {
+			Object model = ((Map) mapBindingContext.binding.getValue()).get(key);
+			Class<?> elementType = mapBindingContext.getElementType();
+			if (elementType == null) {
+				elementType = model.getClass();
+			}
+			GenericBindingRule rule = mapBindingContext.getBindingRule(property, elementType);
+			Binding binding = nestedBindings.get(property);
+			if (binding == null) {
+				PropertyValueModel valueModel = new PropertyValueModel(rule.property, model);
+				binding = new GenericBinding(valueModel, rule);
+				nestedBindings.put(property, binding);
+			}
+			return binding;
+		}
+
+		public Formatter getFormatter() {
+			return mapBindingContext.getElementFormatter();
+		}
+
+		public Formatter getElementFormatter() {
+			return null;
+		}
+
+		public Formatter getKeyFormatter() {
+			return null;
+		}
+
+		public Condition getEditableCondition() {
+			return mapBindingContext.getEditableCondition();
+		}
+
+		public Condition getEnabledCondition() {
+			return mapBindingContext.getEnabledCondition();
+		}
+
+		public Condition getVisibleCondition() {
+			return mapBindingContext.getVisibleCondition();
+		}
+
+		public Binding getListElementBinding(int index) {
+			throw new IllegalArgumentException("Not yet supported");
+		}
+
+		public Binding getMapValueBinding(Object key) {
+			throw new IllegalArgumentException("Not yet supported");
+		}
+
+		public String getLabel() {
+			return mapBindingContext.getLabel() + "[" + key + "]";
+		}
+
+	};
 }
