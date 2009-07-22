@@ -8,7 +8,7 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
