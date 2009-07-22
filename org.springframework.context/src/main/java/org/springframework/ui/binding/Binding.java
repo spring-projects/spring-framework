@@ -61,6 +61,26 @@ public interface Binding {
 	 * Used to determine if the user can see the field.
 	 */
 	boolean isVisible();
+
+	/**
+	 * The current binding status.
+	 * Initially {@link BindingStatus#CLEAN clean}.
+	 * Is {@link BindingStatus#DIRTY} after applying a source value to the value buffer.
+	 * Is {@link BindingStatus#COMMITTED} after successfully committing the buffered value.
+	 * Is {@link BindingStatus#INVALID_SOURCE_VALUE} if a source value could not be applied.
+	 * Is {@link BindingStatus#COMMIT_FAILURE} if a buffered value could not be committed.
+	 */
+	BindingStatus getStatus();
+
+	/**
+	 * An alert that communicates current status to the user.
+	 * Returns <code>null</code> if {@link BindingStatus#CLEAN} and {@link ValidationStatus#NOT_VALIDATED}.
+	 * Returns a {@link Severity#INFO} Alert with code <code>bindSuccess</code> when {@link BindingStatus#COMMITTED}.
+	 * Returns a {@link Severity#ERROR} Alert with code <code>typeMismatch</code> when {@link BindingStatus#INVALID_SOURCE_VALUE} or {@link BindingStatus#COMMIT_FAILURE} due to a value parse / type conversion error.
+	 * Returns a {@link Severity#FATAL} Alert with code <code>internalError</code> when {@link BindingStatus#COMMIT_FAILURE} due to a unexpected runtime exception.
+	 * Returns a {@link Severity#INFO} Alert describing results of validation if {@link ValidationStatus#VALID} or {@link ValidationStatus#INVALID}.
+	 */
+	Alert getStatusAlert();
 	
 	/**
 	 * Apply the source value to this binding.
@@ -78,26 +98,6 @@ public interface Binding {
 	 * @return the invalid source value
 	 */
 	Object getInvalidSourceValue();
-	
-	/**
-	 * The current binding status.
-	 * Initially {@link BindingStatus#CLEAN clean}.
-	 * Is {@link BindingStatus#DIRTY} after applying a source value to the value buffer.
-	 * Is {@link BindingStatus#COMMITTED} after successfully committing the buffered value.
-	 * Is {@link BindingStatus#INVALID_SOURCE_VALUE} if a source value could not be applied.
-	 * Is {@link BindingStatus#COMMIT_FAILURE} if a buffered value could not be committed.
-	 */
-	BindingStatus getStatus();
-	
-	/**
-	 * An alert that communicates current status to the user.
-	 * Returns <code>null</code> if {@link BindingStatus#CLEAN} and {@link ValidationStatus#NOT_VALIDATED}.
-	 * Returns a {@link Severity#INFO} Alert with code <code>bindSuccess</code> when {@link BindingStatus#COMMITTED}.
-	 * Returns a {@link Severity#ERROR} Alert with code <code>typeMismatch</code> when {@link BindingStatus#INVALID_SOURCE_VALUE} or {@link BindingStatus#COMMIT_FAILURE} due to a value parse / type conversion error.
-	 * Returns a {@link Severity#FATAL} Alert with code <code>internalError</code> when {@link BindingStatus#COMMIT_FAILURE} due to a unexpected runtime exception.
-	 * Returns a {@link Severity#INFO} Alert describing results of validation if {@link ValidationStatus#VALID} or {@link ValidationStatus#INVALID}.
-	 */
-	Alert getStatusAlert();
 	
 	/**
 	 * Commit the buffered value to the model.
@@ -119,7 +119,7 @@ public interface Binding {
 	 * @return the binding to the nested property
 	 * @throws IllegalStateException if not a bean
 	 */
-	Binding getBinding(String property);
+	Binding getNestedBinding(String property);
 
 	/**
 	 * If bound to an indexable Collection, either a {@link java.util.List} or an array.
@@ -155,58 +155,4 @@ public interface Binding {
 	 * @return the formatted string
 	 */
 	String formatValue(Object potentialModelValue);
-	
-	/**
-	 * Binding states.
-	 * @author Keith Donald
-	 */
-	public enum BindingStatus {
-		
-		/**
-		 * Initial state: No value is buffered, and there is a direct channel to the model value.
-		 */
-		CLEAN,
-		
-		/**
-		 * An invalid source value is applied.
-		 */
-		INVALID_SOURCE_VALUE,
-		
-		/**
-		 * The binding buffer contains a valid value that has not been committed.
-		 */
-		DIRTY,
-
-		/**
-		 * The buffered value has been committed.
-		 */
-		COMMITTED,
-		
-		/**
-		 * The buffered value failed to commit.
-		 */
-		COMMIT_FAILURE
-	}
-	
-	/**
-	 * Validation states.
-	 * @author Keith Donald
-	 */
-	public enum ValidationStatus {
-
-		/**
-		 * Initial state: No validation has run.
-		 */
-		NOT_VALIDATED,
-		
-		/**
-		 * Validation has succeeded.
-		 */
-		VALID,
-		
-		/**
-		 * Validation has failed.
-		 */
-		INVALID
-	}
 }

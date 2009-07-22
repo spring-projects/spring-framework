@@ -23,7 +23,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.convert.TypeConverter;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingFactory;
-import org.springframework.ui.binding.Binding.BindingStatus;
+import org.springframework.ui.binding.BindingStatus;
 import org.springframework.ui.binding.support.PropertyNotFoundException;
 import org.springframework.util.Assert;
 
