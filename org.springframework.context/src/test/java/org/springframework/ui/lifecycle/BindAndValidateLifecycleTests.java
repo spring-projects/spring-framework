@@ -15,7 +15,8 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Alerts;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.alert.support.DefaultAlertContext;
-import org.springframework.ui.binding.support.WebBinder;
+import org.springframework.ui.binding.binder.WebBinder;
+import org.springframework.ui.binding.support.GenericBindingFactory;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.validation.ValidationFailure;
 import org.springframework.ui.validation.Validator;
@@ -37,7 +38,7 @@ public class BindAndValidateLifecycleTests {
 	public void setUp() {
 		model = new TestBean();
 		alertContext = new DefaultAlertContext();
-		WebBinder binder = new WebBinder(model);
+		WebBinder binder = new WebBinder(new GenericBindingFactory(model));
 		Validator validator = new TestBeanValidator();
 		lifecycle = new BindAndValidateLifecycleImpl(binder, validator, alertContext);
 	}
