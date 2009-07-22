@@ -16,8 +16,8 @@
 		]]></xsd:documentation>
 	</xsd:annotation>
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-2.5.xsd"/>
 
 	<xsd:element name="defaults">
 		<xsd:annotation>
