@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -118,7 +119,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		if (beanType != null) {
 			LifecycleMetadata metadata = findLifecycleMetadata(beanType);
 			for (Iterator<LifecycleElement> it = metadata.getInitMethods().iterator(); it.hasNext();) {
-				String methodName = it.next().getMethod().getName();
+				String methodName = calculateMethodIdentifierInHierarchy(it.next().getMethod());
 				if (!beanDefinition.isExternallyManagedInitMethod(methodName)) {
 					beanDefinition.registerExternallyManagedInitMethod(methodName);
 				}
@@ -127,7 +128,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				}
 			}
 			for (Iterator<LifecycleElement> it = metadata.getDestroyMethods().iterator(); it.hasNext();) {
-				String methodName = it.next().getMethod().getName();
+				String methodName = calculateMethodIdentifierInHierarchy(it.next().getMethod());
 				if (!beanDefinition.isExternallyManagedDestroyMethod(methodName)) {
 					beanDefinition.registerExternallyManagedDestroyMethod(methodName);
 				}
@@ -175,6 +176,15 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 	}
 
+
+	private String calculateMethodIdentifierInHierarchy(Method method) {
+		if (Modifier.isPrivate(method.getModifiers())) {
+			return method.getDeclaringClass() + "." + method.getName();
+		}
+		else {
+			return method.getName();
+		}
+	}
 
 	private LifecycleMetadata findLifecycleMetadata(Class clazz) {
 		if (this.lifecycleMetadataCache == null) {
@@ -299,8 +309,15 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 		@Override
 		public boolean equals(Object other) {
-			return (this == other || (other instanceof LifecycleElement &&
-					this.method.getName().equals(((LifecycleElement) other).method.getName())));
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof LifecycleElement)) {
+				return false;
+			}
+			LifecycleElement otherElement = (LifecycleElement) other;
+			return (this.method.getName().equals(otherElement.method.getName()) &&
+					this.method.getDeclaringClass().equals(otherElement.method.getDeclaringClass()));
 		}
 
 		@Override
