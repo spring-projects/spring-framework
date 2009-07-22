@@ -15,7 +15,7 @@
  */
 package org.springframework.ui.lifecycle;
 
-import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.binding.binder.BindingResults;
 
 /**
  * Decides if validation should run for an execution of the bind and validate lifecycle.

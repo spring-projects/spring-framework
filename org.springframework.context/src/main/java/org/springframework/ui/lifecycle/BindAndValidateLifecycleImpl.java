@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.ui.alert.AlertContext;
-import org.springframework.ui.binding.Binder;
-import org.springframework.ui.binding.BindingResult;
-import org.springframework.ui.binding.BindingResults;
+import org.springframework.ui.binding.binder.Binder;
+import org.springframework.ui.binding.binder.BindingResult;
+import org.springframework.ui.binding.binder.BindingResults;
 import org.springframework.ui.validation.ValidationFailure;
 import org.springframework.ui.validation.Validator;
 

@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding.support;
+package org.springframework.ui.binding.binder;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.BindingFactory;
 
 /**
  * A binder designed for use in HTTP (web) environments.
@@ -36,8 +39,8 @@ public class WebBinder extends GenericBinder {
 	 * Creates a new web binder for the model object.
 	 * @param model the model object containing properties this binder will bind to
 	 */
-	public WebBinder(Object model) {
-		super(model);
+	public WebBinder(BindingFactory bindingFactory) {
+		super(bindingFactory);
 	}
 
 	/**
@@ -72,7 +75,7 @@ public class WebBinder extends GenericBinder {
 			} else if (field.startsWith(presentPrefix)) {
 				field = field.substring(presentPrefix.length());
 				if (!sourceValues.containsKey(field) && !sourceValues.containsKey(defaultPrefix + field)) {
-					value = getEmptyValue((PropertyBinding) getBinding(field));
+					value = getEmptyValue(getBinding(field));
 					filteredValues.put(field, value);
 				}
 			} else {
@@ -82,8 +85,8 @@ public class WebBinder extends GenericBinder {
 		return filteredValues;
 	}
 
-	protected Object getEmptyValue(PropertyBinding binding) {
-		Class<?> type = binding.getValueModel().getValueType();
+	protected Object getEmptyValue(Binding binding) {
+		Class<?> type = binding.getValueType();
 		if (boolean.class.equals(type) || Boolean.class.equals(type)) {
 			return Boolean.FALSE;
 		} else {

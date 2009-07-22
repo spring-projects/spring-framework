@@ -15,21 +15,36 @@
  */
 package org.springframework.ui.binding.support;
 
+import org.springframework.context.MessageSource;
+import org.springframework.core.convert.TypeConverter;
+import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.config.Condition;
 import org.springframework.ui.format.Formatter;
 
-public interface BindingRule {
-	
-	Formatter<?> getFormatter();
-	
-	Formatter<?> getKeyFormatter();
+public interface BindingContext {
 
-	Formatter<?> getElementFormatter();
-	
+	MessageSource getMessageSource();
+
+	TypeConverter getTypeConverter();
+
 	Condition getEditableCondition();
-	
+
 	Condition getEnabledCondition();
-	
+
 	Condition getVisibleCondition();
-	
+
+	Binding getBinding(String property);
+
+	Formatter getFormatter();
+
+	Formatter getElementFormatter();
+
+	Formatter getKeyFormatter();
+
+	Binding getListElementBinding(int index);
+
+	Binding getMapValueBinding(Object key);
+
+	String getLabel();
+
 }
