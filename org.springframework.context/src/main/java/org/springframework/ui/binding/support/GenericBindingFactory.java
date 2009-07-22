@@ -134,7 +134,7 @@ public class GenericBindingFactory implements BindingFactory {
 					throw new IllegalArgumentException("Attempted to index a property that is not a List or Map");
 				}
 			} else {
-				binding = binding.getBinding(element.getValue());
+				binding = binding.getNestedBinding(element.getValue());
 			}
 		}
 		return binding;

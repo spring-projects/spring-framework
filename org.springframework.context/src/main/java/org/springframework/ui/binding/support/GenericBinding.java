@@ -35,6 +35,7 @@ import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.BindingStatus;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
@@ -278,7 +279,7 @@ public class GenericBinding implements Binding {
 		}
 	}
 
-	public Binding getBinding(String property) {
+	public Binding getNestedBinding(String property) {
 		return bindingContext.getBinding(property);
 	}
 

@@ -29,7 +29,7 @@ public interface BindingResult {
 
 	/**
 	 * The model property this binding result is for.
-	 * @see Binder#getBinding(String)
+	 * @see Binder#getNestedBinding(String)
 	 */
 	String getProperty();
 

@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.Binding.BindingStatus;
+import org.springframework.ui.binding.BindingStatus;
 import org.springframework.ui.binding.binder.BindingResults;
 import org.springframework.ui.binding.binder.GenericBinder;
 import org.springframework.ui.binding.binder.MissingSourceValuesException;
