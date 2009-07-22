@@ -156,13 +156,13 @@ public class GenericBinderTests {
 		assertEquals(null, b.getValue());
 		assertEquals("", b.getRenderValue());
 		b.applySourceValue("$23.56");
-		assertEquals(BindingStatus.DIRTY, b.getStatus());
+		assertEquals(BindingStatus.DIRTY, b.getBindingStatus());
 		assertEquals(new BigDecimal("23.56"), b.getValue());
 		assertEquals("$23.56", b.getRenderValue());
 		b.commit();
 		assertEquals(new BigDecimal("23.56"), b.getValue());
 		assertEquals("$23.56", b.getRenderValue());
-		assertEquals(BindingStatus.COMMITTED, b.getStatus());
+		assertEquals(BindingStatus.COMMITTED, b.getBindingStatus());
 	}
 
 	@Test
@@ -173,7 +173,7 @@ public class GenericBinderTests {
 		b.applySourceValue("2,300");
 		assertEquals("2,300", b.getRenderValue());
 		b.commit();
-		assertEquals(BindingStatus.COMMITTED, b.getStatus());
+		assertEquals(BindingStatus.COMMITTED, b.getBindingStatus());
 		assertEquals("2,300", b.getRenderValue());
 	}
 
@@ -228,7 +228,7 @@ public class GenericBinderTests {
 		assertTrue(b.isList());
 		assertEquals(null, b.getValue());
 		b.applySourceValue(new String[] { "BAR", "BOGUS", "BOOP" });
-		assertEquals(BindingStatus.INVALID_SOURCE_VALUE, b.getStatus());
+		assertEquals(BindingStatus.INVALID_SOURCE_VALUE, b.getBindingStatus());
 		assertEquals("typeMismatch", b.getStatusAlert().getCode());
 	}
 

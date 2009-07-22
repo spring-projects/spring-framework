@@ -70,8 +70,17 @@ public interface Binding {
 	 * Is {@link BindingStatus#INVALID_SOURCE_VALUE} if a source value could not be applied.
 	 * Is {@link BindingStatus#COMMIT_FAILURE} if a buffered value could not be committed.
 	 */
-	BindingStatus getStatus();
+	BindingStatus getBindingStatus();
 
+	/**
+	 * The current validation status.
+	 * Initially {@link ValidationStatus#NOT_VALIDATED}.
+	 * Is {@link ValidationStatus#VALID} after value is successfully validated.
+	 * Is {@link ValidationStatus#INVALID} after value fails validation.
+	 * Resets to {@value ValidationStatus#NOT_VALIDATED} when value changes.
+	 */
+	ValidationStatus getValidationStatus();
+	
 	/**
 	 * An alert that communicates current status to the user.
 	 * Returns <code>null</code> if {@link BindingStatus#CLEAN} and {@link ValidationStatus#NOT_VALIDATED}.
@@ -98,6 +107,13 @@ public interface Binding {
 	 * @return the invalid source value
 	 */
 	Object getInvalidSourceValue();
+	
+	/**
+	 * Validate the model value.
+	 * Sets to {@link ValidationStatus#VALID} if succeeds.
+	 * Sets to {@link ValidationStatus#INVALID} if fails.
+	 */
+	void validate();
 	
 	/**
 	 * Commit the buffered value to the model.

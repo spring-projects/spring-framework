@@ -36,6 +36,7 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingStatus;
+import org.springframework.ui.binding.ValidationStatus;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
@@ -43,12 +44,12 @@ import org.springframework.ui.message.ResolvableArgument;
 public class GenericBinding implements Binding {
 
 	private ValueModel valueModel;
-	
+
 	private BindingContext bindingContext;
 
 	private ValueBuffer buffer;
 
-	private BindingStatus status;
+	private BindingStatus bindingStatus;
 
 	private Object sourceValue;
 
@@ -58,7 +59,7 @@ public class GenericBinding implements Binding {
 		this.valueModel = valueModel;
 		this.bindingContext = bindingContext;
 		buffer = new ValueBuffer(valueModel);
-		status = BindingStatus.CLEAN;
+		bindingStatus = BindingStatus.CLEAN;
 	}
 
 	// implementing Binding
@@ -68,7 +69,7 @@ public class GenericBinding implements Binding {
 	}
 
 	public Object getValue() {
-		if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
+		if (bindingStatus == BindingStatus.DIRTY || bindingStatus == BindingStatus.COMMIT_FAILURE) {
 			return buffer.getValue();
 		} else {
 			return valueModel.getValue();
@@ -99,15 +100,15 @@ public class GenericBinding implements Binding {
 				Object parsed = bindingContext.getFormatter().parse((String) sourceValue, getLocale());
 				buffer.setValue(coerseToValueType(parsed));
 				sourceValue = null;
-				status = BindingStatus.DIRTY;
+				bindingStatus = BindingStatus.DIRTY;
 			} catch (ParseException e) {
 				this.sourceValue = sourceValue;
 				invalidSourceValueCause = e;
-				status = BindingStatus.INVALID_SOURCE_VALUE;
+				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
 			} catch (ConversionFailedException e) {
 				this.sourceValue = sourceValue;
 				invalidSourceValueCause = e;
-				status = BindingStatus.INVALID_SOURCE_VALUE;
+				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
 			}
 		} else if (sourceValue instanceof String[]) {
 			Object parsed;
@@ -127,7 +128,7 @@ public class GenericBinding implements Binding {
 					} catch (ParseException e) {
 						this.sourceValue = sourceValue;
 						invalidSourceValueCause = e;
-						status = BindingStatus.INVALID_SOURCE_VALUE;
+						bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
 						break;
 					}
 				}
@@ -143,49 +144,53 @@ public class GenericBinding implements Binding {
 					} catch (ParseException e) {
 						this.sourceValue = sourceValue;
 						invalidSourceValueCause = e;
-						status = BindingStatus.INVALID_SOURCE_VALUE;
+						bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
 						break;
 					}
 				}
 				parsed = list;
 			}
-			if (status != BindingStatus.INVALID_SOURCE_VALUE) {
+			if (bindingStatus != BindingStatus.INVALID_SOURCE_VALUE) {
 				try {
 					buffer.setValue(coerseToValueType(parsed));
 					sourceValue = null;
-					status = BindingStatus.DIRTY;
+					bindingStatus = BindingStatus.DIRTY;
 				} catch (ConversionFailedException e) {
 					this.sourceValue = sourceValue;
 					invalidSourceValueCause = e;
-					status = BindingStatus.INVALID_SOURCE_VALUE;
+					bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
 				}
 			}
 		} else {
 			try {
 				buffer.setValue(coerseToValueType(sourceValue));
 				sourceValue = null;
-				status = BindingStatus.DIRTY;
+				bindingStatus = BindingStatus.DIRTY;
 			} catch (ConversionFailedException e) {
 				this.sourceValue = sourceValue;
 				invalidSourceValueCause = e;
-				status = BindingStatus.INVALID_SOURCE_VALUE;
+				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
 			}
 		}
 	}
 
 	public Object getInvalidSourceValue() {
-		if (status != BindingStatus.INVALID_SOURCE_VALUE) {
+		if (bindingStatus != BindingStatus.INVALID_SOURCE_VALUE) {
 			throw new IllegalStateException("No invalid source value");
 		}
 		return sourceValue;
 	}
 
-	public BindingStatus getStatus() {
-		return status;
+	public BindingStatus getBindingStatus() {
+		return bindingStatus;
+	}
+
+	public ValidationStatus getValidationStatus() {
+		return ValidationStatus.NOT_VALIDATED;
 	}
 
 	public Alert getStatusAlert() {
-		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
+		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
 			return new AbstractAlert() {
 				public String getCode() {
 					return "typeMismatch";
@@ -217,7 +222,7 @@ public class GenericBinding implements Binding {
 					return Severity.ERROR;
 				}
 			};
-		} else if (status == BindingStatus.COMMIT_FAILURE) {
+		} else if (bindingStatus == BindingStatus.COMMIT_FAILURE) {
 			return new AbstractAlert() {
 				public String getCode() {
 					return "internalError";
@@ -232,7 +237,7 @@ public class GenericBinding implements Binding {
 					return Severity.FATAL;
 				}
 			};
-		} else if (status == BindingStatus.COMMITTED) {
+		} else if (bindingStatus == BindingStatus.COMMITTED) {
 			return new AbstractAlert() {
 				public String getCode() {
 					return "bindSuccess";
@@ -251,15 +256,18 @@ public class GenericBinding implements Binding {
 		}
 	}
 
+	public void validate() {
+	}
+
 	public void commit() {
 		assertEditable();
 		assertEnabled();
-		if (status == BindingStatus.DIRTY) {
+		if (bindingStatus == BindingStatus.DIRTY) {
 			buffer.flush();
 			if (buffer.flushFailed()) {
-				status = BindingStatus.COMMIT_FAILURE;
+				bindingStatus = BindingStatus.COMMIT_FAILURE;
 			} else {
-				status = BindingStatus.COMMITTED;
+				bindingStatus = BindingStatus.COMMITTED;
 			}
 		} else {
 			throw new IllegalStateException("Binding is not dirty; nothing to commit");
@@ -267,13 +275,13 @@ public class GenericBinding implements Binding {
 	}
 
 	public void revert() {
-		if (status == BindingStatus.INVALID_SOURCE_VALUE) {
+		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
 			sourceValue = null;
 			invalidSourceValueCause = null;
-			status = BindingStatus.CLEAN;
-		} else if (status == BindingStatus.DIRTY || status == BindingStatus.COMMIT_FAILURE) {
+			bindingStatus = BindingStatus.CLEAN;
+		} else if (bindingStatus == BindingStatus.DIRTY || bindingStatus == BindingStatus.COMMIT_FAILURE) {
 			buffer.clear();
-			status = BindingStatus.CLEAN;
+			bindingStatus = BindingStatus.CLEAN;
 		} else {
 			throw new IllegalStateException("Nothing to revert");
 		}
@@ -318,7 +326,7 @@ public class GenericBinding implements Binding {
 	}
 
 	// internal helpers
-	
+
 	private String format(Object value, Formatter formatter) {
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = bindingContext.getTypeConverter().convert(value, formattedType);
