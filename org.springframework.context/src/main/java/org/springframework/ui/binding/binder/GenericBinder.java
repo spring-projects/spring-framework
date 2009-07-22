@@ -135,7 +135,7 @@ public class GenericBinder implements Binder {
 			return new PropertyNotEditableResult(property, value, messageSource);
 		} else {
 			binding.applySourceValue(value);
-			if (binding.getStatus() == BindingStatus.DIRTY) {
+			if (binding.getBindingStatus() == BindingStatus.DIRTY) {
 				binding.commit();
 			}
 			return new BindingStatusResult(property, value, binding.getStatusAlert());
