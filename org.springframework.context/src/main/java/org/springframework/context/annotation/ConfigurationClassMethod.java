@@ -57,7 +57,7 @@ final class ConfigurationClassMethod {
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-		if (this.declaringClass.getMetadata().hasAnnotation(Configuration.class.getName()) && !getMetadata().isOverridable()) {
+		if (this.declaringClass.getMetadata().isAnnotated(Configuration.class.getName()) && !getMetadata().isOverridable()) {
 			problemReporter.error(new NonOverridableMethodError());
 		}
 	}

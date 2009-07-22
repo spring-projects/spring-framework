@@ -62,8 +62,20 @@ public interface AnnotationMetadata extends ClassMetadata {
 	boolean hasMetaAnnotation(String metaAnnotationType);
 
 	/**
+	 * Determine whether the underlying class has an annotation or
+	 * meta-annotation of the given type defined.
+	 * <p>This is equivalent to a "hasAnnotation || hasMetaAnnotation"
+	 * check. If this method returns <code>true</code>, then
+	 * {@link #getAnnotationAttributes} will return a non-null Map.
+	 * @param annotationType the annotation type to look for
+	 * @return whether a matching annotation is defined
+	 */
+	boolean isAnnotated(String annotationType);
+
+	/**
 	 * Retrieve the attributes of the annotation of the given type,
-	 * if any (i.e. if defined on the underlying class).
+	 * if any (i.e. if defined on the underlying class, as direct
+	 * annotation or as meta-annotation).
 	 * @param annotationType the annotation type to look for
 	 * @return a Map of attributes, with the attribute name as key (e.g. "value")
 	 * and the defined attribute value as Map value. This return value will be
@@ -73,15 +85,9 @@ public interface AnnotationMetadata extends ClassMetadata {
 
 	/**
 	 * Retrieve the method metadata for all methods that are annotated
-	 * with at least one annotation type.
-	 * @return a Set of {@link MethodMetadata} for methods that have annotations.
-	 * The return value will be an empty set if no annotated methods are found.
-	 */
-	Set<MethodMetadata> getAnnotatedMethods();
-
-	/**
-	 * Retrieve the method metadata for all methods that have the
-	 * given annotation type.
+	 * (or meta-annotated) with the given annotation type.
+	 * <p>For any returned method, {@link MethodMetadata#isAnnotated} will
+	 * return <code>true</code> for the given annotation type.
 	 * @param annotationType the annotation type to look for
 	 * @return a Set of {@link MethodMetadata} for methods that have a matching
 	 * annotation. The return value will be an empty set if no methods match

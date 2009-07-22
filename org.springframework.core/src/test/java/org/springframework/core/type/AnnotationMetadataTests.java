@@ -84,11 +84,10 @@ public class AnnotationMetadataTests extends TestCase {
 	}
 
 	private void doTestMethodAnnotationInfo(AnnotationMetadata classMetadata) {
-		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods("org.springframework.beans.factory.annotation.Autowired");
+		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods(Autowired.class.getName());
 		assertEquals(1, methods.size());
 		for (MethodMetadata methodMetadata : methods) {
-			Set<String> annotationTypes = methodMetadata.getAnnotationTypes();
-			assertEquals(1, annotationTypes.size());
+			assertTrue(methodMetadata.isAnnotated(Autowired.class.getName()));
 		}
 		
 	}

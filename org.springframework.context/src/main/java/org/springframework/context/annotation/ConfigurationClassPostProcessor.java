@@ -218,11 +218,11 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		}
 
 		if (metadata != null) {
-			if (metadata.hasAnnotation(Configuration.class.getName())) {
+			if (metadata.isAnnotated(Configuration.class.getName())) {
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 				return true;
 			}
-			else if (metadata.hasAnnotation(Component.class.getName())) {
+			else if (metadata.isAnnotated(Component.class.getName())) {
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 				return true;
 			}

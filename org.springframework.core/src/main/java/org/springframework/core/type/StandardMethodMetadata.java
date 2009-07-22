@@ -19,9 +19,7 @@ package org.springframework.core.type;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -30,8 +28,8 @@ import org.springframework.util.Assert;
  * {@link MethodMetadata} implementation that uses standard reflection
  * to introspect a given <code>Method</code>.
  *
- * @author Mark Pollack
  * @author Juergen Hoeller
+ * @author Mark Pollack
  * @since 3.0
  */
 public class StandardMethodMetadata implements MethodMetadata {
@@ -72,20 +70,16 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return (!isStatic() && !isFinal() && !Modifier.isPrivate(this.introspectedMethod.getModifiers()));
 	}
 
-	public Set<String> getAnnotationTypes() {
-		Set<String> types = new HashSet<String>();
-		Annotation[] anns = this.introspectedMethod.getAnnotations();
-		for (Annotation ann : anns) {
-			types.add(ann.annotationType().getName());
-		}
-		return types;
-	}
-
-	public boolean hasAnnotation(String annotationType) {
+	public boolean isAnnotated(String annotationType) {
 		Annotation[] anns = this.introspectedMethod.getAnnotations();
 		for (Annotation ann : anns) {
 			if (ann.annotationType().getName().equals(annotationType)) {
 				return true;
+			}
+			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+				if (metaAnn.annotationType().getName().equals(annotationType)) {
+					return true;
+				}
 			}
 		}
 		return false;

@@ -36,6 +36,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
@@ -128,11 +129,11 @@ class ConfigurationClassBeanDefinitionReader {
 		List<String> names = new ArrayList<String>(Arrays.asList((String[]) beanAttributes.get("name")));
 		String beanName = (names.size() > 0 ? names.remove(0) : method.getMetadata().getMethodName());
 		for (String alias : names) {
-			registry.registerAlias(beanName, alias);
+			this.registry.registerAlias(beanName, alias);
 		}
 
 		// has this already been overriden (i.e.: via XML)?
-		if (registry.containsBeanDefinition(beanName)) {
+		if (this.registry.containsBeanDefinition(beanName)) {
 			BeanDefinition existingBeanDef = registry.getBeanDefinition(beanName);
 			// is the existing bean definition one that was created from a configuration class?
 			if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
@@ -146,19 +147,19 @@ class ConfigurationClassBeanDefinitionReader {
 			}
 		}
 
-		if (metadata.hasAnnotation(Primary.class.getName())) {
+		if (metadata.isAnnotated(Primary.class.getName())) {
 			beanDef.setPrimary(true);
 		}
 
 		// is this bean to be instantiated lazily?
-		if (metadata.hasAnnotation(Lazy.class.getName())) {
+		if (metadata.isAnnotated(Lazy.class.getName())) {
 			beanDef.setLazyInit((Boolean) metadata.getAnnotationAttributes(Lazy.class.getName()).get("value"));
 		}
-		else if (configClass.getMetadata().hasAnnotation(Lazy.class.getName())){
+		else if (configClass.getMetadata().isAnnotated(Lazy.class.getName())){
 			beanDef.setLazyInit((Boolean) configClass.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value"));
 		}
 
-		if (metadata.hasAnnotation(DependsOn.class.getName())) {
+		if (metadata.isAnnotated(DependsOn.class.getName())) {
 			String[] dependsOn = (String[]) metadata.getAnnotationAttributes(DependsOn.class.getName()).get("value");
 			if (dependsOn.length > 0) {
 				beanDef.setDependsOn(dependsOn);
@@ -232,7 +233,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		@Override
 		public boolean isFactoryMethod(Method candidate) {
-			return (super.isFactoryMethod(candidate) && candidate.isAnnotationPresent(Bean.class));
+			return (super.isFactoryMethod(candidate) && AnnotationUtils.findAnnotation(candidate, Bean.class) != null);
 		}
 
 		@Override

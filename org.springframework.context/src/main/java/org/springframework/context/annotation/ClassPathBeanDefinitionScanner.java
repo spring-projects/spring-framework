@@ -205,14 +205,14 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotatedBeanDefinition abd = (AnnotatedBeanDefinition) candidate;
-					if (abd.getMetadata().hasAnnotation(Primary.class.getName())) {
+					if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
 						abd.setPrimary(true);
 					}
-					if (abd.getMetadata().hasAnnotation(Lazy.class.getName())) {
+					if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
 						Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
 						abd.setLazyInit(value);
 					}
-					if (abd.getMetadata().hasAnnotation(DependsOn.class.getName())) {
+					if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
 						String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
 						abd.setDependsOn(value);
 					}

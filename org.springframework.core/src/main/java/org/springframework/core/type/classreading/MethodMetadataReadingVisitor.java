@@ -18,7 +18,6 @@ package org.springframework.core.type.classreading;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodAdapter;
@@ -32,8 +31,8 @@ import org.springframework.core.type.MethodMetadata;
  * exposing them through the {@link org.springframework.core.type.MethodMetadata}
  * interface.
  *
- * @author Mark Pollack
  * @author Juergen Hoeller
+ * @author Mark Pollack
  * @since 3.0
  */
 final class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
@@ -44,7 +43,7 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	private final ClassLoader classLoader;
 
-	private final Map<String, Map<String, Object>> annotationMap = new LinkedHashMap<String, Map<String, Object>>();
+	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>();
 
 
 	public MethodMetadataReadingVisitor(String name, int access, ClassLoader classLoader) {
@@ -52,6 +51,13 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 		this.name = name;
 		this.access = access;
 		this.classLoader = classLoader;
+	}
+
+
+	@Override
+	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
+		String className = Type.getType(desc).getClassName();
+		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
 	}
 
 
@@ -71,23 +77,12 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 		return (!isStatic() && !isFinal() && ((this.access & Opcodes.ACC_PRIVATE) == 0));
 	}
 
-	public Set<String> getAnnotationTypes() {
-		return this.annotationMap.keySet();
+	public boolean isAnnotated(String annotationType) {
+		return this.attributeMap.containsKey(annotationType);
 	}
 
-	public boolean hasAnnotation(String annotationType) {
-		return this.annotationMap.containsKey(annotationType);
-	}
-	
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return this.annotationMap.get(annotationType);
-	}
-
-
-	@Override
-	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
-		String className = Type.getType(desc).getClassName();
-		return new AnnotationAttributesReadingVisitor(className, this.annotationMap, null, this.classLoader);
+		return this.attributeMap.get(annotationType);
 	}
 
 }

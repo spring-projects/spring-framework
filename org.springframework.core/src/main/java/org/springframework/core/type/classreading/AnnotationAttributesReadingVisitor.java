@@ -28,9 +28,9 @@ import java.util.Set;
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * ASM visitor which looks for the annotations defined on a class or method.
@@ -42,13 +42,13 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 
 	private final String annotationType;
 
-	private final Map<String, Map<String, Object>> annotationMap;
+	private final Map<String, Map<String, Object>> attributesMap;
 
 	private final Map<String, Set<String>> metaAnnotationMap;
 
 	private final ClassLoader classLoader;
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> localAttributes = new LinkedHashMap<String, Object>();
 
 
 	public AnnotationAttributesReadingVisitor(
@@ -56,7 +56,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 			Map<String, Set<String>> metaAnnotationMap, ClassLoader classLoader) {
 
 		this.annotationType = annotationType;
-		this.annotationMap = attributesMap;
+		this.attributesMap = attributesMap;
 		this.metaAnnotationMap = metaAnnotationMap;
 		this.classLoader = classLoader;
 	}
@@ -67,7 +67,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 		if (valueToUse instanceof Type) {
 			valueToUse = ((Type) value).getClassName();
 		}
-		this.attributes.put(name, valueToUse);
+		this.localAttributes.put(name, valueToUse);
 	}
 
 	public void visitEnum(String name, String desc, String value) {
@@ -82,7 +82,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 		catch (Exception ex) {
 			// Class not found - can't resolve class reference in annotation attribute.
 		}
-		this.attributes.put(name, valueToUse);
+		this.localAttributes.put(name, valueToUse);
 	}
 
 	public AnnotationVisitor visitAnnotation(String name, String desc) {
@@ -96,7 +96,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 				if (newValue instanceof Type) {
 					newValue = ((Type) value).getClassName();
 				}
-				Object existingValue = attributes.get(attrName);
+				Object existingValue = localAttributes.get(attrName);
 				if (existingValue != null) {
 					newValue = ObjectUtils.addObjectToArray((Object[]) existingValue, newValue);
 				}
@@ -105,7 +105,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 					newArray[0] = newValue;
 					newValue = newArray;
 				}
-				attributes.put(attrName, newValue);
+				localAttributes.put(attrName, newValue);
 			}
 			public void visitEnum(String name, String desc, String value) {
 			}
@@ -121,7 +121,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 	}
 
 	public void visitEnd() {
-		this.annotationMap.put(this.annotationType, this.attributes);
+		this.attributesMap.put(this.annotationType, this.localAttributes);
 		try {
 			Class<?> annotationClass = this.classLoader.loadClass(this.annotationType);
 			// Check declared default values of attributes in the annotation type.
@@ -129,23 +129,23 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 			for (Method annotationAttribute : annotationAttributes) {
 				String attributeName = annotationAttribute.getName();
 				Object defaultValue = annotationAttribute.getDefaultValue();
-				if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
-					this.attributes.put(attributeName, defaultValue);
+				if (defaultValue != null && !this.localAttributes.containsKey(attributeName)) {
+					this.localAttributes.put(attributeName, defaultValue);
 				}
 			}
 			// Register annotations that the annotation type is annotated with.
-			if (this.metaAnnotationMap != null) {
-				Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
-				for (Annotation metaAnnotation : annotationClass.getAnnotations()) {
-					metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
-					if (!this.annotationMap.containsKey(metaAnnotation.annotationType().getName())) {
-						this.annotationMap.put(metaAnnotation.annotationType().getName(),
-								AnnotationUtils.getAnnotationAttributes(metaAnnotation, true));
-					}
-					for (Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
-						metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
-					}
+			Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
+			for (Annotation metaAnnotation : annotationClass.getAnnotations()) {
+				metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
+				if (!this.attributesMap.containsKey(metaAnnotation.annotationType().getName())) {
+					this.attributesMap.put(metaAnnotation.annotationType().getName(),
+							AnnotationUtils.getAnnotationAttributes(metaAnnotation, true));
 				}
+				for (Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
+					metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
+				}
+			}
+			if (this.metaAnnotationMap != null) {
 				this.metaAnnotationMap.put(this.annotationType, metaAnnotationTypeNames);
 			}
 		}

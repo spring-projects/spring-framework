@@ -25,8 +25,7 @@ import org.springframework.stereotype.Repository;
 /**
  * @author Juergen Hoeller
  */
-@Repository
-@Primary @Lazy
+@MyRepository
 public class OtherFooDao implements FooDao {
 
 	public String findFoo(int id) {

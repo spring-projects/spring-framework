@@ -66,7 +66,9 @@ public class ScopingTests {
 
 	@After
 	public void tearDown() throws Exception {
-		ctx.close();
+		if (ctx != null) {
+			ctx.close();
+		}
 		ctx = null;
 		customScope = null;
 	}
@@ -328,7 +330,6 @@ public class ScopingTests {
 			return tb;
 		}
 
-		@Bean
 		@MyProxiedScope
 		public TestBean scopedProxyClass() {
 			TestBean tb = new TestBean();
@@ -361,6 +362,7 @@ public class ScopingTests {
 
 	@Target({ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
+	@Bean
 	@Scope(value=SCOPE, proxyMode=ScopedProxyMode.TARGET_CLASS)
 	@interface MyProxiedScope {
 	}
