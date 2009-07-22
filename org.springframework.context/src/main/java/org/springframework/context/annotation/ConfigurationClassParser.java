@@ -121,7 +121,7 @@ class ConfigurationClassParser {
 	}
 
 	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
-		if (metadata.hasAnnotation(Import.class.getName())) {
+		if (metadata.isAnnotated(Import.class.getName())) {
 			processImport(configClass, (String[]) metadata.getAnnotationAttributes(Import.class.getName()).get("value"));
 		}
 		Set<MethodMetadata> methods = metadata.getAnnotatedMethods(Bean.class.getName());
@@ -146,7 +146,7 @@ class ConfigurationClassParser {
 	private void processClassToImport(String classToImport) throws IOException {
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(classToImport);
 		AnnotationMetadata metadata = reader.getAnnotationMetadata();
-		if (!metadata.hasAnnotation(Configuration.class.getName())) {
+		if (!metadata.isAnnotated(Configuration.class.getName())) {
 			this.problemReporter.error(
 					new NonAnnotatedConfigurationProblem(metadata.getClassName(), reader.getResource(), metadata));
 		}

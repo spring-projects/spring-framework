@@ -98,6 +98,21 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
+	public boolean isAnnotated(String annotationType) {
+		Annotation[] anns = getIntrospectedClass().getAnnotations();
+		for (Annotation ann : anns) {
+			if (ann.annotationType().getName().equals(annotationType)) {
+				return true;
+			}
+			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+				if (metaAnn.annotationType().getName().equals(annotationType)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
@@ -113,25 +128,22 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return null;
 	}
 
-	public Set<MethodMetadata> getAnnotatedMethods() {
-		Method[] methods = getIntrospectedClass().getDeclaredMethods();
-		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
-		for (Method method : methods) {
-			if (method.getAnnotations().length > 0) {
-				annotatedMethods.add(new StandardMethodMetadata(method));
-			}
-		}
-		return annotatedMethods;
-	}
-
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (Method method : methods) {
-			Annotation[] methodAnnotations = method.getAnnotations();
-			for (Annotation ann : methodAnnotations) {
+			for (Annotation ann : method.getAnnotations()) {
 				if (ann.annotationType().getName().equals(annotationType)) {
 					annotatedMethods.add(new StandardMethodMetadata(method));
+					break;
+				}
+				else {
+					for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+						if (metaAnn.annotationType().getName().equals(annotationType)) {
+							annotatedMethods.add(new StandardMethodMetadata(method));
+							break;
+						}
+					}
 				}
 			}
 		}

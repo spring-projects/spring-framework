@@ -116,7 +116,7 @@ final class ConfigurationClass {
 		}
 
 		// A configuration class may not be final (CGLIB limitation)
-		if (getMetadata().hasAnnotation(Configuration.class.getName())) {
+		if (getMetadata().isAnnotated(Configuration.class.getName())) {
 			if (getMetadata().isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}

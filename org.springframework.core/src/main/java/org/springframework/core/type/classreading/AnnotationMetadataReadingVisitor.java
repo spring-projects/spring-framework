@@ -39,6 +39,8 @@ import org.springframework.core.type.MethodMetadata;
  */
 final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
+	private final ClassLoader classLoader;
+
 	private final Set<String> annotationSet = new LinkedHashSet<String>();
 
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
@@ -46,8 +48,6 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>();
 
 	private final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>();
-
-	private final ClassLoader classLoader;
 
 
 	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {
@@ -92,24 +92,18 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		return false;
 	}
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return this.attributeMap.get(annotationType);
+	public boolean isAnnotated(String annotationType) {
+		return this.attributeMap.containsKey(annotationType);
 	}
 
-	public Set<MethodMetadata> getAnnotatedMethods() {
-		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
-		for (MethodMetadata method : this.methodMetadataSet) {
-			if (!method.getAnnotationTypes().isEmpty()) {
-				annotatedMethods.add(method);
-			}
-		}
-		return annotatedMethods;
+	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		return this.attributeMap.get(annotationType);
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (MethodMetadata method : this.methodMetadataSet) {
-			if (method.hasAnnotation(annotationType)) {
+			if (method.isAnnotated(annotationType)) {
 				annotatedMethods.add(method);
 			}
 		}
