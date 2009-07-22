@@ -113,11 +113,13 @@ public class CommonAnnotationBeanPostProcessorTests {
 		ResourceInjectionBean bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
 		assertTrue(bean.initCalled);
 		assertTrue(bean.init2Called);
+		assertTrue(bean.init3Called);
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb2, bean.getTestBean2());
 		bf.destroySingletons();
 		assertTrue(bean.destroyCalled);
 		assertTrue(bean.destroy2Called);
+		assertTrue(bean.destroy3Called);
 	}
 
 	@Test
@@ -338,7 +340,11 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		public boolean init2Called = false;
 
+		public boolean init3Called = false;
+
 		public boolean destroy2Called = false;
+
+		public boolean destroy3Called = false;
 
 		@Resource
 		private TestBean testBean;
@@ -356,12 +362,28 @@ public class CommonAnnotationBeanPostProcessorTests {
 			this.init2Called = true;
 		}
 
+		@PostConstruct
+		private void init() {
+			if (this.init3Called) {
+				throw new IllegalStateException("Already called");
+			}
+			this.init3Called = true;
+		}
+
 		@PreDestroy
 		protected void destroy2() {
 			if (this.destroy2Called) {
 				throw new IllegalStateException("Already called");
 			}
 			this.destroy2Called = true;
+		}
+
+		@PreDestroy
+		private void destroy() {
+			if (this.destroy3Called) {
+				throw new IllegalStateException("Already called");
+			}
+			this.destroy3Called = true;
 		}
 
 		@Resource
