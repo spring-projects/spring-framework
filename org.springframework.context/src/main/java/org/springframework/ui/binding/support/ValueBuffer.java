@@ -15,7 +15,6 @@
  */
 package org.springframework.ui.binding.support;
 
-
 class ValueBuffer {
 
 	private Object value;

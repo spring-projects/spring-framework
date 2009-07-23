@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
 class ArrayListBindingResults implements BindingResults {
 
 	private List<BindingResult> results;

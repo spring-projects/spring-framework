@@ -226,7 +226,7 @@ public class GenericBindingFactory implements BindingFactory {
 			return visibleCondition;
 		}
 
-		public Binding getBinding(String property) {
+		public Binding getNestedBinding(String property) {
 			createValueIfNecessary();
 			return getBindingRule(property, binding.getValueType()).getBinding(binding.getValue());
 		}
@@ -444,7 +444,7 @@ public class GenericBindingFactory implements BindingFactory {
 			return listBindingContext.getTypeConverter();
 		}
 
-		public Binding getBinding(String property) {
+		public Binding getNestedBinding(String property) {
 			Object model = ((List<?>) listBindingContext.binding.getValue()).get(index);
 			Class<?> elementType = listBindingContext.getElementType();
 			if (elementType == null) {
@@ -523,7 +523,7 @@ public class GenericBindingFactory implements BindingFactory {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Binding getBinding(String property) {
+		public Binding getNestedBinding(String property) {
 			Object model = ((Map) mapBindingContext.binding.getValue()).get(key);
 			Class<?> elementType = mapBindingContext.getElementType();
 			if (elementType == null) {

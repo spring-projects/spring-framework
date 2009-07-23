@@ -16,14 +16,12 @@
 package org.springframework.ui.binding.binder;
 
 import org.springframework.ui.alert.Alert;
-import org.springframework.ui.binding.Binding;
 
 /**
  * The result of a bind operation.
  * @author Keith Donald
  * @since 3.0
- * @see Binder#bind(Map)
- * @see Binding#setValue(Object)
+ * @see Binder#bind(java.util.Map)
  */
 public interface BindingResult {
 

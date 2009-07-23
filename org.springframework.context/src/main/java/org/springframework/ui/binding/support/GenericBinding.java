@@ -288,7 +288,7 @@ public class GenericBinding implements Binding {
 	}
 
 	public Binding getNestedBinding(String property) {
-		return bindingContext.getBinding(property);
+		return bindingContext.getNestedBinding(property);
 	}
 
 	public boolean isList() {

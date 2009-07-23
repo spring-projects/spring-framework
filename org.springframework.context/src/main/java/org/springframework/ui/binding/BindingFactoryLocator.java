@@ -19,6 +19,7 @@ package org.springframework.ui.binding;
  * A locator for BindingFactories indexed by their models.
  * Makes it easy for clients to lookup BindingFactories for models the need to bind to.
  * @author Keith Donald
+ * @since 3.0
  */
 public interface BindingFactoryLocator {
 	
