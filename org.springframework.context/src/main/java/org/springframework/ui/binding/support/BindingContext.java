@@ -35,10 +35,13 @@ public interface BindingContext {
 
 	Binding getBinding(String property);
 
+	@SuppressWarnings("unchecked")
 	Formatter getFormatter();
 
+	@SuppressWarnings("unchecked")
 	Formatter getElementFormatter();
 
+	@SuppressWarnings("unchecked")
 	Formatter getKeyFormatter();
 
 	Binding getListElementBinding(int index);

@@ -19,7 +19,7 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 
 /**
- * A binding between a source element and a model property.
+ * A binding between one or more UI components and a model property.
  * @author Keith Donald
  * @since 3.0
  */
@@ -138,12 +138,12 @@ public interface Binding {
 	Binding getNestedBinding(String property);
 
 	/**
-	 * If bound to an indexable Collection, either a {@link java.util.List} or an array.
+	 * If bound to an indexable collection, either a {@link java.util.List} or an array.
 	 */
 	boolean isList();
 
 	/**
-	 * If a List, get a Binding to a element in the List.
+	 * If a list, get a Binding to a element in the list..
 	 * @param index the element index
 	 * @return the indexed binding
 	 * @throws IllegalStateException if not a list
@@ -151,7 +151,7 @@ public interface Binding {
 	Binding getListElementBinding(int index);
 
 	/**
-	 * If bound to a {@link java.util.Map}.
+	 * If bound to a Map.
 	 */
 	boolean isMap();
 

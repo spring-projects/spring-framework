@@ -92,6 +92,7 @@ public class GenericBinding implements Binding {
 		return bindingContext.getVisibleCondition().isTrue();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void applySourceValue(Object sourceValue) {
 		assertEditable();
 		assertEnabled();
@@ -119,7 +120,6 @@ public class GenericBinding implements Binding {
 				Map map = new LinkedHashMap(sourceValues.length);
 				for (int i = 0; i < sourceValues.length; i++) {
 					String entryString = sourceValues[i];
-					Object parsedValue;
 					try {
 						String[] keyValue = entryString.split("=");
 						Object parsedMapKey = keyFormatter.parse(keyValue[0], getLocale());
@@ -327,6 +327,7 @@ public class GenericBinding implements Binding {
 
 	// internal helpers
 
+	@SuppressWarnings("unchecked")
 	private String format(Object value, Formatter formatter) {
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
 		value = bindingContext.getTypeConverter().convert(value, formattedType);
@@ -337,6 +338,7 @@ public class GenericBinding implements Binding {
 		return LocaleContextHolder.getLocale();
 	}
 
+	@SuppressWarnings("unchecked")
 	private Class getFormattedObjectType(Class formatterClass) {
 		Class classToIntrospect = formatterClass;
 		while (classToIntrospect != null) {
@@ -365,6 +367,7 @@ public class GenericBinding implements Binding {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Object coerseToValueType(Object parsed) {
 		TypeDescriptor targetType = valueModel.getValueTypeDescriptor();
 		TypeConverter converter = bindingContext.getTypeConverter();
