@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2004-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,6 @@
  */
 package org.springframework.ui.validation;
 
-import java.util.List;
-
-/**
- * Validates a model object.
- * @author Keith Donald
- * @param <M> the type of model object this validator supports
- */
-public interface Validator {
-	
-	/**
-	 * Validate the properties of the model object.
-	 * @param model the model object
-	 * @param properties the properties to validate
-	 * @return a list of validation failures, empty if there were no failures
-	 */
-	List<ValidationFailure> validate(Object model, List<String> properties);
+public interface ValidationConstraint<T> {
+	boolean validate(T value);
 }

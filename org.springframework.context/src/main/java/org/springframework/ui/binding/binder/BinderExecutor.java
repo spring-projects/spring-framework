@@ -48,6 +48,9 @@ public interface BinderExecutor<M> {
 	BindingResults bind();
 
 	// TODO return validation results
+	/**
+	 * Execute the validate operation.
+	 */
 	void validate();
 	
 	/**
