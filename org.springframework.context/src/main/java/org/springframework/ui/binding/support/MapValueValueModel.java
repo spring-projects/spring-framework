@@ -25,8 +25,10 @@ public class MapValueValueModel implements ValueModel {
 
 	private Class<?> elementType;
 
+	@SuppressWarnings("unchecked")
 	private Map map;
 
+	@SuppressWarnings("unchecked")
 	public MapValueValueModel(Object key, Class<?> elementType, Map map, BindingContext bindingContext) {
 		this.key = key;
 		this.elementType = elementType;
@@ -53,6 +55,7 @@ public class MapValueValueModel implements ValueModel {
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		map.put(key, value);
 	}

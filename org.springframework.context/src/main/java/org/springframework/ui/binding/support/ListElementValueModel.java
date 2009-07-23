@@ -21,12 +21,14 @@ import org.springframework.core.convert.TypeDescriptor;
 
 class ListElementValueModel implements ValueModel {
 
+	@SuppressWarnings("unchecked")
 	private List list;
 
 	private int index;
 
 	private Class<?> elementType;
 
+	@SuppressWarnings("unchecked")
 	public ListElementValueModel(int index, Class<?> elementType, List list) {
 		this.index = index;
 		this.elementType = elementType;
@@ -53,6 +55,7 @@ class ListElementValueModel implements ValueModel {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		list.set(index, value);
 	}

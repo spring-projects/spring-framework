@@ -13,27 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding.support;
+package org.springframework.ui.binding;
 
-@SuppressWarnings("serial")
-public class PropertyNotFoundException extends RuntimeException {
-
-	private String property;
-
-	private Class<?> modelClass;
-
-	public PropertyNotFoundException(String property, Class<?> modelClass) {
-		super("No property '" + property + "' found on model [" + modelClass.getName() + "]");
-		this.property = property;
-		this.modelClass = modelClass;
-	}
-
-	public String getProperty() {
-		return property;
-	}
-
-	public Class<?> getModelClass() {
-		return modelClass;
-	}
-
+/**
+ * A locator for BindingFactories indexed by their models.
+ * Makes it easy for clients to lookup BindingFactories for models the need to bind to.
+ * @author Keith Donald
+ */
+public interface BindingFactoryLocator {
+	
+	/**
+	 * Get the BindingFactory for the model object.
+	 * If no such BindingFactory exists, one is created and cached.
+	 * Never returns <code>null</code>.
+	 * @param model the model object
+	 * @return the binding Factory
+	 */
+	public BindingFactory getBindingFactory(Object model);
 }

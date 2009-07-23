@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.groovy.binding.PropertyBinding;
 import org.springframework.context.MessageSource;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.convert.TypeConverter;
@@ -446,7 +445,7 @@ public class GenericBindingFactory implements BindingFactory {
 		}
 
 		public Binding getBinding(String property) {
-			Object model = ((List) listBindingContext.binding.getValue()).get(index);
+			Object model = ((List<?>) listBindingContext.binding.getValue()).get(index);
 			Class<?> elementType = listBindingContext.getElementType();
 			if (elementType == null) {
 				elementType = model.getClass();
@@ -461,14 +460,17 @@ public class GenericBindingFactory implements BindingFactory {
 			return binding;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Formatter getFormatter() {
 			return listBindingContext.getElementFormatter();
 		}
 
+		@SuppressWarnings("unchecked")
 		public Formatter getElementFormatter() {
 			return null;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Formatter getKeyFormatter() {
 			return null;
 		}
@@ -520,6 +522,7 @@ public class GenericBindingFactory implements BindingFactory {
 			return mapBindingContext.getTypeConverter();
 		}
 
+		@SuppressWarnings("unchecked")
 		public Binding getBinding(String property) {
 			Object model = ((Map) mapBindingContext.binding.getValue()).get(key);
 			Class<?> elementType = mapBindingContext.getElementType();
@@ -536,14 +539,17 @@ public class GenericBindingFactory implements BindingFactory {
 			return binding;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Formatter getFormatter() {
 			return mapBindingContext.getElementFormatter();
 		}
 
+		@SuppressWarnings("unchecked")
 		public Formatter getElementFormatter() {
 			return null;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Formatter getKeyFormatter() {
 			return null;
 		}
