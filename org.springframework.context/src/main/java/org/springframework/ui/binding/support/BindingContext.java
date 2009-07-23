@@ -21,6 +21,11 @@ import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.config.Condition;
 import org.springframework.ui.format.Formatter;
 
+/**
+ * A context that allows a Binding to query its BindingRule.
+ * @author Keith Donald
+ * @since 3.0
+ */
 public interface BindingContext {
 
 	MessageSource getMessageSource();
@@ -33,7 +38,7 @@ public interface BindingContext {
 
 	Condition getVisibleCondition();
 
-	Binding getBinding(String property);
+	Binding getNestedBinding(String property);
 
 	@SuppressWarnings("unchecked")
 	Formatter getFormatter();

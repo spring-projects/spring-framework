@@ -55,16 +55,16 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 	private Map<Class, Formatter> typeFormatters = new ConcurrentHashMap<Class, Formatter>();
 
-	private Map<GenericCollectionPropertyType, Formatter> collectionTypeFormatters = new ConcurrentHashMap<GenericCollectionPropertyType, Formatter>();
+	private Map<CollectionTypeDescriptor, Formatter> collectionTypeFormatters = new ConcurrentHashMap<CollectionTypeDescriptor, Formatter>();
 
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
 	private TypeConverter typeConverter = new DefaultTypeConverter();
-	
+
 	public void setTypeConverter(TypeConverter typeConverter) {
 		this.typeConverter = typeConverter;
 	}
-	
+
 	public Formatter<?> getFormatter(PropertyDescriptor property) {
 		Assert.notNull(property, "The PropertyDescriptor is required");
 		TypeDescriptor<?> propertyType = new TypeDescriptor(new MethodParameter(property.getReadMethod(), -1));
@@ -78,8 +78,8 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		Formatter<?> formatter = null;
 		Class<?> type;
 		if (propertyType.isCollection() || propertyType.isArray()) {
-			GenericCollectionPropertyType collectionType = new GenericCollectionPropertyType(propertyType.getType(),
-					propertyType.getElementType());
+			CollectionTypeDescriptor collectionType = new CollectionTypeDescriptor(propertyType.getType(), propertyType
+					.getElementType());
 			formatter = collectionTypeFormatters.get(collectionType);
 			if (formatter != null) {
 				return formatter;
@@ -126,7 +126,7 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		}
 	}
 
-	public void add(GenericCollectionPropertyType propertyType, Formatter<?> formatter) {
+	public void add(CollectionTypeDescriptor propertyType, Formatter<?> formatter) {
 		collectionTypeFormatters.put(propertyType, formatter);
 	}
 
@@ -183,16 +183,16 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 	private static class DefaultFormatter implements Formatter {
 
 		public static final Formatter DEFAULT_INSTANCE = new DefaultFormatter(null, null);
-		
+
 		private Class<?> objectType;
-		
+
 		private TypeConverter typeConverter;
-		
+
 		public DefaultFormatter(Class<?> objectType, TypeConverter typeConverter) {
 			this.objectType = objectType;
 			this.typeConverter = typeConverter;
 		}
-		
+
 		public String format(Object object, Locale locale) {
 			if (object == null) {
 				return "";
@@ -221,14 +221,14 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 			}
 		}
 	}
-	
+
 	private static class DefaultCollectionFormatter implements Formatter {
 
-		private GenericCollectionPropertyType collectionType;
+		private CollectionTypeDescriptor collectionType;
 
 		private Formatter elementFormatter;
 
-		public DefaultCollectionFormatter(GenericCollectionPropertyType collectionType,
+		public DefaultCollectionFormatter(CollectionTypeDescriptor collectionType,
 				GenericFormatterRegistry formatterRegistry) {
 			this.collectionType = collectionType;
 			this.elementFormatter = collectionType.getElementType() != null ? formatterRegistry

@@ -23,7 +23,7 @@ import java.util.Map;
  * Indicates a client configuration error. 
  * @author Keith Donald
  * @since 3.0
- * @see Binder#bind(Map)
+ * @see Binder#bind(java.util.Map)
  */
 @SuppressWarnings("serial")
 public class MissingSourceValuesException extends RuntimeException {

@@ -21,6 +21,7 @@ import org.springframework.ui.binding.config.BindingRuleConfiguration;
  * A SPI interface that lets you configure a model binder, then execute it.
  * Hides details about the source of binder source values.
  * @author Keith Donald
+ * @since 3.0
  * @param <M> the type of model to bind to
  */
 public interface BinderExecutor<M> {

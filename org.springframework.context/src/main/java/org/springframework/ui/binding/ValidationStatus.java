@@ -18,6 +18,7 @@ package org.springframework.ui.binding;
 /**
  * Validation states.
  * @author Keith Donald
+ * @since 3.0
  */
 public enum ValidationStatus {
 

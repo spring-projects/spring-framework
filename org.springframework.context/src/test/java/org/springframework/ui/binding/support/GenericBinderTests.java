@@ -262,7 +262,7 @@ public class GenericBinderTests {
 	@Test
 	public void bindToListSingleString() {
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
-		formatterRegistry.add(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
+		formatterRegistry.add(new CollectionTypeDescriptor(List.class, Address.class), new AddressListFormatter());
 		bindingFactory.setFormatterRegistry(formatterRegistry);
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values
@@ -309,7 +309,7 @@ public class GenericBinderTests {
 	@Test
 	public void getListAsSingleString() {
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
-		formatterRegistry.add(new GenericCollectionPropertyType(List.class, Address.class), new AddressListFormatter());
+		formatterRegistry.add(new CollectionTypeDescriptor(List.class, Address.class), new AddressListFormatter());
 		bindingFactory.setFormatterRegistry(formatterRegistry);
 		Address address1 = new Address();
 		address1.setStreet("s1");
