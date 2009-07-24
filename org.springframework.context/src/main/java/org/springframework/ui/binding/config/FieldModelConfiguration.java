@@ -36,7 +36,7 @@ public interface FieldModelConfiguration {
 	FieldModelConfiguration formatKeysWith(Formatter<?> formatter);
 
 	/**
-	 * If an List, array, or Map, set the Formatter to use to format indexed elements.
+	 * If a List, array, or Map, set the Formatter to use to format indexed elements.
 	 */
 	FieldModelConfiguration formatElementsWith(Formatter<?> formatter);
 
