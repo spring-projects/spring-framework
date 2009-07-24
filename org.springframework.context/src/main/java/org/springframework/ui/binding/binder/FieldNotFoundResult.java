@@ -22,7 +22,7 @@ import org.springframework.ui.alert.Severity;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
 
-class PropertyNotFoundResult implements BindingResult {
+class FieldNotFoundResult implements BindingResult {
 
 	private String property;
 
@@ -30,17 +30,17 @@ class PropertyNotFoundResult implements BindingResult {
 
 	private MessageSource messageSource;
 	
-	public PropertyNotFoundResult(String property, Object sourceValue, MessageSource messageSource) {
+	public FieldNotFoundResult(String property, Object sourceValue, MessageSource messageSource) {
 		this.property = property;
 		this.sourceValue = sourceValue;
 		this.messageSource = messageSource;
 	}
 
-	public String getProperty() {
+	public String getFieldName() {
 		return property;
 	}
 
-	public Object getSourceValue() {
+	public Object getSubmittedValue() {
 		return sourceValue;
 	}
 

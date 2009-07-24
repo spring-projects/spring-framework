@@ -20,23 +20,23 @@ import org.springframework.ui.alert.Severity;
 
 class BindingStatusResult implements BindingResult {
 
-	private String property;
+	private String fieldName;
 	
 	private Object sourceValue;
 
 	private Alert bindingStatusAlert;
 	
-	public BindingStatusResult(String property, Object sourceValue, Alert alert) {
-		this.property = property;
+	public BindingStatusResult(String fieldName, Object sourceValue, Alert alert) {
+		this.fieldName = fieldName;
 		this.sourceValue = sourceValue;
 		this.bindingStatusAlert = alert;
 	}
 
-	public String getProperty() {
-		return property;
+	public String getFieldName() {
+		return fieldName;
 	}
 
-	public Object getSourceValue() {
+	public Object getSubmittedValue() {
 		return sourceValue;
 	}
 

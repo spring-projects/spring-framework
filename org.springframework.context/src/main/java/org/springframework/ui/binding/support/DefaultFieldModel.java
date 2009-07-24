@@ -34,38 +34,38 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
-import org.springframework.ui.binding.Binding;
 import org.springframework.ui.binding.BindingStatus;
+import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.binding.ValidationStatus;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
 
-public class GenericBinding implements Binding {
+public class DefaultFieldModel implements FieldModel {
 
 	private ValueModel valueModel;
 
-	private BindingContext bindingContext;
+	private FieldModelContext context;
 
 	private ValueBuffer buffer;
 
 	private BindingStatus bindingStatus;
 
-	private Object sourceValue;
+	private Object submittedValue;
 
-	private Exception invalidSourceValueCause;
+	private Exception invalidSubmittedValueCause;
 
-	public GenericBinding(ValueModel valueModel, BindingContext bindingContext) {
+	public DefaultFieldModel(ValueModel valueModel, FieldModelContext context) {
 		this.valueModel = valueModel;
-		this.bindingContext = bindingContext;
+		this.context = context;
 		buffer = new ValueBuffer(valueModel);
 		bindingStatus = BindingStatus.CLEAN;
 	}
 
-	// implementing Binding
+	// implementing FieldModel
 
 	public String getRenderValue() {
-		return format(getValue(), bindingContext.getFormatter());
+		return format(getValue(), context.getFormatter());
 	}
 
 	public Object getValue() {
@@ -81,42 +81,42 @@ public class GenericBinding implements Binding {
 	}
 
 	public boolean isEditable() {
-		return valueModel.isWriteable() && bindingContext.getEditableCondition().isTrue();
+		return valueModel.isWriteable() && context.getEditableCondition().isTrue();
 	}
 
 	public boolean isEnabled() {
-		return bindingContext.getEnabledCondition().isTrue();
+		return context.getEnabledCondition().isTrue();
 	}
 
 	public boolean isVisible() {
-		return bindingContext.getVisibleCondition().isTrue();
+		return context.getVisibleCondition().isTrue();
 	}
 
 	@SuppressWarnings("unchecked")
-	public void applySourceValue(Object sourceValue) {
+	public void applySubmittedValue(Object submittedValue) {
 		assertEditable();
 		assertEnabled();
-		if (sourceValue instanceof String) {
+		if (submittedValue instanceof String) {
 			try {
-				Object parsed = bindingContext.getFormatter().parse((String) sourceValue, getLocale());
+				Object parsed = context.getFormatter().parse((String) submittedValue, getLocale());
 				buffer.setValue(coerseToValueType(parsed));
-				sourceValue = null;
+				submittedValue = null;
 				bindingStatus = BindingStatus.DIRTY;
 			} catch (ParseException e) {
-				this.sourceValue = sourceValue;
-				invalidSourceValueCause = e;
-				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+				this.submittedValue = submittedValue;
+				invalidSubmittedValueCause = e;
+				bindingStatus = BindingStatus.INVALID_SUBMITTED_VALUE;
 			} catch (ConversionFailedException e) {
-				this.sourceValue = sourceValue;
-				invalidSourceValueCause = e;
-				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+				this.submittedValue = submittedValue;
+				invalidSubmittedValueCause = e;
+				bindingStatus = BindingStatus.INVALID_SUBMITTED_VALUE;
 			}
-		} else if (sourceValue instanceof String[]) {
+		} else if (submittedValue instanceof String[]) {
 			Object parsed;
 			if (isMap()) {
-				String[] sourceValues = (String[]) sourceValue;
-				Formatter keyFormatter = bindingContext.getKeyFormatter();
-				Formatter valueFormatter = bindingContext.getElementFormatter();
+				String[] sourceValues = (String[]) submittedValue;
+				Formatter keyFormatter = context.getKeyFormatter();
+				Formatter valueFormatter = context.getElementFormatter();
 				Map map = new LinkedHashMap(sourceValues.length);
 				for (int i = 0; i < sourceValues.length; i++) {
 					String entryString = sourceValues[i];
@@ -126,59 +126,59 @@ public class GenericBinding implements Binding {
 						Object parsedMapValue = valueFormatter.parse(keyValue[1], getLocale());
 						map.put(parsedMapKey, parsedMapValue);
 					} catch (ParseException e) {
-						this.sourceValue = sourceValue;
-						invalidSourceValueCause = e;
-						bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+						this.submittedValue = submittedValue;
+						invalidSubmittedValueCause = e;
+						bindingStatus = BindingStatus.INVALID_SUBMITTED_VALUE;
 						break;
 					}
 				}
 				parsed = map;
 			} else {
-				String[] sourceValues = (String[]) sourceValue;
+				String[] sourceValues = (String[]) submittedValue;
 				List list = new ArrayList(sourceValues.length);
 				for (int i = 0; i < sourceValues.length; i++) {
 					Object parsedValue;
 					try {
-						parsedValue = bindingContext.getElementFormatter().parse(sourceValues[i], getLocale());
+						parsedValue = context.getElementFormatter().parse(sourceValues[i], getLocale());
 						list.add(parsedValue);
 					} catch (ParseException e) {
-						this.sourceValue = sourceValue;
-						invalidSourceValueCause = e;
-						bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+						this.submittedValue = submittedValue;
+						invalidSubmittedValueCause = e;
+						bindingStatus = BindingStatus.INVALID_SUBMITTED_VALUE;
 						break;
 					}
 				}
 				parsed = list;
 			}
-			if (bindingStatus != BindingStatus.INVALID_SOURCE_VALUE) {
+			if (bindingStatus != BindingStatus.INVALID_SUBMITTED_VALUE) {
 				try {
 					buffer.setValue(coerseToValueType(parsed));
-					sourceValue = null;
+					submittedValue = null;
 					bindingStatus = BindingStatus.DIRTY;
 				} catch (ConversionFailedException e) {
-					this.sourceValue = sourceValue;
-					invalidSourceValueCause = e;
-					bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+					this.submittedValue = submittedValue;
+					invalidSubmittedValueCause = e;
+					bindingStatus = BindingStatus.INVALID_SUBMITTED_VALUE;
 				}
 			}
 		} else {
 			try {
-				buffer.setValue(coerseToValueType(sourceValue));
-				sourceValue = null;
+				buffer.setValue(coerseToValueType(submittedValue));
+				submittedValue = null;
 				bindingStatus = BindingStatus.DIRTY;
 			} catch (ConversionFailedException e) {
-				this.sourceValue = sourceValue;
-				invalidSourceValueCause = e;
-				bindingStatus = BindingStatus.INVALID_SOURCE_VALUE;
+				this.submittedValue = submittedValue;
+				invalidSubmittedValueCause = e;
+				bindingStatus = BindingStatus.INVALID_SUBMITTED_VALUE;
 			}
 		}
 	}
 
-	public Object getInvalidSourceValue() {
-		if (bindingStatus != BindingStatus.INVALID_SOURCE_VALUE) {
-			throw new IllegalStateException("No invalid source value");
+	public Object getInvalidSubmittedValue() {
+		if (bindingStatus != BindingStatus.INVALID_SUBMITTED_VALUE) {
+			throw new IllegalStateException("No invalid submitted value applied to this field");
 		}
-		return sourceValue;
+		return submittedValue;
 	}
 
 	public BindingStatus getBindingStatus() {
@@ -186,32 +186,33 @@ public class GenericBinding implements Binding {
 	}
 
 	public ValidationStatus getValidationStatus() {
+		// TODO implementation
 		return ValidationStatus.NOT_VALIDATED;
 	}
 
 	public Alert getStatusAlert() {
-		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
+		if (bindingStatus == BindingStatus.INVALID_SUBMITTED_VALUE) {
 			return new AbstractAlert() {
 				public String getCode() {
 					return "typeMismatch";
 				}
 
 				public String getMessage() {
-					MessageBuilder builder = new MessageBuilder(bindingContext.getMessageSource());
+					MessageBuilder builder = new MessageBuilder(context.getMessageSource());
 					builder.code(getCode());
-					if (invalidSourceValueCause instanceof ParseException) {
-						ParseException e = (ParseException) invalidSourceValueCause;
-						builder.arg("label", bindingContext.getLabel());
-						builder.arg("value", sourceValue);
+					if (invalidSubmittedValueCause instanceof ParseException) {
+						ParseException e = (ParseException) invalidSubmittedValueCause;
+						builder.arg("label", context.getLabel());
+						builder.arg("value", submittedValue);
 						builder.arg("errorOffset", e.getErrorOffset());
-						builder.defaultMessage("Failed to bind '" + bindingContext.getLabel() + "'; the source value "
-								+ StylerUtils.style(sourceValue) + " has an invalid format and could no be parsed");
+						builder.defaultMessage("Failed to bind '" + context.getLabel() + "'; the submitted value "
+								+ StylerUtils.style(submittedValue) + " has an invalid format and could no be parsed");
 					} else {
-						ConversionFailedException e = (ConversionFailedException) invalidSourceValueCause;
-						builder.arg("label", new ResolvableArgument(bindingContext.getLabel()));
-						builder.arg("value", sourceValue);
-						builder.defaultMessage("Failed to bind '" + bindingContext.getLabel() + "'; the source value "
-								+ StylerUtils.style(sourceValue) + " has could not be converted to "
+						ConversionFailedException e = (ConversionFailedException) invalidSubmittedValueCause;
+						builder.arg("label", new ResolvableArgument(context.getLabel()));
+						builder.arg("value", submittedValue);
+						builder.defaultMessage("Failed to bind '" + context.getLabel() + "'; the submitted value "
+								+ StylerUtils.style(submittedValue) + " has could not be converted to "
 								+ e.getTargetType().getName());
 
 					}
@@ -257,6 +258,7 @@ public class GenericBinding implements Binding {
 	}
 
 	public void validate() {
+		// TODO implementation
 	}
 
 	public void commit() {
@@ -270,57 +272,57 @@ public class GenericBinding implements Binding {
 				bindingStatus = BindingStatus.COMMITTED;
 			}
 		} else {
-			throw new IllegalStateException("Binding is not dirty; nothing to commit");
+			throw new IllegalStateException("Field is not dirty; nothing to commit");
 		}
 	}
 
 	public void revert() {
-		if (bindingStatus == BindingStatus.INVALID_SOURCE_VALUE) {
-			sourceValue = null;
-			invalidSourceValueCause = null;
+		if (bindingStatus == BindingStatus.INVALID_SUBMITTED_VALUE) {
+			submittedValue = null;
+			invalidSubmittedValueCause = null;
 			bindingStatus = BindingStatus.CLEAN;
 		} else if (bindingStatus == BindingStatus.DIRTY || bindingStatus == BindingStatus.COMMIT_FAILURE) {
 			buffer.clear();
 			bindingStatus = BindingStatus.CLEAN;
 		} else {
-			throw new IllegalStateException("Nothing to revert");
+			throw new IllegalStateException("Field is clean or committed; nothing to revert");
 		}
 	}
 
-	public Binding getNestedBinding(String property) {
-		return bindingContext.getNestedBinding(property);
+	public FieldModel getNested(String fieldName) {
+		return context.getNested(fieldName);
 	}
 
 	public boolean isList() {
-		return List.class.isAssignableFrom(getValueType());
+		return getValueType().isArray() || List.class.isAssignableFrom(getValueType());
 	}
 
-	public Binding getListElementBinding(int index) {
-		return bindingContext.getListElementBinding(index);
+	public FieldModel getListElement(int index) {
+		return context.getListElement(index);
 	}
 
 	public boolean isMap() {
 		return Map.class.isAssignableFrom(getValueType());
 	}
 
-	public Binding getMapValueBinding(Object key) {
+	public FieldModel getMapValue(Object key) {
 		if (key instanceof String) {
 			try {
-				key = bindingContext.getKeyFormatter().parse((String) key, getLocale());
+				key = context.getKeyFormatter().parse((String) key, getLocale());
 			} catch (ParseException e) {
 				throw new IllegalArgumentException("Unable to parse map key '" + key + "'", e);
 			}
 		}
-		return bindingContext.getMapValueBinding(key);
+		return context.getMapValue(key);
 	}
 
 	@SuppressWarnings("unchecked")
 	public String formatValue(Object value) {
 		Formatter formatter;
 		if (Collection.class.isAssignableFrom(getValueType()) || getValueType().isArray() || isMap()) {
-			formatter = bindingContext.getElementFormatter();
+			formatter = context.getElementFormatter();
 		} else {
-			formatter = bindingContext.getFormatter();
+			formatter = context.getFormatter();
 		}
 		return format(value, formatter);
 	}
@@ -330,7 +332,7 @@ public class GenericBinding implements Binding {
 	@SuppressWarnings("unchecked")
 	private String format(Object value, Formatter formatter) {
 		Class<?> formattedType = getFormattedObjectType(formatter.getClass());
-		value = bindingContext.getTypeConverter().convert(value, formattedType);
+		value = context.getTypeConverter().convert(value, formattedType);
 		return formatter.format(value, getLocale());
 	}
 
@@ -370,7 +372,7 @@ public class GenericBinding implements Binding {
 	@SuppressWarnings("unchecked")
 	private Object coerseToValueType(Object parsed) {
 		TypeDescriptor targetType = valueModel.getValueTypeDescriptor();
-		TypeConverter converter = bindingContext.getTypeConverter();
+		TypeConverter converter = context.getTypeConverter();
 		if (parsed != null && converter.canConvert(parsed.getClass(), targetType)) {
 			return converter.convert(parsed, targetType);
 		} else {
@@ -380,13 +382,13 @@ public class GenericBinding implements Binding {
 
 	private void assertEditable() {
 		if (!isEditable()) {
-			throw new IllegalStateException("Binding is not editable");
+			throw new IllegalStateException("Field is not editable");
 		}
 	}
 
 	private void assertEnabled() {
 		if (!isEditable()) {
-			throw new IllegalStateException("Binding is not enabled");
+			throw new IllegalStateException("Field is not enabled");
 		}
 	}
 

@@ -17,16 +17,16 @@ package org.springframework.ui.binding.support;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.convert.TypeConverter;
-import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.binding.config.Condition;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A context that allows a Binding to query its BindingRule.
+ * A context that allows a FieldModel to access its external configuration.
  * @author Keith Donald
  * @since 3.0
  */
-public interface BindingContext {
+public interface FieldModelContext {
 
 	MessageSource getMessageSource();
 
@@ -38,8 +38,6 @@ public interface BindingContext {
 
 	Condition getVisibleCondition();
 
-	Binding getNestedBinding(String property);
-
 	@SuppressWarnings("unchecked")
 	Formatter getFormatter();
 
@@ -49,10 +47,12 @@ public interface BindingContext {
 	@SuppressWarnings("unchecked")
 	Formatter getKeyFormatter();
 
-	Binding getListElementBinding(int index);
-
-	Binding getMapValueBinding(Object key);
-
 	String getLabel();
+
+	FieldModel getNested(String fieldName);
+
+	FieldModel getListElement(int index);
+
+	FieldModel getMapValue(Object key);
 
 }

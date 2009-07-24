@@ -26,17 +26,17 @@ import org.springframework.ui.alert.Alert;
 public interface BindingResult {
 
 	/**
-	 * The model property this binding result is for.
-	 * @see Binder#getNestedBinding(String)
+	 * The name of the field this binding result is for.
+	 * @see Binder#getNested(String)
 	 */
-	String getProperty();
+	String getFieldName();
 
 	/**
-	 * The raw source value for which binding was attempted.
+	 * The raw submitted value for which binding was attempted.
 	 * If not a failure, this value was successfully bound to the model.
 	 * @see #isFailure()
 	 */
-	Object getSourceValue();
+	Object getSubmittedValue();
 	
 	/**
 	 * Indicates if the binding failed.

@@ -70,7 +70,7 @@ class ArrayListBindingResults implements BindingResults {
 	public List<String> properties() {
 		List<String> properties = new ArrayList<String>(results.size());
 		for (BindingResult result : this) {
-			properties.add(result.getProperty());
+			properties.add(result.getFieldName());
 		}
 		return properties;
 	}

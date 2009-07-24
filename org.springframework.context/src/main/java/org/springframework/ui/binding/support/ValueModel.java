@@ -18,8 +18,9 @@ package org.springframework.ui.binding.support;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
- * For accessing the raw bound model object.
+ * A interface for reading and writing a value.
  * @author Keith Donald
+ * @since 3.0
  */
 public interface ValueModel {
 

@@ -19,7 +19,12 @@ import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
 
-class ListElementValueModel implements ValueModel {
+/**
+ * A ValueModel for a element in a List.
+ * @author Keith Donald
+ * @since 3.0
+ */
+public class ListElementValueModel implements ValueModel {
 
 	@SuppressWarnings("unchecked")
 	private List list;

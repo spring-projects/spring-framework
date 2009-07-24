@@ -263,7 +263,7 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 		public Object parse(String formatted, Locale locale) throws ParseException {
 			String[] fields = StringUtils.commaDelimitedListToStringArray(formatted);
-			if (collectionType.getCollectionType().isArray()) {
+			if (collectionType.getType().isArray()) {
 				Object array = Array.newInstance(getElementType(), fields.length);
 				for (int i = 0; i < fields.length; i++) {
 					Array.set(array, i, elementFormatter.parse(fields[i], locale));
@@ -289,7 +289,7 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 		private Collection newCollection() {
 			try {
 				Class<? extends Collection> implType = ConversionUtils
-						.getCollectionImpl((Class<? extends Collection>) collectionType.getCollectionType());
+						.getCollectionImpl((Class<? extends Collection>) collectionType.getType());
 				return (Collection) implType.newInstance();
 			} catch (InstantiationException e) {
 				throw new IllegalStateException("Should not happen", e);

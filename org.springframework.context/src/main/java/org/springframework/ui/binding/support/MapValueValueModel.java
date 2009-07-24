@@ -19,6 +19,11 @@ import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
 
+/**
+ * A ValueModel for a element in a Map.
+ * @author Keith Donald
+ * @since 3.0
+ */
 public class MapValueValueModel implements ValueModel {
 
 	private Object key;
@@ -29,7 +34,7 @@ public class MapValueValueModel implements ValueModel {
 	private Map map;
 
 	@SuppressWarnings("unchecked")
-	public MapValueValueModel(Object key, Class<?> elementType, Map map, BindingContext bindingContext) {
+	public MapValueValueModel(Object key, Class<?> elementType, Map map, FieldModelContext bindingContext) {
 		this.key = key;
 		this.elementType = elementType;
 		this.map = map;			

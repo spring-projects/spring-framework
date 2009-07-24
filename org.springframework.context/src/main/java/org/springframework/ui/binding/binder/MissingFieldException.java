@@ -26,7 +26,7 @@ import java.util.Map;
  * @see Binder#bind(java.util.Map)
  */
 @SuppressWarnings("serial")
-public class MissingSourceValuesException extends RuntimeException {
+public class MissingFieldException extends RuntimeException {
 
 	private List<String> missing;
 
@@ -35,7 +35,7 @@ public class MissingSourceValuesException extends RuntimeException {
 	 * @param missing
 	 * @param sourceValues
 	 */
-	public MissingSourceValuesException(List<String> missing, Map<String, ? extends Object> sourceValues) {
+	public MissingFieldException(List<String> missing, Map<String, ? extends Object> sourceValues) {
 		super(getMessage(missing, sourceValues));
 		this.missing = missing;
 	}
@@ -49,9 +49,9 @@ public class MissingSourceValuesException extends RuntimeException {
 
 	private static String getMessage(List<String> missingRequired, Map<String, ? extends Object> sourceValues) {
 		if (missingRequired.size() == 1) {
-			return "Missing a source value for required propertyPath [" + missingRequired.get(0) + "]; sourceValues map contained " + sourceValues.keySet();
+			return "Missing a field [" + missingRequired.get(0) + "]; fieldValues map contained " + sourceValues.keySet();
 		} else {
-			return "Missing source values to required propertyPaths " + missingRequired + "; sourceValues map contained " + sourceValues.keySet();
+			return "Missing fields " + missingRequired + "; fieldValues map contained " + sourceValues.keySet();
 		}
 	}
 

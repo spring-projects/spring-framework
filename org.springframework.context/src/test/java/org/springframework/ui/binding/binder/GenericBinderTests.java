@@ -1,4 +1,4 @@
-package org.springframework.ui.binding.support;
+package org.springframework.ui.binding.binder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,11 +22,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.ui.binding.Binding;
+import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.binding.BindingStatus;
 import org.springframework.ui.binding.binder.BindingResults;
 import org.springframework.ui.binding.binder.GenericBinder;
-import org.springframework.ui.binding.binder.MissingSourceValuesException;
+import org.springframework.ui.binding.binder.MissingFieldException;
+import org.springframework.ui.binding.support.CollectionTypeDescriptor;
+import org.springframework.ui.binding.support.DefaultPresentationModel;
+import org.springframework.ui.binding.support.GenericFormatterRegistry;
 import org.springframework.ui.format.AnnotationFormatterFactory;
 import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
@@ -40,15 +43,15 @@ public class GenericBinderTests {
 
 	private GenericBinder binder;
 
-	private GenericBindingFactory bindingFactory;
+	private DefaultPresentationModel presentationModel;
 
 	private TestBean bean;
 
 	@Before
 	public void setUp() {
 		bean = new TestBean();
-		bindingFactory = new GenericBindingFactory(bean);
-		binder = new GenericBinder(bindingFactory);
+		presentationModel = new DefaultPresentationModel(bean);
+		binder = new GenericBinder(presentationModel);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
@@ -66,17 +69,17 @@ public class GenericBinderTests {
 		BindingResults results = binder.bind(values);
 		assertEquals(3, results.size());
 
-		assertEquals("string", results.get(0).getProperty());
+		assertEquals("string", results.get(0).getFieldName());
 		assertFalse(results.get(0).isFailure());
-		assertEquals("test", results.get(0).getSourceValue());
+		assertEquals("test", results.get(0).getSubmittedValue());
 
-		assertEquals("integer", results.get(1).getProperty());
+		assertEquals("integer", results.get(1).getFieldName());
 		assertFalse(results.get(1).isFailure());
-		assertEquals("3", results.get(1).getSourceValue());
+		assertEquals("3", results.get(1).getSubmittedValue());
 
-		assertEquals("foo", results.get(2).getProperty());
+		assertEquals("foo", results.get(2).getFieldName());
 		assertFalse(results.get(2).isFailure());
-		assertEquals("BAR", results.get(2).getSourceValue());
+		assertEquals("BAR", results.get(2).getSubmittedValue());
 
 		assertEquals("test", bean.getString());
 		assertEquals(3, bean.getInteger());
@@ -98,14 +101,14 @@ public class GenericBinderTests {
 
 	@Test
 	public void bindSingleValuePropertyFormatter() throws ParseException {
-		bindingFactory.bindingRule("date").formatWith(new DateFormatter());
+		presentationModel.field("date").formatWith(new DateFormatter());
 		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
-		bindingFactory.bindingRule("date").formatWith(new DateFormatter());
+		presentationModel.field("date").formatWith(new DateFormatter());
 		BindingResults results = binder.bind(Collections.singletonMap("date", "bogus"));
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isFailure());
@@ -116,7 +119,7 @@ public class GenericBinderTests {
 	public void bindSingleValueWithFormatterRegistedByType() throws ParseException {
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 		formatterRegistry.add(Date.class, new DateFormatter());
-		bindingFactory.setFormatterRegistry(formatterRegistry);
+		presentationModel.setFormatterRegistry(formatterRegistry);
 
 		binder.bind(Collections.singletonMap("date", "2009-06-01"));
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
@@ -126,7 +129,7 @@ public class GenericBinderTests {
 	public void bindSingleValueWithAnnotationFormatterFactoryRegistered() throws ParseException {
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 		formatterRegistry.add(new CurrencyAnnotationFormatterFactory());
-		bindingFactory.setFormatterRegistry(formatterRegistry);
+		presentationModel.setFormatterRegistry(formatterRegistry);
 
 		binder.bind(Collections.singletonMap("currency", "$23.56"));
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
@@ -135,27 +138,27 @@ public class GenericBinderTests {
 	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
 		BindingResults results = binder.bind(Collections.singletonMap("bogus", "2009-06-01"));
-		assertEquals("bogus", results.get(0).getProperty());
+		assertEquals("bogus", results.get(0).getFieldName());
 		assertTrue(results.get(0).isFailure());
 		assertEquals("propertyNotFound", results.get(0).getAlert().getCode());
 	}
 
-	@Test(expected = MissingSourceValuesException.class)
+	@Test(expected = MissingFieldException.class)
 	public void bindMissingRequiredSourceValue() {
-		binder.setRequired(new String[] { "integer" });
+		binder.setRequiredFields(new String[] { "integer" });
 		// missing "integer" - violated bind contract
 		binder.bind(Collections.singletonMap("string", "test"));
 	}
 
 	@Test
 	public void getBindingCustomFormatter() {
-		bindingFactory.bindingRule("currency").formatWith(new CurrencyFormatter());
-		Binding b = bindingFactory.getBinding("currency");
+		presentationModel.field("currency").formatWith(new CurrencyFormatter());
+		FieldModel b = presentationModel.getFieldModel("currency");
 		assertFalse(b.isList());
 		assertFalse(b.isMap());
 		assertEquals(null, b.getValue());
 		assertEquals("", b.getRenderValue());
-		b.applySourceValue("$23.56");
+		b.applySubmittedValue("$23.56");
 		assertEquals(BindingStatus.DIRTY, b.getBindingStatus());
 		assertEquals(new BigDecimal("23.56"), b.getValue());
 		assertEquals("$23.56", b.getRenderValue());
@@ -168,9 +171,9 @@ public class GenericBinderTests {
 	@Test
 	public void getBindingCustomFormatterRequiringTypeCoersion() {
 		// IntegerFormatter formats Longs, so conversion from Integer -> Long is performed
-		bindingFactory.bindingRule("integer").formatWith(new IntegerFormatter());
-		Binding b = bindingFactory.getBinding("integer");
-		b.applySourceValue("2,300");
+		presentationModel.field("integer").formatWith(new IntegerFormatter());
+		FieldModel b = presentationModel.getFieldModel("integer");
+		b.applySubmittedValue("2,300");
 		assertEquals("2,300", b.getRenderValue());
 		b.commit();
 		assertEquals(BindingStatus.COMMITTED, b.getBindingStatus());
@@ -182,10 +185,10 @@ public class GenericBinderTests {
 		MockMessageSource messages = new MockMessageSource();
 		messages.addMessage("typeMismatch", Locale.US,
 				"Please enter an integer in format ### for the #{label} field; you entered #{value}");
-		bindingFactory.setMessageSource(messages);
-		bindingFactory.bindingRule("integer").formatWith(new IntegerFormatter());
-		Binding b = bindingFactory.getBinding("integer");
-		b.applySourceValue("bogus");
+		presentationModel.setMessageSource(messages);
+		presentationModel.field("integer").formatWith(new IntegerFormatter());
+		FieldModel b = presentationModel.getFieldModel("integer");
+		b.applySubmittedValue("bogus");
 		assertEquals("Please enter an integer in format ### for the integer field; you entered bogus", b
 				.getStatusAlert().getMessage());
 	}
@@ -193,11 +196,11 @@ public class GenericBinderTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void getBindingMultiValued() {
-		Binding b = bindingFactory.getBinding("foos");
+		FieldModel b = presentationModel.getFieldModel("foos");
 		assertTrue(b.isList());
 		assertEquals(null, b.getValue());
 		assertEquals("", b.getRenderValue());
-		b.applySourceValue(new String[] { "BAR", "BAZ", "BOOP" });
+		b.applySubmittedValue(new String[] { "BAR", "BAZ", "BOOP" });
 		b.commit();
 		assertEquals(FooEnum.BAR, bean.getFoos().get(0));
 		assertEquals(FooEnum.BAZ, bean.getFoos().get(1));
@@ -213,22 +216,22 @@ public class GenericBinderTests {
 	@Test
 	public void getBindingMultiValuedIndexAccess() {
 		bean.setFoos(Arrays.asList(new FooEnum[] { FooEnum.BAR }));
-		Binding b = bindingFactory.getBinding("foos[0]");
+		FieldModel b = presentationModel.getFieldModel("foos[0]");
 		assertFalse(b.isList());
 		assertEquals(FooEnum.BAR, b.getValue());
 		assertEquals("BAR", b.getRenderValue());
-		b.applySourceValue("BAZ");
+		b.applySubmittedValue("BAZ");
 		assertEquals("BAZ", b.getRenderValue());
 		assertEquals(FooEnum.BAZ, b.getValue());
 	}
 
 	@Test
 	public void getBindingMultiValuedTypeConversionFailure() {
-		Binding b = bindingFactory.getBinding("foos");
+		FieldModel b = presentationModel.getFieldModel("foos");
 		assertTrue(b.isList());
 		assertEquals(null, b.getValue());
-		b.applySourceValue(new String[] { "BAR", "BOGUS", "BOOP" });
-		assertEquals(BindingStatus.INVALID_SOURCE_VALUE, b.getBindingStatus());
+		b.applySubmittedValue(new String[] { "BAR", "BOGUS", "BOOP" });
+		assertEquals(BindingStatus.INVALID_SUBMITTED_VALUE, b.getBindingStatus());
 		assertEquals("typeMismatch", b.getStatusAlert().getCode());
 	}
 
@@ -263,7 +266,7 @@ public class GenericBinderTests {
 	public void bindToListSingleString() {
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 		formatterRegistry.add(new CollectionTypeDescriptor(List.class, Address.class), new AddressListFormatter());
-		bindingFactory.setFormatterRegistry(formatterRegistry);
+		presentationModel.setFormatterRegistry(formatterRegistry);
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values
 				.put("addresses",
@@ -310,7 +313,7 @@ public class GenericBinderTests {
 	public void getListAsSingleString() {
 		GenericFormatterRegistry formatterRegistry = new GenericFormatterRegistry();
 		formatterRegistry.add(new CollectionTypeDescriptor(List.class, Address.class), new AddressListFormatter());
-		bindingFactory.setFormatterRegistry(formatterRegistry);
+		presentationModel.setFormatterRegistry(formatterRegistry);
 		Address address1 = new Address();
 		address1.setStreet("s1");
 		address1.setCity("c1");
@@ -325,8 +328,8 @@ public class GenericBinderTests {
 		addresses.add(address1);
 		addresses.add(address2);
 		bean.addresses = addresses;
-		String value = bindingFactory.getBinding("addresses").getRenderValue();
-		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2,", value);
+		String value = presentationModel.getFieldModel("addresses").getRenderValue();
+		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2", value);
 	}
 
 	@Test
@@ -345,7 +348,7 @@ public class GenericBinderTests {
 		addresses.add(address1);
 		addresses.add(address2);
 		bean.addresses = addresses;
-		String value = bindingFactory.getBinding("addresses").getRenderValue();
+		String value = presentationModel.getFieldModel("addresses").getRenderValue();
 		assertEquals("s1:c1:st1:z1,s2:c2:st2:z2", value);
 	}
 
@@ -424,7 +427,7 @@ public class GenericBinderTests {
 		foods.put(FoodGroup.FRUIT, "Peaches");
 		foods.put(FoodGroup.MEAT, "Ham");
 		bean.favoriteFoodsByGroup = foods;
-		String value = bindingFactory.getBinding("favoriteFoodsByGroup").getRenderValue();
+		String value = presentationModel.getFieldModel("favoriteFoodsByGroup").getRenderValue();
 		// TODO this is inconsistent with previous test case
 		assertEquals("{DAIRY=Milk, FRUIT=Peaches, MEAT=Ham}", value);
 	}
@@ -439,15 +442,15 @@ public class GenericBinderTests {
 
 	@Test
 	public void formatPossibleValue() {
-		bindingFactory.bindingRule("currency").formatWith(new CurrencyFormatter());
-		Binding b = bindingFactory.getBinding("currency");
+		presentationModel.field("currency").formatWith(new CurrencyFormatter());
+		FieldModel b = presentationModel.getFieldModel("currency");
 		assertEquals("$5.00", b.formatValue(new BigDecimal("5")));
 	}
 
 	@Test
 	public void formatPossibleValueDefault() {
-		bindingFactory.bindingRule("currency");
-		Binding b = bindingFactory.getBinding("currency");
+		presentationModel.field("currency");
+		FieldModel b = presentationModel.getFieldModel("currency");
 		assertEquals("5", b.formatValue(new BigDecimal("5")));
 	}
 
