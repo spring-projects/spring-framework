@@ -18,7 +18,7 @@ package org.springframework.ui.binding.config;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A fluent interface for configuring a newly added binding rule.
+ * A fluent interface for configuring a newly added field model.
  * @author Keith Donald
  */
 public interface FieldModelConfiguration {
