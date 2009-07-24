@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @since 3.0
  * @see #setMessageSource(MessageSource)
- * @see #setTypeConverter(TypeConverter)
+ * @see #setRequiredFields(String[])
  * @see #bind(Map)
  */
 public class GenericBinder implements Binder {
