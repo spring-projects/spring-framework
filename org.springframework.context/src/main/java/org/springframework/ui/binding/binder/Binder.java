@@ -17,23 +17,19 @@ package org.springframework.ui.binding.binder;
 
 import java.util.Map;
 
-import org.springframework.ui.binding.FieldModel;
-
 /**
- * Binds user-entered values to properties of a model object.
+ * Bind to fields of a model object.
  * @author Keith Donald
  * @since 3.0
- * @see #bind(String)
  * @see #bind(Map)
  */
 public interface Binder {
 	
 	/**
-	 * Bind the source values to the properties of the model.
-	 * A result is returned for each registered {@link FieldModel}.
+	 * Bind submitted field values.
 	 * @param fieldValues the field values to bind
 	 * @return the results of the binding operation
-	 * @throws MissingFieldException when the fieldValues Map is missing entries for required bindings
+	 * @throws MissingFieldException when the fieldValues Map is missing required fields
 	 */
 	BindingResults bind(Map<String, ? extends Object> fieldValues);
 
