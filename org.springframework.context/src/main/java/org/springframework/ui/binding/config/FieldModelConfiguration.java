@@ -31,12 +31,12 @@ public interface FieldModelConfiguration {
 	FieldModelConfiguration formatWith(Formatter<?> formatter);
 
 	/**
-	 * If a map property, set the Formatter to use to format map keys.
+	 * If a Map field, set the Formatter to use to format map keys.
 	 */
 	FieldModelConfiguration formatKeysWith(Formatter<?> formatter);
 
 	/**
-	 * If an list or map property, set the Formatter to use to format indexed elements.
+	 * If an List, array, or Map, set the Formatter to use to format indexed elements.
 	 */
 	FieldModelConfiguration formatElementsWith(Formatter<?> formatter);
 
