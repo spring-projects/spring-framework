@@ -29,7 +29,7 @@ import org.springframework.ui.binding.PresentationModel;
  * @see #setDefaultPrefix(String)
  * @see #setPresentPrefix(String)
  */
-public class WebBinder extends GenericBinder {
+public class WebBinder extends PresentationModelBinder {
 
 	private String defaultPrefix = "!";
 

@@ -38,7 +38,7 @@ import org.springframework.ui.message.MockMessageSource;
 
 public class GenericBinderTests {
 
-	private GenericBinder binder;
+	private PresentationModelBinder binder;
 
 	private DefaultPresentationModel presentationModel;
 
@@ -48,7 +48,7 @@ public class GenericBinderTests {
 	public void setUp() {
 		bean = new TestBean();
 		presentationModel = new DefaultPresentationModel(bean);
-		binder = new GenericBinder(presentationModel);
+		binder = new PresentationModelBinder(presentationModel);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
