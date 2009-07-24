@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,12 @@ import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -66,11 +70,22 @@ import org.springframework.util.Assert;
  * @see Required
  */
 public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements PriorityOrdered {
+		implements PriorityOrdered, BeanFactoryAware {
+
+	/**
+	 * Bean definition attribute that may indicate whether a given bean is supposed
+	 * to be skipped when performing this post-processor's required property check.
+	 * @see #shouldSkip
+	 */
+	public static final String SKIP_REQUIRED_CHECK_ATTRIBUTE =
+			Conventions.getQualifiedAttributeName(RequiredAnnotationBeanPostProcessor.class, "skipRequiredCheck");
+
 
 	private Class<? extends Annotation> requiredAnnotationType = Required.class;
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 1;
+
+	private ConfigurableListableBeanFactory beanFactory;
 
 	/** Cache for validated bean names, skipping re-validation for the same bean */
 	private final Set<String> validatedBeanNames = Collections.synchronizedSet(new HashSet<String>());
@@ -97,6 +112,12 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		return this.requiredAnnotationType;
 	}
 
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
+			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		}
+	}
+
 	public void setOrder(int order) {
 	  this.order = order;
 	}
@@ -112,18 +133,34 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 			throws BeansException {
 
 		if (!this.validatedBeanNames.contains(beanName)) {
-			List<String> invalidProperties = new ArrayList<String>();
-			for (PropertyDescriptor pd : pds) {
-				if (isRequiredProperty(pd) && !pvs.contains(pd.getName())) {
-					invalidProperties.add(pd.getName());
+			if (!shouldSkip(this.beanFactory, beanName)) {
+				List<String> invalidProperties = new ArrayList<String>();
+				for (PropertyDescriptor pd : pds) {
+					if (isRequiredProperty(pd) && !pvs.contains(pd.getName())) {
+						invalidProperties.add(pd.getName());
+					}
 				}
-			}
-			if (!invalidProperties.isEmpty()) {
-				throw new BeanInitializationException(buildExceptionMessage(invalidProperties, beanName));
+				if (!invalidProperties.isEmpty()) {
+					throw new BeanInitializationException(buildExceptionMessage(invalidProperties, beanName));
+				}
 			}
 			this.validatedBeanNames.add(beanName);
 		}
 		return pvs;
+	}
+
+	/**
+	 * Check whether the given bean definition is not subject to the annotation-based
+	 * required property check as performed by this post-processor.
+	 * <p>The default implementations check for the presence of the
+	 * {@link #SKIP_REQUIRED_CHECK_ATTRIBUTE} attribute in the bean definition, if any.
+	 * @param beanFactory the BeanFactory to check against
+	 * @param beanName the name of the bean to check against
+	 * @return <code>true</code> to skip the bean; <code>false</code> to process it
+	 */
+	protected boolean shouldSkip(ConfigurableListableBeanFactory beanFactory, String beanName) {
+		return (beanFactory != null && beanFactory.containsBeanDefinition(beanName) &&
+				Boolean.TRUE.equals(beanFactory.getBeanDefinition(beanName).getAttribute(SKIP_REQUIRED_CHECK_ATTRIBUTE)));
 	}
 
 	/**

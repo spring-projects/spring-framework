@@ -23,7 +23,8 @@ import test.beans.TestBean;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -56,9 +57,11 @@ public class ConfigurationClassProcessingTests {
 			String configBeanName = configClass.getName();
 			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
 		}
-		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		pp.postProcessBeanFactory(factory);
-		factory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
+		ccpp.postProcessBeanFactory(factory);
+		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
+		rapp.setBeanFactory(factory);
+		factory.addBeanPostProcessor(rapp);
 		return factory;
 	}
 
@@ -161,13 +164,13 @@ public class ConfigurationClassProcessingTests {
 	static class ConfigWithPrototypeBean {
 
 		public @Bean TestBean foo() {
-			TestBean foo = new TestBean("foo");
+			TestBean foo = new SpousyTestBean("foo");
 			foo.setSpouse(bar());
 			return foo;
 		}
 
 		public @Bean TestBean bar() {
-			TestBean bar = new TestBean("bar");
+			TestBean bar = new SpousyTestBean("bar");
 			bar.setSpouse(baz());
 			return bar;
 		}
@@ -175,6 +178,20 @@ public class ConfigurationClassProcessingTests {
 		@Bean @Scope("prototype")
 		public TestBean baz() {
 			return new TestBean("bar");
+		}
+	}
+
+
+	private static class SpousyTestBean extends TestBean {
+
+		public SpousyTestBean(String name) {
+			super(name);
+		}
+
+		@Override
+		@Required
+		public void setSpouse(ITestBean spouse) {
+			super.setSpouse(spouse);
 		}
 	}
 
