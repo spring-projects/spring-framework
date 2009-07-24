@@ -22,11 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.binding.BindingStatus;
-import org.springframework.ui.binding.binder.BindingResults;
-import org.springframework.ui.binding.binder.GenericBinder;
-import org.springframework.ui.binding.binder.MissingFieldException;
+import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.binding.support.CollectionTypeDescriptor;
 import org.springframework.ui.binding.support.DefaultPresentationModel;
 import org.springframework.ui.binding.support.GenericFormatterRegistry;
@@ -376,8 +373,6 @@ public class GenericBinderTests {
 		values.put("addresses[5].zip", "32901");
 
 		BindingResults results = binder.bind(values);
-		System.out.println(results);
-		System.out.println(bean);
 		Assert.assertEquals(6, bean.addresses.size());
 		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 		Assert.assertNotNull(bean.addresses.get(2));
@@ -388,7 +383,7 @@ public class GenericBinderTests {
 	public void bindToMap() {
 		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
 		values.put("favoriteFoodsByGroup", new String[] { "DAIRY=Milk", "FRUIT=Peaches", "MEAT=Ham" });
-		BindingResults results = binder.bind(values);
+		binder.bind(values);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
@@ -401,8 +396,7 @@ public class GenericBinderTests {
 		values.put("favoriteFoodsByGroup[DAIRY]", "Milk");
 		values.put("favoriteFoodsByGroup[FRUIT]", "Peaches");
 		values.put("favoriteFoodsByGroup[MEAT]", "Ham");
-		BindingResults results = binder.bind(values);
-		System.out.println(results);
+		binder.bind(values);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
