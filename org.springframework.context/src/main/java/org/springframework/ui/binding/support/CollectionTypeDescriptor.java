@@ -18,6 +18,11 @@ package org.springframework.ui.binding.support;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
+/**
+ * A type descriptor for a parameterizable collection type such as a java.util.List&lt;?&gt;.
+ * @author Keith Donald
+ * @since 3.0
+ */
 public class CollectionTypeDescriptor {
 
 	private Class<?> type;
@@ -38,7 +43,7 @@ public class CollectionTypeDescriptor {
 	}
 
 	/**
-	 * The element type.
+	 * The parameterized collection element type.
 	 */
 	public Class<?> getElementType() {
 		return elementType;
