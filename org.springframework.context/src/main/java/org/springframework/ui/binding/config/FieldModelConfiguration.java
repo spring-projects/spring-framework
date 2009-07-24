@@ -15,11 +15,13 @@
  */
 package org.springframework.ui.binding.config;
 
+import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A fluent interface for configuring a newly added field model.
+ * A fluent interface for configuring a {@link FieldModel}.
  * @author Keith Donald
+ * @since 3.0
  */
 public interface FieldModelConfiguration {
 	
