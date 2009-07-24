@@ -102,12 +102,12 @@ public class DefaultPresentationModel implements PresentationModel {
 	}
 
 	/**
-	 * Add a FieldModel rule at the domain object property path.
-	 * @param propertyPath the domain object property path in format &lt;prop&gt;[.nestedProp]
-	 * @return a builder for the field model configuration
+	 * Add a FieldModel configuration at the path specified.
+	 * @param fieldPath the domain object property path in format &lt;prop&gt;[.nestedProp]
+	 * @return a builder for the {@link FieldModel} configuration
 	 */
-	public FieldModelConfiguration field(String propertyPath) {
-		FieldPath path = new FieldPath(propertyPath);
+	public FieldModelConfiguration field(String fieldPath) {
+		FieldPath path = new FieldPath(fieldPath);
 		PropertyFieldModelRule rule = getRule(path.getFirstElement().getValue());
 		for (FieldPathElement element : path.getNestedElements()) {
 			rule = rule.getNestedRule(element.getValue());

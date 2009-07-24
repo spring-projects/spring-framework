@@ -15,16 +15,34 @@
  */
 package org.springframework.ui.binding.config;
 
+import org.springframework.ui.binding.FieldModel;
+
+/**
+ * A FieldModel condition.
+ * @author Keith Donald
+ * @see FieldModel#isEnabled()
+ * @see FieldModel#isEditable()
+ * @see FieldModel#isVisible()
+ */
 public interface Condition {
 	
+	/**
+	 * Is the condition true or false?
+	 */
 	boolean isTrue();
 	
+	/**
+	 * The condition is always true.
+	 */
 	static final Condition ALWAYS_TRUE = new Condition() {
 		public boolean isTrue() {
 			return true;
 		}
 	};
 
+	/**
+	 * The condition is always false.
+	 */
 	static final Condition ALWAYS_FALSE = new Condition() {
 		public boolean isTrue() {
 			return false;
