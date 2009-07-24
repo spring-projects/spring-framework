@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @see #setRequiredFields(String[])
  * @see #bind(Map)
  */
-public class GenericBinder implements Binder {
+public class PresentationModelBinder implements Binder {
 
 	private PresentationModel presentationModel;
 	
@@ -42,7 +42,7 @@ public class GenericBinder implements Binder {
 	
 	private MessageSource messageSource;
 
-	public GenericBinder(PresentationModel presentationModel) {
+	public PresentationModelBinder(PresentationModel presentationModel) {
 		Assert.notNull(presentationModel, "The PresentationModel is required");
 		this.presentationModel = presentationModel;
 	}
