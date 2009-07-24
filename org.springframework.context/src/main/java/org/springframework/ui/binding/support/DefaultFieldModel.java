@@ -41,6 +41,11 @@ import org.springframework.ui.format.Formatter;
 import org.springframework.ui.message.MessageBuilder;
 import org.springframework.ui.message.ResolvableArgument;
 
+/**
+ * Default FieldModel implementation suitable for use in most environments.
+ * @author Keith Donald
+ * @since 3.0
+ */
 public class DefaultFieldModel implements FieldModel {
 
 	private ValueModel valueModel;

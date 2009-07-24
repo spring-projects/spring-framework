@@ -22,8 +22,9 @@ import org.springframework.ui.binding.PresentationModel;
 import org.springframework.ui.binding.PresentationModelFactory;
 
 /**
- * BindingFactoryLocator implementation that uses a {@link IdentityHashMap} to map models to BindingFactories.
+ * Default PresentationModelFactory implementation that uses a {@link IdentityHashMap} to map domain models to PresentationModels.
  * @author Keith Donald
+ * @since 3.0
  */
 public class DefaultPresentationModelFactory implements PresentationModelFactory {
 

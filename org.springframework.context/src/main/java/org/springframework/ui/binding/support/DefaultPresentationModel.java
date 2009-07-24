@@ -32,20 +32,19 @@ import org.springframework.core.convert.support.DefaultTypeConverter;
 import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.binding.FieldNotFoundException;
 import org.springframework.ui.binding.PresentationModel;
-import org.springframework.ui.binding.binder.Binder;
-import org.springframework.ui.binding.config.FieldModelConfiguration;
 import org.springframework.ui.binding.config.Condition;
+import org.springframework.ui.binding.config.FieldModelConfiguration;
 import org.springframework.ui.format.Formatter;
 import org.springframework.util.Assert;
 
 /**
- * A generic {@link Binder binder} suitable for use in most environments.
+ * A default PresentationModel implementation suitable for use in most environments.
  * @author Keith Donald
  * @since 3.0
  * @see #setFormatterRegistry(FormatterRegistry)
  * @see #setMessageSource(MessageSource)
  * @see #setTypeConverter(TypeConverter)
- * @see #bind(Map)
+ * @see #field(String)
  */
 public class DefaultPresentationModel implements PresentationModel {
 
@@ -103,9 +102,9 @@ public class DefaultPresentationModel implements PresentationModel {
 	}
 
 	/**
-	 * Add a a new FieldModelRule for the property at the path specified.
-	 * @param propertyPath binding rule property path in format prop.nestedProp
-	 * @return a builder for the binding rule
+	 * Add a FieldModel rule at the domain object property path.
+	 * @param propertyPath the domain object property path in format &lt;prop&gt;[.nestedProp]
+	 * @return a builder for the field model configuration
 	 */
 	public FieldModelConfiguration field(String propertyPath) {
 		FieldPath path = new FieldPath(propertyPath);
@@ -116,6 +115,9 @@ public class DefaultPresentationModel implements PresentationModel {
 		return rule;
 	}
 
+	/**
+	 * The domain-layer model this presentation model coordinates with.
+	 */
 	public Object getDomainModel() {
 		return domainModel;
 	}
