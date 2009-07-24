@@ -18,8 +18,8 @@ package org.springframework.ui.binding.binder;
 import org.springframework.ui.binding.config.FieldModelConfiguration;
 
 /**
- * A SPI interface that lets you configure a model binder, then execute it.
- * Hides details about the source of binder source values.
+ * A SPI interface that lets you configure a {@link Binder}, then execute it.
+ * Hides details about the source of binder field values.
  * @author Keith Donald
  * @since 3.0
  * @param <M> the type of model to bind to
@@ -33,11 +33,11 @@ public interface BinderExecutor<M> {
 	void setModel(M model);
 	
 	/**
-	 * Add a binding rule for the model property.
-	 * @param property the model property
-	 * @return a builder API for configuring the rule
+	 * Configure a bindable field.
+	 * @param fieldPath the field path, typically a domain object property path on the model object in format &lt;prop&gt;[.nestedProp]
+	 * @return a builder for the field model configuration
 	 */
-	FieldModelConfiguration bindingRule(String property);
+	FieldModelConfiguration field(String fieldPath);
 
 	// TODO allow injection of pre-created BindingRules
 

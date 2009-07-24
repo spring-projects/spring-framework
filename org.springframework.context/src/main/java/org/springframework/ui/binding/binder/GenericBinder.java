@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.MessageSource;
-import org.springframework.core.convert.TypeConverter;
+import org.springframework.ui.binding.BindingStatus;
 import org.springframework.ui.binding.FieldModel;
 import org.springframework.ui.binding.FieldNotFoundException;
 import org.springframework.ui.binding.PresentationModel;
-import org.springframework.ui.binding.BindingStatus;
 import org.springframework.util.Assert;
 
 /**
