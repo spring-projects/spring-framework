@@ -21,10 +21,10 @@ import java.util.Map;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.convert.TypeConverter;
-import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.BindingFactory;
+import org.springframework.ui.binding.FieldModel;
+import org.springframework.ui.binding.FieldNotFoundException;
+import org.springframework.ui.binding.PresentationModel;
 import org.springframework.ui.binding.BindingStatus;
-import org.springframework.ui.binding.support.PropertyNotFoundException;
 import org.springframework.util.Assert;
 
 /**
@@ -37,15 +37,15 @@ import org.springframework.util.Assert;
  */
 public class GenericBinder implements Binder {
 
-	private BindingFactory bindingFactory;
+	private PresentationModel presentationModel;
 	
-	private String[] requiredProperties;
+	private String[] requiredFields;
 	
 	private MessageSource messageSource;
 
-	public GenericBinder(BindingFactory bindingFactory) {
-		Assert.notNull(bindingFactory, "The BindingFactory is required");
-		this.bindingFactory = bindingFactory;
+	public GenericBinder(PresentationModel presentationModel) {
+		Assert.notNull(presentationModel, "The PresentationModel is required");
+		this.presentationModel = presentationModel;
 	}
 
 	/**
@@ -58,34 +58,38 @@ public class GenericBinder implements Binder {
 	}
 	
 	/**
-	 * Configure the properties for which source values must be present in each bind attempt.
-	 * @param propertyPaths the property path expressions
-	 * @see MissingSourceValuesException
+	 * Configure the fields for which values must be present in each bind attempt.
+	 * @param fieldNames the field names
+	 * @see MissingFieldException
 	 */
-	public void setRequired(String[] propertyPaths) {
-		this.requiredProperties = propertyPaths;
+	public void setRequiredFields(String[] fieldNames) {
+		this.requiredFields = fieldNames;
 	}
 	
-	public Object getModel() {
-		return bindingFactory.getModel();
-	}
+	// subclassing hooks
 	
-	protected Binding getBinding(String property) {
-		return bindingFactory.getBinding(property);
+	/**
+	 * Get the model for the field.
+	 * @param fieldName
+	 * @return the field model
+	 * @throws NoSuchFieldException if no such field exists
+	 */
+	protected FieldModel getFieldModel(String fieldName) {
+		return presentationModel.getFieldModel(fieldName);
 	}
 
 	// implementing Binder
 
-	public BindingResults bind(Map<String, ? extends Object> sourceValues) {
-		sourceValues = filter(sourceValues);
-		checkRequired(sourceValues);
-		ArrayListBindingResults results = new ArrayListBindingResults(sourceValues.size());
-		for (Map.Entry<String, ? extends Object> sourceValue : sourceValues.entrySet()) {
+	public BindingResults bind(Map<String, ? extends Object> fieldValues) {
+		fieldValues = filter(fieldValues);
+		checkRequired(fieldValues);
+		ArrayListBindingResults results = new ArrayListBindingResults(fieldValues.size());
+		for (Map.Entry<String, ? extends Object> fieldValue : fieldValues.entrySet()) {
 			try {
-				Binding binding = getBinding(sourceValue.getKey());
-				results.add(bind(sourceValue, binding));
-			} catch (PropertyNotFoundException e) {
-				results.add(new PropertyNotFoundResult(sourceValue.getKey(), sourceValue.getValue(), messageSource));
+				FieldModel field = getFieldModel(fieldValue.getKey());
+				results.add(bind(fieldValue, field));
+			} catch (FieldNotFoundException e) {
+				results.add(new FieldNotFoundResult(fieldValue.getKey(), fieldValue.getValue(), messageSource));
 			}
 		}
 		return results;
@@ -95,26 +99,26 @@ public class GenericBinder implements Binder {
 
 	/**
 	 * Hook subclasses may use to filter the source values to bind.
-	 * This hook allows the binder to pre-process the source values before binding occurs.
+	 * This hook allows the binder to pre-process the field values before binding occurs.
 	 * For example, a Binder might insert empty or default values for fields that are not present.
 	 * As another example, a Binder might collapse multiple source values into a single source value. 
-	 * @param sourceValues the original source values map provided by the caller
-	 * @return the filtered source values map that will be used to bind
+	 * @param fieldValues the original fieldValues map provided by the caller
+	 * @return the filtered fieldValues map that will be used to bind
 	 */
-	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> sourceValues) {
-		return sourceValues;
+	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues) {
+		return fieldValues;
 	}
 
 	// internal helpers
 
-	private void checkRequired(Map<String, ? extends Object> sourceValues) {
-		if (requiredProperties == null) {
+	private void checkRequired(Map<String, ? extends Object> fieldValues) {
+		if (requiredFields == null) {
 			return;
 		}
 		List<String> missingRequired = new ArrayList<String>();
-		for (String required : requiredProperties) {
+		for (String required : requiredFields) {
 			boolean found = false;
-			for (String property : sourceValues.keySet()) {
+			for (String property : fieldValues.keySet()) {
 				if (property.equals(required)) {
 					found = true;
 				}
@@ -124,21 +128,21 @@ public class GenericBinder implements Binder {
 			}
 		}
 		if (!missingRequired.isEmpty()) {
-			throw new MissingSourceValuesException(missingRequired, sourceValues);
+			throw new MissingFieldException(missingRequired, fieldValues);
 		}
 	}
 
-	private BindingResult bind(Map.Entry<String, ? extends Object> sourceValue, Binding binding) {
-		String property = sourceValue.getKey();
-		Object value = sourceValue.getValue();
-		if (!binding.isEditable()) {
-			return new PropertyNotEditableResult(property, value, messageSource);
+	private BindingResult bind(Map.Entry<String, ? extends Object> fieldValue, FieldModel field) {
+		String fieldName = fieldValue.getKey();
+		Object value = fieldValue.getValue();
+		if (!field.isEditable()) {
+			return new FieldNotEditableResult(fieldName, value, messageSource);
 		} else {
-			binding.applySourceValue(value);
-			if (binding.getBindingStatus() == BindingStatus.DIRTY) {
-				binding.commit();
+			field.applySubmittedValue(value);
+			if (field.getBindingStatus() == BindingStatus.DIRTY) {
+				field.commit();
 			}
-			return new BindingStatusResult(property, value, binding.getStatusAlert());
+			return new BindingStatusResult(fieldName, value, field.getStatusAlert());
 		}
 	}
 	

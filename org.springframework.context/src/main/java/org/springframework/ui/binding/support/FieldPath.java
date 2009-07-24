@@ -20,11 +20,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class PropertyPath implements Iterable<PropertyPathElement> {
+class FieldPath implements Iterable<FieldPathElement> {
 
-	private List<PropertyPathElement> elements = new ArrayList<PropertyPathElement>();
+	private List<FieldPathElement> elements = new ArrayList<FieldPathElement>();
 
-	public PropertyPath(String propertyPath) {
+	public FieldPath(String propertyPath) {
 		// a.b.c[i].d[key].e
 		String[] props = propertyPath.split("\\.");
 		if (props.length == 0) {
@@ -35,19 +35,19 @@ public class PropertyPath implements Iterable<PropertyPathElement> {
 				int start = prop.indexOf('[');
 				int end = prop.indexOf(']', start);
 				String index = prop.substring(start + 1, end);
-				elements.add(new PropertyPathElement(prop.substring(0, start), false));
-				elements.add(new PropertyPathElement(index, true));
+				elements.add(new FieldPathElement(prop.substring(0, start), false));
+				elements.add(new FieldPathElement(index, true));
 			} else {
-				elements.add(new PropertyPathElement(prop, false));
+				elements.add(new FieldPathElement(prop, false));
 			}
 		}
 	}
 
-	public PropertyPathElement getFirstElement() {
+	public FieldPathElement getFirstElement() {
 		return elements.get(0);
 	}
 
-	public List<PropertyPathElement> getNestedElements() {
+	public List<FieldPathElement> getNestedElements() {
 		if (elements.size() > 1) {
 			return elements.subList(1, elements.size());
 		} else {
@@ -55,12 +55,11 @@ public class PropertyPath implements Iterable<PropertyPathElement> {
 		}
 	}
 
-	public Iterator<PropertyPathElement> iterator() {
+	public Iterator<FieldPathElement> iterator() {
 		return elements.iterator();
 	}
 	
 	public String toString() {
 		return elements.toString();
 	}
-
 }

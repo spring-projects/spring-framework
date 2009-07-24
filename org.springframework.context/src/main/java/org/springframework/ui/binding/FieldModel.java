@@ -19,11 +19,11 @@ import org.springframework.ui.alert.Alert;
 import org.springframework.ui.alert.Severity;
 
 /**
- * A binding between one or more UI components and a model property.
+ * A model for a single data field containing dynamic information to display in the view.
  * @author Keith Donald
  * @since 3.0
  */
-public interface Binding {
+public interface FieldModel {
 
 	/**
 	 * The model value formatted for display in a single field in the UI.
@@ -33,47 +33,47 @@ public interface Binding {
 	String getRenderValue();
 
 	/**
-	 * The bound model value.
+	 * The field model value.
 	 */
 	Object getValue();
 	
 	/**
-	 * The bound model value type.
+	 * The field model value type.
 	 */
 	Class<?> getValueType();	
 	
 	/**
-	 * If this Binding is editable.
+	 * If editable.
 	 * Used to determine if the user can edit the field value.
-	 * A Binding that is not editable cannot have source values applied and cannot be committed.
+	 * A Binding that is not editable cannot have submitted values applied and cannot be committed.
 	 */
 	boolean isEditable();
 	
 	/**
-	 * If this Binding is enabled.
+	 * If enabled.
 	 * Used to determine if the user can interact with the field at all.
-	 * A Binding that is not enabled cannot have source values applied and cannot be committed.
+	 * A Binding that is not enabled cannot have submitted values applied and cannot be committed.
 	 */
 	boolean isEnabled();
 	
 	/**
-	 * If this Binding is visible.
+	 * If visible.
 	 * Used to determine if the user can see the field.
 	 */
 	boolean isVisible();
 
 	/**
-	 * The current binding status.
+	 * The current field binding status.
 	 * Initially {@link BindingStatus#CLEAN clean}.
-	 * Is {@link BindingStatus#DIRTY} after applying a source value to the value buffer.
+	 * Is {@link BindingStatus#DIRTY} after applying a submitted value to the value buffer.
 	 * Is {@link BindingStatus#COMMITTED} after successfully committing the buffered value.
-	 * Is {@link BindingStatus#INVALID_SOURCE_VALUE} if a source value could not be applied.
+	 * Is {@link BindingStatus#INVALID_SUBMITTED_VALUE} if a submitted value could not be applied.
 	 * Is {@link BindingStatus#COMMIT_FAILURE} if a buffered value could not be committed.
 	 */
 	BindingStatus getBindingStatus();
 
 	/**
-	 * The current validation status.
+	 * The current field validation status.
 	 * Initially {@link ValidationStatus#NOT_VALIDATED}.
 	 * Is {@link ValidationStatus#VALID} after value is successfully validated.
 	 * Is {@link ValidationStatus#INVALID} after value fails validation.
@@ -82,31 +82,31 @@ public interface Binding {
 	ValidationStatus getValidationStatus();
 	
 	/**
-	 * An alert that communicates current status to the user.
+	 * An alert that communicates current FieldModel status to the user.
 	 * Returns <code>null</code> if {@link BindingStatus#CLEAN} and {@link ValidationStatus#NOT_VALIDATED}.
 	 * Returns a {@link Severity#INFO} Alert with code <code>bindSuccess</code> when {@link BindingStatus#COMMITTED}.
-	 * Returns a {@link Severity#ERROR} Alert with code <code>typeMismatch</code> when {@link BindingStatus#INVALID_SOURCE_VALUE} or {@link BindingStatus#COMMIT_FAILURE} due to a value parse / type conversion error.
+	 * Returns a {@link Severity#ERROR} Alert with code <code>typeMismatch</code> when {@link BindingStatus#INVALID_SUBMITTED_VALUE} or {@link BindingStatus#COMMIT_FAILURE} due to a value parse / type conversion error.
 	 * Returns a {@link Severity#FATAL} Alert with code <code>internalError</code> when {@link BindingStatus#COMMIT_FAILURE} due to a unexpected runtime exception.
 	 * Returns a {@link Severity#INFO} Alert describing results of validation if {@link ValidationStatus#VALID} or {@link ValidationStatus#INVALID}.
 	 */
 	Alert getStatusAlert();
 	
 	/**
-	 * Apply the source value to this binding.
-	 * The source value is parsed and stored in the binding's value buffer.
+	 * Apply a submitted value to this FieldModel.
+	 * The submitted value is parsed and stored in the value buffer.
 	 * Sets to {@link BindingStatus#DIRTY} if succeeds.
-	 * Sets to {@link BindingStatus#INVALID_SOURCE_VALUE} if fails.
-	 * @param sourceValue
+	 * Sets to {@link BindingStatus#INVALID_SUBMITTED_VALUE} if fails.
+	 * @param submittedValue
 	 * @throws IllegalStateException if not editable or not enabled
 	 */
-	void applySourceValue(Object sourceValue);
+	void applySubmittedValue(Object submittedValue);
 	
 	/**
-	 * If {@link BindingStatus#INVALID_SOURCE_VALUE}, returns the invalid source value.
+	 * If {@link BindingStatus#INVALID_SUBMITTED_VALUE}, returns the invalid submitted value.
 	 * Returns null otherwise.
-	 * @return the invalid source value
+	 * @return the invalid submitted value
 	 */
-	Object getInvalidSourceValue();
+	Object getInvalidSubmittedValue();
 	
 	/**
 	 * Validate the model value.
@@ -130,45 +130,46 @@ public interface Binding {
 	void revert();
 
 	/**
-	 * Get a Binding to a nested property value.
-	 * @param property the nested property name, such as "foo"; should not be a property path like "foo.bar"
-	 * @return the binding to the nested property
-	 * @throws IllegalStateException if not a bean
+	 * Get a model for a nested field.
+	 * @param fieldName the nested field name, such as "foo"; should not be a property path like "foo.bar"
+	 * @return the nested field model
+	 * @throws IllegalStateException if {@link #isList()}
+	 * @throws FieldNotFoundException if no such nested field exists
 	 */
-	Binding getNestedBinding(String property);
+	FieldModel getNested(String fieldName);
 
 	/**
-	 * If bound to an indexable collection, either a {@link java.util.List} or an array.
+	 * If an indexable {@link java.util.List} or array.
 	 */
 	boolean isList();
 
 	/**
-	 * If a list, get a Binding to a element in the list..
+	 * If {@link #isList()}, get a FieldModel for a element in the list..
 	 * @param index the element index
 	 * @return the indexed binding
 	 * @throws IllegalStateException if not a list
 	 */
-	Binding getListElementBinding(int index);
+	FieldModel getListElement(int index);
 
 	/**
-	 * If bound to a Map.
+	 * If a Map.
 	 */
 	boolean isMap();
 
 	/**
-	 * If a Map, get a Binding to a value in the Map.
+	 * If {@link #isMap()}, get FieldModel for a value in the Map.
 	 * @param key the map key
 	 * @return the keyed binding
 	 * @throws IllegalStateException if not a map 
 	 */
-	Binding getMapValueBinding(Object key);
+	FieldModel getMapValue(Object key);
 
 	/**
 	 * Format a potential model value for display.
-	 * If a list binding, expects the model value to be a potential list element & uses the configured element formatter.
-	 * If a map binding, expects the model value to be a potential map value & uses the configured map value formatter.
+	 * If {@link #isList()}, expects the value to be a potential list element & uses the configured element formatter.
+	 * If {@link #isMap()}, expects the value to be a potential map value & uses the configured map value formatter.
 	 * @param potentialValue the potential value
 	 * @return the formatted string
 	 */
-	String formatValue(Object potentialModelValue);
+	String formatValue(Object potentialValue);
 }

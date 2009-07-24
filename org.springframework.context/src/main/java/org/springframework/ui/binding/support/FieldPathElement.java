@@ -13,22 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding;
+package org.springframework.ui.binding.support;
 
-/**
- * A locator for BindingFactories indexed by their models.
- * Makes it easy for clients to lookup BindingFactories for models the need to bind to.
- * @author Keith Donald
- * @since 3.0
- */
-public interface BindingFactoryLocator {
+class FieldPathElement {
+
+	private String value;
+
+	private boolean index;
+
+	public FieldPathElement(String value, boolean index) {
+		this.value = value;
+		this.index = index;
+	}
+
+	public boolean isIndex() {
+		return index;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public int getIntValue() {
+		return Integer.parseInt(value);
+	}
 	
-	/**
-	 * Get the BindingFactory for the model object.
-	 * If no such BindingFactory exists, one is created and cached.
-	 * Never returns <code>null</code>.
-	 * @param model the model object
-	 * @return the binding Factory
-	 */
-	public BindingFactory getBindingFactory(Object model);
+	public String toString() {
+		return value + ";index=" + index;
+	}
 }

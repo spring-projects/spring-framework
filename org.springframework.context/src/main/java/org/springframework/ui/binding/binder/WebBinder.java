@@ -18,8 +18,8 @@ package org.springframework.ui.binding.binder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.ui.binding.Binding;
-import org.springframework.ui.binding.BindingFactory;
+import org.springframework.ui.binding.FieldModel;
+import org.springframework.ui.binding.PresentationModel;
 
 /**
  * A binder designed for use in HTTP (web) environments.
@@ -39,13 +39,12 @@ public class WebBinder extends GenericBinder {
 	 * Creates a new web binder for the model object.
 	 * @param model the model object containing properties this binder will bind to
 	 */
-	public WebBinder(BindingFactory bindingFactory) {
+	public WebBinder(PresentationModel bindingFactory) {
 		super(bindingFactory);
 	}
 
 	/**
-	 * Configure the prefix to detect the default user value for a property when no value was submitted.
-	 * This is used to configure a <i>default</i> {@link UserValue} for binding when no value is submitted by the client.
+	 * Configure the prefix used to detect the default value for a field when no value is submitted.
 	 * Default is '!'.
 	 */
 	public void setDefaultPrefix(String defaultPrefix) {
@@ -53,8 +52,8 @@ public class WebBinder extends GenericBinder {
 	}
 
 	/**
-	 * Configure the prefix to detect the presence of a property on the web UI when no user value for the property was actually submitted.
-	 * This is used to configure a <i>empty</i> {@link UserValue} for binding when no other {@link #setDefaultPrefix(String) default value} is specified by the client.
+	 * Configure the prefix used to detect the presence of a field on the web UI when no value was actually submitted.
+	 * This is used to configure a <i>empty</i> field when no other {@link #setDefaultPrefix(String) default value} is specified by the client.
 	 * Default is '_'.
 	 */
 	public void setPresentPrefix(String presentPrefix) {
@@ -62,20 +61,20 @@ public class WebBinder extends GenericBinder {
 	}
 
 	@Override
-	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> sourceValues) {
+	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues) {
 		LinkedHashMap<String, Object> filteredValues = new LinkedHashMap<String, Object>();
-		for (Map.Entry<String, ? extends Object> entry : sourceValues.entrySet()) {
+		for (Map.Entry<String, ? extends Object> entry : fieldValues.entrySet()) {
 			String field = entry.getKey();
 			Object value = entry.getValue();
 			if (field.startsWith(defaultPrefix)) {
 				field = field.substring(defaultPrefix.length());
-				if (!sourceValues.containsKey(field)) {
+				if (!fieldValues.containsKey(field)) {
 					filteredValues.put(field, value);
 				}
 			} else if (field.startsWith(presentPrefix)) {
 				field = field.substring(presentPrefix.length());
-				if (!sourceValues.containsKey(field) && !sourceValues.containsKey(defaultPrefix + field)) {
-					value = getEmptyValue(getBinding(field));
+				if (!fieldValues.containsKey(field) && !fieldValues.containsKey(defaultPrefix + field)) {
+					value = getEmptyValue(getFieldModel(field));
 					filteredValues.put(field, value);
 				}
 			} else {
@@ -85,7 +84,7 @@ public class WebBinder extends GenericBinder {
 		return filteredValues;
 	}
 
-	protected Object getEmptyValue(Binding binding) {
+	protected Object getEmptyValue(FieldModel binding) {
 		Class<?> type = binding.getValueType();
 		if (boolean.class.equals(type) || Boolean.class.equals(type)) {
 			return Boolean.FALSE;

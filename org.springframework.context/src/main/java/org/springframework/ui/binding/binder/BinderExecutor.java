@@ -15,7 +15,7 @@
  */
 package org.springframework.ui.binding.binder;
 
-import org.springframework.ui.binding.config.BindingRuleConfiguration;
+import org.springframework.ui.binding.config.FieldModelConfiguration;
 
 /**
  * A SPI interface that lets you configure a model binder, then execute it.
@@ -37,7 +37,7 @@ public interface BinderExecutor<M> {
 	 * @param property the model property
 	 * @return a builder API for configuring the rule
 	 */
-	BindingRuleConfiguration bindingRule(String property);
+	FieldModelConfiguration bindingRule(String property);
 
 	// TODO allow injection of pre-created BindingRules
 

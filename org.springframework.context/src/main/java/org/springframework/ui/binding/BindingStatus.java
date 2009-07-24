@@ -16,9 +16,10 @@
 package org.springframework.ui.binding;
 
 /**
- * Binding states.
+ * FieldModel binding states.
  * @author Keith Donald
  * @since 3.0
+ * @see FieldModel#getBindingStatus()
  */
 public enum BindingStatus {
 	
@@ -28,9 +29,9 @@ public enum BindingStatus {
 	CLEAN,
 	
 	/**
-	 * An invalid source value is applied.
+	 * An invalid submitted value is applied.
 	 */
-	INVALID_SOURCE_VALUE,
+	INVALID_SUBMITTED_VALUE,
 	
 	/**
 	 * The binding buffer contains a valid value that has not been committed.

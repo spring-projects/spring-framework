@@ -21,6 +21,11 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ReflectionUtils;
 
+/**
+ * A ValueModel for a bean property.
+ * @author Keith Donald
+ * @since 3.0
+ */
 public class PropertyValueModel implements ValueModel {
 
 	private PropertyDescriptor property;

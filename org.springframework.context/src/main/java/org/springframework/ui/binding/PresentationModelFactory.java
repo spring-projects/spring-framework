@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding.support;
+package org.springframework.ui.binding;
 
-@SuppressWarnings("serial")
-public class PropertyNotFoundException extends RuntimeException {
-
-	private String property;
-
-	private Class<?> modelClass;
-
-	public PropertyNotFoundException(String property, Class<?> modelClass) {
-		super("No property '" + property + "' found on model [" + modelClass.getName() + "]");
-		this.property = property;
-		this.modelClass = modelClass;
-	}
-
-	public String getProperty() {
-		return property;
-	}
-
-	public Class<?> getModelClass() {
-		return modelClass;
-	}
-
+/**
+ * A factory for domain object PresentationModels.
+ * Makes it easy for clients to lookup PresentationModels for domain objects they need to bind to.
+ * @author Keith Donald
+ * @since 3.0
+ */
+public interface PresentationModelFactory {
+	
+	/**
+	 * Get the PresentationModel for the domain object.
+	 * If none exists, one is created and cached.
+	 * Never returns <code>null</code>.
+	 * @param domainObject the model object
+	 * @return the presentation model
+	 */
+	public PresentationModel getPresentationModel(Object domainObject);
 }

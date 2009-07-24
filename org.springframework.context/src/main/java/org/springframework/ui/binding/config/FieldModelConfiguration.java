@@ -21,35 +21,35 @@ import org.springframework.ui.format.Formatter;
  * A fluent interface for configuring a newly added binding rule.
  * @author Keith Donald
  */
-public interface BindingRuleConfiguration {
+public interface FieldModelConfiguration {
 	
 	/**
 	 * Set the Formatter to use to format bound property values.
 	 */
-	BindingRuleConfiguration formatWith(Formatter<?> formatter);
+	FieldModelConfiguration formatWith(Formatter<?> formatter);
 
 	/**
 	 * If a map property, set the Formatter to use to format map keys.
 	 */
-	BindingRuleConfiguration formatKeysWith(Formatter<?> formatter);
+	FieldModelConfiguration formatKeysWith(Formatter<?> formatter);
 
 	/**
 	 * If an list or map property, set the Formatter to use to format indexed elements.
 	 */
-	BindingRuleConfiguration formatElementsWith(Formatter<?> formatter);
+	FieldModelConfiguration formatElementsWith(Formatter<?> formatter);
 
 	/**
 	 * Set when the binding is editable.
 	 */
-	BindingRuleConfiguration editableWhen(Condition condition);
+	FieldModelConfiguration editableWhen(Condition condition);
 
 	/**
 	 * Set when the binding is enabled.
 	 */
-	BindingRuleConfiguration enabledWhen(Condition condition);
+	FieldModelConfiguration enabledWhen(Condition condition);
 
 	/**
 	 * Set when the binding is visible.
 	 */
-	BindingRuleConfiguration visibleWhen(Condition condition);
+	FieldModelConfiguration visibleWhen(Condition condition);
 }

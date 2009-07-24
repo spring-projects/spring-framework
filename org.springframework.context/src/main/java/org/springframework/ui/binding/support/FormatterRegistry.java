@@ -28,6 +28,10 @@ import org.springframework.ui.format.Formatter;
  */
 public interface FormatterRegistry {
 
+	/**
+	 * Get the Formatter for the property.
+	 * @return the Formatter, or <code>null</code> if none is registered
+	 */
 	Formatter<?> getFormatter(PropertyDescriptor property);
 
 	/**

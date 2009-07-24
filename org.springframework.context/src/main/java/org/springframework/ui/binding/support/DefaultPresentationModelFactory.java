@@ -18,26 +18,26 @@ package org.springframework.ui.binding.support;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import org.springframework.ui.binding.BindingFactory;
-import org.springframework.ui.binding.BindingFactoryLocator;
+import org.springframework.ui.binding.PresentationModel;
+import org.springframework.ui.binding.PresentationModelFactory;
 
 /**
  * BindingFactoryLocator implementation that uses a {@link IdentityHashMap} to map models to BindingFactories.
  * @author Keith Donald
  */
-public class GenericBindingFactoryLocator implements BindingFactoryLocator {
+public class DefaultPresentationModelFactory implements PresentationModelFactory {
 
-	private Map<Object, BindingFactory> bindingFactories = new IdentityHashMap<Object, BindingFactory>();
+	private Map<Object, PresentationModel> presentationModels = new IdentityHashMap<Object, PresentationModel>();
 	
-	public void put(BindingFactory bindingFactory) {
-		bindingFactories.put(bindingFactory.getModel(), bindingFactory);
+	public void put(Object domainObject, PresentationModel presentationModel) {
+		presentationModels.put(domainObject, presentationModel);
 	}
 	
-	public BindingFactory getBindingFactory(Object model) {
-		BindingFactory factory = bindingFactories.get(model);
+	public PresentationModel getPresentationModel(Object domainObject) {
+		PresentationModel factory = presentationModels.get(domainObject);
 		if (factory == null) {
-			factory = new GenericBindingFactory(model);
-			bindingFactories.put(model, factory);
+			factory = new DefaultPresentationModel(domainObject);
+			presentationModels.put(domainObject, factory);
 		}
 		return factory;
 	}

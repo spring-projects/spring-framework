@@ -1,4 +1,4 @@
-package org.springframework.ui.binding.support;
+package org.springframework.ui.binding.binder;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,11 +12,12 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.binding.binder.BindingResults;
 import org.springframework.ui.binding.binder.WebBinder;
+import org.springframework.ui.binding.support.DefaultPresentationModel;
+import org.springframework.ui.binding.support.GenericFormatterRegistry;
 import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
@@ -25,11 +26,15 @@ public class WebBinderTests {
 
 	TestBean bean = new TestBean();
 
-	WebBinder binder = new WebBinder(new GenericBindingFactory(bean));
-
+	DefaultPresentationModel presentationModel;
+	
+	WebBinder binder;
+	
 	@Before
 	public void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
+		presentationModel = new DefaultPresentationModel(bean);
+		binder = new WebBinder(presentationModel);		
 	}
 
 	@After
@@ -38,11 +43,11 @@ public class WebBinderTests {
 	}
 
 	@Test
-	@Ignore
 	public void bindUserValuesCreatedFromUserMap() throws ParseException {
 		GenericFormatterRegistry registry = new GenericFormatterRegistry();
+		registry.add(Date.class, new DateFormatter());
 		registry.add(CurrencyFormat.class, new CurrencyFormatter());
-		//binder.setFormatterRegistry(registry);
+		presentationModel.setFormatterRegistry(registry);
 		Map<String, String> userMap = new LinkedHashMap<String, String>();
 		userMap.put("string", "test");
 		userMap.put("_integer", "doesn't matter");
@@ -53,12 +58,12 @@ public class WebBinderTests {
 		userMap.put("_addresses", "doesn't matter");
 		BindingResults results = binder.bind(userMap);
 		assertEquals(6, results.size());
-		assertEquals("test", results.get(0).getSourceValue());
-		assertEquals(null, results.get(1).getSourceValue());
-		assertEquals(Boolean.FALSE, results.get(2).getSourceValue());
-		assertEquals("2009-06-10", results.get(3).getSourceValue());
-		assertEquals("$5.00", results.get(4).getSourceValue());
-		assertEquals(null, results.get(5).getSourceValue());
+		assertEquals("test", results.get(0).getSubmittedValue());
+		assertEquals(null, results.get(1).getSubmittedValue());
+		assertEquals(Boolean.FALSE, results.get(2).getSubmittedValue());
+		assertEquals("2009-06-10", results.get(3).getSubmittedValue());
+		assertEquals("$5.00", results.get(4).getSubmittedValue());
+		assertEquals(null, results.get(5).getSubmittedValue());
 
 		assertEquals("test", bean.getString());
 		assertEquals(0, bean.getInteger());
@@ -73,13 +78,21 @@ public class WebBinderTests {
 	}
 
 	public static class TestBean {
+		
 		private String string;
+		
 		private int integer;
+		
 		private boolean bool;
+		
 		private Date date;
+		
 		private FooEnum foo;
+		
 		private BigDecimal currency;
+		
 		private List<FooEnum> foos;
+		
 		private List<Address> addresses;
 
 		public String getString() {

@@ -16,22 +16,27 @@
 package org.springframework.ui.binding;
 
 /**
- * A factory for model property bindings.
+ * Thrown when a PresentationModel field cannot be found.
  * @author Keith Donald
  * @since 3.0
+ * @see PresentationModel#getFieldModel(String)
+ * @see FieldModel#getNested(String)
  */
-public interface BindingFactory {
+@SuppressWarnings("serial")
+public class FieldNotFoundException extends RuntimeException {
+
+	private String field;
 
 	/**
-	 * The model object upon which bindings may be accessed.
+	 * Creates a new FieldNotFoundException.
+	 * @param fieldName the field not found exception
 	 */
-	Object getModel();
+	public FieldNotFoundException(String fieldName) {
+		super("No field '" + fieldName + "' found");
+	}
 
-	/**
-	 * Get a binding to a model property.
-	 * @param property the property path
-	 * @throws NoSuchBindingException if no binding to the property exists
-	 */
-	Binding getBinding(String property);
-	
+	public String getField() {
+		return field;
+	}
+
 }

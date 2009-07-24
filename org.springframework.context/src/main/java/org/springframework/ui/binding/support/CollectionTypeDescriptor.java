@@ -15,29 +15,26 @@
  */
 package org.springframework.ui.binding.support;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 public class CollectionTypeDescriptor {
 
-	private Class<?> collectionType;
+	private Class<?> type;
 
 	private Class<?> elementType;
 
-	/**
-	 * Creates a new generic collection property type
-	 * @param collectionType the collection type
-	 * @param elementType the element type
-	 */
-	public CollectionTypeDescriptor(Class<?> collectionType, Class<?> elementType) {
-		this.collectionType = collectionType;
+	public CollectionTypeDescriptor(Class<?> type, Class<?> elementType) {
+		Assert.notNull(type, "The collection type is required");
+		this.type = type;
 		this.elementType = elementType;
 	}
 
 	/**
 	 * The collection type.
 	 */
-	public Class<?> getCollectionType() {
-		return collectionType;
+	public Class<?> getType() {
+		return type;
 	}
 
 	/**
@@ -52,11 +49,11 @@ public class CollectionTypeDescriptor {
 			return false;
 		}
 		CollectionTypeDescriptor type = (CollectionTypeDescriptor) o;
-		return collectionType.equals(type.collectionType)
+		return type.equals(type.type)
 				&& ObjectUtils.nullSafeEquals(elementType, type.elementType);
 	}
 
 	public int hashCode() {
-		return collectionType.hashCode() + elementType.hashCode();
+		return type.hashCode() + elementType.hashCode();
 	}
 }

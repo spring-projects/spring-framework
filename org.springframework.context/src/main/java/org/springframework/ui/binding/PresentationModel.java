@@ -13,28 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ui.binding.binder;
-
-import java.util.Map;
-
-import org.springframework.ui.binding.FieldModel;
+package org.springframework.ui.binding;
 
 /**
- * Binds user-entered values to properties of a model object.
+ * Represents the state and behavior of a presentation independently of the GUI controls used in the interface.
+ * Pulls the state and behavior of a view out into a model class that is part of the presentation.
+ * Coordinates with the domain layer and provides an interface to the view that minimizes decision making in the view.
  * @author Keith Donald
  * @since 3.0
- * @see #bind(String)
- * @see #bind(Map)
  */
-public interface Binder {
-	
-	/**
-	 * Bind the source values to the properties of the model.
-	 * A result is returned for each registered {@link FieldModel}.
-	 * @param fieldValues the field values to bind
-	 * @return the results of the binding operation
-	 * @throws MissingFieldException when the fieldValues Map is missing entries for required bindings
-	 */
-	BindingResults bind(Map<String, ? extends Object> fieldValues);
+public interface PresentationModel {
 
+	/**
+	 * Get the model for the field.
+	 * @param fieldName the field name.
+	 * @throws FieldNotFoundException if no such field exists
+	 */
+	FieldModel getFieldModel(String fieldName);
+	
 }
