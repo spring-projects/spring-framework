@@ -31,12 +31,18 @@ public interface BindingResults extends Iterable<BindingResult> {
 	BindingResults successes();
 
 	/**
+	 * If there is at least one failed BindingResult.
+	 * @see BindingResult#isFailure()
+	 */
+	boolean hasFailures();
+	
+	/**
 	 * The subset of BindingResults that failed.
 	 */
 	BindingResults failures();
 
 	/**
-	 * The number of results.
+	 * The total number of results.
 	 */
 	int size();
 

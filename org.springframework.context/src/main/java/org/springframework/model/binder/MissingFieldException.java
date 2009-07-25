@@ -31,17 +31,17 @@ public class MissingFieldException extends RuntimeException {
 	private List<String> missing;
 
 	/**
-	 * Creates a new missing source values exeption.
+	 * Creates a new missing field exceptions.
 	 * @param missing
-	 * @param sourceValues
+	 * @param fieldValues
 	 */
-	public MissingFieldException(List<String> missing, Map<String, ? extends Object> sourceValues) {
-		super(getMessage(missing, sourceValues));
+	public MissingFieldException(List<String> missing, Map<String, ? extends Object> fieldValues) {
+		super(getMessage(missing, fieldValues));
 		this.missing = missing;
 	}
 
 	/**
-	 * The property paths for which source values were missing.
+	 * The names of the fields that are missing.
 	 */
 	public List<String> getMissing() {
 		return missing;
