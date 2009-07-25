@@ -59,23 +59,21 @@ public class PresentationModelBinder extends AbstractBinder {
 		return presentationModel.getFieldModel(fieldName);
 	}
 
-	protected BindingResult bind(Map.Entry<String, ? extends Object> fieldValue) {
-		String fieldName = fieldValue.getKey();
-		Object value = fieldValue.getValue();
+	protected BindingResult bindField(String name, Object value) {
 		FieldModel field;
 		try {
-			field = getFieldModel(fieldName);
+			field = getFieldModel(name);
 		} catch (FieldNotFoundException e) {
-			return new FieldNotFoundResult(fieldName, value, getMessageSource());
+			return new FieldNotFoundResult(name, value, getMessageSource());
 		}
 		if (!field.isEditable()) {
-			return new FieldNotEditableResult(fieldName, value, getMessageSource());
+			return new FieldNotEditableResult(name, value, getMessageSource());
 		} else {
 			field.applySubmittedValue(value);
 			if (field.getBindingStatus() == BindingStatus.DIRTY) {
 				field.commit();
 			}
-			return new AlertBindingResult(fieldName, value, field.getStatusAlert());
+			return new AlertBindingResult(name, value, field.getStatusAlert());
 		}
 	}
 }

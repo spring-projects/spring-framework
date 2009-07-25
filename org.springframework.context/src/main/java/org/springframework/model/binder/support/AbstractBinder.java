@@ -30,8 +30,8 @@ import org.springframework.util.Assert;
  * A base {@link Binder binder} implementation designed for subclassing.
  * @author Keith Donald
  * @since 3.0
- * @see #setMessageSource(MessageSource)
  * @see #setRequiredFields(String[])
+ * @see #setMessageSource(MessageSource)
  * @see #bind(Map)
  */
 public abstract class AbstractBinder implements Binder {
@@ -39,6 +39,15 @@ public abstract class AbstractBinder implements Binder {
 	private String[] requiredFields;
 
 	private MessageSource messageSource;
+
+	/**
+	 * Configure the fields for which values must be present in each bind attempt.
+	 * @param fieldNames the required field names
+	 * @see MissingFieldException
+	 */
+	public void setRequiredFields(String[] fieldNames) {
+		this.requiredFields = fieldNames;
+	}
 
 	/**
 	 * Configure the MessageSource that resolves localized {@link BindingResult} alert messages.
@@ -49,15 +58,6 @@ public abstract class AbstractBinder implements Binder {
 		this.messageSource = messageSource;
 	}
 
-	/**
-	 * Configure the fields for which values must be present in each bind attempt.
-	 * @param fieldNames the field names
-	 * @see MissingFieldException
-	 */
-	public void setRequiredFields(String[] fieldNames) {
-		this.requiredFields = fieldNames;
-	}
-
 	// implementing Binder
 
 	public BindingResults bind(Map<String, ? extends Object> fieldValues) {
@@ -65,21 +65,21 @@ public abstract class AbstractBinder implements Binder {
 		checkRequired(fieldValues);
 		ArrayListBindingResults results = new ArrayListBindingResults(fieldValues.size());
 		for (Map.Entry<String, ? extends Object> fieldValue : fieldValues.entrySet()) {
-			results.add(bind(fieldValue));
+			results.add(bindField(fieldValue.getKey(), fieldValue.getValue()));
 		}
 		return results;
 	}
 
 	// subclassing hooks
-
 	
 	/**
 	 * Hook subclasses may use to filter the source values to bind.
 	 * This hook allows the binder to pre-process the field values before binding occurs.
 	 * For example, a Binder might insert empty or default values for fields that are not present.
-	 * As another example, a Binder might collapse multiple source values into a single source value. 
-	 * @param fieldValues the original fieldValues map provided by the caller
-	 * @return the filtered fieldValues map that will be used to bind
+	 * As another example, a Binder might collapse multiple source values into a single source value.
+	 * Default implementation simply returns the fieldValues Map unchanged. 
+	 * @param fieldValues the original fieldValues Map provided by the caller
+	 * @return the filtered fieldValues Map that will be used to bind
 	 */
 	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues) {
 		return fieldValues;
@@ -93,11 +93,12 @@ public abstract class AbstractBinder implements Binder {
 	}
 
 	/**
-	 * Hook method subclasses should override to perform a single binding.
-	 * @param fieldValue the field value to bind
+	 * Hook method subclasses override to perform a single field binding.
+	 * @param name the field name
+	 * @param value the field value
 	 * @return the binding result
 	 */
-	protected abstract BindingResult bind(Map.Entry<String, ? extends Object> fieldValue);
+	protected abstract BindingResult bindField(String name, Object value);
 
 	// internal helpers
 
