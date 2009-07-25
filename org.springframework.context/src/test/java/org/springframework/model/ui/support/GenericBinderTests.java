@@ -1,4 +1,4 @@
-package org.springframework.model.ui.binder;
+package org.springframework.model.ui.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -34,10 +34,6 @@ import org.springframework.model.ui.format.date.DateFormatter;
 import org.springframework.model.ui.format.number.CurrencyFormat;
 import org.springframework.model.ui.format.number.CurrencyFormatter;
 import org.springframework.model.ui.format.number.IntegerFormatter;
-import org.springframework.model.ui.support.CollectionTypeDescriptor;
-import org.springframework.model.ui.support.DefaultPresentationModel;
-import org.springframework.model.ui.support.GenericFormatterRegistry;
-import org.springframework.model.ui.support.PresentationModelBinder;
 
 public class GenericBinderTests {
 
@@ -140,7 +136,7 @@ public class GenericBinderTests {
 		BindingResults results = binder.bind(Collections.singletonMap("bogus", "2009-06-01"));
 		assertEquals("bogus", results.get(0).getFieldName());
 		assertTrue(results.get(0).isFailure());
-		assertEquals("propertyNotFound", results.get(0).getAlert().getCode());
+		assertEquals("fieldNotFound", results.get(0).getAlert().getCode());
 	}
 
 	@Test(expected = MissingFieldException.class)

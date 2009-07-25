@@ -1,4 +1,4 @@
-package org.springframework.model.ui.binder;
+package org.springframework.model.ui.support;
 
 import static org.junit.Assert.assertEquals;
 
