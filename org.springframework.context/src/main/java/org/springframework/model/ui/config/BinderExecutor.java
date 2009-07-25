@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.model.ui.binder;
+package org.springframework.model.ui.config;
 
 import org.springframework.model.binder.Binder;
 import org.springframework.model.binder.BindingResults;
-import org.springframework.model.ui.config.FieldModelConfiguration;
 
 /**
  * A SPI interface that lets you configure a {@link Binder}, then execute it.

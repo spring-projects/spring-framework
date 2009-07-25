@@ -27,7 +27,6 @@ import org.springframework.model.binder.MissingFieldException;
 import org.springframework.model.message.MockMessageSource;
 import org.springframework.model.ui.BindingStatus;
 import org.springframework.model.ui.FieldModel;
-import org.springframework.model.ui.binder.PresentationModelBinder;
 import org.springframework.model.ui.format.AnnotationFormatterFactory;
 import org.springframework.model.ui.format.Formatted;
 import org.springframework.model.ui.format.Formatter;
@@ -38,6 +37,7 @@ import org.springframework.model.ui.format.number.IntegerFormatter;
 import org.springframework.model.ui.support.CollectionTypeDescriptor;
 import org.springframework.model.ui.support.DefaultPresentationModel;
 import org.springframework.model.ui.support.GenericFormatterRegistry;
+import org.springframework.model.ui.support.PresentationModelBinder;
 
 public class GenericBinderTests {
 

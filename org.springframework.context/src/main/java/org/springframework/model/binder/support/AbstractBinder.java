@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.model.ui.binder;
+package org.springframework.model.binder.support;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,32 +24,21 @@ import org.springframework.model.binder.Binder;
 import org.springframework.model.binder.BindingResult;
 import org.springframework.model.binder.BindingResults;
 import org.springframework.model.binder.MissingFieldException;
-import org.springframework.model.ui.BindingStatus;
-import org.springframework.model.ui.FieldModel;
-import org.springframework.model.ui.FieldNotFoundException;
-import org.springframework.model.ui.PresentationModel;
 import org.springframework.util.Assert;
 
 /**
- * A generic {@link Binder binder} suitable for use in most environments.
+ * A base {@link Binder binder} implementation designed for subclassing.
  * @author Keith Donald
  * @since 3.0
  * @see #setMessageSource(MessageSource)
  * @see #setRequiredFields(String[])
  * @see #bind(Map)
  */
-public class PresentationModelBinder implements Binder {
+public abstract class AbstractBinder implements Binder {
 
-	private PresentationModel presentationModel;
-	
 	private String[] requiredFields;
-	
-	private MessageSource messageSource;
 
-	public PresentationModelBinder(PresentationModel presentationModel) {
-		Assert.notNull(presentationModel, "The PresentationModel is required");
-		this.presentationModel = presentationModel;
-	}
+	private MessageSource messageSource;
 
 	/**
 	 * Configure the MessageSource that resolves localized {@link BindingResult} alert messages.
@@ -59,7 +48,7 @@ public class PresentationModelBinder implements Binder {
 		Assert.notNull(messageSource, "The MessageSource is required");
 		this.messageSource = messageSource;
 	}
-	
+
 	/**
 	 * Configure the fields for which values must be present in each bind attempt.
 	 * @param fieldNames the field names
@@ -67,18 +56,6 @@ public class PresentationModelBinder implements Binder {
 	 */
 	public void setRequiredFields(String[] fieldNames) {
 		this.requiredFields = fieldNames;
-	}
-	
-	// subclassing hooks
-	
-	/**
-	 * Get the model for the field.
-	 * @param fieldName
-	 * @return the field model
-	 * @throws NoSuchFieldException if no such field exists
-	 */
-	protected FieldModel getFieldModel(String fieldName) {
-		return presentationModel.getFieldModel(fieldName);
 	}
 
 	// implementing Binder
@@ -88,18 +65,14 @@ public class PresentationModelBinder implements Binder {
 		checkRequired(fieldValues);
 		ArrayListBindingResults results = new ArrayListBindingResults(fieldValues.size());
 		for (Map.Entry<String, ? extends Object> fieldValue : fieldValues.entrySet()) {
-			try {
-				FieldModel field = getFieldModel(fieldValue.getKey());
-				results.add(bind(fieldValue, field));
-			} catch (FieldNotFoundException e) {
-				results.add(new FieldNotFoundResult(fieldValue.getKey(), fieldValue.getValue(), messageSource));
-			}
+			results.add(bind(fieldValue));
 		}
 		return results;
 	}
 
 	// subclassing hooks
 
+	
 	/**
 	 * Hook subclasses may use to filter the source values to bind.
 	 * This hook allows the binder to pre-process the field values before binding occurs.
@@ -111,6 +84,20 @@ public class PresentationModelBinder implements Binder {
 	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues) {
 		return fieldValues;
 	}
+
+	/**
+	 * The configured MessageSource that resolves binding result alert messages.
+	 */
+	protected MessageSource getMessageSource() {
+		return messageSource;
+	}
+
+	/**
+	 * Hook method subclasses should override to perform a single binding.
+	 * @param fieldValue the field value to bind
+	 * @return the binding result
+	 */
+	protected abstract BindingResult bind(Map.Entry<String, ? extends Object> fieldValue);
 
 	// internal helpers
 
@@ -135,18 +122,4 @@ public class PresentationModelBinder implements Binder {
 		}
 	}
 
-	private BindingResult bind(Map.Entry<String, ? extends Object> fieldValue, FieldModel field) {
-		String fieldName = fieldValue.getKey();
-		Object value = fieldValue.getValue();
-		if (!field.isEditable()) {
-			return new FieldNotEditableResult(fieldName, value, messageSource);
-		} else {
-			field.applySubmittedValue(value);
-			if (field.getBindingStatus() == BindingStatus.DIRTY) {
-				field.commit();
-			}
-			return new BindingStatusResult(fieldName, value, field.getStatusAlert());
-		}
-	}
-	
 }

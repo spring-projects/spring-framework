@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.model.ui.binder;
+package org.springframework.model.binder.support;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.style.StylerUtils;
@@ -23,17 +23,17 @@ import org.springframework.model.binder.BindingResult;
 import org.springframework.model.message.MessageBuilder;
 import org.springframework.model.message.ResolvableArgument;
 
-class FieldNotFoundResult implements BindingResult {
+public class FieldNotEditableResult implements BindingResult {
 
 	private String property;
 
-	private Object sourceValue;
+	private Object submittedValue;
 
 	private MessageSource messageSource;
 	
-	public FieldNotFoundResult(String property, Object sourceValue, MessageSource messageSource) {
+	public FieldNotEditableResult(String property, Object submittedValue, MessageSource messageSource) {
 		this.property = property;
-		this.sourceValue = sourceValue;
+		this.submittedValue = submittedValue;
 		this.messageSource = messageSource;
 	}
 
@@ -42,7 +42,7 @@ class FieldNotFoundResult implements BindingResult {
 	}
 
 	public Object getSubmittedValue() {
-		return sourceValue;
+		return submittedValue;
 	}
 
 	public boolean isFailure() {
@@ -52,7 +52,7 @@ class FieldNotFoundResult implements BindingResult {
 	public Alert getAlert() {
 		return new Alert() {
 			public String getCode() {
-				return "fieldNotFound";
+				return "fieldNotEditable";
 			}
 
 			public Severity getSeverity() {
@@ -63,9 +63,9 @@ class FieldNotFoundResult implements BindingResult {
 				MessageBuilder builder = new MessageBuilder(messageSource);
 				builder.code("bindSuccess");
 				builder.arg("label", new ResolvableArgument(property));
-				builder.arg("value", sourceValue);
+				builder.arg("value", submittedValue);
 				// TODO lazily create default message
-				builder.defaultMessage("Successfully bound user value " + StylerUtils.style(sourceValue)
+				builder.defaultMessage("Successfully bound user value " + StylerUtils.style(submittedValue)
 						+ " to property '" + property + "'");
 				return builder.build();
 			}

@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.model.ui.binder;
+package org.springframework.model.binder.support;
 
 import org.springframework.model.alert.Alert;
 import org.springframework.model.alert.Severity;
 import org.springframework.model.binder.BindingResult;
 
-class BindingStatusResult implements BindingResult {
+public class AlertBindingResult implements BindingResult {
 
 	private String fieldName;
 	
-	private Object sourceValue;
+	private Object submittedValue;
 
-	private Alert bindingStatusAlert;
+	private Alert alert;
 	
-	public BindingStatusResult(String fieldName, Object sourceValue, Alert alert) {
+	public AlertBindingResult(String fieldName, Object sourceValue, Alert alert) {
 		this.fieldName = fieldName;
-		this.sourceValue = sourceValue;
-		this.bindingStatusAlert = alert;
+		this.submittedValue = sourceValue;
+		this.alert = alert;
 	}
 
 	public String getFieldName() {
@@ -38,15 +38,15 @@ class BindingStatusResult implements BindingResult {
 	}
 
 	public Object getSubmittedValue() {
-		return sourceValue;
+		return submittedValue;
 	}
 
 	public boolean isFailure() {
-		return bindingStatusAlert.getSeverity().compareTo(Severity.INFO) > 1;
+		return alert.getSeverity().compareTo(Severity.INFO) > 1;
 	}
 	
 	public Alert getAlert() {
-		return bindingStatusAlert;
+		return alert;
 	}
 	
 	public String toString() {
