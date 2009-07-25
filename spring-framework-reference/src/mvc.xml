@@ -15,7 +15,7 @@
     <interfacename>@RequestMapping</interfacename> annotations, offering a
     wide range of flexible handling methods. With the introduction of Spring
     3.0, the <interfacename>@Controller</interfacename> mechanism also allows
-    your to create RESTful Web sites or application, though the
+    you to create RESTful Web sites or application, though the
     <interfacename>@PathVarariable</interfacename> annotation and other
     features.</para>
 
