@@ -15,6 +15,7 @@
  */
 package org.springframework.model.ui;
 
+
 /**
  * Represents the state and behavior of a presentation independently of the GUI controls used in the interface.
  * Pulls the state and behavior of a view out into a model class that is part of the presentation.
