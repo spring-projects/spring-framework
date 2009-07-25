@@ -1,4 +1,4 @@
-package org.springframework.ui.format.date;
+package org.springframework.model.ui.format.date;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import org.junit.Test;
+import org.springframework.model.ui.format.date.DateFormatter;
 
 public class DateFormatterTests {
 

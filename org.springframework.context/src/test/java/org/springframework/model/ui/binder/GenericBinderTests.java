@@ -1,4 +1,4 @@
-package org.springframework.ui.binding.binder;
+package org.springframework.model.ui.binder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,19 +22,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.ui.binding.BindingStatus;
-import org.springframework.ui.binding.FieldModel;
-import org.springframework.ui.binding.support.CollectionTypeDescriptor;
-import org.springframework.ui.binding.support.DefaultPresentationModel;
-import org.springframework.ui.binding.support.GenericFormatterRegistry;
-import org.springframework.ui.format.AnnotationFormatterFactory;
-import org.springframework.ui.format.Formatted;
-import org.springframework.ui.format.Formatter;
-import org.springframework.ui.format.date.DateFormatter;
-import org.springframework.ui.format.number.CurrencyFormat;
-import org.springframework.ui.format.number.CurrencyFormatter;
-import org.springframework.ui.format.number.IntegerFormatter;
-import org.springframework.ui.message.MockMessageSource;
+import org.springframework.model.binder.BindingResults;
+import org.springframework.model.binder.MissingFieldException;
+import org.springframework.model.message.MockMessageSource;
+import org.springframework.model.ui.BindingStatus;
+import org.springframework.model.ui.FieldModel;
+import org.springframework.model.ui.binder.PresentationModelBinder;
+import org.springframework.model.ui.format.AnnotationFormatterFactory;
+import org.springframework.model.ui.format.Formatted;
+import org.springframework.model.ui.format.Formatter;
+import org.springframework.model.ui.format.date.DateFormatter;
+import org.springframework.model.ui.format.number.CurrencyFormat;
+import org.springframework.model.ui.format.number.CurrencyFormatter;
+import org.springframework.model.ui.format.number.IntegerFormatter;
+import org.springframework.model.ui.support.CollectionTypeDescriptor;
+import org.springframework.model.ui.support.DefaultPresentationModel;
+import org.springframework.model.ui.support.GenericFormatterRegistry;
 
 public class GenericBinderTests {
 

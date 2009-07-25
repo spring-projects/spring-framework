@@ -1,10 +1,13 @@
-package org.springframework.ui.message;
+package org.springframework.model.message;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
 
 import org.junit.Test;
+import org.springframework.model.message.MessageResolver;
+import org.springframework.model.message.MessageResolverBuilder;
+import org.springframework.model.message.ResolvableArgument;
 
 public class MessageResolverBuilderTests {
 	
