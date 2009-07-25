@@ -35,7 +35,7 @@ import org.springframework.model.ui.format.number.CurrencyFormat;
 import org.springframework.model.ui.format.number.CurrencyFormatter;
 import org.springframework.model.ui.format.number.IntegerFormatter;
 
-public class GenericBinderTests {
+public class PresentationModelBinderTests {
 
 	private PresentationModelBinder binder;
 
