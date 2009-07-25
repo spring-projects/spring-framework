@@ -69,7 +69,7 @@
       <title>Note:</title>
 
       <para>This document is not yet available as of Spring 3.0 RC1. It will
-      be avaialabe for the Spring 3.0 final release.</para>
+      be available for the Spring 3.0 final release.</para>
     </sidebar>
   </section>
 
@@ -217,7 +217,7 @@
       <para>BeanFactory interface returns typed bean instances as far as
       possible: <itemizedlist>
           <listitem>
-            <para>T getBean(Stringname, Class&lt;T&gt; requiredType)</para>
+            <para>T getBean(String name, Class&lt;T&gt; requiredType)</para>
           </listitem>
 
           <listitem>
