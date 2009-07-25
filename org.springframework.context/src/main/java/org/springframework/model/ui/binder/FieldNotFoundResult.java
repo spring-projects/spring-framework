@@ -52,7 +52,7 @@ class FieldNotFoundResult implements BindingResult {
 	public Alert getAlert() {
 		return new Alert() {
 			public String getCode() {
-				return "propertyNotFound";
+				return "fieldNotFound";
 			}
 
 			public Severity getSeverity() {

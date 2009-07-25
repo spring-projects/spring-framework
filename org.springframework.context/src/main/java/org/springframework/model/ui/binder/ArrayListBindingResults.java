@@ -56,6 +56,10 @@ class ArrayListBindingResults implements BindingResults {
 		return results;
 	}
 
+	public boolean hasFailures() {
+		return failures().size() > 0;
+	}
+	
 	public BindingResults failures() {
 		ArrayListBindingResults results = new ArrayListBindingResults();
 		for (BindingResult result : this) {

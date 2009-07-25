@@ -52,7 +52,7 @@ class FieldNotEditableResult implements BindingResult {
 	public Alert getAlert() {
 		return new Alert() {
 			public String getCode() {
-				return "propertyNotWriteable";
+				return "fieldNotEditable";
 			}
 
 			public Severity getSeverity() {
