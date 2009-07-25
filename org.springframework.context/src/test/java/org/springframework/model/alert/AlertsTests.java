@@ -1,15 +1,17 @@
-package org.springframework.ui.alert;
+package org.springframework.model.alert;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.ui.alert.Alerts.error;
-import static org.springframework.ui.alert.Alerts.fatal;
-import static org.springframework.ui.alert.Alerts.info;
-import static org.springframework.ui.alert.Alerts.warning;
+import static org.springframework.model.alert.Alerts.error;
+import static org.springframework.model.alert.Alerts.fatal;
+import static org.springframework.model.alert.Alerts.info;
+import static org.springframework.model.alert.Alerts.warning;
 
 import org.junit.Test;
+import org.springframework.model.alert.Alert;
+import org.springframework.model.alert.Severity;
 
 public class AlertsTests {
-	
+
 	@Test
 	public void testFactoryMethods() {
 		Alert a1 = info("alert 1");

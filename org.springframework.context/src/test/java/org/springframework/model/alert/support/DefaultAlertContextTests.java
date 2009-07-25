@@ -1,12 +1,12 @@
-package org.springframework.ui.alert.support;
+package org.springframework.model.alert.support;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ui.alert.Alert;
-import org.springframework.ui.alert.Severity;
-import org.springframework.ui.alert.support.DefaultAlertContext;
+import org.springframework.model.alert.Alert;
+import org.springframework.model.alert.Severity;
+import org.springframework.model.alert.support.DefaultAlertContext;
 
 public class DefaultAlertContextTests {
 	

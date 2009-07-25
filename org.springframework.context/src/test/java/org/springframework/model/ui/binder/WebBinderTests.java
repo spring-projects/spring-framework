@@ -1,4 +1,4 @@
-package org.springframework.ui.binding.binder;
+package org.springframework.model.ui.binder;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,13 +14,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.binding.binder.BindingResults;
-import org.springframework.ui.binding.binder.WebBinder;
-import org.springframework.ui.binding.support.DefaultPresentationModel;
-import org.springframework.ui.binding.support.GenericFormatterRegistry;
-import org.springframework.ui.format.date.DateFormatter;
-import org.springframework.ui.format.number.CurrencyFormat;
-import org.springframework.ui.format.number.CurrencyFormatter;
+import org.springframework.model.binder.BindingResults;
+import org.springframework.model.ui.binder.WebBinder;
+import org.springframework.model.ui.format.date.DateFormatter;
+import org.springframework.model.ui.format.number.CurrencyFormat;
+import org.springframework.model.ui.format.number.CurrencyFormatter;
+import org.springframework.model.ui.support.DefaultPresentationModel;
+import org.springframework.model.ui.support.GenericFormatterRegistry;
 
 public class WebBinderTests {
 

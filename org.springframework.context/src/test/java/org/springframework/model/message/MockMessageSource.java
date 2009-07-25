@@ -1,4 +1,4 @@
-package org.springframework.ui.message;
+package org.springframework.model.message;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
