@@ -21,7 +21,7 @@ import org.springframework.model.alert.Alert;
  * The result of a bind operation.
  * @author Keith Donald
  * @since 3.0
- * @see Binder#bind(java.util.Map)
+ * @see Binder#bind(java.util.Map, Object)
  */
 public interface BindingResult {
 

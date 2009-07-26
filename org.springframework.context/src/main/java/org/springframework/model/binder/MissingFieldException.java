@@ -23,7 +23,7 @@ import java.util.Map;
  * Indicates a client configuration error. 
  * @author Keith Donald
  * @since 3.0
- * @see Binder#bind(java.util.Map)
+ * @see Binder#bind(Map, Object)
  */
 @SuppressWarnings("serial")
 public class MissingFieldException extends RuntimeException {

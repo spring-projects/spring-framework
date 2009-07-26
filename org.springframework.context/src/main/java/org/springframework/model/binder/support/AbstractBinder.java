@@ -31,8 +31,8 @@ import org.springframework.util.Assert;
  * @since 3.0
  * @see #setRequiredFields(String[])
  * @see #setMessageSource(MessageSource)
- * @see #bind(Map, Object)
  * @see #createBindTemplate()
+ * @see #bind(Map, Object)
  */
 public abstract class AbstractBinder<M> implements Binder<M> {
 

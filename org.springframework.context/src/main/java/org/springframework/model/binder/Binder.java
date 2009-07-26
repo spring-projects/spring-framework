@@ -21,7 +21,6 @@ import java.util.Map;
  * Bind to fields of a model object.
  * @author Keith Donald
  * @since 3.0
- * @see #bind(Map)
  * @param <M> The type of model this binder binds to
  */
 public interface Binder<M> {
