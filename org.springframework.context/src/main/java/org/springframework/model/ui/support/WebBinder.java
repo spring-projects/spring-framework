@@ -28,20 +28,13 @@ import org.springframework.model.ui.PresentationModel;
  * @since 3.0
  * @see #setDefaultPrefix(String)
  * @see #setPresentPrefix(String)
+ * @see #filter(Map, PresentationModel)
  */
 public class WebBinder extends PresentationModelBinder {
 
 	private String defaultPrefix = "!";
 
 	private String presentPrefix = "_";
-
-	/**
-	 * Creates a new web binder for the model object.
-	 * @param model the model object containing properties this binder will bind to
-	 */
-	public WebBinder(PresentationModel bindingFactory) {
-		super(bindingFactory);
-	}
 
 	/**
 	 * Configure the prefix used to detect the default value for a field when no value is submitted.
@@ -61,7 +54,7 @@ public class WebBinder extends PresentationModelBinder {
 	}
 
 	@Override
-	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues) {
+	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues, PresentationModel model) {
 		LinkedHashMap<String, Object> filteredValues = new LinkedHashMap<String, Object>();
 		for (Map.Entry<String, ? extends Object> entry : fieldValues.entrySet()) {
 			String field = entry.getKey();
@@ -74,7 +67,7 @@ public class WebBinder extends PresentationModelBinder {
 			} else if (field.startsWith(presentPrefix)) {
 				field = field.substring(presentPrefix.length());
 				if (!fieldValues.containsKey(field) && !fieldValues.containsKey(defaultPrefix + field)) {
-					value = getEmptyValue(getFieldModel(field));
+					value = getEmptyValue(model.getFieldModel(field));
 					filteredValues.put(field, value);
 				}
 			} else {

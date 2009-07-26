@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.model.binder;
+package org.springframework.model.binder.support;
 
-import java.util.Map;
+import org.springframework.model.binder.BindingResult;
 
 /**
- * Bind to fields of a model object.
+ * BindTemplate callback interface for binding a single field value.
  * @author Keith Donald
- * @since 3.0
- * @see #bind(Map)
- * @param <M> The type of model this binder binds to
+ * @see BindTemplate#bind(java.util.Map, BindCallback)
  */
-public interface Binder<M> {
-	
-	/**
-	 * Bind submitted field values.
-	 * @param fieldValues the field values to bind
-	 * @param model the model to bind to
-	 * @return the results of the binding operation
-	 * @throws MissingFieldException when the fieldValues Map is missing required fields
-	 */
-	BindingResults bind(Map<String, ? extends Object> fieldValues, M model);
+public interface FieldBinder {
 
+	/**
+	 * Bind a single field.
+	 * @param fieldName the field name
+	 * @param value the field value
+	 * @return the binding result
+	 */
+	BindingResult bind(String fieldName, Object value);
 }

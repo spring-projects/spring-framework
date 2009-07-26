@@ -15,8 +15,6 @@
  */
 package org.springframework.model.binder.support;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.MessageSource;
@@ -27,18 +25,24 @@ import org.springframework.model.binder.MissingFieldException;
 import org.springframework.util.Assert;
 
 /**
- * A base {@link Binder binder} implementation designed for subclassing.
+ * Base Binder implementation that defines common structural elements.
+ * Subclasses should parameterized & implement {@link #bind(Map, Object)}.
  * @author Keith Donald
  * @since 3.0
  * @see #setRequiredFields(String[])
  * @see #setMessageSource(MessageSource)
- * @see #bind(Map)
+ * @see #bind(Map, Object)
+ * @see #createBindTemplate()
  */
-public abstract class AbstractBinder implements Binder {
+public abstract class AbstractBinder<M> implements Binder<M> {
 
-	private String[] requiredFields;
+	private BindTemplate bindTemplate;
 
 	private MessageSource messageSource;
+
+	public AbstractBinder() {
+		bindTemplate = createBindTemplate();
+	}
 
 	/**
 	 * Configure the fields for which values must be present in each bind attempt.
@@ -46,9 +50,9 @@ public abstract class AbstractBinder implements Binder {
 	 * @see MissingFieldException
 	 */
 	public void setRequiredFields(String[] fieldNames) {
-		this.requiredFields = fieldNames;
+		bindTemplate.setRequiredFields(fieldNames);
 	}
-
+	
 	/**
 	 * Configure the MessageSource that resolves localized {@link BindingResult} alert messages.
 	 * @param messageSource the message source
@@ -58,69 +62,30 @@ public abstract class AbstractBinder implements Binder {
 		this.messageSource = messageSource;
 	}
 
-	// implementing Binder
+	public abstract BindingResults bind(Map<String, ? extends Object> fieldValues, M model);
 
-	public BindingResults bind(Map<String, ? extends Object> fieldValues) {
-		fieldValues = filter(fieldValues);
-		checkRequired(fieldValues);
-		ArrayListBindingResults results = new ArrayListBindingResults(fieldValues.size());
-		for (Map.Entry<String, ? extends Object> fieldValue : fieldValues.entrySet()) {
-			results.add(bindField(fieldValue.getKey(), fieldValue.getValue()));
-		}
-		return results;
-	}
-
-	// subclassing hooks
+	// subclass hooks
 	
 	/**
-	 * Hook subclasses may use to filter the source values to bind.
-	 * This hook allows the binder to pre-process the field values before binding occurs.
-	 * For example, a Binder might insert empty or default values for fields that are not present.
-	 * As another example, a Binder might collapse multiple source values into a single source value.
-	 * Default implementation simply returns the fieldValues Map unchanged. 
-	 * @param fieldValues the original fieldValues Map provided by the caller
-	 * @return the filtered fieldValues Map that will be used to bind
+	 * Create the template defining the bulk-binding algorithm.
+	 * Subclasses may override to customize the algorithm.
 	 */
-	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues) {
-		return fieldValues;
+	protected BindTemplate createBindTemplate() {
+		return new BindTemplate();
 	}
 
+	/**
+	 * The template defining the bulk-binding algorithm.
+	 */
+	protected BindTemplate getBindTemplate() {
+		return bindTemplate;
+	}
+	
 	/**
 	 * The configured MessageSource that resolves binding result alert messages.
 	 */
 	protected MessageSource getMessageSource() {
 		return messageSource;
 	}
-
-	/**
-	 * Hook method subclasses override to perform a single field binding.
-	 * @param name the field name
-	 * @param value the field value
-	 * @return the binding result
-	 */
-	protected abstract BindingResult bindField(String name, Object value);
-
-	// internal helpers
-
-	private void checkRequired(Map<String, ? extends Object> fieldValues) {
-		if (requiredFields == null) {
-			return;
-		}
-		List<String> missingRequired = new ArrayList<String>();
-		for (String required : requiredFields) {
-			boolean found = false;
-			for (String property : fieldValues.keySet()) {
-				if (property.equals(required)) {
-					found = true;
-				}
-			}
-			if (!found) {
-				missingRequired.add(required);
-			}
-		}
-		if (!missingRequired.isEmpty()) {
-			throw new MissingFieldException(missingRequired, fieldValues);
-		}
-	}
-
+	
 }
