@@ -62,7 +62,7 @@ public class FieldNotEditableResult implements BindingResult {
 
 			public String getMessage() {
 				MessageBuilder builder = new MessageBuilder(messageSource);
-				builder.code("bindSuccess");
+				builder.code(getCode());
 				builder.arg("label", new ResolvableArgument(fieldName));
 				builder.arg("value", submittedValue);
 				builder.defaultMessage(new DefaultMessageFactory() {
