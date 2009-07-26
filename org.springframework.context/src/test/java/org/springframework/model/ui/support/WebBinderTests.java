@@ -34,7 +34,7 @@ public class WebBinderTests {
 	public void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
 		presentationModel = new DefaultPresentationModel(bean);
-		binder = new WebBinder(presentationModel);		
+		binder = new WebBinder();		
 	}
 
 	@After
@@ -56,7 +56,7 @@ public class WebBinderTests {
 		userMap.put("!currency", "$5.00");
 		userMap.put("_currency", "doesn't matter");
 		userMap.put("_addresses", "doesn't matter");
-		BindingResults results = binder.bind(userMap);
+		BindingResults results = binder.bind(userMap, presentationModel);
 		assertEquals(6, results.size());
 		assertEquals("test", results.get(0).getSubmittedValue());
 		assertEquals(null, results.get(1).getSubmittedValue());

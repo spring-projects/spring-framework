@@ -47,7 +47,7 @@ public class PresentationModelBinderTests {
 	public void setUp() {
 		bean = new TestBean();
 		presentationModel = new DefaultPresentationModel(bean);
-		binder = new PresentationModelBinder(presentationModel);
+		binder = new PresentationModelBinder();
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
@@ -62,7 +62,7 @@ public class PresentationModelBinderTests {
 		values.put("string", "test");
 		values.put("integer", "3");
 		values.put("foo", "BAR");
-		BindingResults results = binder.bind(values);
+		BindingResults results = binder.bind(values, presentationModel);
 		assertEquals(3, results.size());
 
 		assertEquals("string", results.get(0).getFieldName());
@@ -89,7 +89,7 @@ public class PresentationModelBinderTests {
 		// bad value
 		values.put("integer", "bogus");
 		values.put("foo", "BAR");
-		BindingResults results = binder.bind(values);
+		BindingResults results = binder.bind(values, presentationModel);
 		assertEquals(3, results.size());
 		assertTrue(results.get(1).isFailure());
 		assertEquals("typeMismatch", results.get(1).getAlert().getCode());
@@ -98,14 +98,14 @@ public class PresentationModelBinderTests {
 	@Test
 	public void bindSingleValuePropertyFormatter() throws ParseException {
 		presentationModel.field("date").formatWith(new DateFormatter());
-		binder.bind(Collections.singletonMap("date", "2009-06-01"));
+		binder.bind(Collections.singletonMap("date", "2009-06-01"), presentationModel);
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
 	@Test
 	public void bindSingleValuePropertyFormatterParseException() {
 		presentationModel.field("date").formatWith(new DateFormatter());
-		BindingResults results = binder.bind(Collections.singletonMap("date", "bogus"));
+		BindingResults results = binder.bind(Collections.singletonMap("date", "bogus"), presentationModel);
 		assertEquals(1, results.size());
 		assertTrue(results.get(0).isFailure());
 		assertEquals("typeMismatch", results.get(0).getAlert().getCode());
@@ -117,7 +117,7 @@ public class PresentationModelBinderTests {
 		formatterRegistry.add(Date.class, new DateFormatter());
 		presentationModel.setFormatterRegistry(formatterRegistry);
 
-		binder.bind(Collections.singletonMap("date", "2009-06-01"));
+		binder.bind(Collections.singletonMap("date", "2009-06-01"), presentationModel);
 		assertEquals(new DateFormatter().parse("2009-06-01", Locale.US), bean.getDate());
 	}
 
@@ -127,13 +127,13 @@ public class PresentationModelBinderTests {
 		formatterRegistry.add(new CurrencyAnnotationFormatterFactory());
 		presentationModel.setFormatterRegistry(formatterRegistry);
 
-		binder.bind(Collections.singletonMap("currency", "$23.56"));
+		binder.bind(Collections.singletonMap("currency", "$23.56"), presentationModel);
 		assertEquals(new BigDecimal("23.56"), bean.getCurrency());
 	}
 
 	@Test
 	public void bindSingleValuePropertyNotFound() throws ParseException {
-		BindingResults results = binder.bind(Collections.singletonMap("bogus", "2009-06-01"));
+		BindingResults results = binder.bind(Collections.singletonMap("bogus", "2009-06-01"), presentationModel);
 		assertEquals("bogus", results.get(0).getFieldName());
 		assertTrue(results.get(0).isFailure());
 		assertEquals("fieldNotFound", results.get(0).getAlert().getCode());
@@ -143,7 +143,7 @@ public class PresentationModelBinderTests {
 	public void bindMissingRequiredSourceValue() {
 		binder.setRequiredFields(new String[] { "integer" });
 		// missing "integer" - violated bind contract
-		binder.bind(Collections.singletonMap("string", "test"));
+		binder.bind(Collections.singletonMap("string", "test"), presentationModel);
 	}
 
 	@Test
@@ -236,7 +236,7 @@ public class PresentationModelBinderTests {
 		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
 		values.put("addresses", new String[] { "4655 Macy Lane:Melbourne:FL:35452",
 				"1234 Rostock Circle:Palm Bay:FL:32901", "1977 Bel Aire Estates:Coker:AL:12345" });
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		assertEquals(3, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
@@ -250,7 +250,7 @@ public class PresentationModelBinderTests {
 		values.put("addresses[0]", "4655 Macy Lane:Melbourne:FL:35452");
 		values.put("addresses[1]", "1234 Rostock Circle:Palm Bay:FL:32901");
 		values.put("addresses[5]", "1977 Bel Aire Estates:Coker:AL:12345");
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		Assert.assertEquals(6, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
@@ -267,7 +267,7 @@ public class PresentationModelBinderTests {
 		values
 				.put("addresses",
 						"4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		Assert.assertEquals(3, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
@@ -289,7 +289,7 @@ public class PresentationModelBinderTests {
 		values
 				.put("addresses",
 						"4655 Macy Lane:Melbourne:FL:35452,1234 Rostock Circle:Palm Bay:FL:32901,1977 Bel Aire Estates:Coker:AL:12345");
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		Assert.assertEquals(3, bean.addresses.size());
 		assertEquals("4655 Macy Lane", bean.addresses.get(0).street);
 		assertEquals("Melbourne", bean.addresses.get(0).city);
@@ -371,7 +371,7 @@ public class PresentationModelBinderTests {
 		values.put("addresses[5].state", "FL");
 		values.put("addresses[5].zip", "32901");
 
-		BindingResults results = binder.bind(values);
+		BindingResults results = binder.bind(values, presentationModel);
 		Assert.assertEquals(6, bean.addresses.size());
 		Assert.assertEquals("Palm Bay", bean.addresses.get(1).city);
 		Assert.assertNotNull(bean.addresses.get(2));
@@ -382,7 +382,7 @@ public class PresentationModelBinderTests {
 	public void bindToMap() {
 		Map<String, String[]> values = new LinkedHashMap<String, String[]>();
 		values.put("favoriteFoodsByGroup", new String[] { "DAIRY=Milk", "FRUIT=Peaches", "MEAT=Ham" });
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
@@ -395,7 +395,7 @@ public class PresentationModelBinderTests {
 		values.put("favoriteFoodsByGroup[DAIRY]", "Milk");
 		values.put("favoriteFoodsByGroup[FRUIT]", "Peaches");
 		values.put("favoriteFoodsByGroup[MEAT]", "Ham");
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
@@ -406,7 +406,7 @@ public class PresentationModelBinderTests {
 	public void bindToMapSingleString() {
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("favoriteFoodsByGroup", "DAIRY=Milk FRUIT=Peaches MEAT=Ham");
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		Assert.assertEquals(3, bean.favoriteFoodsByGroup.size());
 		assertEquals("Milk", bean.favoriteFoodsByGroup.get(FoodGroup.DAIRY));
 		assertEquals("Peaches", bean.favoriteFoodsByGroup.get(FoodGroup.FRUIT));
@@ -429,7 +429,7 @@ public class PresentationModelBinderTests {
 	public void bindToNullObjectPath() {
 		Map<String, String> values = new LinkedHashMap<String, String>();
 		values.put("primaryAddress.city", "Melbourne");
-		binder.bind(values);
+		binder.bind(values, presentationModel);
 		Assert.assertEquals("Melbourne", bean.primaryAddress.city);
 	}
 
