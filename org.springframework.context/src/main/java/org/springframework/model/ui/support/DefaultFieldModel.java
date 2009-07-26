@@ -259,7 +259,7 @@ public class DefaultFieldModel implements FieldModel {
 
 				public String getMessage() {
 					MessageBuilder builder = new MessageBuilder(context.getMessageSource());
-					builder.code("bindSuccess");
+					builder.code(getCode());
 					builder.arg("label", context.getLabel());
 					builder.arg("value", submittedValue);
 					builder.defaultMessage(new DefaultMessageFactory() {
