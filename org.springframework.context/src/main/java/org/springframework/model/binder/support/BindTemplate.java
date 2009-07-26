@@ -27,7 +27,7 @@ import org.springframework.model.binder.MissingFieldException;
  * @author Keith Donald
  * @since 3.0
  * @see #setRequiredFields(String[])
- * @see #bind(Map)
+ * @see #bind(Map, FieldBinder)
  */
 public class BindTemplate  {
 
