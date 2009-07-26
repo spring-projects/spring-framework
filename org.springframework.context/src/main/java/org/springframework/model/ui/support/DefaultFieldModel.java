@@ -268,7 +268,7 @@ public class DefaultFieldModel implements FieldModel {
 									+ " to field '" + context.getLabel() + "'";
 						}
 					});
-					return "Binding successful";
+					return builder.build();
 				}
 
 				public Severity getSeverity() {
