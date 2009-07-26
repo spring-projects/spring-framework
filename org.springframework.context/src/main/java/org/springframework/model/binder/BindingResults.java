@@ -15,13 +15,13 @@
  */
 package org.springframework.model.binder;
 
-import java.util.List;
+import org.springframework.model.alert.Severity;
 
 /**
  * The results of a bind operation.
  * @author Keith Donald
  * @since 3.0
- * @see Binder#bind(UserValues)
+ * @see Binder#bind(java.util.Map, Object)
  */
 public interface BindingResults extends Iterable<BindingResult> {
 
@@ -31,16 +31,21 @@ public interface BindingResults extends Iterable<BindingResult> {
 	BindingResults successes();
 
 	/**
-	 * If there is at least one failed BindingResult.
-	 * @see BindingResult#isFailure()
-	 */
-	boolean hasFailures();
-	
-	/**
 	 * The subset of BindingResults that failed.
 	 */
 	BindingResults failures();
-
+	
+	/**
+	 * If there is at least one failure with a Severity equal to or greater than {@link Severity#ERROR}.
+	 * @see BindingResults#failures()
+	 */
+	boolean hasErrors();
+	
+	/**
+	 * The subset of BindingResults that failed with {@link Severity#ERROR} or greater.
+	 */
+	BindingResults errors();
+	
 	/**
 	 * The total number of results.
 	 */
@@ -52,9 +57,4 @@ public interface BindingResults extends Iterable<BindingResult> {
 	 */
 	BindingResult get(int index);
 
-	/**
-	 * The ordered list of properties for which a {@link BindingResult} was returned.
-	 */
-	List<String> properties();
-	
 }

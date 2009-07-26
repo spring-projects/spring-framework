@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.model.alert.Severity;
 import org.springframework.model.binder.BindingResult;
 import org.springframework.model.binder.BindingResults;
 
@@ -56,10 +57,6 @@ class ArrayListBindingResults implements BindingResults {
 		return results;
 	}
 
-	public boolean hasFailures() {
-		return failures().size() > 0;
-	}
-	
 	public BindingResults failures() {
 		ArrayListBindingResults results = new ArrayListBindingResults();
 		for (BindingResult result : this) {
@@ -70,16 +67,22 @@ class ArrayListBindingResults implements BindingResults {
 		return results;
 	}
 
-	public BindingResult get(int index) {
-		return results.get(index);
+	public boolean hasErrors() {
+		return errors().size() > 0;
+	}
+	
+	public BindingResults errors() {
+		ArrayListBindingResults results = new ArrayListBindingResults();
+		for (BindingResult result : this) {
+			if (result.isFailure() && result.getAlert().getSeverity().compareTo(Severity.ERROR) >= 0) {
+				results.add(result);
+			}
+		}
+		return results;
 	}
 
-	public List<String> properties() {
-		List<String> properties = new ArrayList<String>(results.size());
-		for (BindingResult result : this) {
-			properties.add(result.getFieldName());
-		}
-		return properties;
+	public BindingResult get(int index) {
+		return results.get(index);
 	}
 
 	public int size() {
