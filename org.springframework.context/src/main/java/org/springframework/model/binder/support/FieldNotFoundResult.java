@@ -20,25 +20,26 @@ import org.springframework.core.style.StylerUtils;
 import org.springframework.model.alert.Alert;
 import org.springframework.model.alert.Severity;
 import org.springframework.model.binder.BindingResult;
+import org.springframework.model.message.DefaultMessageFactory;
 import org.springframework.model.message.MessageBuilder;
 import org.springframework.model.message.ResolvableArgument;
 
 public class FieldNotFoundResult implements BindingResult {
 
-	private String property;
+	private String fieldName;
 
 	private Object submittedValue;
 
 	private MessageSource messageSource;
 	
-	public FieldNotFoundResult(String property, Object submittedValue, MessageSource messageSource) {
-		this.property = property;
+	public FieldNotFoundResult(String fieldName, Object submittedValue, MessageSource messageSource) {
+		this.fieldName = fieldName;
 		this.submittedValue = submittedValue;
 		this.messageSource = messageSource;
 	}
 
 	public String getFieldName() {
-		return property;
+		return fieldName;
 	}
 
 	public Object getSubmittedValue() {
@@ -62,11 +63,13 @@ public class FieldNotFoundResult implements BindingResult {
 			public String getMessage() {
 				MessageBuilder builder = new MessageBuilder(messageSource);
 				builder.code("bindSuccess");
-				builder.arg("label", new ResolvableArgument(property));
+				builder.arg("label", new ResolvableArgument(fieldName));
 				builder.arg("value", submittedValue);
-				// TODO lazily create default message
-				builder.defaultMessage("Successfully bound user value " + StylerUtils.style(submittedValue)
-						+ " to property '" + property + "'");
+				builder.defaultMessage(new DefaultMessageFactory() {
+					public String createDefaultMessage() {
+						return "Failed to bind submitted value " + StylerUtils.style(submittedValue) + "; no field '" + fieldName + "' found";
+					}
+				});				
 				return builder.build();
 			}
 		};

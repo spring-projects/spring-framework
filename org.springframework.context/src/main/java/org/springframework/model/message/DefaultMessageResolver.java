@@ -39,15 +39,15 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 
 	private Map<String, Object> args;
 
-	private String defaultMessage;
+	private DefaultMessageFactory defaultMessageFactory;
 
 	private ExpressionParser expressionParser;
 
-	public DefaultMessageResolver(String[] codes, Map<String, Object> args, String defaultText,
-			ExpressionParser expressionParser) {
+	public DefaultMessageResolver(String[] codes, Map<String, Object> args,
+			DefaultMessageFactory defaultMessageFactory, ExpressionParser expressionParser) {
 		this.codes = codes;
 		this.args = args;
-		this.defaultMessage = defaultText;
+		this.defaultMessageFactory = defaultMessageFactory;
 		this.expressionParser = expressionParser;
 	}
 
@@ -55,10 +55,11 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 
 	public String resolveMessage(MessageSource messageSource, Locale locale) {
 		if (messageSource == null) {
-			if (defaultMessage != null) {
-				return defaultMessage;
+			if (defaultMessageFactory != null) {
+				return defaultMessageFactory.createDefaultMessage();
 			} else {
-				throw new MessageResolutionException("Unable to resolve message; MessagSource argument is null and no defaultMessage is configured");
+				throw new MessageResolutionException(
+						"Unable to resolve message; MessagSource argument is null and no defaultMessage is configured");
 			}
 		}
 		String messageString;
@@ -95,11 +96,12 @@ final class DefaultMessageResolver implements MessageResolver, MessageSourceReso
 	}
 
 	public String getDefaultMessage() {
-		return defaultMessage;
+		return defaultMessageFactory.createDefaultMessage();
 	}
 
 	public String toString() {
-		return new ToStringCreator(this).append("codes", codes).append("defaultText", defaultMessage).toString();
+		return new ToStringCreator(this).append("codes", codes).append("args", args).append("defaultMessageFactory",
+				defaultMessageFactory).toString();
 	}
 
 	@SuppressWarnings("unchecked")

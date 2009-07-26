@@ -56,7 +56,7 @@ public class MessageResolverBuilder {
 
 	private Map<String, Object> args = new LinkedHashMap<String, Object>();
 
-	private String defaultMessage;
+	private DefaultMessageFactory defaultMessageFactory;
 
 	private ExpressionParser expressionParser = new SpelExpressionParser();
 	
@@ -97,9 +97,21 @@ public class MessageResolverBuilder {
 	 * @return this, for fluent API usage
 	 */
 	public MessageResolverBuilder defaultMessage(String message) {
-		defaultMessage = message;
+		return defaultMessage(new StaticDefaultMessageFactory(message));
+	}
+
+	/**
+	 * Set the default message.
+	 * If the MessageResolver has no codes to try, this will be used as the message.
+	 * If the MessageResolver has codes to try but none of those resolve to a message, this will be used as the message.
+	 * @param message the default text
+	 * @return this, for fluent API usage
+	 */
+	public MessageResolverBuilder defaultMessage(DefaultMessageFactory defaultMessageFactory) {
+		this.defaultMessageFactory = defaultMessageFactory;
 		return this;
 	}
+
 
 	/**
 	 * Builds the resolver for the message.
@@ -108,12 +120,12 @@ public class MessageResolverBuilder {
 	 * @throws IllegalStateException if no codes have been added and there is no default message
 	 */
 	public MessageResolver build() {
-		if (codes == null && defaultMessage == null) {
+		if (codes == null && defaultMessageFactory == null) {
 			throw new IllegalStateException(
 					"A message code or the message text is required to build this message resolver");
 		}
 		String[] codesArray = (String[]) codes.toArray(new String[codes.size()]);
-		return new DefaultMessageResolver(codesArray, args, defaultMessage, expressionParser);
+		return new DefaultMessageResolver(codesArray, args, defaultMessageFactory, expressionParser);
 	}
 
 }

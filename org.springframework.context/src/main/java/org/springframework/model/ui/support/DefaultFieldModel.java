@@ -34,6 +34,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.style.StylerUtils;
 import org.springframework.model.alert.Alert;
 import org.springframework.model.alert.Severity;
+import org.springframework.model.message.DefaultMessageFactory;
 import org.springframework.model.message.MessageBuilder;
 import org.springframework.model.message.ResolvableArgument;
 import org.springframework.model.ui.BindingStatus;
@@ -210,16 +211,24 @@ public class DefaultFieldModel implements FieldModel {
 						builder.arg("label", context.getLabel());
 						builder.arg("value", submittedValue);
 						builder.arg("errorOffset", e.getErrorOffset());
-						builder.defaultMessage("Failed to bind '" + context.getLabel() + "'; the submitted value "
-								+ StylerUtils.style(submittedValue) + " has an invalid format and could no be parsed");
+						builder.defaultMessage(new DefaultMessageFactory() {
+							public String createDefaultMessage() {
+								return "Failed to bind '" + context.getLabel() + "'; the submitted value "
+										+ StylerUtils.style(submittedValue)
+										+ " has an invalid format and could no be parsed";
+							}
+						});
 					} else {
-						ConversionFailedException e = (ConversionFailedException) invalidSubmittedValueCause;
+						final ConversionFailedException e = (ConversionFailedException) invalidSubmittedValueCause;
 						builder.arg("label", new ResolvableArgument(context.getLabel()));
 						builder.arg("value", submittedValue);
-						builder.defaultMessage("Failed to bind '" + context.getLabel() + "'; the submitted value "
-								+ StylerUtils.style(submittedValue) + " has could not be converted to "
-								+ e.getTargetType().getName());
-
+						builder.defaultMessage(new DefaultMessageFactory() {
+							public String createDefaultMessage() {
+								return "Failed to bind '" + context.getLabel() + "'; the submitted value "
+										+ StylerUtils.style(submittedValue) + " has could not be converted to "
+										+ e.getTargetType().getName();
+							}
+						});
 					}
 					return builder.build();
 				}
@@ -235,7 +244,6 @@ public class DefaultFieldModel implements FieldModel {
 				}
 
 				public String getMessage() {
-					buffer.getFlushException().printStackTrace();
 					return "Internal error occurred; message = [" + buffer.getFlushException().getMessage() + "]";
 				}
 
@@ -250,6 +258,16 @@ public class DefaultFieldModel implements FieldModel {
 				}
 
 				public String getMessage() {
+					MessageBuilder builder = new MessageBuilder(context.getMessageSource());
+					builder.code("bindSuccess");
+					builder.arg("label", context.getLabel());
+					builder.arg("value", submittedValue);
+					builder.defaultMessage(new DefaultMessageFactory() {
+						public String createDefaultMessage() {
+							return "Successfully bound submitted value " + StylerUtils.style(submittedValue)
+									+ " to field '" + context.getLabel() + "'";
+						}
+					});
 					return "Binding successful";
 				}
 

@@ -103,6 +103,18 @@ public class MessageBuilder {
 	}
 	
 	/**
+	 * Set the default message.
+	 * If there are no codes to try, this will be used as the message.
+	 * If there are codes to try but none of those resolve to a message, this will be used as the message.
+	 * @param message the default text
+	 * @return this, for fluent API usage
+	 */
+	public MessageBuilder defaultMessage(DefaultMessageFactory defaultMessageFactory) {
+		builder.defaultMessage(defaultMessageFactory);
+		return this;
+	}
+	
+	/**
 	 * Set the message locale.
 	 * If not set, the default locale the Locale of the current request obtained from {@link LocaleContextHolder#getLocale()}.
 	 * @param message the locale
