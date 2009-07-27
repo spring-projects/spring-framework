@@ -18,10 +18,11 @@ package org.springframework.model.ui.support;
 import java.util.Map;
 
 import org.springframework.context.MessageSource;
+import org.springframework.model.binder.Binder;
 import org.springframework.model.binder.BindingResult;
 import org.springframework.model.binder.BindingResults;
-import org.springframework.model.binder.support.AbstractBinder;
 import org.springframework.model.binder.support.AlertBindingResult;
+import org.springframework.model.binder.support.BinderSupport;
 import org.springframework.model.binder.support.FieldBinder;
 import org.springframework.model.binder.support.FieldNotEditableResult;
 import org.springframework.model.binder.support.FieldNotFoundResult;
@@ -38,7 +39,7 @@ import org.springframework.model.ui.PresentationModel;
  * @see #setRequiredFields(String[])
  * @see #bind(Map, PresentationModel)
  */
-public class PresentationModelBinder extends AbstractBinder<PresentationModel> {
+public class PresentationModelBinder extends BinderSupport implements Binder<PresentationModel> {
 
 	public BindingResults bind(Map<String, ? extends Object> fieldValues, PresentationModel model) {
 		fieldValues = filter(fieldValues, model);
