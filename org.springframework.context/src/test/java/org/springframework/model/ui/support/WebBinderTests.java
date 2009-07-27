@@ -34,7 +34,8 @@ public class WebBinderTests {
 	public void setUp() {
 		LocaleContextHolder.setLocale(Locale.US);
 		presentationModel = new DefaultPresentationModel(bean);
-		binder = new WebBinder();		
+		binder = new WebBinder();
+		binder.setCommitDirtyValue(true);
 	}
 
 	@After
