@@ -1230,7 +1230,7 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <classname>AnnotationMethodHandlerAdapter</classname> has been
         extended to support the <classname>@RequestBody</classname> and has
         several <interfacename>HttpMessageConverters</interfacename>
-        registered by default, these are</para>
+        registered by default, these are:</para>
 
         <itemizedlist>
           <listitem>
@@ -1245,12 +1245,12 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
 
           <listitem>
             <para><classname>FormHttpMessageConverter</classname> - converts
-            form data to/from a MultiValueMap&lt;String, String&gt;</para>
+            form data to/from a <literal>MultiValueMap&lt;String, String&gt;</literal></para>
           </listitem>
 
           <listitem>
             <para><classname>SourceHttpMessageConverter</classname> - converts
-            to/from a javax.xml.transform.Source;</para>
+            to/from a <classname>javax.xml.transform.Source</classname></para>
           </listitem>
 
           <listitem>
@@ -1270,7 +1270,7 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <classname>org.springframework.oxm</classname> package to be
         configured on an instance of
         <classname>AnnotationMethodHandlerAdapter</classname> in the
-        application context. For example</para>
+        application context. For example:</para>
 
         <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"&gt;
     &lt;property name="messageConverters"&gt;
