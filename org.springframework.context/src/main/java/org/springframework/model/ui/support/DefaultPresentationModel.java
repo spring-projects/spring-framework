@@ -143,18 +143,18 @@ public class DefaultPresentationModel implements PresentationModel {
 		return field;
 	}
 
+	public void validate() {
+		
+	}
+
 	public boolean hasErrors() {
 		return false;
 	}
-
+	
 	public void commit() {
 		
 	}
 
-	public void validate() {
-		
-	}
-	
 	// internal helpers
 
 	private PropertyFieldModelRule getRule(String fieldName) {
