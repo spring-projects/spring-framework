@@ -24,6 +24,10 @@ import org.springframework.model.message.DefaultMessageFactory;
 import org.springframework.model.message.MessageBuilder;
 import org.springframework.model.message.ResolvableArgument;
 
+/**
+ * Indicates field failed to bind because it was not found.
+ * @author Keith Donald
+ */
 public class FieldNotFoundResult implements BindingResult {
 
 	private String fieldName;
