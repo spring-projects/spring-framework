@@ -18,11 +18,9 @@ package org.springframework.model.ui.support;
 import java.util.Map;
 
 import org.springframework.context.MessageSource;
-import org.springframework.model.binder.Binder;
 import org.springframework.model.binder.BindingResult;
-import org.springframework.model.binder.BindingResults;
+import org.springframework.model.binder.support.AbstractBinder;
 import org.springframework.model.binder.support.AlertBindingResult;
-import org.springframework.model.binder.support.BinderSupport;
 import org.springframework.model.binder.support.FieldBinder;
 import org.springframework.model.binder.support.FieldNotEditableResult;
 import org.springframework.model.binder.support.FieldNotFoundResult;
@@ -39,28 +37,15 @@ import org.springframework.model.ui.PresentationModel;
  * @see #setRequiredFields(String[])
  * @see #bind(Map, PresentationModel)
  */
-public class PresentationModelBinder extends BinderSupport implements Binder<PresentationModel> {
+public class PresentationModelBinder extends AbstractBinder<PresentationModel> {
 
-	public BindingResults bind(Map<String, ? extends Object> fieldValues, PresentationModel model) {
-		fieldValues = filter(fieldValues, model);
-		return getBindTemplate().bind(fieldValues, new FieldModelBinder(model, getMessageSource()));
-	}
-	
 	// subclassing hooks
-	
-	/**
-	 * Filter the fields to bind.
-	 * Allows for pre-processing the fieldValues Map before any binding occurs.
-	 * For example, you might insert empty or default values for fields that are not present.
-	 * As another example, you might collapse multiple fields into a single field.
-	 * Default implementation simply returns the fieldValues Map unchanged. 
-	 * @param fieldValues the original fieldValues Map provided by the caller
-	 * @return the filtered fieldValues Map that will be used to bind
-	 */
-	protected Map<String, ? extends Object> filter(Map<String, ? extends Object> fieldValues, PresentationModel model) {
-		return fieldValues;
+
+	@Override
+	protected FieldBinder createFieldBinder(PresentationModel model) {
+		return new FieldModelBinder(model, getMessageSource());
 	}
-	
+
 	// internal helpers
 	
 	private static class FieldModelBinder implements FieldBinder {

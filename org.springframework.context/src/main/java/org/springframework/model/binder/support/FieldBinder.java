@@ -18,9 +18,9 @@ package org.springframework.model.binder.support;
 import org.springframework.model.binder.BindingResult;
 
 /**
- * BindTemplate callback interface for binding a single field value.
+ * Binder callback interface for binding a single field value.
  * @author Keith Donald
- * @see BindTemplate#bind(java.util.Map, BindCallback)
+ * @see AbstractBinder#createFieldBinder(Object)
  */
 public interface FieldBinder {
 

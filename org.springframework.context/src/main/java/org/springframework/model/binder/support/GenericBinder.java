@@ -15,8 +15,6 @@
  */
 package org.springframework.model.binder.support;
 
-import java.util.Map;
-
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -29,7 +27,6 @@ import org.springframework.model.alert.Alert;
 import org.springframework.model.alert.Severity;
 import org.springframework.model.binder.Binder;
 import org.springframework.model.binder.BindingResult;
-import org.springframework.model.binder.BindingResults;
 
 /**
  * A {@link Binder} implementation that accepts any target object and uses
@@ -38,18 +35,19 @@ import org.springframework.model.binder.BindingResults;
  * @author Mark Fisher
  * @since 3.0
  */
-public class GenericBinder extends BinderSupport implements Binder<Object> {
+public class GenericBinder extends AbstractBinder<Object> {
 
 	private final ExpressionParser parser = new SpelExpressionParser(
 			SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull
 					| SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
 
-	public BindingResults bind(Map<String, ? extends Object> fieldValues, Object model) {
+	@Override
+	protected FieldBinder createFieldBinder(Object model) {
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
 		evaluationContext.setRootObject(model);
-		FieldBinder fieldBinder = new EvaluationContextFieldBinder(parser, evaluationContext);
-		return getBindTemplate().bind(fieldValues, fieldBinder);
+		return new EvaluationContextFieldBinder(parser, evaluationContext);
 	}
+
 
 	private static class EvaluationContextFieldBinder implements FieldBinder {
 
