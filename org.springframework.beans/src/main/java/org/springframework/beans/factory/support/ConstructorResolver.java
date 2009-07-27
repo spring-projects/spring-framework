@@ -443,6 +443,12 @@ class ConstructorResolver {
 						argsToUse = args.arguments;
 						minTypeDiffWeight = typeDiffWeight;
 					}
+					else if (typeDiffWeight < Integer.MAX_VALUE && typeDiffWeight == minTypeDiffWeight &&
+							!mbd.isLenientConstructorResolution()) {
+						throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+								"Ambiguous factory method matches found in bean '" + beanName + "' " +
+								"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
+					}
 				}
 			}
 
