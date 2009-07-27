@@ -15,32 +15,26 @@
  */
 package org.springframework.model.binder.support;
 
-import java.util.Map;
-
 import org.springframework.context.MessageSource;
-import org.springframework.model.binder.Binder;
 import org.springframework.model.binder.BindingResult;
-import org.springframework.model.binder.BindingResults;
 import org.springframework.model.binder.MissingFieldException;
 import org.springframework.util.Assert;
 
 /**
- * Base Binder implementation that defines common structural elements.
- * Subclasses should parameterized & implement {@link #bind(Map, Object)}.
+ * Binder implementation support class that defines common structural elements.
  * @author Keith Donald
  * @since 3.0
  * @see #setRequiredFields(String[])
  * @see #setMessageSource(MessageSource)
  * @see #createBindTemplate()
- * @see #bind(Map, Object)
  */
-public abstract class AbstractBinder<M> implements Binder<M> {
+public abstract class BinderSupport {
 
 	private BindTemplate bindTemplate;
 
 	private MessageSource messageSource;
 
-	public AbstractBinder() {
+	public BinderSupport() {
 		bindTemplate = createBindTemplate();
 	}
 
@@ -61,8 +55,6 @@ public abstract class AbstractBinder<M> implements Binder<M> {
 		Assert.notNull(messageSource, "The MessageSource is required");
 		this.messageSource = messageSource;
 	}
-
-	public abstract BindingResults bind(Map<String, ? extends Object> fieldValues, M model);
 
 	// subclass hooks
 	

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.model.binder.support;
 
 import java.util.Map;
@@ -36,25 +35,21 @@ import org.springframework.model.binder.BindingResults;
  * A {@link Binder} implementation that accepts any target object and uses
  * Spring's Expression Language support to evaluate the keys in the field
  * value Map.
- * 
  * @author Mark Fisher
  * @since 3.0
  */
-public class GenericBinder extends AbstractBinder<Object> {
+public class GenericBinder extends BinderSupport implements Binder<Object> {
 
 	private final ExpressionParser parser = new SpelExpressionParser(
-			SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull |
-			SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize); 
+			SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull
+					| SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
 
-
-	@Override
 	public BindingResults bind(Map<String, ? extends Object> fieldValues, Object model) {
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
 		evaluationContext.setRootObject(model);
-		FieldBinder fieldBinder = new EvaluationContextFieldBinder(this.parser, evaluationContext);
-		return this.getBindTemplate().bind(fieldValues, fieldBinder);
+		FieldBinder fieldBinder = new EvaluationContextFieldBinder(parser, evaluationContext);
+		return getBindTemplate().bind(fieldValues, fieldBinder);
 	}
-
 
 	private static class EvaluationContextFieldBinder implements FieldBinder {
 
@@ -73,17 +68,14 @@ public class GenericBinder extends AbstractBinder<Object> {
 				Expression e = this.parser.parseExpression(key);
 				e.setValue(this.context, value);
 				alert = new BindSuccessAlert();
-			}
-			catch (ParseException e) {
+			} catch (ParseException e) {
 				alert = new ParseFailureAlert(e);
-			}
-			catch (EvaluationException e) {
+			} catch (EvaluationException e) {
 				alert = new EvaluationFailureAlert(e);
 			}
 			return new AlertBindingResult(key, value, alert);
 		}
 	}
-
 
 	private static class BindSuccessAlert implements Alert {
 
@@ -99,7 +91,6 @@ public class GenericBinder extends AbstractBinder<Object> {
 			return Severity.INFO;
 		}
 	}
-
 
 	private static class ParseFailureAlert implements Alert {
 
@@ -121,7 +112,6 @@ public class GenericBinder extends AbstractBinder<Object> {
 			return Severity.ERROR;
 		}
 	}
-
 
 	private static class EvaluationFailureAlert implements Alert {
 
