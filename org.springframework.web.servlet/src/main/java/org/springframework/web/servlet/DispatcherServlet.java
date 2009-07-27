@@ -79,7 +79,10 @@ import org.springframework.web.util.WebUtils;
  * default HandlerAdapters. Like HandlerMappings, HandlerAdapters can be given any bean name (they are tested by type).
  *
  * <li>The dispatcher's exception resolution strategy can be specified via a {@link HandlerExceptionResolver}, for
- * example mapping certain exceptions to error pages. Default is none. Additional HandlerExceptionResolvers can be added
+ * example mapping certain exceptions to error pages. Default are
+ * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver},
+ * {@link org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver}, and
+ * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver}. These HandlerExceptionResolvers can be overridden
  * through the application context. HandlerExceptionResolver can be given any bean name (they are tested by type).
  *
  * <li>Its view resolution strategy can be specified via a {@link ViewResolver} implementation, resolving symbolic view
