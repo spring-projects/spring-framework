@@ -30,7 +30,7 @@ import org.springframework.model.binder.BindingResult;
 
 /**
  * A {@link Binder} implementation that accepts any target object and uses
- * Spring's Expression Language support to evaluate the keys in the field
+ * Spring's Expression Language (SpEL) to evaluate the keys in the field
  * value Map.
  * @author Mark Fisher
  * @since 3.0
@@ -43,11 +43,10 @@ public class GenericBinder extends AbstractBinder<Object> {
 
 	@Override
 	protected FieldBinder createFieldBinder(Object model) {
-		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-		evaluationContext.setRootObject(model);
-		return new EvaluationContextFieldBinder(parser, evaluationContext);
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setRootObject(model);
+		return new EvaluationContextFieldBinder(parser, context);
 	}
-
 
 	private static class EvaluationContextFieldBinder implements FieldBinder {
 
