@@ -20,7 +20,6 @@ import java.io.IOException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -44,8 +43,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConverter<Object>
-		implements InitializingBean {
+public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConverter<Object> {
 
 	private Marshaller marshaller;
 
@@ -66,18 +64,11 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	 * {@code Unmarshaller} interface, so that you can safely use this constructor.
 	 *
 	 * @param marshaller object used as marshaller and unmarshaller
-	 * @throws IllegalArgumentException when <code>marshaller</code> does not implement the {@link Unmarshaller} interface
-	 * as well
 	 */
 	public MarshallingHttpMessageConverter(Marshaller marshaller) {
 		Assert.notNull(marshaller, "marshaller must not be null");
-		if (!(marshaller instanceof Unmarshaller)) {
-			throw new IllegalArgumentException("Marshaller [" + marshaller + "] does not implement the Unmarshaller " +
-					"interface. Please set an Unmarshaller explicitely by using the " +
-					"MarshallingHttpMessageConverter(Marshaller, Unmarshaller) constructor.");
-		}
-		else {
-			this.marshaller = marshaller;
+		this.marshaller = marshaller;
+		if (marshaller instanceof Unmarshaller) {
 			this.unmarshaller = (Unmarshaller) marshaller;
 		}
 	}
@@ -106,17 +97,13 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 		this.unmarshaller = unmarshaller;
 	}
 
-	public void afterPropertiesSet() {
-		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
-		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
-	}
-
 	public boolean supports(Class<?> clazz) {
 		return unmarshaller.supports(clazz);
 	}
 
 	@Override
 	protected Object readFromSource(Class<Object> clazz, HttpHeaders headers, Source source) throws IOException {
+		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
 		try {
 			return unmarshaller.unmarshal(source);
 		}
@@ -127,6 +114,7 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 
 	@Override
 	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws IOException {
+		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
 			marshaller.marshal(o, result);
 		}
