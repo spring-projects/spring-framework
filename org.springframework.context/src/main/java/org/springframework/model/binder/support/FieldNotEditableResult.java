@@ -24,6 +24,10 @@ import org.springframework.model.message.DefaultMessageFactory;
 import org.springframework.model.message.MessageBuilder;
 import org.springframework.model.message.ResolvableArgument;
 
+/**
+ * Indicates a field failed to bind because it was not editable/writeable.
+ * @author Keith Donald
+ */
 public class FieldNotEditableResult implements BindingResult {
 
 	private String fieldName;
