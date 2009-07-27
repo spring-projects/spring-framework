@@ -162,7 +162,7 @@
 		<constructor-arg value="NaN" type="double"/>
 	</bean>
 
-	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype">
+	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype" factory-method="create">
 		<constructor-arg type="java.lang.Boolean"><value>true</value></constructor-arg>
 	</bean>
 
@@ -171,6 +171,11 @@
 	</bean>
 
 	<bean id="beanWithDoubleBooleanNoType" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" scope="prototype">
+		<constructor-arg index="0"><value>false</value></constructor-arg>
+		<constructor-arg index="1"><value>true</value></constructor-arg>
+	</bean>
+
+	<bean id="beanWithDoubleBooleanNoTypeFactoryMethod" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" scope="prototype" factory-method="create">
 		<constructor-arg index="0"><value>false</value></constructor-arg>
 		<constructor-arg index="1"><value>true</value></constructor-arg>
 	</bean>

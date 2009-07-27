@@ -1380,6 +1380,21 @@ public final class XmlBeanFactoryTests {
 		}
 	}
 
+	public @Test void testDoubleBooleanNoTypeFactoryMethod() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("beanWithDoubleBooleanNoTypeFactoryMethod");
+		bd.setLenientConstructorResolution(false);
+		try {
+			xbf.getBean("beanWithDoubleBooleanNoTypeFactoryMethod");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			ex.printStackTrace();
+			assertTrue(ex.getMostSpecificCause().getMessage().contains("Ambiguous"));
+		}
+	}
+
 	public @Test void testStringConstructor() {
 		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("string");
@@ -1631,6 +1646,14 @@ public final class XmlBeanFactoryTests {
 
 		public DoubleBooleanConstructorBean(String s1, String s2) {
 			throw new IllegalStateException("Don't pick this constructor");
+		}
+
+		public static DoubleBooleanConstructorBean create(Boolean b1, Boolean b2) {
+			return new DoubleBooleanConstructorBean(b1, b2);
+		}
+
+		public static DoubleBooleanConstructorBean create(String s1, String s2) {
+			return new DoubleBooleanConstructorBean(s1, s2);
 		}
 	}
 
