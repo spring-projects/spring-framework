@@ -35,28 +35,36 @@ import org.springframework.model.ui.PresentationModel;
  * @since 3.0
  * @see #setMessageSource(MessageSource)
  * @see #setRequiredFields(String[])
+ * @see #setCommitDirtyValue(boolean)
  * @see #bind(Map, PresentationModel)
  */
 public class PresentationModelBinder extends AbstractBinder<PresentationModel> {
 
-	// subclassing hooks
+	private boolean commitDirtyValue;
+	
+	/**
+	 * Configures if this PresentationModelBinder should eagerly commit the dirty value after a successful field binding.
+	 * Default is false.
+	 */
+	public void setCommitDirtyValue(boolean commitDirtyValue) {
+		this.commitDirtyValue = commitDirtyValue;
+	}
+
+	// subclass hooks
 
 	@Override
 	protected FieldBinder createFieldBinder(PresentationModel model) {
-		return new FieldModelBinder(model, getMessageSource());
+		return new FieldModelBinder(model);
 	}
 
 	// internal helpers
 	
-	private static class FieldModelBinder implements FieldBinder {
+	private class FieldModelBinder implements FieldBinder {
 		
 		private PresentationModel presentationModel;
 
-		private MessageSource messageSource;
-		
-		public FieldModelBinder(PresentationModel presentationModel, MessageSource messageSource) {
+		public FieldModelBinder(PresentationModel presentationModel) {
 			this.presentationModel = presentationModel;
-			this.messageSource = messageSource;
 		}
 
 		public BindingResult bind(String fieldName, Object value) {
@@ -64,13 +72,13 @@ public class PresentationModelBinder extends AbstractBinder<PresentationModel> {
 			try {
 				field = presentationModel.getFieldModel(fieldName);
 			} catch (FieldNotFoundException e) {
-				return new FieldNotFoundResult(fieldName, value,  messageSource);
+				return new FieldNotFoundResult(fieldName, value,  getMessageSource());
 			}
 			if (!field.isEditable()) {
-				return new FieldNotEditableResult(fieldName, value, messageSource);
+				return new FieldNotEditableResult(fieldName, value, getMessageSource());
 			} else {
 				field.applySubmittedValue(value);
-				if (field.getBindingStatus() == BindingStatus.DIRTY) {
+				if (field.getBindingStatus() == BindingStatus.DIRTY && commitDirtyValue) {
 					field.commit();
 				}
 				return new AlertBindingResult(fieldName, value, field.getStatusAlert());

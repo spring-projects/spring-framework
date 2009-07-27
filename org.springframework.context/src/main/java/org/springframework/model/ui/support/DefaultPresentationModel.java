@@ -143,6 +143,20 @@ public class DefaultPresentationModel implements PresentationModel {
 		return field;
 	}
 
+	public boolean hasErrors() {
+		return false;
+	}
+
+	public void commit() {
+		
+	}
+
+	public void validate() {
+		
+	}
+	
+	// internal helpers
+
 	private PropertyFieldModelRule getRule(String fieldName) {
 		PropertyFieldModelRule rule = fieldModelRules.get(fieldName);
 		if (rule == null) {

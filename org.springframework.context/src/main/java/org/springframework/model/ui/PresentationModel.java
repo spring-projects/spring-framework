@@ -15,7 +15,6 @@
  */
 package org.springframework.model.ui;
 
-
 /**
  * Represents the state and behavior of a presentation independently of the GUI controls used in the interface.
  * Pulls the state and behavior of a view out into a model class that is part of the presentation.
@@ -31,5 +30,23 @@ public interface PresentationModel {
 	 * @throws FieldNotFoundException if no such field exists
 	 */
 	FieldModel getFieldModel(String fieldName);
+
+	/**
+	 * If errors are present on this PresentationModel.
+	 * Returns true if at least one FieldModel has {@link BindingStatus#INVALID_SUBMITTED_VALUE invalid submitted values} or is {@link ValidationStatus#INVALID invalid}.
+	 */
+	boolean hasErrors();
 	
+	/**
+	 * Commit any {@link BindingStatus#DIRTY dirty} fields.
+	 * @throws IllegalStateException if there are field models that have {@link BindingStatus#INVALID_SUBMITTED_VALUE invalid submitted values} or are {@link ValidationStatus#INVALID invalid}.
+	 */
+	void commit();
+
+	/**
+	 * Validate all fields.
+	 * Skips any fields with {@link BindingStatus#INVALID_SUBMITTED_VALUE invalid submitted values}.
+	 */
+	void validate();
+
 }

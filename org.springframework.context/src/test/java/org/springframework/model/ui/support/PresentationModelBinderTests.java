@@ -48,6 +48,7 @@ public class PresentationModelBinderTests {
 		bean = new TestBean();
 		presentationModel = new DefaultPresentationModel(bean);
 		binder = new PresentationModelBinder();
+		binder.setCommitDirtyValue(true);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
