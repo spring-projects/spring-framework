@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -51,6 +53,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -71,6 +74,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
@@ -726,15 +730,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 
 			if (returnValue != null && handlerMethod.isAnnotationPresent(ResponseBody.class)) {
-				Class returnValueType = returnValue.getClass();
-				HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
-				for (HttpMessageConverter messageConverter : messageConverters) {
-					if (messageConverter.supports(returnValueType)) {
-						messageConverter.write(returnValue, outputMessage);
-						responseArgumentUsed = true;
-						return null;
-					}
-				}
+				handleRequestBody(returnValue, webRequest);
 			}
 
 			if (returnValue instanceof ModelAndView) {
@@ -776,6 +772,31 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
 			}
+		}
+
+		@SuppressWarnings("unchecked")
+		private void handleRequestBody(Object returnValue, ServletWebRequest webRequest) throws ServletException, IOException {
+			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
+			List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
+			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
+			Class<?> returnValueType = returnValue.getClass();
+			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
+			for (HttpMessageConverter messageConverter : messageConverters) {
+				allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
+				if (messageConverter.supports(returnValueType)) {
+					for (Object o : messageConverter.getSupportedMediaTypes()) {
+						MediaType supportedMediaType = (MediaType) o;
+						for (MediaType acceptedMediaType : acceptedMediaTypes) {
+							if (supportedMediaType.includes(acceptedMediaType)) {
+								messageConverter.write(returnValue, outputMessage);
+								responseArgumentUsed = true;
+								return;
+							}
+						}
+					}
+				}
+			}
+			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
 		}
 	}
 
