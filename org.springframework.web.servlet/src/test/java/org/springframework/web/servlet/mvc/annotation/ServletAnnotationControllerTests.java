@@ -876,9 +876,24 @@ public class ServletAnnotationControllerTests {
 		String requestBody = "Hello World";
 		request.setContent(requestBody.getBytes("UTF-8"));
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("Accept", "text/*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals(requestBody, response.getContentAsString());
+	}
+
+	@Test
+	public void responseBodyNoAcceptableMediaType() throws ServletException, IOException {
+		initServlet(RequestBodyController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
+		String requestBody = "Hello World";
+		request.setContent(requestBody.getBytes("UTF-8"));
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("Accept", "application/pdf, application/msword");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(406, response.getStatus());
 	}
 
 	@Test

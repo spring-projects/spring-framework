@@ -33,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
@@ -91,6 +92,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof HttpMediaTypeNotSupportedException) {
 				return handleHttpMediaTypeNotSupported((HttpMediaTypeNotSupportedException) ex, request, response,
+						handler);
+			}
+			else if (ex instanceof HttpMediaTypeNotAcceptableException) {
+				return handleHttpMediaTypeNotAcceptable((HttpMediaTypeNotAcceptableException) ex, request, response,
 						handler);
 			}
 			else if (ex instanceof MissingServletRequestParameterException) {
@@ -169,7 +174,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Handle the case where no {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}
-	 * were found for the PUT or POSTed content. <p>The default implementation sends an HTTP 415 error, sets the "Allow"
+	 * were found for the PUT or POSTed content. <p>The default implementation sends an HTTP 415 error, sets the "Accept"
 	 * header, and returns an empty {@code ModelAndView}. Alternatively, a fallback view could be chosen, or the
 	 * HttpMediaTypeNotSupportedException could be rethrown as-is.
 	 *
@@ -191,6 +196,29 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			response.setHeader("Accept", MediaType.toString(mediaTypes));
 		}
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle the case where no {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}
+	 * were found that were acceptable for the client (expressed via the {@code Accept} header.
+	 * <p>The default implementation sends an HTTP 406 error and returns an empty {@code ModelAndView}. Alternatively,
+	 * a fallback view could be chosen, or the HttpMediaTypeNotAcceptableException could be rethrown as-is.
+	 *
+	 * @param ex the HttpMediaTypeNotAcceptableException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of the exception (for example,
+	 * if multipart resolution failed)
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex,
+			HttpServletRequest request,
+			HttpServletResponse response,
+			Object handler) throws Exception {
+
+		response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		return new ModelAndView();
 	}
 

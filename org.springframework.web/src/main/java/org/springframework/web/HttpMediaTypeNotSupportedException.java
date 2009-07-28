@@ -16,9 +16,7 @@
 
 package org.springframework.web;
 
-import java.util.Collections;
 import java.util.List;
-import javax.servlet.ServletException;
 
 import org.springframework.http.MediaType;
 
@@ -29,11 +27,9 @@ import org.springframework.http.MediaType;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class HttpMediaTypeNotSupportedException extends ServletException {
+public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 
 	private final MediaType contentType;
-
-	private final List<MediaType> supportedMediaTypes;
 
 	/**
 	 * Create a new HttpMediaTypeNotSupportedException.
@@ -42,7 +38,6 @@ public class HttpMediaTypeNotSupportedException extends ServletException {
 	public HttpMediaTypeNotSupportedException(String message) {
 		super(message);
 		this.contentType = null;
-		this.supportedMediaTypes = Collections.emptyList();
 	}
 
 	/**
@@ -61,9 +56,8 @@ public class HttpMediaTypeNotSupportedException extends ServletException {
 	 * @param msg the detail message
 	 */
 	public HttpMediaTypeNotSupportedException(MediaType contentType, List<MediaType> supportedMediaTypes, String msg) {
-		super(msg);
+		super(msg, supportedMediaTypes);
 		this.contentType = contentType;
-		this.supportedMediaTypes = supportedMediaTypes;
 	}
 
 	/**
@@ -73,10 +67,4 @@ public class HttpMediaTypeNotSupportedException extends ServletException {
 		return contentType;
 	}
 
-	/**
-	 * Return the list of supported media types.
-	 */
-	public List<MediaType> getSupportedMediaTypes() {
-		return supportedMediaTypes;
-	}
 }
