@@ -1395,6 +1395,48 @@ public final class XmlBeanFactoryTests {
 		}
 	}
 
+	public @Test void testLenientDependencyMatching() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		LenientDependencyTestBean bean = (LenientDependencyTestBean) xbf.getBean("lenientDependencyTestBean");
+		assertTrue(bean.tb instanceof DerivedTestBean);
+	}
+
+	public @Test void testLenientDependencyMatchingFactoryMethod() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		LenientDependencyTestBean bean = (LenientDependencyTestBean) xbf.getBean("lenientDependencyTestBeanFactoryMethod");
+		assertTrue(bean.tb instanceof DerivedTestBean);
+	}
+
+	public @Test void testNonLenientDependencyMatching() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("lenientDependencyTestBean");
+		bd.setLenientConstructorResolution(false);
+		try {
+			xbf.getBean("lenientDependencyTestBean");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			ex.printStackTrace();
+			assertTrue(ex.getMostSpecificCause().getMessage().contains("Ambiguous"));
+		}
+	}
+
+	public @Test void testNonLenientDependencyMatchingFactoryMethod() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("lenientDependencyTestBeanFactoryMethod");
+		bd.setLenientConstructorResolution(false);
+		try {
+			xbf.getBean("lenientDependencyTestBeanFactoryMethod");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			ex.printStackTrace();
+			assertTrue(ex.getMostSpecificCause().getMessage().contains("Ambiguous"));
+		}
+	}
+
 	public @Test void testStringConstructor() {
 		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("string");
@@ -1425,7 +1467,7 @@ public final class XmlBeanFactoryTests {
 			fail("Duplicate name not detected");
 		}
 		catch (BeansException ex) {
-			assertTrue(ex.getMessage().indexOf("Bean name 'foo'") > -1);
+			assertTrue(ex.getMessage().contains("Bean name 'foo'"));
 		}
 	}
 
@@ -1435,7 +1477,7 @@ public final class XmlBeanFactoryTests {
 			fail("Duplicate name not detected");
 		}
 		catch (BeansException e) {
-			assertTrue(e.getMessage().indexOf("Bean name 'foo'") > -1);
+			assertTrue(e.getMessage().contains("Bean name 'foo'"));
 		}
 	}
 
@@ -1654,6 +1696,40 @@ public final class XmlBeanFactoryTests {
 
 		public static DoubleBooleanConstructorBean create(String s1, String s2) {
 			return new DoubleBooleanConstructorBean(s1, s2);
+		}
+	}
+
+
+	public static class LenientDependencyTestBean {
+
+		public final ITestBean tb;
+
+		public LenientDependencyTestBean(ITestBean tb) {
+			this.tb = tb;
+		}
+
+		public LenientDependencyTestBean(TestBean tb) {
+			this.tb = tb;
+		}
+
+		public LenientDependencyTestBean(DerivedTestBean tb) {
+			this.tb = tb;
+		}
+
+		public LenientDependencyTestBean(Map[] m) {
+			throw new IllegalStateException("Don't pick this constructor");
+		}
+
+		public static LenientDependencyTestBean create(ITestBean tb) {
+			return new LenientDependencyTestBean(tb);
+		}
+
+		public static LenientDependencyTestBean create(TestBean tb) {
+			return new LenientDependencyTestBean(tb);
+		}
+
+		public static LenientDependencyTestBean create(DerivedTestBean tb) {
+			return new LenientDependencyTestBean(tb);
 		}
 	}
 
