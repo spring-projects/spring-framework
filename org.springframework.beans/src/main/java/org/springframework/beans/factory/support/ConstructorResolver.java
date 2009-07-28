@@ -220,7 +220,8 @@ class ConstructorResolver {
 					args = new ArgumentsHolder(explicitArgs);
 				}
 
-				int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
+				int typeDiffWeight = (mbd.isLenientConstructorResolution() ?
+						args.getTypeDifferenceWeight(paramTypes) : args.getAssignabilityWeight(paramTypes));
 				// Choose this constructor if it represents the closest match.
 				if (typeDiffWeight < minTypeDiffWeight) {
 					constructorToUse = candidate;
@@ -436,8 +437,9 @@ class ConstructorResolver {
 						args = new ArgumentsHolder(explicitArgs);
 					}
 
-					int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
-					// Choose this constructor if it represents the closest match.
+					int typeDiffWeight = (mbd.isLenientConstructorResolution() ?
+							args.getTypeDifferenceWeight(paramTypes) : args.getAssignabilityWeight(paramTypes));
+					// Choose this factory method if it represents the closest match.
 					if (typeDiffWeight < minTypeDiffWeight) {
 						factoryMethodToUse = candidate;
 						argsToUse = args.arguments;
@@ -743,6 +745,20 @@ class ConstructorResolver {
 			int typeDiffWeight = MethodInvoker.getTypeDifferenceWeight(paramTypes, this.arguments);
 			int rawTypeDiffWeight = MethodInvoker.getTypeDifferenceWeight(paramTypes, this.rawArguments) - 1024;
 			return (rawTypeDiffWeight < typeDiffWeight ? rawTypeDiffWeight : typeDiffWeight);
+		}
+
+		public int getAssignabilityWeight(Class[] paramTypes) {
+			for (int i = 0; i < paramTypes.length; i++) {
+				if (!ClassUtils.isAssignableValue(paramTypes[i], this.arguments[i])) {
+					return Integer.MAX_VALUE;
+				}
+			}
+			for (int i = 0; i < paramTypes.length; i++) {
+				if (!ClassUtils.isAssignableValue(paramTypes[i], this.rawArguments[i])) {
+					return Integer.MAX_VALUE - 512;
+				}
+			}
+			return Integer.MAX_VALUE - 1024;
 		}
 	}
 

@@ -180,6 +180,18 @@
 		<constructor-arg index="1"><value>true</value></constructor-arg>
 	</bean>
 
+	<bean id="lenientDependencyTestBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype">
+		<constructor-arg>
+			<bean class="org.springframework.beans.DerivedTestBean"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="lenientDependencyTestBeanFactoryMethod" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype" factory-method="create">
+		<constructor-arg>
+			<bean class="org.springframework.beans.DerivedTestBean"/>
+		</constructor-arg>
+	</bean>
+
 	<bean id="string" class="java.lang.String" autowire-candidate="false">
 		<constructor-arg><value type="java.lang.String">test</value></constructor-arg>
 	</bean>
