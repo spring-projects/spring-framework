@@ -38,6 +38,8 @@ public class MvcBindingLifecycle implements BindingLifecycle<Object> {
 
 	private Object model;
 
+	private PresentationModel presentationModel;
+	
 	public MvcBindingLifecycle(Class<?> modelType, PresentationModelFactory presentationModelFactory,
 			ModelMap modelMap, Map<String, ? extends Object> fieldValues) {
 		this.presentationModelFactory = presentationModelFactory;
@@ -56,7 +58,7 @@ public class MvcBindingLifecycle implements BindingLifecycle<Object> {
 			bindEagerCommit = true;
 		}
 		modelMap.addAttribute(model);
-		PresentationModel presentationModel = presentationModelFactory.getPresentationModel(model);
+		presentationModel = presentationModelFactory.getPresentationModel(model);
 		PresentationModelBinder binder = new PresentationModelBinder();
 		binder.setCommitDirtyValue(bindEagerCommit);
 		binder.bind(fieldValues, presentationModel);
@@ -67,7 +69,7 @@ public class MvcBindingLifecycle implements BindingLifecycle<Object> {
 	}
 
 	public boolean hasErrors() {
-		return false;
+		return presentationModel.hasErrors();
 	}
 
 	public Object getModel() {
