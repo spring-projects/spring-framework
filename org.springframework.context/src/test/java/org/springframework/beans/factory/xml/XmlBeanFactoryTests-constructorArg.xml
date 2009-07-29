@@ -196,7 +196,11 @@
 		<constructor-arg><value type="java.lang.String">test</value></constructor-arg>
 	</bean>
 
-	<bean id="constructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean">
+	<bean id="stringConstructor" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$StringConstructorTestBean" scope="prototype">
+		<constructor-arg value="test"/>
+	</bean>
+
+	<bean id="constructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean" scope="prototype">
 		<constructor-arg type="int[]">
 			<array value-type="int">
 				<value>1</value>
@@ -204,11 +208,17 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="indexedConstructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean">
+	<bean id="indexedConstructorArray" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean" scope="prototype">
 		<constructor-arg index="0" type="int[]">
 			<array value-type="int">
 				<value>1</value>
 			</array>
+		</constructor-arg>
+	</bean>
+
+	<bean id="constructorArrayNoType" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$ConstructorArrayTestBean" scope="prototype">
+		<constructor-arg>
+			<array value-type="java.lang.String"/>
 		</constructor-arg>
 	</bean>
 
