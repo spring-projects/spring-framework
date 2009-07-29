@@ -18,11 +18,15 @@ package org.springframework.web.servlet.handler;
 
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link org.springframework.web.servlet.HandlerExceptionResolver} implementation that allows for mapping exception
@@ -46,6 +50,8 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	private String defaultErrorView;
 
 	private Integer defaultStatusCode;
+
+	private Map<String, Integer> statusCodes = new HashMap<String, Integer>();
 
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
@@ -77,14 +83,37 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	}
 
 	/**
-	 * Set the default HTTP status code that this exception resolver will apply if it resolves an error view. <p>Note that
-	 * this error code will only get applied in case of a top-level request. It will not be set for an include request,
-	 * since the HTTP status cannot be modified from within an include. <p>If not specified, no status code will be
-	 * applied, either leaving this to the controller or view, or keeping the servlet engine's default of 200 (OK).
+	 * Set the HTTP status code that this exception resolver will apply for a given resolved error view. Keys are
+	 * view names; values are status codes.
 	 *
-	 * @param defaultStatusCode HTTP status code value, for example 500 (SC_INTERNAL_SERVER_ERROR) or 404 (SC_NOT_FOUND)
-	 * @see javax.servlet.http.HttpServletResponse#SC_INTERNAL_SERVER_ERROR
-	 * @see javax.servlet.http.HttpServletResponse#SC_NOT_FOUND
+	 * <p>Note that this error code will only get applied in case of a top-level request. It will not be set for an include
+	 * request, since the HTTP status cannot be modified from within an include.
+	 *
+	 * <p>If not specified, the default status code will be applied.
+	 *
+	 * @see #setDefaultStatusCode(int)
+	 */
+	public void setStatusCodes(Properties statusCodes) {
+		for (Enumeration enumeration = statusCodes.propertyNames(); enumeration.hasMoreElements();) {
+			String viewName = (String) enumeration.nextElement();
+			Integer statusCode = new Integer(statusCodes.getProperty(viewName));
+			this.statusCodes.put(viewName, statusCode);
+		}
+	}
+
+	/**
+	 * Set the default HTTP status code that this exception resolver will apply if it resolves an error view and if there
+	 * is no status code mapping defined.
+	 *
+	 * <p>Note that this error code will only get applied in case of a top-level request. It will not be set for an
+	 * include request, since the HTTP status cannot be modified from within an include.
+	 *
+	 * <p>If not specified, no status code will be applied, either leaving this to the controller or view, or keeping
+	 * the servlet engine's default of 200 (OK).
+	 *
+	 * @param defaultStatusCode HTTP status code value, for example 500
+	 * ({@link HttpServletResponse#SC_INTERNAL_SERVER_ERROR}) or 404 ({@link HttpServletResponse#SC_NOT_FOUND})
+	 * @see #setStatusCodes(Properties)
 	 */
 	public void setDefaultStatusCode(int defaultStatusCode) {
 		this.defaultStatusCode = defaultStatusCode;
@@ -210,9 +239,13 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	}
 
 	/**
-	 * Determine the HTTP status code to apply for the given error view. <p>The default implementation always returns the
-	 * specified {@link #setDefaultStatusCode "defaultStatusCode"}, as a common status code for all error views. Override
-	 * this in a custom subclass to determine a specific status code for the given view.
+	 * Determine the HTTP status code to apply for the given error view.
+	 *
+	 * <p>The default implementation returns the status code for the given view name (specified through the
+	 * {@link #setStatusCodes(Properties) statusCodes} property), or falls back to the
+	 * {@link #setDefaultStatusCode defaultStatusCode} if there is no match.
+	 *
+	 * <p>Override this in a custom subclass to customize this behavior.
 	 *
 	 * @param request current HTTP request
 	 * @param viewName the name of the error view
@@ -222,6 +255,9 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @see #applyStatusCodeIfPossible
 	 */
 	protected Integer determineStatusCode(HttpServletRequest request, String viewName) {
+		if (this.statusCodes.containsKey(viewName)) {
+			return this.statusCodes.get(viewName);
+		}
 		return this.defaultStatusCode;
 	}
 
@@ -234,7 +270,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @param statusCode the status code to apply
 	 * @see #determineStatusCode
 	 * @see #setDefaultStatusCode
-	 * @see javax.servlet.http.HttpServletResponse#setStatus
+	 * @see HttpServletResponse#setStatus
 	 */
 	protected void applyStatusCodeIfPossible(HttpServletRequest request, HttpServletResponse response, int statusCode) {
 		if (!WebUtils.isIncludeRequest(request)) {
