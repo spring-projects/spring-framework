@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.Md5HashUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * {@link javax.servlet.Filter} that generates an <code>ETag</code> value based on the content on the response. This
@@ -118,7 +119,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			if (this.writer == null) {
 				String characterEncoding = getCharacterEncoding();
 				this.writer = (characterEncoding != null ? new ResponsePrintWriter(characterEncoding) :
-						new ResponsePrintWriter());
+						new ResponsePrintWriter(WebUtils.DEFAULT_CHARACTER_ENCODING));
 			}
 			return this.writer;
 		}
