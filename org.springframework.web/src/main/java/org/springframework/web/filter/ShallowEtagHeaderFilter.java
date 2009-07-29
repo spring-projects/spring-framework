@@ -155,10 +155,6 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		private class ResponsePrintWriter extends PrintWriter {
 
-			private ResponsePrintWriter() {
-				super(new OutputStreamWriter(content));
-			}
-
 			private ResponsePrintWriter(String characterEncoding) throws UnsupportedEncodingException {
 				super(new OutputStreamWriter(content, characterEncoding));
 			}
