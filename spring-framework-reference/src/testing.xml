@@ -179,7 +179,7 @@
       linkend="testcontext-framework">Spring TestContext Framework</link>. The
       TestContext Framework is agnostic of the actual testing framework in
       use, thus allowing instrumentation of tests in various environments
-      including JUnit 3.8, JUnit 4.6, TestNG, etc.</para>
+      including JUnit, TestNG, etc.</para>
 
       <note>
         <title>Legacy JUnit 3.8 class hierarchy is deprecated</title>
@@ -811,17 +811,17 @@ public void testProcessRepeatedly() {
       <para>The <emphasis>Spring <classname>TestContext</classname>
       Framework</emphasis> (located in the
       <literal>org.springframework.test.context</literal> package) provides
-      generic, annotation-driven unit and integration testing support that is
-      agnostic of the testing framework in use, for example JUnit 3.8, JUnit
-      4.6, TestNG 5.8, etc. The TestContext framework also places a great deal
-      of importance on <emphasis>convention over configuration</emphasis> with
-      reasonable defaults that can be overridden via annotation-based
-      configuration.</para>
+      generic, annotation-driven unit and integration testing support that
+      is agnostic of the testing framework in use, for example JUnit 3.8,
+      JUnit 4.6, TestNG 5.9, etc. The TestContext framework also places a
+      great deal of importance on <emphasis>convention over
+      configuration</emphasis> with reasonable defaults that can be
+      overridden via annotation-based configuration.</para>
 
       <para>In addition to generic testing infrastructure, the TestContext
-      framework provides explicit support for JUnit 3.8, JUnit 4.6, and TestNG
-      5.8 in the form of <literal>abstract</literal> support classes. For
-      JUnit 4.6, the framework also provides a custom
+      framework provides explicit support for JUnit 3.8, JUnit 4.6, and
+      TestNG 5.9 in the form of <literal>abstract</literal> support
+      classes. For JUnit 4.6, the framework also provides a custom
       <interfacename>Runner</interfacename> which allows one to write test
       classes that are not required to extend a particular class
       hierarchy.</para>
@@ -1120,6 +1120,17 @@ public class ExtendedTest extends BaseTest {
         The same DI techniques can be used in conjunction with any testing
         framework.</emphasis></para>
 
+		<note>
+			<title>Static imports for assertions</title>
+			<para>The following examples make calls to static
+			assertion methods such as <literal>assertNotNull()</literal>
+			but without prepending the call with
+			"<literal>Assert.</literal>". In such cases you should assume
+			that the method has been properly imported via
+			an <literal>import static</literal> declaration which is
+			simply not shown in the example.</para>
+		</note>
+
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
 <emphasis role="bold">@ContextConfiguration("daos.xml")</emphasis>
@@ -1241,12 +1252,15 @@ public final class HibernateTitleDaoTests {
           <interfacename>@Qualifier</interfacename> annotation to indicate a
           specific target bean as follows:</para>
 
-          <programlisting language="java">...
-    @Override @Autowired
+          <programlisting language="java"><lineannotation>// ...</lineannotation>
+
+    @Autowired
+    @Override
     public void setDataSource(<emphasis role="bold">@Qualifier("myDataSource")</emphasis> DataSource dataSource) {
         super.setDataSource(dataSource);
     }
-...</programlisting>
+
+<lineannotation>// ...</lineannotation></programlisting>
 
           <para>The specified qualifier value indicates the specific
           <interfacename>DataSource</interfacename> bean to inject, narrowing
@@ -1267,12 +1281,15 @@ public final class HibernateTitleDaoTests {
           bean with that specific name, no matter whether there is one or more
           beans of the given type.</para>
 
-          <programlisting language="java">...
-    @Override <emphasis role="bold">@Resource("myDataSource")</emphasis>
+          <programlisting language="java"><lineannotation>// ...</lineannotation>
+
+    <emphasis role="bold">@Resource("myDataSource")</emphasis>
+    @Override
     public void setDataSource(DataSource dataSource) {
         super.setDataSource(dataSource);
     }
-...</programlisting>
+
+<lineannotation>// ...</lineannotation></programlisting>
         </note>
       </section>
 
@@ -1411,7 +1428,8 @@ public class FictitiousTransactionalTest {
           and one which correctly exposes the results of flushing the
           session.</para>
 
-          <programlisting language="java">...
+          <programlisting language="java"><lineannotation>// ...</lineannotation>
+
 @Autowired
 private SessionFactory sessionFactory;
 
@@ -1428,7 +1446,8 @@ public void updateWithSessionFlush() {
     // Manual flush is required to avoid false positive in test
     sessionFactory.getCurrentSession().flush();
 }
-...</programlisting>
+
+<lineannotation>// ...</lineannotation></programlisting>
         </note>
 
       </section>
@@ -1719,7 +1738,10 @@ public class SimpleTest {
       <classname>AbstractClinicTests</classname>, for which a partial listing
       is shown below:</para>
 
-      <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>
+      <programlisting language="java">import static org.junit.Assert.assertEquals;
+<lineannotation>// import ...</lineannotation>
+
+<emphasis role="bold">@ContextConfiguration</emphasis>
 public abstract class AbstractClinicTests <emphasis role="bold">extends AbstractTransactionalJUnit4SpringContextTests</emphasis> {
 
     <emphasis role="bold">@Autowired</emphasis>
