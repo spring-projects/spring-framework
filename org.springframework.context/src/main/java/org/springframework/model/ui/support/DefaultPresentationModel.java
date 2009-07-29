@@ -144,15 +144,15 @@ public class DefaultPresentationModel implements PresentationModel {
 	}
 
 	public void validate() {
-		
+
 	}
 
 	public boolean hasErrors() {
 		return false;
 	}
-	
+
 	public void commit() {
-		
+
 	}
 
 	// internal helpers
@@ -192,7 +192,7 @@ public class DefaultPresentationModel implements PresentationModel {
 		private Map<Integer, FieldModel> listElements;
 
 		private Map<Object, FieldModel> mapValues;
-		
+
 		public PropertyFieldModelRule(String property, Class domainModelClass) {
 			this.domainModelClass = domainModelClass;
 			this.property = findPropertyDescriptor(property);
@@ -247,7 +247,7 @@ public class DefaultPresentationModel implements PresentationModel {
 		public String getLabel() {
 			return property.getName();
 		}
-		
+
 		public FieldModel getNested(String fieldName) {
 			createValueIfNecessary();
 			return getNestedRule(fieldName, fieldModel.getValueType()).getFieldModel(fieldModel.getValue());
@@ -277,7 +277,8 @@ public class DefaultPresentationModel implements PresentationModel {
 			FieldModel field = mapValues.get(key);
 			if (field == null) {
 				FieldModelContext context = new MapValueContext(key, this);
-				ValueModel valueModel = new MapValueValueModel(key, getElementType(), (Map) fieldModel.getValue(), context);
+				ValueModel valueModel = new MapValueValueModel(key, getElementType(), (Map) fieldModel.getValue(),
+						context);
 				field = new DefaultFieldModel(valueModel, context);
 				mapValues.put(key, field);
 			}
@@ -293,8 +294,7 @@ public class DefaultPresentationModel implements PresentationModel {
 
 		public FieldModelConfiguration formatElementsWith(Formatter<?> formatter) {
 			if (!List.class.isAssignableFrom(domainModelClass) || domainModelClass.isArray()) {
-				throw new IllegalStateException(
-						"Field is not a List or an Array; cannot set a element formatter");
+				throw new IllegalStateException("Field is not a List or an Array; cannot set a element formatter");
 			}
 			elementFormatter = formatter;
 			return this;
@@ -324,7 +324,7 @@ public class DefaultPresentationModel implements PresentationModel {
 		}
 
 		// package private helpers
-		
+
 		PropertyFieldModelRule getNestedRule(String propertyName) {
 			return getNestedRule(propertyName, this.property.getPropertyType());
 		}
@@ -344,10 +344,13 @@ public class DefaultPresentationModel implements PresentationModel {
 		// internal helpers
 
 		private Class<?> getElementType() {
-			if (Map.class.isAssignableFrom(property.getPropertyType())) {
-				return GenericCollectionTypeResolver.getMapValueReturnType(property.getReadMethod());				
+			Class<?> propertyType = property.getPropertyType();
+			if (Map.class.isAssignableFrom(propertyType)) {
+				return GenericCollectionTypeResolver.getMapValueReturnType(property.getReadMethod());
+			} else if (propertyType.isArray()) {
+				return property.getPropertyType().getComponentType();
 			} else {
-				return GenericCollectionTypeResolver.getCollectionReturnType(property.getReadMethod());				
+				return GenericCollectionTypeResolver.getCollectionReturnType(property.getReadMethod());
 			}
 		}
 
@@ -396,9 +399,9 @@ public class DefaultPresentationModel implements PresentationModel {
 				value = newMapValue(fieldModel.getValueType());
 				fieldModel.applySubmittedValue(value);
 				fieldModel.commit();
-			}			
+			}
 		}
-		
+
 		private void growListIfNecessary(int index) {
 			List list = (List) fieldModel.getValue();
 			if (list == null) {
@@ -443,18 +446,18 @@ public class DefaultPresentationModel implements PresentationModel {
 	}
 
 	private static class ListElementContext implements FieldModelContext {
-		
+
 		private int index;
 
 		private PropertyFieldModelRule listBindingContext;
-		
+
 		final Map<String, FieldModel> nestedBindings = new HashMap<String, FieldModel>();
-		
+
 		public ListElementContext(int index, PropertyFieldModelRule listBindingContext) {
 			this.index = index;
 			this.listBindingContext = listBindingContext;
 		}
-		
+
 		public MessageSource getMessageSource() {
 			return listBindingContext.getMessageSource();
 		}
@@ -522,20 +525,20 @@ public class DefaultPresentationModel implements PresentationModel {
 			throw new IllegalArgumentException("Not yet supported");
 		}
 	};
-	
+
 	private static class MapValueContext implements FieldModelContext {
-		
+
 		private Object key;
 
 		private PropertyFieldModelRule mapContext;
-		
+
 		final Map<String, FieldModel> nestedBindings = new HashMap<String, FieldModel>();
-		
+
 		public MapValueContext(Object key, PropertyFieldModelRule mapContext) {
 			this.key = key;
 			this.mapContext = mapContext;
 		}
-		
+
 		public MessageSource getMessageSource() {
 			return mapContext.getMessageSource();
 		}
