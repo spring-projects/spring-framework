@@ -153,6 +153,7 @@ class ConstructorResolver {
 			}
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
+			Set<Constructor> ambiguousConstructors = null;
 
 			for (int i = 0; i < candidates.length; i++) {
 				Constructor<?> candidate = candidates[i];
@@ -227,18 +228,26 @@ class ConstructorResolver {
 					constructorToUse = candidate;
 					argsToUse = args.arguments;
 					minTypeDiffWeight = typeDiffWeight;
+					ambiguousConstructors = null;
 				}
-				else if (typeDiffWeight < Integer.MAX_VALUE && typeDiffWeight == minTypeDiffWeight &&
-						!mbd.isLenientConstructorResolution()) {
-					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-							"Ambiguous constructor matches found in bean '" + beanName + "' " +
-							"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
+				else if (constructorToUse != null && typeDiffWeight == minTypeDiffWeight) {
+					if (ambiguousConstructors == null) {
+						ambiguousConstructors = new LinkedHashSet<Constructor>();
+						ambiguousConstructors.add(constructorToUse);
+					}
+					ambiguousConstructors.add(candidate);
 				}
 			}
 
 			if (constructorToUse == null) {
 				throw new BeanCreationException(
 						mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
+			}
+			else if (ambiguousConstructors != null && !mbd.isLenientConstructorResolution()) {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+						"Ambiguous constructor matches found in bean '" + beanName + "' " +
+						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): " +
+						ambiguousConstructors);
 			}
 
 			if (explicitArgs == null) {
@@ -369,9 +378,10 @@ class ConstructorResolver {
 			Method[] candidates = candidateSet.toArray(new Method[candidateSet.size()]);
 			AutowireUtils.sortFactoryMethods(candidates);
 
+			ConstructorArgumentValues resolvedValues = null;
 			boolean autowiring = (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
-			ConstructorArgumentValues resolvedValues = null;
+			Set<Method> 	ambiguousFactoryMethods = null;
 
 			int minNrOfArgs;
 			if (explicitArgs != null) {
@@ -444,12 +454,14 @@ class ConstructorResolver {
 						factoryMethodToUse = candidate;
 						argsToUse = args.arguments;
 						minTypeDiffWeight = typeDiffWeight;
+							ambiguousFactoryMethods = null;
 					}
-					else if (typeDiffWeight < Integer.MAX_VALUE && typeDiffWeight == minTypeDiffWeight &&
-							!mbd.isLenientConstructorResolution()) {
-						throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-								"Ambiguous factory method matches found in bean '" + beanName + "' " +
-								"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
+					else if (factoryMethodToUse != null && typeDiffWeight == minTypeDiffWeight) {
+						if (	ambiguousFactoryMethods == null) {
+								ambiguousFactoryMethods = new LinkedHashSet<Method>();
+								ambiguousFactoryMethods.add(factoryMethodToUse);
+						}
+							ambiguousFactoryMethods.add(candidate);
 					}
 				}
 			}
@@ -461,10 +473,16 @@ class ConstructorResolver {
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "'");
 			}
-			if (void.class.equals(factoryMethodToUse.getReturnType())) {
+			else if (void.class.equals(factoryMethodToUse.getReturnType())) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Invalid factory method '" + mbd.getFactoryMethodName() +
 						"': needs to have a non-void return type!");
+			}
+			else if (ambiguousFactoryMethods != null && !mbd.isLenientConstructorResolution()) {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+						"Ambiguous factory method matches found in bean '" + beanName + "' " +
+						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): " +
+						ambiguousFactoryMethods);
 			}
 
 			if (explicitArgs == null) {

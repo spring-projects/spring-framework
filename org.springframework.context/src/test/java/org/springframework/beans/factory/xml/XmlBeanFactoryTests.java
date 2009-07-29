@@ -271,8 +271,8 @@ public final class XmlBeanFactoryTests {
 		catch (BeanCreationException ex) {
 			// Check whether message contains outer bean name.
 			ex.printStackTrace();
-			assertTrue(ex.getMessage().indexOf("failsOnInnerBean") != -1);
-			assertTrue(ex.getMessage().indexOf("someMap") != -1);
+			assertTrue(ex.getMessage().contains("failsOnInnerBean"));
+			assertTrue(ex.getMessage().contains("someMap"));
 		}
 
 		try {
@@ -281,8 +281,8 @@ public final class XmlBeanFactoryTests {
 		catch (BeanCreationException ex) {
 			// Check whether message contains outer bean name.
 			ex.printStackTrace();
-			assertTrue(ex.getMessage().indexOf("failsOnInnerBeanForConstructor") != -1);
-			assertTrue(ex.getMessage().indexOf("constructor argument") != -1);
+			assertTrue(ex.getMessage().contains("failsOnInnerBeanForConstructor"));
+			assertTrue(ex.getMessage().contains("constructor argument"));
 		}
 	}
 
@@ -1437,12 +1437,20 @@ public final class XmlBeanFactoryTests {
 		}
 	}
 
-	public @Test void testStringConstructor() {
+	public @Test void testJavaLangStringConstructor() {
 		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("string");
 		bd.setLenientConstructorResolution(false);
 		String str = (String) xbf.getBean("string");
 		assertEquals("test", str);
+	}
+
+	public @Test void testCustomStringConstructor() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("stringConstructor");
+		bd.setLenientConstructorResolution(false);
+		StringConstructorTestBean tb = (StringConstructorTestBean) xbf.getBean("stringConstructor");
+		assertEquals("test", tb.name);
 	}
 
 	public @Test void testPrimitiveConstructorArray() {
@@ -1459,6 +1467,22 @@ public final class XmlBeanFactoryTests {
 		assertTrue(bean.array instanceof int[]);
 		assertEquals(1, ((int[]) bean.array).length);
 		assertEquals(1, ((int[]) bean.array)[0]);
+	}
+
+	public @Test void testStringConstructorArrayNoType() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
+		assertTrue(bean.array instanceof String[]);
+		assertEquals(0, ((String[]) bean.array).length);
+	}
+
+	public @Test void testStringConstructorArrayNoTypeNonLenient() {
+		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("constructorArrayNoType");
+		bd.setLenientConstructorResolution(false);
+		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
+		assertTrue(bean.array instanceof String[]);
+		assertEquals(0, ((String[]) bean.array).length);
 	}
 
 	public @Test void testWithDuplicateName() throws Exception {
@@ -1748,6 +1772,20 @@ public final class XmlBeanFactoryTests {
 
 		public ConstructorArrayTestBean(short[] array) {
 			this.array = array;
+		}
+
+		public ConstructorArrayTestBean(String[] array) {
+			this.array = array;
+		}
+	}
+
+
+	public static class StringConstructorTestBean {
+
+		public final String name;
+
+		public StringConstructorTestBean(String name) {
+			this.name = name;
 		}
 	}
 
