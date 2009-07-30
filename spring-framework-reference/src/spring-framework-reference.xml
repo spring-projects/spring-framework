@@ -125,14 +125,20 @@
 	</bookinfo>
 	<!-- front matter -->
 	<toc/>
-	<xi:include href="preface.xml"/>
-	<xi:include href="overview.xml"/>
-	<xi:include href="new-in-3.xml"/>
+	<part id="spring-introduction">
+		<title>Overview of Spring Framework</title>
+		<xi:include href="preface.xml"/>
+		<xi:include href="overview.xml"/>
+	</part>
+	<part id="spring-whats-new">
+		<title>What's New in Spring 3.0</title>
+		<xi:include href="new-in-3.xml"/>
+	</part>
 	<part id="spring-core">
 		<title>Core Technologies</title>
 		<partintro id="spring-core-intro">
 			<para>
-				This initial part of the reference documentation covers
+				This part of the reference documentation covers
 				all of those technologies that are absolutely integral
 				to the Spring Framework.
 			</para>
@@ -282,7 +288,7 @@
 		<partintro id="spring-integration-intro">
 			<para>
 				This part of the reference documentation covers
-				the Spring Framework's integration with a number of J2EE
+				the Spring Framework's integration with a number of Java EE
 				(and related) technologies.
 			</para>
 			<itemizedlist>
@@ -326,11 +332,14 @@
 		<xi:include href="metadata.xml"/>
 	</part>
 	<!-- back matter -->
-	<xi:include href="classic-spring.xml"/>
-	<xi:include href="classic-aop-spring.xml"/>
-	<xi:include href="xsd-configuration.xml"/>
-	<xi:include href="xml-custom.xml"/>
-	<xi:include href="dtd.xml"/>
-	<xi:include href="spring.tld.xml"/>
-	<xi:include href="spring-form.tld.xml"/>
+	<part id="spring-appendices">
+		<title>Appendices</title>
+		<xi:include href="classic-spring.xml"/>
+		<xi:include href="classic-aop-spring.xml"/>
+		<xi:include href="xsd-configuration.xml"/>
+		<xi:include href="xml-custom.xml"/>
+		<xi:include href="dtd.xml"/>
+		<xi:include href="spring.tld.xml"/>
+		<xi:include href="spring-form.tld.xml"/>
+	</part>
 </book>
