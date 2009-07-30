@@ -17,6 +17,7 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -61,6 +62,13 @@ public interface WebRequest extends RequestAttributes {
 	 */
 	String[] getParameterValues(String paramName);
 
+	/**
+	 * Return a Iterator over request parameter names.
+	 * @see javax.servlet.http.HttpServletRequest#getParameterNames()
+	 * @since 3.0
+	 */
+	Iterator<String> getParameterNames();
+	
 	/**
 	 * Return a immutable Map of the request parameters, with parameter names as map keys
 	 * and parameter values as map values. The map values will be of type String array.

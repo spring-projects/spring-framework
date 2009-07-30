@@ -16,6 +16,14 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
@@ -35,6 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,9 +52,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -69,6 +76,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.model.ui.config.BindingLifecycle;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -1725,7 +1733,54 @@ public class ServletAnnotationControllerTests {
 		}
 
 	}
-
+	
+	@Test
+	public void testBindingLifecycle() throws Exception {
+		initServlet(BindingLifecycleController.class);
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addParameter("bar", "test");
+		request.addParameter("baz", "12");
+		MockHttpServletResponse response  = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("bar=test, baz=12", response.getContentAsString());
+	}
+	
+	@Controller
+	public static class BindingLifecycleController {
+		
+		@RequestMapping("/test")
+		public void bind(BindingLifecycle<Foo> fooLifecycle, Writer writer) throws IOException {
+			fooLifecycle.execute();
+			Foo foo = fooLifecycle.getModel();
+			assertEquals("test", foo.getBar());
+			assertEquals(new Integer(12), foo.getBaz());
+			writer.write("bar=" + foo.getBar() + ", baz=" + foo.getBaz());
+		}
+		
+		public static final class Foo {
+			
+			private String bar;
+			
+			private Integer baz;
+			
+			public String getBar() {
+				return bar;
+			}
+			
+			public void setBar(String bar) {
+				this.bar = bar;
+			}
+			
+			public Integer getBaz() {
+				return baz;
+			}
+			
+			public void setBaz(Integer baz) {
+				this.baz = baz;
+			}
+			
+		}
+	}
 
 
 }

@@ -17,12 +17,14 @@
 package org.springframework.web.portlet.context;
 
 import java.security.Principal;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -78,7 +80,6 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return getRequest().getProperty(headerName);
 	}
 
-	@SuppressWarnings("unchecked")
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getProperties(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
@@ -92,7 +93,10 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return getRequest().getParameterValues(paramName);
 	}
 
-	@SuppressWarnings("unchecked")
+	public Iterator<String> getParameterNames() {
+		return CollectionUtils.toIterator(getRequest().getParameterNames());
+	}
+	
 	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}

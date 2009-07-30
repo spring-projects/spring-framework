@@ -17,12 +17,14 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -95,6 +97,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	public String[] getParameterValues(String paramName) {
 		return getRequest().getParameterValues(paramName);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Iterator<String> getParameterNames() {
+		return CollectionUtils.toIterator(getRequest().getParameterNames());
 	}
 
 	@SuppressWarnings("unchecked")

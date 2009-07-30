@@ -39,9 +39,10 @@ public class MvcBindingLifecycle implements BindingLifecycle<Object> {
 	private Object model;
 
 	private PresentationModel presentationModel;
-	
+
 	public MvcBindingLifecycle(Class<?> modelType, PresentationModelFactory presentationModelFactory,
 			ModelMap modelMap, Map<String, ? extends Object> fieldValues) {
+		this.modelType = modelType;
 		this.presentationModelFactory = presentationModelFactory;
 		this.modelMap = modelMap;
 		this.fieldValues = fieldValues;
@@ -78,6 +79,10 @@ public class MvcBindingLifecycle implements BindingLifecycle<Object> {
 
 	private void initModel() {
 		try {
+			if (modelType == null) {
+				throw new IllegalStateException("Unable to create new model to bind to, no modelType was specified - "
+						+ "did you parameterize the model <M> for your BindingLifecycle declaration?");
+			}
 			model = modelType.newInstance();
 		} catch (InstantiationException e) {
 			throw new IllegalStateException("Model of type [" + modelType.getName()

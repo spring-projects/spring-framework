@@ -19,6 +19,9 @@ package org.springframework.web.bind.annotation.support;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,7 +32,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Conventions;
@@ -40,8 +42,11 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.model.ui.PresentationModelFactory;
+import org.springframework.model.ui.config.BindingLifecycle;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.ui.MvcBindingLifecycle;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -64,8 +69,10 @@ import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.NativeWebRequestParameterMap;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.web.servlet.support.PresentationModelUtils;
 
 /**
  * Support class for invoking an annotated handler method. Operates on the introspection results of a {@link
@@ -236,6 +243,13 @@ public class HandlerMethodInvoker {
 					else if (Errors.class.isAssignableFrom(paramType)) {
 						throw new IllegalStateException("Errors/BindingResult argument declared " +
 								"without preceding model attribute. Check your handler method signature!");
+					}
+					// TODO - Code Review - NEW BINDING LIFECYCLE RESOLVABLE ARG
+					else if (BindingLifecycle.class.isAssignableFrom(paramType)) {
+						Class<?> modelType = resolveBindingLifecycleModelType(methodParam);
+						PresentationModelFactory factory = PresentationModelUtils.getPresentationModelFactory(webRequest);
+						Map<String, Object> fieldValues = new NativeWebRequestParameterMap(webRequest);
+						args[i] = new MvcBindingLifecycle(modelType, factory, implicitModel, fieldValues);
 					}
 					else if (BeanUtils.isSimpleProperty(paramType)) {
 						paramName = "";
@@ -696,7 +710,7 @@ public class HandlerMethodInvoker {
 		}
 		return WebArgumentResolver.UNRESOLVED;
 	}
-
+	
 	protected final void addReturnValueAsModelAttribute(
 			Method handlerMethod, Class handlerType, Object returnValue, ExtendedModelMap implicitModel) {
 
@@ -707,6 +721,25 @@ public class HandlerMethodInvoker {
 			attrName = Conventions.getVariableNameForReturnType(handlerMethod, resolvedType, returnValue);
 		}
 		implicitModel.addAttribute(attrName, returnValue);
+	}
+
+	// TODO - Code Review - BINDING LIFECYCLE RELATED INTERNAL HELPERS
+	
+	// TODO - this generic arg identification looping code is duplicated in several places now...
+	private Class<?> resolveBindingLifecycleModelType(MethodParameter methodParam) {
+		Type type = GenericTypeResolver.getTargetType(methodParam);
+		if (type instanceof ParameterizedType) {
+			ParameterizedType paramType = (ParameterizedType) type;
+			Type rawType = paramType.getRawType();
+			Type arg = paramType.getActualTypeArguments()[0];
+			if (arg instanceof TypeVariable) {
+				arg = GenericTypeResolver.resolveTypeVariable((TypeVariable) arg, BindingLifecycle.class);
+			}
+			if (arg instanceof Class) {
+				return (Class) arg;
+			}
+		}
+		return null;
 	}
 
 }
