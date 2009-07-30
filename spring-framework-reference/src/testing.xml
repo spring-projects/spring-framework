@@ -20,7 +20,7 @@
     <title>Unit testing</title>
 
     <para>One of the main benefits of Dependency Injection is that your code
-    should really depend far less on the container than in traditional J2EE
+    should really depend far less on the container than in traditional Java EE
     development. The POJOs that make up your application should be testable in
     JUnit or TestNG tests, with objects simply instantiated using the
     <literal>new</literal> operator, <emphasis>without Spring or any other
@@ -54,7 +54,7 @@
         contains an implementation of the JNDI SPI, which is useful for
         setting up a simple JNDI environment for test suites or stand-alone
         applications. If, for example, JDBC <classname>DataSource</classname>s
-        get bound to the same JNDI names in test code as within a J2EE
+        get bound to the same JNDI names in test code as within a Java EE
         container, both application code and configuration can be reused in
         testing scenarios without modification.</para>
       </section>

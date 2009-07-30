@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-<chapter id="introduction">
-  <title>Introduction</title>
+<chapter id="overview">
+  <title>Introduction to Spring Framework</title>
 
   <para>Fundamentally, what is Spring? We think of it as a Platform for your
   Java code. It provides comprehensive infrastructural support for developing
@@ -39,7 +39,7 @@
     </listitem>
   </itemizedlist>
 
-  <section id="introduction-dependency-injection">
+  <section id="overview-dependency-injection">
     <title>Dependency Injection</title>
 
     <sidebar id="background-ioc">
@@ -108,7 +108,7 @@
     applications.</para>
   </section>
 
-  <section id="introduction-modules">
+  <section id="overview-modules">
     <title>Modules</title>
 
     <para>The Spring Framework contains a lot of features, which are

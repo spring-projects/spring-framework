@@ -987,7 +987,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       class="libraryfile">commons-collections.jar</filename> needs also to be
       available for Velocity. Typically they are included in the
       <literal>WEB-INF/lib</literal> folder where they are guaranteed to be
-      found by a J2EE server and added to the classpath for your application.
+      found by a Java EE server and added to the classpath for your application.
       It is of course assumed that you already have the <filename
       class="libraryfile">spring.jar</filename> in your <filename
       class="directory">'WEB-INF/lib'</filename> directory too! The latest
@@ -1864,7 +1864,7 @@ home.root=words</programlisting>
 
       <para>You will also need to ensure that an XML parser and an XSLT engine
       are available on the classpath. JDK 1.4 provides them by default, and
-      most J2EE containers will also make them available by default, but it's
+      most Java EE containers will also make them available by default, but it's
       a possible source of errors to be aware of.</para>
     </section>
   </section>
