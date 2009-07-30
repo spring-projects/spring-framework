@@ -81,7 +81,7 @@
 
     <para>Onto specifics... all that one need do is to declare a <ulink
     url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></ulink>
-    in the standard J2EE servlet <literal>web.xml</literal> file of one's web
+    in the standard Java EE servlet <literal>web.xml</literal> file of one's web
     application, and add a <literal>contextConfigLocation</literal>
     &lt;context-param/&gt; section (in the same file) that defines which set
     of Spring XML cpnfiguration files to load.</para>
@@ -611,13 +611,13 @@
     </quote>
 
     <para>While Spring has its own <link linkend="mvc">powerful web
-    layer</link>, there are a number of unique advantages to building a J2EE
+    layer</link>, there are a number of unique advantages to building a Java EE
     application using a combination of Tapestry for the web user interface and
     the Spring container for the lower layers. This section of the web
     integration chapter attempts to detail a few best practices for combining
     these two frameworks.</para>
 
-    <para>A <emphasis>typical</emphasis> layered J2EE application built with
+    <para>A <emphasis>typical</emphasis> layered Java EE application built with
     Tapestry and Spring will consist of a top user interface (UI) layer built
     with Tapestry, and a number of lower layers, all wired together by one or
     more Spring containers. Tapestry's own reference documentation contains
@@ -728,7 +728,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       application by calling Spring's static utility function
       <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
       where servletContext is the standard
-      <interface>ServletContext</interface> from the J2EE Servlet
+      <interface>ServletContext</interface> from the Java EE Servlet
       specification. As such, one simple mechanism for a page to get an
       instance of the <interfacename>UserService</interfacename>, for example,
       would be with code such as:</para>
@@ -1096,7 +1096,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
     are coming from, and in fact it is easy to slip in another implementation,
     for example, during testing. This inversion of control is one of the prime
     goals and benefits of the Spring Framework, and we have managed to extend
-    it all the way up the J2EE stack in this Tapestry application.</para>
+    it all the way up the Java EE stack in this Tapestry application.</para>
   </section>
 
   <section id="web-integration-resources">

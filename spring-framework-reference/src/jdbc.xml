@@ -1139,7 +1139,7 @@ jdbcTemplate.update(
       time.</para>
 
       <para>This is potentially useful for test or standalone environments
-      outside of a J2EE container, either as a
+      outside of a Java EE container, either as a
       <interfacename>DataSource</interfacename> bean in a Spring IoC
       container, or in conjunction with a simple JNDI environment.
       Pool-assuming <literal>Connection.close()</literal> calls will simply
@@ -1159,7 +1159,7 @@ jdbcTemplate.update(
       target <interfacename>DataSource</interfacename> to add awareness of
       Spring-managed transactions. In this respect it is similar to a
       transactional JNDI <interfacename>DataSource</interfacename> as provided
-      by a J2EE server.</para>
+      by a Java EE server.</para>
 
       <note>
         <para>It should almost never be necessary or desirable to use this
@@ -1189,7 +1189,7 @@ jdbcTemplate.update(
 
       <para>Application code is required to retrieve the JDBC connection via
       <literal>DataSourceUtils.getConnection(DataSource)</literal> instead of
-      J2EE's standard <literal>DataSource.getConnection</literal>. This is
+      Java EE's standard <literal>DataSource.getConnection</literal>. This is
       recommended anyway, as it throws unchecked
       <literal>org.springframework.dao</literal> exceptions instead of checked
       <exceptionname>SQLExceptions</exceptionname>. All framework classes like

@@ -528,7 +528,7 @@ public class AccountServiceImpl implements AccountService {
       <para>Spring can work with both standard Java web services APIs. On Java
       EE 5 / Java 6, the obvious choice is JAX-WS. On J2EE 1.4 environments
       that run on Java 5, you might have the option to plug in a JAX-WS
-      provider; check your J2EE server's documentation.</para>
+      provider; check your Java EE server's documentation.</para>
     </note>
 
     <para>In addition to stock support for JAX-RPC and JAX-WS in Spring Core,

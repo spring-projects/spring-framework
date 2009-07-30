@@ -7,15 +7,15 @@
   <section id="cci-introduction">
     <title>Introduction</title>
 
-    <para>J2EE provides a specification to standardize access to enterprise
-    information systems (EIS): the JCA (Java Connector Architecture). This
+    <para>Java EE provides a specification to standardize access to enterprise
+    information systems (EIS): the JCA (J2EE Connector Architecture). This
     specification is divided into several different parts:</para>
 
     <itemizedlist>
       <listitem>
         <para>SPI (Service provider interfaces) that the connector provider
         must implement. These interfaces constitute a resource adapter which
-        can be deployed on a J2EE application server. In such a scenario, the
+        can be deployed on a Java EE application server. In such a scenario, the
         server manages connection pooling, transaction and security (managed
         mode). The application server is also responsible for managing the
         configuration, which is held outside the client application. A
@@ -38,7 +38,7 @@
     <note>
       <para>The client side of connectors doesn't alway use CCI. Some
       connectors expose their own APIs, only providing JCA resource adapter to
-      use the system contracts of a J2EE container (connection pooling, global
+      use the system contracts of a Java EE container (connection pooling, global
       transactions, security). Spring does not offer special support for such
       connector-specific APIs.</para>
     </note>
@@ -84,7 +84,7 @@
         <para>When you use a connector in non-managed mode, you can't use
         global transactions because the resource is never enlisted / delisted
         in the current global transaction of the current thread. The resource
-        is simply not aware of any global J2EE transactions that might be
+        is simply not aware of any global Java EE transactions that might be
         running.</para>
       </note>
     </section>
@@ -760,7 +760,7 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);</progr
   &lt;property name="connectionFactory" ref="connectionFactory"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>In managed mode (that is, in a J2EE environment), the
+      <para>In managed mode (that is, in a Java EE environment), the
       configuration could look as follows:</para>
 
       <programlisting language="xml">&lt;jee:jndi-lookup id="connectionFactory" jndi-name="eis/cicseci"/&gt;
@@ -941,7 +941,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
       database with the Blackbox CCI connector.</para>
 
       <note>
-        <para>The original version of this connector is provided by the J2EE
+        <para>The original version of this connector is provided by the Java EE
         SDK (version 1.3), available from Sun.</para>
       </note>
 
@@ -1025,7 +1025,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
   &lt;property name="connectionFactory" ref="connectionFactory"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>In managed mode (that is, in a J2EE environment), the
+      <para>In managed mode (that is, in a Java EE environment), the
       configuration could look as follows:</para>
 
       <programlisting language="xml">&lt;jee:jndi-lookup id="targetConnectionFactory" jndi-name="eis/blackbox"/&gt;
@@ -1120,7 +1120,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
   &lt;property name="connectionFactory" ref="connectionFactory"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>In managed mode (that is, in a J2EE environment), the
+      <para>In managed mode (that is, in a Java EE environment), the
       configuration could look as follows:</para>
 
       <programlisting language="xml">&lt;jee:jndi-lookup id="connectionFactory" jndi-name="eis/cicseci"/&gt;
@@ -1156,7 +1156,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
     <para>For global transactions, you can use Spring's generic transaction
     infrastructure to demarcate transactions, with
     <classname>JtaTransactionManager</classname> as backend (delegating to the
-    J2EE server's distributed transaction coordinator underneath).</para>
+    Java EE server's distributed transaction coordinator underneath).</para>
 
     <para>For local transactions on a single CCI
     <interfacename>ConnectionFactory</interfacename>, Spring provides a

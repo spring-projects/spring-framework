@@ -15,7 +15,7 @@
     the production and consumption of messages. The
     <classname>JmsTemplate</classname> class is used for message production
     and synchronous message reception. For asynchronous reception similar to
-    J2EE's message-driven bean style, Spring provides a number of message
+    Java EE's message-driven bean style, Spring provides a number of message
     listener containers that are used to create Message-Driven POJOs
     (MDPs).</para>
 
@@ -131,7 +131,7 @@
       <para>When using JMS inside an EJB, the vendor provides implementations
       of the JMS interfaces so that they can participate in declarative
       transaction management and perform pooling of connections and session.
-      In order to use this implementation, J2EE containers typically require
+      In order to use this implementation, Java EE containers typically require
       that you declare a JMS connection factory as a
       <property>resource-ref</property> inside the EJB or servlet deployment
       descriptors. To ensure the use of these features with the
@@ -334,7 +334,7 @@
       <classname>JmsTemplate</classname> automatically detects such
       transactional resources and operates on them accordingly.</para>
 
-      <para>In a J2EE environment, the
+      <para>In a Java EE environment, the
       <classname>ConnectionFactory</classname> will pool Connections and
       Sessions, so those resources are efficiently reused across transactions.
       In a standalone environment, using Spring's
@@ -349,7 +349,7 @@
       <classname>ConnectionFactory</classname> for performing distributed
       transactions. Note that this requires the use of a JTA transaction
       manager as well as a properly XA-configured ConnectionFactory! (Check
-      your J2EE server's / JMS provider's documentation.)</para>
+      your Java EE server's / JMS provider's documentation.)</para>
 
       <para>Reusing code across a managed and unmanaged transactional
       environment can be confusing when using the JMS API to create a
@@ -801,9 +801,9 @@ public interface SessionAwareMessageListener {
       <para>To configure a message listener container for XA transaction
       participation, you'll want to configure a
       <classname>JtaTransactionManager</classname> (which, by default,
-      delegates to the J2EE server's transaction subsystem). Note that the
+      delegates to the Java EE server's transaction subsystem). Note that the
       underlying JMS ConnectionFactory needs to be XA-capable and properly
-      registered with your JTA transaction coordinator! (Check your J2EE
+      registered with your JTA transaction coordinator! (Check your Java EE
       server's configuration of JNDI resources.) This allows message recepton
       as well as e.g. database access to be part of the same transaction (with
       unified commit semantics, at the expense of XA transaction log
@@ -1157,7 +1157,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             cache level will effectively be "consumer", unless an external
             transaction manager has been specified - in which case the
             effective default will be <literal>none</literal> (assuming
-            J2EE-style transaction management where the given
+            Java EE-style transaction management where the given
             ConnectionFactory is an XA-aware pool).</para></entry>
           </row>
 
