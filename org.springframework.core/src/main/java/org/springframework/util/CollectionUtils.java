@@ -277,4 +277,36 @@ public abstract class CollectionUtils {
 		return true;
 	}
 
+	/**
+	 * Adapts an enumeration to an iterator.
+	 * @param enumeration the enumeration
+	 * @return the iterator
+	 */
+	public static <E> Iterator<E> toIterator(Enumeration<E> enumeration) {
+		return new EnumerationIterator<E>(enumeration);
+	}
+
+	/**
+	 * Iterator wrapping an Enumeration.
+	 */
+	private static class EnumerationIterator<E> implements Iterator<E> {
+
+		private Enumeration<E> enumeration;
+
+		public EnumerationIterator(Enumeration<E> enumeration) {
+			this.enumeration = enumeration;
+		}
+
+		public boolean hasNext() {
+			return enumeration.hasMoreElements();
+		}
+
+		public E next() {
+			return enumeration.nextElement();
+		}
+
+		public void remove() throws UnsupportedOperationException {
+			throw new UnsupportedOperationException("Not supported");
+		}
+	}
 }

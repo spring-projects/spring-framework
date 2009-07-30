@@ -17,11 +17,13 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -63,6 +65,10 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 		return getExternalContext().getRequestParameterMap().get(paramName);
 	}
 
+	public Iterator<String> getParameterNames() {
+		return getExternalContext().getRequestParameterNames();
+	}
+	
 	public String[] getParameterValues(String paramName) {
 		return getExternalContext().getRequestParameterValuesMap().get(paramName);
 	}
