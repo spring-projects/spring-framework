@@ -28,6 +28,7 @@ Import-Template:
  org.springframework.context.*;version="[3.0.0, 3.0.1)",
  org.springframework.core.*;version="[3.0.0, 3.0.1)",
  org.springframework.http.*;version="[3.0.0, 3.0.1)",
+ org.springframework.model.*;version="[3.0.0, 3.0.1)",
  org.springframework.oxm.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.springframework.stereotype;version="[3.0.0, 3.0.1)",
  org.springframework.ui.*;version="[3.0.0, 3.0.1)",
