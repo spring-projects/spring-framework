@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="new-in-3">
-  <title>What's new in Spring 3.0?</title>
+  <title>New Features and Enhancements in Spring 3.0</title>
 
   <para>If you have been using the Spring Framework for some time, you will be
   aware that Spring has undergone two major revisions: Spring 2.0, released in
