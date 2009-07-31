@@ -10,8 +10,10 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context.support"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.jdbc"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.oxm"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.transaction"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-2.0.8.jar" sourcepath="/IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-sources-2.0.8.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar" sourcepath="/IVY_CACHE/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar"/>
@@ -40,8 +42,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.jdom/com.springsource.org.jdom/1.0.0/com.springsource.org.jdom-1.0.0.jar" sourcepath="/IVY_CACHE/org.jdom/com.springsource.org.jdom/1.0.0/com.springsource.org.jdom-1.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-4.6.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-sources-4.6.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.mozilla.javascript/com.springsource.org.mozilla.javascript/1.7.0.R2/com.springsource.org.mozilla.javascript-1.7.0.R2.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.transaction"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.jdbc"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-3.3.1.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar" sourcepath="/IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-sources-1.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.tiles/com.springsource.org.apache.tiles/2.1.2.osgi/com.springsource.org.apache.tiles-2.1.2.osgi.jar"/>
