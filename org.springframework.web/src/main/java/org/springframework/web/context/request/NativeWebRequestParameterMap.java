@@ -17,8 +17,8 @@ package org.springframework.web.context.request;
 
 import java.util.Iterator;
 
-import org.springframework.core.collection.StringKeyedMapAdapter;
 import org.springframework.util.Assert;
+import org.springframework.util.StringKeyedMapAdapter;
 
 /**
  * Map backed by a Web request parameter map for accessing request parameters.
