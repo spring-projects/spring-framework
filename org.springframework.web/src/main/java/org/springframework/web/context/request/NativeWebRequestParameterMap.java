@@ -18,7 +18,9 @@ package org.springframework.web.context.request;
 import java.util.Iterator;
 
 import org.springframework.util.Assert;
+import org.springframework.util.CompositeIterator;
 import org.springframework.util.StringKeyedMapAdapter;
+import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * Map backed by a Web request parameter map for accessing request parameters.
@@ -42,7 +44,6 @@ public class NativeWebRequestParameterMap extends StringKeyedMapAdapter<Object> 
 	}
 
 	protected Object getAttribute(String key) {
-		/* TODO - MultipartRequest is NOT accessible b/c its in web.servlet
 		if (request instanceof MultipartRequest) {
 			MultipartRequest multipartRequest = (MultipartRequest) request;
 			Object data = multipartRequest.getFileMap().get(key);
@@ -50,7 +51,6 @@ public class NativeWebRequestParameterMap extends StringKeyedMapAdapter<Object> 
 				return data;
 			}
 		}
-		*/
 		String[] parameters = request.getParameterValues(key);
 		if (parameters == null) {
 			return null;
@@ -70,17 +70,14 @@ public class NativeWebRequestParameterMap extends StringKeyedMapAdapter<Object> 
 	}
 
 	protected Iterator<String> getAttributeNames() {
-		return request.getParameterNames();
-		/* TODO - MultipartRequest is NOT accessible b/c its in web.servlet
 		if (request instanceof MultipartRequest) {
 			MultipartRequest multipartRequest = (MultipartRequest) request;
-			CompositeIterator iterator = new CompositeIterator();
+			CompositeIterator<String> iterator = new CompositeIterator<String>();
 			iterator.add(multipartRequest.getFileMap().keySet().iterator());
-			iterator.add(CollectionUtils.toIterator(request.getParameterNames()));
+			iterator.add(request.getParameterNames());
 			return iterator;
 		} else {
-			return CollectionUtils.toIterator(request.getParameterNames());
+			return request.getParameterNames();			
 		}
-		*/
 	}
 }
