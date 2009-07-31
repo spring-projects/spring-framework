@@ -15,13 +15,13 @@ public class StringKeyedMapAdapterTests extends TestCase {
 
 	private Map contents = new HashMap();
 
-	private StringKeyedMapAdapter map = new StringKeyedMapAdapter() {
+	private StringKeyedMapAdapter<Object> map = new StringKeyedMapAdapter<Object>() {
 
 		protected Object getAttribute(String key) {
 			return contents.get(key);
 		}
 
-		protected Iterator getAttributeNames() {
+		protected Iterator<String> getAttributeNames() {
 			return contents.keySet().iterator();
 		}
 
