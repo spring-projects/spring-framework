@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.collection;
+package org.springframework.util;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.springframework.util.Assert;
-
 /**
- * Iterator that combines multiple other iterators. This is a simple implementation that just maintains a list of
- * iterators which are invoked in sequence untill all iterators are exhausted.
+ * Iterator that combines multiple other iterators.
+ * This implementation maintains a list of iterators which are invoked in sequence until all iterators are exhausted.
  * @author Erwin Vervaet
  */
 public class CompositeIterator<E> implements Iterator<E> {

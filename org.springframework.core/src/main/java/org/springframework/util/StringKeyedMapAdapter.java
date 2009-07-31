@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.collection;
+package org.springframework.util;
 
 import java.util.AbstractSet;
 import java.util.Collection;
@@ -23,9 +23,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
- * Base class for map adapters whose keys are String values. Concrete classes need only implement the abstract hook
- * methods defined by this class.
- * 
+ * Base class for map adapters whose keys are String values.
+ * Concrete classes need only implement the abstract hook methods defined by this class.
  * @author Keith Donald
  */
 public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {

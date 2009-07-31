@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.collection;
+package org.springframework.util;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -23,9 +23,9 @@ import java.util.Set;
 import org.springframework.core.style.ToStringCreator;
 
 /**
- * A map decorator that implements <code>SharedMap</code>. By default, simply returns the map itself as the mutex.
+ * A map decorator that implements <code>SharedMap</code>.
+ * By default, simply returns the map itself as the mutex.
  * Subclasses may override to return a different mutex object.
- * 
  * @author Keith Donald
  */
 @SuppressWarnings("serial")
