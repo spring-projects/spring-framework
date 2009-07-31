@@ -16,6 +16,7 @@ Import-Template:
  javax.servlet.jsp.*;version="[2.0.0, 3.0.0)";resolution:=optional,
  javax.xml.*;version="0";resolution:=optional,
  org.aopalliance.*;version="[1.0.0, 2.0.0)",
+ org.apache.commons.fileupload.*;version="[1.2.0, 2.0.0)";resolution:=optional, 
  org.apache.commons.httpclient.*;version="[3.1.0, 4.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.apache.log4j.*;version="[1.2.15, 2.0.0)";resolution:=optional,
@@ -23,10 +24,12 @@ Import-Template:
  org.springframework.beans.*;version="[3.0.0, 3.0.1)",
  org.springframework.context.*;version="[3.0.0, 3.0.1)",
  org.springframework.core.*;version="[3.0.0, 3.0.1)",
+ org.springframework.model.*;version="[3.0.0, 3.0.1)", 
  org.springframework.oxm.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.springframework.remoting.*;version="[3.0.0, 3.0.1)";resolution:=optional,
  org.springframework.ui.*;version="[3.0.0, 3.0.1)",
  org.springframework.util.*;version="[3.0.0, 3.0.1)",
+ org.springframework.validation.*;version="[3.0.0, 3.0.1)", 
  org.xml.sax.*;version="0";resolution:=optional,
  org.w3c.dom.*;version="0";resolution:=optional
 Ignored-Existing-Headers: 
