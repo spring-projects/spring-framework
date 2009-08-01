@@ -24,7 +24,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.scheduling.support.DelegatingExceptionProofRunnable;
+import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
+import org.springframework.scheduling.support.ErrorHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -185,16 +186,18 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	/**
 	 * Determine the actual Runnable to schedule for the given task.
 	 * <p>Wraps the task's Runnable in a
-	 * {@link org.springframework.scheduling.support.DelegatingExceptionProofRunnable}
-	 * if necessary, according to the
+	 * {@link org.springframework.scheduling.support.DelegatingErrorHandlingRunnable}
+	 * that will catch and log the Exception. If necessary, it will suppress the
+	 * Exception according to the
 	 * {@link #setContinueScheduledExecutionAfterException "continueScheduledExecutionAfterException"}
 	 * flag.
 	 * @param task the ScheduledExecutorTask to schedule
 	 * @return the actual Runnable to schedule (may be a decorator)
 	 */
 	protected Runnable getRunnableToSchedule(ScheduledExecutorTask task) {
-		boolean propagateException = !this.continueScheduledExecutionAfterException;
-		return new DelegatingExceptionProofRunnable(task.getRunnable(), propagateException);
+		return this.continueScheduledExecutionAfterException
+				? new DelegatingErrorHandlingRunnable(task.getRunnable(), ErrorHandler.LOG_AND_SUPPRESS)
+				: new DelegatingErrorHandlingRunnable(task.getRunnable(), ErrorHandler.LOG_AND_PROPAGATE);
 	}
 
 

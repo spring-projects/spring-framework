@@ -33,6 +33,7 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.ErrorHandler;
 import org.springframework.util.Assert;
 
 /**
@@ -40,16 +41,20 @@ import org.springframework.util.Assert;
  * a native {@link java.util.concurrent.ScheduledThreadPoolExecutor}.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 3.0
  * @see #setPoolSize
  * @see #setThreadFactory
+ * @see #setErrorHandler
  */
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements TaskScheduler, SchedulingTaskExecutor {
 
-	private int poolSize = 1;
+	private volatile int poolSize = 1;
 
-	private ScheduledExecutorService scheduledExecutor;
+	private volatile ScheduledExecutorService scheduledExecutor;
+
+	private volatile ErrorHandler errorHandler;
 
 
 	/**
@@ -61,6 +66,13 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		this.poolSize = poolSize;
 	}
 
+	/**
+	 * Provide an {@link ErrorHandler} strategy.
+	 */
+	public void setErrorHandler(ErrorHandler errorHandler) {
+		Assert.notNull(errorHandler, "'errorHandler' must not be null");
+		this.errorHandler = errorHandler;
+	}
 
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -102,7 +114,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public void execute(Runnable task) {
 		Executor executor = getScheduledExecutor();
 		try {
-			executor.execute(task);
+			executor.execute(errorHandlingTask(task, false));
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -116,7 +128,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public Future<?> submit(Runnable task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
-			return executor.submit(task);
+			return executor.submit(errorHandlingTask(task, false));
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -126,6 +138,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public <T> Future<T> submit(Callable<T> task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
+			if (this.errorHandler != null) {
+				task = new DelegatingErrorHandlingCallable<T>(task, this.errorHandler);
+			}
 			return executor.submit(task);
 		}
 		catch (RejectedExecutionException ex) {
@@ -143,7 +158,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
-			return new ReschedulingRunnable(task, trigger, executor).schedule();
+			ErrorHandler errorHandler = this.errorHandler != null ?
+					this.errorHandler : TaskUtils.getDefaultErrorHandler(true); 
+			return new ReschedulingRunnable(task, trigger, executor, errorHandler).schedule();
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -154,7 +171,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
-			return executor.schedule(task, initialDelay, TimeUnit.MILLISECONDS);
+			return executor.schedule(errorHandlingTask(task, false), initialDelay, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -165,7 +182,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
-			return executor.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
+			return executor.scheduleAtFixedRate(errorHandlingTask(task, true), initialDelay, period, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -175,7 +192,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
-			return executor.scheduleAtFixedRate(task, 0, period, TimeUnit.MILLISECONDS);
+			return executor.scheduleAtFixedRate(errorHandlingTask(task, true), 0, period, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -186,7 +203,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
-			return executor.scheduleWithFixedDelay(task, initialDelay, delay, TimeUnit.MILLISECONDS);
+			return executor.scheduleWithFixedDelay(errorHandlingTask(task, true), initialDelay, delay, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -196,10 +213,37 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
-			return executor.scheduleWithFixedDelay(task, 0, delay, TimeUnit.MILLISECONDS);
+			return executor.scheduleWithFixedDelay(errorHandlingTask(task, true), 0, delay, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+		}
+	}
+
+	private Runnable errorHandlingTask(Runnable task, boolean isRepeatingTask) {
+		return TaskUtils.errorHandlingTask(task, this.errorHandler, isRepeatingTask);
+	}
+
+
+	private static class DelegatingErrorHandlingCallable<V> implements Callable<V> {
+
+		private final Callable<V> delegate;
+
+		private final ErrorHandler errorHandler;
+
+		DelegatingErrorHandlingCallable(Callable<V> delegate, ErrorHandler errorHandler) {
+			this.delegate = delegate;
+			this.errorHandler = errorHandler;
+		}
+
+		public V call() throws Exception {
+			try {
+				return delegate.call();
+			}
+			catch (Throwable t) {
+				this.errorHandler.handleError(t);
+				return null;
+			}
 		}
 	}
 
