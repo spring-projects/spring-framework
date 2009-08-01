@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.ErrorHandler;
+import org.springframework.util.Assert;
 
 /**
  * Adapter that takes a JDK 1.5 <code>java.util.concurrent.ScheduledExecutorService</code>
@@ -41,6 +43,7 @@ import org.springframework.scheduling.Trigger;
  * a separate definition of the present adapter class.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 3.0
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor
@@ -49,7 +52,9 @@ import org.springframework.scheduling.Trigger;
  */
 public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements TaskScheduler {
 
-	private ScheduledExecutorService scheduledExecutor;
+	private volatile ScheduledExecutorService scheduledExecutor;
+
+	private volatile ErrorHandler errorHandler;
 
 
 	/**
@@ -101,10 +106,20 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 				(scheduledExecutor != null ? scheduledExecutor : Executors.newSingleThreadScheduledExecutor());
 	}
 
+	/**
+	 * Provide an {@link ErrorHandler} strategy.
+	 */
+	public void setErrorHandler(ErrorHandler errorHandler) {
+		Assert.notNull(errorHandler, "'errorHandler' must not be null");
+		this.errorHandler = errorHandler;
+	}
+
 
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		try {
-			return new ReschedulingRunnable(task, trigger, this.scheduledExecutor).schedule();
+			ErrorHandler errorHandler = this.errorHandler != null ?
+					this.errorHandler : TaskUtils.getDefaultErrorHandler(true);
+			return new ReschedulingRunnable(task, trigger, this.scheduledExecutor, errorHandler).schedule();
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -114,7 +129,8 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
-			return this.scheduledExecutor.schedule(task, initialDelay, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.schedule(
+					errorHandlingTask(task, false), initialDelay, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -124,7 +140,8 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
-			return this.scheduledExecutor.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleAtFixedRate(
+					errorHandlingTask(task, true), initialDelay, period, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -133,7 +150,8 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		try {
-			return this.scheduledExecutor.scheduleAtFixedRate(task, 0, period, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleAtFixedRate(
+					errorHandlingTask(task, true), 0, period, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -143,7 +161,8 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
-			return this.scheduledExecutor.scheduleWithFixedDelay(task, initialDelay, delay, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleWithFixedDelay(
+					errorHandlingTask(task, true), initialDelay, delay, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -152,11 +171,16 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		try {
-			return this.scheduledExecutor.scheduleWithFixedDelay(task, 0, delay, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleWithFixedDelay(
+					errorHandlingTask(task, true), 0, delay, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	private Runnable errorHandlingTask(Runnable task, boolean isRepeatingTask) {
+		return TaskUtils.errorHandlingTask(task, this.errorHandler, isRepeatingTask);
 	}
 
 }

@@ -25,7 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.support.DelegatingExceptionProofRunnable;
+import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
+import org.springframework.scheduling.support.ErrorHandler;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 
 /**
@@ -37,9 +38,10 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
  * will be translated onto a delay for the next execution time (repeatedly).
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 3.0
  */
-class ReschedulingRunnable extends DelegatingExceptionProofRunnable implements ScheduledFuture<Object> {
+class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements ScheduledFuture<Object> {
 
 	private final Trigger trigger;
 
@@ -51,29 +53,36 @@ class ReschedulingRunnable extends DelegatingExceptionProofRunnable implements S
 
 	private volatile Date scheduledExecutionTime;
 
+	private final Object triggerContextMonitor = new Object();
 
-	public ReschedulingRunnable(Runnable delegate, Trigger trigger, ScheduledExecutorService executor) {
-		super(delegate);
+
+	public ReschedulingRunnable(Runnable delegate, Trigger trigger, ScheduledExecutorService executor, ErrorHandler errorHandler) {
+		super(delegate, errorHandler);
 		this.trigger = trigger;
 		this.executor = executor;
 	}
 
 
 	public ScheduledFuture schedule() {
-		this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
-		if (this.scheduledExecutionTime == null) {
-			return null;
+		synchronized (this.triggerContextMonitor) {
+			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
+			if (this.scheduledExecutionTime == null) {
+				return null;
+			}
+			long initialDelay = this.scheduledExecutionTime.getTime() - System.currentTimeMillis();
+			this.currentFuture = this.executor.schedule(this, initialDelay, TimeUnit.MILLISECONDS);
+			return this;
 		}
-		long initialDelay = this.scheduledExecutionTime.getTime() - System.currentTimeMillis();
-		this.currentFuture = this.executor.schedule(this, initialDelay, TimeUnit.MILLISECONDS);
-		return this;
 	}
 
+	@Override
 	public void run() {
 		Date actualExecutionTime = new Date();
-		getDelegate().run();
+		super.run();
 		Date completionTime = new Date();
-		this.triggerContext.update(this.scheduledExecutionTime, actualExecutionTime, completionTime);
+		synchronized (this.triggerContextMonitor) {
+			this.triggerContext.update(this.scheduledExecutionTime, actualExecutionTime, completionTime);
+		}
 		if (!this.currentFuture.isCancelled()) {
 			schedule();
 		}
