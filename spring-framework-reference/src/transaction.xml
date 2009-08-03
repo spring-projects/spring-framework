@@ -8,9 +8,9 @@
     <title>Introduction to Spring Framework transaction management</title>
 
     <para>Comprehensive transaction support is among the most compelling
-    reasons to use Spring Framework. Spring Framework provides a consistent
-    abstraction for transaction management that delivers the following
-    benefits:</para>
+    reasons to use the Spring Framework. The Spring Framework provides a
+    consistent abstraction for transaction management that delivers the
+    following benefits:</para>
 
     <itemizedlist>
       <listitem>
@@ -36,19 +36,19 @@
       </listitem>
     </itemizedlist>
 
-    <para>The following sections describe Spring Framework's transaction
+    <para>The following sections describe the Spring Framework's transaction
     value-adds and technologies. (The chapter also includes discussions of
     best practices, application server integration, and solutions to common
     problems.)</para>
 
     <itemizedlist>
       <listitem>
-        <para><link linkend="transaction-motivation">Advantages of Spring
+        <para><link linkend="transaction-motivation">Advantages of the Spring
         Framework's transaction support model</link> describes
-        <emphasis>why</emphasis> you would use Spring Framework's transaction
-        abstraction instead of EJB Container-Managed Transactions (CMT) or
-        choosing to drive transactions through a proprietary API such as
-        Hibernate.</para>
+        <emphasis>why</emphasis> you would use the Spring Framework's
+        transaction abstraction instead of EJB Container-Managed Transactions
+        (CMT) or choosing to drive transactions through a proprietary API such
+        as Hibernate.</para>
 
         <!--The section (formerly called Motivation) does not mention Hibernate. It talks about local and global.-->
       </listitem>
@@ -83,13 +83,13 @@
   </section>
 
   <section id="transaction-motivation">
-    <title>Advantages of Spring Framework's transaction support model<!--Renamed section to make it more to the point.--></title>
+    <title>Advantages of the Spring Framework's transaction support model<!--Renamed section to make it more to the point.--></title>
 
     <para>Traditionally, Java EE developers have had two choices for
     transaction management: <emphasis>global</emphasis> or
     <emphasis>local</emphasis> transactions, both of which have profound
     limitations. Global and local transaction management is reviewed in the
-    next two sections, followed by a discussion of how Spring Framework's
+    next two sections, followed by a discussion of how the Spring Framework's
     transaction management support addresses the limitations of the global and
     local transaction models.</para>
 
@@ -148,7 +148,7 @@
       <emphasis>consistent</emphasis> programming model <emphasis>in any
       environment</emphasis>. You write your code once, and it can benefit
       from different transaction management strategies in different
-      environments. Spring Framework provides both declarative and
+      environments. The Spring Framework provides both declarative and
       programmatic transaction management. Most users prefer declarative
       transaction management, which is recommended in most cases.</para>
 
@@ -168,7 +168,7 @@ TR: I think it's fine as is - the concepts apply to both programmatic and declar
         <title>Do you need an application server for transaction
         management?</title>
 
-        <para>Spring Framework's transaction management support changes
+        <para>The Spring Framework's transaction management support changes
         traditional rules as to when a Java EE application requires an
         application server.</para>
 
@@ -189,14 +189,14 @@ TR: I think it's fine as is - the concepts apply to both programmatic and declar
         such as Java Message Service (JMS) and J2EE Connector Architecture
         (JCA).</para>
 
-        <para>Spring Framework <emphasis>gives you the choice of when to scale
-        your application to a fully loaded application server</emphasis>. Gone
-        are the days when the only alternative to using EJB CMT or JTA was to
-        write code with local transactions such as those on JDBC connections,
-        and face a hefty rework if you need that code to run within global,
-        container-managed transactions. With Spring Framework, only some of
-        the bean definitions in your configuration file, rather than your
-        code, needs to change.</para>
+        <para>The Spring Framework <emphasis>gives you the choice of when to
+        scale your application to a fully loaded application
+        server</emphasis>. Gone are the days when the only alternative to
+        using EJB CMT or JTA was to write code with local transactions such as
+        those on JDBC connections, and face a hefty rework if you need that
+        code to run within global, container-managed transactions. With the
+        Spring Framework, only some of the bean definitions in your
+        configuration file, rather than your code, needs to change.</para>
 
         <!--CLarify last sentence. Only what kind of configuration has to change? 
 TR: changed to say "some of the bean definitions in your configuration file"-->
@@ -584,35 +584,35 @@ TR: I re-wrote this to match the current preferred approaches--></para>
       <emphasis>non-invasive</emphasis> lightweight container.</para>
     </note>
 
-    <para>Spring Framework's declarative transaction management is made
+    <para>The Spring Framework's declarative transaction management is made
     possible with Spring aspect-oriented programming (AOP), although, as the
     transactional aspects code comes with the Spring Framework distribution
     and may be used in a boilerplate fashion, AOP concepts do not generally
     have to be understood to make effective use of this code.</para>
 
-    <para>Spring Framework's declarative transaction management is similar to
-    EJB CMT in that you can specify transaction behavior (or lack of it) down
-    to individual method level. It is possible to make a
+    <para>The Spring Framework's declarative transaction management is similar
+    to EJB CMT in that you can specify transaction behavior (or lack of it)
+    down to individual method level. It is possible to make a
     <methodname>setRollbackOnly()</methodname> call within a transaction
     context if necessary. The differences between the two types of transaction
     management are:</para>
 
     <itemizedlist>
       <listitem>
-        <para>Unlike EJB CMT, which is tied to JTA, Spring Framework's
+        <para>Unlike EJB CMT, which is tied to JTA, the Spring Framework's
         declarative transaction management works in any environment. It can
         work with JTA transactions or local transactions using JDBC, JPA,
         Hibernate or JDO by simple adjusting the configuration files.<!--Indicate what kind of config changes? Changes to what  TR: rewrote this to hoefully make it more clear--></para>
       </listitem>
 
       <listitem>
-        <para>You can apply Spring Framework declarative transaction
+        <para>You can apply the Spring Framework declarative transaction
         management to any class, not merely special classes such as
         EJBs.</para>
       </listitem>
 
       <listitem>
-        <para>Spring Framework offers declarative <link
+        <para>The Spring Framework offers declarative <link
         linkend="transaction-declarative-rolling-back"><emphasis>rollback
         rules</emphasis>, </link>a feature with no EJB equivalent. Both
         programmatic and declarative support for rollback rules is
@@ -620,7 +620,7 @@ TR: I re-wrote this to match the current preferred approaches--></para>
       </listitem>
 
       <listitem>
-        <para>Spring Framework enables you to customize transactional
+        <para>The Spring Framework enables you to customize transactional
         behavior, by using AOP. For example, you can insert custom behavior in
         the case of transaction rollback. You can also add arbitrary advice,
         along with the transactional advice. With EJB CMT, cannot influence
@@ -629,7 +629,7 @@ TR: I re-wrote this to match the current preferred approaches--></para>
       </listitem>
 
       <listitem>
-        <para>Spring Framework does not support propagation of transaction
+        <para>The Spring Framework does not support propagation of transaction
         contexts across remote calls, as do high-end application servers. If
         you need this feature, we recommend that you use EJB. However,
         consider carefully before using such a feature, because normally, one
@@ -677,16 +677,16 @@ TR: I re-wrote this to match the current preferred approaches--></para>
     <!--customize this so that what happens?-->
 
     <section id="tx-decl-explained">
-      <title>Understanding Spring Framework's declarative transaction
+      <title>Understanding the Spring Framework's declarative transaction
       implementation</title>
 
       <para>It is not sufficient to tell you simply to annotate your classes
       with the <interfacename>@Transactional</interfacename> annotation, add
       the line (<literal>&lt;tx:annotation-driven/&gt;</literal>) to your
       configuration, and then expect you to understand how it all works. This
-      section explains the inner workings of Spring Framework's declarative
-      transaction infrastructure in the event of transaction-related
-      issues.</para>
+      section explains the inner workings of the Spring Framework's
+      declarative transaction infrastructure in the event of
+      transaction-related issues.</para>
 
       <para>The most important concepts to grasp with regard to the Spring
       Framework's declarative transaction support are that this support is
@@ -965,17 +965,18 @@ Exception in thread "main" java.lang.UnsupportedOperationException
       control the rollback of transactions in a simple declarative
       fashion.</para>
 
-      <para>The recommended way to indicate to Spring Framework's transaction
-      infrastructure that a transaction's work is to be rolled back is to
-      throw an <exceptionname>Exception</exceptionname> from code that is
-      currently executing in the context of a transaction. Spring Framework's
-      transaction infrastructure code, in its default configuration, will
-      catch any unhandled <exceptionname>Exception</exceptionname> as it
-      bubbles up the call stack, and mark the transaction for rollback.<!--I changed to *can be configured* because next sentence says it does not do this by default in all cases. 
+      <para>The recommended way to indicate to the Spring Framework's
+      transaction infrastructure that a transaction's work is to be rolled
+      back is to throw an <exceptionname>Exception</exceptionname> from code
+      that is currently executing in the context of a transaction. The Spring
+      Framework's transaction infrastructure code, in its default
+      configuration, will catch any unhandled
+      <exceptionname>Exception</exceptionname> as it bubbles up the call
+      stack, and mark the transaction for rollback.<!--I changed to *can be configured* because next sentence says it does not do this by default in all cases. 
 TR: I changed it to *in its default configuration*--></para>
 
-      <para>However, Spring Framework's transaction infrastructure code, by
-      default, <emphasis>only</emphasis> mark a transaction for rollback in
+      <para>However, the Spring Framework's transaction infrastructure code,
+      by default, <emphasis>only</emphasis> mark a transaction for rollback in
       the case of runtime, unchecked exceptions; that is, when the thrown
       exception is an instance or subclass of
       <exceptionname>RuntimeException</exceptionname>.
@@ -1002,7 +1003,7 @@ if the underlying application server infrastructure throws an Error the transact
 
       <para>You can also specify 'no rollback rules', if you do
       <emphasis>not</emphasis> want a transaction rolled back when an
-      exception is thrown. The following example tells Spring Framework's
+      exception is thrown. The following example tells the Spring Framework's
       transaction infrastructure to commit the attendant transaction even in
       the face of an unhandled
       <exceptionname>InstrumentNotFoundException</exceptionname>.</para>
@@ -1014,7 +1015,7 @@ if the underlying application server infrastructure throws an Error the transact
   &lt;/tx:attributes&gt;
 &lt;/tx:advice&gt;</programlisting>
 
-      <para>When Spring Framework's transaction infrastructure catches an
+      <para>When the Spring Framework's transaction infrastructure catches an
       exception and is consults configured rollback rules to determine whether
       to mark the transaction for rollback, the <emphasis>strongest</emphasis>
       matching rule wins. So in the case of the following configuration, any
@@ -1030,7 +1031,7 @@ if the underlying application server infrastructure throws an Error the transact
 
       <para>You can also indicate a required rollback
       <emphasis>programmatically</emphasis>. Although very simple, this
-      process is quite invasive, and tightly couples your code to Spring
+      process is quite invasive, and tightly couples your code to the Spring
       Framework's transaction infrastructure:</para>
 
       <programlisting language="java">public void resolvePosition() {
@@ -2401,7 +2402,7 @@ txManager.commit(status);</programlisting>
   <section id="transaction-resources">
     <title>Further Resources</title>
 
-    <para>For more information about Spring Framework's transaction
+    <para>For more information about the Spring Framework's transaction
     support:</para>
 
     <itemizedlist>
