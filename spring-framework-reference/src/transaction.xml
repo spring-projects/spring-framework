@@ -47,10 +47,10 @@
         Framework's transaction support model</link> describes
         <emphasis>why</emphasis> you would use the Spring Framework's
         transaction abstraction instead of EJB Container-Managed Transactions
-        (CMT) or choosing to drive transactions through a proprietary API such
-        as Hibernate.</para>
+        (CMT) or choosing to drive local transactions through a proprietary
+        API such as Hibernate.</para>
 
-        <!--The section (formerly called Motivation) does not mention Hibernate. It talks about local and global.-->
+        <!--The section (formerly called Motivation) does not mention Hibernate. It talks about local and global. TR: REVISED, PLS REVIEW added 'local' to the sentence-->
       </listitem>
 
       <listitem>
@@ -65,7 +65,7 @@
         <para><link linkend="tx-resource-synchronization">Synchronizing
         resources with transactions </link>describes how the application code
         ensures that resources are created, reused, and cleaned up
-        properly.<!--Added above link and bullet item.--></para>
+        properly.<!--Added above link and bullet item. TR: OK--></para>
       </listitem>
 
       <listitem>
@@ -83,7 +83,7 @@
   </section>
 
   <section id="transaction-motivation">
-    <title>Advantages of the Spring Framework's transaction support model<!--Renamed section to make it more to the point.--></title>
+    <title>Advantages of the Spring Framework's transaction support model<!--Renamed section to make it more to the point. TR: OK--></title>
 
     <para>Traditionally, Java EE developers have had two choices for
     transaction management: <emphasis>global</emphasis> or
@@ -93,7 +93,7 @@
     transaction management support addresses the limitations of the global and
     local transaction models.</para>
 
-    <!--Gave global, local, and spring models their own sections. These need to be called out at a higher level, esp. Spring advantage!-->
+    <!--Gave global, local, and spring models their own sections. These need to be called out at a higher level, esp. Spring advantage! TR: OK-->
 
     <section>
       <title>Global transactions</title>
@@ -152,13 +152,13 @@
       programmatic transaction management. Most users prefer declarative
       transaction management, which is recommended in most cases.</para>
 
-      <!--Do you need to specify that Spring allows you to work with *multiple* transactional resourcess (as global transactions do)?-->
+      <!--Do you need to specify that Spring allows you to work with *multiple* transactional resourcess (as global transactions do)? TR: OK AS IS-->
 
       <para>With programmatic transaction management, developers work with the
       Spring Framework transaction abstraction, which can run over any
       underlying transaction infrastructure. <!--Re preceding statement, does this mean that next section re transaction abstraction applies only to programmatic tx management?If so--><!--shouldn't the next section be subsection of *Programmatic transaction management* section? However, there is a sentence in the next--><!--section that reads *regardless of whether you opt for declarative or prog. tx man. defining correct PlatformTransactionManager impl. is--><!--absolutely essential.* This is followed by discussion of that impl. So I'm not sure what goes where.
 
-TR: I think it's fine as is - the concepts apply to both programmatic and declarative transactions
+TR: OK AS IS - I think it's fine as is - the concepts apply to both programmatic and declarative transactions
 -->With the preferred declarative model, developers typically write little or
       no code related to transaction management, and hence do not depend on
       the Spring Framework transaction API, or any other transaction
@@ -199,13 +199,14 @@ TR: I think it's fine as is - the concepts apply to both programmatic and declar
         configuration file, rather than your code, needs to change.</para>
 
         <!--CLarify last sentence. Only what kind of configuration has to change? 
-TR: changed to say "some of the bean definitions in your configuration file"-->
+TR: REVISED, PLS REVIEW - changed to say "some of the bean definitions in your configuration file"-->
       </sidebar>
     </section>
   </section>
 
   <section id="transaction-strategies">
-    <title>Understanding the Spring Framework transaction abstraction<!--If this section applies only to prog. tx management, we should say that up front. Add info? TR: It's relevant for declarative tx as well--></title>
+    <title>Understanding the Spring Framework transaction abstraction<!--If this section applies only to prog. tx management, we should say that up front. Add info? 
+TR: OK AS IS - It's relevant for declarative tx as well--></title>
 
     <para>The key to the Spring transaction abstraction is the notion of a
     <emphasis>transaction strategy</emphasis>. A transaction strategy is
@@ -227,7 +228,7 @@ TR: changed to say "some of the bean definitions in your configuration file"-->
     can be used <link
     linkend="transaction-programmatic-ptm">programmatically</link> from your
     application code. <!--Write out SPI with SPI in parentheses. SPI stands for a number of different things.And does logic of sentence make sense? 
-TR: spelled SPI out and added a bit of clarification at the end-->Because
+TR: REVISED, PLS REVIEW - spelled SPI out and added a bit of clarification at the end-->Because
     <interfacename>PlatformTransactionManager</interfacename> is an
     <emphasis>interface</emphasis>, it can be easily mocked or stubbed as
     necessary. It is not tied to a lookup strategy such as JNDI.
@@ -256,7 +257,7 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
     transaction exists in the current call stack. The implication in this
     latter case is that, as with Java EE transaction contexts, a
     <interfacename>TransactionStatus</interfacename> is associated with a
-    <emphasis role="bold">thread</emphasis> of execution.<!--Previous sentences were difficult to follow because of all the parenthetical phrases.Revise if necessary.--></para>
+    <emphasis role="bold">thread</emphasis> of execution.<!--Previous sentences were difficult to follow because of all the parenthetical phrases.Revise if necessary. TR: OK AS IS--></para>
 
     <para>The <interfacename>TransactionDefinition</interfacename> interface
     specifies:</para>
@@ -272,9 +273,9 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
       <listitem>
         <para><emphasis role="bold">Propagation</emphasis>: Typically, all
         code executed within a transaction scope will run in that transaction.
-        However, you have options for specifying behavior in the event that a
-        transactional method is executed when a transaction context already
-        exists. <!--Correct to say you have options? A human has to specify what the behavior will be, right?-->For
+        However, you have the option of specifying the behavior in the event
+        that a transactional method is executed when a transaction context
+        already exists. <!--Correct to say you have options? A human has to specify what the behavior will be, right? TR: REVISED, PLS REVIEW-->For
         example, code can continue running in the existing transaction (the
         common case); or the existing transaction can be suspended and a new
         transaction created. <emphasis>Spring offers all of the transaction
@@ -291,10 +292,12 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
 
       <listitem>
         <para><emphasis role="bold">Read-only status</emphasis>: A read-only
-        transaction<!-- describes status but (TR: this was a bit confusing; it read better the original way)
-        we could say 'reads but does not modify' --> does not modify any data.
+        transaction can be used when your code reads but does not modify data.
         Read-only transactions can be a useful optimization in some cases,
-        such as when you are using Hibernate.<!--I added that it describes status. OK? Elaborate on purpose?--></para>
+        such as when you are using Hibernate.</para>
+
+        <!--describes status but we could say 'reads but does not modify' I added that it describes status. OK? Elaborate on purpose?
+TR:REVISED, PLS REVIEW-->
       </listitem>
     </itemizedlist>
 
@@ -332,7 +335,7 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
     dependency injection.</para>
 
     <!--Do you need a link to an explanation of DI?
-    TR: at this point in the text, I don't think you would need that
+    TR: OK AS IS - at this point in the text, I don't think you would need that
     -->
 
     <para><interfacename>PlatformTransactionManager</interfacename>
@@ -365,7 +368,7 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
     conjunction with Spring's <classname>JtaTransactionManager</classname>.
     This is what the JTA and JNDI lookup version would look like:</para>
 
-    <!--Indicate what the following example demonstrates.What is its purpose?-->
+    <!--Indicate what the following example demonstrates.What is its purpose? TR: REVISED, PLS REVIEW-->
 
     <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -448,7 +451,7 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
     transactions, then you should simply use the same
     <classname>JtaTransactionManager</classname> as in the previous JTA
     example for JDBC.<!--Use it to do what? Below, this *what* is identical to JTA config
-     TR: I clarified this a bit
+     TR: REVISED, PLS REVIEW - I clarified this a bit
     --></para>
 
     <programlisting language="xml">&lt;bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>
@@ -482,7 +485,7 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
     resources are created, reused, and cleaned up properly. The section also
     discusses how transaction synchronization is triggered (optionally)
     through the relevant
-    <interfacename>PlatformTransactionManager</interfacename>.<!--I broke into two sentences. Last part of sentence unclear,revise to say what triggers tx synch. Revise sentences if necessray.--></para>
+    <interfacename>PlatformTransactionManager</interfacename>.<!--I broke into two sentences. Last part of sentence unclear,revise to say what triggers tx synch. Revise sentences if necessray. TR: OK--></para>
 
     <section id="tx-resource-synchronization-high">
       <title>High-level synchronization approach</title>
@@ -499,7 +502,7 @@ TR: spelled SPI out and added a bit of clarification at the end-->Because
       access using the <classname>JdbcTemplate</classname>. All of these
       solutions are detailed in subsequent chapters of this reference
       documentation.<!--If this approach is preferred, why not give examples here as you do with less desirable approaches? At least provide--><!--x-refs? Also is it correct to refer to APIs, then give classes as examples? Should this be reworded?
-TR: I re-wrote this to match the current preferred approaches--></para>
+TR: REVISED, PLS REVIEW - I re-wrote this to match the current preferred approaches--></para>
     </section>
 
     <section id="tx-resource-synchronization-low">
@@ -551,7 +554,9 @@ TR: I re-wrote this to match the current preferred approaches--></para>
       occurs behind the scenes and you won't need to write any special
       code.</para>
 
-      <!--I don't understand this. Why tell them to use DataSourceUtils and then say you will prefer Spring abstraction? Why not give example of using Spring abstraction?-->
+      <!--I don't understand this. Why tell them to use DataSourceUtils and then say you will prefer Spring abstraction? 
+Why not give example of using Spring abstraction? 
+TR: OK AS IS - it's not the prefered way, but we need to cover this if someine decideds to use it-->
     </section>
 
     <section id="tx-resource-synchronization-tadsp">
@@ -563,7 +568,8 @@ TR: I re-wrote this to match the current preferred approaches--></para>
       wraps the target <interfacename>DataSource</interfacename> to add
       awareness of Spring-managed transactions. In this respect, it is similar
       to a transactional JNDI <interfacename>DataSource</interfacename> as
-      provided by a Java EE server.<!--What is the purpose of TransactionAwareDataSourceProxy, do you use it instead of 4.2 or 4.1 approaches or in addition to?--></para>
+      provided by a Java EE server.<!--What is the purpose of TransactionAwareDataSourceProxy, do you use it instead of 4.2 or 4.1 approaches or in addition to?
+TR: OK AS IS - it's and additional tool, rarely used, but needs to be documented--></para>
 
       <para>It should almost never be necessary or desirable to use this
       class, except when existing code must be called and passed a standard
@@ -602,7 +608,8 @@ TR: I re-wrote this to match the current preferred approaches--></para>
         <para>Unlike EJB CMT, which is tied to JTA, the Spring Framework's
         declarative transaction management works in any environment. It can
         work with JTA transactions or local transactions using JDBC, JPA,
-        Hibernate or JDO by simple adjusting the configuration files.<!--Indicate what kind of config changes? Changes to what  TR: rewrote this to hoefully make it more clear--></para>
+        Hibernate or JDO by simple adjusting the configuration files.<!--Indicate what kind of config changes? Changes to what  
+TR: REVISED, PLS REVIEW - rewrote this to hoefully make it more clear--></para>
       </listitem>
 
       <listitem>
@@ -653,7 +660,7 @@ TR: I re-wrote this to match the current preferred approaches--></para>
     </sidebar>
 
     <para>The concept of rollback rules is important: they enable you to
-    specify which exceptions (and throwables) <!--If no difference between exceptions and throwables, delete throwables.-->should
+    specify which exceptions (and throwables) <!--If no difference between exceptions and throwables, delete throwables. TR: OK AS IS-->should
     cause automatic rollback. You specify this declaratively, in
     configuration, not in Java code. So, although you can still call
     <methodname>setRollbackOnly()</methodname>on the
@@ -674,7 +681,8 @@ TR: I re-wrote this to match the current preferred approaches--></para>
     EJB convention (roll back is automatic only on unchecked exceptions), it
     is often useful to customize this behavior.</para>
 
-    <!--customize this so that what happens?-->
+    <!--customize this so that what happens? TR: OK AS IS - i think - the option is to provide alternate rules for when a transaction 
+would be rolled back, not necessarily following the EJB rules-->
 
     <section id="tx-decl-explained">
       <title>Understanding the Spring Framework's declarative transaction
@@ -706,7 +714,8 @@ TR: I re-wrote this to match the current preferred approaches--></para>
       <para>Conceptually, calling a method on a transactional proxy looks like
       this...</para>
 
-      <!--I don't see this image in src file or in pdf. Maybe it was added to src after pdf was created?-->
+      <!--I don't see this image in src file or in pdf. Maybe it was added to src after pdf was created? 
+TR: OK AS IS - images don't show up in the editor, but they do show up in the generated docs-->
 
       <para><mediaobject>
           <imageobject role="fo">
@@ -901,7 +910,8 @@ public class DefaultFooService implements FooService {
 
       <para>The above configuration will be used to create a transactional
       proxy around the object that is created from the
-      <literal>fooService</literal> bean definition. <!--Clarify what you mean by around the object; do you mean associated with the object? Revise to clarify. Around is vague.-->The
+      <literal>fooService</literal> bean definition. <!--Clarify what you mean by around the object; do you mean associated with the object? Revise to clarify. Around is vague. 
+TR: OK AS IS - around is used a lot in AOP, so I think the audience will understand this usage-->The
       proxy will be configured with the transactional advice, so that when an
       appropriate method is invoked <emphasis>on the proxy</emphasis>, a
       transaction is started, suspended, marked as read-only, and so on,
@@ -973,7 +983,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
       configuration, will catch any unhandled
       <exceptionname>Exception</exceptionname> as it bubbles up the call
       stack, and mark the transaction for rollback.<!--I changed to *can be configured* because next sentence says it does not do this by default in all cases. 
-TR: I changed it to *in its default configuration*--></para>
+TR: REVISED, PLS REVIEW - I changed it to *in its default configuration*--></para>
 
       <para>However, the Spring Framework's transaction infrastructure code,
       by default, <emphasis>only</emphasis> mark a transaction for rollback in
@@ -984,7 +994,7 @@ TR: I changed it to *in its default configuration*--></para>
       in a rollback). Checked exceptions that are thrown from a transactional
       method do <emphasis>not</emphasis> result in rollback.<!--I revised preceding because it says ONLY first case is rolled back by default, but then says Errors are also marked by default.
 
-TR: Errors aren't thrown by application code, only checked or unchecked exceptions are. So the Errors part is just clarifying that 
+TR: OK AS IS - Errors aren't thrown by application code, only checked or unchecked exceptions are. So the Errors part is just clarifying that 
 if the underlying application server infrastructure throws an Error the transaction will be rolled back--></para>
 
       <para>You can configure exactly which
@@ -1406,10 +1416,12 @@ public class DefaultFooService implements FooService {
       <interfacename>@Transactional</interfacename> annotation is not enough
       to activate the transactional behavior. The
       <interfacename>@Transactional</interfacename> annotation is simply
-      metadata that can be consumed by something<!--Please identify *something* .-->
-      that is <interfacename>@Transactional</interfacename>-aware and that can
-      use the metadata to configure the appropriate beans with transactional
-      behavior. In the preceding example, the
+      metadata that can be consumed by something<!--Please identify *something* . 
+TR: OK AS IS - it's not defined what this something is - could be code written by the user or could be an 
+existing BeanPostProcessor provided or something else--> that is
+      <interfacename>@Transactional</interfacename>-aware and that can use the
+      metadata to configure the appropriate beans with transactional behavior.
+      In the preceding example, the
       <literal>&lt;tx:annotation-driven/&gt;</literal> element
       <emphasis>switches on</emphasis> the transactional behavior.</para>
 
@@ -1440,8 +1452,9 @@ public class DefaultFooService implements FooService {
         <interfacename>@Transactional</interfacename>.</para>
       </note>
 
-      <para>Consider the use of AspectJ mode (see below) if you expect
-      self-invocations to be wrapped with transactions as well. <!--*see below* is not clear re AspectJmode. Provide clear x-ref to mode in table below, or to Using Transactional with AspectJ section. Also clarify reference to *as well*. As well as what?--><!--Below, *in this case* meaning in *what* case? Explain what table shows.-->In
+      <para>Consider the use of AspectJ mode (see mode attribute in table
+      below) if you expect self-invocations to be wrapped with transactions as
+      well. <!--*see below* is not clear re AspectJmode. Provide clear x-ref to mode in table below, or to Using Transactional with AspectJ section. Also clarify reference to *as well*. As well as what?--><!--Below, *in this case* meaning in *what* case? Explain what table shows. TR: REVISED, PLS REVIEW-->In
       this case, there will not be a proxy in the first place; instead, the
       target class will be weaved (that is, its byte code will be modified) in
       order to turn <interfacename>@Transactional</interfacename> into runtime
@@ -1547,12 +1560,13 @@ public class DefaultFooService implements FooService {
         <interfacename>WebApplicationContext</interfacename> for a
         <classname>DispatcherServlet</classname>, it only checks for
         <interfacename>@Transactional</interfacename> beans in your
-        controllers, and not your services. <!--I don't understand the logic of preceding explanation. Also identify *it* in first sentence of Note.-->See
-        <xref linkend="mvc-servlet" /> for more information.</para>
+        controllers, and not your services. <!--I don't understand the logic of preceding explanation. Also identify *it* in first sentence of Note. 
+TR: OK AS IS - "it" refers to <tx:annotation-driven/>-->See <xref
+        linkend="mvc-servlet" /> for more information.</para>
       </note>
 
       <para>The most derived location takes precedence when evaluating the
-      transactional settings for a method. <!--Do you need to clarify what *most derived* location means? Lowest level?-->In
+      transactional settings for a method. <!--Do you need to clarify what *most derived* location means? Lowest level? TR: OK AS IS - following sentence explains it-->In
       the case of the following example, the
       <classname>DefaultFooService</classname> class is annotated at the class
       level with the settings for a read-only transaction, but the
@@ -1610,7 +1624,7 @@ public class DefaultFooService implements FooService {
           <listitem>
             <para>Any <exceptionname>RuntimeException</exceptionname> triggers
             rollback, and any checked <exceptionname>Exception</exceptionname>
-            does not.<!--Bullet list above does not exactly map to properties in table.ok?--></para>
+            does not.<!--Bullet list above does not exactly map to properties in table.ok? TR: OK AS IS--></para>
           </listitem>
         </itemizedlist>
 
@@ -1720,8 +1734,8 @@ public class DefaultFooService implements FooService {
         shown in a transaction monitor, if applicable (for example, WebLogic's
         transaction monitor), and in logging output. For declarative
         transactions, the transaction name is always the fully-qualified class
-        name + "." + <!--Meaning of symbols is unclear.-->method name of the
-        transactionally-advised class. For example, if the
+        name + "." + <!--Meaning of symbols is unclear. TR: OK AS IS - means concatenation and it would be clear to any programmer reading the docs-->method
+        name of the transactionally-advised class. For example, if the
         <methodname>handlePayment(..)</methodname> method of the
         <classname>BusinessService</classname> class started a transaction,
         the name of the transaction would be:
@@ -1733,7 +1747,7 @@ public class DefaultFooService implements FooService {
       <title>Transaction propagation</title>
 
       <!--Changed heading to be more explicit. These are settings, right? 
-TR: changed it back; it's not just settings, the section discusses propagation in general as well as the settings-->
+TR: REVISED, PLS REVIEW - changed it back; it's not just settings, the section discusses propagation in general as well as the settings-->
 
       <para>This section describes some semantics of transaction propagation
       in Spring. Please note that this section is not an introduction to
@@ -1764,11 +1778,11 @@ TR: changed it back; it's not just settings, the section discusses propagation i
         transaction scope can determine rollback-only status individually,
         with an outer transaction scope being logically independent from the
         inner transaction scope. Of course, in case of standard
-        <literal>PROPAGATION_REQUIRED</literal> behavior, all these scopes<!--OK? Need to identify *they*.-->
+        <literal>PROPAGATION_REQUIRED</literal> behavior, all these scopes<!--OK? Need to identify *they*. TR: OK AS IS-->
         will be mapped to the same physical transaction. So a rollback-only
         marker set in the inner transaction scope does affect the outer
         transaction's chance to actually commit (as you would expect it
-        to).<!--Do you need to explain what an inner transaction scope as opposed to an outer transaction scope?--></para>
+        to).<!--Do you need to explain what an inner transaction scope as opposed to an outer transaction scope? TR: OK AS IS--></para>
 
         <para>However, in the case where an inner transaction scope sets the
         rollback-only marker, the outer transaction has not decided on the
@@ -1822,7 +1836,7 @@ TR: changed it back; it's not just settings, the section discusses propagation i
     </section>
 
     <section id="transaction-declarative-applying-more-than-just-tx-advice">
-      <title>Advising transactional operations<!--Need better heading? Executing transactional advice?--></title>
+      <title>Advising transactional operations<!--Need better heading? Executing transactional advice? TR: OK AS IS--></title>
 
       <para>Suppose you want to execute <emphasis>both</emphasis>
       transactional <emphasis>and</emphasis> some basic profiling advice. How
@@ -1830,7 +1844,7 @@ TR: changed it back; it's not just settings, the section discusses propagation i
       <literal>&lt;tx:annotation-driven/&gt;</literal>?</para>
 
       <para>When you invoke the <methodname>updateFoo(Foo)</methodname>
-      method, you want to see the following actions:<!--I changed this to a numbered list because language indicated that one thing happens after another.--></para>
+      method, you want to see the following actions:<!--I changed this to a numbered list because language indicated that one thing happens after another. TR: OK--></para>
 
       <orderedlist>
         <listitem>
@@ -1863,7 +1877,7 @@ TR: changed it back; it's not just settings, the section discusses propagation i
       </note>
 
       <para>Here is the code for a simple profiling aspect discussed above.
-      <!--If you mean this code produces actions above, say that. TR: added 'discussed above'-->The
+      <!--If you mean this code produces actions above, say that. TR: REVISED, PLS REVIEW - added 'discussed above'-->The
       ordering of advice is controlled through the
       <interfacename>Ordered</interfacename> interface. For full details on
       advice ordering, see <xref
@@ -1953,7 +1967,7 @@ public class SimpleProfiler implements Ordered {
       <para>The result of the above configuration is a
       <literal>fooService</literal> bean that has profiling and transactional
       aspects applied to it <emphasis>in the desired order</emphasis>. <!--By *that order,* indicate whether you mean the numbered process or the above example? Or are they the same? 
-TR: changed to 'desired'; seems clear that the desired order is profiling first followed by transactional aspect-->You
+TR: REVISED, PLS REVIEW - changed to 'desired'; seems clear that the desired order is profiling first followed by transactional aspect-->You
       configure any number of additional aspects in similar fashion.</para>
 
       <para>The following example effects the same setup as above, but uses
@@ -2016,7 +2030,7 @@ TR: changed to 'desired'; seems clear that the desired order is profiling first 
       transactional advice on the way in, and <emphasis>before</emphasis> the
       transactional advice on the way out, then you simply swap the value of
       the profiling aspect bean's <literal>order</literal> property so that it
-      is higher than the transactional advice's order value.<!--Do you mean ...transactional advice *bean's* order value?--></para>
+      is higher than the transactional advice's order value.<!--Do you mean ...transactional advice *bean's* order value? TR: OK AS IS--></para>
 
       <para>You configure additional aspects in similar fashion.</para>
     </section>
@@ -2383,7 +2397,7 @@ txManager.commit(status);</programlisting>
 
       <para>Use the <emphasis>correct</emphasis>
       <interfacename>PlatformTransactionManager</interfacename> implementation
-      based on your choice of transactional technologies and requirements.<!--for *what* requirements? Identify *their* TR: clarified this a bit-->
+      based on your choice of transactional technologies and requirements.<!--for *what* requirements? Identify *their* TR: REVISED, PLS REVIEW - clarified this a bit-->
       Used properly, the Spring Framework merely provides a straightforward
       and portable abstraction. If you are using global transactions, you
       <emphasis>must</emphasis> use the
