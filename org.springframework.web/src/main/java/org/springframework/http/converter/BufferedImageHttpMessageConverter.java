@@ -187,6 +187,10 @@ public class BufferedImageHttpMessageConverter extends AbstractHttpMessageConver
 				imageWriter.setOutput(imageOutputStream);
 				imageWriter.write(null, new IIOImage(image, null, null), iwp);
 			}
+			else {
+				throw new HttpMessageNotWritableException(
+						"Could not find javax.imageio.ImageWriter for Content-Type [" + contentType + "]");
+			}
 		}
 		finally {
 			if (imageWriter != null) {
