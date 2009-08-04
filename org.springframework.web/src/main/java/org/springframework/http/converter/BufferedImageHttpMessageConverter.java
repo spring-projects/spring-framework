@@ -116,7 +116,7 @@ public class BufferedImageHttpMessageConverter extends AbstractHttpMessageConver
 	/** Sets the cache directory. If this property is set to an existing directory, this converter will cache image data. */
 	public void setCacheDir(File cacheDir) {
 		Assert.notNull(cacheDir, "'cacheDir' must not be null");
-		Assert.isTrue(cacheDir.isDirectory(), "'cacheDir' is not a valid directory");
+		Assert.isTrue(cacheDir.isDirectory(), "'cacheDir' is not a directory");
 		this.cacheDir = cacheDir;
 	}
 

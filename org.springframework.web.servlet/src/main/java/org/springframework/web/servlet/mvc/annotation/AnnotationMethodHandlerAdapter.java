@@ -166,8 +166,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	private HttpMessageConverter<?>[] messageConverters =
 			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new FormHttpMessageConverter(), new SourceHttpMessageConverter(), 
-					new BufferedImageHttpMessageConverter()};
+					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
 
 	public AnnotationMethodHandlerAdapter() {
 		// no restriction of HTTP methods by default

@@ -94,8 +94,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	private HttpMessageConverter<?>[] messageConverters =
 			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new FormHttpMessageConverter(), new SourceHttpMessageConverter(),
-					new BufferedImageHttpMessageConverter()};
+					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
