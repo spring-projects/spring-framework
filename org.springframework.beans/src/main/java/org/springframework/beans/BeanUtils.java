@@ -51,13 +51,14 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sam Brannen
  */
 public abstract class BeanUtils {
 
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
 
-	private static final Map<Class, Boolean> unknownEditorTypes =
-			Collections.synchronizedMap(new WeakHashMap<Class, Boolean>());
+	private static final Map<Class<?>, Boolean> unknownEditorTypes =
+			Collections.synchronizedMap(new WeakHashMap<Class<?>, Boolean>());
 
 
 	/**
@@ -96,7 +97,7 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 */
-	public static Object instantiateClass(Class clazz) throws BeanInstantiationException {
+	public static <T> T instantiateClass(Class<T> clazz) throws BeanInstantiationException {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
@@ -120,7 +121,7 @@ public abstract class BeanUtils {
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 */
-	public static Object instantiateClass(Constructor ctor, Object... args) throws BeanInstantiationException {
+	public static <T> T instantiateClass(Constructor<T> ctor, Object... args) throws BeanInstantiationException {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
@@ -158,7 +159,7 @@ public abstract class BeanUtils {
 	 * @see java.lang.Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
-	public static Method findMethod(Class clazz, String methodName, Class... paramTypes) {
+	public static Method findMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		try {
 			return clazz.getMethod(methodName, paramTypes);
 		}
@@ -178,7 +179,7 @@ public abstract class BeanUtils {
 	 * @return the Method object, or <code>null</code> if not found
 	 * @see java.lang.Class#getDeclaredMethod
 	 */
-	public static Method findDeclaredMethod(Class clazz, String methodName, Class[] paramTypes) {
+	public static Method findDeclaredMethod(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
 		try {
 			return clazz.getDeclaredMethod(methodName, paramTypes);
 		}
@@ -205,7 +206,7 @@ public abstract class BeanUtils {
 	 * @see java.lang.Class#getMethods
 	 * @see #findDeclaredMethodWithMinimalParameters
 	 */
-	public static Method findMethodWithMinimalParameters(Class clazz, String methodName)
+	public static Method findMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
 
 		Method targetMethod = findMethodWithMinimalParameters(clazz.getMethods(), methodName);
@@ -227,7 +228,7 @@ public abstract class BeanUtils {
 	 * could not be resolved to a unique method with minimal parameters
 	 * @see java.lang.Class#getDeclaredMethods
 	 */
-	public static Method findDeclaredMethodWithMinimalParameters(Class clazz, String methodName)
+	public static Method findDeclaredMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
 
 		Method targetMethod = findMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);
@@ -293,7 +294,7 @@ public abstract class BeanUtils {
 	 * @see #findMethod
 	 * @see #findMethodWithMinimalParameters
 	 */
-	public static Method resolveSignature(String signature, Class clazz) {
+	public static Method resolveSignature(String signature, Class<?> clazz) {
 		Assert.hasText(signature, "'signature' must not be empty");
 		Assert.notNull(clazz, "Class must not be null");
 
@@ -315,7 +316,7 @@ public abstract class BeanUtils {
 			String methodName = signature.substring(0, firstParen);
 			String[] parameterTypeNames =
 					StringUtils.commaDelimitedListToStringArray(signature.substring(firstParen + 1, lastParen));
-			Class[] parameterTypes = new Class[parameterTypeNames.length];
+			Class<?>[] parameterTypes = new Class[parameterTypeNames.length];
 			for (int i = 0; i < parameterTypeNames.length; i++) {
 				String parameterTypeName = parameterTypeNames[i].trim();
 				try {
@@ -337,7 +338,7 @@ public abstract class BeanUtils {
 	 * @return an array of <code>PropertyDescriptors</code> for the given class
 	 * @throws BeansException if PropertyDescriptor look fails
 	 */
-	public static PropertyDescriptor[] getPropertyDescriptors(Class clazz) throws BeansException {
+	public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) throws BeansException {
 		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
 		return cr.getBeanInfo().getPropertyDescriptors();
 	}
@@ -349,7 +350,7 @@ public abstract class BeanUtils {
 	 * @return the corresponding PropertyDescriptor, or <code>null</code> if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
-	public static PropertyDescriptor getPropertyDescriptor(Class clazz, String propertyName)
+	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName)
 			throws BeansException {
 
 		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
@@ -384,7 +385,7 @@ public abstract class BeanUtils {
 	 * @param targetType the type to find an editor for
 	 * @return the corresponding editor, or <code>null</code> if none found
 	 */
-	public static PropertyEditor findEditorByConvention(Class targetType) {
+	public static PropertyEditor findEditorByConvention(Class<?> targetType) {
 		if (targetType == null || targetType.isArray() || unknownEditorTypes.containsKey(targetType)) {
 			return null;
 		}
@@ -397,7 +398,7 @@ public abstract class BeanUtils {
 		}
 		String editorName = targetType.getName() + "Editor";
 		try {
-			Class editorClass = cl.loadClass(editorName);
+			Class<?> editorClass = cl.loadClass(editorName);
 			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
 				logger.warn("Editor class [" + editorName +
 						"] does not implement [java.beans.PropertyEditor] interface");
@@ -423,9 +424,9 @@ public abstract class BeanUtils {
 	 * @param beanClasses the classes to check against
 	 * @return the property type, or <code>Object.class</code> as fallback
 	 */
-	public static Class findPropertyType(String propertyName, Class[] beanClasses) {
+	public static Class<?> findPropertyType(String propertyName, Class<?>[] beanClasses) {
 		if (beanClasses != null) {
-			for (Class beanClass : beanClasses) {
+			for (Class<?> beanClass : beanClasses) {
 				PropertyDescriptor pd = getPropertyDescriptor(beanClass, propertyName);
 				if (pd != null) {
 					return pd.getPropertyType();
@@ -461,7 +462,7 @@ public abstract class BeanUtils {
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
 	 */
-	public static boolean isSimpleProperty(Class clazz) {
+	public static boolean isSimpleProperty(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return isSimpleValueType(clazz) || (clazz.isArray() && isSimpleValueType(clazz.getComponentType()));
 	}
@@ -473,7 +474,7 @@ public abstract class BeanUtils {
 	 * @param clazz the type to check
 	 * @return whether the given type represents a "simple" value type
 	 */
-	public static boolean isSimpleValueType(Class clazz) {
+	public static boolean isSimpleValueType(Class<?> clazz) {
 		return ClassUtils.isPrimitiveOrWrapper(clazz) || CharSequence.class.isAssignableFrom(clazz) ||
 				Number.class.isAssignableFrom(clazz) || Date.class.isAssignableFrom(clazz) ||
 				clazz.equals(URI.class) || clazz.equals(URL.class) ||
@@ -511,7 +512,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	public static void copyProperties(Object source, Object target, Class editable)
+	public static void copyProperties(Object source, Object target, Class<?> editable)
 			throws BeansException {
 
 		copyProperties(source, target, editable, null);
@@ -549,13 +550,13 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	private static void copyProperties(Object source, Object target, Class editable, String[] ignoreProperties)
+	private static void copyProperties(Object source, Object target, Class<?> editable, String[] ignoreProperties)
 			throws BeansException {
 
 		Assert.notNull(source, "Source must not be null");
 		Assert.notNull(target, "Target must not be null");
 
-		Class actualEditable = target.getClass();
+		Class<?> actualEditable = target.getClass();
 		if (editable != null) {
 			if (!editable.isInstance(target)) {
 				throw new IllegalArgumentException("Target class [" + target.getClass().getName() +
@@ -564,7 +565,7 @@ public abstract class BeanUtils {
 			actualEditable = editable;
 		}
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
-		List ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
+		List<String> ignoreList = (ignoreProperties != null) ? Arrays.asList(ignoreProperties) : null;
 
 		for (PropertyDescriptor targetPd : targetPds) {
 			if (targetPd.getWriteMethod() != null &&
