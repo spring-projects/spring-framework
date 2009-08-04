@@ -28,32 +28,38 @@
       <name>Java.net Repository for Maven</name>
       <url>http://download.java.net/maven/1/</url>
       <layout>legacy</layout>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
     <!-- for use with jexcelapi 2.6.8, portlet 2.0, hibernate 3.3.1-->
     <repository>
       <id>jboss</id>
       <name>JBoss Repository</name>
       <url>http://repository.jboss.org/maven2</url>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
     <repository>
       <id>EclipseLink Repo</id>
       <url>http://mirror.cc.vt.edu/pub/eclipse/rt/eclipselink/maven.repo/</url>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
     <!-- for rome 1.0 -->
     <repository>
       <id>sun-repo-2</id>
       <url>http://download.java.net/maven/2/</url>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>    
     <!-- fallback to S2 bundle repo for com.ibm.websphere.uow, oracle.classloader, com.sun.enterprise.loader -->
     <repository>
       <id>com.springsource.repository.bundles.release</id>
       <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
       <url>http://repository.springsource.com/maven/bundles/release</url>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
     <repository>
       <id>com.springsource.repository.bundles.external</id>
       <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
       <url>http://repository.springsource.com/maven/bundles/external</url>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
   </repositories>
 
