@@ -105,9 +105,9 @@
       Furthermore, a JTA <interfacename>UserTransaction</interfacename>
       normally needs to be sourced from JNDI, meaning that you
       <emphasis>also</emphasis> need to use JNDI in order to use JTA.
-      Obviously the use of global transactions would limit any potetntial
-      reuse of application code, as JTA is normally only available in an
-      application server environment.</para>
+      Obviously the use of global transactions would limit any potential reuse
+      of application code, as JTA is normally only available in an application
+      server environment.</para>
 
       <para>Previously, the preferred way to use global transactions was via
       EJB <emphasis>CMT</emphasis> (<emphasis>Container Managed
@@ -196,7 +196,7 @@ TR: OK AS IS - I think it's fine as is - the concepts apply to both programmatic
         those on JDBC connections, and face a hefty rework if you need that
         code to run within global, container-managed transactions. With the
         Spring Framework, only some of the bean definitions in your
-        configuration file, rather than your code, needs to change.</para>
+        configuration file, rather than your code, need to change.</para>
 
         <!--CLarify last sentence. Only what kind of configuration has to change? 
 TR: REVISED, PLS REVIEW - changed to say "some of the bean definitions in your configuration file"-->
@@ -409,15 +409,15 @@ TR:REVISED, PLS REVIEW-->
     instances.</para>
 
     <para>The <interfacename>DataSource</interfacename> bean definition will
-    be similar to the local JDBC example shown previously and thus not shown
-    in the following example.</para>
+    be similar to the local JDBC example shown previously and thus is not
+    shown in the following example.</para>
 
     <!-- TR: added the following clarification rather than embed it in the text above-->
 
     <note>
       <para>If the <interfacename>DataSource</interfacename>, used by any
       non-JTA transaction manager, is looked up via JNDI and managed by a Java
-      EE container then it should be non-transactional because the Spring
+      EE container, then it should be non-transactional because the Spring
       Framework, rather than the Java EE container, will manage the
       transactions.</para>
     </note>
@@ -447,7 +447,7 @@ TR:REVISED, PLS REVIEW-->
   &lt;property name="sessionFactory" ref="sessionFactory" /&gt;
 &lt;/bean&gt;</programlisting>
 
-    <para>If you are using Hibernate and Java EE container managed JTA
+    <para>If you are using Hibernate and Java EE container-managed JTA
     transactions, then you should simply use the same
     <classname>JtaTransactionManager</classname> as in the previous JTA
     example for JDBC.<!--Use it to do what? Below, this *what* is identical to JTA config
@@ -457,11 +457,11 @@ TR:REVISED, PLS REVIEW-->
     <programlisting language="xml">&lt;bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>
 
     <note>
-      <para>If you use JTA then your transacton manager definition will look
-      the same regardles of what data access technology you use, be it JDBC,
-      Hibernate JPA or any other supported technology. This is due to the fact
-      that JTA transactions are global transactions, which can enlist any
-      transactional resource.</para>
+      <para>If you use JTA , then your transaction manager definition will
+      look the same regardless of what data access technology you use, be it
+      JDBC, Hibernate JPA or any other supported technology. This is due to
+      the fact that JTA transactions are global transactions, which can enlist
+      any transactional resource.</para>
     </note>
 
     <para>In all these cases, application code does not need to change. You
@@ -492,16 +492,15 @@ TR:REVISED, PLS REVIEW-->
 
       <para>The preferred approach is to use Spring's highest level template
       based persistence integration APIs or to use native ORM APIs with
-      transaction aware factory beans or proxies for managing the native
-      resource factories. These transaction aware solutions internally handle
+      transaction- aware factory beans or proxies for managing the native
+      resource factories. These transaction-aware solutions internally handle
       resource creation and reuse, cleanup, optional transaction
       synchronization of the resources, and exception mapping. Thus user data
       access code does not have to address these tasks, but can be focused
       purely on non-boilerplate persistence logic. Generally, you use the
-      native ORM API or a <emphasis>template</emphasis> approach for JDBC
-      access using the <classname>JdbcTemplate</classname>. All of these
-      solutions are detailed in subsequent chapters of this reference
-      documentation.<!--If this approach is preferred, why not give examples here as you do with less desirable approaches? At least provide--><!--x-refs? Also is it correct to refer to APIs, then give classes as examples? Should this be reworded?
+      native ORM API or take a <emphasis>template</emphasis> approach for JDBC
+      access by using the <classname>JdbcTemplate</classname>. These solutions
+      are detailed in subsequent chapters of this reference documentation.<!--If this approach is preferred, why not give examples here as you do with less desirable approaches? At least provide--><!--x-refs? Also is it correct to refer to APIs, then give classes as examples? Should this be reworded?
 TR: REVISED, PLS REVIEW - I re-wrote this to match the current preferred approaches--></para>
     </section>
 
@@ -608,7 +607,7 @@ TR: OK AS IS - it's and additional tool, rarely used, but needs to be documented
         <para>Unlike EJB CMT, which is tied to JTA, the Spring Framework's
         declarative transaction management works in any environment. It can
         work with JTA transactions or local transactions using JDBC, JPA,
-        Hibernate or JDO by simple adjusting the configuration files.<!--Indicate what kind of config changes? Changes to what  
+        Hibernate or JDO by simply adjusting the configuration files.<!--Indicate what kind of config changes? Changes to what  
 TR: REVISED, PLS REVIEW - rewrote this to hoefully make it more clear--></para>
       </listitem>
 
@@ -715,7 +714,7 @@ would be rolled back, not necessarily following the EJB rules-->
       this...</para>
 
       <!--I don't see this image in src file or in pdf. Maybe it was added to src after pdf was created? 
-TR: OK AS IS - images don't show up in the editor, but they do show up in the generated docs-->
+TR: OK AS IS. images don't show up in the editor, but they do show up in the generated docs-->
 
       <para><mediaobject>
           <imageobject role="fo">
@@ -979,29 +978,30 @@ Exception in thread "main" java.lang.UnsupportedOperationException
       transaction infrastructure that a transaction's work is to be rolled
       back is to throw an <exceptionname>Exception</exceptionname> from code
       that is currently executing in the context of a transaction. The Spring
-      Framework's transaction infrastructure code, in its default
-      configuration, will catch any unhandled
+      Framework's transaction infrastructure code will catch any unhandled
       <exceptionname>Exception</exceptionname> as it bubbles up the call
-      stack, and mark the transaction for rollback.<!--I changed to *can be configured* because next sentence says it does not do this by default in all cases. 
-TR: REVISED, PLS REVIEW - I changed it to *in its default configuration*--></para>
+      stack, and make a determination whether to mark the transaction for
+      rollback.<!--I changed to *can be configured* because next sentence says it does not do this by default in all cases. 
+TR: REVISED, PLS REVIEW. I changed it to *in its default configuration*BT: I STILL DON'T GET IT. PRECEDING SENTENCE AND FOLLOWING --><!--SENTENCE SEEM CONTRADICTORY. TR: REVISED AGAIN, PLS REVIEW.--></para>
 
-      <para>However, the Spring Framework's transaction infrastructure code,
-      by default, <emphasis>only</emphasis> mark a transaction for rollback in
-      the case of runtime, unchecked exceptions; that is, when the thrown
-      exception is an instance or subclass of
+      <para>In its default configuration, the Spring Framework's transaction
+      infrastructure code <emphasis>only</emphasis> marks a transaction for
+      rollback in the case of runtime, unchecked exceptions; that is, when the
+      thrown exception is an instance or subclass of
       <exceptionname>RuntimeException</exceptionname>.
       (<exceptionname>Error</exceptionname>s will also - by default - result
       in a rollback). Checked exceptions that are thrown from a transactional
-      method do <emphasis>not</emphasis> result in rollback.<!--I revised preceding because it says ONLY first case is rolled back by default, but then says Errors are also marked by default.
-
-TR: OK AS IS - Errors aren't thrown by application code, only checked or unchecked exceptions are. So the Errors part is just clarifying that 
-if the underlying application server infrastructure throws an Error the transaction will be rolled back--></para>
+      method do <emphasis>not</emphasis> result in rollback in the default
+      configuration.<!--I revised preceding because it says ONLY first case is rolled back by default, but then says Errors are also marked by default.
+TR: OK AS IS. Errors aren't thrown by application code, only checked or unchecked exceptions are. So the Errors part is just clarifying that 
+if the underlying application server infrastructure throws an Error the transaction will be rolled back.--></para>
 
       <para>You can configure exactly which
       <exceptionname>Exception</exceptionname> types mark a transaction for
-      rollback. The following XML snippet demonstrates how you configure
-      rollback for a checked, application-specific
-      <exceptionname>Exception</exceptionname> type.</para>
+      rollback, including checked exceptions. The following XML snippet
+      demonstrates how you configure rollback for a checked,
+      application-specific <exceptionname>Exception</exceptionname>
+      type.</para>
 
       <programlisting language="xml">&lt;tx:advice id="txAdvice" transaction-manager="txManager"&gt;
   &lt;tx:attributes&gt;
@@ -1417,7 +1417,7 @@ public class DefaultFooService implements FooService {
       to activate the transactional behavior. The
       <interfacename>@Transactional</interfacename> annotation is simply
       metadata that can be consumed by something<!--Please identify *something* . 
-TR: OK AS IS - it's not defined what this something is - could be code written by the user or could be an 
+TR: OK AS IS.it's not defined what this something is. could be code written by the user or could be an 
 existing BeanPostProcessor provided or something else--> that is
       <interfacename>@Transactional</interfacename>-aware and that can use the
       metadata to configure the appropriate beans with transactional behavior.
@@ -1561,12 +1561,12 @@ existing BeanPostProcessor provided or something else--> that is
         <classname>DispatcherServlet</classname>, it only checks for
         <interfacename>@Transactional</interfacename> beans in your
         controllers, and not your services. <!--I don't understand the logic of preceding explanation. Also identify *it* in first sentence of Note. 
-TR: OK AS IS - "it" refers to <tx:annotation-driven/>-->See <xref
+TR: OK AS IS. "it" refers to <tx:annotation-driven/>-->See <xref
         linkend="mvc-servlet" /> for more information.</para>
       </note>
 
       <para>The most derived location takes precedence when evaluating the
-      transactional settings for a method. <!--Do you need to clarify what *most derived* location means? Lowest level? TR: OK AS IS - following sentence explains it-->In
+      transactional settings for a method. <!--Do you need to clarify what *most derived* location means? Lowest level? TR: OK AS IS. following sentence explains it-->In
       the case of the following example, the
       <classname>DefaultFooService</classname> class is annotated at the class
       level with the settings for a read-only transaction, but the
@@ -1734,7 +1734,7 @@ public class DefaultFooService implements FooService {
         shown in a transaction monitor, if applicable (for example, WebLogic's
         transaction monitor), and in logging output. For declarative
         transactions, the transaction name is always the fully-qualified class
-        name + "." + <!--Meaning of symbols is unclear. TR: OK AS IS - means concatenation and it would be clear to any programmer reading the docs-->method
+        name + "." + <!--Meaning of symbols is unclear. TR: OK AS IS. means concatenation and it would be clear to any programmer reading the docs-->method
         name of the transactionally-advised class. For example, if the
         <methodname>handlePayment(..)</methodname> method of the
         <classname>BusinessService</classname> class started a transaction,
@@ -1877,7 +1877,7 @@ TR: REVISED, PLS REVIEW - changed it back; it's not just settings, the section d
       </note>
 
       <para>Here is the code for a simple profiling aspect discussed above.
-      <!--If you mean this code produces actions above, say that. TR: REVISED, PLS REVIEW - added 'discussed above'-->The
+      <!--If you mean this code produces actions above, say that. TR: REVISED, PLS REVIEW.added 'discussed above'-->The
       ordering of advice is controlled through the
       <interfacename>Ordered</interfacename> interface. For full details on
       advice ordering, see <xref
@@ -1967,7 +1967,7 @@ public class SimpleProfiler implements Ordered {
       <para>The result of the above configuration is a
       <literal>fooService</literal> bean that has profiling and transactional
       aspects applied to it <emphasis>in the desired order</emphasis>. <!--By *that order,* indicate whether you mean the numbered process or the above example? Or are they the same? 
-TR: REVISED, PLS REVIEW - changed to 'desired'; seems clear that the desired order is profiling first followed by transactional aspect-->You
+TR: REVISED, PLS REVIEW. changed to 'desired'; seems clear that the desired order is profiling first followed by transactional aspect-->You
       configure any number of additional aspects in similar fashion.</para>
 
       <para>The following example effects the same setup as above, but uses
@@ -2397,7 +2397,7 @@ txManager.commit(status);</programlisting>
 
       <para>Use the <emphasis>correct</emphasis>
       <interfacename>PlatformTransactionManager</interfacename> implementation
-      based on your choice of transactional technologies and requirements.<!--for *what* requirements? Identify *their* TR: REVISED, PLS REVIEW - clarified this a bit-->
+      based on your choice of transactional technologies and requirements.<!--for *what* requirements? Identify *their* TR: REVISED, PLS REVIEW.Clarified this a bit.-->
       Used properly, the Spring Framework merely provides a straightforward
       and portable abstraction. If you are using global transactions, you
       <emphasis>must</emphasis> use the
