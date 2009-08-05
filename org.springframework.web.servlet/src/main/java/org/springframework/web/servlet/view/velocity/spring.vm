@@ -270,6 +270,21 @@
 #end
 
 #**
+ * springFormCheckbox
+ *
+ * Show a single checkbox.
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size
+*#
+#macro( springFormCheckbox $path $attributes )
+    #springBind($path)
+ 	<input type="hidden" name="_${status.expression}" value="on"/>
+	<input type="checkbox" id="${status.expression}" name="${status.expression}" checked="#if("$!{status.value}"=="true")true#{else}false#end" ${attributes}/>
+#end
+
+#**
  * springShowErrors
  *
  * Show validation errors for the currently bound field, with

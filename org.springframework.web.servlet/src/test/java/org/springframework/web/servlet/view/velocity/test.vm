@@ -53,5 +53,12 @@ FORM9
 FORM10
 #springFormHiddenInput("command.name" "")
 
+FORM15
+#springFormCheckbox("command.name" "")
+
+FORM16
+#springFormCheckbox("command.jedi" "")
+
+
 ERRORS
 #springShowErrors(" " "")

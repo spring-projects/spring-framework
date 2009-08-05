@@ -297,6 +297,23 @@
 </#macro>
 
 <#--
+ * formCheckbox
+ *
+ * Show a single checkbox.
+ *
+ * @param path the name of the field to bind to
+ * @param attributes any additional attributes for the element (such as class
+ *    or CSS styles or size
+-->
+<#macro formCheckbox path attributes="">
+	<@bind path />
+	<#local checked><#if status.value?? && status.value?string=="true">true<#else>false</#if></#local>
+	<#local id><#if status.expression??>${status.expression}<#else>${path}</#if></#local>
+	<input type="hidden" name="_${id}" value="on"/>
+	<input type="checkbox" id="${id}" name="${id}" checked="${checked}" ${attributes}/>
+</#macro>
+
+<#--
  * showErrors
  *
  * Show validation errors for the currently bound field, with
