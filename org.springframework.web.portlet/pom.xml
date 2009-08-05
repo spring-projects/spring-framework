@@ -106,7 +106,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
+      <version>4.6</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

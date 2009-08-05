@@ -149,6 +149,12 @@
       <artifactId>net.sf.jasperreports</artifactId>
       <version>2.0.5</version>
       <scope>test</scope>
+      <exclusions>
+	<exclusion>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis</artifactId>
+	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.jexcelapi</groupId>
@@ -281,6 +287,12 @@
       <artifactId>org.dom4j</artifactId>
       <version>1.6.1</version>
       <scope>test</scope>
+      <exclusions>
+	<exclusion>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis</artifactId>
+	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>
@@ -459,7 +471,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
+      <version>4.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
