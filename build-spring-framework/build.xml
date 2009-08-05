@@ -21,6 +21,7 @@
 		<pathelement location="../org.springframework.web.servlet"/>
 		<pathelement location="../org.springframework.web.portlet"/>
 		<pathelement location="../org.springframework.test"/>
+		<pathelement location="../org.springframework.spring-parent"/>
 		<pathelement location="../org.springframework.spring-library"/>
 		<pathelement location="../org.springframework.integration-tests"/>
 	</path>
