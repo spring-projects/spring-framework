@@ -30,7 +30,7 @@ public class EmbeddedDatabaseBuilderTests {
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
-	@Test
+
 	public void testBuildDerby() {
 		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
 		EmbeddedDatabase db = builder.type(DERBY).script("db-schema-derby.sql").script("db-test-data.sql").build();
