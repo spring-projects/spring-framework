@@ -117,9 +117,8 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	@Test
-	@Ignore
 	public void lexicalHandler() throws SAXException, IOException, XMLStreamException {
-		MockControl lexicalHandlerControl = MockControl.createControl(LexicalHandler.class);
+		MockControl lexicalHandlerControl = MockControl.createStrictControl(LexicalHandler.class);
 		lexicalHandlerControl.setDefaultMatcher(new SaxArgumentMatcher());
 		LexicalHandler lexicalHandlerMock = (LexicalHandler) lexicalHandlerControl.getMock();
 		LexicalHandler lexicalHandler = new CopyingLexicalHandler(lexicalHandlerMock);
@@ -128,7 +127,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 
 		standardReader.setContentHandler(null);
 		standardReader.setProperty("http://xml.org/sax/properties/lexical-handler", lexicalHandler);
-		standardReader.parse(new InputSource(createTestInputStream()));
+		standardReader.parse(new InputSource(testLexicalHandlerXml.getInputStream()));
 		lexicalHandlerControl.replay();
 
 		inputFactory.setProperty("javax.xml.stream.isCoalescing", Boolean.FALSE);
