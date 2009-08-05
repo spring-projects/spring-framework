@@ -159,6 +159,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private Principal userPrincipal;
 
+	private String requestedSessionId;
+
 	private String requestURI;
 
 	private String servletPath = "";
@@ -761,9 +763,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.userPrincipal;
 	}
 
+	public void setRequestedSessionId(String requestedSessionId) {
+		this.requestedSessionId = requestedSessionId;
+	}
+
 	public String getRequestedSessionId() {
-		HttpSession session = getSession();
-		return (session != null ? session.getId() : null);
+		return this.requestedSessionId;
 	}
 
 	public void setRequestURI(String requestURI) {
