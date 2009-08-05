@@ -25,10 +25,10 @@
     <para>The entire framework code has been revised to take advantage of Java
     5 features like generics, varargs and other language improvements. We have
     done our best to still keep the code backwards compatible. We now have
-    consistent use of generic Collections and Maps, consistent use of
-    generified FactoryBeans, and also consistent resolution of bridge methods
-    in the Spring AOP API. Generified ApplicationListeners automatically
-    receive specific event types only. All callback interfaces such as
+    consistent use of generic Collections and Maps, consistent use of generic
+    FactoryBeans, and also consistent resolution of bridge methods in the
+    Spring AOP API. Generic ApplicationListeners automatically receive
+    specific event types only. All callback interfaces such as
     TransactionCallback and HibernateCallback declare a generic result value
     now. Overall, the Spring core codebase is now freshly revised and
     optimized for Java 5.</para>
