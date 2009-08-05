@@ -408,7 +408,8 @@ public class AppConfig{
         the <emphasis>Object to XML mapping</emphasis> functionality mentioned
         earlier.</para>
 
-        <para>Refer to the section on <link linkend="rest">REST support</link>
+        <para>Refer to the section on <link linkend="mvc">MVC</link> and
+        <link linkend="rest-resttemplate">the RestTemplate</link>
         for more information.</para>
       </section>
 
