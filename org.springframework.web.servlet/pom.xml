@@ -12,6 +12,22 @@
     <version>3.0.0.BUILD-SNAPSHOT</version>
   </parent>
 
+  <profiles>
+    <profile>
+      <id>tiger</id>
+      <activation>
+	<jdk>1.5</jdk>
+      </activation>
+      <dependencies>
+	<dependency>
+	  <groupId>stax</groupId>
+	  <artifactId>stax</artifactId>
+	  <version>1.2.0</version>
+	</dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>rome</groupId>
@@ -71,6 +87,12 @@
       <artifactId>jasperreports</artifactId>
       <version>2.0.5</version>
       <optional>true</optional>
+      <exclusions>
+	<exclusion>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis</artifactId>
+	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -87,20 +109,26 @@
     <dependency>
       <groupId>org.apache.tiles</groupId>
       <artifactId>tiles-api</artifactId>
-      <version>2.0.5</version>
+      <version>2.1.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.apache.tiles</groupId>
       <artifactId>tiles-core</artifactId>
-      <version>2.0.5</version>
+      <version>2.1.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.apache.tiles</groupId>
       <artifactId>tiles-jsp</artifactId>
-      <version>2.0.5</version>
+      <version>2.1.2</version>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>rhino</groupId>
+      <artifactId>js</artifactId>
+      <version>1.7R1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>velocity</groupId>
@@ -165,7 +193,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
+      <version>4.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -191,12 +219,32 @@
       <artifactId>dom4j</artifactId>
       <version>1.6.1</version>
       <scope>test</scope>
+      <exclusions>
+	<exclusion>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis</artifactId>
+	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>jaxen</groupId>
       <artifactId>jaxen</artifactId>
       <version>1.1.1</version>
       <scope>test</scope>
+      <exclusions>
+	<exclusion>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>xom</groupId>
+	  <artifactId>xom</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>xerces</groupId>
+	  <artifactId>xercesImpl</artifactId>
+	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>cglib</groupId>
@@ -216,6 +264,19 @@
       <artifactId>geronimo-jta_1.1_spec</artifactId>
       <version>1.1</version>
       <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>jfree</groupId>
+      <artifactId>jfreechart</artifactId>
+      <version>1.0.7</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.0.1</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
