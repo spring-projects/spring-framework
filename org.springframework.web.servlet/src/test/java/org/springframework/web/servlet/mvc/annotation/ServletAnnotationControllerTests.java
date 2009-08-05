@@ -76,7 +76,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.model.ui.config.BindingLifecycle;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -1733,54 +1732,5 @@ public class ServletAnnotationControllerTests {
 		}
 
 	}
-	
-	@Test
-	public void testBindingLifecycle() throws Exception {
-		initServlet(BindingLifecycleController.class);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
-		request.addParameter("bar", "test");
-		request.addParameter("baz", "12");
-		MockHttpServletResponse response  = new MockHttpServletResponse();
-		servlet.service(request, response);
-		assertEquals("bar=test, baz=12", response.getContentAsString());
-	}
-	
-	@Controller
-	public static class BindingLifecycleController {
-		
-		@RequestMapping("/test")
-		public void bind(BindingLifecycle<Foo> fooLifecycle, Writer writer) throws IOException {
-			fooLifecycle.execute();
-			Foo foo = fooLifecycle.getModel();
-			assertEquals("test", foo.getBar());
-			assertEquals(new Integer(12), foo.getBaz());
-			writer.write("bar=" + foo.getBar() + ", baz=" + foo.getBaz());
-		}
-		
-		public static final class Foo {
-			
-			private String bar;
-			
-			private Integer baz;
-			
-			public String getBar() {
-				return bar;
-			}
-			
-			public void setBar(String bar) {
-				this.bar = bar;
-			}
-			
-			public Integer getBaz() {
-				return baz;
-			}
-			
-			public void setBaz(Integer baz) {
-				this.baz = baz;
-			}
-			
-		}
-	}
-
 
 }
