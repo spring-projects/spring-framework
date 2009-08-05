@@ -77,3 +77,9 @@ FORM13
 
 FORM14
 <@spring.formSingleSelect "command.name", options, ""/>
+
+FORM15
+<@spring.formCheckbox "command.name"/>
+
+FORM16
+<@spring.formCheckbox "command.jedi"/>

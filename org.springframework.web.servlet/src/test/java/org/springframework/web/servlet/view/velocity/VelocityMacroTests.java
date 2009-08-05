@@ -133,6 +133,7 @@ public class VelocityMacroTests extends TestCase {
 		rc.setContextPath("/springtest");
 
 		TestBean tb = new TestBean("Darren", 99);
+		tb.setJedi(true);
 		request.setAttribute("command", tb);
 
 		HashMap names = new HashMap();
@@ -178,6 +179,10 @@ public class VelocityMacroTests extends TestCase {
 			//TODO verify remaining output (fix whitespace)
 			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM15")) assertEquals("<input type=\"hidden\" name=\"_name\" value=\"on\"/>", tokens[i + 1]);
+			if (tokens[i].equals("FORM15")) assertEquals("<input type=\"checkbox\" id=\"name\" name=\"name\" checked=\"false\" />", tokens[i + 2]);
+			if (tokens[i].equals("FORM16")) assertEquals("<input type=\"hidden\" name=\"_jedi\" value=\"on\"/>", tokens[i + 1]);
+			if (tokens[i].equals("FORM16")) assertEquals("<input type=\"checkbox\" id=\"jedi\" name=\"jedi\" checked=\"true\" />", tokens[i + 2]);
 		}
 	}
 
