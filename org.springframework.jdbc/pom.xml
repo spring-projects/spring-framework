@@ -11,7 +11,6 @@
     <relativePath>../org.springframework.spring-parent</relativePath>
     <version>3.0.0.BUILD-SNAPSHOT</version>
   </parent>
-
   <dependencies>
     <dependency>
       <groupId>c3p0</groupId>
@@ -68,13 +67,16 @@
       <version>1.0.71</version>
       <scope>compile</scope>
       <optional>true</optional>      
-    </dependency>    
+    </dependency> 
     <dependency>
       <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.4.2.0</version>
-      <scope>compile</scope>
-      <optional>true</optional>      
+      <artifactId>com.springsource.org.apache.derby</artifactId>
+      <version>10.5.1000001.764942</version>
+    </dependency>   
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>com.springsource.org.apache.derby.client</artifactId>
+      <version>10.5.1000001.764942</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -99,7 +101,7 @@
   <build>
     <testResources>
       <testResource>
-        <directory>${pom.build.sourceDirectory}</directory>
+        <directory>src/test/resources</directory>
         <includes>
           <include>**/*.sql</include>
           <include>**/*.xml</include>
