@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param postProcessors the List of BeanPostProcessors
 	 * (potentially DestructionAwareBeanPostProcessor), if any
 	 */
-	public DisposableBeanAdapter(Object bean, String beanName, RootBeanDefinition beanDefinition,
+	public DisposableBeanAdapter(final Object bean, String beanName, RootBeanDefinition beanDefinition,
 			List<BeanPostProcessor> postProcessors, AccessControlContext acc) {
 
 		Assert.notNull(bean, "Bean must not be null");
@@ -92,14 +93,26 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
 		this.acc = acc;
 		
-		String destroyMethodName = beanDefinition.getDestroyMethodName();
+		final String destroyMethodName = beanDefinition.getDestroyMethodName();
 		if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) &&
 				!beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
 			this.destroyMethodName = destroyMethodName;
 			try {
-				this.destroyMethod = (this.nonPublicAccessAllowed ?
-						BeanUtils.findMethodWithMinimalParameters(bean.getClass(), destroyMethodName) :
-						BeanUtils.findMethodWithMinimalParameters(bean.getClass().getMethods(), destroyMethodName));
+				if (System.getSecurityManager() != null) {
+					AccessController.doPrivileged(new PrivilegedAction<Object>() {
+						public Object run() {
+							destroyMethod = (nonPublicAccessAllowed ?
+									BeanUtils.findMethodWithMinimalParameters(bean.getClass(), destroyMethodName) :
+									BeanUtils.findMethodWithMinimalParameters(bean.getClass().getMethods(), destroyMethodName));
+							return null;
+						}
+					});
+				}
+				else {
+					this.destroyMethod = (this.nonPublicAccessAllowed ?
+							BeanUtils.findMethodWithMinimalParameters(bean.getClass(), destroyMethodName) :
+							BeanUtils.findMethodWithMinimalParameters(bean.getClass().getMethods(), destroyMethodName));
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				throw new BeanDefinitionValidationException("Couldn't find a unique destroy method on bean with name '" +
@@ -229,9 +242,15 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			logger.debug("Invoking destroy method '" + this.destroyMethodName +
 					"' on bean with name '" + this.beanName + "'");
 		}
-		ReflectionUtils.makeAccessible(destroyMethod);
 		try {
 			if (System.getSecurityManager() != null) {
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						ReflectionUtils.makeAccessible(destroyMethod);
+						return null;
+					}
+				});
+
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 						public Object run() throws Exception {
@@ -244,6 +263,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				}
 			}
 			else {
+				ReflectionUtils.makeAccessible(destroyMethod);
 				destroyMethod.invoke(bean, args);
 			}
 		} catch (InvocationTargetException ex) {

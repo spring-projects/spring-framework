@@ -385,8 +385,23 @@ class ConstructorResolver {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
-			Method[] rawCandidates = (mbd.isNonPublicAccessAllowed() ?
-					ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
+			Method[] rawCandidates = null; 
+
+			final Class factoryClazz = factoryClass;
+			if (System.getSecurityManager() != null) {
+				
+				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
+					public Method[] run() {
+						return (mbd.isNonPublicAccessAllowed() ?
+								ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
+					}
+				});
+			}
+			else {
+				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
+						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
+			}
+			
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&

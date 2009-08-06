@@ -89,9 +89,18 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 	public Object instantiate(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Constructor ctor, Object[] args) {
+			final Constructor ctor, Object[] args) {
 
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
+			if (System.getSecurityManager() != null) {
+				// use own privileged to change accessibility (when security is on)
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						ReflectionUtils.makeAccessible(ctor);
+						return null;
+					}
+				});
+			}
 			return BeanUtils.instantiateClass(ctor, args);
 		}
 		else {

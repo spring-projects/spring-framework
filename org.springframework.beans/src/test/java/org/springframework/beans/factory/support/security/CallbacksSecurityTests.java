@@ -25,18 +25,26 @@ import java.security.Principal;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
-import java.util.Iterator;
 import java.util.PropertyPermission;
 import java.util.Set;
 
+import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SecurityContextProvider;
 import org.springframework.beans.factory.support.security.support.ConstructorBean;
 import org.springframework.beans.factory.support.security.support.CustomCallbackBean;
@@ -45,6 +53,13 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
 /**
+ * Security test case. Checks whether the container uses its privileges for its
+ * internal work but does not leak them when touching/calling user code.
+ * 
+ *t The first half of the test case checks that permissions are downgraded when
+ * calling user code while the second half that the caller code permission get
+ * through and Spring doesn't override the permission stack.
+ * 
  * @author Costin Leau
  */
 public class CallbacksSecurityTests extends TestCase {
@@ -52,37 +67,160 @@ public class CallbacksSecurityTests extends TestCase {
 	private XmlBeanFactory beanFactory;
 	private SecurityContextProvider provider;
 
+	private static class NonPrivilegedBean {
 
-	private static class TestSecuredBean {
+		private String expectedName;
+		public static boolean destroyed = false;
 
-		private String userName;
+		public NonPrivilegedBean(String expected) {
+			this.expectedName = expected;
+			checkCurrentContext();
+		}
 
 		public void init() {
-			AccessControlContext acc = AccessController.getContext();
-			Subject subject = Subject.getSubject(acc);
-			System.out.println("Current acc is " +acc +" subject = " + subject);
-			if (subject == null) {
-				return;
-			}
-			setNameFromPrincipal(subject.getPrincipals());
+			checkCurrentContext();
 		}
 
-		private void setNameFromPrincipal(Set<Principal> principals) {
-			if (principals == null) {
-				return;
-			}
-			for (Iterator<Principal> it = principals.iterator(); it.hasNext();) {
-				Principal p = it.next();
-				this.userName = p.getName();
-				return;
-			}
+		public void destroy() {
+			checkCurrentContext();
+			destroyed = true;
 		}
 
-		public String getUserName() {
-			return this.userName;
+		public void setProperty(Object value) {
+			checkCurrentContext();
+		}
+
+		public Object getProperty() {
+			checkCurrentContext();
+			return null;
+		}
+
+		private void checkCurrentContext() {
+			assertEquals(expectedName, getCurrentSubjectName());
 		}
 	}
-	
+
+	private static class NonPrivilegedSpringCallbacksBean implements
+			InitializingBean, DisposableBean, BeanClassLoaderAware,
+			BeanFactoryAware, BeanNameAware {
+
+		private String expectedName;
+		public static boolean destroyed = false;
+
+		public NonPrivilegedSpringCallbacksBean(String expected) {
+			this.expectedName = expected;
+			checkCurrentContext();
+		}
+
+		public void afterPropertiesSet() {
+			checkCurrentContext();
+		}
+
+		public void destroy() {
+			checkCurrentContext();
+			destroyed = true;
+		}
+
+		public void setBeanName(String name) {
+			checkCurrentContext();
+		}
+
+		public void setBeanClassLoader(ClassLoader classLoader) {
+			checkCurrentContext();
+		}
+
+		public void setBeanFactory(BeanFactory beanFactory)
+				throws BeansException {
+			checkCurrentContext();
+		}
+
+		private void checkCurrentContext() {
+			assertEquals(expectedName, getCurrentSubjectName());
+		}
+	}
+
+	private static class NonPrivilegedFactoryBean implements SmartFactoryBean {
+		private String expectedName;
+
+		public NonPrivilegedFactoryBean(String expected) {
+			this.expectedName = expected;
+			checkCurrentContext();
+		}
+
+		public boolean isEagerInit() {
+			checkCurrentContext();
+			return false;
+		}
+
+		public boolean isPrototype() {
+			checkCurrentContext();
+			return true;
+		}
+
+		public Object getObject() throws Exception {
+			checkCurrentContext();
+			return new Object();
+		}
+
+		public Class getObjectType() {
+			checkCurrentContext();
+			return Object.class;
+		}
+
+		public boolean isSingleton() {
+			checkCurrentContext();
+			return false;
+		}
+
+		private void checkCurrentContext() {
+			assertEquals(expectedName, getCurrentSubjectName());
+		}
+	}
+
+	private static class NonPrivilegedFactory {
+
+		private final String expectedName;
+
+		public NonPrivilegedFactory(String expected) {
+			this.expectedName = expected;
+			assertEquals(expectedName, getCurrentSubjectName());
+		}
+
+		public static Object makeStaticInstance(String expectedName) {
+			assertEquals(expectedName, getCurrentSubjectName());
+			return new Object();
+		}
+
+		public Object makeInstance() {
+			assertEquals(expectedName, getCurrentSubjectName());
+			return new Object();
+		}
+	}
+
+	private static String getCurrentSubjectName() {
+		final AccessControlContext acc = AccessController.getContext();
+
+		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+
+			public String run() {
+				Subject subject = Subject.getSubject(acc);
+				if (subject == null) {
+					return null;
+				}
+
+				Set<Principal> principals = subject.getPrincipals();
+
+				if (principals == null) {
+					return null;
+				}
+				for (Principal p : principals) {
+					return p.getName();
+				}
+				return null;
+			}
+		});
+	}
+
 	private static class TestPrincipal implements Principal {
 
 		private String name;
@@ -110,12 +248,14 @@ public class CallbacksSecurityTests extends TestCase {
 			return this.name.hashCode();
 		}
 	}
-	
+
 	public CallbacksSecurityTests() {
 		// setup security
 		if (System.getSecurityManager() == null) {
 			Policy policy = Policy.getPolicy();
-			URL policyURL = getClass().getResource("/org/springframework/beans/factory/support/security/policy.all");
+			URL policyURL = getClass()
+					.getResource(
+							"/org/springframework/beans/factory/support/security/policy.all");
 			System.setProperty("java.security.policy", policyURL.toString());
 			System.setProperty("policy.allowSystemProperty", "true");
 			policy.refresh();
@@ -127,10 +267,12 @@ public class CallbacksSecurityTests extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 
-		final ProtectionDomain empty = new ProtectionDomain(null, new Permissions());
+		final ProtectionDomain empty = new ProtectionDomain(null,
+				new Permissions());
 
 		provider = new SecurityContextProvider() {
-			private final AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] { empty });
+			private final AccessControlContext acc = new AccessControlContext(
+					new ProtectionDomain[] { empty });
 
 			public AccessControlContext getAccessControlContext() {
 				return acc;
@@ -138,9 +280,9 @@ public class CallbacksSecurityTests extends TestCase {
 		};
 
 		DefaultResourceLoader drl = new DefaultResourceLoader();
-		Resource config = drl.getResource("/org/springframework/beans/factory/support/security/callbacks.xml");
+		Resource config = drl
+				.getResource("/org/springframework/beans/factory/support/security/callbacks.xml");
 		beanFactory = new XmlBeanFactory(config);
-
 		beanFactory.setSecurityContextProvider(provider);
 	}
 
@@ -171,12 +313,13 @@ public class CallbacksSecurityTests extends TestCase {
 
 		final Class<ConstructorBean> cl = ConstructorBean.class;
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+			AccessController.doPrivileged(
+					new PrivilegedExceptionAction<Object>() {
 
-				public Object run() throws Exception {
-					return cl.newInstance();
-				}
-			}, acc);
+						public Object run() throws Exception {
+							return cl.newInstance();
+						}
+					}, acc);
 			fail("expected security exception");
 		} catch (Exception ex) {
 		}
@@ -247,7 +390,7 @@ public class CallbacksSecurityTests extends TestCase {
 
 	public void testTrustedFactoryMethod() throws Exception {
 		try {
-			beanFactory.getBean("trusted-factory-method");
+			beanFactory.getBean("privileged-static-factory-method");
 			fail("expected security exception");
 		} catch (BeanCreationException ex) {
 			assertTrue(ex.getMostSpecificCause() instanceof SecurityException);
@@ -276,7 +419,7 @@ public class CallbacksSecurityTests extends TestCase {
 			}
 		}, acc);
 	}
-	
+
 	public void testPropertyInjection() throws Exception {
 		try {
 			beanFactory.getBean("property-injection");
@@ -284,26 +427,68 @@ public class CallbacksSecurityTests extends TestCase {
 		} catch (BeanCreationException ex) {
 			assertTrue(ex.getMessage().contains("security"));
 		}
-		
+
 		beanFactory.getBean("working-property-injection");
 	}
-	
+
 	public void testInitSecurityAwarePrototypeBean() {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
-		bd.setScope(ConfigurableBeanFactory.SCOPE_PROTOTYPE);
-		bd.setInitMethodName("init");
-		lbf.registerBeanDefinition("test", bd);
+		BeanDefinitionBuilder bdb = BeanDefinitionBuilder
+				.genericBeanDefinition(NonPrivilegedBean.class).setScope(
+						ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+				.setInitMethodName("init").setDestroyMethodName("destroy")
+				.addConstructorArgValue("user1");
+		lbf.registerBeanDefinition("test", bdb.getBeanDefinition());
 		final Subject subject = new Subject();
 		subject.getPrincipals().add(new TestPrincipal("user1"));
 
-		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
-				new PrivilegedAction() {
+		NonPrivilegedBean bean = (NonPrivilegedBean) Subject.doAsPrivileged(
+				subject, new PrivilegedAction() {
 					public Object run() {
 						return lbf.getBean("test");
 					}
 				}, null);
 		assertNotNull(bean);
-		assertEquals(null, bean.getUserName());
+	}
+
+	public void testTrustedExecution() throws Exception {
+		beanFactory.setSecurityContextProvider(null);
+
+		Permissions perms = new Permissions();
+		perms.add(new AuthPermission("getSubject"));
+		ProtectionDomain pd = new ProtectionDomain(null, perms);
+
+		AccessControlContext acc = new AccessControlContext(
+				new ProtectionDomain[] { pd });
+
+		final Subject subject = new Subject();
+		subject.getPrincipals().add(new TestPrincipal("user1"));
+
+		// request the beans from non-privileged code
+		Subject.doAsPrivileged(subject, new PrivilegedAction<Object>() {
+
+			public Object run() {
+				// sanity check
+				assertEquals("user1", getCurrentSubjectName());
+				assertEquals(false, NonPrivilegedBean.destroyed);
+
+				beanFactory.getBean("trusted-spring-callbacks");
+				beanFactory.getBean("trusted-custom-init-destroy");
+				// the factory is a prototype - ask for multiple instances
+				beanFactory.getBean("trusted-spring-factory");
+				beanFactory.getBean("trusted-spring-factory");
+				beanFactory.getBean("trusted-spring-factory");
+
+				beanFactory.getBean("trusted-factory-bean");
+				beanFactory.getBean("trusted-static-factory-method");
+				beanFactory.getBean("trusted-factory-method");
+				beanFactory.getBean("trusted-property-injection");
+				beanFactory.getBean("trusted-working-property-injection");
+
+				beanFactory.destroySingletons();
+				assertEquals(true, NonPrivilegedBean.destroyed);
+				return null;
+			}
+		}, provider.getAccessControlContext());
 	}
 }

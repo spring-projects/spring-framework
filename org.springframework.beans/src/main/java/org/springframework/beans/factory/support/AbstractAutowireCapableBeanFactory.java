@@ -1496,8 +1496,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking init method  '" + initMethodName + "' on bean with name '" + beanName + "'");
 		}
-		ReflectionUtils.makeAccessible(initMethod);
+		
 		if (System.getSecurityManager() != null) {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+				public Object run() throws Exception {
+					ReflectionUtils.makeAccessible(initMethod);
+					return null;
+				}
+			});
+			
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 					
@@ -1514,6 +1521,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else {
 			try {
+				ReflectionUtils.makeAccessible(initMethod);
 				initMethod.invoke(bean, (Object[]) null);
 			} 
 			catch (InvocationTargetException ex) {
