@@ -205,12 +205,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return doGetBean(name, requiredType, args, false);
 	}
 
-	protected <T> T doGetBean(
-			final String name, final Class<T> requiredType, final Object[] args, final boolean typeCheckOnly)
-			throws BeansException {
-
-			return doGetBeanRaw(name, requiredType, args, typeCheckOnly);
-	}
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
@@ -223,7 +217,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws BeansException if the bean could not be created
 	 */
 	@SuppressWarnings("unchecked")
-	private <T> T doGetBeanRaw(
+	private <T> T doGetBean(
 			final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
