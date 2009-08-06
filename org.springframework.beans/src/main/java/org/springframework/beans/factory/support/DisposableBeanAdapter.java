@@ -19,6 +19,10 @@ package org.springframework.beans.factory.support;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +70,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private List<DestructionAwareBeanPostProcessor> beanPostProcessors;
 
+	private final AccessControlContext acc;
 
 	/**
 	 * Create a new DisposableBeanAdapter for the given bean.
@@ -76,7 +81,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * (potentially DestructionAwareBeanPostProcessor), if any
 	 */
 	public DisposableBeanAdapter(Object bean, String beanName, RootBeanDefinition beanDefinition,
-			List<BeanPostProcessor> postProcessors) {
+			List<BeanPostProcessor> postProcessors, AccessControlContext acc) {
 
 		Assert.notNull(bean, "Bean must not be null");
 		this.bean = bean;
@@ -84,6 +89,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.invokeDisposableBean =
 				(this.bean instanceof DisposableBean && !beanDefinition.isExternallyManagedDestroyMethod("destroy"));
 		this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
+		this.acc = acc;
+		
 		String destroyMethodName = beanDefinition.getDestroyMethodName();
 		if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) &&
 				!beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
@@ -131,6 +138,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.nonPublicAccessAllowed = nonPublicAccessAllowed;
 		this.destroyMethodName = destroyMethodName;
 		this.beanPostProcessors = postProcessors;
+		this.acc = null;
 	}
 
 
@@ -169,7 +177,18 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				logger.debug("Invoking destroy() on bean with name '" + this.beanName + "'");
 			}
 			try {
-				((DisposableBean) this.bean).destroy();
+				if (System.getSecurityManager() != null) {
+					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+	
+						public Object run() throws Exception {
+							((DisposableBean) bean).destroy();
+							return null;
+						}
+					}, acc);
+				}
+				else {
+					((DisposableBean) bean).destroy();
+				}
 			}
 			catch (Throwable ex) {
 				String msg = "Invocation of destroy method failed on bean with name '" + this.beanName + "'";
@@ -199,9 +218,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * for a method with a single boolean argument (passing in "true",
 	 * assuming a "force" parameter), else logging an error.
 	 */
-	private void invokeCustomDestroyMethod(Method destroyMethod) {
+	private void invokeCustomDestroyMethod(final Method destroyMethod) {
 		Class[] paramTypes = destroyMethod.getParameterTypes();
-		Object[] args = new Object[paramTypes.length];
+		final Object[] args = new Object[paramTypes.length];
 		if (paramTypes.length == 1) {
 			args[0] = Boolean.TRUE;
 		}
@@ -211,9 +230,22 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 		ReflectionUtils.makeAccessible(destroyMethod);
 		try {
-			destroyMethod.invoke(this.bean, args);
-		}
-		catch (InvocationTargetException ex) {
+			if (System.getSecurityManager() != null) {
+				try {
+					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						public Object run() throws Exception {
+							destroyMethod.invoke(bean, args);
+							return null;
+						}
+					}, acc);
+				} catch (PrivilegedActionException pax) {
+					throw (InvocationTargetException) pax.getException();
+				}
+			}
+			else {
+				destroyMethod.invoke(bean, args);
+			}
+		} catch (InvocationTargetException ex) {
 			String msg = "Invocation of destroy method '" + this.destroyMethodName +
 					"' failed on bean with name '" + this.beanName + "'";
 			if (logger.isDebugEnabled()) {

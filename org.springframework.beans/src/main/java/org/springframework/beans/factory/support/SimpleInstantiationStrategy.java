@@ -19,6 +19,9 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
@@ -46,12 +49,17 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			Constructor constructorToUse = (Constructor) beanDefinition.resolvedConstructorOrFactoryMethod;
 			if (constructorToUse == null) {
-				Class clazz = beanDefinition.getBeanClass();
+				final Class clazz = beanDefinition.getBeanClass();
 				if (clazz.isInterface()) {
 					throw new BeanInstantiationException(clazz, "Specified class is an interface");
 				}
 				try {
-					constructorToUse = clazz.getDeclaredConstructor((Class[]) null);
+					constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>() {
+
+						public Constructor run() throws Exception {
+							return clazz.getDeclaredConstructor((Class[]) null);
+						}
+					});
 					beanDefinition.resolvedConstructorOrFactoryMethod = constructorToUse;
 				}
 				catch (Exception ex) {
@@ -107,11 +115,17 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 	public Object instantiate(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Object factoryBean, Method factoryMethod, Object[] args) {
+			Object factoryBean, final Method factoryMethod, Object[] args) {
 
 		try {
 			// It's a static method if the target is null.
-			ReflectionUtils.makeAccessible(factoryMethod);
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
+
+				public Object run() {
+					ReflectionUtils.makeAccessible(factoryMethod);
+					return null;
+				}
+			});
 			return factoryMethod.invoke(factoryBean, args);
 		}
 		catch (IllegalArgumentException ex) {

@@ -24,6 +24,8 @@ import java.lang.reflect.Modifier;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -330,13 +332,27 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
-		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
+		final RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		if (bd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR) {
 			return autowireConstructor(beanClass.getName(), bd, null, null).getWrappedInstance();
 		}
 		else {
-			Object bean = getInstantiationStrategy().instantiate(bd, null, this);
+			Object bean = null;
+			final BeanFactory parent = this;
+			
+			if (System.getSecurityManager() != null) {
+				bean = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+	
+					public Object run() {
+						return getInstantiationStrategy().instantiate(bd, null, parent);
+					}
+				}, getAccessControlContext());
+			}
+			else {
+				bean = getInstantiationStrategy().instantiate(bd, null, parent);
+			}
+				
 			populateBean(beanClass.getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
@@ -403,9 +419,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object createBean(final String beanName, final RootBeanDefinition mbd, final Object[] args)
 			throws BeanCreationException {
 
-		AccessControlContext acc = AccessController.getContext();
-		return AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			public Object run() {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating instance of bean '" + beanName + "'");
 				}
@@ -438,8 +451,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					logger.debug("Finished creating instance of bean '" + beanName + "'");
 				}
 				return beanInstance;
-			}
-		}, acc);
 	}
 
 	/**
@@ -904,9 +915,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @return BeanWrapper for the new instance
 	 */
-	protected BeanWrapper instantiateBean(String beanName, RootBeanDefinition mbd) {
+	protected BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition mbd) {
 		try {
-			Object beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, this);
+			Object beanInstance = null;
+			final BeanFactory parent = this;
+			if (System.getSecurityManager() != null) {
+				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+	
+					public Object run() {
+						return getInstantiationStrategy().instantiate(mbd, beanName, parent);
+					}
+				}, getAccessControlContext());
+			}
+			else {
+				beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);
+			}
+			
 			BeanWrapper bw = new BeanWrapperImpl(beanInstance);
 			initBeanWrapper(bw);
 			return bw;
@@ -1229,6 +1253,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		MutablePropertyValues mpvs = null;
 		List<PropertyValue> original;
+		
+		if (System.getSecurityManager()!= null) {
+			if (bw instanceof BeanWrapperImpl) {
+				((BeanWrapperImpl) bw).setSecurityContext(getAccessControlContext());
+			}
+		}
 
 		if (pvs instanceof MutablePropertyValues) {
 			mpvs = (MutablePropertyValues) pvs;
@@ -1337,19 +1367,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #invokeInitMethods
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
-	protected Object initializeBean(String beanName, Object bean, RootBeanDefinition mbd) {
-		if (bean instanceof BeanNameAware) {
-			((BeanNameAware) bean).setBeanName(beanName);
+	protected Object initializeBean(final String beanName, final Object bean, RootBeanDefinition mbd) {
+		
+		if (System.getSecurityManager() != null) {
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				public Object run() {
+					invokeAwareMethods(beanName, bean);
+					return null;
+				}
+			}, getAccessControlContext());
 		}
-
-		if (bean instanceof BeanClassLoaderAware) {
-			((BeanClassLoaderAware) bean).setBeanClassLoader(getBeanClassLoader());
+		else {
+			invokeAwareMethods(beanName, bean);
 		}
-
-		if (bean instanceof BeanFactoryAware) {
-			((BeanFactoryAware) bean).setBeanFactory(this);
-		}
-
+		
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
@@ -1369,6 +1400,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		return wrappedBean;
 	}
+	
+	private void invokeAwareMethods(final String beanName, final Object bean) {
+		if (bean instanceof BeanNameAware) {
+			((BeanNameAware) bean).setBeanName(beanName);
+		}
+
+		if (bean instanceof BeanClassLoaderAware) {
+			((BeanClassLoaderAware) bean).setBeanClassLoader(getBeanClassLoader());
+		}
+
+		if (bean instanceof BeanFactoryAware) {
+			((BeanFactoryAware) bean).setBeanFactory(AbstractAutowireCapableBeanFactory.this);
+		}
+	}
 
 	/**
 	 * Give a bean a chance to react now all its properties are set,
@@ -1382,7 +1427,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @throws Throwable if thrown by init methods or by the invocation process
 	 * @see #invokeCustomInitMethod
 	 */
-	protected void invokeInitMethods(String beanName, Object bean, RootBeanDefinition mbd)
+	protected void invokeInitMethods(String beanName, final Object bean, RootBeanDefinition mbd)
 			throws Throwable {
 
 		boolean isInitializingBean = (bean instanceof InitializingBean);
@@ -1390,7 +1435,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking afterPropertiesSet() on bean with name '" + beanName + "'");
 			}
-			((InitializingBean) bean).afterPropertiesSet();
+			
+			if (System.getSecurityManager() != null) {
+				try {
+					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						public Object run() throws Exception {
+							((InitializingBean) bean).afterPropertiesSet();
+							return null;
+						}
+					},getAccessControlContext());
+				} catch (PrivilegedActionException pae) {
+					throw pae.getException();
+				}
+			}				
+			else {
+				((InitializingBean) bean).afterPropertiesSet();
+			}
 		}
 
 		if (mbd != null) {
@@ -1413,9 +1473,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param enforceInitMethod indicates whether the defined init method needs to exist
 	 * @see #invokeInitMethods
 	 */
-	protected void invokeCustomInitMethod(String beanName, Object bean, RootBeanDefinition mbd) throws Throwable {
+	protected void invokeCustomInitMethod(String beanName, final Object bean, RootBeanDefinition mbd) throws Throwable {
 		String initMethodName = mbd.getInitMethodName();
-		Method initMethod = (mbd.isNonPublicAccessAllowed() ?
+		final Method initMethod = (mbd.isNonPublicAccessAllowed() ?
 				BeanUtils.findMethod(bean.getClass(), initMethodName) :
 				ClassUtils.getMethodIfAvailable(bean.getClass(), initMethodName));
 		if (initMethod == null) {
@@ -1437,11 +1497,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			logger.debug("Invoking init method  '" + initMethodName + "' on bean with name '" + beanName + "'");
 		}
 		ReflectionUtils.makeAccessible(initMethod);
-		try {
-			initMethod.invoke(bean, (Object[]) null);
+		if (System.getSecurityManager() != null) {
+			try {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+					
+					public Object run() throws Exception {
+						initMethod.invoke(bean, (Object[]) null);
+						return null;
+					}
+				}, getAccessControlContext());
+			}
+			catch (PrivilegedActionException pae) {
+				InvocationTargetException ex = (InvocationTargetException) pae.getException();
+				throw ex.getTargetException();
+			}
 		}
-		catch (InvocationTargetException ex) {
-			throw ex.getTargetException();
+		else {
+			initMethod.invoke(bean, (Object[]) null);
 		}
 	}
 

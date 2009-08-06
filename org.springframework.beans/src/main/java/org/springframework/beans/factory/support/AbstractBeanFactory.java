@@ -17,6 +17,11 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -151,6 +156,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
 			new NamedThreadLocal<Object>("Prototype beans currently in creation");
 
+	/** security context used when running with a Security Manager */ 
+	private volatile SecurityContextProvider securityProvider = new SimpleSecurityContextProvider();
+
 	/**
 	 * Create a new AbstractBeanFactory.
 	 */
@@ -196,6 +204,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return doGetBean(name, requiredType, args, false);
 	}
 
+	protected <T> T doGetBean(
+			final String name, final Class<T> requiredType, final Object[] args, final boolean typeCheckOnly)
+			throws BeansException {
+		return AccessController.doPrivileged(new PrivilegedAction<T>() {
+
+			public T run() {
+				return doGetBeanRaw(name, requiredType, args, typeCheckOnly);
+			}
+		});
+	}
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
@@ -208,7 +226,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws BeansException if the bean could not be created
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T doGetBean(
+	private <T> T doGetBeanRaw(
 			final String name, final Class<T> requiredType, final Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
@@ -409,9 +427,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return false;
 			}
 			if (isFactoryBean(beanName, mbd)) {
-				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-				return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
-						!factoryBean.isSingleton());
+				final FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+				if (System.getSecurityManager() != null) {
+					return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+						public Boolean run() {
+							return Boolean.valueOf(((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
+									!factoryBean.isSingleton()));
+						}
+					}, getAccessControlContext()).booleanValue();
+				}
+				else {
+					return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
+							!factoryBean.isSingleton());
+				}
 			}
 			else {
 				return false;
@@ -861,7 +889,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the merged bean definition
 	 */
 	protected void destroyBean(String beanName, Object beanInstance, RootBeanDefinition mbd) {
-		new DisposableBeanAdapter(beanInstance, beanName, mbd, getBeanPostProcessors()).destroy();
+		new DisposableBeanAdapter(beanInstance, beanName, mbd, getBeanPostProcessors(), getAccessControlContext()).destroy();
 	}
 
 	public void destroyScopedBean(String beanName) {
@@ -1136,33 +1164,53 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return the resolved bean class (or <code>null</code> if none)
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
-	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName, Class[] typesToMatch)
+	protected Class resolveBeanClass(final RootBeanDefinition mbd, String beanName, final Class[] typesToMatch)
 			throws CannotLoadBeanClassException {
 		try {
 			if (mbd.hasBeanClass()) {
 				return mbd.getBeanClass();
 			}
-			if (typesToMatch != null) {
-				ClassLoader tempClassLoader = getTempClassLoader();
-				if (tempClassLoader != null) {
-					if (tempClassLoader instanceof DecoratingClassLoader) {
-						DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
-						for (Class typeToMatch : typesToMatch) {
-							dcl.excludeClass(typeToMatch.getName());
-						}
+			
+			if (System.getSecurityManager() != null) {
+				return AccessController.doPrivileged(new PrivilegedExceptionAction<Class>() {
+
+					public Class run() throws Exception {
+						return doResolveBeanClass(mbd, typesToMatch);
 					}
-					String className = mbd.getBeanClassName();
-					return (className != null ? ClassUtils.forName(className, tempClassLoader) : null);
-				}
+				}, getAccessControlContext());
 			}
-			return mbd.resolveBeanClass(getBeanClassLoader());
+			else {
+				return doResolveBeanClass(mbd, typesToMatch);
+			}
+		}
+		catch (PrivilegedActionException pae) {
+			ClassNotFoundException ex = (ClassNotFoundException) pae.getException();
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), (ClassNotFoundException) ex);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), (ClassNotFoundException) ex);
 		}
 		catch (LinkageError err) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
 		}
+	}
+	
+	private Class doResolveBeanClass(final RootBeanDefinition mbd, final Class[] typesToMatch) 
+		throws ClassNotFoundException {
+		if (typesToMatch != null) {
+			ClassLoader tempClassLoader = getTempClassLoader();
+			if (tempClassLoader != null) {
+				if (tempClassLoader instanceof DecoratingClassLoader) {
+					DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
+					for (Class<?> typeToMatch : typesToMatch) {
+						dcl.excludeClass(typeToMatch.getName());
+					}
+				}
+				String className = mbd.getBeanClassName();
+				return (className != null ? ClassUtils.forName(className, tempClassLoader) : null);
+			}
+		}
+		return mbd.resolveBeanClass(getBeanClassLoader());
 	}
 
 	/**
@@ -1363,13 +1411,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @see #registerDependentBean
 	 */
 	protected void registerDisposableBeanIfNecessary(String beanName, Object bean, RootBeanDefinition mbd) {
+		AccessControlContext acc = (System.getSecurityManager() != null ? getAccessControlContext() : null);
 		if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
 			if (mbd.isSingleton()) {
 				// Register a DisposableBean implementation that performs all destruction
 				// work for the given bean: DestructionAwareBeanPostProcessors,
 				// DisposableBean interface, custom destroy method.
 				registerDisposableBean(beanName,
-						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
+						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors(), acc));
 			}
 			else {
 				// A bean with a custom scope...
@@ -1378,11 +1427,41 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
 				}
 				scope.registerDestructionCallback(beanName,
-						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
+						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors(), acc));
 			}
 		}
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 *   
+	 * Delegate the creation of the security context to {@link #getSecurityContextProvider()}.
+	 */
+	@Override
+	protected AccessControlContext getAccessControlContext() {
+		SecurityContextProvider provider = getSecurityContextProvider();
+		return (provider != null ? provider.getAccessControlContext(): null);
+	}
 
+	/**
+	 * Return the security context provider for this bean factory.
+	 * 
+	 * @return
+	 */
+	public SecurityContextProvider getSecurityContextProvider() {
+		return securityProvider;
+	}
+	
+	/**
+	 * Set the security context provider for this bean factory. If a security manager
+	 * is set, interaction with the user code will be executed using the privileged
+	 * of the provided security context.
+	 * 
+	 * @param securityProvider
+	 */
+	public void setSecurityContextProvider(SecurityContextProvider securityProvider) {
+		this.securityProvider = securityProvider;
+	}
 
 	//---------------------------------------------------------------------
 	// Abstract methods to be implemented by subclasses
@@ -1442,5 +1521,4 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected abstract Object createBean(String beanName, RootBeanDefinition mbd, Object[] args)
 			throws BeanCreationException;
-
 }
