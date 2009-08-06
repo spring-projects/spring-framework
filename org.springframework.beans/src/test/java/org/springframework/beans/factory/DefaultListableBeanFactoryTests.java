@@ -16,10 +16,18 @@
 
 package org.springframework.beans.factory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.security.PrivilegedAction;
@@ -2018,6 +2026,7 @@ public final class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", bd);
 		final Subject subject = new Subject();
 		subject.getPrincipals().add(new TestPrincipal("user1"));
+
 		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
 				new PrivilegedAction() {
 					public Object run() {
@@ -2326,7 +2335,8 @@ public final class DefaultListableBeanFactoryTests {
 		private String userName;
 
 		public void init() {
-			Subject subject = Subject.getSubject(AccessController.getContext());
+			AccessControlContext acc = AccessController.getContext();
+			Subject subject = Subject.getSubject(acc);
 			if (subject == null) {
 				return;
 			}

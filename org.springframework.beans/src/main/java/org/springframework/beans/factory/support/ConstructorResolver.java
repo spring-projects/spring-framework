@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -63,6 +62,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Mark Fisher
+ * @author Costin Leau
  * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod

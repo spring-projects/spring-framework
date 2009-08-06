@@ -21,14 +21,22 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Permissions;
 import java.security.Policy;
+import java.security.Principal;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
+import java.util.Iterator;
 import java.util.PropertyPermission;
+import java.util.Set;
+
+import javax.security.auth.Subject;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SecurityContextProvider;
 import org.springframework.beans.factory.support.security.support.ConstructorBean;
 import org.springframework.beans.factory.support.security.support.CustomCallbackBean;
@@ -39,12 +47,71 @@ import org.springframework.core.io.Resource;
 /**
  * @author Costin Leau
  */
-public class CallbacksSecurityTest extends TestCase {
+public class CallbacksSecurityTests extends TestCase {
 
 	private XmlBeanFactory beanFactory;
 	private SecurityContextProvider provider;
 
-	public CallbacksSecurityTest() {
+
+	private static class TestSecuredBean {
+
+		private String userName;
+
+		public void init() {
+			AccessControlContext acc = AccessController.getContext();
+			Subject subject = Subject.getSubject(acc);
+			System.out.println("Current acc is " +acc +" subject = " + subject);
+			if (subject == null) {
+				return;
+			}
+			setNameFromPrincipal(subject.getPrincipals());
+		}
+
+		private void setNameFromPrincipal(Set<Principal> principals) {
+			if (principals == null) {
+				return;
+			}
+			for (Iterator<Principal> it = principals.iterator(); it.hasNext();) {
+				Principal p = it.next();
+				this.userName = p.getName();
+				return;
+			}
+		}
+
+		public String getUserName() {
+			return this.userName;
+		}
+	}
+	
+	private static class TestPrincipal implements Principal {
+
+		private String name;
+
+		public TestPrincipal(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			if (!(obj instanceof TestPrincipal)) {
+				return false;
+			}
+			TestPrincipal p = (TestPrincipal) obj;
+			return this.name.equals(p.name);
+		}
+
+		public int hashCode() {
+			return this.name.hashCode();
+		}
+	}
+	
+	public CallbacksSecurityTests() {
 		// setup security
 		if (System.getSecurityManager() == null) {
 			Policy policy = Policy.getPolicy();
@@ -219,5 +286,24 @@ public class CallbacksSecurityTest extends TestCase {
 		}
 		
 		beanFactory.getBean("working-property-injection");
+	}
+	
+	public void testInitSecurityAwarePrototypeBean() {
+		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
+		bd.setScope(ConfigurableBeanFactory.SCOPE_PROTOTYPE);
+		bd.setInitMethodName("init");
+		lbf.registerBeanDefinition("test", bd);
+		final Subject subject = new Subject();
+		subject.getPrincipals().add(new TestPrincipal("user1"));
+
+		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
+				new PrivilegedAction() {
+					public Object run() {
+						return lbf.getBean("test");
+					}
+				}, null);
+		assertNotNull(bean);
+		assertEquals(null, bean.getUserName());
 	}
 }

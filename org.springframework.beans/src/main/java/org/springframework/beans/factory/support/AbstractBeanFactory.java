@@ -96,6 +96,7 @@ import org.springframework.util.StringValueResolver;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 15 April 2001
  * @see #getBeanDefinition
  * @see #createBean
@@ -207,12 +208,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(
 			final String name, final Class<T> requiredType, final Object[] args, final boolean typeCheckOnly)
 			throws BeansException {
-		return AccessController.doPrivileged(new PrivilegedAction<T>() {
 
-			public T run() {
-				return doGetBeanRaw(name, requiredType, args, typeCheckOnly);
-			}
-		});
+		if (System.getSecurityManager() != null) {
+			return AccessController.doPrivileged(new PrivilegedAction<T>() {
+				public T run() {
+					return doGetBeanRaw(name, requiredType, args, typeCheckOnly);
+				}
+			});
+		}
+		else {
+			return doGetBeanRaw(name, requiredType, args, typeCheckOnly);
+		}
 	}
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
