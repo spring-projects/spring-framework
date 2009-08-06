@@ -231,6 +231,18 @@
           <include>**/*.xsd</include>
         </includes>
       </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <includes>
+          <include>*.jar</include>
+        </includes>
+      </testResource>
     </testResources>
   </build>
 </project>
