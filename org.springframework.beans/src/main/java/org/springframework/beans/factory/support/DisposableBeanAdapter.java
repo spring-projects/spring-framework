@@ -46,6 +46,7 @@ import org.springframework.util.ReflectionUtils;
  * </ul>
  *
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  * @see AbstractBeanFactory
  * @see org.springframework.beans.factory.DisposableBean
