@@ -27,6 +27,8 @@ import commonj.timers.TimerListener;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
+import org.springframework.scheduling.support.ErrorHandler;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 
 /**
@@ -34,47 +36,60 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
  * a CommonJ {@link commonj.timers.TimerManager}.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 3.0
  */
 public class TimerManagerTaskScheduler extends TimerManagerAccessor implements TaskScheduler {
 
+	private volatile ErrorHandler errorHandler;
+
+	public void setErrorHandler(ErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
+	}
+
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
-		return new ReschedulingTimerListener(task, trigger).schedule();
+		return new ReschedulingTimerListener(errorHandlingTask(task, true), trigger).schedule();
 	}
 
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
-		TimerScheduledFuture futureTask = new TimerScheduledFuture(task);
+		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, false));
 		Timer timer = getTimerManager().schedule(futureTask, startTime);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
 
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-		TimerScheduledFuture futureTask = new TimerScheduledFuture(task);
+		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().scheduleAtFixedRate(futureTask, startTime, period);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
 
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
-		TimerScheduledFuture futureTask = new TimerScheduledFuture(task);
+		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().scheduleAtFixedRate(futureTask, 0, period);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
 
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-		TimerScheduledFuture futureTask = new TimerScheduledFuture(task);
+		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().schedule(futureTask, startTime, delay);
 		futureTask.setTimer(timer);
 		return futureTask;
 	}
 
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
-		TimerScheduledFuture futureTask = new TimerScheduledFuture(task);
+		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().schedule(futureTask, 0, delay);
 		futureTask.setTimer(timer);
 		return futureTask;
+	}
+
+	private Runnable errorHandlingTask(Runnable delegate, boolean isRepeatingTask) {
+		ErrorHandler errorHandler = this.errorHandler != null ? this.errorHandler
+				: (isRepeatingTask ? ErrorHandler.LOG_AND_SUPPRESS : ErrorHandler.LOG_AND_PROPAGATE);
+		return new DelegatingErrorHandlingRunnable(delegate, errorHandler);
 	}
 
 
