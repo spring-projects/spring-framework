@@ -21,6 +21,8 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -179,10 +181,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * when deciding whether a bean definition should be considered as a
 	 * candidate for autowiring.
 	 */
-	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
+	public void setAutowireCandidateResolver(final AutowireCandidateResolver autowireCandidateResolver) {
 		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
 		if (autowireCandidateResolver instanceof BeanFactoryAware) {
-			((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(this);
+			if (System.getSecurityManager() != null) {
+				final BeanFactory target = this;
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(target);
+						return null;
+					}
+				}, getAccessControlContext());
+			}
+			else {
+				((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(this);
+			}
 		}
 		this.autowireCandidateResolver = autowireCandidateResolver;
 	}
@@ -493,8 +506,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 					if (isFactoryBean(beanName)) {
-						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-						if (factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit()) {
+						final FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+						boolean isEagerInit = false;
+						
+						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
+							isEagerInit = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+								public Boolean run() {
+									return Boolean.valueOf(((SmartFactoryBean) factory).isEagerInit());
+								}
+							}, getAccessControlContext()).booleanValue();
+						}
+						else {
+							isEagerInit = factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit(); 
+						}
+						if (isEagerInit) {
 							getBean(beanName);
 						}
 					}

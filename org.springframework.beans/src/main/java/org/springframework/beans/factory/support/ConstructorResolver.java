@@ -21,6 +21,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -99,7 +102,7 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper autowireConstructor(
-			String beanName, RootBeanDefinition mbd, Constructor[] chosenCtors, Object[] explicitArgs) {
+			final String beanName, final RootBeanDefinition mbd, Constructor[] chosenCtors, final Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -256,8 +259,25 @@ class ConstructorResolver {
 		}
 
 		try {
-			Object beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
-					mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
+			Object beanInstance = null; 
+			
+			if (System.getSecurityManager() != null) {
+				final Constructor ctorToUse = constructorToUse;
+				final Object[] argumentsToUse = argsToUse;
+				
+				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+	
+					public Object run() {
+						return beanFactory.getInstantiationStrategy().instantiate(
+								mbd, beanName, beanFactory, ctorToUse, argumentsToUse);
+					}
+				}, beanFactory.getAccessControlContext());
+			}
+			else {
+				beanInstance = beanFactory.getInstantiationStrategy().instantiate(
+						mbd, beanName, beanFactory, constructorToUse, argsToUse);
+			}
+			
 			bw.setWrappedInstance(beanInstance);
 			return bw;
 		}
@@ -311,7 +331,7 @@ class ConstructorResolver {
 	 * method, or <code>null</code> if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	public BeanWrapper instantiateUsingFactoryMethod(String beanName, RootBeanDefinition mbd, Object[] explicitArgs) {
+	public BeanWrapper instantiateUsingFactoryMethod(final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
@@ -491,8 +511,27 @@ class ConstructorResolver {
 		}
 
 		try {
-			Object beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
-					mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
+			
+			Object beanInstance = null;
+			
+			if (System.getSecurityManager() != null) {
+				final Object fb = factoryBean;
+				final Method factoryMethod = factoryMethodToUse;
+				final Object[] args = argsToUse;
+				
+				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+	
+					public Object run() {
+						return beanFactory.getInstantiationStrategy().instantiate(
+								mbd, beanName, beanFactory, fb, factoryMethod, args);
+					}
+				}, beanFactory.getAccessControlContext());
+			}
+			else {
+				beanInstance = beanFactory.getInstantiationStrategy().instantiate(
+						mbd, beanName, beanFactory, factoryBean, factoryMethodToUse, argsToUse);
+			}
+			
 			if (beanInstance == null) {
 				return null;
 			}
@@ -808,5 +847,4 @@ class ConstructorResolver {
 			}
 		}
 	}
-
 }

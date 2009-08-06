@@ -16,11 +16,18 @@
 
 package org.springframework.context.support;
 
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
 
@@ -56,7 +63,35 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 
 
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
+		AccessControlContext acc = null;
+		
+		if (System.getSecurityManager() != null) {
+			if (applicationContext instanceof ConfigurableApplicationContext) {
+				ConfigurableListableBeanFactory factory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+				if (factory instanceof AbstractBeanFactory) {
+					acc = ((AbstractBeanFactory) factory).getSecurityContextProvider().getAccessControlContext();
+				}
+			}
+			// optimize - check the bean class before creating the inner class + native call
+			if (bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware 
+					|| bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware) {
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						doProcess(bean);
+						return null;
+					}
+				}, acc);
+			}
+		}
+		else {
+			doProcess(bean);
+		}
+		
+		return bean;
+	}
+	
+	private void doProcess(Object bean) {
 		if (bean instanceof ResourceLoaderAware) {
 			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
 		}
@@ -69,11 +104,9 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		if (bean instanceof ApplicationContextAware) {
 			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 		}
-		return bean;
 	}
 
 	public Object postProcessAfterInitialization(Object bean, String name) {
 		return bean;
 	}
-
 }

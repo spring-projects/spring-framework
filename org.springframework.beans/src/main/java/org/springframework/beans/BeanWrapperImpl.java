@@ -22,6 +22,10 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,7 +35,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
@@ -101,6 +104,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Map with cached nested BeanWrappers: nested path -> BeanWrapper instance.
 	 */
 	private Map<String, BeanWrapperImpl> nestedBeanWrappers;
+
+	/** The security context used for invoking the property methods */
+	private AccessControlContext acc;
 
 
 	/**
@@ -196,6 +202,16 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		this.nestedBeanWrappers = null;
 		this.typeConverterDelegate = new TypeConverterDelegate(this, object);
 		setIntrospectionClass(object.getClass());
+	}
+
+	/**
+	 * Set the security context used during the invocation of the wrapped instance methods.
+	 * Can be null.
+	 * 
+	 * @param acc
+	 */
+	public void setSecurityContext(AccessControlContext acc) {
+		this.acc = acc;
 	}
 
 	public final Object getWrappedInstance() {
@@ -539,12 +555,29 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if (pd == null || pd.getReadMethod() == null) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
 		}
-		Method readMethod = pd.getReadMethod();
+		final Method readMethod = pd.getReadMethod();
 		try {
 			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 				readMethod.setAccessible(true);
 			}
-			Object value = readMethod.invoke(this.object, (Object[]) null);
+			
+			Object value = null; 
+				
+			if (System.getSecurityManager() != null) {
+				try {
+					value = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						public Object run() throws Exception {
+							return readMethod.invoke(object, (Object[]) null);
+						}
+					},acc);
+				} catch (PrivilegedActionException pae) {
+					throw pae.getException();
+				}
+			}
+			else {
+					value = readMethod.invoke(object, (Object[]) null);
+			}
+				
 			if (tokens.keys != null) {
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
@@ -602,7 +635,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Getter for property '" + actualName + "' threw exception", ex);
 		}
-		catch (IllegalAccessException ex) {
+		
+		catch(IllegalAccessException ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Illegal attempt to get property '" + actualName + "' threw exception", ex);
 		}
@@ -611,6 +645,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					"Index of out of bounds in property path '" + propertyName + "'", ex);
 		}
 		catch (NumberFormatException ex) {
+			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+					"Invalid index in property path '" + propertyName + "'", ex);
+		}
+		catch (Exception ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Invalid index in property path '" + propertyName + "'", ex);
 		}
@@ -813,14 +851,26 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					else {
 						if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
-							Method readMethod = pd.getReadMethod();
+							final Method readMethod = pd.getReadMethod();
 							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 								readMethod.setAccessible(true);
 							}
 							try {
-								oldValue = readMethod.invoke(this.object);
+								if (System.getSecurityManager() != null) {
+									oldValue = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+										public Object run() throws Exception {
+											return readMethod.invoke(object);
+										}
+									},acc);
+								}
+								else {
+									oldValue = readMethod.invoke(object);
+								}
 							}
 							catch (Exception ex) {
+								if (ex instanceof PrivilegedActionException) {
+									ex = ((PrivilegedActionException) ex).getException();
+								}
 								if (logger.isDebugEnabled()) {
 									logger.debug("Could not read previous value of property '" +
 											this.nestedPath + propertyName + "'", ex);
@@ -831,11 +881,28 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}
-				Method writeMethod = pd.getWriteMethod();
+				final Method writeMethod = pd.getWriteMethod();
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 					writeMethod.setAccessible(true);
 				}
-				writeMethod.invoke(this.object, valueToApply);
+				final Object value = valueToApply;
+				
+				if (System.getSecurityManager() != null) {
+					try {
+						AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+							public Object run() throws Exception {
+								writeMethod.invoke(object, value);
+								return null;
+							}
+						},acc);
+					} catch (PrivilegedActionException ex) {
+						throw ex.getException();
+					}
+				}
+				else {
+					writeMethod.invoke(object, value);
+				}
+					
 			}
 			catch (InvocationTargetException ex) {
 				PropertyChangeEvent propertyChangeEvent =
@@ -860,6 +927,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			catch (IllegalAccessException ex) {
 				PropertyChangeEvent pce =
 						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
+				throw new MethodInvocationException(pce, ex);
+			}
+			catch (Exception ex) {
+				PropertyChangeEvent pce =
+					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 				throw new MethodInvocationException(pce, ex);
 			}
 		}
