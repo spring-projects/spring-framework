@@ -209,16 +209,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			final String name, final Class<T> requiredType, final Object[] args, final boolean typeCheckOnly)
 			throws BeansException {
 
-		if (System.getSecurityManager() != null) {
-			return AccessController.doPrivileged(new PrivilegedAction<T>() {
-				public T run() {
-					return doGetBeanRaw(name, requiredType, args, typeCheckOnly);
-				}
-			});
-		}
-		else {
 			return doGetBeanRaw(name, requiredType, args, typeCheckOnly);
-		}
 	}
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
@@ -1446,7 +1437,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	protected AccessControlContext getAccessControlContext() {
 		SecurityContextProvider provider = getSecurityContextProvider();
-		return (provider != null ? provider.getAccessControlContext(): null);
+		return (provider != null ? provider.getAccessControlContext(): AccessController.getContext());
 	}
 
 	/**

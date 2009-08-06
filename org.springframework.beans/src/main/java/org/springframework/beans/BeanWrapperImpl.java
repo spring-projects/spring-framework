@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -557,8 +558,18 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 		final Method readMethod = pd.getReadMethod();
 		try {
-			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-				readMethod.setAccessible(true);
+			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
+				if (System.getSecurityManager() != null) {
+					AccessController.doPrivileged(new PrivilegedAction<Object>() {
+						public Object run() {
+							readMethod.setAccessible(true);
+							return null;
+						}
+					});
+				}
+				else {
+					readMethod.setAccessible(true);
+				}
 			}
 			
 			Object value = null; 
@@ -852,8 +863,18 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					else {
 						if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
 							final Method readMethod = pd.getReadMethod();
-							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-								readMethod.setAccessible(true);
+							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
+								if (System.getSecurityManager()!= null) {
+									AccessController.doPrivileged(new PrivilegedAction<Object>() {
+										public Object run() {
+											readMethod.setAccessible(true);
+											return null;
+										}
+									});
+								}
+								else {
+									readMethod.setAccessible(true);
+								}
 							}
 							try {
 								if (System.getSecurityManager() != null) {
@@ -882,8 +903,18 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}
 				final Method writeMethod = pd.getWriteMethod();
-				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-					writeMethod.setAccessible(true);
+				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()) && !writeMethod.isAccessible()) {
+					if (System.getSecurityManager()!= null) {
+						AccessController.doPrivileged(new PrivilegedAction<Object>() {
+							public Object run() {
+								writeMethod.setAccessible(true);
+								return null;
+							}
+						});
+					}
+					else {
+						writeMethod.setAccessible(true);
+					}
 				}
 				final Object value = valueToApply;
 				
