@@ -48,7 +48,7 @@ import org.springframework.web.servlet.mvc.LastModified;
  * class. Subclasses of this class can handle several different types of
  * request with methods of the form
  *
- * <pre class="code">public (ModelAndView | Map | String | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
+ * <pre class="code">public (ModelAndView | Map | String | void) actionName(HttpServletRequest request, HttpServletResponse response, [,HttpSession] [,AnyObject]);</pre>
  *
  * A Map return value indicates a model that is supposed to be passed to a default view
  * (determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}).
