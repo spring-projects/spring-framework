@@ -499,7 +499,7 @@
     <classname>DispatcherServlet</classname> looks up an appropriate handler
     mapping and tests whether the handler that is found
     implements the
-    </emphasis><interfacename>LastModified</interfacename></emphasis>
+    <emphasis><interfacename>LastModified</interfacename></emphasis>
     interface. If so, the value of the <literal>long
     getLastModified(request)</literal> method of the
     <interfacename>LastModified</interfacename> interface is returned to the
