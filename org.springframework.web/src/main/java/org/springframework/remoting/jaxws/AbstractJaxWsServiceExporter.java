@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+import javax.xml.ws.WebServiceProvider;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -101,8 +102,9 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 		String[] beanNames = this.beanFactory.getBeanNamesForType(Object.class, false, false);
 		for (String beanName : beanNames) {
 			Class<?> type = this.beanFactory.getType(beanName);
-			WebService annotation = type.getAnnotation(WebService.class);
-			if (annotation != null) {
+			WebService wsAnnotation = type.getAnnotation(WebService.class);
+			WebServiceProvider wsProviderAnnotation = type.getAnnotation(WebServiceProvider.class);
+			if (wsAnnotation != null || wsProviderAnnotation != null) {
 				Endpoint endpoint = Endpoint.create(this.beanFactory.getBean(beanName));
 				if (this.endpointProperties != null) {
 					endpoint.setProperties(this.endpointProperties);
@@ -110,7 +112,12 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 				if (this.executor != null) {
 					endpoint.setExecutor(this.executor);
 				}
-				publishEndpoint(endpoint, annotation);
+				if (wsAnnotation != null) {
+					publishEndpoint(endpoint, wsAnnotation);
+				}
+				else {
+					publishEndpoint(endpoint, wsProviderAnnotation);
+				}
 				this.publishedEndpoints.add(endpoint);
 			}
 		}
@@ -122,6 +129,13 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * @param annotation the service bean's WebService annotation
 	 */
 	protected abstract void publishEndpoint(Endpoint endpoint, WebService annotation);
+
+	/**
+	 * Actually publish the given provider endpoint. To be implemented by subclasses.
+	 * @param endpoint the JAX-WS Provider Endpoint object
+	 * @param annotation the service bean's WebServiceProvider annotation
+	 */
+	protected abstract void publishEndpoint(Endpoint endpoint, WebServiceProvider annotation);
 
 
 	/**

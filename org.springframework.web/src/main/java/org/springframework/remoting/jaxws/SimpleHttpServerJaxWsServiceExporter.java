@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.remoting.jaxws;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+import javax.xml.ws.WebServiceProvider;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.Filter;
@@ -166,7 +166,22 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 
 	@Override
 	protected void publishEndpoint(Endpoint endpoint, WebService annotation) {
-		String fullPath = this.basePath + annotation.serviceName();
+		endpoint.publish(buildHttpContext(endpoint, annotation.serviceName()));
+	}
+
+	@Override
+	protected void publishEndpoint(Endpoint endpoint, WebServiceProvider annotation) {
+		endpoint.publish(buildHttpContext(endpoint, annotation.serviceName()));
+	}
+
+	/**
+	 * Build the HttpContext for the given endpoint.
+	 * @param endpoint the JAX-WS Provider Endpoint object
+	 * @param serviceName the given service name
+	 * @return the fully populated HttpContext
+	 */
+	protected HttpContext buildHttpContext(Endpoint endpoint, String serviceName) {
+		String fullPath = calculateEndpointPath(endpoint, serviceName);
 		HttpContext httpContext = this.server.createContext(fullPath);
 		if (this.filters != null) {
 			httpContext.getFilters().addAll(this.filters);
@@ -174,8 +189,19 @@ public class SimpleHttpServerJaxWsServiceExporter extends AbstractJaxWsServiceEx
 		if (this.authenticator != null) {
 			httpContext.setAuthenticator(this.authenticator);
 		}
-		endpoint.publish(httpContext);
+		return httpContext;
 	}
+
+	/**
+	 * Calculate the full endpoint path for the given endpoint.
+	 * @param endpoint the JAX-WS Provider Endpoint object
+	 * @param serviceName the given service name
+	 * @return the full endpoint path
+	 */
+	protected String calculateEndpointPath(Endpoint endpoint, String serviceName) {
+		return this.basePath + serviceName;
+	}
+
 
 	@Override
 	public void destroy() {
