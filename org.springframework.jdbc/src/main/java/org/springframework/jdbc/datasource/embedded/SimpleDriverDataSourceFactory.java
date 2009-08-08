@@ -13,35 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
+import java.sql.Driver;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.util.Assert;
 
 /**
  * Creates a {@link SimpleDriverDataSource}.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 final class SimpleDriverDataSourceFactory implements DataSourceFactory {
 
-	private SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
+	private final SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
 	
 	public ConnectionProperties getConnectionProperties() {
 		return new ConnectionProperties() {
-			public void setDriverClass(Class<?> driverClass) {
-				dataSource.setDriverClass(driverClass);
+			@SuppressWarnings("unchecked")
+			public void setDriverClass(Class driverClass) {
+				Assert.isAssignable(Driver.class, driverClass);
+				dataSource.setDriverClass((Class<? extends Driver>) driverClass);
 			}
-
 			public void setUrl(String url) {
 				dataSource.setUrl(url);
 			}
-
 			public void setUsername(String username) {
 				dataSource.setUsername(username);
 			}
-
 			public void setPassword(String password) {
 				dataSource.setPassword(password);
 			}
@@ -49,7 +53,7 @@ final class SimpleDriverDataSourceFactory implements DataSourceFactory {
 	}
 
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.dataSource;
 	}
 	
 }

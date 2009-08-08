@@ -13,38 +13,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
  * A builder that provides a fluent API for constructing an embedded database.
- * Usage example:
+ *
+ * <p>Usage example:
  * <pre>
  * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
  * EmbeddedDatabase db = builder.script("schema.sql").script("test-data.sql").build();
  * db.shutdown();
  * </pre>
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class EmbeddedDatabaseBuilder {
 
-	private EmbeddedDatabaseFactory databaseFactory;
+	private final EmbeddedDatabaseFactory databaseFactory;
 	
-	private ResourceDatabasePopulator databasePopulator;
+	private final ResourceDatabasePopulator databasePopulator;
 
-	private ResourceLoader resourceLoader;
-	
+	private final ResourceLoader resourceLoader;
+
+
 	/**
-	 * Creates a new embedded database builder.
+	 * Create a new embedded database builder.
 	 */
 	public EmbeddedDatabaseBuilder() {
-		init(new DefaultResourceLoader());
+		this(new DefaultResourceLoader());
 	}
+
+	/**
+	 * Create a new embedded database builder withfor the given ResourceLoader.
+	 * @param resourceLoader the ResourceLoader to delegate to
+	 */
+	public EmbeddedDatabaseBuilder(ResourceLoader resourceLoader) {
+		this.databaseFactory = new EmbeddedDatabaseFactory();
+		this.databasePopulator = new ResourceDatabasePopulator();
+		this.databaseFactory.setDatabasePopulator(this.databasePopulator);
+		this.resourceLoader = resourceLoader;
+	}
+
 
 	/**
 	 * Sets the name of the embedded database
@@ -53,7 +69,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @return this, for fluent call chaining
 	 */
 	public EmbeddedDatabaseBuilder name(String databaseName) {
-		databaseFactory.setDatabaseName(databaseName);
+		this.databaseFactory.setDatabaseName(databaseName);
 		return this;
 	}
 
@@ -64,7 +80,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @return this, for fluent call chaining
 	 */
 	public EmbeddedDatabaseBuilder type(EmbeddedDatabaseType databaseType) {
-		databaseFactory.setDatabaseType(databaseType);
+		this.databaseFactory.setDatabaseType(databaseType);
 		return this;
 	}
 	
@@ -74,7 +90,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @return this, for fluent call chaining
 	 */
 	public EmbeddedDatabaseBuilder script(String sqlResource) {
-		databasePopulator.addScript(resourceLoader.getResource(sqlResource));
+		this.databasePopulator.addScript(resourceLoader.getResource(sqlResource));
 		return this;
 	}
 
@@ -83,45 +99,28 @@ public class EmbeddedDatabaseBuilder {
 	 * @return the embedded database
 	 */
 	public EmbeddedDatabase build() {
-		return databaseFactory.getDatabase();
+		return this.databaseFactory.getDatabase();
 	}
-	
-	/**
-	 * Factory method that creates a EmbeddedDatabaseBuilder that loads SQL resources relative to the provided class.
-	 * @param clazz the class to load relative to
-	 * @return the embedded database builder
-	 */
-	public static EmbeddedDatabaseBuilder relativeTo(final Class<?> clazz) {
-		ResourceLoader loader = new ResourceLoader() {
-			public ClassLoader getClassLoader() {
-				return getClass().getClassLoader();
-			}
 
-			public Resource getResource(String location) {
-				return new ClassPathResource(location, clazz);
-			}			
-		};
-		return new EmbeddedDatabaseBuilder(loader);
-	}
-	
+
 	/**
 	 * Factory method that builds a default EmbeddedDatabase instance.
-	 * The default instance is HSQL with a schema created from classpath:schema.sql and test-data loaded from classpath:test-data.sql.
+	 * The default instance is HSQL with a schema created from "classpath:schema.sql"
+	 * and test-data loaded from "classpath:test-data.sql".
 	 * @return an embedded database
 	 */
 	public static EmbeddedDatabase buildDefault() {
 		return new EmbeddedDatabaseBuilder().script("schema.sql").script("test-data.sql").build();
 	}
-	
-	private EmbeddedDatabaseBuilder(ResourceLoader loader) {
-		init(loader);
-	}
-	
-	private void init(ResourceLoader loader) {
-		databaseFactory = new EmbeddedDatabaseFactory();
-		databasePopulator = new ResourceDatabasePopulator();
-		databaseFactory.setDatabasePopulator(databasePopulator);		
-		resourceLoader = loader;
+
+	/**
+	 * Factory method that creates a EmbeddedDatabaseBuilder that loads SQL resources
+	 * relative to the provided class.
+	 * @param clazz the class to load relative to
+	 * @return the embedded database builder
+	 */
+	public static EmbeddedDatabaseBuilder relativeTo(Class clazz) {
+		return new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(clazz));
 	}
 
 }

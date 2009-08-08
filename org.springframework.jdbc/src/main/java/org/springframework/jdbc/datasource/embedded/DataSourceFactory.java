@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import javax.sql.DataSource;
@@ -20,21 +21,25 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 /**
- * Encapsulates the creation of a particular DataSource implementation, such as a {@link SimpleDriverDataSource} or connection pool such as Apache DBCP or c3p0.
- * Call {@link #getConnectionProperties()} to configure normalized DataSource properties before calling {@link #getDataSource()} to actually get the configured DataSource instance.
+ * Encapsulates the creation of a particular DataSource implementation, such as a
+ * {@link SimpleDriverDataSource} or connection pool such as Apache DBCP or C3P0.
+ *
+ * <p>Call {@link #getConnectionProperties()} to configure normalized DataSource properties
+ * before calling {@link #getDataSource()} to actually get the configured DataSource instance.
+ *
  * @author Keith Donald
  * @since 3.0
  */
 public interface DataSourceFactory {
-	
+
 	/**
 	 * Allows properties of the DataSource to be configured.
 	 */
 	ConnectionProperties getConnectionProperties();
-	
+
 	/**
 	 * Returns the DataSource with the connection properties applied.
 	 */
 	DataSource getDataSource();
-	
+
 }

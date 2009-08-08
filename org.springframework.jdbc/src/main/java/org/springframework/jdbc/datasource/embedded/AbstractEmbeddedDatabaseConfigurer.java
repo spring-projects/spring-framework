@@ -13,38 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Base class for {@link EmbeddedDatabaseConfigurer} implementations providing common shutdown behaviour.
+ * Base class for {@link EmbeddedDatabaseConfigurer} implementations providing common shutdown behavior.
+ *
  * @author Oliver Gierke
+ * @author Juergen Hoeller
  * @since 3.0
  */
 abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 
-	private static final Log logger = LogFactory.getLog(AbstractEmbeddedDatabaseConfigurer.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	public void shutdown(DataSource dataSource, String databaseName) {
-		Connection connection = JdbcUtils.getConnection(dataSource);
-		Statement stmt = null;
 		try {
-			stmt = connection.createStatement();
+			Connection connection = dataSource.getConnection();
+			Statement stmt = connection.createStatement();
 			stmt.execute("SHUTDOWN");
-		} catch (SQLException e) {
+		}
+		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Could not shutdown embedded database", e);
+				logger.warn("Could not shutdown embedded database", ex);
 			}
-		} finally {
-			JdbcUtils.closeStatement(stmt);
 		}
 	}
+
 }

@@ -13,38 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
+
+import java.sql.Driver;
 
 /**
  * DataSourceFactory helper that allows essential JDBC connection properties to be configured consistently,
  * independent of the actual DataSource implementation.
+ *
  * @author Keith Donald
  * @since 3.0
  * @see DataSourceFactory
  */
 public interface ConnectionProperties {
-	
+
 	/**
 	 * Set the JDBC driver to use to connect to the database.
 	 * @param driverClass the jdbc driver class
 	 */
-	void setDriverClass(Class<?> driverClass);
-	
+	void setDriverClass(Class driverClass);
+
 	/**
 	 * Sets the JDBC connection URL of the database.
 	 * @param url the connection url
 	 */
 	void setUrl(String url);
-	
+
 	/**
 	 * Sets the username to use to connect to the database.
 	 * @param username the username
 	 */
 	void setUsername(String username);
-	
+
 	/**
 	 * Sets the password to use to connect to the database.
 	 * @param password the password
 	 */
 	void setPassword(String password);
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import java.io.IOException;
@@ -27,15 +28,17 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.StringUtils;
 
 /**
  * Populates a database from SQL scripts defined in external resources.
- * <p>
- * Call {@link #addScript(Resource)} to add a SQL script location.<br>
+ *
+ * <p>Call {@link #addScript(Resource)} to add a SQL script location.<br>
  * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.<br>
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -46,6 +49,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private List<Resource> scripts = new ArrayList<Resource>();
 
 	private String sqlScriptEncoding;
+
 
 	/**
 	 * Add a script to execute to populate the database.
@@ -65,15 +69,17 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
-	 * Note setting this property has no effect on added scripts that are already {@link EncodedResource encoded resources}.
+	 * Note setting this property has no effect on added scripts that are already
+	 * {@link EncodedResource encoded resources}.
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
 		this.sqlScriptEncoding = sqlScriptEncoding;
 	}
-	
+
+
 	public void populate(Connection connection) throws SQLException {
-		for (Resource script : scripts) {
+		for (Resource script : this.scripts) {
 			executeSqlScript(connection, applyEncodingIfNecessary(script), false);
 		}
 	}
@@ -81,8 +87,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private EncodedResource applyEncodingIfNecessary(Resource script) {
 		if (script instanceof EncodedResource) {
 			return (EncodedResource) script;
-		} else {
-			return new EncodedResource(script, sqlScriptEncoding);
+		}
+		else {
+			return new EncodedResource(script, this.sqlScriptEncoding);
 		}
 	}
 	
@@ -95,6 +102,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 */
 	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError)
 			throws SQLException {
+
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
 		}
@@ -112,25 +120,34 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		}
 		splitSqlScript(script, delimiter, statements);
 		int lineNumber = 0;
-		for (String statement : statements) {
-			lineNumber++;
-			Statement stmt = null;
-			try {
-				stmt = connection.createStatement();
-				int rowsAffected = stmt.executeUpdate(statement);
-				if (logger.isDebugEnabled()) {
-					logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-				}
-			} catch (SQLException e) {
-				if (continueOnError) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Line " + lineNumber + " statement failed: " + statement, e);
+		Statement stmt = connection.createStatement();
+		try {
+			for (String statement : statements) {
+				lineNumber++;
+				try {
+					int rowsAffected = stmt.executeUpdate(statement);
+					if (logger.isDebugEnabled()) {
+						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
-				} else {
-					throw e;
 				}
-			} finally {
-				JdbcUtils.closeStatement(stmt);
+				catch (SQLException ex) {
+					if (continueOnError) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Line " + lineNumber + " statement failed: " + statement, ex);
+						}
+					}
+					else {
+						throw ex;
+					}
+				}
+			}
+		}
+		finally {
+			try {
+				stmt.close();
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not close JDBC Statement", ex);
 			}
 		}
 		long elapsedTime = System.currentTimeMillis() - startTime;

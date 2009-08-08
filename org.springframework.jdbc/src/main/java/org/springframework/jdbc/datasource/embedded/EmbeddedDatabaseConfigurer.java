@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import javax.sql.DataSource;
@@ -20,6 +21,7 @@ import javax.sql.DataSource;
 /**
  * Encapsulates the configuration required to create, connect to, and shutdown a specific type of embedded database such as HSQL or H2.
  * Create a implementation for each database type you wish to support; for example HSQL, H2, or some other type.
+ *
  * @author Keith Donald
  * @since 3.0
  */

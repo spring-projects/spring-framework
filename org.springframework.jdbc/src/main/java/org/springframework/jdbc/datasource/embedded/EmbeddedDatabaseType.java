@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 /**
  * A supported embedded database type.
+ *
  * @author Keith Donald
  * @author Oliver Gierke
  * @since 3.0
  */
 public enum EmbeddedDatabaseType {
-	HSQL, H2, DERBY;
+
+	HSQL, H2, DERBY
+
 }
