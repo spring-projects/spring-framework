@@ -44,6 +44,11 @@ public interface ConfigurablePortletApplicationContext
 		extends WebApplicationContext, ConfigurableApplicationContext {
 
 	/**
+	 * Prefix for ApplicationContext ids that refer to portlet name.
+	 */
+	String APPLICATION_CONTEXT_ID_PREFIX = WebApplicationContext.class.getName() + ":";
+
+	/**
 	 * Name of the PortletContext environment bean in the factory.
 	 * @see javax.portlet.PortletContext
 	 */

@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.security.Principal;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -402,21 +403,39 @@ public abstract class FrameworkServlet extends HttpServletBean
 	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
 			throws BeansException {
 
+		Class<?> contextClass = getContextClass();
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Servlet with name '" + getServletName() +
 					"' will try to create custom WebApplicationContext context of class '" +
-					getContextClass().getName() + "'" + ", using parent context [" + parent + "]");
+					contextClass.getName() + "'" + ", using parent context [" + parent + "]");
 		}
-		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
+		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException(
 					"Fatal initialization error in servlet with name '" + getServletName() +
-					"': custom WebApplicationContext class [" + getContextClass().getName() +
+					"': custom WebApplicationContext class [" + contextClass.getName() +
 					"] is not of type ConfigurableWebApplicationContext");
 		}
 
 		ConfigurableWebApplicationContext wac =
-				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(getContextClass());
-		wac.setId(getServletContext().getServletContextName() + "." + getServletName());
+				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
+
+		// Assign the best possible id value.
+		ServletContext servletContext = getServletContext();
+		if (servletContext.getMajorVersion() > 2 || servletContext.getMinorVersion() >= 5) {
+			// Servlet 2.5's getContextPath available!
+			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContext.getContextPath() + "/" + getServletName());
+		}
+		else {
+			// Servlet <= 2.4: resort to name specified in web.xml, if any.
+			String servletContextName = servletContext.getServletContextName();
+			if (servletContextName != null) {
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName + "." + getServletName());
+			}
+			else {
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
+			}
+		}
+
 		wac.setParent(parent);
 		wac.setServletContext(getServletContext());
 		wac.setServletConfig(getServletConfig());
