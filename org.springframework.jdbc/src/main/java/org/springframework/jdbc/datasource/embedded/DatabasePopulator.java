@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Connection;
@@ -20,6 +21,7 @@ import java.sql.SQLException;
 
 /**
  * Strategy used to populate an embedded database during initialization.
+ *
  * @author Keith Donald
  * @since 3.0
  * @see ResourceDatabasePopulator
@@ -32,4 +34,5 @@ public interface DatabasePopulator {
 	 * @throws SQLException if an unrecoverable data access exception occurs during database population
 	 */
 	void populate(Connection connection) throws SQLException;
+
 }

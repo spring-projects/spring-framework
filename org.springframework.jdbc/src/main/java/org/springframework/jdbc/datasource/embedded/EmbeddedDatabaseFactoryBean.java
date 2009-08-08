@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.embedded;
 
 import javax.sql.DataSource;
@@ -24,18 +25,23 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * A subclass of {@link EmbeddedDatabaseFactory} that implements {@link FactoryBean} for registration as a Spring bean.
  * Returns the actual {@link DataSource} that provides connectivity to the embedded database to Spring.
- * The target DataSource is returned instead of a {@link EmbeddedDatabase} proxy since the FactoryBean will manage the initialization and destruction lifecycle of the database instance.
- * Implements DisposableBean to shutdown the embedded database when the managing Spring container is shutdown.
+ *
+ * <p>The target DataSource is returned instead of a {@link EmbeddedDatabase} proxy since the FactoryBean
+ * will manage the initialization and destruction lifecycle of the database instance.
+ *
+ * <p>Implements DisposableBean to shutdown the embedded database when the managing Spring container is shutdown.
+ *
  * @author Keith Donald
  * @since 3.0
  */
-public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory implements FactoryBean<DataSource>, InitializingBean, DisposableBean {
+public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
+		implements FactoryBean<DataSource>, InitializingBean, DisposableBean {
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		initDatabase();
 	}
 
-	public DataSource getObject() throws Exception {
+	public DataSource getObject() {
 		return getDataSource();
 	}
 
@@ -47,7 +53,7 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory impleme
 		return true;
 	}
 
-	public void destroy() throws Exception {
+	public void destroy() {
 		shutdownDatabase();
 	}	
 
