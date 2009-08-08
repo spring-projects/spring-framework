@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.dao.annotation;
 
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import javax.persistence.PersistenceException;
 
 import junit.framework.TestCase;
@@ -109,6 +113,10 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 		doTestTranslationNeededForTheseExceptions(new MyStereotypedRepositoryInterfaceImpl());
 	}
 
+	public void testTranslationNeededForTheseExceptionsWithCustomStereotype() {
+		doTestTranslationNeededForTheseExceptions(new CustomStereotypedRepositoryInterfaceImpl());
+	}
+
 	public void testTranslationNeededForTheseExceptionsOnInterface() {
 		doTestTranslationNeededForTheseExceptions(new MyInterfaceStereotypedRepositoryInterfaceImpl());
 	}
@@ -142,12 +150,14 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 		}
 	}
 
+
 	public interface RepositoryInterface {
 
 		void noThrowsClause();
 
 		void throwsPersistenceException() throws PersistenceException;
 	}
+
 
 	public static class RepositoryInterfaceImpl implements RepositoryInterface {
 
@@ -170,28 +180,48 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 		}
 	}
 
+
 	@Repository
 	public static class StereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl {
 		// Extends above class just to add repository annotation
 	}
 
+
 	public static class MyStereotypedRepositoryInterfaceImpl extends StereotypedRepositoryInterfaceImpl {
 
 	}
+
+
+	@MyRepository
+	public static class CustomStereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl {
+
+	}
+
+
+	@Target({ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Repository
+	public @interface MyRepository {
+
+	}
+
 
 	@Repository
 	public interface StereotypedInterface {
 
 	}
 
+
 	public static class MyInterfaceStereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl
 			implements StereotypedInterface {
 
 	}
 
+
 	public interface StereotypedInheritingInterface extends StereotypedInterface {
 
 	}
+
 
 	public static class MyInterfaceInheritedStereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl
 			implements StereotypedInheritingInterface {
