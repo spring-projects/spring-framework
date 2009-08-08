@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		Connection con = (Connection) conControl.getMock();
 
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -56,7 +56,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con1.stop();  // should be ignored
 		con1.close();  // should be ignored
 		Connection con2 = scf.createConnection();
-		con2.start();
+		con2.start();  // should be ignored
 		con2.stop();  // should be ignored
 		con2.close();  // should be ignored
 		scf.destroy();  // should trigger actual close
@@ -69,7 +69,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		Connection con = (QueueConnection) conControl.getMock();
 
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -96,7 +96,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		Connection con = (TopicConnection) conControl.getMock();
 
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -127,7 +127,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cf.createConnection();
 		cfControl.setReturnValue(con, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -158,7 +158,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cf.createConnection();
 		cfControl.setReturnValue(con, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -189,7 +189,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cf.createQueueConnection();
 		cfControl.setReturnValue(con, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -220,7 +220,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cf.createConnection();
 		cfControl.setReturnValue(con, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -251,7 +251,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cf.createTopicConnection();
 		cfControl.setReturnValue(con, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -284,7 +284,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.setClientID("myId");
 		conControl.setVoidCallable(1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -321,7 +321,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.getExceptionListener();
 		conControl.setReturnValue(listener, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -407,7 +407,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cf.createQueueConnection();
 		cfControl.setReturnValue(con, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -438,7 +438,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cf.createTopicConnection();
 		cfControl.setReturnValue(con, 1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -487,7 +487,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		nonTxSession.close();
 		nonTxSessionControl.setVoidCallable(1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -549,7 +549,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		nonTxSession.close();
 		nonTxSessionControl.setVoidCallable(1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
@@ -611,7 +611,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		nonTxSession.close();
 		nonTxSessionControl.setVoidCallable(1);
 		con.start();
-		conControl.setVoidCallable(2);
+		conControl.setVoidCallable(1);
 		con.stop();
 		conControl.setVoidCallable(1);
 		con.close();
