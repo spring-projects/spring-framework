@@ -141,8 +141,6 @@ public class ContextLoader {
 	}
 
 
-	private static final Log logger = LogFactory.getLog(ContextLoader.class);
-
 	/**
 	 * Map from (thread context) ClassLoader to WebApplicationContext.
 	 * Often just holding one reference - if the ContextLoader class is
@@ -183,6 +181,7 @@ public class ContextLoader {
 					"check whether you have multiple ContextLoader* definitions in your web.xml!");
 		}
 
+		Log logger = LogFactory.getLog(ContextLoader.class);
 		servletContext.log("Initializing Spring root WebApplicationContext");
 		if (logger.isInfoEnabled()) {
 			logger.info("Root WebApplicationContext: initialization started");
@@ -239,7 +238,7 @@ public class ContextLoader {
 	protected WebApplicationContext createWebApplicationContext(
 			ServletContext servletContext, ApplicationContext parent) throws BeansException {
 
-		Class contextClass = determineContextClass(servletContext);
+		Class<?> contextClass = determineContextClass(servletContext);
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException("Custom context class [" + contextClass.getName() +
 					"] is not of type [" + ConfigurableWebApplicationContext.class.getName() + "]");
@@ -247,7 +246,23 @@ public class ContextLoader {
 
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
-		wac.setId(servletContext.getServletContextName());
+
+		// Assign the best possible id value.
+		if (servletContext.getMajorVersion() > 2 || servletContext.getMinorVersion() >= 5) {
+			// Servlet 2.5's getContextPath available!
+			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContext.getContextPath());
+		}
+		else {
+			// Servlet <= 2.4: resort to name specified in web.xml, if any.
+			String servletContextName = servletContext.getServletContextName();
+			if (servletContextName != null) {
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName);
+			}
+			else {
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX);
+			}
+		}
+
 		wac.setParent(parent);
 		wac.setServletContext(servletContext);
 		wac.setConfigLocation(servletContext.getInitParameter(CONFIG_LOCATION_PARAM));
@@ -334,6 +349,7 @@ public class ContextLoader {
 		if (parentContextKey != null) {
 			// locatorFactorySelector may be null, indicating the default "classpath*:beanRefContext.xml"
 			BeanFactoryLocator locator = ContextSingletonBeanFactoryLocator.getInstance(locatorFactorySelector);
+			Log logger = LogFactory.getLog(ContextLoader.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Getting parent context definition: using parent context key of '" +
 						parentContextKey + "' with BeanFactoryLocator");

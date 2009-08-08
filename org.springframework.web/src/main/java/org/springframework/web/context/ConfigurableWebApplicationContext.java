@@ -40,6 +40,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 public interface ConfigurableWebApplicationContext extends WebApplicationContext, ConfigurableApplicationContext {
 
 	/**
+	 * Prefix for ApplicationContext ids that refer to context path and/or servlet name.
+	 */
+	String APPLICATION_CONTEXT_ID_PREFIX = WebApplicationContext.class.getName() + ":";
+
+	/**
 	 * Name of the ServletConfig environment bean in the factory.
 	 * @see javax.servlet.ServletConfig
 	 */

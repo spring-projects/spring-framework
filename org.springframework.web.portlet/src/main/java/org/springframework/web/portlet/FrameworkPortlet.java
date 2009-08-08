@@ -327,20 +327,30 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	protected ApplicationContext createPortletApplicationContext(ApplicationContext parent)
 			throws BeansException {
 
+		Class<?> contextClass = getContextClass();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Portlet with name '" + getPortletName() +
 					"' will try to create custom ApplicationContext context of class '" +
-					getContextClass().getName() + "'" + ", using parent context [" + parent + "]");
+					contextClass.getName() + "'" + ", using parent context [" + parent + "]");
 		}
-		if (!ConfigurablePortletApplicationContext.class.isAssignableFrom(getContextClass())) {
+		if (!ConfigurablePortletApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException("Fatal initialization error in portlet with name '" + getPortletName() +
-					"': custom ApplicationContext class [" + getContextClass().getName() +
+					"': custom ApplicationContext class [" + contextClass.getName() +
 					"] is not of type ConfigurablePortletApplicationContext");
 		}
 
 		ConfigurablePortletApplicationContext pac =
-				(ConfigurablePortletApplicationContext) BeanUtils.instantiateClass(getContextClass());
-		pac.setId(getPortletContext().getPortletContextName() + "." + getPortletName());
+				(ConfigurablePortletApplicationContext) BeanUtils.instantiateClass(contextClass);
+
+		// Assign the best possible id value.
+		String portletContextName = getPortletContext().getPortletContextName();
+		if (portletContextName != null) {
+			pac.setId(ConfigurablePortletApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + portletContextName + "." + getPortletName());
+		}
+		else {
+			pac.setId(ConfigurablePortletApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getPortletName());
+		}
+
 		pac.setParent(parent);
 		pac.setPortletContext(getPortletContext());
 		pac.setPortletConfig(getPortletConfig());
