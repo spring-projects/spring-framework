@@ -20,24 +20,23 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * A type converter can convert values between different types encountered
- * during expression evaluation.
+ * during expression evaluation. This is an SPI for the expression parser;
+ * see {@link org.springframework.core.convert.ConversionService} for the
+ * primary user API to Spring's conversion facilities.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public interface TypeConverter {
-	// TODO replace this stuff with Keiths spring-binding conversion code
-	// TODO should ExpressionException be thrown for lost precision in the case of coercion?
-	// TODO could remove the methods where the target is Class and just keep the TypeDescriptor variants
 
 	/**
-	 * Convert (may coerce) a value from one type to another, for example from a boolean to a string.
-	 * @param value the value to be converted
-	 * @param targetType the type that the value should be converted to if possible
-	 * @return the converted value
-	 * @throws EvaluationException if conversion is not possible
+	 * Return true if the type converter can convert the specified type to the desired target type.
+	 * @param sourceType the type to be converted from
+	 * @param targetType the type to be converted to
+	 * @return true if that conversion can be performed
 	 */
-	<T> T convertValue(Object value, Class<T> targetType) throws EvaluationException;
+	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 
 	/**
 	 * Convert (may coerce) a value from one type to another, for example from a boolean to a string.
@@ -49,21 +48,5 @@ public interface TypeConverter {
 	 * @throws EvaluationException if conversion is not possible
 	 */
 	Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException;
-
-	/**
-	 * Return true if the type converter can convert the specified type to the desired target type.
-	 * @param sourceType the type to be converted from
-	 * @param targetType the type to be converted to
-	 * @return true if that conversion can be performed
-	 */
-	boolean canConvert(Class<?> sourceType, Class<?> targetType);
-
-	/**
-	 * Return true if the type converter can convert the specified type to the desired target type.
-	 * @param sourceType the type to be converted from
-	 * @param typeDescriptor a type descriptor that supplies extra information about the requested result type
-	 * @return true if that conversion can be performed
-	 */
-	boolean canConvert(Class<?> sourceType, TypeDescriptor typeDescriptor);
 
 }

@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -228,7 +229,7 @@ public class ReflectionHelper {
 			} else {
 				targetType = requiredParameterTypes[argPosition];
 			}
-			arguments[argPosition] = converter.convertValue(arguments[argPosition], targetType);
+			arguments[argPosition] = converter.convertValue(arguments[argPosition], TypeDescriptor.valueOf(targetType));
 		}
 	}
 
@@ -267,7 +268,7 @@ public class ReflectionHelper {
 					if (converter == null) {
 						throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, arguments[i].getClass().getName(),targetType);
 					}
-					arguments[i] = converter.convertValue(arguments[i], targetType);
+					arguments[i] = converter.convertValue(arguments[i], TypeDescriptor.valueOf(targetType));
 				}
 			} catch (EvaluationException ex) {
 				// allows for another type converter throwing a different kind of EvaluationException

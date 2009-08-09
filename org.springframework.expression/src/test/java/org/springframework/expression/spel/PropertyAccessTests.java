@@ -17,15 +17,15 @@
 package org.springframework.expression.spel;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
+
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -154,7 +154,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
-			return new TypedValue(flibbles,CommonTypeDescriptors.STRING_TYPE_DESCRIPTOR);
+			return new TypedValue(flibbles, TypeDescriptor.valueOf(String.class));
 		}
 
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
@@ -162,8 +162,8 @@ public class PropertyAccessTests extends ExpressionTestCase {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
 			try {
-				flibbles = context.getTypeConverter().convertValue(newValue, Integer.class);
-			} catch (EvaluationException e) {
+				flibbles = (Integer) context.getTypeConverter().convertValue(newValue, TypeDescriptor.valueOf(Integer.class));
+			}catch (EvaluationException e) {
 				throw new AccessException("Cannot set flibbles to an object of type '" + newValue.getClass() + "'");
 			}
 		}

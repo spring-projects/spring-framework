@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.springframework.expression.spel.support;
+
+package org.springframework.expression.spel.support;
 
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.core.convert.support.DefaultTypeConverter;
+
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
@@ -70,10 +73,9 @@ public class StandardComponentsTests {
 	
 	@Test
 	public void testStandardTypeConverter() throws EvaluationException {
-		TypeConverter tc = new StandardTypeConverter(new DefaultTypeConverter());
-		tc.convertValue(3,Double.class);
+		TypeConverter tc = new StandardTypeConverter(new DefaultConversionService());
+		tc.convertValue(3, TypeDescriptor.valueOf(Double.class));
 	}
-	
-	
+
 }
 

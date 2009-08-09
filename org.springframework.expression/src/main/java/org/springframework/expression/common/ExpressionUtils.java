@@ -16,6 +16,7 @@
 
 package org.springframework.expression.common;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.util.ClassUtils;
@@ -47,7 +48,7 @@ public abstract class ExpressionUtils {
 			return (T) value;
 		}
 		if (context != null) {
-			return context.getTypeConverter().convertValue(value, targetType);
+			return (T) context.getTypeConverter().convertValue(value, TypeDescriptor.valueOf(targetType));
 		}
 		throw new EvaluationException("Cannot convert value '" + value + "' to type '" + targetType.getName() + "'");
 	}

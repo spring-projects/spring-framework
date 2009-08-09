@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.support;
 
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ast.CommonTypeDescriptors;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * @author Andy Clement
@@ -28,7 +29,7 @@ public class BooleanTypedValue extends TypedValue {
 	public static final BooleanTypedValue False = new BooleanTypedValue(false);
 	
 	private BooleanTypedValue(boolean b) {
-		super(b,CommonTypeDescriptors.BOOLEAN_TYPE_DESCRIPTOR);
+		super(b, TypeDescriptor.valueOf(Boolean.class));
 	}
 	
 	public static BooleanTypedValue forValue(boolean b) {
