@@ -23,7 +23,9 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * A converter that can convert from one collection type to another.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 @SuppressWarnings("unchecked")

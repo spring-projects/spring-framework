@@ -24,6 +24,7 @@ import org.springframework.core.convert.converter.Converter;
  * Default conversion executor implementation for converters.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 class StaticConversionExecutor implements ConversionExecutor {
@@ -47,15 +48,15 @@ class StaticConversionExecutor implements ConversionExecutor {
 		if (source == null) {
 			return null;
 		}
-		if (!this.sourceType.isInstance(source)) {
-			throw new ConversionFailedException(source, sourceType.getType(), targetType.getType(), "Source object "
-					+ source + " to convert is expected to be an instance of [" + sourceType.getName() + "]");
+		if (!this.sourceType.isAssignableValue(source)) {
+			throw new ConversionFailedException(source, this.sourceType.getType(), this.targetType.getType(),
+					"Source object " + source + " to convert is expected to be an instance of [" + this.sourceType.getName() + "]");
 		}
 		try {
 			return this.converter.convert(source);
 		}
 		catch (Exception ex) {
-			throw new ConversionFailedException(source, sourceType.getType(), targetType.getType(), ex);
+			throw new ConversionFailedException(source, this.sourceType.getType(), this.targetType.getType(), ex);
 		}
 	}
 

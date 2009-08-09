@@ -28,6 +28,7 @@ import org.springframework.core.convert.TypeDescriptor;
  * specified. Supports type conversion of array elements when a parameterized target collection type descriptor is provided.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 class ArrayToCollection extends AbstractCollectionConverter {

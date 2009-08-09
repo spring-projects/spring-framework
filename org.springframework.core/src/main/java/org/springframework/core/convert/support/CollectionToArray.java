@@ -24,7 +24,9 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special converter that converts from target collection to a source array.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 class CollectionToArray extends AbstractCollectionConverter {
@@ -49,16 +51,15 @@ class CollectionToArray extends AbstractCollectionConverter {
 	private ConversionExecutor getElementConverter(Collection<?> source) {
 		ConversionExecutor elementConverter = getElementConverter();
 		if (elementConverter == NoOpConversionExecutor.INSTANCE) {
-			Iterator<?> it = source.iterator();
-			while (it.hasNext()) {
-				Object value = it.next();
+			for (Object value : source) {
 				if (value != null) {
-					elementConverter = getConversionService().getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(getTargetElementType()));
+					elementConverter = getConversionService()
+							.getConversionExecutor(value.getClass(), TypeDescriptor.valueOf(getTargetElementType()));
 					break;
 				}
 			}
 		}
-		return elementConverter != null ? elementConverter : NoOpConversionExecutor.INSTANCE;
+		return (elementConverter != null ? elementConverter : NoOpConversionExecutor.INSTANCE);
 	}
 
 }

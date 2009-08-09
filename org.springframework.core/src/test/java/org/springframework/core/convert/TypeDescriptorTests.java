@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert;
 
 import static junit.framework.Assert.assertEquals;
@@ -32,12 +33,6 @@ public class TypeDescriptorTests {
 	int[] intArray;
 	List<String>[] arrayOfListOfString;
 
-	@Test
-	public void testWrapperType() {
-		TypeDescriptor desc = TypeDescriptor.valueOf(int.class);
-		assertEquals(Integer.class, desc.getType());
-	}
-	
 	@Test
 	public void listDescriptors() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("listOfString"));

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import java.lang.reflect.Array;
@@ -23,7 +24,9 @@ import org.springframework.core.convert.TypeDescriptor;
  * Special one-way converter that converts from a source array to a target array. Supports type conversion of the
  * individual array elements; for example, the ability to convert a String[] to an Integer[]. Mainly used internally by
  * {@link org.springframework.core.convert.ConversionService} implementations.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
