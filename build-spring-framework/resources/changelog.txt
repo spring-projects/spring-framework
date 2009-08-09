@@ -3,28 +3,50 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.RC1 (2009-06-10)
+Changes in version 3.0.0.M4 (2009-08-10)
 -----------------------------------------
 
+* upgraded to JUnit 4.6, TestNG 5.9, and EasyMock 2.5.1
 * updated all Spring Framework OSGI manifests to list unversioned imports explicitly
-* relaxed several OSGi bundle dependencies to optional and extended version ranges
+* relaxed several OSGi bundle dependencies (optional, extended version ranges)
+* revised Java 6 checks to test for the presence of specific Java 6 interfaces/classes only
 * replaced Commons Collections dependency with Spring-provided LinkedCaseInsensitiveMap
 * case-insensitive Maps and key Sets preserve original casing for introspection/logging
-* Servlet/Portlet ApplicationContexts use a specific id based on servlet/portlet name
+* constructor argument type matching supports arrays and simple class names now
+* XML constructor-arg element allows for specifying a constructor argument by name now
+* XML import elements with relative resource patterns are supported as well now
+* introduced non-lenient constructor resolution mode for BeanDefinitions (for RFC-124)
+* revised DefaultListableBeanFactory's access control when running within a SecurityManager
+* BeanWrapper and DefaultListableBeanFactory accept a custom ConversionService now
 * DefaultListableBeanFactory references are serializable now when initialized with an id
 * scoped proxies are serializable now, for web scopes as well as for singleton beans
 * injected request/session references are serializable proxies for the current request now
+* Servlet/Portlet ApplicationContexts use a specific id based on servlet/portlet name
 * ReloadableResourceBundleMessageSource correctly calculates filenames for all locales now
+* @PostConstruct works for multiple private init methods of the same name in a hierarchy
+* @Primary/@Lazy/@DependsOn supported as meta-annotations as well
+* @Bean/@Scope etc supported as meta-annotations on factory methods as well now
+* @Required does not get processed on beans returned by @Bean factory methods
 * @Import detects and accepts existing configuration class of the desired type
 * @Transactional supports qualifier value for choosing between multiple transaction managers
-* added spring-jdbc config schema with embedded-database tag (supporting HSQL, H2, and Derby)
-* Velocity/FreeMarker/TilesViewResolver only return a view if the target resource exists now
-* upgraded to JUnit 4.6, TestNG 5.9, and EasyMock 2.5.1
+* WebSphereUowTransactionManager falls back to UOWManagerFactory lookup by default
+* JMS SingleConnectionFactory performs start call within connection monitor (for Oracle AQ)
+* @ManagedResource is marked as inherited now, for generic management-aware base classes
+* introduced dedicated @ManagedMetric annotation for metric attributes in a JMX environment
+* added task namespace with scheduler/executor configuration and scheduled task definitions
+* added jdbc namespace with embedded-database tag (supporting HSQL, H2, and Derby)
+* Hibernate AnnotationSessionFactoryBean detects Hibernate's special @Entity annotation too
+* added SimpleJaxWsServiceExporter workaround for WebLogic 10.3's address format requirements
+* added support for @WebServiceProvider annotation to Spring's JaxWsServiceExporters
+* updated Hessian support for Hessian 3.2 compatibility (requiring Hessian 3.2 or above now)
+* updated Tiles support for Tiles 2.1 compatibility (requiring Tiles 2.1.2 or above now)
+* Velocity/FreeMarker/TilesViewResolver only returns a view if the target resource exists now
 * @DirtiesContext is now supported at the test class level with configurable class modes
 * added beforeTestClass() and afterTestClass() to the TestExecutionListener API
 * ProfileValueUtils now enforces class-level overrides for @IfProfileValue
 * @ContextConfiguration's loader attribute is now inherited if not declared locally
 * TransactionalTestExecutionListener no longer flushes transactions before rolling back
+
 
 Changes in version 3.0.0.M3 (2009-05-06)
 ----------------------------------------
