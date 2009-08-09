@@ -1,29 +1,25 @@
-SPRING FRAMEWORK 3.0 M2 (February 2009)
----------------------------------------
+SPRING FRAMEWORK 3.0 M4 (August 2009)
+-------------------------------------
 http://www.springframework.org
 
 1. INTRODUCTION
----------------
 
-This is the second milestone of Spring 3.0 which is scheduled for final release in Q2 2009.
-This release features a codebase that has been fully updated for Java 5+, introduces
-Portlet 2.0 and early JPA 2.0 support, and provides even more comprehensive REST support.
+This is the fourth milestone of Spring 3.0 which is scheduled for final release in Q3 2009.
+It is nearly feature complete, with only very specific areas still being worked on for RC1.
 
 2. RELEASE NOTES
-----------------
 
-This release comes without reference documentation. For the time being, please consult
-the provided javadoc for details on the new features.
+This release comes with complete reference documentation already. Consult the provided
+javadoc for technical details of specific packages and classes.
 
 3. DISTRIBUTION JAR FILES
--------------------------
 
 The Spring Framework module jar files can be found in the 'dist' directory. Note that
-this release does not contain a 'spring.jar' file anymore. Furthermore, the jar file
-names follow bundle repository conventions now.
+this release does not contain a 'spring.jar' file anymore, in contrast to previous Spring
+generations. Furthermore, the jar file names follow bundle repository conventions now.
 
 4. GETTING STARTED
-------------------
 
-Check out the provided PetClinic sample application. It has been fully updated for
-Spring 3.0 already.
+A Getting Started guide is to be provided in time for Spring 3.0 GA. For the time being,
+please consult the blog examples at http://blog.springsource.com as well as the sections
+of interest in the reference documentation.
