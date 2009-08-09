@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.beans.factory.support.security;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -31,8 +38,8 @@ import java.util.Set;
 import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
@@ -62,7 +69,7 @@ import org.springframework.core.io.Resource;
  * 
  * @author Costin Leau
  */
-public class CallbacksSecurityTests extends TestCase {
+public class CallbacksSecurityTests {
 
 	private XmlBeanFactory beanFactory;
 	private SecurityContextProvider provider;
@@ -264,8 +271,8 @@ public class CallbacksSecurityTests extends TestCase {
 		}
 	}
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 
 		final ProtectionDomain empty = new ProtectionDomain(null,
 				new Permissions());
@@ -286,6 +293,7 @@ public class CallbacksSecurityTests extends TestCase {
 		beanFactory.setSecurityContextProvider(provider);
 	}
 
+	@Test
 	public void testSecuritySanity() throws Exception {
 		AccessControlContext acc = provider.getAccessControlContext();
 		try {
@@ -300,7 +308,7 @@ public class CallbacksSecurityTests extends TestCase {
 		method.setAccessible(true);
 
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
 				public Object run() throws Exception {
 					method.invoke(bean, null);
@@ -325,6 +333,7 @@ public class CallbacksSecurityTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSpringInitBean() throws Exception {
 		try {
 			beanFactory.getBean("spring-init");
@@ -333,7 +342,8 @@ public class CallbacksSecurityTests extends TestCase {
 			assertTrue(ex.getCause() instanceof SecurityException);
 		}
 	}
-
+	
+	@Test
 	public void testCustomInitBean() throws Exception {
 		try {
 			beanFactory.getBean("custom-init");
@@ -343,18 +353,21 @@ public class CallbacksSecurityTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSpringDestroyBean() throws Exception {
 		beanFactory.getBean("spring-destroy");
 		beanFactory.destroySingletons();
 		assertNull(System.getProperty("security.destroy"));
 	}
 
+	@Test
 	public void testCustomDestroyBean() throws Exception {
 		beanFactory.getBean("custom-destroy");
 		beanFactory.destroySingletons();
 		assertNull(System.getProperty("security.destroy"));
 	}
 
+	@Test
 	public void testCustomFactoryObject() throws Exception {
 		try {
 			beanFactory.getBean("spring-factory");
@@ -365,11 +378,13 @@ public class CallbacksSecurityTests extends TestCase {
 
 	}
 
+	@Test
 	public void testCustomFactoryType() throws Exception {
 		assertNull(beanFactory.getType("spring-factory"));
 		assertNull(System.getProperty("factory.object.type"));
 	}
 
+	@Test
 	public void testCustomStaticFactoryMethod() throws Exception {
 		try {
 			beanFactory.getBean("custom-static-factory-method");
@@ -379,6 +394,7 @@ public class CallbacksSecurityTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCustomInstanceFactoryMethod() throws Exception {
 		try {
 			beanFactory.getBean("custom-factory-method");
@@ -388,6 +404,7 @@ public class CallbacksSecurityTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testTrustedFactoryMethod() throws Exception {
 		try {
 			beanFactory.getBean("privileged-static-factory-method");
@@ -397,6 +414,7 @@ public class CallbacksSecurityTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testConstructor() throws Exception {
 		try {
 			beanFactory.getBean("constructor");
@@ -407,10 +425,11 @@ public class CallbacksSecurityTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testContainerPriviledges() throws Exception {
 		AccessControlContext acc = provider.getAccessControlContext();
 
-		AccessController.doPrivileged(new PrivilegedExceptionAction() {
+		AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
 			public Object run() throws Exception {
 				beanFactory.getBean("working-factory-method");
@@ -420,6 +439,7 @@ public class CallbacksSecurityTests extends TestCase {
 		}, acc);
 	}
 
+	@Test
 	public void testPropertyInjection() throws Exception {
 		try {
 			beanFactory.getBean("property-injection");
@@ -431,6 +451,7 @@ public class CallbacksSecurityTests extends TestCase {
 		beanFactory.getBean("working-property-injection");
 	}
 
+	@Test
 	public void testInitSecurityAwarePrototypeBean() {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder
@@ -442,15 +463,16 @@ public class CallbacksSecurityTests extends TestCase {
 		final Subject subject = new Subject();
 		subject.getPrincipals().add(new TestPrincipal("user1"));
 
-		NonPrivilegedBean bean = (NonPrivilegedBean) Subject.doAsPrivileged(
-				subject, new PrivilegedAction() {
-					public Object run() {
-						return lbf.getBean("test");
+		NonPrivilegedBean bean = Subject.doAsPrivileged(
+				subject, new PrivilegedAction<NonPrivilegedBean>() {
+					public NonPrivilegedBean run() {
+						return lbf.getBean("test", NonPrivilegedBean.class);
 					}
 				}, null);
 		assertNotNull(bean);
 	}
 
+	@Test
 	public void testTrustedExecution() throws Exception {
 		beanFactory.setSecurityContextProvider(null);
 
