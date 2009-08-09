@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -133,6 +134,17 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Return the resolution strategy for expressions in bean definition values.
 	 */
 	BeanExpressionResolver getBeanExpressionResolver();
+
+	/**
+	 * Specify a Spring 3.0 ConversionService to use for converting
+	 * property values, as an alternative to JavaBeans PropertyEditors.
+	 */
+	void setConversionService(ConversionService conversionService);
+
+	/**
+	 * Return the associated ConversionService, if any.
+	 */
+	ConversionService getConversionService();
 
 	/**
 	 * Add a PropertyEditorRegistrar to be applied to all bean creation processes.

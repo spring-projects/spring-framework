@@ -1,20 +1,37 @@
-package org.springframework.core.convert.support;
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import static org.junit.Assert.assertEquals;
+package org.springframework.core.convert.support;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.CollectionToArray;
-import org.springframework.core.convert.support.DefaultTypeConverter;
 
+import org.springframework.core.convert.TypeDescriptor;
+
+/**
+ * @author Keith Donald
+ */
 public class CollectionToArrayTests {
 
 	@Test
 	public void testCollectionToArrayConversion() throws Exception {
-		DefaultTypeConverter service = new DefaultTypeConverter();
+		DefaultConversionService service = new DefaultConversionService();
 		CollectionToArray c = new CollectionToArray(new TypeDescriptor(getClass().getField("bindTarget")),
 				TypeDescriptor.valueOf(Integer[].class), service);
 		bindTarget.add("1");
@@ -28,7 +45,7 @@ public class CollectionToArrayTests {
 
 	@Test
 	public void testCollectionToArrayConversionNoGenericInfo() throws Exception {
-		DefaultTypeConverter service = new DefaultTypeConverter();
+		DefaultConversionService service = new DefaultConversionService();
 		CollectionToArray c = new CollectionToArray(TypeDescriptor.valueOf(Collection.class), TypeDescriptor
 				.valueOf(Integer[].class), service);
 		bindTarget.add("1");
@@ -42,7 +59,7 @@ public class CollectionToArrayTests {
 	
 	@Test
 	public void testCollectionToArrayConversionNoGenericInfoNullElement() throws Exception {
-		DefaultTypeConverter service = new DefaultTypeConverter();
+		DefaultConversionService service = new DefaultConversionService();
 		CollectionToArray c = new CollectionToArray(TypeDescriptor.valueOf(Collection.class), TypeDescriptor
 				.valueOf(Integer[].class), service);
 		bindTarget.add(null);
