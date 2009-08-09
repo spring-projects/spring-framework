@@ -1,12 +1,12 @@
 /*
- * Copyright 2004-2009 the original author or authors.
- * 
+ * Copyright 2002-2009 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,20 +17,19 @@ package org.springframework.core.convert.support;
 
 import java.lang.reflect.Array;
 
-import org.springframework.core.convert.TypeConverter;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Special one-way converter that converts from a source array to a target array. Supports type conversion of the
  * individual array elements; for example, the ability to convert a String[] to an Integer[]. Mainly used internally by
- * {@link TypeConverter} implementations.
+ * {@link org.springframework.core.convert.ConversionService} implementations.
  * @author Keith Donald
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
 class ArrayToArray extends AbstractCollectionConverter {
 
-	public ArrayToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetArrayType, GenericTypeConverter conversionService) {
+	public ArrayToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetArrayType, GenericConversionService conversionService) {
 		super(sourceArrayType, targetArrayType, conversionService);
 	}
 

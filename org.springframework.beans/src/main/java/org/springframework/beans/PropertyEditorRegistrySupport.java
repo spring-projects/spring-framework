@@ -57,6 +57,7 @@ import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.ClassUtils;
@@ -75,6 +76,8 @@ import org.springframework.util.ClassUtils;
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
+	private ConversionService conversionService;
+
 	private boolean defaultEditorsActive = false;
 
 	private boolean configValueEditorsActive = false;
@@ -88,6 +91,22 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	private Set<PropertyEditor> sharedEditors;
 
 	private Map<Class, PropertyEditor> customEditorCache;
+
+
+	/**
+	 * Specify a Spring 3.0 ConversionService to use for converting
+	 * property values, as an alternative to JavaBeans PropertyEditors.
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
+	/**
+	 * Return the associated ConversionService, if any.
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
+	}
 
 
 	//---------------------------------------------------------------------

@@ -30,6 +30,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -160,6 +162,18 @@ class TypeConverterDelegate {
 		// Custom editor for this type?
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
+		// No custom editor but custom ConversionService specified?
+		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
+		if (editor == null && conversionService != null && convertedValue != null &&
+				conversionService.canConvert(convertedValue.getClass(), requiredType)) {
+			if (methodParam != null) {
+				return (T) conversionService.convert(convertedValue, new TypeDescriptor(methodParam));
+			}
+			else {
+				return conversionService.convert(convertedValue, requiredType);
+			}
+		}
+
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (editor == null) {
@@ -265,7 +279,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	protected Object doConvertValue(Object oldValue, Object newValue, Class requiredType, PropertyEditor editor) {
+	protected Object doConvertValue(Object oldValue, Object newValue, Class<?> requiredType, PropertyEditor editor) {
 		Object convertedValue = newValue;
 		boolean sharedEditor = false;
 
@@ -307,6 +321,8 @@ class TypeConverterDelegate {
 			}
 		}
 
+		Object returnValue = convertedValue;
+
 		if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
 			// Convert String array to a comma-separated String.
 			// Only applies if no PropertyEditor converted the String array before.
@@ -335,7 +351,7 @@ class TypeConverterDelegate {
 			}
 		}
 
-		return convertedValue;
+		return returnValue;
 	}
 
 	/**

@@ -56,6 +56,10 @@ public abstract class CollectionFactory {
 
 	private static final String NAVIGABLE_MAP_CLASS_NAME = "java.util.NavigableMap";
 
+	private static Class navigableSet = null;
+
+	private static Class navigableMap = null;
+
 	private static final Set<Class> approximableCollectionTypes = new HashSet<Class>(10);
 
 	private static final Set<Class> approximableMapTypes = new HashSet<Class>(6);
@@ -72,8 +76,10 @@ public abstract class CollectionFactory {
 
 		// New Java 6 collection interfaces
 		try {
-			approximableCollectionTypes.add(ClassUtils.forName(NAVIGABLE_SET_CLASS_NAME, CollectionFactory.class.getClassLoader()));
-			approximableMapTypes.add(ClassUtils.forName(NAVIGABLE_MAP_CLASS_NAME, CollectionFactory.class.getClassLoader()));
+			navigableSet = ClassUtils.forName(NAVIGABLE_SET_CLASS_NAME, CollectionFactory.class.getClassLoader());
+			navigableMap = ClassUtils.forName(NAVIGABLE_MAP_CLASS_NAME, CollectionFactory.class.getClassLoader());
+			approximableCollectionTypes.add(navigableSet);
+			approximableMapTypes.add(navigableMap);
 		}
 		catch (ClassNotFoundException ex) {
 			// not running on Java 6 or above...
@@ -187,7 +193,7 @@ public abstract class CollectionFactory {
 	 * @return <code>true</code> if the type is approximable,
 	 * <code>false</code> if it is not
 	 */
-	public static boolean isApproximableCollectionType(Class collectionType) {
+	public static boolean isApproximableCollectionType(Class<?> collectionType) {
 		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
 	}
 
@@ -195,9 +201,9 @@ public abstract class CollectionFactory {
 	 * Create the most approximate collection for the given collection.
 	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
 	 * or Set, respectively.
-	 * @param collection the original collection object
+	 * @param collection the original Collection object
 	 * @param initialCapacity the initial capacity
-	 * @return the new collection instance
+	 * @return the new Collection instance
 	 * @see java.util.ArrayList
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
@@ -219,22 +225,61 @@ public abstract class CollectionFactory {
 	}
 
 	/**
+	 * Create the most appropriate collection for the given collection type.
+	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
+	 * or Set, respectively.
+	 * @param collectionType the desired type of the target Collection
+	 * @param initialCapacity the initial capacity
+	 * @return the new Collection instance
+	 * @see java.util.ArrayList
+	 * @see java.util.TreeSet
+	 * @see java.util.LinkedHashSet
+	 */
+	public static Collection createCollection(Class<?> collectionType, int initialCapacity) {
+		if (collectionType.isInterface()) {
+			if (List.class.equals(collectionType)) {
+				return new ArrayList(initialCapacity);
+			}
+			else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSet)) {
+				return new TreeSet();
+			}
+			else if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
+				return new LinkedHashSet(initialCapacity);
+			}
+			else {
+				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
+			}
+		}
+		else {
+			if (!Collection.class.isAssignableFrom(collectionType)) {
+				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
+			}
+			try {
+				return (Collection) collectionType.newInstance();
+			}
+			catch (Exception ex) {
+				throw new IllegalArgumentException("Could not instantiate Collection type: " + collectionType.getName());
+			}
+		}
+	}
+
+	/**
 	 * Determine whether the given map type is an approximable type,
 	 * i.e. a type that {@link #createApproximateMap} can approximate.
 	 * @param mapType the map type to check
 	 * @return <code>true</code> if the type is approximable,
 	 * <code>false</code> if it is not
 	 */
-	public static boolean isApproximableMapType(Class mapType) {
+	public static boolean isApproximableMapType(Class<?> mapType) {
 		return (mapType != null && approximableMapTypes.contains(mapType));
 	}
 
 	/**
 	 * Create the most approximate map for the given map.
 	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
-	 * @param map the original map object
+	 * @param map the original Map object
 	 * @param initialCapacity the initial capacity
-	 * @return the new collection instance
+	 * @return the new Map instance
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
@@ -245,6 +290,40 @@ public abstract class CollectionFactory {
 		}
 		else {
 			return new LinkedHashMap(initialCapacity);
+		}
+	}
+
+	/**
+	 * Create the most approximate map for the given map.
+	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
+	 * @param collectionType the desired type of the target Map
+	 * @param initialCapacity the initial capacity
+	 * @return the new Map instance
+	 * @see java.util.TreeMap
+	 * @see java.util.LinkedHashMap
+	 */
+	public static Map createMap(Class<?> mapType, int initialCapacity) {
+		if (mapType.isInterface()) {
+			if (Map.class.equals(mapType)) {
+				return new LinkedHashMap(initialCapacity);
+			}
+			else if (SortedMap.class.equals(mapType) || mapType.equals(navigableMap)) {
+				return new TreeMap();
+			}
+			else {
+				throw new IllegalArgumentException("Unsupported Map interface: " + mapType.getName());
+			}
+		}
+		else {
+			if (!Map.class.isAssignableFrom(mapType)) {
+				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
+			}
+			try {
+				return (Map) mapType.newInstance();
+			}
+			catch (Exception ex) {
+				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName());
+			}
 		}
 	}
 

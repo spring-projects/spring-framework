@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 	private Collection<V> values;
 
 	private Set<Map.Entry<String, V>> entrySet;
+
 
 	// implementing Map
 
@@ -109,6 +110,7 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 		return (values != null) ? values : (values = new Values());
 	}
 
+
 	// hook methods
 
 	/**
@@ -140,6 +142,7 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 	 */
 	protected abstract Iterator<String> getAttributeNames();
 
+
 	// internal helper classes
 
 	private class KeySet extends AbstractSet<String> {
@@ -167,8 +170,8 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 		public boolean remove(Object o) {
 			return StringKeyedMapAdapter.this.remove(o) != null;
 		}
-		
 	}
+
 
 	private class KeyIterator implements Iterator<String> {
 		
@@ -190,8 +193,8 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 			}
 			StringKeyedMapAdapter.this.remove(currentKey);
 		}
-
 	}
+
 
 	private class Values extends AbstractSet<V> {
 
@@ -229,6 +232,7 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 		}
 	}
 
+
 	private class ValuesIterator implements Iterator<V> {
 		
 		private final Iterator<String> it = getAttributeNames();
@@ -250,8 +254,8 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 			}
 			StringKeyedMapAdapter.this.remove(currentKey);
 		}
-
 	}
+
 
 	private class EntrySet extends AbstractSet<Map.Entry<String, V>> {
 
@@ -300,6 +304,7 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 		}
 	}
 
+
 	private class EntryIterator implements Iterator<Map.Entry<String, V>> {
 		
 		private final Iterator<String> it = getAttributeNames();
@@ -324,6 +329,7 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 		
 	}
 
+
 	private class EntrySetEntry implements Entry<String, V> {
 		
 		private final String currentKey;
@@ -344,4 +350,5 @@ public abstract class StringKeyedMapAdapter<V> implements Map<String, V> {
 			return StringKeyedMapAdapter.this.put(currentKey, value);
 		}
 	}
+
 }

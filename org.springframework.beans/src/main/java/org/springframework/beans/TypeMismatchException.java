@@ -56,10 +56,10 @@ public class TypeMismatchException extends PropertyAccessException {
 	 */
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable cause) {
 		super(propertyChangeEvent,
-				"Failed to convert property value of type [" +
-				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "]" +
+				"Failed to convert property value of type '" +
+				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
 				(requiredType != null ?
-				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : "") +
+				 " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
 				 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				cause);
@@ -83,8 +83,8 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param cause the root cause (may be <code>null</code>)
 	 */
 	public TypeMismatchException(Object value, Class requiredType, Throwable cause) {
-		super("Failed to convert value of type [" + ClassUtils.getDescriptiveType(value) + "]" +
-				(requiredType != null ? " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : ""),
+		super("Failed to convert value of type '" + ClassUtils.getDescriptiveType(value) + "'" +
+				(requiredType != null ? " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : ""),
 				cause);
 		this.value = value;
 		this.requiredType = requiredType;

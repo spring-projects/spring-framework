@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,6 @@ import java.util.Properties;
  * @see java.util.Properties#load
  */
 public class PropertiesEditor extends PropertyEditorSupport {
-	
-	/**
-	 * Any of these characters, if they're first after whitespace or first
-	 * on a line, mean that the line is a comment and should be ignored.
-	 */
-	private final static String COMMENT_MARKERS = "#!";
-
 
 	/**
 	 * Convert {@link String} into {@link Properties}, considering it as

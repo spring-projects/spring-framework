@@ -18,11 +18,11 @@ package org.springframework.context.expression;
 
 import java.util.Map;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 
 /**
  * EL property accessor that knows how to traverse the keys
@@ -39,7 +39,7 @@ public class MapAccessor implements PropertyAccessor {
 	}
 
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		return new TypedValue(((Map) target).get(name),CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR);
+		return new TypedValue(((Map) target).get(name), TypeDescriptor.valueOf(Object.class));
 	}
 
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

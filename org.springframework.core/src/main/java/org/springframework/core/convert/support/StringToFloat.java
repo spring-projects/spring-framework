@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.util.NumberUtils;
 
 /**
- * Converts a String to Float using {@link Float#valueOf(String)}.
+ * Converts a String to Float.
+ *
  * @author Keith Donald
  * @since 3.0
  */
 public class StringToFloat implements Converter<String, Float> {
+
 	public Float convert(String source) {
-		return Float.valueOf(source);
+		return NumberUtils.parseNumber(source, Float.class);
 	}
+
 }

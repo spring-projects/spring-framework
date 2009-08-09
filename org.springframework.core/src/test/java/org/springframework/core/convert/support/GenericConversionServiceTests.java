@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import static junit.framework.Assert.assertEquals;
@@ -32,9 +33,12 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 
-public class GenericTypeConverterTests {
+/**
+ * @author Keith Donald
+ */
+public class GenericConversionServiceTests {
 
-	private GenericTypeConverter converter = new GenericTypeConverter();
+	private GenericConversionService converter = new GenericConversionService();
 
 	@Test
 	public void executeConversion() {
@@ -151,7 +155,7 @@ public class GenericTypeConverterTests {
 	@Test
 	public void convertArrayToListGenericTypeConversion() throws Exception {
 		converter.add(new StringToInteger());
-		List<Integer> result = converter.convert(new String[] { "1", "2", "3" }, new TypeDescriptor<List<Integer>>(getClass().getDeclaredField("genericList")));
+		List<Integer> result = (List<Integer>) converter.convert(new String[] { "1", "2", "3" }, new TypeDescriptor(getClass().getDeclaredField("genericList")));
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
 		assertEquals(new Integer("3"), result.get(2));
@@ -208,7 +212,7 @@ public class GenericTypeConverterTests {
 		foo.put("2", "BAZ");
 		converter.add(new StringToInteger());
 		converter.add(new StringToEnumFactory().getConverter(FooEnum.class));
-		Map<String, FooEnum> map = converter.convert(foo, new TypeDescriptor<Map<String, FooEnum>>(getClass().getField("genericMap")));
+		Map<String, FooEnum> map = (Map<String, FooEnum>) converter.convert(foo, new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(map.get(1), FooEnum.BAR);
 		assertEquals(map.get(2), FooEnum.BAZ);
 	}

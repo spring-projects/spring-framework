@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -145,7 +146,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Create new BeanWrapperImpl, wrapping a new instance of the specified class.
 	 * @param clazz class to instantiate and wrap
 	 */
-	public BeanWrapperImpl(Class clazz) {
+	public BeanWrapperImpl(Class<?> clazz) {
 		registerDefaultEditors();
 		setWrappedInstance(BeanUtils.instantiateClass(clazz));
 	}
@@ -365,8 +366,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return false;
 	}
 
-	public Object convertIfNecessary(
-			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
+	public <T> T convertIfNecessary(
+			Object value, Class<T> requiredType, MethodParameter methodParam) throws TypeMismatchException {
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
 		}
@@ -572,7 +573,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			
-			Object value = null; 
+			Object value;
 				
 			if (System.getSecurityManager() != null) {
 				try {
@@ -580,8 +581,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						public Object run() throws Exception {
 							return readMethod.invoke(object, (Object[]) null);
 						}
-					},acc);
-				} catch (PrivilegedActionException pae) {
+					}, acc);
+				}
+				catch (PrivilegedActionException pae) {
 					throw pae.getException();
 				}
 			}
@@ -625,7 +627,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					else if (value instanceof Map) {
 						Map map = (Map) value;
-						Class mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
+						Class<?> mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
 						Object convertedMapKey = this.typeConverterDelegate.convertIfNecessary(key, mapKeyType);
@@ -944,6 +946,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				else {
 					throw new MethodInvocationException(propertyChangeEvent, ex.getTargetException());
 				}
+			}
+			catch (ConversionException ex) {
+				PropertyChangeEvent pce =
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
+				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
 			}
 			catch (IllegalArgumentException ex) {
 				PropertyChangeEvent pce =
