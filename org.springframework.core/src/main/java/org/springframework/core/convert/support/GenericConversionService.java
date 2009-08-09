@@ -35,6 +35,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterInfo;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Base implementation of a conversion service.
@@ -118,17 +119,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	public boolean canConvert(Class<?> sourceType, TypeDescriptor targetType) {
 		ConversionExecutor executor = getConversionExecutor(sourceType, targetType);
-		if (executor != null) {
-			return true;
-		}
-		else {
-			if (parent != null) {
-				return parent.canConvert(sourceType, targetType);
-			}
-			else {
-				return false;
-			}
-		}
+		return (executor != null || (this.parent != null && this.parent.canConvert(sourceType, targetType)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -144,15 +135,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (executor != null) {
 			return executor.execute(source);
 		}
+		else if (this.parent != null) {
+			return this.parent.convert(source, targetType);
+		}
 		else {
-			if (this.parent != null) {
-				return this.parent.convert(source, targetType);
-			}
-			else {
-				throw new ConverterNotFoundException(source.getClass(), targetType.getType(),
-						"No converter found that can convert from sourceType [" + source.getClass().getName()
-								+ "] to targetType [" + targetType.getName() + "]");
-			}
+			throw new ConverterNotFoundException(source.getClass(), targetType.getType(),
+					"No converter found that can convert from sourceType [" + source.getClass().getName()
+							+ "] to targetType [" + targetType.getName() + "]");
 		}
 	}
 
@@ -279,7 +268,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (sourceType.isAssignableTo(targetType)) {
 			return NoOpConversionExecutor.INSTANCE;
 		}
-		Converter converter = findRegisteredConverter(sourceType.getType(), targetType.getType());
+		Converter converter = findRegisteredConverter(ClassUtils.resolvePrimitiveIfNecessary(sourceType.getType()), ClassUtils.resolvePrimitiveIfNecessary(targetType.getType()));
 		if (converter != null) {
 			return new StaticConversionExecutor(sourceType, targetType, converter);
 		}
@@ -361,7 +350,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			while (!classQueue.isEmpty()) {
 				Class currentClass = classQueue.removeLast();
 				Map<Class, Object> converters = getConvertersForSource(currentClass);
-				System.out.println("Source:" + currentClass);
 				Converter converter = getConverter(converters, targetType);
 				if (converter != null) {
 					return converter;

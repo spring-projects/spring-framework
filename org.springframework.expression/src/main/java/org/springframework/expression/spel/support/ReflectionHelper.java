@@ -50,7 +50,8 @@ public class ReflectionHelper {
 	public static ArgumentsMatchInfo compareArguments( 
 			Class[] expectedArgTypes, Class[] suppliedArgTypes, TypeConverter typeConverter) {
 
-		Assert.isTrue(expectedArgTypes.length==suppliedArgTypes.length, "Expected argument types and supplied argument types should be arrays of same length");
+		Assert.isTrue(expectedArgTypes.length == suppliedArgTypes.length,
+				"Expected argument types and supplied argument types should be arrays of same length");
 
 		ArgsMatchKind match = ArgsMatchKind.EXACT;
 		List<Integer> argsRequiringConversion = null;
@@ -59,23 +60,25 @@ public class ReflectionHelper {
 			Class expectedArg = expectedArgTypes[i];
 			if (expectedArg != suppliedArg) {
 				// The user may supply null - and that will be ok unless a primitive is expected
-				if (suppliedArg==null) {
+				if (suppliedArg == null) {
 					if (expectedArg.isPrimitive()) {
-						match=null;
+						match = null;
 					}
-				} else {
-					if (ClassUtils.isAssignable(expectedArg, suppliedArg)
-					/* || isWidenableTo(expectedArg, suppliedArg) */) {
+				}
+				else {
+					if (ClassUtils.isAssignable(expectedArg, suppliedArg)) {
 						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
 							match = ArgsMatchKind.CLOSE;
 						} 
-					} else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
+					}
+					else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
 						if (argsRequiringConversion == null) {
 							argsRequiringConversion = new ArrayList<Integer>();
 						}
 						argsRequiringConversion.add(i);
 						match = ArgsMatchKind.REQUIRES_CONVERSION;
-					} else {
+					}
+					else {
 						match = null;
 					}
 				}
@@ -83,14 +86,16 @@ public class ReflectionHelper {
 		}
 		if (match == null) {
 			return null;
-		} else {
+		}
+		else {
 			if (match == ArgsMatchKind.REQUIRES_CONVERSION) {
 				int[] argsArray = new int[argsRequiringConversion.size()];
 				for (int i = 0; i < argsRequiringConversion.size(); i++) {
 					argsArray[i] = argsRequiringConversion.get(i);
 				}
 				return new ArgumentsMatchInfo(match, argsArray);
-			} else {
+			}
+			else {
 				return new ArgumentsMatchInfo(match);
 			}
 		}
@@ -125,19 +130,22 @@ public class ReflectionHelper {
 				if (expectedArg.isPrimitive()) {
 					match=null;
 				}
-			} else {
+			}
+			else {
 				if (expectedArg != suppliedArg) {
 					if (expectedArg.isAssignableFrom(suppliedArg) || ClassUtils.isAssignableValue(expectedArg, suppliedArg)) {
 						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
 							match = ArgsMatchKind.CLOSE;
 						}
-					} else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
+					}
+					else if (typeConverter.canConvert(suppliedArg, expectedArg)) {
 						if (argsRequiringConversion == null) {
 							argsRequiringConversion = new ArrayList<Integer>();
 						}
 						argsRequiringConversion.add(i);
 						match = ArgsMatchKind.REQUIRES_CONVERSION;
-					} else {
+					}
+					else {
 						match = null;
 					}
 				}
@@ -150,9 +158,10 @@ public class ReflectionHelper {
 
 		// Special case: there is one parameter left and it is an array and it matches the varargs expected argument -
 		// that is a match, the caller has already built the array
-		if (suppliedArgTypes.length == expectedArgTypes.length
-				&& expectedArgTypes[expectedArgTypes.length - 1] == suppliedArgTypes[suppliedArgTypes.length - 1]) {
-		} else {
+		if (suppliedArgTypes.length == expectedArgTypes.length &&
+				expectedArgTypes[expectedArgTypes.length - 1] == suppliedArgTypes[suppliedArgTypes.length - 1]) {
+		}
+		else {
 			// Now... we have the final argument in the method we are checking as a match and we have 0 or more other
 			// arguments left to pass to it.
 			Class varargsParameterType = expectedArgTypes[expectedArgTypes.length - 1].getComponentType();
@@ -165,18 +174,21 @@ public class ReflectionHelper {
 						if (varargsParameterType.isPrimitive()) {
 							match=null;
 						}
-					} else {
+					}
+					else {
 						if (ClassUtils.isAssignable(varargsParameterType, suppliedArg)) {
 							if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
 								match = ArgsMatchKind.CLOSE;
 							}
-						} else if (typeConverter.canConvert(suppliedArg, varargsParameterType)) {
+						}
+						else if (typeConverter.canConvert(suppliedArg, varargsParameterType)) {
 							if (argsRequiringConversion == null) {
 								argsRequiringConversion = new ArrayList<Integer>();
 							}
 							argsRequiringConversion.add(i);
 							match = ArgsMatchKind.REQUIRES_CONVERSION;
-						} else {
+						}
+						else {
 							match = null;
 						}
 					}
@@ -186,7 +198,8 @@ public class ReflectionHelper {
 
 		if (match == null) {
 			return null;
-		} else {
+		}
+		else {
 			if (match == ArgsMatchKind.REQUIRES_CONVERSION) {
 				int[] argsArray = new int[argsRequiringConversion.size()];
 				for (int i = 0; i < argsRequiringConversion.size(); i++) {
@@ -226,7 +239,8 @@ public class ReflectionHelper {
 			Class<?> targetType = null;
 			if (isVarargs && argPosition >= (requiredParameterTypes.length - 1)) {
 				targetType = varargsType;
-			} else {
+			}
+			else {
 				targetType = requiredParameterTypes[argPosition];
 			}
 			arguments[argPosition] = converter.convertValue(arguments[argPosition], TypeDescriptor.valueOf(targetType));
@@ -260,7 +274,8 @@ public class ReflectionHelper {
 			Class<?> targetType = null;
 			if (isVarargs && i >= (parameterTypes.length - 1)) {
 				targetType = varargsType;
-			} else {
+			}
+			else {
 				targetType = parameterTypes[i];
 			}
 			try {
@@ -270,11 +285,13 @@ public class ReflectionHelper {
 					}
 					arguments[i] = converter.convertValue(arguments[i], TypeDescriptor.valueOf(targetType));
 				}
-			} catch (EvaluationException ex) {
+			}
+			catch (EvaluationException ex) {
 				// allows for another type converter throwing a different kind of EvaluationException
 				if (ex instanceof SpelEvaluationException) {
 					throw (SpelEvaluationException)ex;
-				} else {
+				}
+				else {
 					throw new SpelEvaluationException(ex, SpelMessage.TYPE_CONVERSION_ERROR,arguments[i].getClass().getName(),targetType);
 				}
 			}
@@ -338,13 +355,13 @@ public class ReflectionHelper {
 	 */
 	public static class ArgumentsMatchInfo {
 
-		public ArgsMatchKind kind;
+		public final ArgsMatchKind kind;
 
 		public int[] argsRequiringConversion;
 
 		ArgumentsMatchInfo(ArgsMatchKind kind, int[] integers) {
 			this.kind = kind;
-			argsRequiringConversion = integers;
+			this.argsRequiringConversion = integers;
 		}
 
 		ArgumentsMatchInfo(ArgsMatchKind kind) {
@@ -352,27 +369,27 @@ public class ReflectionHelper {
 		}
 		
 		public boolean isExactMatch() {
-			return kind==ArgsMatchKind.EXACT;
+			return (this.kind == ArgsMatchKind.EXACT);
 		}
 		
 		public boolean isCloseMatch() {
-			return kind==ArgsMatchKind.CLOSE;
+			return (this.kind == ArgsMatchKind.CLOSE);
 		}
 
 		public boolean isMatchRequiringConversion() {
-			return kind==ArgsMatchKind.REQUIRES_CONVERSION;
+			return (this.kind == ArgsMatchKind.REQUIRES_CONVERSION);
 		}
 		
 		public String toString() {
-			StringBuffer sb = new StringBuffer();
-			sb.append("ArgumentMatch: ").append(kind);
-			if (argsRequiringConversion!=null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("ArgumentMatch: ").append(this.kind);
+			if (this.argsRequiringConversion != null) {
 				sb.append("  (argsForConversion:");
-				for (int i=0;i<argsRequiringConversion.length;i++) {
-					if (i>0) {
+				for (int i = 0; i < this.argsRequiringConversion.length;i++) {
+					if (i > 0) {
 						sb.append(",");
 					}
-					sb.append(argsRequiringConversion[i]);
+					sb.append(this.argsRequiringConversion[i]);
 				}
 				sb.append(")");
 			}

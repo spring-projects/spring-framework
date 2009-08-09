@@ -32,19 +32,21 @@ import org.springframework.util.ClassUtils;
  *
  * @author Keith Donald
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0 
  */
 public class TypeDescriptor {
 
 	public final static TypeDescriptor NULL = new TypeDescriptor((Class<?>) null);
 
+
+	private Class<?> type;
+
 	private MethodParameter methodParameter;
 
 	private Field field;
 
 	private Annotation[] cachedFieldAnnotations;
-
-	private Class<?> type;
 
 
 	/**
@@ -101,13 +103,13 @@ public class TypeDescriptor {
 	 */
 	public Class<?> getType() {
 		if (this.type != null) {
-			return wrapperType(this.type);
+			return this.type;
 		}
 		else if (this.field != null) {
-			return wrapperType(this.field.getType());
+			return this.field.getType();
 		}
 		else if (this.methodParameter != null) {
-			return wrapperType(this.methodParameter.getParameterType());
+			return this.methodParameter.getParameterType();
 		}
 		else {
 			return null;
@@ -233,9 +235,9 @@ public class TypeDescriptor {
 	/**
 	 * Is the obj an instance of this type?
 	 */
-	public boolean isInstance(Object obj) {
+	public boolean isAssignableValue(Object obj) {
 		Class<?> type = getType();
-		return (type != null && getType().isInstance(obj));
+		return (type != null && ClassUtils.isAssignableValue(getType(), obj));
 	}
 
 	/**
@@ -282,32 +284,6 @@ public class TypeDescriptor {
 
 
 	// internal helpers
-	
-	private Class<?> wrapperType(Class<?> type) {
-		if (type.isPrimitive()) {
-			if (type.equals(int.class)) {
-				return Integer.class;
-			} else if (type.equals(short.class)) {
-				return Short.class;
-			} else if (type.equals(long.class)) {
-				return Long.class;
-			} else if (type.equals(float.class)) {
-				return Float.class;
-			} else if (type.equals(double.class)) {
-				return Double.class;
-			} else if (type.equals(byte.class)) {
-				return Byte.class;
-			} else if (type.equals(boolean.class)) {
-				return Boolean.class;
-			} else if (type.equals(char.class)) {
-				return Character.class;
-			} else {
-				throw new IllegalStateException("Should never happen - primitive type is not a primitive?");
-			}
-		} else {
-			return type;
-		}
-	}
 
 	private Class<?> getArrayComponentType() {
 		return getType().getComponentType();

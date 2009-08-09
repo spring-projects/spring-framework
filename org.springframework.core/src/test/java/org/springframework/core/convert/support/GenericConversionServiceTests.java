@@ -136,7 +136,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertArrayToPrimitiveArray() {
 		converter.add(new StringToInteger());
-		int[] result = (int[]) converter.convert(new String[] { "1", "2", "3" }, int[].class);
+		int[] result = converter.convert(new String[] { "1", "2", "3" }, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
 		assertEquals(3, result[2]);
@@ -184,7 +184,7 @@ public class GenericConversionServiceTests {
 		list.add("1");
 		list.add("2");
 		list.add("3");
-		String[] result = (String[]) converter.convert(list, String[].class);
+		String[] result = converter.convert(list, String[].class);
 		assertEquals("1", result[0]);
 		assertEquals("2", result[1]);
 		assertEquals("3", result[2]);
@@ -229,14 +229,16 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertStringToArrayWithElementConversion() {
 		converter.add(new StringToInteger());		
-		Integer[] result = (Integer[]) converter.convert("1,2,3", Integer[].class);
+		Integer[] result = converter.convert("1,2,3", Integer[].class);
 		assertEquals(3, result.length);
 		assertEquals(new Integer(1), result[0]);
 		assertEquals(new Integer(2), result[1]);
 		assertEquals(new Integer(3), result[2]);
 	}
 
+
 	public static enum FooEnum {
+
 		BAR, BAZ
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -21,19 +22,22 @@ import org.springframework.core.convert.TypeDescriptor;
  * Encapsulates an object and a type descriptor that describes it.
  * The type descriptor can hold generic information that would
  * not be accessible through a simple getClass() call on the object.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
 public class TypedValue {
 
-	private Object value;
-	private TypeDescriptor typeDescriptor;
-	
 	public static final TypedValue NULL_TYPED_VALUE = new TypedValue(null, TypeDescriptor.NULL);
 
+
+	private final Object value;
+
+	private final TypeDescriptor typeDescriptor;
+	
+
 	/**
-	 * Create a TypedValue for a simple object.  The type descriptor is inferred 
+	 * Create a TypedValue for a simple object. The type descriptor is inferred
 	 * from the object, so no generic information is preserved.
 	 * @param value the object value
 	 */
@@ -52,6 +56,7 @@ public class TypedValue {
 		this.typeDescriptor = typeDescriptor;
 	}
 	
+
 	public Object getValue() {
 		return this.value;
 	}
@@ -60,10 +65,12 @@ public class TypedValue {
 		return this.typeDescriptor;
 	}
 
+
 	@Override
 	public String toString() {
-		StringBuffer str = new StringBuffer();
-		str.append("TypedValue: ").append(value).append(" of type "+typeDescriptor.asString());
+		StringBuilder str = new StringBuilder();
+		str.append("TypedValue: ").append(this.value).append(" of type ").append(this.typeDescriptor.asString());
 		return str.toString();
 	}
+
 }
