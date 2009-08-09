@@ -27,9 +27,9 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ast.CommonTypeDescriptors;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Testing variations on map access.
@@ -78,7 +78,7 @@ public class MapAccessTests extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name),CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR);
+			return new TypedValue(((Map) target).get(name), TypeDescriptor.valueOf(Object.class));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

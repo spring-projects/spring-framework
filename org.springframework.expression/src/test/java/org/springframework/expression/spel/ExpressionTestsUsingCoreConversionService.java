@@ -24,15 +24,14 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultTypeConverter;
-import org.springframework.core.convert.support.GenericTypeConverter;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Expression evaluation where the TypeConverter plugged in is the {@link GenericTypeConverter}
+ * Expression evaluation where the TypeConverter plugged in is the {@link org.springframework.core.convert.support.GenericConversionService}
  * 
  * @author Andy Clement
  */
@@ -99,7 +98,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	 */
 	private static class TypeConvertorUsingConversionService implements TypeConverter {
 
-		private final DefaultTypeConverter service = new DefaultTypeConverter();
+		private final DefaultConversionService service = new DefaultConversionService();
 
 		public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 			return this.service.canConvert(sourceType, TypeDescriptor.valueOf(targetType));

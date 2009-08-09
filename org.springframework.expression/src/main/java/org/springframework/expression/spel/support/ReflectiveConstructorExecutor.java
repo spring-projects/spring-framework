@@ -23,6 +23,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A simple ConstructorExecutor implementation that runs a constructor using reflective invocation.
@@ -32,33 +33,35 @@ import org.springframework.expression.TypedValue;
  */
 class ReflectiveConstructorExecutor implements ConstructorExecutor {
 
-	private final Constructor<?> c;
+	private final Constructor<?> ctor;
 
 	// When the constructor was found, we will have determined if arguments need to be converted for it
 	// to be invoked. Conversion won't be cheap so let's only do it if necessary.
 	private final int[] argsRequiringConversion;
 
 
-	public ReflectiveConstructorExecutor(Constructor<?> constructor, int[] argsRequiringConversion) {
-		c = constructor;
+	public ReflectiveConstructorExecutor(Constructor<?> ctor, int[] argsRequiringConversion) {
+		this.ctor = ctor;
 		this.argsRequiringConversion = argsRequiringConversion;
 	}
 
 	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
 			if (argsRequiringConversion != null && arguments != null) {
-				ReflectionHelper.convertArguments(c.getParameterTypes(), c.isVarArgs(),
-						context.getTypeConverter(), argsRequiringConversion, arguments);
+				ReflectionHelper.convertArguments(this.ctor.getParameterTypes(),
+						this.ctor.isVarArgs(), context.getTypeConverter(),
+						this.argsRequiringConversion, arguments);
 			}
-			if (c.isVarArgs()) {
-				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(c.getParameterTypes(), arguments);
+			if (this.ctor.isVarArgs()) {
+				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(
+						this.ctor.getParameterTypes(), arguments);
 			}
-			if (!c.isAccessible()) {
-				c.setAccessible(true);
-			}
-			return new TypedValue(c.newInstance(arguments),TypeDescriptor.valueOf(c.getClass()));
-		} catch (Exception ex) {
-			throw new AccessException("Problem invoking constructor: " + c, ex);
+			ReflectionUtils.makeAccessible(this.ctor);
+			return new TypedValue(this.ctor.newInstance(arguments),
+					TypeDescriptor.valueOf(this.ctor.getClass()));
+		}
+		catch (Exception ex) {
+			throw new AccessException("Problem invoking constructor: " + this.ctor, ex);
 		}
 	}
 
