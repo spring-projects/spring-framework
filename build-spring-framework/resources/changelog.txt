@@ -3,6 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.0.RC1 (2009 Q3)
+--------------------------------------
+
+* upgraded to JUnit 4.7 and TestNG 5.10
+
+
 Changes in version 3.0.0.M4 (2009-08-10)
 -----------------------------------------
 
