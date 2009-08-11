@@ -81,7 +81,7 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>5.9</version>
+      <version>5.10</version>
       <classifier>jdk15</classifier>
       <optional>true</optional>
     </dependency>

@@ -813,14 +813,14 @@ public void testProcessRepeatedly() {
       <literal>org.springframework.test.context</literal> package) provides
       generic, annotation-driven unit and integration testing support that
       is agnostic of the testing framework in use, for example JUnit 3.8,
-      JUnit 4.7, TestNG 5.9, etc. The TestContext framework also places a
+      JUnit 4.7, TestNG 5.10, etc. The TestContext framework also places a
       great deal of importance on <emphasis>convention over
       configuration</emphasis> with reasonable defaults that can be
       overridden via annotation-based configuration.</para>
 
       <para>In addition to generic testing infrastructure, the TestContext
       framework provides explicit support for JUnit 3.8, JUnit 4.7, and
-      TestNG 5.9 in the form of <literal>abstract</literal> support
+      TestNG 5.10 in the form of <literal>abstract</literal> support
       classes. For JUnit 4.7, the framework also provides a custom
       <interfacename>Runner</interfacename> which allows one to write test
       classes that are not required to extend a particular class
