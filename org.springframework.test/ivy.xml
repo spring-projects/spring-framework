@@ -32,7 +32,7 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.junit" rev="3.8.2" conf="optional->compile"/>
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.6.0" conf="optional->compile"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="optional->compile"/>
 		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="optional->compile"/>
@@ -44,7 +44,7 @@
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.portlet" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="latest.integration" conf="optional->compile"/>
-		<dependency org="org.testng" name="com.springsource.org.testng" rev="5.9.0" conf="optional->compile"/>
+		<dependency org="org.testng" name="com.springsource.org.testng" rev="${org.testng.version}" conf="optional->compile"/>
 	</dependencies>
 
 </ivy-module>
