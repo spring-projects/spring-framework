@@ -19,19 +19,24 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.Assert;
 
 /**
  * A generic implementation of {@link FormatterRegistry} suitable for use in most binding environments.
  * @author Keith Donald
  * @since 3.0
+ * @see #add(Formatter)
  * @see #add(Class, Formatter)
  * @see #add(AnnotationFormatterFactory)
  */
@@ -42,10 +47,21 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
+	private ConversionService conversionService = new DefaultConversionService();
+
+	/**
+	 * Sets the type conversion service used to coerse objects to the types required for Formatting purposes.
+	 * @param conversionService the conversion service
+	 * @see #add(Class, Formatter)
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
 	// implementing FormatterRegistry
-	
+
 	public <T> void add(Formatter<T> formatter) {
-		// TODO
+		typeFormatters.put(getFormattedObjectType(formatter.getClass()), formatter);
 	}
 
 	public <T> void add(Class<?> objectType, Formatter<T> formatter) {
@@ -57,11 +73,79 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 	}
 
 	public <A extends Annotation, T> void add(AnnotationFormatterFactory<A, T> factory) {
-		annotationFormatters.put(getAnnotationType(factory), factory);
+		annotationFormatters.put(getAnnotationType(factory.getClass()), factory);
 	}
 
 	public Formatter<?> getFormatter(TypeDescriptor type) {
 		Assert.notNull(type, "The TypeDescriptor is required");
+		Formatter formatter = getAnnotationFormatter(type);
+		if (formatter == null) {
+			formatter = getTypeFormatter(type.getType());
+		}
+		return formatter;
+	}
+
+	// internal helpers
+
+	private Class getFormattedObjectType(Class formatterClass) {
+		Class classToIntrospect = formatterClass;
+		while (classToIntrospect != null) {
+			Type[] ifcs = classToIntrospect.getGenericInterfaces();
+			for (Type ifc : ifcs) {
+				if (ifc instanceof ParameterizedType) {
+					ParameterizedType paramIfc = (ParameterizedType) ifc;
+					Type rawType = paramIfc.getRawType();
+					if (Formatter.class.equals(rawType)) {
+						Type arg = paramIfc.getActualTypeArguments()[0];
+						if (arg instanceof TypeVariable) {
+							arg = GenericTypeResolver.resolveTypeVariable((TypeVariable) arg, formatterClass);
+						}
+						if (arg instanceof Class) {
+							return (Class) arg;
+						}
+					} else if (Formatter.class.isAssignableFrom((Class) rawType)) {
+						return getFormattedObjectType((Class) rawType);
+					}
+				} else if (Formatter.class.isAssignableFrom((Class) ifc)) {
+					return getFormattedObjectType((Class) ifc);
+				}
+			}
+			classToIntrospect = classToIntrospect.getSuperclass();
+		}
+		return null;
+	}
+
+	private Class getAnnotationType(Class factoryClass) {
+		Class classToIntrospect = factoryClass;
+		while (classToIntrospect != null) {
+			Type[] ifcs = classToIntrospect.getGenericInterfaces();
+			for (Type ifc : ifcs) {
+				if (ifc instanceof ParameterizedType) {
+					ParameterizedType paramIfc = (ParameterizedType) ifc;
+					Type rawType = paramIfc.getRawType();
+					if (AnnotationFormatterFactory.class.equals(rawType)) {
+						Type arg = paramIfc.getActualTypeArguments()[0];
+						if (arg instanceof TypeVariable) {
+							arg = GenericTypeResolver.resolveTypeVariable((TypeVariable) arg, factoryClass);
+						}
+						if (arg instanceof Class) {
+							return (Class) arg;
+						}
+					} else if (AnnotationFormatterFactory.class.isAssignableFrom((Class) rawType)) {
+						return getAnnotationType((Class) rawType);
+					}
+				} else if (AnnotationFormatterFactory.class.isAssignableFrom((Class) ifc)) {
+					return getAnnotationType((Class) ifc);
+				}
+			}
+			classToIntrospect = classToIntrospect.getSuperclass();
+		}
+		throw new IllegalArgumentException(
+				"Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
+						+ factoryClass.getName() + "]; does the factory parameterize the <A> generic type?");
+	}
+
+	private Formatter<?> getAnnotationFormatter(TypeDescriptor type) {
 		Annotation[] annotations = type.getAnnotations();
 		for (Annotation a : annotations) {
 			AnnotationFormatterFactory factory = annotationFormatters.get(a.annotationType());
@@ -69,65 +153,42 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 				return factory.getFormatter(a);
 			}
 		}
-		return getFormatter(type.getType());
+		return null;
 	}
-
-	// internal helpers
-
-	private Formatter<?> getFormatter(Class<?> type) {
+	
+	private Formatter<?> getTypeFormatter(Class<?> type) {
 		Assert.notNull(type, "The Class of the object to format is required");
 		Formatter formatter = typeFormatters.get(type);
 		if (formatter != null) {
-			return formatter;
-		} else {
-			Formatted formatted = AnnotationUtils.findAnnotation(type, Formatted.class);
-			if (formatted != null) {
-				Class formatterClass = formatted.value();
-				try {
-					formatter = (Formatter) formatterClass.newInstance();
-				} catch (InstantiationException e) {
-					throw new IllegalStateException(
-							"Formatter referenced by @Formatted annotation does not have default constructor", e);
-				} catch (IllegalAccessException e) {
-					throw new IllegalStateException(
-							"Formatter referenced by @Formatted annotation does not have public constructor", e);
-				}
-				typeFormatters.put(type, formatter);
+			Class<?> formattedObjectType = getFormattedObjectType(formatter.getClass());
+			if (type.isAssignableFrom(formattedObjectType)) {
 				return formatter;
 			} else {
-				return null;
+				return new ConvertingFormatter(type, formattedObjectType, formatter);
 			}
+		} else {
+			return getDefaultFormatter(type);
 		}
-	}
-	
-	private Class getAnnotationType(AnnotationFormatterFactory factory) {
-		Class classToIntrospect = factory.getClass();
-		while (classToIntrospect != null) {
-			Type[] genericInterfaces = classToIntrospect.getGenericInterfaces();
-			for (Type genericInterface : genericInterfaces) {
-				if (genericInterface instanceof ParameterizedType) {
-					ParameterizedType pInterface = (ParameterizedType) genericInterface;
-					if (AnnotationFormatterFactory.class.isAssignableFrom((Class) pInterface.getRawType())) {
-						return getParameterClass(pInterface.getActualTypeArguments()[0], factory.getClass());
-					}
-				}
-			}
-			classToIntrospect = classToIntrospect.getSuperclass();
-		}
-		throw new IllegalArgumentException(
-				"Unable to extract Annotation type A argument from AnnotationFormatterFactory ["
-						+ factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
 	}
 
-	private Class getParameterClass(Type parameterType, Class converterClass) {
-		if (parameterType instanceof TypeVariable) {
-			parameterType = GenericTypeResolver.resolveTypeVariable((TypeVariable) parameterType, converterClass);
+	private Formatter<?> getDefaultFormatter(Class<?> type) {
+		Formatted formatted = AnnotationUtils.findAnnotation(type, Formatted.class);
+		if (formatted != null) {
+			Class formatterClass = formatted.value();
+			try {
+				Formatter formatter = (Formatter) formatterClass.newInstance();
+				typeFormatters.put(type, formatter);
+				return formatter;
+			} catch (InstantiationException e) {
+				throw new IllegalStateException(
+						"Formatter referenced by @Formatted annotation does not have default constructor", e);
+			} catch (IllegalAccessException e) {
+				throw new IllegalStateException(
+						"Formatter referenced by @Formatted annotation does not have public constructor", e);
+			}
+		} else {
+			return null;
 		}
-		if (parameterType instanceof Class) {
-			return (Class) parameterType;
-		}
-		throw new IllegalArgumentException("Unable to obtain the java.lang.Class for parameterType [" + parameterType
-				+ "] on Formatter [" + converterClass.getName() + "]");
 	}
 
 	private static class SimpleAnnotationFormatterFactory implements AnnotationFormatterFactory {
@@ -140,6 +201,33 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 		public Formatter getFormatter(Annotation annotation) {
 			return formatter;
+		}
+
+	}
+
+	private class ConvertingFormatter implements Formatter {
+
+		private Class<?> type;
+
+		private Class<?> formattedObjectType;
+
+		private Formatter targetFormatter;
+
+		public ConvertingFormatter(Class<?> type, Class<?> formattedObjectType, Formatter targetFormatter) {
+			this.type = type;
+			this.formattedObjectType = formattedObjectType;
+			this.targetFormatter = targetFormatter;
+		}
+
+		public String format(Object object, Locale locale) {
+			object = conversionService.convert(object, formattedObjectType);
+			return targetFormatter.format(object, locale);
+		}
+
+		public Object parse(String formatted, Locale locale) throws ParseException {
+			Object parsed = targetFormatter.parse(formatted, locale);
+			parsed = conversionService.convert(parsed, type);
+			return parsed;
 		}
 
 	}
