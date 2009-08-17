@@ -33,7 +33,7 @@ import org.springframework.ui.format.Formatter;
  * @author Keith Donald
  * @since 3.0
  */
-public class CurrencyFormatter implements Formatter<BigDecimal> {
+public final class CurrencyFormatter implements Formatter<BigDecimal> {
 
 	private CurrencyNumberFormatFactory currencyFormatFactory = new CurrencyNumberFormatFactory();
 

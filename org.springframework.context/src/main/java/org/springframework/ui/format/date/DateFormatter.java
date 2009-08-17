@@ -26,13 +26,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A formatter for {@link Date} types.
+ * A formatter for {@link java.util.Date} types.
  * Allows the configuration of an explicit date pattern and locale.
  * @author Keith Donald
  * @since 3.0
  * @see SimpleDateFormat 
  */
-public class DateFormatter implements Formatter<Date> {
+public final class DateFormatter implements Formatter<Date> {
 
 	private static Log logger = LogFactory.getLog(DateFormatter.class);
 
@@ -66,9 +66,9 @@ public class DateFormatter implements Formatter<Date> {
 		return getDateFormat(locale).parse(formatted);
 	}
 
-	// subclassing hookings
+	// internal helpers
 
-	protected DateFormat getDateFormat(Locale locale) {
+	private DateFormat getDateFormat(Locale locale) {
 		DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT, locale);
 		format.setLenient(false);
 		if (format instanceof SimpleDateFormat) {
@@ -80,8 +80,6 @@ public class DateFormatter implements Formatter<Date> {
 		}
 		return format;
 	}
-
-	// internal helpers
 
 	private String determinePattern(String pattern) {
 		return pattern != null ? pattern : DEFAULT_PATTERN;
