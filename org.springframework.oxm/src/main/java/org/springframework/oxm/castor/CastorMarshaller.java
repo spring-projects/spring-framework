@@ -104,6 +104,10 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private XMLContext xmlContext;
 
+	private boolean suppressNamespaces = false;
+
+	private boolean suppressXsiType = false;
+
 
 	/**
 	 * Set the encoding to be used for stream access.
@@ -180,6 +184,35 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.namespaceMappings = namespaceMappings;
 	}
 
+	/** Returns whether this marshaller should output namespaces. */
+	public boolean isSuppressNamespaces() {
+		return suppressNamespaces;
+	}
+
+	/**
+	 * Sets whether this marshaller should output namespaces. The default is {@code false}, i.e. namespaces are
+	 * written.
+	 *
+	 * @see org.exolab.castor.xml.Marshaller#setSuppressNamespaces(boolean)
+	 */
+	public void setSuppressNamespaces(boolean suppressNamespaces) {
+		this.suppressNamespaces = suppressNamespaces;
+	}
+
+	/** Sets whether this marshaller should output the xsi:type attribute. */
+	public boolean isSuppressXsiType() {
+		return suppressXsiType;
+	}
+
+	/**
+	 * Sets whether this marshaller should output the {@code xsi:type} attribute. The default is {@code false}, i.e. the
+	 * {@code xsi:type} is written.
+	 *
+	 * @see org.exolab.castor.xml.Marshaller#setSuppressXSIType(boolean)
+	 */
+	public void setSuppressXsiType(boolean suppressXsiType) {
+		this.suppressXsiType = suppressXsiType;
+	}
 
 
 	public final void afterPropertiesSet() throws CastorMappingException, IOException {
@@ -296,6 +329,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 */
 	protected void customizeMarshaller(Marshaller marshaller) {
 		marshaller.setValidation(this.validating);
+		marshaller.setSuppressNamespaces(isSuppressNamespaces());
+		marshaller.setSuppressXSIType(isSuppressXsiType());
 		if (this.namespaceMappings != null) {
 			for (Map.Entry<String, String> entry : namespaceMappings.entrySet()) {
 				marshaller.setNamespaceMapping(entry.getKey(), entry.getValue());
