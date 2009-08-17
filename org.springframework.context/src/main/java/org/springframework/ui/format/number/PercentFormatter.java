@@ -30,7 +30,7 @@ import org.springframework.ui.format.Formatter;
  * @author Keith Donald
  * @since 3.0
  */
-public class PercentFormatter implements Formatter<BigDecimal> {
+public final class PercentFormatter implements Formatter<BigDecimal> {
 
 	private PercentNumberFormatFactory percentFormatFactory = new PercentNumberFormatFactory();
 

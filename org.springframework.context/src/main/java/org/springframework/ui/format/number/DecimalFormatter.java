@@ -31,7 +31,7 @@ import org.springframework.ui.format.Formatter;
  * @author Keith Donald
  * @since 3.0
  */
-public class DecimalFormatter implements Formatter<BigDecimal> {
+public final class DecimalFormatter implements Formatter<BigDecimal> {
 
 	private DefaultNumberFormatFactory formatFactory = new DefaultNumberFormatFactory();
 

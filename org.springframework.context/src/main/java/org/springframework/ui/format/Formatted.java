@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A type that can be formatted as a String for display in a UI.
+ * A type that can be formatted as a String for display in a user interface.
  * @author Keith Donald
  * @since 3.0
  */

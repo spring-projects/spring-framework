@@ -28,7 +28,7 @@ import org.springframework.ui.format.Formatter;
  * @author Keith Donald
  * @since 3.0
  */
-public class IntegerFormatter implements Formatter<Long> {
+public final class IntegerFormatter implements Formatter<Long> {
 
 	private IntegerNumberFormatFactory formatFactory = new IntegerNumberFormatFactory();
 

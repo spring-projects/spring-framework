@@ -56,6 +56,7 @@ public interface FormatterRegistry {
 	 * Get the Formatter for the type.
 	 * @return the Formatter, or <code>null</code> if none is registered
 	 */
+	@SuppressWarnings("unchecked")
 	Formatter getFormatter(TypeDescriptor type);
 
 }

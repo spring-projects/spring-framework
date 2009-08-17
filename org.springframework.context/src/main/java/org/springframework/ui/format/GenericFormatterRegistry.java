@@ -42,6 +42,8 @@ public class GenericFormatterRegistry implements FormatterRegistry {
 
 	private Map<Class, AnnotationFormatterFactory> annotationFormatters = new HashMap<Class, AnnotationFormatterFactory>();
 
+	// implementing FormatterRegistry
+	
 	public <T> void add(Formatter<T> formatter) {
 		// TODO
 	}
