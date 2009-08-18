@@ -83,6 +83,10 @@ import java.lang.annotation.Target;
  * only applicable in a Servlet environment).
  * </ul>
  *
+ * <p>In Servlet environments, you can combine the {@code ExceptionHandler} annotation
+ * with {@link ResponseStatus @ResponseStatus}, to define the response status
+ * for the HTTP response.
+ *
  * <p><b>NOTE: <code>@RequestMapping</code> will only be processed if a
  * corresponding <code>HandlerMapping</code> (for type level annotations)
  * and/or <code>HandlerAdapter</code> (for method level annotations) is
