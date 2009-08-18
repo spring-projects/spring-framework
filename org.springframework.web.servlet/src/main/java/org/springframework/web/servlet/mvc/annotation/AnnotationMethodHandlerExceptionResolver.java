@@ -44,6 +44,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -89,14 +90,14 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		if (handler != null) {
 			Method handlerMethod = findBestExceptionHandlerMethod(handler, ex);
 			if (handlerMethod != null) {
-				NativeWebRequest webRequest = new ServletWebRequest(request, response);
+				ServletWebRequest webRequest = new ServletWebRequest(request, response);
 				try {
 					Object[] args = resolveHandlerArguments(handlerMethod, handler, webRequest, ex);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Invoking request handler method: " + handlerMethod);
 					}
 					Object retVal = doInvokeMethod(handlerMethod, handler, args);
-					return getModelAndView(retVal);
+					return getModelAndView(handlerMethod, handler.getClass(), retVal, webRequest);
 				}
 				catch (Exception invocationEx) {
 					logger.error("Invoking request method resulted in exception : " + handlerMethod, invocationEx);
@@ -109,7 +110,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	/**
 	 * Finds the handler method that matches the thrown exception best.
 	 *
-	 * @param handler the handler object
+	 * @param handler		 the handler object
 	 * @param thrownException the exception to be handled
 	 * @return the best matching method; or <code>null</code> if none is found
 	 */
@@ -171,7 +172,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		return result;
 	}
 
-	/** Returns the best matching method. Uses the {@link DepthComparator}. */
+	/**
+	 * Returns the best matching method. Uses the {@link DepthComparator}.
+	 */
 	private Method getBestMatchingMethod(Exception thrownException,
 			Map<Class<? extends Throwable>, Method> resolverMethods) {
 		if (!resolverMethods.isEmpty()) {
@@ -186,7 +189,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 	}
 
-	/** Resolves the arguments for the given method. Delegates to {@link #resolveCommonArgument}. */
+	/**
+	 * Resolves the arguments for the given method. Delegates to {@link #resolveCommonArgument}.
+	 */
 	private Object[] resolveHandlerArguments(Method handlerMethod,
 			Object handler,
 			NativeWebRequest webRequest,
@@ -221,7 +226,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 * then checking {@link #resolveStandardArgument}.
 	 *
 	 * @param methodParameter the method parameter
-	 * @param webRequest the request
+	 * @param webRequest	  the request
 	 * @param thrownException the exception thrown
 	 * @return the argument value, or {@link WebArgumentResolver#UNRESOLVED}
 	 */
@@ -256,8 +261,8 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 * request {@link InputStream}, request {@link Reader}, response {@link OutputStream}, response {@link Writer},
 	 * and the given {@code thrownException}.
 	 *
-	 * @param parameterType the method parameter type
-	 * @param webRequest the request
+	 * @param parameterType   the method parameter type
+	 * @param webRequest	  the request
 	 * @param thrownException the exception thrown
 	 * @return the argument value, or {@link WebArgumentResolver#UNRESOLVED}
 	 */
@@ -319,7 +324,16 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 	@SuppressWarnings("unchecked")
-	private ModelAndView getModelAndView(Object returnValue) {
+	private ModelAndView getModelAndView(Method handlerMethod,
+			Class handlerType,
+			Object returnValue,
+			ServletWebRequest webRequest) throws Exception {
+
+		if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
+			ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
+			HttpServletResponse response = webRequest.getResponse();
+			response.setStatus(responseStatus.value().value());
+		}
 		if (returnValue instanceof ModelAndView) {
 			return (ModelAndView) returnValue;
 		}
@@ -343,7 +357,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 	}
 
-	/** Comparator capable of sorting exceptions based on their depth from the thrown exception type. */
+	/**
+	 * Comparator capable of sorting exceptions based on their depth from the thrown exception type.
+	 */
 	private static class DepthComparator implements Comparator<Class<? extends Throwable>> {
 
 		private final Class<? extends Throwable> handlerExceptionType;

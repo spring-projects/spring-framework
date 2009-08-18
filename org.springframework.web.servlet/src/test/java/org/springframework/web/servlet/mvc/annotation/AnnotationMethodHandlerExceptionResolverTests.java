@@ -30,7 +30,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.http.HttpStatus;
 
 /** @author Arjen Poutsma */
 public class AnnotationMethodHandlerExceptionResolverTests {
@@ -56,6 +58,8 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
 		assertNotNull("No ModelAndView returned", mav);
 		assertEquals("Invalid view name returned", "BindException", mav.getViewName());
+		assertEquals("Invalid status code returned", 406, response.getStatus());
+
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -74,6 +78,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		}
 
 		@ExceptionHandler(BindException.class)
+		@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
 		public String handleBindException(Exception ex, HttpServletResponse response) {
 			return ClassUtils.getShortName(ex.getClass());
 		}
