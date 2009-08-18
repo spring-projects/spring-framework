@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.annotation;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -147,17 +148,21 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 */
 	protected String[] determineUrlsForHandlerMethods(Class<?> handlerType) {
 		final Set<String> urls = new LinkedHashSet<String>();
-		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
-			public void doWith(Method method) {
-				RequestMapping mapping = method.getAnnotation(RequestMapping.class);
-				if (mapping != null) {
-					String[] mappedPaths = mapping.value();
-					for (String mappedPath : mappedPaths) {
-						addUrlsForPath(urls, mappedPath);
+		Class<?>[] handlerTypes =
+				Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[]{handlerType};
+		for (Class<?> currentHandlerType : handlerTypes) {
+			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
+				public void doWith(Method method) {
+					RequestMapping mapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+					if (mapping != null) {
+						String[] mappedPaths = mapping.value();
+						for (String mappedPath : mappedPaths) {
+							addUrlsForPath(urls, mappedPath);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 		return StringUtils.toStringArray(urls);
 	}
 
