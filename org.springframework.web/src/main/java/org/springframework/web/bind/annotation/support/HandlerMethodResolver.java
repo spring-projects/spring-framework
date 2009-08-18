@@ -17,12 +17,14 @@
 package org.springframework.web.bind.annotation.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -68,21 +70,25 @@ public class HandlerMethodResolver {
 	 * Initialize a new HandlerMethodResolver for the specified handler type.
 	 * @param handlerType the handler class to introspect
 	 */
-	public void init(final Class<?> handlerType) {
-		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
-			public void doWith(Method method) {
-				if (isHandlerMethod(method)) {
-					handlerMethods.add(ClassUtils.getMostSpecificMethod(method, handlerType));
+	public void init(Class<?> handlerType) {
+		Class<?>[] handlerTypes =
+				Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[]{handlerType};
+		for (final Class<?> currentHandlerType : handlerTypes) {
+			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
+				public void doWith(Method method) {
+					if (isHandlerMethod(ClassUtils.getMostSpecificMethod(method, currentHandlerType))) {
+						handlerMethods.add(ClassUtils.getMostSpecificMethod(method, currentHandlerType));
+					}
+					else if (method.isAnnotationPresent(InitBinder.class)) {
+						initBinderMethods.add(ClassUtils.getMostSpecificMethod(method, currentHandlerType));
+					}
+					else if (method.isAnnotationPresent(ModelAttribute.class)) {
+						modelAttributeMethods.add(ClassUtils.getMostSpecificMethod(method, currentHandlerType));
+					}
 				}
-				else if (method.isAnnotationPresent(InitBinder.class)) {
-					initBinderMethods.add(ClassUtils.getMostSpecificMethod(method, handlerType));
-				}
-				else if (method.isAnnotationPresent(ModelAttribute.class)) {
-					modelAttributeMethods.add(ClassUtils.getMostSpecificMethod(method, handlerType));
-				}
-			}
-		});
-		this.typeLevelMapping = handlerType.getAnnotation(RequestMapping.class);
+			});
+		}
+		this.typeLevelMapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
 		SessionAttributes sessionAttributes = handlerType.getAnnotation(SessionAttributes.class);
 		this.sessionAttributesFound = (sessionAttributes != null);
 		if (this.sessionAttributesFound) {
@@ -92,7 +98,7 @@ public class HandlerMethodResolver {
 	}
 
 	protected boolean isHandlerMethod(Method method) {
-		return method.isAnnotationPresent(RequestMapping.class);
+		return AnnotationUtils.findAnnotation(method, RequestMapping.class) != null;
 	}
 
 
