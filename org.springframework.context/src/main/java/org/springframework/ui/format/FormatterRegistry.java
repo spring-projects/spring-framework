@@ -38,8 +38,8 @@ public interface FormatterRegistry {
 	 * Adds a Formatter to this registry indexed by type.
 	 * Use this add method when type differs from &lt;T&gt;.
 	 * Calling getFormatter(type) returns a decorator that wraps the targetFormatter.
-	 * On format, the decorator first coerses the instance of tType to &lt;T&gt;, then delegates to <code>targetFormatter</code> to format the value.
-	 * On parse, the decorator first delegates to the formatter to parse a &lt;T&gt;, then coerses the parsed value to objectType.
+	 * On format, the decorator first coerses the instance of type to &lt;T&gt;, then delegates to <code>targetFormatter</code> to format the value.
+	 * On parse, the decorator first delegates to the formatter to parse a &lt;T&gt;, then coerses the parsed value to type.
 	 * @param type the object type
 	 * @param targetFormatter the target formatter
 	 * @param <T> the type of object the target formatter formats
@@ -47,14 +47,14 @@ public interface FormatterRegistry {
 	<T> void add(Class<?> type, Formatter<T> targetFormatter);
 
 	/**
-	 * Adds a AnnotationFormatterFactory that will format values of properties annotated with a specific annotation.
+	 * Adds a AnnotationFormatterFactory that returns the Formatter for properties annotated with a specific annotation.
 	 * @param factory the annotation formatter factory
 	 */
 	<A extends Annotation, T> void add(AnnotationFormatterFactory<A, T> factory);
 
 	/**
 	 * Get the Formatter for the type descriptor.
-	 * @return the Formatter, or <code>null</code> if none is registered
+	 * @return the Formatter, or <code>null</code> if no suitable one is registered
 	 */
 	@SuppressWarnings("unchecked")
 	Formatter getFormatter(TypeDescriptor type);
