@@ -3,6 +3,11 @@ package org.springframework.ui.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -12,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.ui.format.number.CurrencyFormat;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
 
@@ -73,7 +77,7 @@ public class GenericFormatterRegistryTests {
 		registry.add(Integer.class, new AddressFormatter());
 	}
 	
-	@CurrencyFormat
+	@Currency
 	public BigDecimal currencyField;
 
 	private static TypeDescriptor typeDescriptor(Class<?> clazz) {
@@ -81,11 +85,11 @@ public class GenericFormatterRegistryTests {
 	}
 
 	public static class CurrencyAnnotationFormatterFactory implements
-			AnnotationFormatterFactory<CurrencyFormat, BigDecimal> {
+			AnnotationFormatterFactory<Currency, BigDecimal> {
 		
 		private CurrencyFormatter currencyFormatter = new CurrencyFormatter();
 		
-		public Formatter<BigDecimal> getFormatter(CurrencyFormat annotation) {
+		public Formatter<BigDecimal> getFormatter(Currency annotation) {
 			return currencyFormatter;
 		}
 	}
@@ -159,6 +163,13 @@ public class GenericFormatterRegistryTests {
 			address.setZip(fields[3]);
 			return address;
 		}
+
+	}
+	
+	@Target( { ElementType.METHOD, ElementType.FIELD })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	public @interface Currency {
 
 	}
 
