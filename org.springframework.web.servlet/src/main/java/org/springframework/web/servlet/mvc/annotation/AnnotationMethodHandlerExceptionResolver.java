@@ -97,7 +97,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 						logger.debug("Invoking request handler method: " + handlerMethod);
 					}
 					Object retVal = doInvokeMethod(handlerMethod, handler, args);
-					return getModelAndView(handlerMethod, handler.getClass(), retVal, webRequest);
+					return getModelAndView(handlerMethod, retVal, webRequest);
 				}
 				catch (Exception invocationEx) {
 					logger.error("Invoking request method resulted in exception : " + handlerMethod, invocationEx);
@@ -324,10 +324,8 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 	@SuppressWarnings("unchecked")
-	private ModelAndView getModelAndView(Method handlerMethod,
-			Class handlerType,
-			Object returnValue,
-			ServletWebRequest webRequest) throws Exception {
+	private ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ServletWebRequest webRequest)
+			throws Exception {
 
 		if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
 			ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
@@ -350,7 +348,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			return new ModelAndView((String) returnValue);
 		}
 		else if (returnValue == null) {
-			return null;
+			return new ModelAndView();
 		}
 		else {
 			throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
