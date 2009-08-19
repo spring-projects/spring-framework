@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.io.UnsupportedEncodingException;
 import java.net.BindException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +27,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
@@ -32,9 +35,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.http.HttpStatus;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class AnnotationMethodHandlerExceptionResolverTests {
 
 	private AnnotationMethodHandlerExceptionResolver exceptionResolver;
@@ -59,7 +63,6 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertEquals("Invalid view name returned", "BindException", mav.getViewName());
 		assertEquals("Invalid status code returned", 406, response.getStatus());
-
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -67,6 +70,16 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		AmbiguousController controller = new AmbiguousController();
 		exceptionResolver.resolveException(request, response, controller, ex);
+	}
+
+	@Test
+	public void noModelAndView() throws UnsupportedEncodingException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		NoMAVReturningController controller = new NoMAVReturningController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("ModelAndView not empty", mav.isEmpty());
+		assertEquals("Invalid response written", "IllegalArgumentException", response.getContentAsString());
 	}
 
 	@Controller
@@ -104,5 +117,14 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 
+	}
+
+	@Controller
+	private static class NoMAVReturningController {
+
+		@ExceptionHandler(Exception.class)
+		public void handle(Exception ex, Writer writer) throws IOException {
+			writer.write(ClassUtils.getShortName(ex.getClass()));
+		}
 	}
 }
