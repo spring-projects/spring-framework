@@ -16,6 +16,7 @@
 package org.springframework.ui.format.number;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -24,14 +25,17 @@ import java.util.Locale;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A BigDecimal formatter for decimal values.
+ * A Number formatter for decimal values.
  * Delegates to {@link NumberFormat#getInstance(Locale)}.
  * Configures BigDecimal parsing so there is no loss in precision.
- * Allows configuration over the decimal number pattern; see {@link #DecimalFormatter(String)}.
+ * Allows configuration over the decimal number pattern.
+ * The {@link #parse(String, Locale)} routine always returns a BigDecimal.
  * @author Keith Donald
  * @since 3.0
+ * @see #setPattern(String)
+ * @see #setLenient(boolean)
  */
-public final class DecimalFormatter implements Formatter<BigDecimal> {
+public final class DecimalFormatter implements Formatter<Number> {
 
 	private DefaultNumberFormatFactory formatFactory = new DefaultNumberFormatFactory();
 
@@ -40,13 +44,28 @@ public final class DecimalFormatter implements Formatter<BigDecimal> {
 	public DecimalFormatter() {
 		initDefaults();
 	}
-	
-	public DecimalFormatter(String pattern) {
-		initDefaults();
+
+	/**
+	 * Sets the pattern to use to format number values.
+	 * If not specified, the default DecimalFormat pattern is used.
+	 * @param pattern the format pattern
+	 * @see DecimalFormat#applyPattern(String)
+	 */
+	public void setPattern(String pattern) {
 		formatFactory.setPattern(pattern);
 	}
-	
-	public String format(BigDecimal decimal, Locale locale) {
+
+	/**
+	 * Specify whether or not parsing is to be lenient.
+	 * With lenient parsing, the parser may allow inputs that do not precisely match the format.
+	 * With strict parsing, inputs must match the format exactly.
+	 * Default is false.
+	 */
+	public void setLenient(boolean lenient) {
+		this.lenient = lenient;
+	}
+
+	public String format(Number decimal, Locale locale) {
 		if (decimal == null) {
 			return "";
 		}
@@ -54,8 +73,7 @@ public final class DecimalFormatter implements Formatter<BigDecimal> {
 		return format.format(decimal);
 	}
 
-	public BigDecimal parse(String formatted, Locale locale)
-			throws ParseException {
+	public Number parse(String formatted, Locale locale) throws ParseException {
 		if (formatted.length() == 0) {
 			return null;
 		}
@@ -73,7 +91,9 @@ public final class DecimalFormatter implements Formatter<BigDecimal> {
 		}
 		return decimal;
 	}
-	
+
+	// internal helpers
+
 	private void initDefaults() {
 		formatFactory.setParseBigDecimal(true);
 	}
