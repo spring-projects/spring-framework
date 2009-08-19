@@ -32,12 +32,23 @@ import org.springframework.ui.format.Formatter;
  * Applies {@link RoundingMode#DOWN} to parsed values.
  * @author Keith Donald
  * @since 3.0
+ * @see #setLenient(boolean)
  */
 public final class CurrencyFormatter implements Formatter<BigDecimal> {
 
 	private CurrencyNumberFormatFactory currencyFormatFactory = new CurrencyNumberFormatFactory();
 
 	private boolean lenient;
+
+	/**
+	 * Specify whether or not parsing is to be lenient.
+	 * With lenient parsing, the parser may allow inputs that do not precisely match the format.
+	 * With strict parsing, inputs must match the format exactly.
+	 * Default is false.
+	 */
+	public void setLenient(boolean lenient) {
+		this.lenient = lenient;
+	}
 
 	public String format(BigDecimal decimal, Locale locale) {
 		if (decimal == null) {

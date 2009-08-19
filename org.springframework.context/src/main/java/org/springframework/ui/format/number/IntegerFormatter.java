@@ -23,18 +23,30 @@ import java.util.Locale;
 import org.springframework.ui.format.Formatter;
 
 /**
- * A Long formatter for whole integer values.
+ * A Number formatter for whole integer values.
  * Delegates to {@link NumberFormat#getIntegerInstance(Locale)}.
+ * The {@link #parse(String, Locale)} routine always returns a Long.
  * @author Keith Donald
  * @since 3.0
+ * @see #setLenient(boolean)
  */
-public final class IntegerFormatter implements Formatter<Long> {
+public final class IntegerFormatter implements Formatter<Number> {
 
 	private IntegerNumberFormatFactory formatFactory = new IntegerNumberFormatFactory();
 
 	private boolean lenient;
 
-	public String format(Long integer, Locale locale) {
+	/**
+	 * Specify whether or not parsing is to be lenient.
+	 * With lenient parsing, the parser may allow inputs that do not precisely match the format.
+	 * With strict parsing, inputs must match the format exactly.
+	 * Default is false.
+	 */
+	public void setLenient(boolean lenient) {
+		this.lenient = lenient;
+	}
+
+	public String format(Number integer, Locale locale) {
 		if (integer == null) {
 			return "";
 		}
@@ -42,7 +54,7 @@ public final class IntegerFormatter implements Formatter<Long> {
 		return format.format(integer);
 	}
 
-	public Long parse(String formatted, Locale locale)
+	public Number parse(String formatted, Locale locale)
 			throws ParseException {
 		if (formatted.length() == 0) {
 			return null;

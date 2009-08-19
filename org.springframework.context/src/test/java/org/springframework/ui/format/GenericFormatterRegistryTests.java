@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Locale;
 
@@ -25,18 +26,20 @@ public class GenericFormatterRegistryTests {
 	}
 
 	@Test
-	public void testAdd() {
+	public void testAdd() throws ParseException {
 		registry.add(new IntegerFormatter());
-		Formatter formatter = registry.getFormatter(typeDescriptor(Long.class));
-		String formatted = formatter.format(new Long(3), Locale.US);
+		Formatter formatter = registry.getFormatter(typeDescriptor(Integer.class));
+		String formatted = formatter.format(new Integer(3), Locale.US);
 		assertEquals("3", formatted);
+		Integer i = (Integer) formatter.parse("3", Locale.US);
+		assertEquals(new Integer(3), i);
 	}
 
 	@Test
 	public void testAddByObjectType() {
-		registry.add(Integer.class, new IntegerFormatter());
-		Formatter formatter = registry.getFormatter(typeDescriptor(Integer.class));
-		String formatted = formatter.format(new Integer(3), Locale.US);
+		registry.add(BigInteger.class, new IntegerFormatter());
+		Formatter formatter = registry.getFormatter(typeDescriptor(BigInteger.class));
+		String formatted = formatter.format(new BigInteger("3"), Locale.US);
 		assertEquals("3", formatted);
 	}
 
@@ -64,6 +67,11 @@ public class GenericFormatterRegistryTests {
 	public void testGetNoFormatterForType() {
 		assertNull(registry.getFormatter(typeDescriptor(Integer.class)));
 	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetFormatterCannotConvert() {
+		registry.add(Integer.class, new AddressFormatter());
+	}
 	
 	@CurrencyFormat
 	public BigDecimal currencyField;
@@ -74,8 +82,11 @@ public class GenericFormatterRegistryTests {
 
 	public static class CurrencyAnnotationFormatterFactory implements
 			AnnotationFormatterFactory<CurrencyFormat, BigDecimal> {
+		
+		private CurrencyFormatter currencyFormatter = new CurrencyFormatter();
+		
 		public Formatter<BigDecimal> getFormatter(CurrencyFormat annotation) {
-			return new CurrencyFormatter();
+			return currencyFormatter;
 		}
 	}
 	
