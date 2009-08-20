@@ -27,7 +27,7 @@ public interface Binder<M> {
 	
 	/**
 	 * Bind submitted field values.
-	 * @param fieldValues the field values to bind
+	 * @param fieldValues the field values to bind; an entry key is a field name, the associated entry value is the submitted value for that field
 	 * @param model the model to bind to
 	 * @return the results of the binding operation
 	 * @throws MissingFieldException when the fieldValues Map is missing required fields
