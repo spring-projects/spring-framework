@@ -31,6 +31,7 @@ import org.springframework.context.message.MockMessageSource;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.model.binder.Binder;
 import org.springframework.model.binder.BindingResults;
+import org.springframework.model.binder.MissingFieldException;
 
 /**
  * @author Mark Fisher
@@ -155,6 +156,22 @@ public class GenericBinderTests {
 		BindingResults results = binder.bind(map, person);
 		assertEquals("Please enter true or false for the value of the male field; you entered bogus", results.get(0).getAlert().getMessage());		
 		LocaleContextHolder.setLocale(null);
+	}
+	
+	@Test
+	public void missingFields() {
+		Person person = new Person();
+		Map<String, Object> map = new HashMap<String, Object>();
+		GenericBinder binder = new GenericBinder();
+		binder.setRequiredFields(new String[] { "name", "age", "male" });
+		try {
+			binder.bind(map, person);
+		} catch (MissingFieldException e) {
+			assertEquals(3, e.getMissing().size());
+			assertEquals("name", e.getMissing().get(0));
+			assertEquals("age", e.getMissing().get(1));
+			assertEquals("male", e.getMissing().get(2));
+		}
 	}
 	
 	public static class Person {
