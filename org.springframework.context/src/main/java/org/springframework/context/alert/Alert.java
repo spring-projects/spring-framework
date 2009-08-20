@@ -17,7 +17,7 @@ package org.springframework.context.alert;
 
 /**
  * Communicates an event of interest to the user.
- * For example, an alert may inform a user of a web application a business rule was violated.
+ * For example, an alert may inform a user of a application a business rule was violated.
  * @author Keith Donald
  * @since 3.0
  */
