@@ -24,14 +24,13 @@ import java.lang.annotation.Target;
 
 /**
  * Test annotation to indicate that a method is not transactional.
- *
+ * 
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
  */
-@Target( { ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 public @interface NotTransactional {
-
 }

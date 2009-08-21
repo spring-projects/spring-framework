@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,13 @@ import java.lang.annotation.Target;
  * The <code>&#064;BeforeTransaction</code> methods of superclasses will be
  * executed before those of the current class.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.transaction.annotation.Transactional
  */
-@Target( { ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 public @interface BeforeTransaction {
-
 }

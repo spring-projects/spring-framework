@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * TransactionConfiguration defines class-level metadata for configuring
  * transactional tests.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see ContextConfiguration
  * @see TransactionalTestExecutionListener
  */
+@Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Inherited
-@Documented
 public @interface TransactionConfiguration {
 
 	/**

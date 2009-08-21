@@ -29,17 +29,17 @@ import java.lang.annotation.Target;
  * be registered with a {@link TestContextManager}. Typically,
  * <code>&#064;TestExecutionListeners</code> will be used in conjunction with
  * {@link ContextConfiguration &#064;ContextConfiguration}.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see TestExecutionListener
  * @see TestContextManager
  * @see ContextConfiguration
  */
+@Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Inherited
-@Documented
 public @interface TestExecutionListeners {
 
 	/**
@@ -47,7 +47,7 @@ public @interface TestExecutionListeners {
 	 * The {@link TestExecutionListener TestExecutionListeners} to register with
 	 * a {@link TestContextManager}.
 	 * </p>
-	 *
+	 * 
 	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
@@ -73,20 +73,20 @@ public @interface TestExecutionListeners {
 	 * <code>DirtiesContextTestExecutionListener</code>, <strong>and</strong>
 	 * <code>TransactionalTestExecutionListener</code>, in that order.
 	 * </p>
-	 *
+	 * 
 	 * <pre class="code">
 	 * &#064;TestExecutionListeners({ DependencyInjectionTestExecutionListener.class,
-	 *     DirtiesContextTestExecutionListener.class })
+     *    DirtiesContextTestExecutionListener.class })
 	 * public abstract class AbstractBaseTest {
-	 *     // ...
+	 * 	// ...
 	 * }
-	 *
+	 * 
 	 * &#064;TestExecutionListeners(TransactionalTestExecutionListener.class)
 	 * public class TransactionalTest extends AbstractBaseTest {
-	 *     // ...
+	 * 	// ...
 	 * }
 	 * </pre>
-	 *
+     *
 	 * <p>
 	 * If <code>inheritListeners</code> is set to <code>false</code>, the
 	 * listeners for the annotated class will <em>shadow</em> and effectively

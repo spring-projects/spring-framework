@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,20 @@ import java.lang.annotation.Target;
  * <p>
  * ProfileValueSourceConfiguration is a class-level annotation which is used to
  * specify what type of {@link ProfileValueSource} to use when retrieving
- * <em>profile values</em> configured via the
- * {@link IfProfileValue @IfProfileValue} annotation.
+ * <em>profile values</em> configured via the {@link IfProfileValue
+ * &#064;IfProfileValue} annotation.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see ProfileValueSource
  * @see IfProfileValue
  * @see ProfileValueUtils
  */
+@Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Inherited
-@Documented
 public @interface ProfileValueSourceConfiguration {
 
 	/**
@@ -48,7 +48,7 @@ public @interface ProfileValueSourceConfiguration {
 	 * The type of {@link ProfileValueSource} to use when retrieving
 	 * <em>profile values</em>.
 	 * </p>
-	 *
+	 * 
 	 * @see SystemProfileValueSource
 	 */
 	Class<? extends ProfileValueSource> value() default SystemProfileValueSource.class;
