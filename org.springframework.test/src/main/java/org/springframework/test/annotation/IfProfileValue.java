@@ -72,10 +72,10 @@ import java.lang.annotation.Target;
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  */
-@Target( { ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target( { ElementType.TYPE, ElementType.METHOD })
 public @interface IfProfileValue {
 
 	/**

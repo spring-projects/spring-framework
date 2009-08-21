@@ -27,16 +27,16 @@ import java.lang.annotation.Target;
  * ContextConfiguration defines class-level metadata which can be used to
  * instruct client code with regard to how to load and configure an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see ContextLoader
  * @see org.springframework.context.ApplicationContext
  */
+@Documented
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Inherited
-@Documented
 public @interface ContextConfiguration {
 
 	/**
@@ -62,7 +62,7 @@ public @interface ContextConfiguration {
 	 * defined by an annotated superclass. Thus, subclasses have the option of
 	 * <em>extending</em> the list of resource locations. In the following
 	 * example, the {@link org.springframework.context.ApplicationContext ApplicationContext}
-	 * for <code>ExtendedTest</code> will be loaded from
+     * for <code>ExtendedTest</code> will be loaded from
 	 * &quot;base-context.xml&quot; <strong>and</strong>
 	 * &quot;extended-context.xml&quot;, in that order. Beans defined in
 	 * &quot;extended-context.xml&quot; may therefore override those defined in
@@ -70,12 +70,12 @@ public @interface ContextConfiguration {
 	 * <pre class="code">
 	 * &#064;ContextConfiguration(&quot;base-context.xml&quot;)
 	 * public class BaseTest {
-	 *     // ...
+	 * 	// ...
 	 * }
 	 * 
 	 * &#064;ContextConfiguration(&quot;extended-context.xml&quot;)
 	 * public class ExtendedTest extends BaseTest {
-	 *     // ...
+	 * 	// ...
 	 * }
 	 * </pre>
 	 * If <code>inheritLocations</code> is set to <code>false</code>, the
@@ -89,8 +89,8 @@ public @interface ContextConfiguration {
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * <p>If not specified, the loader will be inherited from the first superclass
 	 * which is annotated with <code>&#064;ContextConfiguration</code> and specifies
-	 * an explicit loader. If no class in the hierarchy specifies an explicit
-	 * loader, a default loader will be used instead.
+     * an explicit loader. If no class in the hierarchy specifies an explicit
+     * loader, a default loader will be used instead.
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
 
