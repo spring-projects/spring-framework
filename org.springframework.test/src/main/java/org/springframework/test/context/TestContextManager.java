@@ -47,6 +47,10 @@ import org.springframework.util.Assert;
  * execution points:
  * </p>
  * <ul>
+ * <li>{@link #beforeTestClass() before test class execution}:
+ * prior to any <em>before class methods</em> of a particular testing
+ * framework (e.g., JUnit 4's {@link org.junit.BeforeClass
+ * &#064;BeforeClass})</li>
  * <li>{@link #prepareTestInstance(Object) test instance preparation}:
  * immediately following instantiation of the test instance</li>
  * <li>{@link #beforeTestMethod(Object,Method) before test method execution}:
@@ -55,6 +59,10 @@ import org.springframework.util.Assert;
  * <li>{@link #afterTestMethod(Object,Method,Throwable) after test method
  * execution}: after any <em>after methods</em> of a particular testing
  * framework (e.g., JUnit 4's {@link org.junit.After &#064;After})</li>
+ * <li>{@link #afterTestClass() after test class execution}: after any
+ * <em>after class methods</em> of a particular testing
+ * framework (e.g., JUnit 4's {@link org.junit.AfterClass
+ * &#064;AfterClass})</li>
  * </ul>
  * 
  * @author Sam Brannen
