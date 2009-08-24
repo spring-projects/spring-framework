@@ -54,12 +54,15 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					throw new BeanInstantiationException(clazz, "Specified class is an interface");
 				}
 				try {
-					constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>() {
-
-						public Constructor run() throws Exception {
-							return clazz.getDeclaredConstructor((Class[]) null);
-						}
-					});
+					if (System.getSecurityManager() != null) {
+						constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>() {
+							public Constructor run() throws Exception {
+								return clazz.getDeclaredConstructor((Class[]) null);
+							}
+						});
+					} else {
+						constructorToUse =	clazz.getDeclaredConstructor((Class[]) null);
+					}
 					beanDefinition.resolvedConstructorOrFactoryMethod = constructorToUse;
 				}
 				catch (Exception ex) {
@@ -127,14 +130,19 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			Object factoryBean, final Method factoryMethod, Object[] args) {
 
 		try {
+			if (System.getSecurityManager() != null) {
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						ReflectionUtils.makeAccessible(factoryMethod);
+						return null;
+					}
+				});
+			}
+			else {
+				ReflectionUtils.makeAccessible(factoryMethod);
+			}
+			
 			// It's a static method if the target is null.
-			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-
-				public Object run() {
-					ReflectionUtils.makeAccessible(factoryMethod);
-					return null;
-				}
-			});
 			return factoryMethod.invoke(factoryBean, args);
 		}
 		catch (IllegalArgumentException ex) {
@@ -151,5 +159,4 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					"Factory method [" + factoryMethod + "] threw exception", ex.getTargetException());
 		}
 	}
-
 }
