@@ -19,8 +19,8 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -212,6 +212,11 @@ class TypeConverterDelegate {
 						// proceed with field lookup
 						if (logger.isTraceEnabled()) {
 							logger.trace("No String constructor found on type [" + requiredType.getName() + "]", ex);
+						}
+					}
+					catch (Exception ex) {
+						if (logger.isTraceEnabled()) {
+							logger.trace("Construction via String failed for type [" + requiredType.getName() + "]", ex);
 						}
 					}
 					String trimmedValue = ((String) convertedValue).trim();
