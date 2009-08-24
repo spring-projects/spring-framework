@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionService;
@@ -57,6 +58,28 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 */
 	private final Map<Class, Map<Class, Object>> sourceTypeConverters = new HashMap<Class, Map<Class, Object>>();
 
+
+	/**
+	 * Registers the converters in the set provided.
+	 * JavaBean-friendly alternative to calling {@link #add(Converter)}.
+	 * @see #add(Converter)
+	 */
+	public void setConverters(Set<Converter> converters) {
+		for (Converter converter : converters) {
+			add(converter);
+		}
+	}
+
+	/**
+	 * Registers the converters in the set provided.
+	 * JavaBean-friendly alternative to calling {@link #add(ConverterFactory)}.
+	 * @see #add(ConverterFactory)
+	 */
+	public void setConverterFactories(Set<ConverterFactory> converters) {
+		for (ConverterFactory converterFactory : converters) {
+			add(converterFactory);
+		}
+	}
 
 	/**
 	 * Set the parent of this conversion service. This is optional.
@@ -100,16 +123,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		sourceMap.remove(targetType);
 	}
 
-	public void removeConverterFactory(ConverterFactory<?, ?> converter) {
-		List typeInfo = getRequiredTypeInfo(converter);
-		Class sourceType = (Class) typeInfo.get(0);
-		Class targetType = (Class) typeInfo.get(1);
-		Map sourceMap = getSourceMap(sourceType);
-		ConverterFactory existing = (ConverterFactory) sourceMap.get(targetType);
-		if (converter == existing) {
-			sourceMap.remove(targetType);
-		}
-	}
 
 	// implementing ConversionService
 

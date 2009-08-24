@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ui.format;
 
 import java.lang.annotation.Annotation;
@@ -21,6 +22,7 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * A shared registry of Formatters.
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -42,21 +44,19 @@ public interface FormatterRegistry {
 	 * On parse, the decorator first delegates to the formatter to parse a &lt;T&gt;, then coerses the parsed value to type.
 	 * @param type the object type
 	 * @param targetFormatter the target formatter
-	 * @param <T> the type of object the target formatter formats
 	 */
-	<T> void add(Class<?> type, Formatter<T> targetFormatter);
+	void add(Class<?> type, Formatter<?> targetFormatter);
 
 	/**
 	 * Adds a AnnotationFormatterFactory that returns the Formatter for properties annotated with a specific annotation.
 	 * @param factory the annotation formatter factory
 	 */
-	<A extends Annotation, T> void add(AnnotationFormatterFactory<A, T> factory);
+	void add(AnnotationFormatterFactory<?, ?> factory);
 
 	/**
 	 * Get the Formatter for the type descriptor.
 	 * @return the Formatter, or <code>null</code> if no suitable one is registered
 	 */
-	@SuppressWarnings("unchecked")
-	Formatter getFormatter(TypeDescriptor type);
+	Formatter<Object> getFormatter(TypeDescriptor type);
 
 }

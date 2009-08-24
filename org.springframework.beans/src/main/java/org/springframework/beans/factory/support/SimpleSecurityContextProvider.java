@@ -20,18 +20,19 @@ import java.security.AccessControlContext;
 import java.security.AccessController;
 
 /**
- * Simple #SecurityContextProvider implementation.
+ * Simple {@link SecurityContextProvider} implementation.
  * 
  * @author Costin Leau
+ * @since 3.0
  */
 public class SimpleSecurityContextProvider implements SecurityContextProvider {
 
 	private final AccessControlContext acc;
 
+
 	/**
-	 * Constructs a new <code>SimpleSecurityContextProvider</code> instance.
-	 * 
-	 * The security context will be retrieved on each call from the current
+	 * Construct a new <code>SimpleSecurityContextProvider</code> instance.
+	 * <p>The security context will be retrieved on each call from the current
 	 * thread.
 	 */
 	public SimpleSecurityContextProvider() {
@@ -39,20 +40,19 @@ public class SimpleSecurityContextProvider implements SecurityContextProvider {
 	}
 
 	/**
-	 * Constructs a new <code>SimpleSecurityContextProvider</code> instance.
-	 * 
-	 * If the given control context is null, the security context will be
+	 * Construct a new <code>SimpleSecurityContextProvider</code> instance.
+	 * <p>If the given control context is null, the security context will be
 	 * retrieved on each call from the current thread.
-	 * 
+	 * @param acc access control context (can be <code>null</code>)
 	 * @see AccessController#getContext()
-	 * @param acc
-	 *            access control context (can be null)
 	 */
 	public SimpleSecurityContextProvider(AccessControlContext acc) {
 		this.acc = acc;
 	}
 
+
 	public AccessControlContext getAccessControlContext() {
-		return (acc == null ? AccessController.getContext() : acc);
+		return (this.acc != null ? acc : AccessController.getContext());
 	}
+
 }

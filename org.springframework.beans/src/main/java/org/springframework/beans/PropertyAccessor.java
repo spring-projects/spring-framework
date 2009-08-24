@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.beans;
 
 import java.util.Map;
+
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Common interface for classes that can access named properties
@@ -85,6 +87,17 @@ public interface PropertyAccessor {
 	 * accessor method failed
 	 */
 	Class getPropertyType(String propertyName) throws BeansException;
+
+	/**
+	 * Return a type descriptor for the specified property.
+	 * @param propertyName the property to check
+	 * (may be a nested path and/or an indexed/mapped property)
+	 * @return the property type for the particular property,
+	 * or <code>null</code> if not determinable
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't readable
+	 */
+	TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException;
 
 	/**
 	 * Get the current value of the specified property.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.bind.support;
 
 import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.ui.format.FormatterRegistry;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.WebDataBinder;
@@ -41,6 +42,8 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	private MessageCodesResolver messageCodesResolver;
 
 	private BindingErrorProcessor bindingErrorProcessor;
+
+	private FormatterRegistry formatterRegistry;
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
@@ -91,24 +94,35 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	}
 
 	/**
-	 * Specify a single PropertyEditorRegistrar to be applied
-	 * to every DataBinder that this controller uses.
+	 * Specify a FormatterRegistry which will apply to every DataBinder.
+	 */
+	public final void setFormatterRegistry(FormatterRegistry formatterRegistry) {
+		this.formatterRegistry = formatterRegistry;
+	}
+
+	/**
+	 * Return a FormatterRegistry which will apply to every DataBinder.
+	 */
+	public final FormatterRegistry getFormatterRegistry() {
+		return this.formatterRegistry;
+	}
+
+	/**
+	 * Specify a single PropertyEditorRegistrar to be applied to every DataBinder.
 	 */
 	public final void setPropertyEditorRegistrar(PropertyEditorRegistrar propertyEditorRegistrar) {
 		this.propertyEditorRegistrars = new PropertyEditorRegistrar[] {propertyEditorRegistrar};
 	}
 
 	/**
-	 * Specify multiple PropertyEditorRegistrars to be applied
-	 * to every DataBinder that this controller uses.
+	 * Specify multiple PropertyEditorRegistrars to be applied to every DataBinder.
 	 */
 	public final void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
 		this.propertyEditorRegistrars = propertyEditorRegistrars;
 	}
 
 	/**
-	 * Return the PropertyEditorRegistrars to be applied
-	 * to every DataBinder that this controller uses.
+	 * Return the PropertyEditorRegistrars to be applied to every DataBinder.
 	 */
 	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
 		return this.propertyEditorRegistrars;
@@ -125,9 +139,12 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 		if (this.bindingErrorProcessor != null) {
 			binder.setBindingErrorProcessor(this.bindingErrorProcessor);
 		}
+		if (this.formatterRegistry != null) {
+			binder.setFormatterRegistry(this.formatterRegistry);
+		}
 		if (this.propertyEditorRegistrars != null) {
-			for (int i = 0; i < this.propertyEditorRegistrars.length; i++) {
-				this.propertyEditorRegistrars[i].registerCustomEditors(binder);
+			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
+				propertyEditorRegistrar.registerCustomEditors(binder);
 			}
 		}
 	}

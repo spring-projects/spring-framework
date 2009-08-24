@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ui.format.date;
 
 import java.text.DateFormat;
@@ -21,36 +22,59 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.ui.format.Formatter;
 
 /**
  * A formatter for {@link java.util.Date} types.
  * Allows the configuration of an explicit date pattern and locale.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  * @see SimpleDateFormat 
  */
 public final class DateFormatter implements Formatter<Date> {
 
-	private static Log logger = LogFactory.getLog(DateFormatter.class);
-
-	/**
-	 * The default date pattern.
-	 */
-	private static final String DEFAULT_PATTERN = "yyyy-MM-dd";
-
 	private String pattern;
 
+	private int style = DateFormat.DEFAULT;
+
+
 	/**
-	 * Sets the pattern to use to format date values.
-	 * If not specified, the default pattern 'yyyy-MM-dd' is used. 
-	 * @param pattern the date formatting pattern
+	 * Create a new default DateFormatter.
+	 */
+	public DateFormatter() {
+	}
+
+	/**
+	 * Create a new DateFormatter for the given date pattern.
+	 */
+	public DateFormatter(String pattern) {
+		this.pattern = pattern;
+	}
+
+
+	/**
+	 * Set the pattern to use to format date values.
+	 * <p>If not specified, DateFormat's default style will be used.
 	 */
 	public void setPattern(String pattern) {
 		this.pattern = pattern;
 	}
+
+	/**
+	 * Set the style to use to format date values.
+	 * <p>If not specified, DateFormat's default style will be used.
+	 * @see DateFormat#DEFAULT
+	 * @see DateFormat#SHORT
+	 * @see DateFormat#MEDIUM
+	 * @see DateFormat#LONG
+	 * @see DateFormat#FULL
+	 */
+	public void setStyle(int style) {
+		this.style = style;
+	}
+
 
 	public String format(Date date, Locale locale) {
 		if (date == null) {
@@ -66,23 +90,17 @@ public final class DateFormatter implements Formatter<Date> {
 		return getDateFormat(locale).parse(formatted);
 	}
 
-	// internal helpers
 
-	private DateFormat getDateFormat(Locale locale) {
-		DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT, locale);
-		format.setLenient(false);
-		if (format instanceof SimpleDateFormat) {
-			String pattern = determinePattern(this.pattern);
-			((SimpleDateFormat) format).applyPattern(pattern);
-		} else {
-			logger.warn("Unable to apply format pattern '" + pattern
-					+ "'; Returned DateFormat is not a SimpleDateFormat");
+	protected DateFormat getDateFormat(Locale locale) {
+		DateFormat dateFormat;
+		if (this.pattern != null) {
+			dateFormat = new SimpleDateFormat(this.pattern, locale);
 		}
-		return format;
-	}
-
-	private String determinePattern(String pattern) {
-		return pattern != null ? pattern : DEFAULT_PATTERN;
+		else {
+			dateFormat = DateFormat.getDateInstance(this.style, locale);
+		}
+		dateFormat.setLenient(false);
+		return dateFormat;
 	}
 
 }

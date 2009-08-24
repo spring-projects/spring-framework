@@ -19,6 +19,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
+import org.springframework.ui.format.support.GenericFormatterRegistry;
 
 public class GenericFormatterRegistryTests {
 

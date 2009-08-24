@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.ui.format.Formatter;
+import org.springframework.ui.format.FormatterRegistry;
+import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
+import org.springframework.ui.format.support.FormattingPropertyEditorAdapter;
+import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@link BindingResult} implementations that work with
@@ -37,6 +44,9 @@ import org.springframework.beans.PropertyEditorRegistry;
  */
 public abstract class AbstractPropertyBindingResult extends AbstractBindingResult {
 
+	private FormatterRegistry formatterRegistry;
+
+
 	/**
 	 * Create a new AbstractPropertyBindingResult instance.
 	 * @param objectName the name of the target object
@@ -46,6 +56,12 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 		super(objectName);
 	}
 
+
+	public void initFormatterLookup(FormatterRegistry formatterRegistry) {
+		Assert.notNull(formatterRegistry, "FormatterRegistry must not be null");
+		this.formatterRegistry = formatterRegistry;
+		getPropertyAccessor().setConversionService(new FormattingConversionServiceAdapter(formatterRegistry));
+	}
 
 	/**
 	 * Returns the underlying PropertyAccessor.
@@ -89,7 +105,13 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	protected Object formatFieldValue(String field, Object value) {
-		PropertyEditor customEditor = getCustomEditor(field);
+		String fixedField = fixedField(field);
+		TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
+		Formatter<Object> formatter = (this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
+		if (formatter != null) {
+			return formatter.format(value, LocaleContextHolder.getLocale());
+		}
+		PropertyEditor customEditor = getCustomEditor(fixedField);
 		if (customEditor != null) {
 			customEditor.setValue(value);
 			String textValue = customEditor.getAsText();
@@ -104,17 +126,32 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 
 	/**
 	 * Retrieve the custom PropertyEditor for the given field, if any.
-	 * @param field the field name
+	 * @param fixedField the fully qualified field name
 	 * @return the custom PropertyEditor, or <code>null</code>
 	 */
-	protected PropertyEditor getCustomEditor(String field) {
-		String fixedField = fixedField(field);
+	protected PropertyEditor getCustomEditor(String fixedField) {
 		Class targetType = getPropertyAccessor().getPropertyType(fixedField);
 		PropertyEditor editor = getPropertyAccessor().findCustomEditor(targetType, fixedField);
 		if (editor == null) {
 			editor = BeanUtils.findEditorByConvention(targetType);
 		}
 		return editor;
+	}
+
+	/**
+	 * This implementation exposes a PropertyEditor adapter for a Formatter,
+	 * if applicable.
+	 */
+	@Override
+	public PropertyEditor findEditor(String field, Class valueType) {
+		TypeDescriptor td = (valueType != null ? TypeDescriptor.valueOf(valueType) :
+				getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)));
+		final Formatter<Object> formatter =
+				(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
+		if (formatter != null) {
+			return new FormattingPropertyEditorAdapter(formatter);
+		}
+		return super.findEditor(field, valueType);
 	}
 
 

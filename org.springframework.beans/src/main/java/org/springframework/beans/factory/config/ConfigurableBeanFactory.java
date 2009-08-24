@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
+import java.security.AccessControlContext;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
@@ -248,6 +249,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @see #registerScope
 	 */
 	Scope getRegisteredScope(String scopeName);
+
+	/**
+	 * Provides a security access control context relevant to this factory.
+	 * @return the applicable AccessControlContext (never <code>null</code>)
+	 */
+	AccessControlContext getAccessControlContext();
 
 	/**
 	 * Copy all relevant configuration from the given other factory.

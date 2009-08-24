@@ -75,8 +75,8 @@ import org.springframework.web.multipart.MultipartRequest;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
- * @see #invokeHandlerMethod
  * @since 2.5.2
+ * @see #invokeHandlerMethod
  */
 public class HandlerMethodInvoker {
 
@@ -93,9 +93,9 @@ public class HandlerMethodInvoker {
 
 	private final WebArgumentResolver[] customArgumentResolvers;
 
-	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
-
 	private final HttpMessageConverter[] messageConverters;
+
+	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
 
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver) {
@@ -103,8 +103,7 @@ public class HandlerMethodInvoker {
 	}
 
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer) {
-		this(methodResolver, bindingInitializer, new DefaultSessionAttributeStore(), null, new WebArgumentResolver[0],
-				new HttpMessageConverter[0]);
+		this(methodResolver, bindingInitializer, new DefaultSessionAttributeStore(), null, null, null);
 	}
 
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer,
@@ -379,7 +378,7 @@ public class HandlerMethodInvoker {
 			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
 			throws Exception {
 
-		Class paramType = methodParam.getParameterType();
+		Class<?> paramType = methodParam.getParameterType();
 		if (paramName.length() == 0) {
 			paramName = getRequiredParameterName(methodParam);
 		}
@@ -411,7 +410,7 @@ public class HandlerMethodInvoker {
 			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
 			throws Exception {
 
-		Class paramType = methodParam.getParameterType();
+		Class<?> paramType = methodParam.getParameterType();
 		if (headerName.length() == 0) {
 			headerName = getRequiredParameterName(methodParam);
 		}
@@ -455,12 +454,14 @@ public class HandlerMethodInvoker {
 					"Cannot extract @RequestBody parameter (" + builder.toString() + "): no Content-Type found");
 		}
 		List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-		for (HttpMessageConverter<?> messageConverter : messageConverters) {
-			allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-			if (messageConverter.supports(paramType)) {
-				for (MediaType supportedMediaType : messageConverter.getSupportedMediaTypes()) {
-					if (supportedMediaType.includes(contentType)) {
-						return messageConverter.read(paramType, inputMessage);
+		if (this.messageConverters != null) {
+			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
+				allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
+				if (messageConverter.supports(paramType)) {
+					for (MediaType supportedMediaType : messageConverter.getSupportedMediaTypes()) {
+						if (supportedMediaType.includes(contentType)) {
+							return messageConverter.read(paramType, inputMessage);
+						}
 					}
 				}
 			}
@@ -480,7 +481,7 @@ public class HandlerMethodInvoker {
 			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
 			throws Exception {
 
-		Class paramType = methodParam.getParameterType();
+		Class<?> paramType = methodParam.getParameterType();
 		if (cookieName.length() == 0) {
 			cookieName = getRequiredParameterName(methodParam);
 		}
@@ -512,7 +513,7 @@ public class HandlerMethodInvoker {
 	private Object resolvePathVariable(String pathVarName, MethodParameter methodParam,
 			NativeWebRequest webRequest, Object handlerForInitBinderCall) throws Exception {
 
-		Class paramType = methodParam.getParameterType();
+		Class<?> paramType = methodParam.getParameterType();
 		if (pathVarName.length() == 0) {
 			pathVarName = getRequiredParameterName(methodParam);
 		}
@@ -565,8 +566,8 @@ public class HandlerMethodInvoker {
 		if ("".equals(name)) {
 			name = Conventions.getVariableNameForParameter(methodParam);
 		}
-		Class paramType = methodParam.getParameterType();
-		Object bindObject = null;
+		Class<?> paramType = methodParam.getParameterType();
+		Object bindObject;
 		if (implicitModel.containsKey(name)) {
 			bindObject = implicitModel.get(name);
 		}
