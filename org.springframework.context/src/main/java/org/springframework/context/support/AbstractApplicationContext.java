@@ -63,6 +63,7 @@ import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -367,6 +368,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
 
+				// Initialize conversion service for this context.
+				initConversionService();
+
 				// Initialize message source for this context.
 				initMessageSource();
 
@@ -602,6 +606,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		for (BeanPostProcessor postProcessor : postProcessors) {
 			beanFactory.addBeanPostProcessor(postProcessor);
+		}
+	}
+
+	/**
+	 * Initialize the BeanFactory's ConversionService.
+	 */
+	protected void initConversionService() {
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
+			beanFactory.setConversionService(beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
 		}
 	}
 

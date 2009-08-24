@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -82,6 +83,14 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		Field field = this.fieldMap.get(propertyName);
 		if (field != null) {
 			return field.getType();
+		}
+		return null;
+	}
+
+	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
+		Field field = this.fieldMap.get(propertyName);
+		if (field != null) {
+			return new TypeDescriptor(field);
 		}
 		return null;
 	}

@@ -36,9 +36,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -317,6 +319,24 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				Class editorType = guessPropertyTypeFromEditors(propertyName);
 				if (editorType != null) {
 					return editorType;
+				}
+			}
+		}
+		catch (InvalidPropertyException ex) {
+			// Consider as not determinable.
+		}
+		return null;
+	}
+
+	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
+		try {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				if (pd.getReadMethod() != null) {
+					return new TypeDescriptor(new MethodParameter(pd.getReadMethod(), -1));
+				}
+				else if (pd.getWriteMethod() != null) {
+					return new TypeDescriptor(new MethodParameter(pd.getWriteMethod(), 0));
 				}
 			}
 		}

@@ -212,10 +212,10 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * Returns the security context for this bean factory. If a security manager
 	 * is set, interaction with the user code will be executed using the privileged
 	 * of the security context returned by this method.
-	 * 
-	 * @return
+	 * @see AccessController#getContext()
 	 */
 	protected AccessControlContext getAccessControlContext() {
 		return AccessController.getContext();
 	}
+
 }

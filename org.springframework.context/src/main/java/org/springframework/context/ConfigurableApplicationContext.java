@@ -45,6 +45,13 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
 	/**
+	 * Name of the ConversionService bean in the factory.
+	 * If none is supplied, default conversion rules apply.
+	 * @see org.springframework.core.convert.ConversionService
+	 */
+	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
+
+	/**
 	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
 	 * the context will use a temporary ClassLoader for type matching, in order
 	 * to allow the LoadTimeWeaver to process all actual bean classes.

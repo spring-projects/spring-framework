@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,6 +66,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see DefaultMessageCodesResolver
 	 */
 	public void setMessageCodesResolver(MessageCodesResolver messageCodesResolver) {
+		Assert.notNull(messageCodesResolver, "MessageCodesResolver must not be null");
 		this.messageCodesResolver = messageCodesResolver;
 	}
 

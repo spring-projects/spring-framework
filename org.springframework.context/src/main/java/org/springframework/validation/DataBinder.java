@@ -35,6 +35,9 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
+import org.springframework.ui.format.FormatterRegistry;
+import org.springframework.ui.format.support.GenericFormatterRegistry;
+import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -132,6 +135,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
+	private FormatterRegistry formatterRegistry;
+
 
 	/**
 	 * Create a new DataBinder instance, with default object name.
@@ -178,6 +183,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.isNull(this.bindingResult,
 				"DataBinder is already initialized - call initBeanPropertyAccess before any other configuration methods");
 		this.bindingResult = new BeanPropertyBindingResult(getTarget(), getObjectName());
+		if (this.formatterRegistry != null) {
+			this.bindingResult.initFormatterLookup(this.formatterRegistry);
+		}
 	}
 
 	/**
@@ -189,6 +197,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.isNull(this.bindingResult,
 				"DataBinder is already initialized - call initDirectFieldAccess before any other configuration methods");
 		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName());
+		if (this.formatterRegistry != null) {
+			this.bindingResult.initFormatterLookup(this.formatterRegistry);
+		}
 	}
 
 	/**
@@ -215,6 +226,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected SimpleTypeConverter getSimpleTypeConverter() {
 		if (this.typeConverter == null) {
 			this.typeConverter = new SimpleTypeConverter();
+			if (this.formatterRegistry != null) {
+				this.typeConverter.setConversionService(new FormattingConversionServiceAdapter(this.formatterRegistry));
+			}
 		}
 		return this.typeConverter;
 	}
@@ -418,6 +432,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see DefaultBindingErrorProcessor
 	 */
 	public void setBindingErrorProcessor(BindingErrorProcessor bindingErrorProcessor) {
+		Assert.notNull(bindingErrorProcessor, "BindingErrorProcessor must not be null");
 		this.bindingErrorProcessor = bindingErrorProcessor;
 	}
 
@@ -426,6 +441,31 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public BindingErrorProcessor getBindingErrorProcessor() {
 		return this.bindingErrorProcessor;
+	}
+
+	/**
+	 * Set the FormatterRegistry to use for obtaining Formatters in preference
+	 * to JavaBeans PropertyEditors.
+	 */
+	public void setFormatterRegistry(FormatterRegistry formatterRegistry) {
+		this.formatterRegistry = formatterRegistry;
+	}
+
+	/**
+	 * Return the FormatterRegistry to use for obtaining Formatters in preference
+	 * to JavaBeans PropertyEditors.
+	 * @return the FormatterRegistry (never <code>null</code>), which may also be
+	 * used to register further Formatters for this DataBinder
+	 */
+	public FormatterRegistry getFormatterRegistry() {
+		if (this.formatterRegistry == null) {
+			this.formatterRegistry = new GenericFormatterRegistry();
+		}
+		else if (this.formatterRegistry instanceof GenericFormatterRegistry &&
+				((GenericFormatterRegistry) this.formatterRegistry).isShared()) {
+			this.formatterRegistry = ((GenericFormatterRegistry) this.formatterRegistry).clone();
+		}
+		return this.formatterRegistry;
 	}
 
 

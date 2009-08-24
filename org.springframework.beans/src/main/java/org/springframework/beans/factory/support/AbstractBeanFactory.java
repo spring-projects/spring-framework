@@ -150,6 +150,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Map from scope identifier String to corresponding Scope */
 	private final Map<String, Scope> scopes = new HashMap<String, Scope>();
 
+	/** Security context used when running with a SecurityManager */
+	private SecurityContextProvider securityContextProvider;
+
 	/** Map from bean name to merged RootBeanDefinition */
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions =
 			new ConcurrentHashMap<String, RootBeanDefinition>();
@@ -160,9 +163,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Names of beans that are currently in creation */
 	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
 			new NamedThreadLocal<Object>("Prototype beans currently in creation");
-
-	/** security context used when running with a Security Manager */ 
-	private volatile SecurityContextProvider securityProvider = new SimpleSecurityContextProvider();
 
 	/**
 	 * Create a new AbstractBeanFactory.
@@ -761,6 +761,26 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.scopes.get(scopeName);
 	}
 
+	/**
+	 * Set the security context provider for this bean factory. If a security manager
+	 * is set, interaction with the user code will be executed using the privileged
+	 * of the provided security context.
+	 */
+	public void setSecurityContextProvider(SecurityContextProvider securityProvider) {
+		this.securityContextProvider = securityProvider;
+	}
+
+	/**
+	 * Delegate the creation of the access control context to the
+	 * {@link #setSecurityContextProvider SecurityContextProvider}.
+	 */
+	@Override
+	public AccessControlContext getAccessControlContext() {
+		return (this.securityContextProvider != null ?
+				this.securityContextProvider.getAccessControlContext() :
+				AccessController.getContext());
+	}
+
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		Assert.notNull(otherFactory, "BeanFactory must not be null");
 		setBeanClassLoader(otherFactory.getBeanClassLoader());
@@ -776,6 +796,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.hasDestructionAwareBeanPostProcessors = this.hasDestructionAwareBeanPostProcessors ||
 					otherAbstractFactory.hasDestructionAwareBeanPostProcessors;
 			this.scopes.putAll(otherAbstractFactory.scopes);
+			this.securityContextProvider = otherAbstractFactory.securityContextProvider;
 		}
 		else {
 			setTypeConverter(otherFactory.getTypeConverter());
@@ -1436,37 +1457,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 *   
-	 * Delegate the creation of the security context to {@link #getSecurityContextProvider()}.
-	 */
-	@Override
-	protected AccessControlContext getAccessControlContext() {
-		SecurityContextProvider provider = getSecurityContextProvider();
-		return (provider != null ? provider.getAccessControlContext(): AccessController.getContext());
-	}
 
-	/**
-	 * Return the security context provider for this bean factory.
-	 * 
-	 * @return
-	 */
-	public SecurityContextProvider getSecurityContextProvider() {
-		return securityProvider;
-	}
-	
-	/**
-	 * Set the security context provider for this bean factory. If a security manager
-	 * is set, interaction with the user code will be executed using the privileged
-	 * of the provided security context.
-	 * 
-	 * @param securityProvider
-	 */
-	public void setSecurityContextProvider(SecurityContextProvider securityProvider) {
-		this.securityProvider = securityProvider;
-	}
 
 	//---------------------------------------------------------------------
 	// Abstract methods to be implemented by subclasses
@@ -1526,4 +1517,5 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected abstract Object createBean(String beanName, RootBeanDefinition mbd, Object[] args)
 			throws BeanCreationException;
+
 }
