@@ -200,10 +200,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.spouses = new ITestBean[] {spouse};
 	}
 
-	public void setActualSpouse(TestBean spouse) {
-		this.spouses = new ITestBean[] {spouse};
-	}
-
 	public ITestBean getSpouse() {
 		return (spouses != null ? spouses[0] : null);
 	}

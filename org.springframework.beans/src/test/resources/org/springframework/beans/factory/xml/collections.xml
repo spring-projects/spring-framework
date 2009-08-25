@@ -44,7 +44,7 @@
 		</property>
 	</bean>
 
-	<bean id="pDavid" class="test.beans.TestBean" scope="prototype">
+	<bean id="pDavid" class="test.beans.DerivedTestBean" scope="prototype">
 		<property name="name"><value>David</value></property>
 		<property name="age"><value>27</value></property>
 		<property name="actualSpouse" value="Jen"/>

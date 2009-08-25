@@ -437,6 +437,16 @@ class TypeConverterDelegate {
 	protected Collection convertToTypedCollection(
 			Collection original, String propertyName, Class requiredType, MethodParameter methodParam) {
 
+		boolean originalAllowed = requiredType.isInstance(original);
+		Class elementType = null;
+		if (methodParam != null) {
+			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
+		}
+		if (elementType == null && originalAllowed &&
+				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
+			return original;
+		}
+
 		Iterator it;
 		try {
 			it = original.iterator();
@@ -473,16 +483,6 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		boolean originalAllowed = requiredType.isInstance(original);
-		Class elementType = null;
-		if (methodParam != null) {
-			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
-		}
-		if (elementType == null && originalAllowed &&
-				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
-			return original;
-		}
-
 		int i = 0;
 		for (; it.hasNext(); i++) {
 			Object element = it.next();
@@ -503,6 +503,18 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	protected Map convertToTypedMap(Map original, String propertyName, Class requiredType, MethodParameter methodParam) {
+		boolean originalAllowed = requiredType.isInstance(original);
+		Class keyType = null;
+		Class valueType = null;
+		if (methodParam != null) {
+			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
+			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
+		}
+		if (keyType == null && valueType == null && originalAllowed &&
+				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
+			return original;
+		}
+
 		Iterator it;
 		try {
 			it = original.entrySet().iterator();
@@ -536,18 +548,6 @@ class TypeConverterDelegate {
 				logger.debug("Cannot create copy of Map type [" + original.getClass().getName() +
 						"] - injecting original Map as-is", ex);
 			}
-			return original;
-		}
-
-		boolean originalAllowed = requiredType.isInstance(original);
-		Class keyType = null;
-		Class valueType = null;
-		if (methodParam != null) {
-			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
-			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
-		}
-		if (keyType == null && valueType == null && originalAllowed &&
-				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
 			return original;
 		}
 
