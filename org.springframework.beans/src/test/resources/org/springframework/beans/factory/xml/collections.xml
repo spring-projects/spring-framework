@@ -47,6 +47,7 @@
 	<bean id="pDavid" class="test.beans.TestBean" scope="prototype">
 		<property name="name"><value>David</value></property>
 		<property name="age"><value>27</value></property>
+		<property name="actualSpouse" value="Jen"/>
 	</bean>
 
 	<bean id="pRod" class="test.beans.TestBean" scope="prototype">
@@ -210,7 +211,6 @@
 		</property>
 	</bean>
 
-
 	<bean id="set" class="org.springframework.beans.factory.xml.HasMap">
 		<property name="set">
 			<set>
@@ -218,6 +218,25 @@
 				<ref local="jenny"/>
 				<null/>
 			</set>
+		</property>
+	</bean>
+
+	<bean id="concurrentSet" class="org.springframework.beans.factory.xml.HasMap">
+		<property name="concurrentSet">
+			<set>
+				<value>bar</value>
+				<ref local="jenny"/>
+				<null/>
+			</set>
+		</property>
+	</bean>
+
+	<bean id="identityMap" class="org.springframework.beans.factory.xml.HasMap">
+		<property name="identityMap">
+			<map>
+				<entry key="foo" value="bar"/>
+				<entry key="jenny" value-ref="pJenny"/>
+			</map>
 		</property>
 	</bean>
 

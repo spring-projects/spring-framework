@@ -27,9 +27,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.IdentityHashMap;
+import java.util.HashSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+import static org.junit.Assert.*;
 import test.beans.TestBean;
 
 import org.springframework.beans.factory.BeanCreationException;
@@ -120,6 +123,7 @@ public class XmlBeanCollectionTests {
 		TestBean jen = (TestBean) this.beanFactory.getBean("pJenny");
 		TestBean dave = (TestBean) this.beanFactory.getBean("pDavid");
 		TestBean rod = (TestBean) this.beanFactory.getBean("pRod");
+
 		Object[] friends = rod.getFriends().toArray();
 		assertTrue(friends.length == 2);
 		assertTrue("First friend must be jen, not " + friends[0],
@@ -127,6 +131,7 @@ public class XmlBeanCollectionTests {
 		assertTrue("Jen not same instance", friends[0] != jen);
 		assertTrue(friends[1].toString().equals(dave.toString()));
 		assertTrue("Dave not same instance", friends[1] != dave);
+		assertEquals("Jen", dave.getSpouse().getName());
 
 		TestBean rod2 = (TestBean) this.beanFactory.getBean("pRod");
 		Object[] friends2 = rod2.getFriends().toArray();
@@ -274,6 +279,25 @@ public class XmlBeanCollectionTests {
 	}
 
 	@Test
+	public void testPopulatedConcurrentSet() throws Exception {
+		HasMap hasMap = (HasMap) this.beanFactory.getBean("concurrentSet");
+		assertTrue(hasMap.getConcurrentSet().size() == 3);
+		assertTrue(hasMap.getConcurrentSet().contains("bar"));
+		TestBean jenny = (TestBean) this.beanFactory.getBean("jenny");
+		assertTrue(hasMap.getConcurrentSet().contains(jenny));
+		assertTrue(hasMap.getConcurrentSet().contains(null));
+	}
+
+	@Test
+	public void testPopulatedIdentityMap() throws Exception {
+		HasMap hasMap = (HasMap) this.beanFactory.getBean("identityMap");
+		assertTrue(hasMap.getIdentityMap().size() == 2);
+		HashSet set = new HashSet(hasMap.getIdentityMap().keySet());
+		assertTrue(set.contains("foo"));
+		assertTrue(set.contains("jenny"));
+	}
+
+	@Test
 	public void testEmptyProps() throws Exception {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("emptyProps");
 		assertTrue(hasMap.getProps().size() == 0);
@@ -399,6 +423,7 @@ public class XmlBeanCollectionTests {
 		assertTrue(set.contains("TWO"));
 	}
 
+
 	public static class MapAndSet {
 
 		private Object obj;
@@ -415,7 +440,6 @@ public class XmlBeanCollectionTests {
 			return obj;
 		}
 	}
-	
 }
 
 
@@ -429,7 +453,11 @@ class HasMap {
 	
 	private Map map;
 
+	private IdentityHashMap identityMap;
+
 	private Set set;
+
+	private CopyOnWriteArraySet concurrentSet;
 
 	private Properties props;
 	
@@ -439,9 +467,6 @@ class HasMap {
 	
 	private Integer[] intArray;
 
-	private HasMap() {
-	}
-
 	public Map getMap() {
 		return map;
 	}
@@ -450,12 +475,28 @@ class HasMap {
 		this.map = map;
 	}
 
+	public IdentityHashMap getIdentityMap() {
+		return identityMap;
+	}
+
+	public void setIdentityMap(IdentityHashMap identityMap) {
+		this.identityMap = identityMap;
+	}
+
 	public Set getSet() {
 		return set;
 	}
 
 	public void setSet(Set set) {
 		this.set = set;
+	}
+
+	public CopyOnWriteArraySet getConcurrentSet() {
+		return concurrentSet;
+	}
+
+	public void setConcurrentSet(CopyOnWriteArraySet concurrentSet) {
+		this.concurrentSet = concurrentSet;
 	}
 
 	public Properties getProps() {

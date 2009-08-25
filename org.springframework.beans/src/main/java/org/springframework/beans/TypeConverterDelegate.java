@@ -195,28 +195,32 @@ class TypeConverterDelegate {
 					// Array required -> apply appropriate conversion of elements.
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 				}
-				else if (convertedValue instanceof Collection && CollectionFactory.isApproximableCollectionType(requiredType)) {
+				else if (convertedValue instanceof Collection) {
 					// Convert elements to target type, if determined.
-					convertedValue = convertToTypedCollection((Collection) convertedValue, propertyName, methodParam);
+					convertedValue = convertToTypedCollection(
+							(Collection) convertedValue, propertyName, requiredType, methodParam);
 				}
-				else if (convertedValue instanceof Map && CollectionFactory.isApproximableMapType(requiredType)) {
+				else if (convertedValue instanceof Map) {
 					// Convert keys and values to respective target type, if determined.
-					convertedValue = convertToTypedMap((Map) convertedValue, propertyName, methodParam);
+					convertedValue = convertToTypedMap(
+							(Map) convertedValue, propertyName, requiredType, methodParam);
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-					try {
-						Constructor strCtor = requiredType.getConstructor(String.class);
-						return (T) BeanUtils.instantiateClass(strCtor, convertedValue);
-					}
-					catch (NoSuchMethodException ex) {
-						// proceed with field lookup
-						if (logger.isTraceEnabled()) {
-							logger.trace("No String constructor found on type [" + requiredType.getName() + "]", ex);
+					if (!requiredType.isInterface() && !requiredType.isEnum()) {
+						try {
+							Constructor strCtor = requiredType.getConstructor(String.class);
+							return (T) BeanUtils.instantiateClass(strCtor, convertedValue);
 						}
-					}
-					catch (Exception ex) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Construction via String failed for type [" + requiredType.getName() + "]", ex);
+						catch (NoSuchMethodException ex) {
+							// proceed with field lookup
+							if (logger.isTraceEnabled()) {
+								logger.trace("No String constructor found on type [" + requiredType.getName() + "]", ex);
+							}
+						}
+						catch (Exception ex) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Construction via String failed for type [" + requiredType.getName() + "]", ex);
+							}
 						}
 					}
 					String trimmedValue = ((String) convertedValue).trim();
@@ -431,18 +435,8 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	protected Collection convertToTypedCollection(
-			Collection original, String propertyName, MethodParameter methodParam) {
+			Collection original, String propertyName, Class requiredType, MethodParameter methodParam) {
 
-		Class elementType = null;
-		if (methodParam != null) {
-			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
-		}
-		if (elementType == null &&
-				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
-			return original;
-		}
-
-		Collection convertedCopy;
 		Iterator it;
 		try {
 			it = original.iterator();
@@ -453,7 +447,6 @@ class TypeConverterDelegate {
 				}
 				return original;
 			}
-			convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
@@ -462,7 +455,34 @@ class TypeConverterDelegate {
 			}
 			return original;
 		}
-		boolean actuallyConverted = false;
+
+		Collection convertedCopy;
+		try {
+			if (CollectionFactory.isApproximableCollectionType(requiredType)) {
+				convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
+			}
+			else {
+				convertedCopy = (Collection) requiredType.newInstance();
+			}
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot create copy of Collection type [" + original.getClass().getName() +
+						"] - injecting original Collection as-is", ex);
+			}
+			return original;
+		}
+
+		boolean originalAllowed = requiredType.isInstance(original);
+		Class elementType = null;
+		if (methodParam != null) {
+			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
+		}
+		if (elementType == null && originalAllowed &&
+				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
+			return original;
+		}
+
 		int i = 0;
 		for (; it.hasNext(); i++) {
 			Object element = it.next();
@@ -476,25 +496,13 @@ class TypeConverterDelegate {
 				methodParam.decreaseNestingLevel();
 			}
 			convertedCopy.add(convertedElement);
-			actuallyConverted = actuallyConverted || (element != convertedElement);
+			originalAllowed = originalAllowed && (element == convertedElement);
 		}
-		return (actuallyConverted ? convertedCopy : original);
+		return (originalAllowed ? original : convertedCopy);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map convertToTypedMap(Map original, String propertyName, MethodParameter methodParam) {
-		Class keyType = null;
-		Class valueType = null;
-		if (methodParam != null) {
-			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
-			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
-		}
-		if (keyType == null && valueType == null &&
-				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
-			return original;
-		}
-
-		Map convertedCopy;
+	protected Map convertToTypedMap(Map original, String propertyName, Class requiredType, MethodParameter methodParam) {
 		Iterator it;
 		try {
 			it = original.entrySet().iterator();
@@ -505,7 +513,6 @@ class TypeConverterDelegate {
 				}
 				return original;
 			}
-			convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
@@ -514,7 +521,36 @@ class TypeConverterDelegate {
 			}
 			return original;
 		}
-		boolean actuallyConverted = false;
+
+		Map convertedCopy;
+		try {
+			if (CollectionFactory.isApproximableMapType(requiredType)) {
+				convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
+			}
+			else {
+				convertedCopy = (Map) requiredType.newInstance();
+			}
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot create copy of Map type [" + original.getClass().getName() +
+						"] - injecting original Map as-is", ex);
+			}
+			return original;
+		}
+
+		boolean originalAllowed = requiredType.isInstance(original);
+		Class keyType = null;
+		Class valueType = null;
+		if (methodParam != null) {
+			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
+			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
+		}
+		if (keyType == null && valueType == null && originalAllowed &&
+				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
+			return original;
+		}
+
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
 			Object key = entry.getKey();
@@ -533,9 +569,9 @@ class TypeConverterDelegate {
 				methodParam.decreaseNestingLevel();
 			}
 			convertedCopy.put(convertedKey, convertedValue);
-			actuallyConverted = actuallyConverted || (key != convertedKey) || (value != convertedValue);
+			originalAllowed = originalAllowed && (key == convertedKey) && (value == convertedValue);
 		}
-		return (actuallyConverted ? convertedCopy : original);
+		return (originalAllowed ? original : convertedCopy);
 	}
 
 	private String buildIndexedPropertyName(String propertyName, int index) {
