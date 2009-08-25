@@ -5567,11 +5567,11 @@ public class Bar {
 
 @Configuration
 public class AppConfig {
-    @Bean(initMethodName = "init")
+    @Bean(initMethod = "init")
     public Foo foo() {
         return new Foo();
     }
-    @Bean(destroyMethodName="cleanup")
+    @Bean(destroyMethod = "cleanup")
     public Bar bar() {
         return new Bar();
     }
