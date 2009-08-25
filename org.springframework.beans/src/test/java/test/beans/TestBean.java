@@ -196,12 +196,16 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.jedi = jedi;
 	}
 
-	public ITestBean getSpouse() {
-		return (spouses != null ? spouses[0] : null);
-	}
-
 	public void setSpouse(ITestBean spouse) {
 		this.spouses = new ITestBean[] {spouse};
+	}
+
+	public void setActualSpouse(TestBean spouse) {
+		this.spouses = new ITestBean[] {spouse};
+	}
+
+	public ITestBean getSpouse() {
+		return (spouses != null ? spouses[0] : null);
 	}
 
 	public ITestBean[] getSpouses() {
