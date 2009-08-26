@@ -91,28 +91,31 @@ public abstract class JmxUtils {
 	 * <code>MBeanServer</code> can be found. Logs a warning if more than one
 	 * <code>MBeanServer</code> found, returning the first one from the list.
 	 * @param agentId the agent identifier of the MBeanServer to retrieve.
-	 * If this parameter is <code>null</code>, all registered MBeanServers are
-	 * considered.
+	 * If this parameter is <code>null</code>, all registered MBeanServers are considered.
+	 * If the empty String is given, the platform MBeanServer will be returned.
 	 * @return the <code>MBeanServer</code> if found
 	 * @throws org.springframework.jmx.MBeanServerNotFoundException
 	 * if no <code>MBeanServer</code> could be found
 	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
 	 */
 	public static MBeanServer locateMBeanServer(String agentId) throws MBeanServerNotFoundException {
-		List servers = MBeanServerFactory.findMBeanServer(agentId);
-
 		MBeanServer server = null;
-		if (servers != null && servers.size() > 0) {
-			// Check to see if an MBeanServer is registered.
-			if (servers.size() > 1 && logger.isWarnEnabled()) {
-				logger.warn("Found more than one MBeanServer instance" +
-						(agentId != null ? " with agent id [" + agentId + "]" : "") +
-						". Returning first from list.");
+
+		// null means any registered server, but "" specifically means the platform server
+		if (!"".equals(agentId)) {
+			List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(agentId);
+			if (servers != null && servers.size() > 0) {
+				// Check to see if an MBeanServer is registered.
+				if (servers.size() > 1 && logger.isWarnEnabled()) {
+					logger.warn("Found more than one MBeanServer instance" +
+							(agentId != null ? " with agent id [" + agentId + "]" : "") +
+							". Returning first from list.");
+				}
+				server = servers.get(0);
 			}
-			server = (MBeanServer) servers.get(0);
 		}
 
-		if (server == null && agentId == null) {
+		if (server == null && !StringUtils.hasLength(agentId)) {
 			// Attempt to load the PlatformMBeanServer.
 			try {
 				server = ManagementFactory.getPlatformMBeanServer();
