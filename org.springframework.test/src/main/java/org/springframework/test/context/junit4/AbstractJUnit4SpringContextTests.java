@@ -32,7 +32,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * <p>
  * Abstract base test class which integrates the <em>Spring TestContext
  * Framework</em> with explicit {@link ApplicationContext} testing support in a
- * <strong>JUnit 4.7</strong> environment.
+ * <strong>JUnit 4.5+</strong> environment.
  * </p>
  * <p>
  * Concrete subclasses should typically declare a class-level
