@@ -3,15 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.RC1 (2009 Q3)
---------------------------------------
+Changes in version 3.0.0.RC1 (2009-09-XX)
+-----------------------------------------
 
 * upgraded to JUnit 4.7 and TestNG 5.10
-* SpringJUnit4ClassRunner is now compatible with JUnit 4.5 - 4.7
+* SpringJUnit4ClassRunner is now compatible with JUnit 4.5, 4.6, and 4.7
+* @NotTransactional is now deprecated
 
 
 Changes in version 3.0.0.M4 (2009-08-10)
------------------------------------------
+----------------------------------------
 
 * upgraded to JUnit 4.6, TestNG 5.9, and EasyMock 2.5.1
 * updated all Spring Framework OSGI manifests to list unversioned imports explicitly

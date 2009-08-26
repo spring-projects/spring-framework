@@ -181,7 +181,7 @@
       use, thus allowing instrumentation of tests in various environments
       including JUnit, TestNG, etc.</para>
 
-      <note>
+      <warning>
         <title>Legacy JUnit 3.8 class hierarchy is deprecated</title>
 
         <para>As of Spring 3.0, the legacy JUnit 3.8 base class hierarchy
@@ -192,7 +192,7 @@
         Thus any code which depends on the legacy JUnit 3.8 support should be
         migrated to the <link linkend="testcontext-framework">Spring
         TestContext Framework</link>.</para>
-      </note>
+      </warning>
     </section>
 
     <section id="integration-testing-goals">
@@ -613,6 +613,23 @@ public void afterTransaction() {
 public void testProcessWithoutTransaction() {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
+
+          <warning>
+            <title>@NotTransactional is deprecated</title>
+            <para>As of Spring 3.0, <interfacename>@NotTransactional</interfacename>
+            is deprecated in favor of moving the
+            <emphasis>non-transactional</emphasis> test
+            method to a separate (non-transactional) test class or to a
+            <interfacename>@BeforeTransaction</interfacename> or
+            <interfacename>@AfterTransaction</interfacename> method.
+            As an alternative to annotating an entire class with
+            <interfacename>@Transactional</interfacename> consider
+            annotating individual methods with
+            <interfacename>@Transactional</interfacename>;
+            doing so allows a mix of transactional and non-transactional
+            methods in the same test class without the need for
+            using <interfacename>@NotTransactional</interfacename>.</para>
+          </warning>
         </listitem>
       </itemizedlist>
 
@@ -1318,14 +1335,9 @@ public final class HibernateTitleDaoTests {
         in the <link linkend="integration-testing-annotations">annotation
         support</link> section.</para>
 
-        <para>There are several options for configuring transactions for
-        individual test methods. If transactions are not enabled for the
+        <para>If transactions are not enabled for the
         entire test class, methods may be explicitly annotated with
-        <interfacename>@Transactional</interfacename>. Similarly, if
-        transactions <emphasis>are</emphasis> enabled for the entire test
-        class, methods may be explicitly flagged not to run within a
-        transaction by annotating them with
-        <interfacename>@NotTransactional</interfacename>. To control whether
+        <interfacename>@Transactional</interfacename>. To control whether
         or not a transaction should commit for a particular test method, you
         may use the <interfacename>@Rollback</interfacename> annotation to
         override the class-level default rollback setting.</para>
@@ -1364,7 +1376,9 @@ public final class HibernateTitleDaoTests {
           <interfacename>@BeforeTransaction</interfacename> or
           <interfacename>@AfterTransaction</interfacename> will naturally not
           be executed for tests annotated with
-          <interfacename>@NotTransactional</interfacename>.</para>
+          <interfacename>@NotTransactional</interfacename>. Note, however,
+          that <interfacename>@NotTransactional</interfacename> is
+          deprecated as of Spring 3.0.</para>
         </tip>
 
         <para>The following JUnit 4 based example displays a fictitious
@@ -1407,11 +1421,6 @@ public class FictitiousTransactionalTest {
         <lineannotation>// logic to verify the final state after transaction has rolled back</lineannotation>
     }
 
-    @Test
-    <emphasis role="bold">@NotTransactional</emphasis>
-    public void performNonDatabaseRelatedAction() {
-        <lineannotation>// logic which does not modify database state</lineannotation>
-    }
 }</programlisting>
 
         <note>
