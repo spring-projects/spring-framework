@@ -738,10 +738,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				msg.append(getDestinationDescription()).append("' - trying to recover. Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
-					logger.info(msg, ex);
+					logger.warn(msg, ex);
 				}
 				else {
-					logger.info(msg);
+					logger.warn(msg);
 				}
 			}
 		}
@@ -792,10 +792,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				msg.append(this.recoveryInterval).append(" ms. Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
-					logger.info(msg, ex);
+					logger.warn(msg, ex);
 				}
-				else if (logger.isInfoEnabled()) {
-					logger.info(msg);
+				else {
+					logger.warn(msg);
 				}
 			}
 			sleepInbetweenRecoveryAttempts();
