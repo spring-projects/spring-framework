@@ -7,6 +7,7 @@ Changes in version 3.0.0.RC1 (2009 Q3)
 --------------------------------------
 
 * upgraded to JUnit 4.7 and TestNG 5.10
+* SpringJUnit4ClassRunner is now compatible with JUnit 4.5 - 4.7
 
 
 Changes in version 3.0.0.M4 (2009-08-10)
