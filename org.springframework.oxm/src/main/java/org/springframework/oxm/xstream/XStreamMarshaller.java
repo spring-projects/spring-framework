@@ -111,7 +111,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	/**
 	 * Returns the XStream instance used by this marshaller.
 	 */
-	public final XStream getXStream() {
+	public XStream getXStream() {
 		return xstream;
 	}
 
