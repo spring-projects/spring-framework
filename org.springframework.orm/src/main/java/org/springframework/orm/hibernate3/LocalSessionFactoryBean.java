@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate3;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,7 +36,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cache.CacheProvider;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
-import org.hibernate.cfg.Mappings;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
@@ -52,6 +52,7 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -578,9 +579,15 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.typeDefinitions != null) {
 				// Register specified Hibernate type definitions.
-				Mappings mappings = config.createMappings();
+				// Use reflection for compatibility with both Hibernate 3.3 and 3.5:
+				// the returned Mappings object changed from a class to an interface.
+				Method createMappings = Configuration.class.getMethod("createMappings");
+				Method addTypeDef = createMappings.getReturnType().getMethod(
+						"addTypeDef", String.class, String.class, Properties.class);
+				Object mappings = ReflectionUtils.invokeMethod(createMappings, config);
 				for (TypeDefinitionBean typeDef : this.typeDefinitions) {
-					mappings.addTypeDef(typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
+					ReflectionUtils.invokeMethod(addTypeDef, mappings,
+							typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
 				}
 			}
 
