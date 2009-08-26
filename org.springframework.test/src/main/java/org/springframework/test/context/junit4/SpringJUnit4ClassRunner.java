@@ -228,7 +228,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	@Override
 	protected void runChild(FrameworkMethod frameworkMethod, RunNotifier notifier) {
-		EachTestNotifier eachNotifier = makeNotifier(frameworkMethod, notifier);
+		EachTestNotifier eachNotifier = springMakeNotifier(frameworkMethod, notifier);
 		if (isTestMethodIgnored(frameworkMethod)) {
 			eachNotifier.fireTestIgnored();
 			return;
@@ -249,7 +249,15 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		}
 	}
 
-	private EachTestNotifier makeNotifier(FrameworkMethod method, RunNotifier notifier) {
+	/**
+	 * <code>springMakeNotifier()</code> is an exact copy of
+	 * {@link BlockJUnit4ClassRunner BlockJUnit4ClassRunner's}
+	 * <code>makeNotifier()</code> method, but we have decided to prefix it with
+	 * "spring" and keep it <code>private</code> in order to avoid the
+	 * compatibility clashes that were introduced in JUnit between versions 4.5,
+	 * 4.6, and 4.7.
+	 */
+	private EachTestNotifier springMakeNotifier(FrameworkMethod method, RunNotifier notifier) {
 		Description description = describeChild(method);
 		return new EachTestNotifier(notifier, description);
 	}
