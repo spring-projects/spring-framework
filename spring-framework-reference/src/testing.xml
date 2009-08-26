@@ -621,8 +621,8 @@ public void testProcessWithoutTransaction() {
       <para>The following annotations are <emphasis>only</emphasis> supported
       when used in conjunction with JUnit (i.e., with the <link
       linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link> or
-      the <link linkend="testcontext-support-classes-junit38">JUnit 3.8</link>
-      and <link linkend="testcontext-support-classes-junit4">JUnit 4.7</link>
+      the <link linkend="testcontext-support-classes-junit38">JUnit 3.8.2</link>
+      and <link linkend="testcontext-support-classes-junit4">JUnit 4.5+</link>
       support classes.</para>
 
       <itemizedlist>
@@ -812,16 +812,16 @@ public void testProcessRepeatedly() {
       Framework</emphasis> (located in the
       <literal>org.springframework.test.context</literal> package) provides
       generic, annotation-driven unit and integration testing support that
-      is agnostic of the testing framework in use, for example JUnit 3.8,
-      JUnit 4.7, TestNG 5.10, etc. The TestContext framework also places a
+      is agnostic of the testing framework in use, for example JUnit 3.8.2,
+      JUnit 4.5+, TestNG 5.10, etc. The TestContext framework also places a
       great deal of importance on <emphasis>convention over
       configuration</emphasis> with reasonable defaults that can be
       overridden via annotation-based configuration.</para>
 
       <para>In addition to generic testing infrastructure, the TestContext
-      framework provides explicit support for JUnit 3.8, JUnit 4.7, and
+      framework provides explicit support for JUnit 3.8.2, JUnit 4.5+, and
       TestNG 5.10 in the form of <literal>abstract</literal> support
-      classes. For JUnit 4.7, the framework also provides a custom
+      classes. For JUnit 4.5+, the framework also provides a custom
       <interfacename>Runner</interfacename> which allows one to write test
       classes that are not required to extend a particular class
       hierarchy.</para>
@@ -1112,11 +1112,11 @@ public class ExtendedTest extends BaseTest {
         <para>Consider the scenario where we have a class,
         <classname>HibernateTitleDao</classname> (as outlined in the <link
         linkend="testing-fixture-di">Goals</link> section). First, let's look
-        at a JUnit 4.7 based implementation of the test class itself which
+        at a JUnit 4 based implementation of the test class itself which
         uses <interfacename>@Autowired</interfacename> for field injection (we
         will look at the application context configuration after all sample
         code listings). <emphasis>Note: The dependency injection behavior in
-        the following code listings is not in any way specific to JUnit 4.7.
+        the following code listings is not in any way specific to JUnit 4.
         The same DI techniques can be used in conjunction with any testing
         framework.</emphasis></para>
 
@@ -1525,10 +1525,10 @@ public void updateWithSessionFlush() {
         </section>
 
         <section id="testcontext-support-classes-junit4">
-          <title>JUnit 4.7 support classes</title>
+          <title>JUnit 4.5+ support classes</title>
 
           <para>The <literal>org.springframework.test.context.junit4</literal>
-          package provides support classes for JUnit 4.7 based test
+          package provides support classes for JUnit 4.5+ based test
           cases.</para>
 
           <itemizedlist>
@@ -1538,7 +1538,7 @@ public void updateWithSessionFlush() {
               <para>Abstract base test class which integrates the
               <emphasis>Spring TestContext Framework</emphasis> with explicit
               <classname>ApplicationContext</classname> testing support in a
-              JUnit 4.7 environment.</para>
+              JUnit 4.5+ environment.</para>
 
               <para>When you extend
               <classname>AbstractJUnit4SpringContextTests</classname> you will
@@ -1608,13 +1608,13 @@ public void updateWithSessionFlush() {
         </section>
 
         <section id="testcontext-junit4-runner">
-          <title>Custom JUnit 4.7 Runner</title>
+          <title>Custom JUnit 4.5+ Runner</title>
 
           <para>The <emphasis>Spring TestContext Framework</emphasis> offers
-          full integration with JUnit 4.7 via a custom runner. By annotating
-          test classes with
+          full integration with JUnit 4.5+ via a custom runner (tested on
+          JUnit 4.5, 4.6, and 4.7). By annotating test classes with
           <literal>@Runwith(SpringJUnit4ClassRunner.class)</literal>,
-          developers can implement standard JUnit 4.7 unit and integration
+          developers can implement standard JUnit 4.5+ unit and integration
           tests and simultaneously reap the benefits of the TestContext
           framework such as support for loading application contexts,
           dependency injection of test instances, transactional test method
@@ -1733,7 +1733,7 @@ public class SimpleTest {
 
       <para>The PetClinic sample application included with the full Spring
       distribution illustrates several features of the <emphasis>Spring
-      TestContext Framework</emphasis> in a JUnit 4.7 environment. Most test
+      TestContext Framework</emphasis> in a JUnit 4.5+ environment. Most test
       functionality is included in the
       <classname>AbstractClinicTests</classname>, for which a partial listing
       is shown below:</para>
@@ -1875,7 +1875,7 @@ public class HibernateClinicTests extends AbstractClinicTests { }
     <itemizedlist>
       <listitem>
         <para><ulink url="http://www.junit.org/">JUnit</ulink>: the Spring
-        Framework's unit and integration test suite is written using JUnit 3.8
+        Framework's unit and integration test suite is written using JUnit 3.8.2
         and JUnit 4.7 as the testing framework.</para>
       </listitem>
 
