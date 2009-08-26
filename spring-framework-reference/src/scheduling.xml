@@ -267,6 +267,7 @@ public class ExampleJob extends QuartzJobBean {
 	</section>
 	<section id="scheduling-task-executor">
 		<title>The Spring <interfacename>TaskExecutor</interfacename> abstraction</title>
+
 		<para>Spring 2.0 introduces a new abstraction for dealing with
 		executors. Executors are the Java 5 name for the concept of
 		thread pools. The "executor" naming is due to the fact that there
@@ -499,4 +500,127 @@ public class TaskExecutorExample {
 
 		</section>
 	</section>
+
+	<section id="scheduling-task-scheduler">
+		<title>The Spring <interfacename>TaskScheduler</interfacename> abstraction</title>
+
+		<para>In addition to the <interfacename>TaskExecutor</interfacename>
+		abstraction, Spring 3.0 introduces a <interfacename>TaskScheduler</interfacename>
+		with a variety of methods for scheduling tasks to run at some point in the future.
+		</para>
+		<programlisting language="java"><![CDATA[public interface TaskScheduler {
+
+    ScheduledFuture schedule(Runnable task, Trigger trigger);
+
+    ScheduledFuture schedule(Runnable task, Date startTime);
+
+    ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period);
+
+    ScheduledFuture scheduleAtFixedRate(Runnable task, long period);
+
+    ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay);
+
+    ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay);
+
+}]]></programlisting>
+
+		<para>The simplest method is the one named 'schedule' that takes a
+		<interfacename>Runnable</interfacename> and <classname>Date</classname>
+		only. That will cause the task to run once after the specified time. All of
+		the other methods are capable of scheduling tasks to run repeatedly. The
+		fixed-rate and fixed-delay methods are for simple, periodic execution, but
+		the method that accepts a Trigger is much more flexible.</para>
+
+		<section id="scheduling-trigger-interface">
+			<title>The <interfacename>Trigger</interfacename> interface</title>
+
+			<para>The <interfacename>Trigger</interfacename> interface is
+			essentially inspired by JSR-236, which, as of Spring 3.0, has not yet
+			been officially implemented. The basic idea of the
+			<interfacename>Trigger</interfacename> is that execution times may be
+			determined based on past execution outcomes or even arbitrary
+			conditions. If these determinations do take into account the outcome of
+			the preceding execution, that information is available within a
+			<interfacename>TriggerContext</interfacename>. The
+			<interfacename>Trigger</interfacename> interface itself is quite
+			simple:</para>
+			<programlisting language="java"><![CDATA[public interface Trigger {
+
+    Date nextExecutionTime(TriggerContext triggerContext);
+
+}]]></programlisting>
+
+			<para>As you can see, the <interfacename>TriggerContext</interfacename>
+			is the most important part. It encapsulates all of the relevant data,
+			and is open for extension in the future if necessary. The
+			<interfacename>TriggerContext</interfacename> is an interface (a
+			<classname>SimpleTriggerContext</classname> implementation is used by
+			default). Here you can see what methods are available for
+			<interfacename>Trigger</interfacename> implementations.</para>
+			<programlisting language="java"><![CDATA[public interface TriggerContext {
+
+    Date lastScheduledExecutionTime();
+
+    Date lastActualExecutionTime();
+
+    Date lastCompletionTime();
+
+}]]></programlisting>
+		</section>
+
+		<section id="scheduling-trigger-implementations">
+			<title><interfacename>Trigger</interfacename> implementations</title>
+
+			<para>Spring provides two implementations of the
+			<interfacename>Trigger</interfacename> interface. The most interesting
+			one is the <classname>CronTrigger</classname>. It enables the
+			scheduling of tasks based on cron expressions. For example the
+			following task is being scheduled to run 15 minutes past each hour but
+			only during the 9-to-5 "business hours" on weekdays.</para>
+			<programlisting language="java"><![CDATA[scheduler.schedule(task, new CronTrigger("* 15 9-17 * * MON-FRI"));]]></programlisting>
+
+			<para>The other out-of-the-box implementation is a
+			<classname>PeriodicTrigger</classname> that accepts a fixed period, an
+			optional initial delay value, and a boolean to indicate whether the
+			period should be interpreted as a fixed-rate or a fixed-delay. Since
+			the <interfacename>TaskScheduler</interfacename> interface already
+			defines methods for scheduling tasks at a fixed-rate or with a
+			fixed-delay, those methods should be used directly whenever possible.
+			The value of the <classname>PeriodicTrigger</classname> implementation
+			is that it can be used within components that rely on the
+			<interfacename>Trigger</interfacename> abstraction. For example, it may
+			be convenient to allow periodic triggers, cron-based triggers, and even
+			custom trigger implementations to be used interchangeably. Such a
+			component could take advantage of dependency injection so that such
+			<interfacename>Triggers</interfacename> could be configured externally.
+			</para>
+		</section>
+
+		<section id="scheduling-task-scheduler-implementations">
+			<title><interfacename>TaskScheduler</interfacename> implementations</title>
+
+			<para>As with Spring's <interfacename>TaskExecutor</interfacename>
+			abstraction, the primary benefit of the
+			<interfacename>TaskScheduler</interfacename> is that code relying on
+			scheduling behavior need not be coupled to a particular scheduler
+			implementation. The flexibility this provides is particularly relevant
+			when running within Application Server environments where threads
+			should not be created directly by the application itself. For such
+			cases, Spring provides a
+			<classname>TimerManagerTaskScheduler</classname> that delegates to a
+			CommonJ TimerManager instance, typically configured with a JNDI-lookup.
+			</para>
+
+			<para>A simpler alternative, the
+			<classname>ThreadPoolTaskScheduler</classname>, can be used whenever
+			external thread management is not a requirement. Internally, it
+			delegates to a <interfacename>ScheduledExecutorService</interfacename>
+			instance. <classname>ThreadPoolTaskScheduler</classname> actually
+			implements Spring's <interfacename>TaskExecutor</interfacename>
+			interface as well, so that a single instance can be used for
+			asynchronous execution <emphasis>as soon as possible</emphasis> as well
+			as scheduled, and potentially recurring, executions.</para>
+		</section>
+	</section>
+
 </chapter>
