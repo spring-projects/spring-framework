@@ -83,10 +83,10 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		assertEquals("Invalid amount of items", 2, order.getOrderItemCount());
 		OrderItem item = order.getOrderItem(0);
 		assertEquals("Invalid items", "1", item.getId());
-		assertEquals("Invalid items", new Integer(15), item.getQuantity());
+		assertEquals("Invalid items", 15, (int)item.getQuantity());
 		item = order.getOrderItem(1);
 		assertEquals("Invalid items", "3", item.getId());
-		assertEquals("Invalid items", new Integer(20), item.getQuantity());
+		assertEquals("Invalid items", 20, (int)item.getQuantity());
 	}
 
 
