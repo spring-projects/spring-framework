@@ -19,7 +19,6 @@ package org.springframework.oxm.castor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import javax.xml.transform.stream.StreamSource;
 
 import static org.junit.Assert.*;
@@ -44,7 +43,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	protected void testFlight(Object o) {
 		Flight flight = (Flight) o;
 		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, flight.getNumber());
+		assertEquals("Number is invalid", Long.valueOf(42L), flight.getNumber());
 	}
 
 	@Override
@@ -59,7 +58,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	@Test
 	public void unmarshalTargetClass() throws Exception {
 		CastorMarshaller unmarshaller = new CastorMarshaller();
-		unmarshaller.setTargetClass(Flights.class);
+		unmarshaller.setTargetClasses(new Class[] { Flights.class } );
 		unmarshaller.afterPropertiesSet();
 		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
 		Object flights = unmarshaller.unmarshal(source);
@@ -67,10 +66,10 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	}
 
 	@Test
-	public void testSetBothTargetClassAndMapping() throws IOException {
+	public void testSetBothTargetClassesAndMapping() throws IOException {
 		CastorMarshaller unmarshaller = new CastorMarshaller();
 		unmarshaller.setMappingLocation(new ClassPathResource("order-mapping.xml", CastorMarshaller.class));
-		unmarshaller.setTargetClass(ArrayList.class);
+		unmarshaller.setTargetClasses(new Class[] { Order.class } );
 		unmarshaller.afterPropertiesSet();
 
 		String xml = "<order>" +
@@ -78,12 +77,12 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 				"<order-item id=\"3\" quantity=\"20\"/>" +
 				"</order>";
 
-		ArrayList result = (ArrayList) unmarshaller.unmarshal(new StreamSource(new StringReader(xml)));
-		assertEquals("Invalid amount of items", 2, result.size());
-		OrderItem item = (OrderItem) result.get(0);
+		Order order = (Order) unmarshaller.unmarshal(new StreamSource(new StringReader(xml)));
+		assertEquals("Invalid amount of items", 2, order.getOrderItemCount());
+		OrderItem item = order.getOrderItem(0);
 		assertEquals("Invalid items", "1", item.getId());
 		assertEquals("Invalid items", new Integer(15), item.getQuantity());
-		item = (OrderItem) result.get(1);
+		item = order.getOrderItem(1);
 		assertEquals("Invalid items", "3", item.getId());
 		assertEquals("Invalid items", new Integer(20), item.getQuantity());
 	}
