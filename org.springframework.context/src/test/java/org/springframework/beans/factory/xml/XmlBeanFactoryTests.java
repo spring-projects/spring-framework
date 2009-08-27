@@ -1365,36 +1365,6 @@ public final class XmlBeanFactoryTests {
 		assertEquals(Boolean.TRUE, bean.boolean2);
 	}
 
-	public @Test void testDoubleBooleanNoType() {
-		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
-		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("beanWithDoubleBooleanNoType");
-		bd.setLenientConstructorResolution(false);
-		try {
-			xbf.getBean("beanWithDoubleBooleanNoType");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			ex.printStackTrace();
-			assertTrue(ex.getMostSpecificCause().getMessage().contains("Ambiguous"));
-		}
-	}
-
-	public @Test void testDoubleBooleanNoTypeFactoryMethod() {
-		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
-		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("beanWithDoubleBooleanNoTypeFactoryMethod");
-		bd.setLenientConstructorResolution(false);
-		try {
-			xbf.getBean("beanWithDoubleBooleanNoTypeFactoryMethod");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			ex.printStackTrace();
-			assertTrue(ex.getMostSpecificCause().getMessage().contains("Ambiguous"));
-		}
-	}
-
 	public @Test void testLenientDependencyMatching() {
 		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
 		LenientDependencyTestBean bean = (LenientDependencyTestBean) xbf.getBean("lenientDependencyTestBean");

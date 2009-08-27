@@ -259,14 +259,12 @@ class ConstructorResolver {
 		}
 
 		try {
-			Object beanInstance = null; 
-			
+			Object beanInstance;
+
 			if (System.getSecurityManager() != null) {
 				final Constructor ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
-				
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-	
 					public Object run() {
 						return beanFactory.getInstantiationStrategy().instantiate(
 								mbd, beanName, beanFactory, ctorToUse, argumentsToUse);
@@ -389,7 +387,6 @@ class ConstructorResolver {
 
 			final Class factoryClazz = factoryClass;
 			if (System.getSecurityManager() != null) {
-				
 				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
 					public Method[] run() {
 						return (mbd.isNonPublicAccessAllowed() ?
@@ -416,7 +413,7 @@ class ConstructorResolver {
 			ConstructorArgumentValues resolvedValues = null;
 			boolean autowiring = (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
-			Set<Method> 	ambiguousFactoryMethods = null;
+			Set<Method> ambiguousFactoryMethods = null;
 
 			int minNrOfArgs;
 			if (explicitArgs != null) {
@@ -526,16 +523,13 @@ class ConstructorResolver {
 		}
 
 		try {
-			
-			Object beanInstance = null;
-			
+			Object beanInstance;
+
 			if (System.getSecurityManager() != null) {
 				final Object fb = factoryBean;
 				final Method factoryMethod = factoryMethodToUse;
 				final Object[] args = argsToUse;
-				
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-	
 					public Object run() {
 						return beanFactory.getInstantiationStrategy().instantiate(
 								mbd, beanName, beanFactory, fb, factoryMethod, args);
