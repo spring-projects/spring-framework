@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
+import org.apache.commons.logging.LogFactory;
 import org.easymock.MockControl;
 import org.easymock.internal.ArrayMatcher;
-import org.apache.commons.logging.LogFactory;
 
+import org.springframework.jdbc.core.BatchUpdateTestHelper;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.BatchUpdateTestHelper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -102,7 +101,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 
 		MockControl mc = MockControl.createControl(NamedParameterJdbcOperations.class);
 		NamedParameterJdbcOperations npjo = (NamedParameterJdbcOperations) mc.getMock();
-		Map args = new HashMap(2);
+		Map<String, Object> args = new HashMap<String, Object>(2);
 		args.put("id", arg1);
 		args.put("xy", arg2);
 		npjo.queryForInt(sql, args);
@@ -154,26 +153,6 @@ public class SimpleJdbcTemplateTests extends TestCase {
 	}
 
 	public void testQueryForLongWithArgs() {
-		String sql = "SELECT COUNT(0) FROM BAR WHERE ID=? AND XY=?";
-		long expectedResult = 666;
-		double arg1 = 24.7;
-		String arg2 = "foo";
-		Object arg3 = new Object();
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForLong(sql, new Object[]{arg1, arg2, arg3});
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		long result = jth.queryForLong(sql, arg1, arg2, arg3);
-		assertEquals(expectedResult, result);
-		mc.verify();
-	}
-
-	public void testQueryForLongWithMap() {
 		String sql = "SELECT COUNT(0) FROM BAR WHERE ID=? AND XY=?";
 		long expectedResult = 666;
 		double arg1 = 24.7;

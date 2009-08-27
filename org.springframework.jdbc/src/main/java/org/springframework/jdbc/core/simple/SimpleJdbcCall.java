@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T executeFunction(Class<T> returnType, Map<String, Object> args) {
+	public <T> T executeFunction(Class<T> returnType, Map<String, ?> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
@@ -152,7 +152,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T executeObject(Class<T> returnType, Map<String, Object> args) {
+	public <T> T executeObject(Class<T> returnType, Map<String, ?> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 

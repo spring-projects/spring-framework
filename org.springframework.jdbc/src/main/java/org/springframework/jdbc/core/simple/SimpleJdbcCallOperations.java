@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public interface SimpleJdbcCallOperations {
 	SimpleJdbcCallOperations withReturnValue();
 
 	/**
-	 * Specify one or more parameters if desired.  These parameters will be supplemented with any
+	 * Specify one or more parameters if desired. These parameters will be supplemented with any
 	 * parameter information retrieved from the database meta data.
 	 * Note that only parameters declared as <code>SqlParameter</code> and <code>SqlInOutParameter</code>
 	 * will be used to provide input values.  This is different from the <code>StoredProcedure</code> class
@@ -85,7 +85,7 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
-	 * by a RowMapper.  The results will be returned using the parameter name specified.  Multiple
+	 * by a RowMapper. The results will be returned using the parameter name specified.  Multiple
 	 * ResultSets must be declared in the correct order. If the database you are using uses ref cursors
 	 * then the name specified must match the name of the parameter declared for the procedure in the
 	 * database.
@@ -114,7 +114,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args Map containing the parameter values to be used in the call.
 	 */
-	<T> T executeFunction(Class<T> returnType, Map<String, Object> args);
+	<T> T executeFunction(Class<T> returnType, Map<String, ?> args);
 
 	/**
 	 * Execute the stored function and return the results obtained as an Object of the specified return type.
@@ -140,7 +140,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args Map containing the parameter values to be used in the call.
 	 */
-	<T> T executeObject(Class<T> returnType, Map<String, Object> args);
+	<T> T executeObject(Class<T> returnType, Map<String, ?> args);
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
