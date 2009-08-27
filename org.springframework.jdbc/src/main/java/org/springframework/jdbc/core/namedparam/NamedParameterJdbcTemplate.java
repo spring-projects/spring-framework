@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().execute(getPreparedStatementCreator(sql, paramSource), action);
 	}
 
-	public <T> T execute(String sql, Map<String, Object> paramMap, PreparedStatementCallback<T> action)
+	public <T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return execute(sql, new MapSqlParameterSource(paramMap), action);
@@ -115,7 +115,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rse);
 	}
 
-	public <T> T query(String sql, Map<String, Object> paramMap, ResultSetExtractor<T> rse)
+	public <T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rse);
@@ -127,7 +127,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rch);
 	}
 
-	public void query(String sql, Map<String, Object> paramMap, RowCallbackHandler rch)
+	public void query(String sql, Map<String, ?> paramMap, RowCallbackHandler rch)
 			throws DataAccessException {
 
 		query(sql, new MapSqlParameterSource(paramMap), rch);
@@ -139,7 +139,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
 	}
 
-	public <T> List<T> query(String sql, Map<String, Object> paramMap, RowMapper<T> rowMapper)
+	public <T> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rowMapper);
@@ -152,7 +152,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
-	public <T> T queryForObject(String sql, Map<String, Object> paramMap, RowMapper<T>rowMapper)
+	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
 			throws DataAccessException {
 
 		return queryForObject(sql, new MapSqlParameterSource(paramMap), rowMapper);
@@ -164,7 +164,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return queryForObject(sql, paramSource, new SingleColumnRowMapper<T>(requiredType));
 	}
 
-	public <T> T queryForObject(String sql, Map<String, Object> paramMap, Class<T> requiredType)
+	public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 
 		return queryForObject(sql, paramMap, new SingleColumnRowMapper<T>(requiredType));
@@ -174,7 +174,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return queryForObject(sql, paramSource, new ColumnMapRowMapper());
 	}
 
-	public Map<String, Object> queryForMap(String sql, Map<String, Object> paramMap) throws DataAccessException {
+	public Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
 	}
 
@@ -183,7 +183,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return (number != null ? number.longValue() : 0);
 	}
 
-	public long queryForLong(String sql, Map<String, Object> paramMap) throws DataAccessException {
+	public long queryForLong(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForLong(sql, new MapSqlParameterSource(paramMap));
 	}
 
@@ -192,7 +192,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return (number != null ? number.intValue() : 0);
 	}
 
-	public int queryForInt(String sql, Map<String, Object> paramMap) throws DataAccessException {
+	public int queryForInt(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForInt(sql, new MapSqlParameterSource(paramMap));
 	}
 
@@ -202,7 +202,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return query(sql, paramSource, new SingleColumnRowMapper<T>(elementType));
 	}
 
-	public <T> List<T> queryForList(String sql, Map<String, Object> paramMap, Class<T> elementType)
+	public <T> List<T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException {
 
 		return queryForList(sql, new MapSqlParameterSource(paramMap), elementType);
@@ -214,7 +214,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return query(sql, paramSource, new ColumnMapRowMapper());
 	}
 
-	public List<Map<String, Object>> queryForList(String sql, Map<String, Object> paramMap)
+	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap)
 			throws DataAccessException {
 
 		return queryForList(sql, new MapSqlParameterSource(paramMap));
@@ -225,7 +225,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 				getPreparedStatementCreator(sql, paramSource), new SqlRowSetResultSetExtractor());
 	}
 
-	public SqlRowSet queryForRowSet(String sql, Map<String, Object> paramMap) throws DataAccessException {
+	public SqlRowSet queryForRowSet(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForRowSet(sql, new MapSqlParameterSource(paramMap));
 	}
 
@@ -233,7 +233,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().update(getPreparedStatementCreator(sql, paramSource));
 	}
 
-	public int update(String sql, Map<String, Object> paramMap) throws DataAccessException {
+	public int update(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return update(sql, new MapSqlParameterSource(paramMap));
 	}
 
@@ -261,10 +261,10 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().update(pscf.newPreparedStatementCreator(params), generatedKeyHolder);
 	}
 
-	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues) {
+	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
 		SqlParameterSource[] batchArgs = new SqlParameterSource[batchValues.length];
 		int i = 0;
-		for (Map<String, Object> values : batchValues) {
+		for (Map<String, ?> values : batchValues) {
 			batchArgs[i] = new MapSqlParameterSource(values);
 			i++;
 		}

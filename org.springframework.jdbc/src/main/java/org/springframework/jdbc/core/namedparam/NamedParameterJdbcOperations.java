@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> T execute(String sql, Map<String, Object> paramMap, PreparedStatementCallback<T> action)
+	<T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException;
 
 	/**
@@ -112,7 +112,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
-	<T> T query(String sql, Map<String, Object> paramMap, ResultSetExtractor<T> rse)
+	<T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException;
 
 	/**
@@ -137,7 +137,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param rch object that will extract results, one row at a time
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
-	void query(String sql, Map<String, Object> paramMap, RowCallbackHandler rch) throws DataAccessException;
+	void query(String sql, Map<String, ?> paramMap, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -163,7 +163,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the result List, containing mapped objects
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
-	<T> List<T> query(String sql, Map<String, Object> paramMap, RowMapper<T> rowMapper)
+	<T> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -196,7 +196,7 @@ public interface NamedParameterJdbcOperations {
 	 * one column in that row
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 */
-	<T> T queryForObject(String sql, Map<String, Object> paramMap, RowMapper<T> rowMapper)
+	<T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -233,7 +233,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */
-	<T> T queryForObject(String sql, Map<String, Object> paramMap, Class<T> requiredType)
+	<T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException;
 
 	/**
@@ -272,7 +272,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForMap(String)
 	 * @see org.springframework.jdbc.core.ColumnMapRowMapper
 	 */
-	Map<String, Object> queryForMap(String sql, Map<String, Object> paramMap) throws DataAccessException;
+	Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -305,7 +305,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForLong(String)
 	 */
-	long queryForLong(String sql, Map<String, Object> paramMap) throws DataAccessException;
+	long queryForLong(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -336,7 +336,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForInt(String)
 	 */
-	int queryForInt(String sql, Map<String, Object> paramMap) throws DataAccessException;
+	int queryForInt(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -370,7 +370,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String, Class)
 	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
-	<T> List<T> queryForList(String sql, Map<String, Object> paramMap, Class<T> elementType)
+	<T> List<T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException;
 
 	/**
@@ -402,7 +402,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String)
 	 */
-	List<Map<String, Object>> queryForList(String sql, Map<String, Object> paramMap) throws DataAccessException;
+	List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -443,7 +443,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.SqlRowSetResultSetExtractor
 	 * @see javax.sql.rowset.CachedRowSet
 	 */
-	SqlRowSet queryForRowSet(String sql, Map<String, Object> paramMap) throws DataAccessException;
+	SqlRowSet queryForRowSet(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
@@ -462,7 +462,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the number of rows affected
 	 * @throws org.springframework.dao.DataAccessException if there is any problem issuing the update
 	 */
-	int update(String sql, Map<String, Object> paramMap) throws DataAccessException;
+	int update(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments,
@@ -499,7 +499,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param batchValues the array of Maps containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
-	public int[] batchUpdate(String sql, Map<String, Object>[] batchValues);
+	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues);
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
