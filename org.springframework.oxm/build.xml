@@ -4,7 +4,9 @@
 	<import file="${basedir}/../build-spring-framework/package-bundle.xml"/>
 	<import file="${basedir}/../spring-build/standard/default.xml"/>
 
-	<property name="schema" value="${basedir}/src/test/resources/org/springframework/oxm/flight.xsd"/>
+	<property name="flightSchema" value="${basedir}/src/test/resources/org/springframework/oxm/flight.xsd"/>
+	<property name="orderSchema" value="${basedir}/src/test/resources/org/springframework/oxm/order.xsd"/>
+	<property name="castorBuilderProperties" value="${basedir}/src/test/castor/castorbuilder.properties"/>
 	<property name="test.castor.dir" value="${target.dir}/castor/test"/>
 	<property name="test.jaxb.dir" value="${target.dir}/jaxb/test"/>
 
@@ -26,10 +28,17 @@
 			<delete quiet="true" dir="${test.castor.dir}" />
 			<mkdir dir="${test.castor.dir}" />
 
-			<castor types="j2" warnings="false" file="${schema}" todir="${test.castor.dir}"
-					package="org.springframework.oxm.castor"/>
+			<castor types="j2" warnings="false" file="${flightSchema}" todir="${test.castor.dir}"
+					package="org.springframework.oxm.castor" properties="${castorBuilderProperties}"/>
+			<castor types="j2" warnings="false" file="${orderSchema}" todir="${test.castor.dir}"
+					package="org.springframework.oxm.castor" properties="${castorBuilderProperties}"/>
 			<do-compile classpath.id="@{classpath.id}" input.dir="${test.castor.dir}" output.dir="@{output.dir}"
 					resources.dir="${test.castor.dir}"/>
+            <copy todir="@{output.dir}">
+                <fileset dir="${test.castor.dir}">
+                    <exclude name="**/*.java"/>
+                </fileset>
+            </copy>
 
 			<!-- JAXB2 -->
 		    <ivy:cachepath resolveId="jaxb.classpath" pathid="jaxb.classpath" organisation="com.sun.xml"
@@ -40,7 +49,7 @@
 			<delete quiet="true" dir="${test.jaxb.dir}" />
 			<mkdir dir="${test.jaxb.dir}" />
 
-			<xjc destdir="${test.jaxb.dir}" package="org.springframework.oxm.jaxb.test" schema="${schema}">
+			<xjc destdir="${test.jaxb.dir}" package="org.springframework.oxm.jaxb.test" schema="${flightSchema}">
 				<produces dir="${test.jaxb.dir}" includes="**/*.java"/>
 			</xjc>
 			<do-compile classpath.id="@{classpath.id}" input.dir="${test.jaxb.dir}" output.dir="@{output.dir}"
@@ -67,7 +76,7 @@
 					module="com.springsource.org.apache.xmlbeans" revision="2.4.0"
 					conf="runtime" type="jar" inline="true" log="download-only"/>
 			<taskdef name="xmlbeans" classname="org.apache.xmlbeans.impl.tool.XMLBean" classpathref="xmlbeans.classpath"/>
-			<xmlbeans schema="${schema}" classgendir="@{output.dir}" classpathref="xmlbeans.classpath" compiler="modern"
+			<xmlbeans schema="${flightSchema}" classgendir="@{output.dir}" classpathref="xmlbeans.classpath" compiler="modern"
 					  verbose="false"/>
 		</sequential>
 

@@ -61,7 +61,7 @@ import org.springframework.util.xml.StaxUtils;
 
 /**
  * Implementation of the <code>Marshaller</code> interface for Castor. By default, Castor does not require any further
- * configuration, though setting a target class or providing a mapping file can be used to have more control over the
+ * configuration, though setting target classes, target packages or providing a mapping file can be used to have more control over the
  * behavior of Castor.
  *
  * <p>If a target class is specified using <code>setTargetClass</code>, the <code>CastorMarshaller</code> can only be
@@ -74,6 +74,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Arjen Poutsma
  * @see #setEncoding(String)
  * @see #setTargetClass(Class)
+ * @see #setTargetPackages(String[])
  * @see #setMappingLocation(Resource)
  * @see #setMappingLocations(Resource[])
  * @since 3.0
@@ -90,7 +91,9 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private String encoding = DEFAULT_ENCODING;
 
-	private Class targetClass;
+	private Class[] targetClasses;
+
+	private String[] targetPackages;
 
 	private boolean validating = false;
 
@@ -132,12 +135,28 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Set the Castor target class. If this property is set, this <code>CastorMarshaller</code>
-	 * is tied to this one specific class. Use a mapping file for unmarshalling multiple classes.
-	 * <p>You cannot set both this property and the mapping (location).
+	 * Set the Castor target class. Alternative means of configuring
+	 * <code>CastorMarshaller<code> for unmarshalling multiple classes include
+	 * use of mapping files, and specifying packages with Castor descriptor classes.
 	 */
 	public void setTargetClass(Class targetClass) {
-		this.targetClass = targetClass;
+		this.targetClasses = new Class[]{targetClass};
+	}
+
+	/**
+	 * Set the Castor target classes. Alternative means of configuring
+	 * <code>CastorMarshaller<code> for unmarshalling multiple classes include
+	 * use of mapping files, and specifying packages with Castor descriptor classes.
+	 */
+	public void setTargetClasses(Class[] targetClasses) {
+		this.targetClasses = targetClasses;
+	}
+
+	/**
+	 * Set the package names of packages with the Castor descriptor classes.
+	 */
+	public void setTargetPackages(String[] targetPackages) {
+		this.targetPackages = targetPackages;
 	}
 
 	/**
@@ -214,21 +233,28 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.suppressXsiType = suppressXsiType;
 	}
 
-
 	public final void afterPropertiesSet() throws CastorMappingException, IOException {
 		if (logger.isInfoEnabled()) {
-			if (this.mappingLocations != null) {
-				logger.info("Configured using " + StringUtils.arrayToCommaDelimitedString(this.mappingLocations));
+			if (!ObjectUtils.isEmpty(this.mappingLocations)) {
+				logger.info(
+						"Configured using [" + StringUtils.arrayToCommaDelimitedString(this.mappingLocations) + "]");
 			}
-			if (this.targetClass != null) {
-				logger.info("Configured for target class [" + this.targetClass.getName() + "]");
+			if (!ObjectUtils.isEmpty(this.targetClasses)) {
+				logger.info("Configured for target classes " + StringUtils.arrayToCommaDelimitedString(targetClasses) +
+						"]");
 			}
-			if (this.mappingLocations == null && this.targetClass == null) {
+			if (!ObjectUtils.isEmpty(this.targetPackages)) {
+				logger.info(
+						"Configured for target packages [" + StringUtils.arrayToCommaDelimitedString(targetPackages) +
+								"]");
+			}
+			if (ObjectUtils.isEmpty(this.mappingLocations) && ObjectUtils.isEmpty(this.targetClasses) &&
+					ObjectUtils.isEmpty(this.targetPackages)) {
 				logger.info("Using default configuration");
 			}
 		}
 		try {
-			this.xmlContext = createXMLContext(this.mappingLocations, this.targetClass);
+			this.xmlContext = createXMLContext(this.mappingLocations, this.targetClasses, this.targetPackages);
 		}
 		catch (MappingException ex) {
 			throw new CastorMappingException("Could not load Castor mapping", ex);
@@ -240,14 +266,16 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	/**
 	 * Create the Castor <code>XMLContext</code>. Subclasses can override this to create a custom context.
-	 * <p>The default implementation loads mapping files if defined, and the target class if not defined.
+	 * <p>
+	 * The default implementation loads mapping files if defined, or the target class or packages if defined.
+	 *
 	 * @return the created resolver
 	 * @throws MappingException when the mapping file cannot be loaded
-	 * @throws IOException in case of I/O errors
+	 * @throws IOException	  in case of I/O errors
 	 * @see XMLContext#addMapping(org.exolab.castor.mapping.Mapping)
 	 * @see XMLContext#addClass(Class)
 	 */
-	protected XMLContext createXMLContext(Resource[] mappingLocations, Class targetClass)
+	protected XMLContext createXMLContext(Resource[] mappingLocations, Class[] targetClasses, String[] targetPackages)
 			throws MappingException, ResolverException, IOException {
 
 		XMLContext context = new XMLContext();
@@ -258,12 +286,14 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 			}
 			context.addMapping(mapping);
 		}
-		if (targetClass != null) {
-			context.addClass(targetClass);
+		if (!ObjectUtils.isEmpty(targetClasses)) {
+			context.addClasses(targetClasses);
+		}
+		if (!ObjectUtils.isEmpty(targetPackages)) {
+			context.addPackages(targetPackages);
 		}
 		return context;
 	}
-
 
 	/**
 	 * Returns <code>true</code> for all classes, i.e. Castor supports arbitrary classes.
@@ -271,7 +301,6 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	public boolean supports(Class<?> clazz) {
 		return true;
 	}
-
 
 	// Marshalling
 
@@ -378,7 +407,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 			return unmarshalSaxReader(reader, new InputSource());
 		}
 		catch (IOException ex) {
-			throw new UnmarshallingFailureException("Failed to read XML stream",  ex);
+			throw new UnmarshallingFailureException("Failed to read XML stream", ex);
 		}
 	}
 
@@ -411,19 +440,20 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private Unmarshaller createUnmarshaller() {
 		Unmarshaller unmarshaller = this.xmlContext.createUnmarshaller();
-		if (this.targetClass != null) {
-			unmarshaller.setClass(this.targetClass);
-			unmarshaller.setClassLoader(this.targetClass.getClassLoader());
-		}
 		customizeUnmarshaller(unmarshaller);
 		return unmarshaller;
 	}
 
 	/**
-	 * Template method that allows for customizing of the given Castor {@link Unmarshaller}.
-	 * <p>The default implementation invokes {@link Unmarshaller#setValidation(boolean)},
-	 * {@link Unmarshaller#setWhitespacePreserve(boolean)}, {@link Unmarshaller#setIgnoreExtraAttributes(boolean)},
-	 * and {@link Unmarshaller#setIgnoreExtraElements(boolean)} with the properties set on this marshaller.
+	 * Template method that allows for customizing of the given Castor
+	 * {@link Unmarshaller}.
+	 * <p>
+	 * The default implementation invokes
+	 * {@link Unmarshaller#setValidation(boolean)},
+	 * {@link Unmarshaller#setWhitespacePreserve(boolean)},
+	 * {@link Unmarshaller#setIgnoreExtraAttributes(boolean)}, and
+	 * {@link Unmarshaller#setIgnoreExtraElements(boolean)} with the properties
+	 * set on this marshaller.
 	 */
 	protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
 		unmarshaller.setValidation(this.validating);
@@ -433,13 +463,16 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Convert the given <code>XMLException</code> to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
-	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
-	 * unmarshalling, since Castor itself does not make this distinction in its exception hierarchy.
-	 * @param ex Castor <code>XMLException</code> that occured
-	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
-	 * or unmarshalling (<code>false</code>)
+	 * Convert the given <code>XMLException</code> to an appropriate exception
+	 * from the <code>org.springframework.oxm</code> hierarchy.
+	 * <p>
+	 * A boolean flag is used to indicate whether this exception occurs during
+	 * marshalling or unmarshalling, since Castor itself does not make this
+	 * distinction in its exception hierarchy.
+	 *
+	 * @param ex		  Castor <code>XMLException</code> that occured
+	 * @param marshalling indicates whether the exception occurs during
+	 *                    marshalling (<code>true</code>), or unmarshalling (<code>false</code>)
 	 * @return the corresponding <code>XmlMappingException</code>
 	 */
 	protected XmlMappingException convertCastorException(XMLException ex, boolean marshalling) {
@@ -448,7 +481,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		}
 		else if (ex instanceof MarshalException) {
 			if (marshalling) {
-				return new MarshallingFailureException("Castor marshalling exception",  ex);
+				return new MarshallingFailureException("Castor marshalling exception", ex);
 			}
 			else {
 				return new UnmarshallingFailureException("Castor unmarshalling exception", ex);
