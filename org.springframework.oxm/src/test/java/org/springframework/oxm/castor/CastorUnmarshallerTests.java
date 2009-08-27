@@ -28,7 +28,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.Unmarshaller;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Override
@@ -43,7 +45,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	protected void testFlight(Object o) {
 		Flight flight = (Flight) o;
 		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", Long.valueOf(42L), flight.getNumber());
+		assertEquals("Number is invalid", 42L, (long) flight.getNumber());
 	}
 
 	@Override
