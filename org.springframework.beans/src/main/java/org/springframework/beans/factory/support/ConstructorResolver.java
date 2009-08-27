@@ -681,14 +681,7 @@ class ConstructorResolver {
 					}
 				}
 				args.arguments[paramIndex] = convertedValue;
-				if (mbd.isLenientConstructorResolution()) {
-					args.rawArguments[paramIndex] = originalValue;
-				}
-				else {
-					args.rawArguments[paramIndex] =
-							((sourceValue instanceof TypedStringValue && !((TypedStringValue) sourceValue).hasTargetType()) ?
-							convertedValue : originalValue);
-				}
+				args.rawArguments[paramIndex] = originalValue;
 			}
 			else {
 				// No explicit match found: we're either supposed to autowire or
