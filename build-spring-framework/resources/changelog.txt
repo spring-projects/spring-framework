@@ -3,12 +3,22 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.RC1 (2009-09-XX)
+Changes in version 3.0.0.RC1 (2009-09-xx)
 -----------------------------------------
 
-* upgraded to JUnit 4.7 and TestNG 5.10
+* revised AccessControlContext access from BeanFactory
+* BeanFactory's default type conversion falls back to String constructor on target type
+* BeanFactory tries to create unknown collection implementation types via default constructor
+* support for default "conversionService" bean in an ApplicationContext
+* introduced "ui.format" package as an alternative to PropertyEditors for data binding
+* MBeanServerFactoryBean returns JDK 1.5 platform MBeanServer for agent id "" (empty String) 
+* refined logging in JMS SingleConnectionFactory and DefaultMessageListenerContainer
+* @RequestMapping annotation now supported for annotated interfaces (and JDK proxies) as well
+* refined response handling for @ExceptionHandler methods
+* deprecated @NotTransactional annotation for test classes in favor of @BeforeTransaction
 * SpringJUnit4ClassRunner is now compatible with JUnit 4.5, 4.6, and 4.7
-* @NotTransactional is now deprecated
+* Spring's Hibernate support is now compatible with Hibernate 3.5 beta 1 as well
+* Spring's JPA support is now fully compatible with JPA 2.0 as in EclipseLink 2.0.0.M7
 
 
 Changes in version 3.0.0.M4 (2009-08-10)
