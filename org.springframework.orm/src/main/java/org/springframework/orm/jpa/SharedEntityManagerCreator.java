@@ -71,7 +71,7 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
-		Class[] emIfcs = null;
+		Class[] emIfcs;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
 			Class emIfc = emfInfo.getEntityManagerInterface();
@@ -154,10 +154,10 @@ public abstract class SharedEntityManagerCreator {
 				// JPA 2.0: return EntityManagerFactory without creating an EntityManager.
 				return this.targetFactory;
 			}
-			else if (method.getName().equals("getQueryBuilder")) {
-				// JPA 2.0: return EntityManagerFactory's QueryBuilder (avoid creation of EntityManager).
+			else if (method.getName().equals("getQueryBuilder") || method.getName().equals("getMetamodel")) {
+				// JPA 2.0: return EntityManagerFactory's QueryBuilder/Metamodel (avoid creation of EntityManager)
 				try {
-					return EntityManagerFactory.class.getMethod("getQueryBuilder").invoke(this.targetFactory);
+					return EntityManagerFactory.class.getMethod(method.getName()).invoke(this.targetFactory);
 				}
 				catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
@@ -202,15 +202,11 @@ public abstract class SharedEntityManagerCreator {
 				return target;
 			}
 			else if (method.getName().equals("unwrap")) {
-				// Handle JPA 2.0 unwrap method - could be a proxy match.
-				Class targetClass = (Class) args[0];
-				if (targetClass == null || targetClass.isInstance(proxy)) {
-					return proxy;
-				}
 				// We need a transactional target now.
 				if (target == null) {
 					throw new IllegalStateException("No transactional EntityManager available");
 				}
+				// Still perform unwrap call on target EntityManager.
 			}
 
 			// Regular EntityManager operations.
