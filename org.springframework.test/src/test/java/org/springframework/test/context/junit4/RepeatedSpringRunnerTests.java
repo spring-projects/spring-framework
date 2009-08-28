@@ -30,7 +30,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
@@ -76,7 +75,8 @@ public class RepeatedSpringRunnerTests {
 			{ NonAnnotatedRepeatedTestCase.class, 0, 1, 1, 1 },//
 			{ DefaultRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
 			{ NegativeRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
-			{ RepeatedFiveTimesRepeatedTestCase.class, 0, 1, 1, 5 } //
+			{ RepeatedFiveTimesRepeatedTestCase.class, 0, 1, 1, 5 },//
+			{ TimedRepeatedTestCase.class, 3, 4, 4, (5 + 1 + 4 + 10) } //
 		});
 	}
 
@@ -101,7 +101,6 @@ public class RepeatedSpringRunnerTests {
 
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners( {})
-	@ContextConfiguration(locations = {})
 	public abstract static class AbstractRepeatedTestCase {
 
 		protected void incrementInvocationCount() throws IOException {
@@ -113,7 +112,7 @@ public class RepeatedSpringRunnerTests {
 
 		@Test
 		@Timed(millis = 10000)
-		public void testNonAnnotated() throws Exception {
+		public void nonAnnotated() throws Exception {
 			incrementInvocationCount();
 		}
 	}
@@ -123,7 +122,7 @@ public class RepeatedSpringRunnerTests {
 		@Test
 		@Repeat
 		@Timed(millis = 10000)
-		public void testDefaultRepeatValue() throws Exception {
+		public void defaultRepeatValue() throws Exception {
 			incrementInvocationCount();
 		}
 	}
@@ -133,7 +132,7 @@ public class RepeatedSpringRunnerTests {
 		@Test
 		@Repeat(-5)
 		@Timed(millis = 10000)
-		public void testNegativeRepeatValue() throws Exception {
+		public void negativeRepeatValue() throws Exception {
 			incrementInvocationCount();
 		}
 	}
@@ -142,9 +141,47 @@ public class RepeatedSpringRunnerTests {
 
 		@Test
 		@Repeat(5)
-		@Timed(millis = 10000)
-		public void testRepeatedFiveTimes() throws Exception {
+		public void repeatedFiveTimes() throws Exception {
 			incrementInvocationCount();
+		}
+	}
+
+	/**
+	 * Unit tests for claims raised in <a
+	 * href="http://jira.springframework.org/browse/SPR-6011"
+	 * target="_blank">SPR-6011</a>.
+	 */
+	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {
+
+		@Test
+		@Timed(millis = 10000)
+		@Repeat(5)
+		public void repeatedFiveTimesButDoesNotExceedTimeout() throws Exception {
+			incrementInvocationCount();
+		}
+
+		@Test
+		@Timed(millis = 100)
+		@Repeat(1)
+		public void singleRepetitionExceedsTimeout() throws Exception {
+			incrementInvocationCount();
+			Thread.sleep(250);
+		}
+
+		@Test
+		@Timed(millis = 200)
+		@Repeat(4)
+		public void firstRepetitionOfManyExceedsTimeout() throws Exception {
+			incrementInvocationCount();
+			Thread.sleep(250);
+		}
+
+		@Test
+		@Timed(millis = 1000)
+		@Repeat(10)
+		public void collectiveRepetitionsExceedTimeout() throws Exception {
+			incrementInvocationCount();
+			Thread.sleep(150);
 		}
 	}
 
