@@ -52,6 +52,14 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 	private SessionFactory sessionFactory;
 
 
+	protected int countRowsInPersonTable() {
+		return countRowsInTable("person");
+	}
+
+	protected void assertPersonCount(int expectedCount) {
+		assertEquals("Verifying number of rows in the 'person' table.", expectedCount, countRowsInPersonTable());
+	}
+
 	@Before
 	public void setUp() {
 		assertInTransaction(true);
@@ -72,7 +80,9 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 	public void saveJuergenWithDriversLicense() {
 		DriversLicense driversLicense = new DriversLicense(2L, 2222L);
 		Person juergen = new Person(JUERGEN, driversLicense);
+		int numRows = countRowsInPersonTable();
 		personService.save(juergen);
+		assertPersonCount(numRows + 1);
 		assertNotNull("Should be able to save and retrieve Juergen", personService.findByName(JUERGEN));
 		assertNotNull("Juergen's ID should have been set", juergen.getId());
 	}
