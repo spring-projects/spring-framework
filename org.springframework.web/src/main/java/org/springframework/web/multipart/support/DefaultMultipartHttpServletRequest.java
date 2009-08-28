@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Default implementation of the
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 29.09.2003
  * @see org.springframework.web.multipart.MultipartResolver
  */
@@ -49,7 +51,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	 * with Strings as keys and String arrays as values
 	 */
 	public DefaultMultipartHttpServletRequest(
-			HttpServletRequest request, Map<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
+			HttpServletRequest request, MultiValueMap<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
 
 		super(request);
 		setMultipartFiles(mpFiles);
