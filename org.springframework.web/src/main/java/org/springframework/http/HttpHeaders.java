@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.LinkedHashMap;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -494,6 +495,19 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 		headers.put(headerName, headerValues);
 	}
 
+	public void setAll(Map<String, String> values) {
+		for (Entry<String, String> entry : values.entrySet()) {
+			set(entry.getKey(), entry.getValue());
+		}
+	}
+
+	public Map<String, String> toSingleValueMap() {
+		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
+		for (Entry<String, List<String>> entry : headers.entrySet()) {
+			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
+		}
+		return singleValueMap;
+	}
 
 	// Map implementation
 

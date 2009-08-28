@@ -19,24 +19,28 @@ package org.springframework.web.multipart.support;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * Abstract base implementation of the MultipartHttpServletRequest interface.
  * Provides management of pre-generated MultipartFile instances.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 06.10.2003
  */
 public abstract class AbstractMultipartHttpServletRequest extends HttpServletRequestWrapper
 	implements MultipartHttpServletRequest {
 
-	private Map<String, MultipartFile> multipartFiles;
+	private MultiValueMap<String, MultipartFile> multipartFiles;
 
 
 	/**
@@ -53,20 +57,34 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	}
 
 	public MultipartFile getFile(String name) {
-		return getMultipartFiles().get(name);
+		return getMultipartFiles().getFirst(name);
+	}
+
+	public List<MultipartFile> getFiles(String name) {
+		List<MultipartFile> multipartFiles = getMultipartFiles().get(name);
+		if (multipartFiles != null) {
+			return multipartFiles;
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	public Map<String, MultipartFile> getFileMap() {
+		return getMultipartFiles().toSingleValueMap();
+	}
+
+	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
 		return getMultipartFiles();
 	}
 
-
 	/**
-	 * Set a Map with parameter names as keys and MultipartFile objects as values.
+	 * Set a Map with parameter names as keys and list of MultipartFile objects as values.
 	 * To be invoked by subclasses on initialization.
 	 */
-	protected final void setMultipartFiles(Map<String, MultipartFile> multipartFiles) {
-		this.multipartFiles = Collections.unmodifiableMap(multipartFiles);
+	protected final void setMultipartFiles(MultiValueMap<String, MultipartFile> multipartFiles) {
+		this.multipartFiles =
+				new LinkedMultiValueMap<String, MultipartFile>(Collections.unmodifiableMap(multipartFiles));
 	}
 
 	/**
@@ -74,7 +92,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
-	protected Map<String, MultipartFile> getMultipartFiles() {
+	protected MultiValueMap<String, MultipartFile> getMultipartFiles() {
 		if (this.multipartFiles == null) {
 			initializeMultipart();
 		}

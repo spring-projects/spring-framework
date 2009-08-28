@@ -18,6 +18,9 @@ package org.springframework.web.multipart;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+
+import org.springframework.util.MultiValueMap;
 
 /**
  * This interface defines the multipart request access operations
@@ -26,6 +29,7 @@ import java.util.Map;
  * {@link org.springframework.web.portlet.multipart.MultipartActionRequest}.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 2.5.2
  */
 public interface MultipartRequest {
@@ -43,16 +47,33 @@ public interface MultipartRequest {
 	 * Return the contents plus description of an uploaded file in this request,
 	 * or <code>null</code> if it does not exist.
 	 * @param name a String specifying the parameter name of the multipart file
-	 * @return the uploaded content in the form of a {@link org.springframework.web.multipart.MultipartFile} object
+	 * @return the uploaded content in the form of a {@link MultipartFile} object
 	 */
 	MultipartFile getFile(String name);
 
 	/**
+	 * Return the contents plus description of uploaded files in this request,
+	 * or an empty list if it does not exist.
+	 * @param name a String specifying the parameter name of the multipart file
+	 * @return the uploaded content in the form of a {@link MultipartFile} list
+	 */
+	List<MultipartFile> getFiles(String name);
+
+	/**
 	 * Return a {@link java.util.Map} of the multipart files contained in this request.
 	 * @return a map containing the parameter names as keys, and the
-	 * {@link org.springframework.web.multipart.MultipartFile} objects as values
+	 * {@link MultipartFile} objects as values
 	 * @see MultipartFile
 	 */
 	Map<String, MultipartFile> getFileMap();
+
+	/**
+	 * Return a {@link MultiValueMap} of the multipart files contained in this request.
+	 * @return a map containing the parameter names as keys, and a list of
+	 * {@link MultipartFile} objects as values
+	 * @see MultipartFile
+	 */
+	MultiValueMap<String, MultipartFile> getMultiFileMap();
+
 
 }

@@ -67,10 +67,13 @@ import org.springframework.web.portlet.multipart.MultipartActionRequest;
 import org.springframework.web.portlet.multipart.PortletMultipartResolver;
 import org.springframework.web.portlet.mvc.Controller;
 import org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Arjen Poutsma
  */
 public class ComplexPortletApplicationContext extends StaticPortletApplicationContext {
 
@@ -472,8 +475,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 				throw new IllegalStateException("Already resolved");
 			}
 			request.setAttribute("resolved", Boolean.TRUE);
-			Map files = new HashMap();
-			files.put("someFile", "someFile");
+			MultiValueMap files = new LinkedMultiValueMap();
+			files.set("someFile", "someFile");
 			Map params = new HashMap();
 			params.put("someParam", "someParam");
 			return new DefaultMultipartActionRequest(request, files, params);

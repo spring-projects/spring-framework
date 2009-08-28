@@ -48,4 +48,16 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	 */
 	void set(K key, V value);
 
+	/**
+	 * Set the given values under.
+	 * @param values the values.
+	 */
+	void setAll(Map<K, V> values);
+
+	/**
+	 * Returns the first values contained in this {@code MultiValueMap}.
+	 * @return a single value representation of this map
+	 */
+	Map<K, V> toSingleValueMap();
+
 }

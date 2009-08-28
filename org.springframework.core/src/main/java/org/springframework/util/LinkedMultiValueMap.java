@@ -64,7 +64,6 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 		this.targetMap = new LinkedHashMap<K, List<V>>(otherMap);
 	}
 
-
 	// MultiValueMap implementation
 
 	public void add(K key, V value) {
@@ -87,6 +86,19 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 		this.targetMap.put(key, values);
 	}
 
+	public void setAll(Map<K, V> values) {
+		for (Entry<K, V> entry : values.entrySet()) {
+			set(entry.getKey(), entry.getValue());
+		}
+	}
+
+	public Map<K, V> toSingleValueMap() {
+		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K,V>(this.targetMap.size());
+		for (Entry<K, List<V>> entry : targetMap.entrySet()) {
+			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
+		}
+		return singleValueMap;
+	}
 
 	// Map implementation
 

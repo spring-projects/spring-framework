@@ -23,22 +23,26 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 import javax.portlet.ActionRequest;
 import javax.portlet.filter.ActionRequestWrapper;
 
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * Default implementation of the {@link MultipartActionRequest} interface.
  * Provides management of pre-generated parameter values.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 2.0
  * @see PortletMultipartResolver
  */
 public class DefaultMultipartActionRequest extends ActionRequestWrapper implements MultipartActionRequest {
 
-	private Map<String, MultipartFile> multipartFiles;
+	private MultiValueMap<String, MultipartFile> multipartFiles;
 
 	private Map<String, String[]> multipartParameters;
 
@@ -51,7 +55,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	 * with Strings as keys and String arrays as values
 	 */
 	public DefaultMultipartActionRequest(
-			ActionRequest request, Map<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
+			ActionRequest request, MultiValueMap<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
 
 		super(request);
 		setMultipartFiles(mpFiles);
@@ -72,13 +76,27 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 	public MultipartFile getFile(String name) {
-		return getMultipartFiles().get(name);
+		return getMultipartFiles().getFirst(name);
 	}
+
+	public List<MultipartFile> getFiles(String name) {
+		List<MultipartFile> multipartFiles = getMultipartFiles().get(name);
+		if (multipartFiles != null) {
+			return multipartFiles;
+		}
+		else {
+			return Collections.emptyList();
+		}
+	}
+	
 
 	public Map<String, MultipartFile> getFileMap() {
-		return getMultipartFiles();
+		return getMultipartFiles().toSingleValueMap();
 	}
 
+	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
+		return getMultipartFiles();
+	}
 
 	@Override
 	public Enumeration<String> getParameterNames() {
@@ -120,11 +138,12 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 
 
 	/**
-	 * Set a Map with parameter names as keys and MultipartFile objects as values.
+	 * Set a Map with parameter names as keys and list of MultipartFile objects as values.
 	 * To be invoked by subclasses on initialization.
 	 */
-	protected final void setMultipartFiles(Map<String, MultipartFile> multipartFiles) {
-		this.multipartFiles = Collections.unmodifiableMap(multipartFiles);
+	protected final void setMultipartFiles(MultiValueMap<String, MultipartFile> multipartFiles) {
+		this.multipartFiles =
+				new LinkedMultiValueMap<String, MultipartFile>(Collections.unmodifiableMap(multipartFiles));
 	}
 
 	/**
@@ -132,7 +151,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
-	protected Map<String, MultipartFile> getMultipartFiles() {
+	protected MultiValueMap<String, MultipartFile> getMultipartFiles() {
 		if (this.multipartFiles == null) {
 			initializeMultipart();
 		}
