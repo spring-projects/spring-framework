@@ -19,6 +19,7 @@ Changes in version 3.0.0.RC1 (2009-09-xx)
 * SpringJUnit4ClassRunner is now compatible with JUnit 4.5, 4.6, and 4.7
 * Spring's Hibernate support is now compatible with Hibernate 3.5 beta 1 as well
 * Spring's JPA support is now fully compatible with JPA 2.0 as in EclipseLink 2.0.0.M7
+* SpringJUnit4ClassRunner once again supports collective timeouts for repeated tests
 
 
 Changes in version 3.0.0.M4 (2009-08-10)
