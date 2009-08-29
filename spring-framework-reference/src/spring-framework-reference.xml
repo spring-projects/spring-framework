@@ -127,7 +127,33 @@
 	<toc/>
 	<part id="spring-introduction">
 		<title>Overview of Spring Framework</title>
-		<xi:include href="preface.xml"/>
+		<partintro id="spring-core-intro">
+			<para>The Spring Framework is a lightweight solution and a potential
+			one-stop-shop for building your enterprise-ready applications. However,
+			Spring is modular, allowing you to use only those parts that you need,
+			without having to bring in the rest. You can use the IoC container, with
+			Struts on top, but you can also use only the <link
+			linkend="orm-hibernate">Hibernate integration code</link> or the <link
+			linkend="jdbc-introduction">JDBC abstraction layer</link>. The Spring
+			Framework supports declarative transaction management, remote access to your
+			logic through RMI or web services, and various options for persisting your
+			data. It offers a full-featured <link linkend="mvc-introduction">MVC
+			framework</link>, and enables you to integrate <link
+			linkend="aop-introduction">AOP</link> transparently into your
+			software.</para>
+
+			<para>Spring is designed to be non-intrusive, meaning that your domain logic
+			code generally has no dependencies on the framework itself. In your
+			integration layer (such as the data access layer), some dependencies on the
+			data access technology and the Spring libraries will exist. However, it
+			should be easy to isolate these dependencies from the rest of your code
+			base.</para>
+
+			<para>This document is a reference guide to Spring Framework features. If
+			you have any requests, comments, or questions on this document, please post
+			them on the user mailing list or on the support forums at <ulink
+			url="http://forum.springsource.org/"></ulink>.<!--Missing link above. PDF shows it as http://forum.springsource.org/--></para>
+		</partintro>
 		<xi:include href="overview.xml"/>
 	</part>
 	<part id="spring-whats-new">
