@@ -97,6 +97,24 @@
           <option name="LABEL_INDENT_SIZE" value="0" />
           <option name="LABEL_INDENT_ABSOLUTE" value="false" />
         </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="groovy">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="gsp">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="java">
           <option name="INDENT_SIZE" value="4" />
           <option name="CONTINUATION_INDENT_SIZE" value="8" />
@@ -368,36 +386,7 @@
               <file url="file://$PROJECT_DIR$/org.springframework.aop/src/test/java/org/springframework/aop/target/threadLocalTests.xml" />
             </files>
           </module>
-          <module name="test">
-            <files>
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/XmlBasedSpr3350SingleSpringContextTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/annotation/ProfileValueAnnotationAwareTransactionalTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit38/ConcreteTransactionalJUnit38SpringContextTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit38/FailingBeforeAndAfterMethodsTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/BeforeAndAfterTransactionAnnotationTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/ClassLevelTransactionalSpringRunnerTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/ConcreteTransactionalJUnit4SpringContextTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/DefaultRollbackFalseTransactionalSpringRunnerTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/DefaultRollbackTrueTransactionalSpringRunnerTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/FailingBeforeAndAfterMethodsTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MethodLevelTransactionalSpringRunnerTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context1.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context2.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context3.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/ParameterizedDependencyInjectionTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/spr3896/BeanOverridingDefaultLocationsInheritedTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/spr3896/DefaultLocationsBaseTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/spr3896/DefaultLocationsInheritedTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/junit4/transactionalTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/support/CustomizedGenericXmlContextLoaderTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/testng/ConcreteTransactionalTestNGSpringContextTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/testng/DirtiesContextTransactionalTestNGSpringContextTests-context.xml" />
-              <file url="file://$PROJECT_DIR$/org.springframework.test/src/test/java/org/springframework/test/context/testng/FailingBeforeAndAfterMethodsTests-context.xml" />
-            </files>
-          </module>
+          <module name="test" />
           <module name="transaction">
             <files>
               <file url="file://$PROJECT_DIR$/org.springframework.transaction/src/test/java/org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml" />
@@ -901,11 +890,11 @@
     </library>
     <library name="AspectJ">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-1.6.2.RELEASE.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.aspectj/com.springsource.org.aspectj.weaver/1.6.5.RELEASE/com.springsource.org.aspectj.weaver-1.6.5.RELEASE.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-sources-1.6.2.RELEASE.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.aspectj/com.springsource.org.aspectj.weaver/1.6.5.RELEASE/com.springsource.org.aspectj.weaver-sources-1.6.5.RELEASE.jar!/" />
       </SOURCES>
     </library>
     <library name="javax.el">
@@ -917,7 +906,7 @@
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/javax.el/com.springsource.javax.el/2.1.0/com.springsource.javax.el-sources-2.1.0.jar!/" />
       </SOURCES>
     </library>
-    <library name="cglib">
+    <library name="CGLIB">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-2.1.3.jar!/" />
       </CLASSES>
@@ -926,7 +915,7 @@
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-sources-2.1.3.jar!/" />
       </SOURCES>
     </library>
-    <library name="aop alliance">
+    <library name="AOP Alliance">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-1.0.0.jar!/" />
       </CLASSES>
@@ -935,7 +924,7 @@
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-sources-1.0.0.jar!/" />
       </SOURCES>
     </library>
-    <library name="jamon">
+    <library name="Jamon">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/com.jamonapi/com.springsource.com.jamonapi/2.4.0/com.springsource.com.jamonapi-2.4.0.jar!/" />
       </CLASSES>
@@ -951,6 +940,35 @@
       <JAVADOC />
       <SOURCES>
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.apache.commons/com.springsource.org.apache.commons.pool/1.4.0/com.springsource.org.apache.commons.pool-sources-1.4.0.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="JUnit">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-4.7.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.7.0.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="EasyMock">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-2.5.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-sources-2.5.1.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="SLF4j">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.api/1.5.6/com.springsource.slf4j.api-1.5.6.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.jcl/1.5.6/com.springsource.slf4j.jcl-1.5.6.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.api/1.5.6/com.springsource.slf4j.api-sources-1.5.6.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.jcl/1.5.6/com.springsource.slf4j.jcl-sources-1.5.6.jar!/" />
       </SOURCES>
     </library>
   </component>

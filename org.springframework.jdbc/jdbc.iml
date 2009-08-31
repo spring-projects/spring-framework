@@ -11,22 +11,14 @@
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-sources-1.1.1.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
     <orderEntry type="module" module-name="aop" />
     <orderEntry type="module" module-name="beans" />
     <orderEntry type="module" module-name="context" />
     <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="transaction" />
+    <orderEntry type="library" name="Commons Logging" level="project" />
+    <orderEntry type="library" name="EasyMock" level="project" />
+    <orderEntry type="library" name="JUnit" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -74,22 +66,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-4.6.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.h2database/com.springsource.org.h2/1.0.71/com.springsource.org.h2-1.0.71.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-sources-4.6.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-2.5.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-sources-2.5.1.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.h2database/com.springsource.org.h2/1.0.71/com.springsource.org.h2-sources-1.0.71.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

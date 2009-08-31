@@ -41,7 +41,7 @@
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="test->compile"/>
 		<dependency org="javax.xml.rpc" name="com.springsource.javax.xml.rpc" rev="1.1.0" conf="test->compile"/>
 		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.1.3" conf="test->compile"/>
-		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.3.0" conf="test->compile"/>
+		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.6.0" conf="test->compile"/>
 		<dependency org="net.sourceforge.jasperreports" name="com.springsource.net.sf.jasperreports" rev="2.0.5" conf="test->compile"/>
 		<dependency org="net.sourceforge.jexcelapi" name="com.springsource.jxl" rev="2.6.6" conf="test->compile"/>
 		<dependency org="org.antlr" name="com.springsource.org.antlr" rev="3.0.1" conf="test->compile"/>
@@ -62,8 +62,8 @@
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.jsp" rev="2.0.5" conf="test->compile"/>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity" rev="1.5.0" conf="test->compile"/>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity.tools.view" rev="1.4.0" conf="test->compile"/>
-		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.3.RELEASE" conf="test->compile"/>
-		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.5.1" conf="test->compile"/>
+		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="test->compile"/>
+		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.3" conf="test->compile"/>
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="test->compile"/>
@@ -93,7 +93,7 @@
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock.classextension" rev="2.3.0" conf="test->compile"/>
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.6.0" conf="test->runtime"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
 		<dependency org="org.testng" name="com.springsource.org.testng" rev="5.9.0" conf="test->compile"/>
 	</dependencies>
 

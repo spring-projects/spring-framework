@@ -15,14 +15,41 @@
     <orderEntry type="module" module-name="beans" />
     <orderEntry type="module" module-name="context" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="library" name="AOP Alliance" level="project" />
+    <orderEntry type="library" name="AspectJ" level="project" />
+    <orderEntry type="library" name="Commons Logging" level="project" />
+    <orderEntry type="library" name="EasyMock" level="project" />
+    <orderEntry type="library" name="JUnit" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-1.1.1.jar!/" />
+          <root url="jar://$IVY_CACHE$/javax.ejb/com.springsource.javax.ejb/3.0.0/com.springsource.javax.ejb-3.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.logging/1.1.1/com.springsource.org.apache.commons.logging-sources-1.1.1.jar!/" />
+          <root url="jar://$IVY_CACHE$/javax.ejb/com.springsource.javax.ejb/3.0.0/com.springsource.javax.ejb-sources-3.0.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/javax.persistence/com.springsource.javax.persistence/1.0.0/com.springsource.javax.persistence-1.0.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/javax.persistence/com.springsource.javax.persistence/1.0.0/com.springsource.javax.persistence-sources-1.0.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-sources-1.5.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -44,94 +71,6 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.objectweb.jotm/com.springsource.org.objectweb.jotm/2.0.10/com.springsource.org.objectweb.jotm-2.0.10.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.objectweb.jotm/com.springsource.org.objectweb.jotm/2.0.10/com.springsource.org.objectweb.jotm-sources-2.0.10.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/javax.ejb/com.springsource.javax.ejb/3.0.0/com.springsource.javax.ejb-3.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/javax.ejb/com.springsource.javax.ejb/3.0.0/com.springsource.javax.ejb-sources-3.0.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/javax.resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-sources-1.5.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-1.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.aopalliance/com.springsource.org.aopalliance/1.0.0/com.springsource.org.aopalliance-sources-1.0.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/javax.persistence/com.springsource.javax.persistence/1.0.0/com.springsource.javax.persistence-1.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/javax.persistence/com.springsource.javax.persistence/1.0.0/com.springsource.javax.persistence-sources-1.0.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-1.6.2.RELEASE.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.aspectj/com.springsource.org.aspectj.weaver/1.6.2.RELEASE/com.springsource.org.aspectj.weaver-sources-1.6.2.RELEASE.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-4.6.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-sources-4.6.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-2.5.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-sources-2.5.1.jar!/" />
-        </SOURCES>
       </library>
     </orderEntry>
   </component>
