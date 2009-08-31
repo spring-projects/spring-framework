@@ -132,6 +132,11 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return ProceedingJoinPoint.METHOD_EXECUTION;
 	}
 
+	public int getId() {
+		// TODO: It's just an adapter but returning 0 might still have side effects...
+		return 0;
+	}
+
 	public JoinPoint.StaticPart getStaticPart() {
 		return this;
 	}
