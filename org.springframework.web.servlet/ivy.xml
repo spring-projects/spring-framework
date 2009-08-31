@@ -77,7 +77,7 @@
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration"
                     conf="compile->compile"/>
 		<!-- test dependencies -->
- 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.6.0" conf="test->runtime"/>
+ 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.fileupload" rev="1.2.0"
                     conf="test->compile"/>		
