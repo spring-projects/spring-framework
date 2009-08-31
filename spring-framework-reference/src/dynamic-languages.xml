@@ -42,7 +42,7 @@
     </itemizedlist>
     <para>
       Fully working examples of where this dynamic language support can be immediately useful
-      are described in the section entitled <xref linkend="dynamic-language-scenarios"/>.
+      are described in <xref linkend="dynamic-language-scenarios"/>.
     </para>
     <para>
       <emphasis>Note:</emphasis> Only the specific versions as listed above are supported
@@ -167,8 +167,8 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
       idioms of the supported dynamic languages. For example, if you want to
       use Groovy to write certain of the classes in your application, then the
       assumption is that you already know Groovy. If you need further details
-      about the dynamic languages themselves, please consult the section
-      entitled <xref linkend="dynamic-language-resources" /> at the end of this chapter.
+      about the dynamic languages themselves, please consult
+      <xref linkend="dynamic-language-resources" /> at the end of this chapter.
     </para>
 
     <section id="dynamic-language-beans-concepts">
@@ -388,7 +388,7 @@ class GroovyMessenger implements Messenger {
           The refreshable bean behavior described above does
           <emphasis>not</emphasis> apply to dynamic language source files
           defined using the <literal>&lt;lang:inline-script/&gt;</literal> element
-          notation (see the section entitled <xref linkend="dynamic-language-beans-inline" />).
+          notation (see <xref linkend="dynamic-language-beans-inline" />).
           Additionally, it <emphasis>only</emphasis> applies to beans where
           changes to the underlying source file can actually be detected;
           for example, by code that checks the last modified date of a
@@ -426,8 +426,8 @@ class GroovyMessenger implements Messenger {
           some scenarios. For instance, we might want to quickly add a Spring
           <interfacename>Validator</interfacename> implementation to a Spring MVC
           <interfacename>Controller</interfacename>. This is but a moment's work
-          using inline source. (See the section entitled
-          <xref linkend="dynamic-language-scenarios-validators" />  for such an example.)
+          using inline source. (See <xref linkend="dynamic-language-scenarios-validators" />
+          for such an example.)
         </para>
         <para>
           Find below an example of defining the source for a JRuby-based bean
@@ -629,7 +629,7 @@ RubyMessenger.new]]></programlisting>
         source file as a whole must return an object (for Spring to configure).
       </para>
       <para>
-        See the section entitled <xref linkend="dynamic-language-scenarios" /> for some
+        See <xref linkend="dynamic-language-scenarios" /> for some
         scenarios where you might want to use JRuby-based beans.
       </para>
     </section>
@@ -711,8 +711,8 @@ public class Main {
         (unsurprisingly) <computeroutput>10</computeroutput>.
         (Exciting example, huh? Remember that the intent is to illustrate the
         concept. Please consult the dynamic language showcase project for a
-        more complex example, or indeed the section entitled
-        <xref linkend="dynamic-language-scenarios" /> later in this chapter).
+        more complex example, or indeed <xref linkend="dynamic-language-scenarios" />
+        later in this chapter).
       </para>
       <para>
         It is important that you <emphasis>do not</emphasis> define more than one
@@ -865,7 +865,7 @@ void setMessage(String aMessage) {
 
     <lang:property name="message" value="Hello World!" />
 </lang:bsh>]]></programlisting>
-      <para>See the section entitled <xref linkend="dynamic-language-scenarios" /> for some
+      <para>See <xref linkend="dynamic-language-scenarios" /> for some
       scenarios where you might want to use BeanShell-based beans.</para>
     </section>
   </section>
@@ -907,7 +907,7 @@ void setMessage(String aMessage) {
         <para>
           In order to effect this automatic 'pickup' of any changes
           to dynamic-language-backed beans, you will have had to enable the
-          'refreshable beans' functionality. See the section entitle
+          'refreshable beans' functionality. See
            <xref linkend="dynamic-language-refreshable-beans"/> for a full treatment
            of this feature.
         </para>
@@ -966,7 +966,7 @@ class FortuneController implements Controller {
         <para>
           Please note that in order to effect the automatic 'pickup' of any changes
           to dynamic-language-backed beans, you will have had to enable the
-          'refreshable beans' feature. See the section entitled
+          'refreshable beans' feature. See 
           <xref linkend="dynamic-language-refreshable-beans"/> for a full and
           detailed treatment of this feature.
         </para>
@@ -974,9 +974,8 @@ class FortuneController implements Controller {
       <para>
         Find below an example of a Spring
         <interfacename>org.springframework.validation.Validator</interfacename>
-        implemented using the Groovy dynamic language. (See the section entitled
-        <xref linkend="validator"/> for a discussion of the
-        <interfacename>Validator</interfacename> interface.)
+        implemented using the Groovy dynamic language. (See <xref linkend="validator"/>
+        for a discussion of the <interfacename>Validator</interfacename> interface.)
       </para>
       <programlisting source="java"><![CDATA[import org.springframework.validation.Validator
 import org.springframework.validation.Errors
@@ -1057,7 +1056,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
 
 </beans>]]></programlisting>
       <para>
-        See the section entitled <xref linkend="beans-factory-scopes"/> in <xref linkend="beans"/>
+        See <xref linkend="beans-factory-scopes"/> in <xref linkend="beans"/>
         for a fuller discussion of the scoping support in the Spring Framework.
       </para>
     </section>

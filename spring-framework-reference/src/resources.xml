@@ -329,8 +329,8 @@
 
             <entry><para> Loaded as a <classname>URL</classname>, from the
             filesystem. <footnote>
-                <para>But see also the section entitled <xref
-                linkend="resources-filesystemresource-caveats" />.</para>
+                <para>But see also
+                <xref linkend="resources-filesystemresource-caveats" />.</para>
               </footnote> </para></entry>
           </row>
 
@@ -394,9 +394,9 @@
     <interfacename>ResourceLoader</interfacename> as an alternative to
     implementing the <interfacename>ResourceLoaderAware</interfacename> interface.
     The "traditional" <literal>constructor</literal> and <literal>byType</literal>
-    autowiring modes (as described in the section entitled
-    <xref linkend="beans-factory-autowire"/>) are now capable of providing a
-    dependency of type <interfacename>ResourceLoader</interfacename> for either a
+    autowiring modes (as described in <xref linkend="beans-factory-autowire"/>)
+    are now capable of providing a dependency of type
+    <interfacename>ResourceLoader</interfacename> for either a
     constructor argument or setter method parameter respectively. For more flexibility
     (including the ability to autowire fields and multiple parameter methods), consider
     using the new annotation-based autowiring features. In that case, the
@@ -405,7 +405,7 @@
     <interfacename>ResourceLoader</interfacename> type as long as the field,
     constructor, or method in question carries the
     <interfacename>@Autowired</interfacename> annotation. For more information,
-    see the section entitled <xref linkend="beans-autowired-annotation"/>.</para>
+    see <xref linkend="beans-autowired-annotation"/>.</para>
   </section>
 
   <section id="resources-as-dependencies">

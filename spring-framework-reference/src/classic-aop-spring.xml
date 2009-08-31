@@ -825,7 +825,7 @@ public interface IntroductionInfo {
           <para>Specify the target you want to proxy.</para>
         </listitem>
         <listitem>
-          <para>Specify whether to use CGLIB (see below and also the section entitled
+          <para>Specify whether to use CGLIB (see below and also
 			<xref linkend="aop-pfb-proxy-types"/>).</para>
         </listitem>
       </itemizedlist>
@@ -840,8 +840,7 @@ public interface IntroductionInfo {
 			<literal>proxyTargetClass</literal>: <literal>true</literal> if the
 			target class is to be proxied, rather than the target class' interfaces.
 			If this property value is set to <literal>true</literal>, then CGLIB proxies
-			will be created (but see also below the section entitled
-			<xref linkend="aop-pfb-proxy-types"/>).
+			will be created (but see also below <xref linkend="aop-pfb-proxy-types"/>).
 		  </para>
         </listitem>
         <listitem>
@@ -890,8 +889,7 @@ public interface IntroductionInfo {
           <para>
 			<literal>proxyInterfaces</literal>: array of String interface
 			names. If this isn't supplied, a CGLIB proxy for the target class
-			will be used (but see also below the section entitled
-			<xref linkend="aop-pfb-proxy-types"/>).
+			will be used (but see also below <xref linkend="aop-pfb-proxy-types"/>).
           </para>
         </listitem>
         <listitem>

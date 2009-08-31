@@ -18,8 +18,7 @@
       <para>This chapter is not an introduction to JMX... it doesn't try to
       explain the motivations of why one might want to use JMX (or indeed what
       the letters JMX actually stand for). If you are new to JMX, check out
-      the section entitled <xref linkend="jmx-resources" /> at the end of this
-      chapter.</para>
+      <xref linkend="jmx-resources" /> at the end of this chapter.</para>
     </sidebar>
 
     <para>Specifically, Spring's JMX support provides four core
@@ -128,7 +127,7 @@ public class JmxTestBean implements IJmxTestBean {
     <literal>beans</literal> <interfacename>Map</interfacename> is used as the
     <classname>ObjectName</classname> for the bean referenced by the
     corresponding entry value. This behavior can be changed as described in
-    the section entitled <xref linkend="jmx-naming"/>.</para>
+    <xref linkend="jmx-naming"/>.</para>
 
     <para>With this configuration the <literal>testBean</literal> bean is
     exposed as an MBean under the <classname>ObjectName</classname>
@@ -270,8 +269,7 @@ public class JmxTestBean implements IJmxTestBean {
       already a valid JMX MBean and will be automatically registered by
       Spring. By default, beans that are autodetected for JMX registration
       have their bean name used as the <classname>ObjectName</classname>. This
-      behavior can be overridden as detailed in the section entitled
-      <xref linkend="jmx-naming" />.</para>
+      behavior can be overridden as detailed in <xref linkend="jmx-naming" />.</para>
     </section>
 
     <section id="jmx-exporting-registration-behavior">
@@ -954,8 +952,8 @@ public class AnnotationTestBean implements IJmxTestBean {
       to include it. The only problem with this approach is that the name of
       the <classname>JmxTestBean</classname> now has business meaning. You can
       address this issue by changing the default behavior for
-      <classname>ObjectName</classname> creation as defined in the section
-      entitled <xref linkend="jmx-naming" />.</para>
+      <classname>ObjectName</classname> creation as defined in
+      <xref linkend="jmx-naming" />.</para>
     </section>
 
     <section id="jmx-interface-java">

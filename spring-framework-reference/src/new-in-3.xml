@@ -307,6 +307,10 @@ public class RewardsTestDatabase {
             </listitem>
 
             <listitem>
+              <para>@DependsOn</para>
+            </listitem>
+
+            <listitem>
               <para>@Primary</para>
             </listitem>
 
@@ -324,8 +328,10 @@ public class RewardsTestDatabase {
           </itemizedlist></para>
 
         <para>Here is an example of a Java class providing basic configuration
-        using the new JavaConfig features: <programlisting language="java">@Configuration
-public class AppConfig{
+        using the new JavaConfig features: <programlisting language="java">package org.example.config;
+
+@Configuration
+public class AppConfig {
     private @Value("#{jdbcProperties.url}") String jdbcUrl;
     private @Value("#{jdbcProperties.username}") String username;
     private @Value("#{jdbcProperties.password}") String password;
@@ -357,8 +363,9 @@ public class AppConfig{
 }
 </programlisting> To get this to work you need to add the following component
         scanning entry in your minimal application context XML file.
-        <programlisting language="java">&lt;context:component-scan 
-    base-package="com.myco.config"/&gt;</programlisting></para>
+        <programlisting language="xml">&lt;context:component-scan base-package="org.example.config"/&gt;
+&lt;util:properties id="jdbcProperties" location="classpath:org/example/config/jdbc.properties"/&gt;
+        </programlisting></para>
       </section>
 
       <section>

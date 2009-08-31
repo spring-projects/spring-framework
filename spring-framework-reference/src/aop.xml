@@ -271,8 +271,8 @@
         indication that the Spring team favors the @AspectJ annotation-style
         approach over the Spring XML configuration-style.</para>
 
-        <para>See the section entitled <xref linkend="aop-choosing" /> for a
-        fuller discussion of the whys and wherefores of each style.</para>
+        <para>See <xref linkend="aop-choosing" /> for a
+        more complete discussion of the whys and wherefores of each style.</para>
       </note>
     </section>
 
@@ -294,7 +294,7 @@
       to a method as a concrete type.</para>
 
       <para>It is important to grasp the fact that Spring AOP is
-      <emphasis>proxy-based</emphasis>. See the section entitled <xref
+      <emphasis>proxy-based</emphasis>. See <xref
       linkend="aop-understanding-aop-proxies" /> for a thorough examination of
       exactly what this implementation detail actually means.</para>
     </section>

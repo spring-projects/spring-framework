@@ -116,7 +116,7 @@
       normal and global). This is not a specific feature of Spring Portlet MVC
       itself, but rather of the <interfacename>WebApplicationContext</interfacename>
       container(s) that Spring Portlet MVC uses. These bean scopes are described
-      in detail in the section entitled <xref linkend="beans-factory-scopes-other"/></para>
+      in detail in <xref linkend="beans-factory-scopes-other"/></para>
     </section>
 
     <note>
@@ -921,8 +921,8 @@ public class SampleController extends AbstractController {
     the view technologies from Spring Web MVC. This includes not only the
     various <interfacename>View</interfacename> implementations themselves,
     but also the <interfacename>ViewResolver</interfacename> implementations.
-    For more information, refer to the sections entitled
-    <xref linkend="view"/> and <xref linkend="mvc-viewresolver"/> respectively.</para>
+    For more information, refer to <xref linkend="view"/> and
+    <xref linkend="mvc-viewresolver"/> respectively.</para>
 
     <para>A few items on using the existing <interfacename>View</interfacename> and
     <interfacename>ViewResolver</interfacename> implementations  are worth mentioning:</para>

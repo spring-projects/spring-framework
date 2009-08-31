@@ -1669,8 +1669,7 @@ New York</programlisting>
       <para>This example is a trivial Spring application that creates a list
       of words in the <interfacename>Controller</interfacename> and adds them
       to the model map. The map is returned along with the view name of our
-      XSLT view. See the section entitled <xref linkend="mvc-controller" />
-      for details of Spring Web MVC's
+      XSLT view. See <xref linkend="mvc-controller" /> for details of Spring Web MVC's
       <interfacename>Controller</interfacename> interface. The XSLT view will
       turn the list of words into a simple XML document ready for
       transformation.</para>
