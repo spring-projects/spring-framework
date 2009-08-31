@@ -260,9 +260,8 @@
       <para>One of the most common uses of JMS messages in the EJB world is to
       drive message-driven beans (MDBs). Spring offers a solution to create
       message-driven POJOs (MDPs) in a way that does not tie a user to an EJB
-      container. (See the section entitled <xref
-      linkend="jms-asynchronousMessageReception" /> for detailed coverage of
-      Spring's MDP support.)</para>
+      container. (See <xref linkend="jms-asynchronousMessageReception" />
+      for detailed coverage of Spring's MDP support.)</para>
 
       <para>A message listener container is used to receive messages from a
       JMS message queue and drive the MessageListener that is injected into
@@ -955,10 +954,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <para>The example above is equivalent to creating two distinct listener
     container bean definitions and two distinct
     <classname>MessageListenerAdapter</classname> bean definitions as
-    demonstrated in the section entitled <xref
-    linkend="jms-receiving-async-message-listener-adapter" />. In addition to
-    the attributes shown above, the <literal>listener</literal> element may
-    contain several optional ones. The following table describes all available
+    demonstrated in <xref linkend="jms-receiving-async-message-listener-adapter" />.
+    In addition to the attributes shown above, the <literal>listener</literal> element
+    may contain several optional ones. The following table describes all available
     attributes:</para>
 
     <table id="jms-namespace-listener-tbl">

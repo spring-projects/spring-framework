@@ -448,8 +448,7 @@
       <para>This property simply holds an implementation of the
       <interfacename>RecordCreator</interfacename> interface, used for that
       purpose. The <interfacename>RecordCreator</interfacename> interface has
-      already been discussed in the section entitled <xref
-      linkend="cci-record-creator" />. The
+      already been discussed in <xref linkend="cci-record-creator" />. The
       <literal>outputRecordCreator</literal> property must be directly
       specified on the <classname>CciTemplate</classname>. This could be done
       in the application code like so:</para>
@@ -880,8 +879,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
       output records as with <classname>CciTemplate</classname> is available.
       Every operation object provides a corresponding
       <literal>setOutputRecordCreator(..)</literal> method. For further
-      information, see the section entitled <xref
-      linkend="automatic-output-generation" />.</para>
+      information, see <xref linkend="automatic-output-generation" />.</para>
     </section>
 
     <section id="cci-object-summary">

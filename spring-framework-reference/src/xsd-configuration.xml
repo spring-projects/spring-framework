@@ -364,7 +364,7 @@ public class Client {
                 <interfacename>List</interfacename> implementation will be chosen by the container.</para>
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:list/&gt;</literal>
-                element; collection merging is described in more detail in the section entitled
+                element; collection merging is described in more detail in
                 <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
             <section id="xsd-config-body-schemas-util-map">
@@ -409,7 +409,7 @@ public class Client {
                 <interfacename>Map</interfacename> implementation will be chosen by the container.</para>
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:map/&gt;</literal>
-                element; collection merging is described in more detail in the section entitled
+                element; collection merging is described in more detail in
                 <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
             <section id="xsd-config-body-schemas-util-set">
@@ -454,7 +454,7 @@ public class Client {
                 <interfacename>Set</interfacename> implementation will be chosen by the container.</para>
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:set/&gt;</literal>
-                element; collection merging is described in more detail in the section entitled
+                element; collection merging is described in more detail in
                 <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
         </section>
@@ -776,19 +776,19 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			</section>
 			<section id="xsd-config-body-schemas-context-component-scan">
 				<title><literal>&lt;component-scan/&gt;</literal></title>
-				<para>This element is detailed in the section entitled <xref linkend="beans-annotation-config"/>.</para>
+				<para>This element is detailed in <xref linkend="beans-annotation-config"/>.</para>
 			</section>
 			<section id="xsd-config-body-schemas-context-ltw">
 				<title><literal>&lt;load-time-weaver/&gt;</literal></title>
-				<para>This element is detailed in the section entitled <xref linkend="aop-aj-ltw"/>.</para>
+				<para>This element is detailed in <xref linkend="aop-aj-ltw"/>.</para>
 			</section>
 			<section id="xsd-config-body-schemas-context-sc">
 				<title><literal>&lt;spring-configured/&gt;</literal></title>
-				<para>This element is detailed in the section entitled <xref linkend="aop-atconfigurable"/>.</para>
+				<para>This element is detailed in <xref linkend="aop-atconfigurable"/>.</para>
 			</section>
 			<section id="xsd-config-body-schemas-context-mbe">
 				<title><literal>&lt;mbean-export/&gt;</literal></title>
-				<para>This element is detailed in the section entitled <xref linkend="jmx-context-mbeanexport"/>.</para>
+				<para>This element is detailed in <xref linkend="jmx-context-mbeanexport"/>.</para>
 			</section>
 		</section>
 
@@ -811,7 +811,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <para>Last but not least we have the tags in the <literal>beans</literal> schema.
             These are the same tags that have been in Spring since the very dawn of the framework.
             Examples of the various tags in the <literal>beans</literal> schema are not shown here
-            because they are quite comprehensively covered in the section entitled <xref linkend="beans-factory-properties-detailed"/>
+            because they are quite comprehensively covered in <xref linkend="beans-factory-properties-detailed"/>
             (and indeed in that entire <link linkend="beans">chapter</link>).</para>
             <para>One thing that is new to the beans tags themselves in Spring 2.0 is the idea
             of arbitrary bean metadata. In Spring 2.0 it is now possible to add zero or more

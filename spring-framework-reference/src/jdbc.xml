@@ -602,7 +602,7 @@ public int countOfActors(Actor exampleActor) {
       <interfacename>JdbcOperations</interfacename>
       interface</emphasis>.</para>
 
-      <para>See also the section entitled <xref
+      <para>See also <xref
       linkend="jdbc-JdbcTemplate-idioms" /> for some advice on how to best use
       the <classname>NamedParameterJdbcTemplate</classname> class in the
       context of an application.</para>
@@ -696,10 +696,9 @@ public Actor findActor(String specialty, int age) {
     return this.simpleJdbcTemplate.queryForObject(sql, mapper, specialty, age);
 }</programlisting>
 
-      <para>See also the section entitled <xref
-      linkend="jdbc-JdbcTemplate-idioms" /> for some advice on how to best use
-      the <classname>SimpleJdbcTemplate</classname> class in the context of an
-      application.</para>
+      <para>See also <xref linkend="jdbc-JdbcTemplate-idioms" />
+      for some advice on how to best use the <classname>SimpleJdbcTemplate</classname>
+      class in the context of an application.</para>
 
       <note>
         <para>The <classname>SimpleJdbcTemplate</classname> class only offers

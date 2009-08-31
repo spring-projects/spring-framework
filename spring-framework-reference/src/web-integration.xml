@@ -51,8 +51,8 @@
     to use Struts for the presentation layer of your web application, the
     assumption is that you are already familiar with Struts. If you need
     further details about any of the supported web frameworks themselves,
-    please do consult the section entitled <xref
-    linkend="web-integration-resources" /> at the end of this chapter.
+    please do consult <xref linkend="web-integration-resources" /> at the end
+    of this chapter.
     </emphasis></para>
   </section>
 

@@ -66,8 +66,8 @@
       existing configuration needs to change, and no existing configuration
       will break.</para>
 
-      <para>Both the new and the original scopes are detailed in the section
-      entitled <xref linkend="beans-factory-scopes"/>.</para>
+      <para>Both the new and the original scopes are detailed in
+      <xref linkend="beans-factory-scopes"/>.</para>
     </section>
 
     <section id="new-in-2-ioc-configuration">
@@ -77,8 +77,7 @@
       of the new XML configuration syntax based on XML Schema. If you want to
       take advantage of the new tags that Spring provides (and the Spring team
       certainly suggest that you do because they make configuration less
-      verbose and easier to read), then do read the section entitled <xref
-      linkend="xsd-config"/>.</para>
+      verbose and easier to read), then do read <xref linkend="xsd-config"/>.</para>
 
       <para>On a related note, there is a new, updated DTD for Spring 2.0 that
       you may wish to reference if you cannot take advantage of the XML
@@ -169,8 +168,7 @@
       backed by regular Java objects. This support takes advantage of the
       AspectJ pointcut language and offers fully typed advice (i.e. no more
       casting and <literal>Object[]</literal> argument manipulation). Details
-      of this support can be found in the section entitled <xref
-      linkend="aop-schema"/>.</para>
+      of this support can be found in <xref linkend="aop-schema"/>.</para>
     </section>
 
     <section id="new-in-2-aop-aspectj">
@@ -258,9 +256,8 @@
       usage patterns.</para>
 
       <para>If you are interested in using a JPA-implementation as the
-      backbone of your persistence layer, the section entitled <xref
-      linkend="orm-jpa"/> is dedicated to detailing Spring's support and
-      value-add in this area.</para>
+      backbone of your persistence layer, <xref linkend="orm-jpa"/> is
+      dedicated to detailing Spring's support and value-add in this area.</para>
 
       <para>Spring 2.5 upgrades its OpenJPA support to OpenJPA 1.0,
       with support for advanced features such as savepoints.</para>
@@ -277,7 +274,7 @@
       receiving of messages.</para>
 
       <para>Spring 2.0 now ships with full support for the reception of
-      messages in an asynchronous fashion, as detailed in the section entitled
+      messages in an asynchronous fashion, as detailed in
       <xref linkend="jms-asynchronousMessageReception"/>.</para>
 
       <para>As of Spring 2.5, the JCA style of setting up asynchronous
@@ -339,7 +336,7 @@
       of (always good-to-have) consistency across a codebase.</para>
 
       <para>Spring MVC's convention-over-configuration support is detailed in
-      the section entitled <xref linkend="mvc-coc"/></para>
+      <xref linkend="mvc-coc"/></para>
     </section>
 
     <section id="new-in-2-web-portlet">
@@ -347,8 +344,7 @@
 
       <para>Spring 2.0 ships with a Portlet framework that is conceptually
       similar to the Spring MVC framework. Detailed coverage of the Spring
-      Portlet framework can be found in the section entitled <xref
-      linkend="portlet"/>.</para>
+      Portlet framework can be found in <xref linkend="portlet"/>.</para>
     </section>
 
     <section id="new-in-2-web-annotations">
@@ -376,7 +372,7 @@
       the job of authoring JSP pages much easier when using Spring MVC; the
       Spring team is confident it will satisfy all of those developers who
       voted for the issue on JIRA. The new tag library is itself covered in
-      the section entitled <xref linkend="view-jsp-formtaglib"/>, and a quick
+      <xref linkend="view-jsp-formtaglib"/>, and a quick
       reference to all of the new tags can be found in the appendix entitled
       <xref linkend="spring-form.tld"/>.</para>
     </section>
@@ -419,7 +415,7 @@
       <para>Spring 2.0 introduced support for beans written in languages other
       than Java, with the currently supported dynamic languages being JRuby,
       Groovy and BeanShell. This dynamic language support is comprehensively
-      detailed in the section entitled <xref linkend="dynamic-language"/>.</para>
+      detailed in <xref linkend="dynamic-language"/>.</para>
 
       <para>Spring 2.5 refines the dynamic languages support with autowiring
       and support for the recently released JRuby 1.0.</para>
@@ -486,9 +482,8 @@
       <title>Task scheduling</title>
 
       <para>Spring 2.0 offers an abstraction around the scheduling of tasks.
-      For the interested developer, the section entitled <xref
-      linkend="scheduling-task-executor"/> contains all of the
-      details.</para>
+      For the interested developer, <xref linkend="scheduling-task-executor"/>
+      contains all of the details.</para>
 
       <para>The <interfacename>TaskExecutor</interfacename> abstraction is used
       throughout the framework itself as well, e.g. for the asynchronous JMS support.

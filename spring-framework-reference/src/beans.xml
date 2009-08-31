@@ -9,8 +9,7 @@
 
     <para>This chapter covers the Spring Framework implementation of the
     Inversion of Control (IoC) <footnote>
-        <para>See the section entitled <xref
-        linkend="background-ioc" /></para>
+        <para>See <xref linkend="background-ioc" /></para>
       </footnote>principle. IoC is also known as <emphasis>dependency
     injection</emphasis> (DI). It is a process whereby objects define their
     dependencies, that is, the other objects they work with, only through
@@ -216,8 +215,8 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       metadata from a variety of external resources such as the local file
       system, from the Java <literal>CLASSPATH</literal>, and so on.</para>
 
-      <programlisting language="java">ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"services.xml",
-                                                                              "daos.xml"});</programlisting>
+      <programlisting language="java">ApplicationContext context =
+    new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});</programlisting>
 
       <note>
         <para>After you learn about Spring's IoC container, you may want to
@@ -233,7 +232,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <para>The following example shows the service layer objects
       <literal>(services.xml)</literal> configuration file:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -256,13 +255,14 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <para>The following example shows the data access objects
       <literal>daos.xml</literal>) file:</para>
 
-      <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
 
-  &lt;bean id="accountDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao"&gt;
+  &lt;bean id="accountDao"
+      class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao"&gt;
     &lt;!-- additional collaborators and configuration for this bean go here --&gt;
   &lt;/bean&gt;
 
@@ -361,7 +361,8 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       to read bean definitions and access them as follows:</para>
 
       <programlisting language="java">// create and configure beans
-ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});
+ApplicationContext context =
+    new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});
 
 // retrieve configured instance
 PetStoreServiceImpl service = context.getBean("petStore", PetStoreServiceImpl.class);
@@ -1076,7 +1077,7 @@ public class ExampleBean {
         properties themselves are not set until the bean <emphasis>is actually
         created</emphasis>. Beans that are singleton-scoped and set to be
         pre-instantiated (the default) are created when the container is
-        created. Scopes are defined in the section <xref
+        created. Scopes are defined in <xref
         linkend="beans-factory-scopes" /> Otherwise, the bean is created only
         when it is requested. Creation of a bean potentially causes a graph of
         beans to be created, as the bean's dependencies and its dependencies'
@@ -1300,19 +1301,19 @@ public class ExampleBean {
         linkend="beans-p-namespace">p-namespace</link> for even more succinct
         XML configuration.</para>
 
-        <programlisting>&lt;beans xmlns="http://www.springframework.org/schema/beans"
+        <programlisting language="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
 
-  &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+  &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+        destroy-method="close"
         p:driverClassName="com.mysql.jdbc.Driver"
         p:url="jdbc:mysql://localhost:3306/mydb"
         p:username="root"
         p:password="masterkaoli"/&gt;
 
-  
 &lt;/beans&gt;
 
 </programlisting>
@@ -1329,8 +1330,9 @@ public class ExampleBean {
         <para>You can also configure a
         <classname>java.util.Properties</classname> instance as:</para>
 
-        <programlisting language="xml">&lt;bean id="mappings" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
-            
+        <programlisting language="xml">&lt;bean id="mappings"
+      class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
+
    <lineannotation>&lt;!-- typed as a <classname>java.util.Properties</classname> --&gt;</lineannotation>
    &lt;property name="properties"&gt;
       &lt;value&gt;
@@ -1395,7 +1397,7 @@ public class ExampleBean {
           time.</para>
 
           <programlisting language="xml">&lt;property name="targetName"&gt;
-   <lineannotation>&lt;!-- a bean with an id of '<literal>theTargetBean</literal>' must exist; otherwise an XML exception will be thrown --&gt;</lineannotation>
+   <lineannotation>&lt;!-- a bean with id '<literal>theTargetBean</literal>' must exist; otherwise an exception will be thrown --&gt;</lineannotation>
    &lt;idref local="theTargetBean"/&gt;
 &lt;/property&gt;</programlisting>
 
@@ -1465,14 +1467,12 @@ public class ExampleBean {
 &lt;/bean&gt;</programlisting>
 
         <programlisting language="xml"><lineannotation>&lt;!-- in the child (descendant) context --&gt;</lineannotation>
-&lt;bean id="accountService"  <lineannotation>&lt;-- notice that the name of this bean is the <emphasis
-              role="bold">same</emphasis> as the name of the <literal>parent</literal> bean</lineannotation>
+&lt;bean id="accountService"  <lineannotation>&lt;-- bean name is the same as the parent bean --&gt;</lineannotation>
       class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
       &lt;property name="target"&gt;
-          &lt;ref parent="accountService"/&gt;  <lineannotation>&lt;-- notice how we refer to the <emphasis
-              role="bold">parent</emphasis> bean</lineannotation>
+          &lt;ref parent="accountService"/&gt;  <lineannotation>&lt;!-- notice how we refer to the parent bean --&gt;</lineannotation>
       &lt;/property&gt;
-    <lineannotation>&lt;!-- insert other configuration and dependencies as required as here --&gt;</lineannotation>
+    <lineannotation>&lt;!-- insert other configuration and dependencies as required here --&gt;</lineannotation>
 &lt;/bean&gt;</programlisting>
       </section>
 
@@ -2231,8 +2231,8 @@ support=support@example.co.uk</programlisting>
       </table>
 
       <para>If you use Java 5 and thus have access to source-level
-      annotations, you may find <xref
-      linkend="metadata-annotations-required" /> to be of interest.</para>
+      annotations, you may find <literal><xref
+      linkend="metadata-annotations-required" /></literal> to be of interest.</para>
     </section>
 
     <section id="beans-factory-method-injection">
@@ -2278,12 +2278,13 @@ public class CommandManager implements ApplicationContextAware {
       return command.execute();
    }
 
-   <lineannotation>// the <interfacename>Command</interfacename> returned here could be an implementation that executes asynchronously, or whatever</lineannotation>
    protected Command createCommand() {
-      return this.applicationContext.getBean("command", Command.class); <lineannotation>// notice the Spring API dependency</lineannotation>
+      <lineannotation>// notice the Spring API dependency!</lineannotation>
+      return this.applicationContext.getBean("command", Command.class);
    }
 
-   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+   public void setApplicationContext(ApplicationContext applicationContext)
+                                                                    throws BeansException {
       this.applicationContext = applicationContext;
    }
 }</programlisting>
@@ -2565,6 +2566,14 @@ public class ReplacementComputeValue implements MethodReplacer {
         </tbody>
       </tgroup>
     </table>
+    <note>
+      <title>Thread-scoped beans</title>
+      <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is available, but is
+      not registered by default. For more information, see the documentation for
+      <ulink url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/SimpleThreadScope.html">SimpleThreadScope</ulink>.
+      For instructions on how to register this or any other custom scope, see
+      <xref linkend="beans-factory-scopes-custom-using"/>.</para>
+    </note>
 
     <section id="beans-factory-scopes-singleton">
       <title>The singleton scope</title>
@@ -2609,11 +2618,8 @@ public class ReplacementComputeValue implements MethodReplacer {
 
       <programlisting language="xml">&lt;bean id="accountService" class="com.foo.DefaultAccountService"/&gt;
 
-<lineannotation>&lt;!-- the following is equivalent, though redundant (singleton scope is the default); using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation>
-&lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/&gt;
-
-<lineannotation>&lt;!-- the following is equivalent and preserved for backward compatibility in <literal>spring-beans.dtd</literal> --&gt;</lineannotation>
-&lt;bean id="accountService" class="com.foo.DefaultAccountService" singleton="true"/&gt;</programlisting>
+<lineannotation>&lt;!-- the following is equivalent, though redundant (singleton scope is the default) --&gt;</lineannotation>
+&lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/&gt;</programlisting>
     </section>
 
     <section id="beans-factory-scopes-prototype">
@@ -2648,10 +2654,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       <para>The following example defines a bean as a prototype in XML:</para>
 
       <programlisting language="xml"><lineannotation>&lt;!-- using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation>
-&lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/&gt;
-
-<lineannotation>&lt;!-- the following is equivalent and preserved for backward compatibility in <literal>spring-beans.dtd</literal> --&gt;</lineannotation>
-&lt;bean id="accountService" class="com.foo.DefaultAccountService" singleton="false"/&gt;</programlisting>
+&lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/&gt;</programlisting>
 
       <para>In contrast to the other scopes, Spring does not manage the
       complete lifecycle of a prototype bean: the container instantiates,
@@ -2694,32 +2697,6 @@ public class ReplacementComputeValue implements MethodReplacer {
       and injecting its dependencies. If you need a new instance of a
       prototype bean at runtime more than once, see <xref
       linkend="beans-factory-method-injection" /></para>
-
-      <note>
-        <title>Backwards compatibility and specifying the lifecycle scope in
-        XML</title>
-
-        <para>If you reference the <filename>spring-beans.dtd</filename> DTD
-        in a bean definition file, and you are explicit about the lifecycle
-        scope of your beans, you must use the <literal>singleton</literal>
-        attribute to express the lifecycle scope. The <link
-        linkend="beans-factory-scopes-singleton">singleton lifecycle
-        scope</link> is the default. If you reference the
-        <filename>spring-beans-2.0.dtd</filename> DTD or the Spring 2.0 XSD
-        schema, you must use the <literal>scope</literal> attribute, because
-        the <literal>singleton</literal> attribute was removed from the
-        definition of the new DTD and XSD files in favor of the
-        <literal>scope</literal> attribute.</para>
-
-        <para>This means that if you use the <literal>singleton</literal>
-        attribute in an XML bean definition, you <emphasis>must</emphasis>
-        reference the <filename>spring-beans.dtd</filename> DTD <emphasis>in
-        that file</emphasis>. If you use the <literal>scope</literal>
-        attribute, you <emphasis>must</emphasis> reference either the
-        <filename>spring-beans-2.0.dtd</filename> DTD or the
-        <filename>spring-beans-3.0.xsd</filename> XSD <emphasis>in that
-        file</emphasis>.</para>
-      </note>
     </section>
 
     <section id="beans-factory-scopes-other">
@@ -2766,7 +2743,9 @@ public class ReplacementComputeValue implements MethodReplacer {
         <programlisting language="xml">&lt;web-app&gt;
   ...
   &lt;listener&gt;
-    &lt;listener-class&gt;org.springframework.web.context.request.RequestContextListener&lt;/listener-class&gt;
+    &lt;listener-class&gt;
+        org.springframework.web.context.request.RequestContextListener
+    &lt;/listener-class&gt;
   &lt;/listener&gt;
   ...
 &lt;/web-app&gt;</programlisting>
@@ -3131,18 +3110,21 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>Suppose that you write your custom
         <interfacename>Scope</interfacename> implementation, and then register
-        it as follows:</para>
+        it as below.</para>
+        <note>
+            <para>The example below uses <literal>SimpleThreadScope</literal>
+            which is included with Spring, but not registered by default. The instructions
+            would be the same for your own custom <literal>Scope</literal> implementations.</para>
+        </note>
 
-        <programlisting language="java"><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis
-              role="bold">not</emphasis> ship with the Spring Framework</lineannotation>
-Scope customScope = new ThreadScope();
-beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope);</programlisting>
+        <programlisting language="java">
+Scope threadScope = new SimpleThreadScope();
+beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope);</programlisting>
 
         <para>You then create bean definitions that adhere to the scoping
         rules of your custom <interfacename>Scope</interfacename>:</para>
 
-        <programlisting language="xml">&lt;bean id="..." class="..." <emphasis
-            role="bold">scope="thread"</emphasis>/&gt;</programlisting>
+        <programlisting language="xml">&lt;bean id="..." class="..." scope="thread"&gt;</programlisting>
 
         <para>With a custom <interfacename>Scope</interfacename>
         implementation, you are not limited to programmatic registration of
@@ -3163,13 +3145,13 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", customScope
         &lt;property name="scopes"&gt;
             &lt;map&gt;<emphasis role="bold">
                 &lt;entry key="thread"&gt;
-                    &lt;bean class="com.foo.ThreadScope"/&gt;
+                    &lt;bean class="org.springframework.context.support.SimpleThreadScope"/&gt;
                 &lt;/entry&gt;</emphasis>
             &lt;/map&gt;
         &lt;/property&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="bar" class="x.y.Bar" <emphasis role="bold">scope="thread"</emphasis>&gt;
+    &lt;bean id="bar" class="x.y.Bar" scope="thread"&gt;
         &lt;property name="name" value="Rick"/&gt;
         &lt;aop:scoped-proxy/&gt;
     &lt;/bean&gt;
@@ -3546,7 +3528,7 @@ public final class Boot {
       <interfacename>BeanFactory</interfacename> type if the field,
       constructor, or method in question carries the
       <interfacename>@Autowired</interfacename> annotation. For more
-      information, see the section entitled <xref
+      information, see <xref
       linkend="beans-autowired-annotation" />.</para>
 
       <para>When an ApplicationContext creates a class that implements the
@@ -3792,11 +3774,13 @@ import org.springframework.beans.BeansException;
 public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor {
 
     <lineannotation>// simply return the instantiated bean as-is</lineannotation>
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(Object bean, String beanName)
+                                                                       throws BeansException {
         return bean; <lineannotation>// we could potentially return <emphasis>any</emphasis> object reference here...</lineannotation>
     }
 
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName)
+                                                                       throws BeansException {
         System.out.println("Bean '" + beanName + "' created : " + bean.toString());
         return bean;
     }
@@ -3862,8 +3846,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         <para>Using callback interfaces or annotations in conjunction with a
         custom <interfacename>BeanPostProcessor</interfacename> implementation
         is a common means of extending the Spring IoC container. An example is
-        shown in the section entitled <xref
-        linkend="metadata-annotations-required" /> which demonstrates the
+        shown in <xref linkend="metadata-annotations-required" /> which demonstrates the
         usage of a custom <interfacename>BeanPostProcessor</interfacename>
         implementation that ships with the Spring distribution which ensures
         that JavaBean properties on beans that are marked with an (arbitrary)
@@ -3907,8 +3890,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         <emphasis>instances</emphasis> (the objects that are created from the
         configuration metadata), then you instead need to use a
         <interfacename>BeanPostProcessor</interfacename> (described above in
-        the section entitled <xref
-        linkend="beans-factory-extension-bpp" />.</para>
+        <xref linkend="beans-factory-extension-bpp" />.</para>
 
         <para>Also, <literal>BeanFactoryPostProcessors</literal> are scoped
         <emphasis>per-container</emphasis>. This is only relevant if you are
@@ -4292,11 +4274,12 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       <programlisting language="java">public class MovieRecommender {
 
     private MovieCatalog movieCatalog;
-    
+
     private CustomerPreferenceDao customerPreferenceDao;
 
     @Autowired
-    public void prepare(MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
+    public void prepare(MovieCatalog movieCatalog,
+                        CustomerPreferenceDao customerPreferenceDao) {
         this.movieCatalog = movieCatalog;
         this.customerPreferenceDao = customerPreferenceDao;
     }
@@ -4460,7 +4443,8 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     private CustomerPreferenceDao customerPreferenceDao;
 
     @Autowired
-    public void prepare(<emphasis role="bold">@Qualifier("main")</emphasis> MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
+    public void prepare(<emphasis role="bold">@Qualifier("main")</emphasis> MovieCatalog movieCatalog,
+                        CustomerPreferenceDao customerPreferenceDao) {
         this.movieCatalog = movieCatalog;
         this.customerPreferenceDao = customerPreferenceDao;
     }
@@ -4668,14 +4652,14 @@ public @interface Offline {
 public @interface MovieQualifier {
 
     String genre();
-    
+
     Format format();
 }</programlisting>
 
       <para>In this case <literal>Format</literal> is an enum:</para>
 
       <programlisting language="java">public enum Format {
-    
+
     VHS, DVD, BLURAY
 }</programlisting>
 
@@ -4766,7 +4750,8 @@ public @interface MovieQualifier {
       if they are not annotated with Spring's
       <interfacename>@Qualifier</interfacename> annotation.</para>
 
-      <programlisting language="xml">&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer"&gt;
+      <programlisting language="xml">&lt;bean id="customAutowireConfigurer"
+       class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer"&gt;
     &lt;property name="customQualifierTypes"&gt;
         &lt;set&gt;
             &lt;value&gt;example.CustomQualifier&lt;/value&gt;
@@ -4887,7 +4872,7 @@ public @interface MovieQualifier {
       only recognizes the <interfacename>@Resource</interfacename> annotation
       but also the JSR-250 <emphasis>lifecycle</emphasis> annotations.
       Introduced in Spring 2.5, the support for these annotations offers yet
-      another alternative to those described in the sections on <link
+      another alternative to those described in <link
       linkend="beans-factory-lifecycle-initializingbean">initialization
       callbacks</link> and <link
       linkend="beans-factory-lifecycle-disposablebean">destruction
@@ -5140,10 +5125,11 @@ public class JpaMovieFinder implements MovieFinder {
             <row>
               <entry>custom</entry>
 
-              <entry><literal>org.example.MyCustomTypeFilter</literal></entry>
+              <entry><literal>org.example.MyTypeFilter</literal></entry>
 
               <entry>A custom implementation of the
-              <interfacename>org.springframework.core.type.TypeFilter</interfacename>
+              <interfacename>org.springframework.core.type
+              .TypeFilter</interfacename>
               interface.</entry>
             </row>
           </tbody>
@@ -5154,11 +5140,12 @@ public class JpaMovieFinder implements MovieFinder {
       <interfacename>@Repository</interfacename> annotations and using "stub"
       repositories instead.</para>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans&gt;
 
      &lt;context:component-scan base-package="org.example"&gt;
         &lt;context:include-filter type="regex" expression=".*Stub.*Repository"/&gt;
-        &lt;context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/&gt;
+        &lt;context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Repository"/&gt;
      &lt;/context:component-scan&gt;
 
 &lt;/beans&gt;</programlisting>
@@ -5184,22 +5171,21 @@ public class JpaMovieFinder implements MovieFinder {
       <literal>@Configuration</literal> annotated classes. Here is a simple
       example:</para>
 
-      <programlisting>@Component
+      <programlisting language="java">@Component
 public class FactoryMethodComponent {
 
-  @Bean @Qualifier("public")
-  public TestBean publicInstance() {
-    return new TestBean("publicInstance");
-  }
+    @Bean @Qualifier("public")
+    public TestBean publicInstance() {
+        return new TestBean("publicInstance");
+    }
 
-  public void DoWork() 
-  {
-    // Component method implementation omitted
-  }
+    public void doWork() {
+        // Component method implementation omitted
+    }
 }</programlisting>
 
       <para>This class is a Spring component that has application-specific
-      code contained in its <methodname>DoWork</methodname> method. However,
+      code contained in its <methodname>doWork</methodname> method. However,
       it also contributes a bean definition that has a factory method
       referring to the method <methodname>publicInstance</methodname>. The
       <literal>@Bean</literal> annotation identifies the factory method and
@@ -5208,37 +5194,39 @@ public class FactoryMethodComponent {
       annotations that can be specified are <literal>@Scope</literal>,
       <literal>@Lazy</literal>, and custom qualifier annotations. Autowired
       fields and methods are supported as previously discussed, with
-      additional support for autowiring of @Bean methods:</para>
+      additional support for autowiring of <literal>@Bean</literal> methods:</para>
 
       <programlisting language="java">@Component
 public class FactoryMethodComponent {
 
- private static int i;
+    private static int i;
 
- @Bean @Qualifier("public")
- public TestBean publicInstance() { 
-  return new TestBean("publicInstance");
- }
+    @Bean @Qualifier("public")
+    public TestBean publicInstance() { 
+        return new TestBean("publicInstance");
+    }
 
- // use of a custom qualifier and autowiring of method parameters
+    // use of a custom qualifier and autowiring of method parameters
 
- @Bean @BeanAge(1)
- protected TestBean protectedInstance(@Qualifier("public") TestBean spouse, @Value("#{privateInstance.age}") String country) {
-  TestBean tb = new TestBean("protectedInstance", 1);
-  tb.setSpouse(tb);
-  tb.setCountry(country);
-  return tb;
- }
+    @Bean @BeanAge(1)
+    protected TestBean protectedInstance(@Qualifier("public") TestBean spouse,
+                                         @Value("#{privateInstance.age}") String country) {
+        TestBean tb = new TestBean("protectedInstance", 1);
+        tb.setSpouse(tb);
+        tb.setCountry(country);
+        return tb;
+    }
 
- @Bean @Scope(BeanDefinition.SCOPE_SINGLETON)
- private TestBean privateInstance() {
-  return new TestBean("privateInstance", i++);
- }
+    @Bean @Scope(BeanDefinition.SCOPE_SINGLETON)
+    private TestBean privateInstance() {
+        return new TestBean("privateInstance", i++);
+    }
 
- @Bean @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
- public TestBean requestScopedInstance() {
-  return new TestBean("requestScopedInstance", 3);
- }
+    @Bean @Scope(value = WebApplicationContext.SCOPE_SESSION,
+                 proxyMode = ScopedProxyMode.TARGET_CLASS)
+    public TestBean requestScopedInstance() {
+        return new TestBean("requestScopedInstance", 3);
+    }
 }
 </programlisting>
 
@@ -5304,7 +5292,7 @@ public class MovieFinderImpl implements MovieFinder {
         scanner:</para>
       </note>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans&gt;
                
      &lt;context:component-scan base-package="org.example"
                              name-generator="org.example.MyNameGenerator" /&gt;
@@ -5341,7 +5329,7 @@ public class MovieFinderImpl implements MovieFinder {
         scanner:</para>
       </note>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans&gt;
                
      &lt;context:component-scan base-package="org.example"
                              scope-resolver="org.example.MyScopeResolver" /&gt;
@@ -5356,7 +5344,7 @@ public class MovieFinderImpl implements MovieFinder {
       interfaces, and targetClass. For example, the following configuration
       will result in standard JDK dynamic proxies:</para>
 
-      <programlisting language="xml">&lt;beans ...&gt;
+      <programlisting language="xml">&lt;beans&gt;
                
      &lt;context:component-scan base-package="org.example"
                              scoped-proxy="interfaces" /&gt;
@@ -5528,8 +5516,7 @@ public class AppConfig {
         <interfacename>@Configuration</interfacename>-annotated class supports
         the regular lifecycle callbacks. Any classes defined with the @Bean
         annotation can use the @PostConstruct and @PreDestroy annotations from
-        JSR-250, see the section on <link
-        linkend="beans-factory-lifecycle-combined-effects">JSR-250
+        JSR-250, see <link linkend="beans-factory-lifecycle-combined-effects">JSR-250
         annotations</link> for further details.</para>
 
         <para>The regular Spring <link
@@ -5540,13 +5527,13 @@ public class AppConfig {
 
         <para>The standard set of <code>*Aware</code> interfaces such as
         <code><link
-        linkend="beans-factory-aware-beanfactoryaware">BeanFactoryAware</link></code>,
+        linkend="beans-beanfactory">BeanFactoryAware</link></code>,
         <code><link
-        linkend="beans-factory-aware-beannameaware">BeanNameAware</link></code>,
+        linkend="beans-factory-aware">BeanNameAware</link></code>,
         <code><link
         linkend="context-functionality-messagesource">MessageSourceAware</link></code>,
         <code><link
-        linkend="context-functionality-events">ApplicationContextAware</link></code>,
+        linkend="beans-factory-aware">ApplicationContextAware</link></code>,
         and so on are also fully supported.</para>
 
         <para>The <interfacename>@Bean</interfacename> annotation supports
@@ -5716,7 +5703,7 @@ public CommandManager commandManager() {
         the <code>name</code> attribute. <programlisting language="java">@Configuration
 public class AppConfig {
 
-    @Bean(name = "bar")
+    @Bean(name = "myFoo")
     public Foo foo() {
         return new Foo();
     }
@@ -5732,7 +5719,7 @@ public class AppConfig {
     <para>The <literal>context</literal> namespace introduced in Spring 2.5
     provides a <literal>load-time-weaver</literal> element.<!--Need to explain purpose of LoadTimeWeaver? Is this section ok here? --></para>
 
-    <programlisting language="xml">&lt;beans ...&gt;
+    <programlisting language="xml">&lt;beans&gt;
      
      &lt;context:load-time-weaver/&gt;
      
