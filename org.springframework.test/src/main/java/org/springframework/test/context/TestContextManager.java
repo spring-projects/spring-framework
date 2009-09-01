@@ -47,10 +47,9 @@ import org.springframework.util.Assert;
  * execution points:
  * </p>
  * <ul>
- * <li>{@link #beforeTestClass() before test class execution}:
- * prior to any <em>before class methods</em> of a particular testing
- * framework (e.g., JUnit 4's {@link org.junit.BeforeClass
- * &#064;BeforeClass})</li>
+ * <li>{@link #beforeTestClass() before test class execution}: prior to any
+ * <em>before class methods</em> of a particular testing framework (e.g., JUnit
+ * 4's {@link org.junit.BeforeClass &#064;BeforeClass})</li>
  * <li>{@link #prepareTestInstance(Object) test instance preparation}:
  * immediately following instantiation of the test instance</li>
  * <li>{@link #beforeTestMethod(Object,Method) before test method execution}:
@@ -60,9 +59,8 @@ import org.springframework.util.Assert;
  * execution}: after any <em>after methods</em> of a particular testing
  * framework (e.g., JUnit 4's {@link org.junit.After &#064;After})</li>
  * <li>{@link #afterTestClass() after test class execution}: after any
- * <em>after class methods</em> of a particular testing
- * framework (e.g., JUnit 4's {@link org.junit.AfterClass
- * &#064;AfterClass})</li>
+ * <em>after class methods</em> of a particular testing framework (e.g., JUnit
+ * 4's {@link org.junit.AfterClass &#064;AfterClass})</li>
  * </ul>
  * 
  * @author Sam Brannen
@@ -150,6 +148,17 @@ public class TestContextManager {
 	 */
 	public final List<TestExecutionListener> getTestExecutionListeners() {
 		return Collections.unmodifiableList(this.testExecutionListeners);
+	}
+
+	/**
+	 * Gets a copy of the {@link TestExecutionListener TestExecutionListeners}
+	 * registered for this <code>TestContextManager</code> in reverse order.
+	 */
+	private List<TestExecutionListener> getReversedTestExecutionListeners() {
+		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
+			getTestExecutionListeners());
+		Collections.reverse(listenersReversed);
+		return listenersReversed;
 	}
 
 	/**
@@ -264,6 +273,7 @@ public class TestContextManager {
 		if (logger.isTraceEnabled()) {
 			logger.trace("beforeTestClass(): class [" + testClass + "]");
 		}
+		getTestContext().updateState(null, null, null);
 
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
@@ -393,14 +403,10 @@ public class TestContextManager {
 		}
 		getTestContext().updateState(testInstance, testMethod, exception);
 
+		Exception afterTestMethodException = null;
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
 		// "wrapper"-style execution of listeners.
-		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
-			getTestExecutionListeners());
-		Collections.reverse(listenersReversed);
-
-		Exception afterTestMethodException = null;
-		for (TestExecutionListener testExecutionListener : listenersReversed) {
+		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
 			try {
 				testExecutionListener.afterTestMethod(getTestContext());
 			}
@@ -440,15 +446,12 @@ public class TestContextManager {
 		if (logger.isTraceEnabled()) {
 			logger.trace("afterTestClass(): class [" + testClass + "]");
 		}
-
-		// Traverse the TestExecutionListeners in reverse order to ensure proper
-		// "wrapper"-style execution of listeners.
-		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
-			getTestExecutionListeners());
-		Collections.reverse(listenersReversed);
+		getTestContext().updateState(null, null, null);
 
 		Exception afterTestClassException = null;
-		for (TestExecutionListener testExecutionListener : listenersReversed) {
+		// Traverse the TestExecutionListeners in reverse order to ensure proper
+		// "wrapper"-style execution of listeners.
+		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
 			try {
 				testExecutionListener.afterTestClass(getTestContext());
 			}
