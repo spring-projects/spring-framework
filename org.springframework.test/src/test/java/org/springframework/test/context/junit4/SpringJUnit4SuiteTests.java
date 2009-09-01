@@ -21,6 +21,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.test.context.ClassLevelDirtiesContextTests;
 import org.springframework.test.context.SpringRunnerContextCacheTests;
+import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests;
 
 /**
  * <p>
@@ -44,7 +45,8 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.
 @SuiteClasses( {//
-StandardJUnit4FeaturesTests.class,//
+//
+	StandardJUnit4FeaturesTests.class,//
 	StandardJUnit4FeaturesSpringRunnerTests.class,//
 	ExpectedExceptionSpringRunnerTests.class,//
 	TimedSpringRunnerTests.class,//
@@ -69,7 +71,8 @@ StandardJUnit4FeaturesTests.class,//
 	RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests.class,//
 	RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//
-	TimedTransactionalSpringRunnerTests.class //
+	TimedTransactionalSpringRunnerTests.class,//
+	HibernateSessionFlushingTests.class //
 })
 public class SpringJUnit4SuiteTests {
 	/* this test case consists entirely of tests loaded as a suite. */
