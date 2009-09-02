@@ -354,7 +354,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * resolving the root directory location to a <code>java.io.File</code>
 	 * and passing it into <code>retrieveMatchingFiles</code>, with the
 	 * remainder of the location as pattern.
-	 * <p>Will return "/WEB-INF" for the pattern "/WEB-INF/*.xml",
+	 * <p>Will return "/WEB-INF/" for the pattern "/WEB-INF/*.xml",
 	 * for example.
 	 * @param location the location to check
 	 * @return the part of the location that denotes the root directory
