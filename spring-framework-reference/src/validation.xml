@@ -801,9 +801,9 @@ public class StringToInteger implements Converter<String, Integer> {
 			<programlisting language="java"><![CDATA[
 public interface ConversionService {
 
-	boolean canConvert(Class<?> sourceType, Class<?> targetType);
-	
-	<T> T convert(Object source, Class<T> targetType);
+    boolean canConvert(Class<?> sourceType, Class<?> targetType);
+    
+    <T> T convert(Object source, Class<T> targetType);
 	
 }]]>
 			</programlisting>
@@ -839,7 +839,7 @@ public interface ConversionService {
 <bean id="conversionService" class="org.springframework.core.convert.support.DefaultConversionService">
     <property name="converters">
         <list>
-        	<bean class="example.MyCustomConverter" />
+            <bean class="example.MyCustomConverter" />
         </list>
     </property>
 </bean>]]>
@@ -921,31 +921,31 @@ package org.springframework.ui.format.date;
 
 public final class DateFormatter implements Formatter<Date> {
 
-	private String pattern;
+    private String pattern;
+    
+    public DateFormatter(String pattern) {
+        this.pattern = pattern;
+    }
+    
+    public String format(Date date, Locale locale) {
+        if (date == null) {
+            return "";
+        }
+        return getDateFormat(locale).format(date);
+    }
 
-	public DateFormatter(String pattern) {
-		this.pattern = pattern;
-	}
+    public Date parse(String formatted, Locale locale) throws ParseException {
+        if (formatted.length() == 0) {
+            return null;
+        }
+        return getDateFormat(locale).parse(formatted);
+    }
 
-	public String format(Date date, Locale locale) {
-		if (date == null) {
-			return "";
-		}
-		return getDateFormat(locale).format(date);
-	}
-
-	public Date parse(String formatted, Locale locale) throws ParseException {
-		if (formatted.length() == 0) {
-			return null;
-		}
-		return getDateFormat(locale).parse(formatted);
-	}
-
-	protected DateFormat getDateFormat(Locale locale) {
-		DateFormat dateFormat = new SimpleDateFormat(this.pattern, locale);
-		dateFormat.setLenient(false);
-		return dateFormat;
-	}
+    protected DateFormat getDateFormat(Locale locale) {
+        DateFormat dateFormat = new SimpleDateFormat(this.pattern, locale);
+        dateFormat.setLenient(false);
+        return dateFormat;
+    }
 
 }]]>
 			</programlisting>
@@ -979,7 +979,7 @@ public class Money {
 package org.springframework.ui.format;
 
 public interface AnnotationFormatterFactory<A extends Annotation, T> {
-	Formatter<T> getFormatter(A annotation);	
+    Formatter<T> getFormatter(A annotation);	
 }			
 ]]>
 			</programlisting>
@@ -992,12 +992,11 @@ package example.format;
 
 public class DecimalAnnotationFormatterFactory implements AnnotationFormatterFactory<DecimalFormat, Number> {
 
-	Formatter<Number> getFormatter(DecimalFormat annotation) {
-	   DecimalFormatter formatter = DecimalFormatter();
-	   formatter.setPattern(annotation.value());
-	   return formatter;
-	}
-	
+    Formatter<Number> getFormatter(DecimalFormat annotation) {
+        DecimalFormatter formatter = DecimalFormatter();
+        formatter.setPattern(annotation.value());
+        return formatter;
+    }
 }
 ]]>
 			</programlisting>
@@ -1010,7 +1009,7 @@ package example.app;
 public class MyModel {
 
     @DecimalFormat("#,###")
-	private BigDecimal decimal;
+    private BigDecimal decimal;
 	
 }
 ]]>
@@ -1031,9 +1030,9 @@ public class MyModel {
 			<programlisting language="java"><![CDATA[
 public interface FormatterRegistry {
 
-	void add(Class<?> type, Formatter<?> targetFormatter);
+    void add(Class<?> type, Formatter<?> targetFormatter);
 
-	void add(AnnotationFormatterFactory<?, ?> factory);			
+    void add(AnnotationFormatterFactory<?, ?> factory);			
 }]]>
 			</programlisting>
 			<para>
