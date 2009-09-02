@@ -26,17 +26,16 @@
 
     <para>The <interfacename>BeanWrapper</interfacename> is a fundamental concept in the
     Spring Framework and is used in a lot of places. However, you probably
-    will not ever have the need to use the <interfacename>BeanWrapper</interfacename> directly. Because this
+    will not have the need to use the <interfacename>BeanWrapper</interfacename> directly. Because this
     is reference documentation however, we felt that some explanation might be
-    in order. We're explaining the <interfacename>BeanWrapper</interfacename> in this chapter since if you were
-    going to use it at all, you would probably do so when trying to bind
-    data to objects, which is strongly related to the <interfacename>BeanWrapper</interfacename>.</para>
+    in order. We will explain the <interfacename>BeanWrapper</interfacename> in this chapter since, if you were
+    going to use it at all, you would most likely do so when trying to bind data to objects.</para>
 
-    <para>Spring uses PropertyEditors all over the place. The concept of a
-    <interfacename>PropertyEditor</interfacename> is part of the JavaBeans specification. Just as the
-    <interfacename>BeanWrapper</interfacename>, it's best to explain the use of PropertyEditors in this
-    chapter as well, since it's closely related to the <interfacename>BeanWrapper</interfacename> and the
-    <interfacename>DataBinder</interfacename>.</para>
+    <para>Spring's DataBinder and the lower-level BeanWrapper both use PropertyEditors to parse and format property values.
+    The <interfacename>PropertyEditor</interfacename> concept is part of the JavaBeans specification, and is also explained in this chapter.
+    Spring 3 introduces a "core.convert" package that provides a general type conversion facility, as well as a higher-level "format" package for formatting UI field values.
+    These new packages may be used as simpler alternatives to PropertyEditors, and will also be discussed in this chapter.</para>
+    
   </section>
 
     <section id="validator">
@@ -749,4 +748,320 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
     </section>
   </section>
 
+	<section id="core.convert">
+		<title>Spring 3 Type Conversion</title>
+		<para>
+			Spring 3 introduces a <filename>core.convert</filename> package that provides a general type conversion system.
+			The system defines a SPI to implement type conversion logic, as well as a API to execute type conversions at runtime.
+			Within a Spring container, if configured, this system can be used as an alternative to PropertyEditors to convert externalized bean property value strings to required property types.
+			The public API may also be used anywhere in your application where type coersion is needed.
+		</para>
+		<section id="core-convert-Converter-SPI">
+			<title>Converter SPI</title>
+			<para>
+				The SPI to implement type conversion logic is simple and strongly typed:
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.core.converter;
+    
+public interface Converter<S, T> {
+    T convert(S source) throws Exception;        
+}]]>
+			</programlisting>
+			<para>
+				To create your own Converter, simply implement the Converter interface.
+				Parameterize S as the type you are converting from, and T as the type you are converting to.
+				For each call to convert(S), the source argument is guaranteed to be NOT null.
+				Your Converter may throw any Exception if conversion fails.
+				An IllegalArgumentException is often thrown to report an invalid source value.
+				Take special care to ensure your Converter implementation is thread safe.
+			</para>
+			<para>
+				Several converter implementations are provided in the <filename>core.convert.converters</filename> package as a convenience.
+				These include converters to from String to Numbers and other common types.
+				Note StringToInteger as an example Converter implementation:
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.core.convert.converters;
+    
+public class StringToInteger implements Converter<String, Integer> {
+    public Integer convert(String source) {
+        return Integer.valueOf(source);
+    }
+}]]>
+			</programlisting>
+		</section>
+		<section id="core-convert-ConversionService-API">
+			<title>ConversionService API</title>
+			<para>
+				The ConversionService defines a public API for executing type conversion logic at runtime.
+				Converters are <emphasis>always</emphasis> executed behind this API.
+				User code should not depend on the Converter SPI.
+			</para>
+			<programlisting language="java"><![CDATA[
+public interface ConversionService {
+
+	boolean canConvert(Class<?> sourceType, Class<?> targetType);
+	
+	<T> T convert(Object source, Class<T> targetType);
+	
+}]]>
+			</programlisting>
+			<para>
+				Most ConversionService implementations also implement <interface>ConverterRegistry</interface>, which provides a SPI for registering converters.
+				Internally, a ConversionService implementation delegates to its registered Converters to carry out type conversion logic.
+			</para>
+			<para>
+				Two ConversionService implementations are provided with the system in the <filename>core.convert.support</filename> package.
+				<classname>GenericConversionService</classname> is a generic implementation designed to be explicitly configured, either programatically or declaratively as a Spring bean.
+				<classname>DefaultConversionService</classname> is a subclass that pre-registers the common Converters in the <filename>core.converter</filename> package as a convenience.
+			</para>
+		</section>
+		<section id="core-convert-Spring-config">
+			<title>Configuring a ConversionService</title>
+			<para>
+				A ConversionService is a stateless object designed to be instantiated on application startup, then shared between multiple threads.
+				In a Spring application, you typically configure a ConversionService instance per Spring container (or ApplicationContext).
+				That ConversionService will be picked up by Spring and then used whenever a type conversion needs to be performed by the framework.
+				You may also inject this ConversionService into any of your beans and invoke it directly.
+				If no ConversionService is registered with Spring, the original PropertyEditor-based system is used.
+			</para>
+			<para>
+				To register the DefaultConversionService with Spring, simply configure it as a bean with the id <code>conversionService</code>:
+			</para>
+			<programlisting language="xml"><![CDATA[
+<bean id="conversionService" class="org.springframework.core.convert.support.DefaultConversionService" />]]>
+			</programlisting>
+			<para>
+				To override the default converter set with your own custom converter(s), set the <code>converters</code> property:
+			</para>
+			<programlisting language="xml"><![CDATA[
+<bean id="conversionService" class="org.springframework.core.convert.support.DefaultConversionService">
+    <property name="converters">
+        <list>
+        	<bean class="example.MyCustomConverter" />
+        </list>
+    </property>
+</bean>]]>
+			</programlisting>
+		</section>
+		<section id="core-convert-programmatic-usage">
+			<title>Using a ConversionService programatically</title>
+			<para>
+				To work with a ConversionService instance programatically, simply inject a reference to it like you would any other bean:
+			</para>
+			<programlisting language="java"><![CDATA[
+@Service
+public class MyService {
+
+    @Autowired
+    public MyService(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+    
+    public void doIt() {
+        this.conversionService.convert(...)
+    }
+}]]>
+			</programlisting>
+		</section>
+	</section>
+	
+	<section id="ui.format">
+		<title>Spring 3 UI Field Formatting</title>
+		<para>
+			The <filename>core.convert</filename> is a simple, general-purpose type conversion system.
+			It addresses <emphasis>one-way</emphasis> conversion from one type to another, and is not limited to just converting Strings.
+			As discussed in the previous section, a Spring Container can be configured to use this system when binding bean property values.
+			In addition, the Spring Expression Language (SpEL) uses this system to coerce Expression values.
+			For example, when SpEL needs to coerse a Short to a Long to fullfill a expression.setValue attempt, the core.convert system performs the coersion.
+		</para>
+		<para>
+			Now consider the type conversion requirements of a typical UI environment such as a web or desktop application.
+			In such environments, you typically convert <emphasis>from String</emphasis> to support the postback process, as well as back <emphasis>to String</emphasis> to support the rendering process.
+			The more general <emphasis>core.convert</emphasis> system does not address this specific scenario directly.
+			To directly address this, Spring 3 introduces a new <emphasis>ui.format</emphasis> system that provides a simple and robust alternative to PropertyEditors in a UI environment.
+		</para>
+		<para>
+			In general, use Converters when you need implement general-purpose type conversion logic; logic that may be invoked by the Spring Container, SpEL, or your own code as part of a <emphasis>one-way</emphasis> binding process.
+			Use Formatters when you're working in a UI environment such as a HTML form of a web application, and need to apply <emphasis>two-way</emphasis> parsing, formatting, and localization logic to form field values.
+		</para>
+		<section id="ui-format-Formatter-SPI">
+			<title>Formatter SPI</title>
+			<para>
+				The SPI to implement UI formatting logic is simple and strongly typed:
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.ui.format;
+
+import java.text.ParseException;
+
+public interface Formatter<T> {
+    String format(T object, Locale locale);
+	
+    T parse(String formatted, Locale locale) throws ParseException;
+}]]>
+			</programlisting>
+			<para>
+				To create your own Formatter, simply implement the Formatter interface above.
+				Parameterize T to be the type of Object you are formatting; for example, java.lang.BigDecimal.
+				Implement the <methodname>format</methodname> operation to format an instance of T for display in the client locale.
+				Implement the <methodname>parse</methodname> operation to parse an instance of T from the formatted representation returned from the client locale.
+				Your Formatter should throw a ParseException if a parse attempt fails.
+				Take special care to ensure your Formatter implementation is thread safe.
+			</para>
+			<para>
+				Several Formatter implementations are provided in subpackages of <filename>ui.format</filename> as a convenience.
+				The <filename>date</filename> package provides a DateFormatter to format java.util.Date objects with a java.text.DateFormat.
+				The <filename>number</filename> package provides a DecimalFormatter, IntegerFormatter, CurrencyFormatter, and PercentFormatter for formatting java.lang.Number objects using a java.text.NumberFormat.
+				Note DateFormatter as an example Formatter implementation:				
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.ui.format.date;
+
+public final class DateFormatter implements Formatter<Date> {
+
+	private String pattern;
+
+	public DateFormatter(String pattern) {
+		this.pattern = pattern;
+	}
+
+	public String format(Date date, Locale locale) {
+		if (date == null) {
+			return "";
+		}
+		return getDateFormat(locale).format(date);
+	}
+
+	public Date parse(String formatted, Locale locale) throws ParseException {
+		if (formatted.length() == 0) {
+			return null;
+		}
+		return getDateFormat(locale).parse(formatted);
+	}
+
+	protected DateFormat getDateFormat(Locale locale) {
+		DateFormat dateFormat = new SimpleDateFormat(this.pattern, locale);
+		dateFormat.setLenient(false);
+		return dateFormat;
+	}
+
+}]]>
+			</programlisting>
+		</section>
+		<section id="ui-format-Formatted-Annotation">
+			<title>@Formatted Annotation</title>
+			<para>
+				The @Formatted annotation allows you to easily configure the Formatter implementation to use for one or more of your model classes.
+				To use this feature, simply annotate your class as @Formatted and specify the Formatter implementation to use as the annotation value:
+			</para>
+			<programlisting language="java"><![CDATA[
+@Formatted(MoneyFormatter.class)
+public class Money {
+    ...
+}
+]]>
+			</programlisting>
+			<para>
+				The example above says <emphasis>"Money objects should be formatted by MoneyFormatter"</emphasis>.
+				With this configuation, whenever a field binds to a Money property, the MoneyFormatter implementation will format the field value.
+				When referenced by a @Formatted annotation, a Formatter implementation must declare a public default constructor.
+			</para>
+		</section>
+		<section id="ui-format-AnnotationFormatterFactory">
+			<title>Custom Format Annotations</title>
+			<para>
+				The presence of field or method annotations on properties of your model objects can also trigger field-specific formatting logic.
+				The binding between a custom annotation and a specific Formatter instance is made by implementing a custom AnnotationFormatterFactory: 
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.ui.format;
+
+public interface AnnotationFormatterFactory<A extends Annotation, T> {
+	Formatter<T> getFormatter(A annotation);	
+}			
+]]>
+			</programlisting>
+			<para>
+				The example implementation below binds a custom @DecimalFormat annotation to a Number Formatter instance.
+				The annotation allows the format pattern to be configured as its value.
+			</para>
+			<programlisting language="java"><![CDATA[
+package example.format;
+
+public class DecimalAnnotationFormatterFactory implements AnnotationFormatterFactory<DecimalFormat, Number> {
+
+	Formatter<Number> getFormatter(DecimalFormat annotation) {
+	   DecimalFormatter formatter = DecimalFormatter();
+	   formatter.setPattern(annotation.value());
+	   return formatter;
+	}
+	
+}
+]]>
+			</programlisting>
+			<para>
+				Then, to trigger somewhere in your model:
+			</para>
+			<programlisting language="java"><![CDATA[
+package example.app;
+
+public class MyModel {
+
+    @DecimalFormat("#,###")
+	private BigDecimal decimal;
+	
+}
+]]>
+			</programlisting>
+		</section>
+		<section id="ui-format-FormatterRegistry-SPI">
+			<title>FormatterRegistry SPI</title>
+			<para>
+				Formatters are often registered in a FormatterRegistry.
+				A DataBinder uses this registry to resolve the Formatter to use for a specific field.
+				This allows you to configure default Formatting rules centrally, rather than duplicating such configuration across your UI Controllers.
+				For example, you might want to enforce that all Date fields are formatted a certain way, or fields with a specific annotation are formatted in a certain way.
+				With a shared FormatterRegistry, you define these rules once and they are applied whenever field formatting is needed.
+			</para>
+			<para>
+				Review the FormatterRegistry SPI below:
+			</para>
+			<programlisting language="java"><![CDATA[
+public interface FormatterRegistry {
+
+	void add(Class<?> type, Formatter<?> targetFormatter);
+
+	void add(AnnotationFormatterFactory<?, ?> factory);			
+}]]>
+			</programlisting>
+			<para>
+				As shown above, Formatters may be registered by field type or annotation.
+				<classname>GenericFormatterRegistry</classname> is the implementation suitable for use in most UI binding environments.
+				This implementation may be configured programatically or declatively as a Spring bean.
+			</para>
+		</section>
+		<section id="ui-format-configuring-FormatterRegistry">
+			<title>Configuring a FormatterRegistry</title>
+			<para>
+			</para>
+			<para>
+			</para>
+			<programlisting language="java"><![CDATA[
+]]>
+			</programlisting>
+		</section>
+		<section id="ui-format-customizing-DataBinder">
+			<title>Registering field-specific Formatters</title>
+			<para>
+			</para>
+			<para>
+			</para>
+			<programlisting language="java"><![CDATA[
+]]>
+			</programlisting>
+		</section>
+	</section>
+	
 </chapter>
