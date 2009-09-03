@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.springframework.expression.spel.standard;
+ package org.springframework.expression.spel.standard.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.standard.InternalParseException;
 
 /**
  * Lex some input data into a stream of tokens that can then be parsed.

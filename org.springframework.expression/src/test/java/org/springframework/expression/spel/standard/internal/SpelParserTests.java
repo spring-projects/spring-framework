@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.springframework.expression.spel.standard;
+ package org.springframework.expression.spel.standard.internal;
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -27,6 +27,7 @@ import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.expression.spel.ast.OpOr;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 
