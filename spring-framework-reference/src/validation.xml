@@ -805,7 +805,7 @@ public interface ConverterFactory<S, R> {
 			</programlisting>
 			<para>
 				Parameterize S to be type you are converting from, and R to be base type defining the <emphasis>range</emphasis> of classes you can convert to.
-				Then implement getConverter(Class&lt;T&gt;T), where T is a subclass of R.
+				Then implement getConverter(Class&lt;T&gt;), where T is a subclass of R.
 			</para>
 			<para>
 				Note the StringToEnum ConverterFactory as an example:
@@ -861,7 +861,7 @@ public interface ConversionService {
 		<section id="core-convert-Spring-config">
 			<title>Configuring a ConversionService</title>
 			<para>
-				A ConversionService is a stateless object designed to be instantiated on application startup, then shared between multiple threads.
+				A ConversionService is a stateless object designed to be instantiated at application startup, then shared between multiple threads.
 				In a Spring application, you typically configure a ConversionService instance per Spring container (or ApplicationContext).
 				That ConversionService will be picked up by Spring and then used whenever a type conversion needs to be performed by the framework.
 				You may also inject this ConversionService into any of your beans and invoke it directly.
@@ -919,7 +919,7 @@ public class MyService {
 		</para>
 		<para>
 			Now consider the type conversion requirements of a typical UI environment such as a web or desktop application.
-			In such environments, you typically convert <emphasis>from String</emphasis> to support the postback process, as well as back <emphasis>to String</emphasis> to support the rendering process.
+			In such environments, you typically convert <emphasis>from String</emphasis> to support the form postback process, as well as back <emphasis>to String</emphasis> to support the rendering process.
 			The more general <emphasis>core.convert</emphasis> system does not address this specific scenario directly.
 			To directly address this, Spring 3 introduces a new <emphasis>ui.format</emphasis> system that provides a simple and robust alternative to PropertyEditors in a UI environment.
 		</para>
