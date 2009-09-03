@@ -978,8 +978,8 @@ public class Money {
 		<section id="ui-format-AnnotationFormatterFactory">
 			<title>Custom Format Annotations</title>
 			<para>
-				The presence of field or method annotations on properties of your model objects can also trigger field-specific formatting logic.
-				Bind a custom annotation to a Formatter instance by implementing an AnnotationFormatterFactory: 
+				Field-specific formatting can be triggered by annotating model properties.
+				To bind a custom annotation to a Formatter instance, implement a AnnotationFormatterFactory: 
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.ui.format;
@@ -991,7 +991,7 @@ public interface AnnotationFormatterFactory<A extends Annotation, T> {
 			</programlisting>
 			<para>
 				The example implementation below binds a custom @DecimalFormat annotation to a Number Formatter instance.
-				This annotation allows the format pattern to be configured as its value.
+				This particular annotation allows the format pattern to be configured.
 			</para>
 			<programlisting language="java"><![CDATA[
 package example.format;
@@ -1007,7 +1007,7 @@ public class DecimalAnnotationFormatterFactory implements AnnotationFormatterFac
 ]]>
 			</programlisting>
 			<para>
-				Then, to trigger somewhere in your model:
+				Then, to trigger this custom Number formatting, simply annotate a property as a @DecimalFormat in your model:
 			</para>
 			<programlisting language="java"><![CDATA[
 package example.app;
