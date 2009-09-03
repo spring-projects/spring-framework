@@ -1021,7 +1021,6 @@ public class Money {
 			<para>
 				The example above says <emphasis>"Money objects should be formatted by a MoneyFormatter"</emphasis>.
 				With this configuation, whenever a field is of type Money, MoneyFormatter will format the field value.
-				When referenced by a @Formatted annotation, a Formatter implementation must declare a public default constructor.
 			</para>
 		</section>
 		<section id="ui-format-CustomFormatAnnotations">
