@@ -64,6 +64,7 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals(TestBean[].class, ClassUtils.forName(TestBean[].class.getName()));
 		assertEquals(TestBean[][].class, ClassUtils.forName("org.springframework.beans.TestBean[][]"));
 		assertEquals(TestBean[][].class, ClassUtils.forName(TestBean[][].class.getName()));
+		assertEquals(short[][][].class, ClassUtils.forName("[[[S"));
 	}
 
 	public void testForNameWithPrimitiveClasses() throws ClassNotFoundException {
