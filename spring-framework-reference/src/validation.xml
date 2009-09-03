@@ -889,7 +889,7 @@ public class MyService {
 		<section id="ui-format-Formatter-SPI">
 			<title>Formatter SPI</title>
 			<para>
-				The SPI to implement UI formatting logic is simple and strongly typed:
+				The Formatter SPI to implement UI formatting logic is simple and strongly typed:
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.ui.format;
@@ -903,17 +903,19 @@ public interface Formatter<T> {
 }]]>
 			</programlisting>
 			<para>
-				To create your own Formatter, simply implement the Formatter interface above.
-				Parameterize T to be the type of Object you are formatting; for example, java.lang.BigDecimal.
+				To create your own Formatter, simply implement the interface above.
+				Parameterize T to be the type of Object you are formatting; for example, <classname>java.lang.BigDecimal</classname>.
 				Implement the <methodname>format</methodname> operation to format an instance of T for display in the client locale.
 				Implement the <methodname>parse</methodname> operation to parse an instance of T from the formatted representation returned from the client locale.
 				Your Formatter should throw a ParseException if a parse attempt fails.
-				Take special care to ensure your Formatter implementation is thread safe.
+				Take care to ensure your Formatter implementation is thread safe.
 			</para>
 			<para>
 				Several Formatter implementations are provided in subpackages of <filename>ui.format</filename> as a convenience.
 				The <filename>date</filename> package provides a DateFormatter to format java.util.Date objects with a java.text.DateFormat.
-				The <filename>number</filename> package provides a DecimalFormatter, IntegerFormatter, CurrencyFormatter, and PercentFormatter for formatting java.lang.Number objects using a java.text.NumberFormat.
+				The <filename>number</filename> package provides a DecimalFormatter, IntegerFormatter, CurrencyFormatter, and PercentFormatter to format java.lang.Number objects using a java.text.NumberFormat.
+			</para>
+			<para>
 				Note DateFormatter as an example Formatter implementation:				
 			</para>
 			<programlisting language="java"><![CDATA[
@@ -949,11 +951,15 @@ public final class DateFormatter implements Formatter<Date> {
 
 }]]>
 			</programlisting>
+			<para>
+				The Spring team welcomes community-driven Formatter contributions; see <ulink url="http://jira.springframework.org">http://jira.springframework.org</ulink> to contribute.
+				In particular, the team expects to integrate support for Joda Time and Money Formatters in the future.
+			</para>
 		</section>
 		<section id="ui-format-Formatted-Annotation">
 			<title>@Formatted</title>
 			<para>
-				The @Formatted annotation allows you to easily configure the Formatter implementation to use for one or more of your model classes.
+				The @Formatted annotation allows you to easily associate a Formatter implementation with one of your classes.
 				To use this feature, simply annotate your class as @Formatted and specify the Formatter implementation to use as the annotation value:
 			</para>
 			<programlisting language="java"><![CDATA[
@@ -964,8 +970,8 @@ public class Money {
 ]]>
 			</programlisting>
 			<para>
-				The example above says <emphasis>"Money objects should be formatted by MoneyFormatter"</emphasis>.
-				With this configuation, whenever a field binds to a Money property, the MoneyFormatter implementation will format the field value.
+				The example above says <emphasis>"Money objects should be formatted by a MoneyFormatter"</emphasis>.
+				With this configuation, whenever a field is of type Money, MoneyFormatter will format the field value.
 				When referenced by a @Formatted annotation, a Formatter implementation must declare a public default constructor.
 			</para>
 		</section>
@@ -973,7 +979,7 @@ public class Money {
 			<title>Custom Format Annotations</title>
 			<para>
 				The presence of field or method annotations on properties of your model objects can also trigger field-specific formatting logic.
-				The binding between a custom annotation and a specific Formatter instance is made by implementing a custom AnnotationFormatterFactory: 
+				Bind a custom annotation to a Formatter instance by implementing an AnnotationFormatterFactory: 
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.ui.format;
@@ -985,7 +991,7 @@ public interface AnnotationFormatterFactory<A extends Annotation, T> {
 			</programlisting>
 			<para>
 				The example implementation below binds a custom @DecimalFormat annotation to a Number Formatter instance.
-				The annotation allows the format pattern to be configured as its value.
+				This annotation allows the format pattern to be configured as its value.
 			</para>
 			<programlisting language="java"><![CDATA[
 package example.format;
@@ -1018,11 +1024,11 @@ public class MyModel {
 		<section id="ui-format-FormatterRegistry-SPI">
 			<title>FormatterRegistry SPI</title>
 			<para>
-				Formatters are often registered in a FormatterRegistry.
+				Formatters are typically registered in a FormatterRegistry.
 				A DataBinder uses this registry to resolve the Formatter to use for a specific field.
 				This allows you to configure default Formatting rules centrally, rather than duplicating such configuration across your UI Controllers.
 				For example, you might want to enforce that all Date fields are formatted a certain way, or fields with a specific annotation are formatted in a certain way.
-				With a shared FormatterRegistry, you define these rules once and they are applied whenever field formatting is needed.
+				With a shared FormatterRegistry, you define these rules once and they are applied whenever formatting is needed.
 			</para>
 			<para>
 				Review the FormatterRegistry SPI below:
@@ -1038,7 +1044,7 @@ public interface FormatterRegistry {
 			<para>
 				As shown above, Formatters may be registered by field type or annotation.
 				<classname>GenericFormatterRegistry</classname> is the implementation suitable for use in most UI binding environments.
-				This implementation may be configured programatically or declatively as a Spring bean.
+				This implementation may be configured programatically or declaratively as a Spring bean.
 			</para>
 		</section>
 		<section id="ui-format-configuring-FormatterRegistry">
@@ -1090,13 +1096,13 @@ public interface FormatterRegistry {
 				For example, you may need to format a specific Date field in a way that differs from all the other Date fields in your application.
 			</para>
 			<para>
-				To apply a Formatter to a single field, create an @InitBinder callback on your @Controller, then call binder.registerFormatter(String, Formatter<?>):
+				To apply a Formatter to a single field, create an @InitBinder callback on your @Controller, then call binder.registerFormatter(String, Formatter):
 			</para>
 			<programlisting language="java"><![CDATA[
     public class MyControler {
         @InitBinder
         public void initBinder(WebDataBinder binder) {
-            binder.registerFormatter("myfieldName", new MyCustomFieldFormatter());
+            binder.registerFormatter("myFieldName", new MyCustomFieldFormatter());
         }
         ...
     }
