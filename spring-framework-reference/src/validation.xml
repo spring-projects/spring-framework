@@ -1044,14 +1044,14 @@ public interface FormatterRegistry {
 		<section id="ui-format-configuring-FormatterRegistry">
 			<title>Configuring a FormatterRegistry</title>
 			<para>
-				A FormatterRegistry is a stateless object designed to be instantiated on application startup, then shared between multiple threads.
-				In a Spring MVC application, you configure a FormatterRegistry as a property of the WebBinderInitializer.
-				The FormatterRegistry will then be configured whenever a DataBinder is created by Spring MVC to bind model properties and render field values.
+				A FormatterRegistry is a stateless object designed to be instantiated at application startup, then shared between multiple threads.
+				In a Spring MVC application, you configure a FormatterRegistry as a property of the WebBindingInitializer.
+				The FormatterRegistry will then be configured whenever a DataBinder is created by Spring MVC to bind and render model properties.
 				If no FormatterRegistry is configured, the original PropertyEditor-based system is used.
 			</para>
 			<para>
 				To register a FormatterRegistry with Spring MVC, simply configure it as a property of a custom WebBindingInitializer injected into the 
-				Spring MVC AnnotationMethodHandlerAdapter.
+				Spring MVC AnnotationMethodHandlerAdapter:
 			</para>
 			<programlisting language="xml"><![CDATA[
 <!-- Invokes Spring MVC @Controller methods -->
@@ -1085,7 +1085,7 @@ public interface FormatterRegistry {
 			<title>Registering field-specific Formatters</title>
 			<para>
 				In most cases, configuring a shared FormatterRegistry that selects Formatters based on model property type or annotation is sufficient.
-				When sufficient, special @Controller @InitBinder callbacks are NOT needed to apply custom formatting logic.
+				When sufficient, no special @Controller @InitBinder callbacks are needed to apply custom formatting logic.
 				However, there are cases where field-specific formatting should be configured on a Controller-by-Controller basis.
 				For example, you may need to format a specific Date field in a way that differs from all the other Date fields in your application.
 			</para>
@@ -1103,7 +1103,7 @@ public interface FormatterRegistry {
 ]]>
 			</programlisting>
 			<para>
-				This applies the Formatter to the specific field, overriding any Formatter that would have been applied by type or annotation.
+				This applies the Formatter to the field, and overrides any Formatter that would have been applied by field type or annotation.
 			</para>
 		</section>
 	</section>
