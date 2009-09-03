@@ -69,7 +69,7 @@ public class CookieGenerator {
 	 * Return the given name for cookies created by this generator.
 	 */
 	public String getCookieName() {
-		return cookieName;
+		return this.cookieName;
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class CookieGenerator {
 	 * Return the domain for cookies created by this generator, if any.
 	 */
 	public String getCookieDomain() {
-		return cookieDomain;
+		return this.cookieDomain;
 	}
 
 	/**
@@ -99,14 +99,14 @@ public class CookieGenerator {
 	 * Return the path for cookies created by this generator.
 	 */
 	public String getCookiePath() {
-		return cookiePath;
+		return this.cookiePath;
 	}
 
 	/**
 	 * Use the given maximum age (in seconds) for cookies created by this generator.
 	 * Useful special value: -1 ... not persistent, deleted when client shuts down
 	 */
-	public void setCookieMaxAge(int cookieMaxAge) {
+	public void setCookieMaxAge(Integer cookieMaxAge) {
 		this.cookieMaxAge = cookieMaxAge;
 	}
 
@@ -114,7 +114,7 @@ public class CookieGenerator {
 	 * Return the maximum age for cookies created by this generator.
 	 */
 	public Integer getCookieMaxAge() {
-		return cookieMaxAge;
+		return this.cookieMaxAge;
 	}
 
 	/**
@@ -131,21 +131,20 @@ public class CookieGenerator {
 	 * such as HTTPS (SSL).
 	 */
 	public boolean isCookieSecure() {
-		return cookieSecure;
+		return this.cookieSecure;
 	}
 
 
 	/**
 	 * Add a cookie with the given value to the response,
 	 * using the cookie descriptor settings of this generator.
-	 * <p>Delegates to <code>createCookie</code> for cookie creation.
+	 * <p>Delegates to {@link #createCookie} for cookie creation.
 	 * @param response the HTTP response to add the cookie to
 	 * @param cookieValue the value of the cookie to add
 	 * @see #setCookieName
 	 * @see #setCookieDomain
 	 * @see #setCookiePath
 	 * @see #setCookieMaxAge
-	 * @see #createCookie
 	 */
 	public void addCookie(HttpServletResponse response, String cookieValue) {
 		Cookie cookie = createCookie(cookieValue);
@@ -165,12 +164,11 @@ public class CookieGenerator {
 	/**
 	 * Remove the cookie that this generator describes from the response.
 	 * Will generate a cookie with empty value and max age 0.
-	 * <p>Delegates to <code>createCookie</code> for cookie creation.
+	 * <p>Delegates to {@link #createCookie} for cookie creation.
 	 * @param response the HTTP response to remove the cookie from
 	 * @see #setCookieName
 	 * @see #setCookieDomain
 	 * @see #setCookiePath
-	 * @see #createCookie
 	 */
 	public void removeCookie(HttpServletResponse response) {
 		Cookie cookie = createCookie("");
