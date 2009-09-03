@@ -386,11 +386,11 @@ public class AppConfig {
     <section id="new-feature-convert-and-format">
       <title>General purpose type conversion system and UI field formatting system</title>
       <para>
-		A general purpose <link linked="core.convert">type conversion system</link> has been introduced.
+		A general purpose <link linkend="core.convert">type conversion system</link> has been introduced.
 		The system is currently used by SpEL for type coersion, and may also be used by a Spring Container when binding bean property values.
 	  </para>
 	  <para>
-		In addition, a <link linked="ui.format">ui.format</link> system has been introduced for formatting UI field values.
+		In addition, a <link linkend="ui.format">ui.format</link> system has been introduced for formatting UI field values.
 		This system provides a simpler and more robust alternative to JavaBean PropertyEditors in UI environments such as Spring MVC.
 	  </para>
     </section>
