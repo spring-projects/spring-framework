@@ -1007,7 +1007,7 @@ public class DecimalAnnotationFormatterFactory implements AnnotationFormatterFac
 ]]>
 			</programlisting>
 			<para>
-				Then, to trigger this custom Number formatting, simply annotate a property as a @DecimalFormat in your model:
+				Then, to trigger, simply annotate a property as a @DecimalFormat in your model:
 			</para>
 			<programlisting language="java"><![CDATA[
 package example.app;
