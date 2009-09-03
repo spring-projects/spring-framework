@@ -1068,7 +1068,7 @@ public @interface Currency {
 			<section id="ui-format-AnnotationFormatterFactory">
 				<title>AnnotationFormatterFactory</title>
 				<para>
-					If your custom annotation has attributes to configure Formatter instance behavior by property, implement a AnnotationFormatterFactory:
+					If your custom annotation has attributes that configure Formatter instance behavior by property, implement a AnnotationFormatterFactory:
 				</para>
 				<programlisting language="java"><![CDATA[
 package org.springframework.ui.format;
