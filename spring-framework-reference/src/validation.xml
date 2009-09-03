@@ -1024,13 +1024,54 @@ public class Money {
 				When referenced by a @Formatted annotation, a Formatter implementation must declare a public default constructor.
 			</para>
 		</section>
-		<section id="ui-format-AnnotationFormatterFactory">
+		<section id="ui-format-CustomFormatAnnotations">
 			<title>Custom Format Annotations</title>
 			<para>
 				Field-specific formatting can be triggered by annotating model properties.
-				To bind a custom annotation to a Formatter instance, implement a AnnotationFormatterFactory: 
+				To bind a custom annotation to a Formatter instance, simply annotate the annotation as @Formatted:
 			</para>
 			<programlisting language="java"><![CDATA[
+@Target({ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Formatted(CurrencyFormatter.class)
+public @interface Currency {
+}			
+]]>
+			</programlisting>
+			<para>
+				Then, to trigger formatting, simply annotate a model property with the annotation:
+			</para>
+			<programlisting language="java"><![CDATA[
+public class MyModel {
+
+    @Currency
+    private BigDecimal amount;
+	
+}
+]]>
+			</programlisting>
+			<para>
+				Custom annotations like @Currency can also be annotated with JSR-303 constraint annotations to specify declarative validation constraints.
+				For example:
+			</para>
+			<programlisting language="java"><![CDATA[
+@Target({ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Formatted(CurrencyFormatter.class)
+@Constraint(validatedBy = CurrencyValidator.class)
+public @interface Currency {
+}			
+]]>
+			</programlisting>
+			<para>
+				Given the example above, on form postback any @Currency properties will first be parsed by CurrencyFormatter, then validated by CurrencyValidator.
+			</para>
+			<section id="ui-format-AnnotationFormatterFactory">
+				<title>AnnotationFormatterFactory</title>
+				<para>
+					If your custom annotation has attributes to configure Formatter instance behavior by property, implement a AnnotationFormatterFactory:
+				</para>
+				<programlisting language="java"><![CDATA[
 package org.springframework.ui.format;
 
 public interface AnnotationFormatterFactory<A extends Annotation, T> {
@@ -1039,14 +1080,12 @@ public interface AnnotationFormatterFactory<A extends Annotation, T> {
 
 }			
 ]]>
-			</programlisting>
-			<para>
-				The example implementation below binds a custom @DecimalFormat annotation to a Number Formatter instance.
-				This particular annotation allows the format pattern to be configured.
-			</para>
-			<programlisting language="java"><![CDATA[
-package example.format;
-
+				</programlisting>
+				<para>
+					The example implementation below binds a @DecimalFormat instance to a Formatter instance.
+					This particular annotation allows the NumberFormat pattern to be configured.
+				</para>
+				<programlisting language="java"><![CDATA[
 public class DecimalAnnotationFormatterFactory implements AnnotationFormatterFactory<DecimalFormat, Number> {
 
     Formatter<Number> getFormatter(DecimalFormat annotation) {
@@ -1056,13 +1095,11 @@ public class DecimalAnnotationFormatterFactory implements AnnotationFormatterFac
     }
 }
 ]]>
-			</programlisting>
-			<para>
-				Then, to trigger, simply annotate a property as a @DecimalFormat in your model:
-			</para>
-			<programlisting language="java"><![CDATA[
-package example.app;
-
+				</programlisting>
+				<para>
+					Then, to trigger, simply annotate a property as a @DecimalFormat in your model:
+				</para>
+				<programlisting language="java"><![CDATA[
 public class MyModel {
 
     @DecimalFormat("#,###")
@@ -1070,12 +1107,13 @@ public class MyModel {
 	
 }
 ]]>
-			</programlisting>
+				</programlisting>							
+			</section>
 		</section>
 		<section id="ui-format-FormatterRegistry-SPI">
 			<title>FormatterRegistry SPI</title>
 			<para>
-				Formatters are typically registered in a FormatterRegistry.
+				Formatters can be registered in a FormatterRegistry.
 				A DataBinder uses this registry to resolve the Formatter to use for a specific field.
 				This allows you to configure default Formatting rules centrally, rather than duplicating such configuration across your UI Controllers.
 				For example, you might want to enforce that all Date fields are formatted a certain way, or fields with a specific annotation are formatted in a certain way.
@@ -1085,6 +1123,8 @@ public class MyModel {
 				Review the FormatterRegistry SPI below:
 			</para>
 			<programlisting language="java"><![CDATA[
+package org.springframework.ui.format;
+
 public interface FormatterRegistry {
 
     void add(Formatter<?> formatter);
@@ -1121,7 +1161,7 @@ public interface FormatterRegistry {
                 <bean class="org.springframework.ui.format.GenericFormatterRegistry">
                     <property name="formatters">
                         <list>
-	                        <!-- Register formatter beans here -->
+	                        <!-- Register Formatter beans here -->
                         </list>	
                     </property>
                     <property name="annotationFormatterFactories">
@@ -1136,6 +1176,7 @@ public interface FormatterRegistry {
 </bean>]]>
 			</programlisting>
 			<para>
+				When using the @Formatted annotation, no explicit Formatter or AnnotationFormatterFactory registration is required.
 				See the JavaDocs for GenericFormatterRegistry for more configuration options.
 			</para>
 		</section>
