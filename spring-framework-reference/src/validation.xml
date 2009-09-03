@@ -1157,7 +1157,7 @@ public interface FormatterRegistry {
         <!-- Configures Spring MVC DataBinder instances -->
         <bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
             <property name="formatterRegistry">
-                <bean class="org.springframework.ui.format.GenericFormatterRegistry">
+                <bean class="org.springframework.ui.format.support.GenericFormatterRegistry">
                     <property name="formatters">
                         <list>
 	                        <!-- Register Formatter beans here -->
