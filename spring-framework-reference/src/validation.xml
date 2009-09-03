@@ -754,7 +754,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 			Spring 3 introduces a <filename>core.convert</filename> package that provides a general type conversion system.
 			The system defines a SPI to implement type conversion logic, as well as a API to execute type conversions at runtime.
 			Within a Spring container, if configured, this system can be used as an alternative to PropertyEditors to convert externalized bean property value strings to required property types.
-			The public API may also be used anywhere in your application where type coersion is needed.
+			The public API may also be used anywhere in your application where type conversion is needed.
 		</para>
 		<section id="core-convert-Converter-SPI">
 			<title>Converter SPI</title>
@@ -769,12 +769,12 @@ public interface Converter<S, T> {
 }]]>
 			</programlisting>
 			<para>
-				To create your own Converter, simply implement the Converter interface.
+				To create your own Converter, simply implement the interface above.
 				Parameterize S as the type you are converting from, and T as the type you are converting to.
 				For each call to convert(S), the source argument is guaranteed to be NOT null.
 				Your Converter may throw any Exception if conversion fails.
 				An IllegalArgumentException is often thrown to report an invalid source value.
-				Take special care to ensure your Converter implementation is thread safe.
+				Take care to ensure your Converter implementation is thread safe.
 			</para>
 			<para>
 				Several converter implementations are provided in the <filename>core.convert.converters</filename> package as a convenience.
@@ -791,6 +791,47 @@ public class StringToInteger implements Converter<String, Integer> {
 }]]>
 			</programlisting>
 		</section>
+		<section id="core-convert-ConverterFactory-SPI">
+			<title>ConverterFactory</title>
+			<para>
+				When you need to centralize the conversion logic for an entire class hierarchy, for example, when converting from String to java.lang.Enum objects, implement a ConverterFactory:
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.core.converter;
+    
+public interface ConverterFactory<S, R> {
+    <T extends R> Converter<S, T> getConverter(Class<T> targetType);        
+}]]>
+			</programlisting>
+			<para>
+				Parameterize S to be type you are converting from, and R to be base type defining the <emphasis>range</emphasis> of classes you can convert to.
+				Then implement getConverter(Class&lt;T&gt;T), where T is a subclass of R.
+			</para>
+			<para>
+				Note the StringToEnum ConverterFactory as an example:
+			</para>
+			<programlisting language="java"><![CDATA[
+public class StringToEnumFactory implements ConverterFactory<String, Enum> {
+
+    public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
+        return new StringToEnum(targetType);
+    }
+
+    private final class StringToEnum<T extends Enum> implements Converter<String, T> {
+
+        private Class<T> enumType;
+		
+        public StringToEnum(Class<T> enumType) {
+            this.enumType = enumType;
+        }
+        
+        public T convert(String source) throws Exception {
+            return (T) Enum.valueOf(this.enumType, source.trim());
+        }
+    }
+}]]>
+			</programlisting>
+		</section>		
 		<section id="core-convert-ConversionService-API">
 			<title>ConversionService API</title>
 			<para>
@@ -809,7 +850,7 @@ public interface ConversionService {
 			</programlisting>
 			<para>
 				Most ConversionService implementations also implement <interface>ConverterRegistry</interface>, which provides a SPI for registering converters.
-				Internally, a ConversionService implementation delegates to its registered Converters to carry out type conversion logic.
+				Internally, a ConversionService implementation delegates to its registered Converters and ConverterFactories to carry out type conversion logic.
 			</para>
 			<para>
 				Two ConversionService implementations are provided with the system in the <filename>core.convert.support</filename> package.
@@ -870,7 +911,7 @@ public class MyService {
 	<section id="ui.format">
 		<title>Spring 3 UI Field Formatting</title>
 		<para>
-			The <filename>core.convert</filename> is a simple, general-purpose type conversion system.
+			<filename>core.convert</filename> is a simple, general-purpose type conversion system.
 			It addresses <emphasis>one-way</emphasis> conversion from one type to another, and is not limited to just converting Strings.
 			As discussed in the previous section, a Spring Container can be configured to use this system when binding bean property values.
 			In addition, the Spring Expression Language (SpEL) uses this system to coerce Expression values.
@@ -953,7 +994,7 @@ public final class DateFormatter implements Formatter<Date> {
 			</programlisting>
 			<para>
 				The Spring team welcomes community-driven Formatter contributions; see <ulink url="http://jira.springframework.org">http://jira.springframework.org</ulink> to contribute.
-				In particular, the team expects to integrate support for Joda Time and Money Formatters in the future.
+				In particular, the team hopes to integrate support for Joda Time and Money Formatters in the future.
 			</para>
 		</section>
 		<section id="ui-format-Formatted-Annotation">
@@ -1036,7 +1077,7 @@ public class MyModel {
 			<programlisting language="java"><![CDATA[
 public interface FormatterRegistry {
 
-    void add(Class<?> type, Formatter<?> targetFormatter);
+    void add(Formatter<?> formatter);
 
     void add(AnnotationFormatterFactory<?, ?> factory);			
 }]]>
@@ -1099,11 +1140,14 @@ public interface FormatterRegistry {
 				To apply a Formatter to a single field, create an @InitBinder callback on your @Controller, then call binder.registerFormatter(String, Formatter):
 			</para>
 			<programlisting language="java"><![CDATA[
-    public class MyControler {
+    @Controller
+    public class MyController {
+    
         @InitBinder
         public void initBinder(WebDataBinder binder) {
             binder.registerFormatter("myFieldName", new MyCustomFieldFormatter());
         }
+        
         ...
     }
 ]]>
