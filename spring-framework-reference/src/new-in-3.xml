@@ -186,6 +186,10 @@
       </listitem>
 
       <listitem>
+        <para>General-purpose type conversion system and UI field formatting system</para>
+      </listitem>
+
+      <listitem>
         <para>Object to XML mapping functionality (OXM) moved from Spring Web
         Services project</para>
       </listitem>
@@ -377,6 +381,18 @@ public class AppConfig {
         linkend="beans-factorybeans-annotations">Defining bean metadata within
         components</link> for more information</para>
       </section>
+    </section>
+
+    <section id="new-feature-convert-and-format">
+      <title>General purpose type conversion system and UI field formatting system</title>
+      <para>
+		A general purpose <link linked="core.convert">type conversion system</link> has been introduced.
+		The system is currently used by SpEL for type coersion, and may also be used by a Spring Container when binding bean property values.
+	  </para>
+	  <para>
+		In addition, a <link linked="ui.format">ui.format</link> system has been introduced for formatting UI field values.
+		This system provides a simpler and more robust alternative to JavaBean PropertyEditors in UI environments such as Spring MVC.
+	  </para>
     </section>
 
     <section id="new-feature-oxm">
