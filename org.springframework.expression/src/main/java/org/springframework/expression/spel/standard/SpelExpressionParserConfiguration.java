@@ -31,6 +31,10 @@ public interface SpelExpressionParserConfiguration {
 	 */
 	static final int CreateObjectIfAttemptToReferenceNull = 0x0001;
 	
+	/**
+	 * This option allows collections to grow if an attempt is made to index an element beyond the current size.  Rather than fail the
+	 * collection is populated with elements up to the specified index.
+	 */
 	static final int GrowListsOnIndexBeyondSize   = 0x0002;
 	
 }

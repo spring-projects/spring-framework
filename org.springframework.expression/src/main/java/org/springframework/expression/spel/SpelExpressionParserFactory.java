@@ -28,4 +28,12 @@ public class SpelExpressionParserFactory {
 		return new SpelExpressionParser();
 	}
 	
+	/**
+	 * @param configuration configuration bit flags @see SpelExpressionParserConfiguration
+	 * @return an expression parser instance configured appropriately
+	 */
+	public static ExpressionParser getParser(int configuration) {
+		return new SpelExpressionParser(configuration);
+	}
+	
 }
