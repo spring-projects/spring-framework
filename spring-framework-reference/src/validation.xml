@@ -917,7 +917,7 @@ public class MyService {
 	<section id="ui.format">
 		<title>Spring 3 UI Field Formatting</title>
 		<para>
-			<filename>core.convert</filename> is a simple, general-purpose type conversion system.
+			<link linkend="core.convert"><filename>core.convert</filename></link> is a simple, general-purpose type conversion system.
 			It addresses <emphasis>one-way</emphasis> conversion from one type to another, and is not limited to just converting Strings.
 			As discussed in the previous section, a Spring Container can be configured to use this system when binding bean property values.
 			In addition, the Spring Expression Language (SpEL) uses this system to coerce Expression values.
