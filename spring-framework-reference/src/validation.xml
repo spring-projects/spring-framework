@@ -765,7 +765,9 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 package org.springframework.core.converter;
     
 public interface Converter<S, T> {
-    T convert(S source) throws Exception;        
+
+    T convert(S source) throws Exception;    
+        
 }]]>
 			</programlisting>
 			<para>
@@ -785,9 +787,11 @@ public interface Converter<S, T> {
 package org.springframework.core.convert.converters;
     
 public class StringToInteger implements Converter<String, Integer> {
+
     public Integer convert(String source) {
         return Integer.valueOf(source);
     }
+    
 }]]>
 			</programlisting>
 		</section>
@@ -800,7 +804,9 @@ public class StringToInteger implements Converter<String, Integer> {
 package org.springframework.core.converter;
     
 public interface ConverterFactory<S, R> {
-    <T extends R> Converter<S, T> getConverter(Class<T> targetType);        
+
+    <T extends R> Converter<S, T> getConverter(Class<T> targetType);  
+          
 }]]>
 			</programlisting>
 			<para>
@@ -938,9 +944,11 @@ package org.springframework.ui.format;
 import java.text.ParseException;
 
 public interface Formatter<T> {
+
     String format(T object, Locale locale);
 	
     T parse(String formatted, Locale locale) throws ParseException;
+    
 }]]>
 			</programlisting>
 			<para>
@@ -1026,7 +1034,9 @@ public class Money {
 package org.springframework.ui.format;
 
 public interface AnnotationFormatterFactory<A extends Annotation, T> {
-    Formatter<T> getFormatter(A annotation);	
+
+    Formatter<T> getFormatter(A annotation);
+
 }			
 ]]>
 			</programlisting>
@@ -1079,7 +1089,8 @@ public interface FormatterRegistry {
 
     void add(Formatter<?> formatter);
 
-    void add(AnnotationFormatterFactory<?, ?> factory);			
+    void add(AnnotationFormatterFactory<?, ?> factory);
+    
 }]]>
 			</programlisting>
 			<para>
