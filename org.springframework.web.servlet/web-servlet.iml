@@ -16,7 +16,9 @@
     <orderEntry type="module" module-name="context" />
     <orderEntry type="module" module-name="context-support" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="orm" />
     <orderEntry type="module" module-name="oxm" />
+    <orderEntry type="module" module-name="transaction" />
     <orderEntry type="module" module-name="web" />
     <orderEntry type="library" name="Commons Logging" level="project" />
     <orderEntry type="library" name="EasyMock" level="project" />
@@ -325,6 +327,24 @@
         <SOURCES>
           <root url="jar://$IVY_CACHE$/org.mozilla.javascript/com.springsource.org.mozilla.javascript/1.7.0.R2/com.springsource.org.mozilla.javascript-sources-1.7.0.R2.jar!/" />
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-3.3.1.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
       </library>
     </orderEntry>
   </component>
