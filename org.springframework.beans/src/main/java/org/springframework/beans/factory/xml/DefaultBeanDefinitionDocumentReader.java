@@ -35,7 +35,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
-import org.springframework.util.xml.DomUtils;
 
 /**
  * Default implementation of the {@link BeanDefinitionDocumentReader} interface.
@@ -121,13 +120,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
-		if (delegate.isDefaultNamespace(root.getNamespaceURI())) {
+		if (delegate.isDefaultNamespace(delegate.getNamespaceURI(root))) {
 			NodeList nl = root.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
 				if (node instanceof Element) {
 					Element ele = (Element) node;
-					String namespaceUri = ele.getNamespaceURI();
+					String namespaceUri = delegate.getNamespaceURI(ele);
 					if (delegate.isDefaultNamespace(namespaceUri)) {
 						parseDefaultElement(ele, delegate);
 					}
@@ -143,13 +142,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
-		if (DomUtils.nodeNameEquals(ele, IMPORT_ELEMENT)) {
+		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
-		else if (DomUtils.nodeNameEquals(ele, ALIAS_ELEMENT)) {
+		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
 			processAliasRegistration(ele);
 		}
-		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
+		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			processBeanDefinition(ele, delegate);
 		}
 	}
