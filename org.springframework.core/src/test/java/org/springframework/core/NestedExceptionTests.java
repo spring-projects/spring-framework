@@ -19,8 +19,6 @@ package org.springframework.core;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
-import javax.servlet.ServletException;
-
 import junit.framework.TestCase;
 import junit.framework.Assert;
 
@@ -49,7 +47,7 @@ public class NestedExceptionTests extends TestCase {
 	public void testNestedRuntimeExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMesg = "this is the obscure message of the root cause";
-		ServletException rootCause = new ServletException(rootCauseMesg);
+		Exception rootCause = new Exception(rootCauseMesg);
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedRuntimeException nex = new NestedRuntimeException(myMessage, rootCause) {};
 		Assert.assertEquals(nex.getCause(), rootCause);
@@ -85,7 +83,7 @@ public class NestedExceptionTests extends TestCase {
 	public void testNestedCheckedExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMesg = "this is the obscure message of the root cause";
-		ServletException rootCause = new ServletException(rootCauseMesg);
+		Exception rootCause = new Exception(rootCauseMesg);
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedCheckedException nex = new NestedCheckedException(myMessage, rootCause) {};
 		Assert.assertEquals(nex.getCause(), rootCause);
