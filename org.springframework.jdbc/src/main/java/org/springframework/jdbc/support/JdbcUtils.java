@@ -387,7 +387,9 @@ public abstract class JdbcUtils {
 			name = "DB2";
 		}
 		else if ("Sybase SQL Server".equals(source) ||
-				"Adaptive Server Enterprise".equals(source) || "sql server".equals(source) ) {
+				"Adaptive Server Enterprise".equals(source) || 
+				"ASE".equals(source) || 
+				"sql server".equalsIgnoreCase(source) ) {
 			name = "Sybase";
 		}
 		return name;
