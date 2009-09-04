@@ -17,8 +17,7 @@
 package org.springframework.util;
 
 import java.io.IOException;
-
-import javax.servlet.ServletException;
+import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
@@ -33,7 +32,7 @@ public final class ObjectUtilsTests extends TestCase {
 
 	public void testIsCheckedException() {
 		assertTrue(ObjectUtils.isCheckedException(new Exception()));
-		assertTrue(ObjectUtils.isCheckedException(new ServletException()));
+		assertTrue(ObjectUtils.isCheckedException(new SQLException()));
 
 		assertFalse(ObjectUtils.isCheckedException(new RuntimeException()));
 		assertFalse(ObjectUtils.isCheckedException(new TaskRejectedException("")));
@@ -46,31 +45,31 @@ public final class ObjectUtilsTests extends TestCase {
 	public void testIsCompatibleWithThrowsClause() {
 		Class[] empty = new Class[0];
 		Class[] exception = new Class[] {Exception.class};
-		Class[] servletAndIO = new Class[] {ServletException.class, IOException.class};
+		Class[] sqlAndIO = new Class[] {SQLException.class, IOException.class};
 		Class[] throwable = new Class[] {Throwable.class};
 
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), null));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), empty));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), exception));
-		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), servletAndIO));
+		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), sqlAndIO));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), throwable));
 
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), null));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), empty));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), exception));
-		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), servletAndIO));
+		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), sqlAndIO));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new Exception(), throwable));
 
-		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new ServletException(), null));
-		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new ServletException(), empty));
-		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new ServletException(), exception));
-		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new ServletException(), servletAndIO));
-		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new ServletException(), throwable));
+		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), null));
+		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), empty));
+		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), exception));
+		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), sqlAndIO));
+		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new SQLException(), throwable));
 
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), null));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), empty));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), exception));
-		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), servletAndIO));
+		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), sqlAndIO));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), throwable));
 	}
 
