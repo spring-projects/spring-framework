@@ -618,7 +618,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && DomUtils.nodeNameEquals(node, META_ELEMENT)) {
+			if (node instanceof Element && nodeNameEquals(node, META_ELEMENT)) {
 				Element metaElement = (Element) node;
 				String key = metaElement.getAttribute(KEY_ATTRIBUTE);
 				String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
@@ -677,7 +677,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && DomUtils.nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
+			if (node instanceof Element && nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
 				parseConstructorArgElement((Element) node, bd);
 			}
 		}
@@ -690,7 +690,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && DomUtils.nodeNameEquals(node, PROPERTY_ELEMENT)) {
+			if (node instanceof Element && nodeNameEquals(node, PROPERTY_ELEMENT)) {
 				parsePropertyElement((Element) node, bd);
 			}
 		}
@@ -703,7 +703,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && DomUtils.nodeNameEquals(node, QUALIFIER_ELEMENT)) {
+			if (node instanceof Element && nodeNameEquals(node, QUALIFIER_ELEMENT)) {
 				parseQualifierElement((Element) node, bd);
 			}
 		}
@@ -716,7 +716,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && DomUtils.nodeNameEquals(node, LOOKUP_METHOD_ELEMENT)) {
+			if (node instanceof Element && nodeNameEquals(node, LOOKUP_METHOD_ELEMENT)) {
 				Element ele = (Element) node;
 				String methodName = ele.getAttribute(NAME_ATTRIBUTE);
 				String beanRef = ele.getAttribute(BEAN_ELEMENT);
@@ -734,7 +734,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && DomUtils.nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
+			if (node instanceof Element && nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
 				Element replacedMethodEle = (Element) node;
 				String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
 				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
@@ -852,7 +852,7 @@ public class BeanDefinitionParserDelegate {
 			NodeList nl = ele.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
-				if (node instanceof Element && DomUtils.nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
+				if (node instanceof Element && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
 					Element attributeEle = (Element) node;
 					String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
 					String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
@@ -888,8 +888,8 @@ public class BeanDefinitionParserDelegate {
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && !DomUtils.nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
-					!DomUtils.nodeNameEquals(node, META_ELEMENT)) {
+			if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
+					!nodeNameEquals(node, META_ELEMENT)) {
 				// Child element is what we're looking for.
 				if (subElement != null) {
 					error(elementName + " must not contain more than one sub-element", ele);
@@ -944,17 +944,17 @@ public class BeanDefinitionParserDelegate {
 	 * <code>&lt;value&gt;</code> tag that might be created
 	 */
 	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultValueType) {
-		if (!isDefaultNamespace(ele.getNamespaceURI())) {
+		if (!isDefaultNamespace(getNamespaceURI(ele))) {
 			return parseNestedCustomElement(ele, bd);
 		}
-		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
+		else if (nodeNameEquals(ele, BEAN_ELEMENT)) {
 			BeanDefinitionHolder nestedBd = parseBeanDefinitionElement(ele, bd);
 			if (nestedBd != null) {
 				nestedBd = decorateBeanDefinitionIfRequired(ele, nestedBd, bd);
 			}
 			return nestedBd;
 		}
-		else if (DomUtils.nodeNameEquals(ele, REF_ELEMENT)) {
+		else if (nodeNameEquals(ele, REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
 			String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			boolean toParent = false;
@@ -979,32 +979,32 @@ public class BeanDefinitionParserDelegate {
 			ref.setSource(extractSource(ele));
 			return ref;
 		}
-		else if (DomUtils.nodeNameEquals(ele, IDREF_ELEMENT)) {
+		else if (nodeNameEquals(ele, IDREF_ELEMENT)) {
 			return parseIdRefElement(ele);
 		}
-		else if (DomUtils.nodeNameEquals(ele, VALUE_ELEMENT)) {
+		else if (nodeNameEquals(ele, VALUE_ELEMENT)) {
 			return parseValueElement(ele, defaultValueType);
 		}
-		else if (DomUtils.nodeNameEquals(ele, NULL_ELEMENT)) {
+		else if (nodeNameEquals(ele, NULL_ELEMENT)) {
 			// It's a distinguished null value. Let's wrap it in a TypedStringValue
 			// object in order to preserve the source location.
 			TypedStringValue nullHolder = new TypedStringValue(null);
 			nullHolder.setSource(extractSource(ele));
 			return nullHolder;
 		}
-		else if (DomUtils.nodeNameEquals(ele, ARRAY_ELEMENT)) {
+		else if (nodeNameEquals(ele, ARRAY_ELEMENT)) {
 			return parseArrayElement(ele, bd);
 		}
-		else if (DomUtils.nodeNameEquals(ele, LIST_ELEMENT)) {
+		else if (nodeNameEquals(ele, LIST_ELEMENT)) {
 			return parseListElement(ele, bd);
 		}
-		else if (DomUtils.nodeNameEquals(ele, SET_ELEMENT)) {
+		else if (nodeNameEquals(ele, SET_ELEMENT)) {
 			return parseSetElement(ele, bd);
 		}
-		else if (DomUtils.nodeNameEquals(ele, MAP_ELEMENT)) {
+		else if (nodeNameEquals(ele, MAP_ELEMENT)) {
 			return parseMapElement(ele, bd);
 		}
-		else if (DomUtils.nodeNameEquals(ele, PROPS_ELEMENT)) {
+		else if (nodeNameEquals(ele, PROPS_ELEMENT)) {
 			return parsePropsElement(ele);
 		}
 		else {
@@ -1128,7 +1128,7 @@ public class BeanDefinitionParserDelegate {
 
 		for (int i = 0; i < elementNodes.getLength(); i++) {
 			Node node = elementNodes.item(i);
-			if (node instanceof Element && !DomUtils.nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
+			if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
 				target.add(parsePropertySubElement((Element) node, bd, defaultElementType));
 			}
 		}
@@ -1158,7 +1158,7 @@ public class BeanDefinitionParserDelegate {
 				Node node = entrySubNodes.item(j);
 				if (node instanceof Element) {
 					Element candidateEle = (Element) node;
-					if (DomUtils.nodeNameEquals(candidateEle, KEY_ELEMENT)) {
+					if (nodeNameEquals(candidateEle, KEY_ELEMENT)) {
 						if (keyEle != null) {
 							error("<entry> element is only allowed to contain one <key> sub-element", entryEle);
 						}
@@ -1318,7 +1318,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	public BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
-		String namespaceUri = ele.getNamespaceURI();
+		String namespaceUri = getNamespaceURI(ele);
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
@@ -1357,7 +1357,7 @@ public class BeanDefinitionParserDelegate {
 	private BeanDefinitionHolder decorateIfRequired(
 			Node node, BeanDefinitionHolder originalDef, BeanDefinition containingBd) {
 
-		String namespaceUri = node.getNamespaceURI();
+		String namespaceUri = getNamespaceURI(node);
 		if (!isDefaultNamespace(namespaceUri)) {
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 			if (handler != null) {
@@ -1396,4 +1396,25 @@ public class BeanDefinitionParserDelegate {
 		return new BeanDefinitionHolder(innerDefinition, id);
 	}
 
+	/**
+	 * Gets the namespace URI for the supplied node. The default implementation uses {@link Node#getNamespaceURI}.
+	 * Subclasses may override the default implementation to provide a different namespace identification mechanism.
+	 * @param node the node
+	 * @return the namespace URI of the the node.
+	 */
+	public String getNamespaceURI(Node node) {
+		return node.getNamespaceURI();
+	}
+
+	/**
+	 * Determines whether the name of the supplied node is equal to the supplied name.
+	 * The default implementation delegates to {@link DomUtils#nodeNameEquals}.
+	 * Subclasses may override the default implementatino to provide a different mechanism for comparing node names.
+	 * @param node the node to compare
+	 * @param desiredName the name to check for
+	 * @return <code>true</code> if the names are equal otherwise <code>false</code>.
+	 */
+	public boolean nodeNameEquals(Node node, String desiredName) {
+		return DomUtils.nodeNameEquals(node, desiredName);
+	}
 }
