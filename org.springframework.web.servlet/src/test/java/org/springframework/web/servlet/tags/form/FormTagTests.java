@@ -253,6 +253,16 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(inputOutput, "type", "hidden");
 	}
 
+	public void testClearAttributesOnFinally() throws Exception {
+		this.tag.setModelAttribute("model");
+		getPageContext().setAttribute("model", "foo bar");
+		assertNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+		this.tag.doStartTag();
+		assertNotNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+		this.tag.doFinally();
+		assertNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+	}
+
 	private String getFormTag(String output) {
 		int inputStart = output.indexOf("<", 1);
 		int inputEnd = output.lastIndexOf(">", output.length() - 2);

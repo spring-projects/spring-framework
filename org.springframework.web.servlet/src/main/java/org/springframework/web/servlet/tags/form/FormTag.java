@@ -423,6 +423,15 @@ public class FormTag extends AbstractHtmlElementTag {
 	@Override
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
+		return EVAL_PAGE;
+	}
+
+	/**
+	 * Clears the stored {@link TagWriter}.
+	 */
+	@Override
+	public void doFinally() {
+		super.doFinally();
 		this.pageContext.removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		this.pageContext.removeAttribute(COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (this.previousNestedPath != null) {
@@ -433,15 +442,6 @@ public class FormTag extends AbstractHtmlElementTag {
 			// Remove exposed nestedPath value.
 			this.pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
-		return EVAL_PAGE;
-	}
-
-	/**
-	 * Clears the stored {@link TagWriter}.
-	 */
-	@Override
-	public void doFinally() {
-		super.doFinally();
 		this.tagWriter = null;
 		this.previousNestedPath = null;
 	}
