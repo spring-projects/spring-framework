@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import java.util.HashMap;
@@ -36,7 +37,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParserConfigur
  * communicate state. This is in contrast to the EvaluationContext, which is shared amongst expression evaluations, and
  * any changes to it will be seen by other expressions or any code that chooses to ask questions of the context.
  * 
- * It also acts as a place for to define common utility routines that the various Ast nodes might need.
+ * <p>It also acts as a place for to define common utility routines that the various Ast nodes might need.
  * 
  * @author Andy Clement
  * @since 3.0
@@ -75,7 +76,8 @@ public class ExpressionState {
 			TypedValue rootObject = this.relatedContext.getRootObject();
 			if (rootObject == null) {
 				return TypedValue.NULL_TYPED_VALUE;
-			} else {
+			}
+			else {
 				return rootObject;
 			}
 		}
@@ -94,7 +96,8 @@ public class ExpressionState {
 		TypedValue root = this.relatedContext.getRootObject();
 		if (root == null) {
 			return TypedValue.NULL_TYPED_VALUE;
-		} else {
+		}
+		else {
 			return root;
 		}
 	}
@@ -105,10 +108,11 @@ public class ExpressionState {
 
 	public TypedValue lookupVariable(String name) {
 		Object value = this.relatedContext.lookupVariable(name);
-		if (value==null) {
+		if (value == null) {
 			return TypedValue.NULL_TYPED_VALUE;
-		} else {
-			return new TypedValue(value,TypeDescriptor.forObject(value));
+		}
+		else {
+			return new TypedValue(value, TypeDescriptor.forObject(value));
 		}
 	}
 

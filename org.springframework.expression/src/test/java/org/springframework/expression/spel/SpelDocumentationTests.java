@@ -48,8 +48,6 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 
 	static Inventor tesla ;
 	static Inventor pupin ;
-
-	
 	
 	static {
 		GregorianCalendar c = new GregorianCalendar();
@@ -115,7 +113,7 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression exp = parser.parseExpression("name");
 
-		EvaluationContext context = new StandardEvaluationContext();
+		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setRootObject(tesla);
 
 		String name = (String) exp.getValue(context);
@@ -124,10 +122,9 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 	
 	@Test
 	public void testEqualityCheck() throws Exception {
-
 		ExpressionParser parser = new SpelExpressionParser();
 	
-		EvaluationContext context = new StandardEvaluationContext();
+		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setRootObject(tesla);
 
 		Expression exp = parser.parseExpression("name == 'Nikola Tesla'");

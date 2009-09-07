@@ -47,8 +47,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private TypedValue rootObject;
 
-	private final Map<String, Object> variables = new HashMap<String, Object>();
-
 	private final List<ConstructorResolver> constructorResolvers = new ArrayList<ConstructorResolver>();
 
 	private final List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
@@ -57,11 +55,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private TypeLocator typeLocator = new StandardTypeLocator();
 
-	private TypeComparator typeComparator = new StandardTypeComparator();
-
 	private TypeConverter typeConverter = new StandardTypeConverter();
 
+	private TypeComparator typeComparator = new StandardTypeComparator();
+
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
+
+	private final Map<String, Object> variables = new HashMap<String, Object>();
+
 
 	public StandardEvaluationContext() {
 		this.methodResolvers.add(new ReflectiveMethodResolver());
@@ -74,32 +75,17 @@ public class StandardEvaluationContext implements EvaluationContext {
 		setRootObject(rootObject);
 	}
 
+
 	public void setRootObject(Object rootObject) {
-		this.rootObject = new TypedValue(rootObject,TypeDescriptor.forObject(rootObject));
+		this.rootObject = new TypedValue(rootObject, TypeDescriptor.forObject(rootObject));
 	}
 
 	public void setRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
-		this.rootObject = new TypedValue(rootObject,typeDescriptor);
+		this.rootObject = new TypedValue(rootObject, typeDescriptor);
 	}
 
 	public TypedValue getRootObject() {
 		return this.rootObject;
-	}
-
-	public void setVariable(String name, Object value) {
-		this.variables.put(name, value);
-	}
-	
-	public void setVariables(Map<String,Object> variables) {
-		this.variables.putAll(variables);
-	}
-
-	public void registerFunction(String name, Method method) {
-		this.variables.put(name, method);
-	}
-
-	public Object lookupVariable(String name) {
-		return this.variables.get(name);
 	}
 
 	public void addConstructorResolver(ConstructorResolver resolver) {
@@ -135,15 +121,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return this.typeLocator;
 	}
 
-	public void setTypeComparator(TypeComparator typeComparator) {
-		Assert.notNull(typeComparator, "TypeComparator must not be null");
-		this.typeComparator = typeComparator;
-	}
-
-	public TypeComparator getTypeComparator() {
-		return this.typeComparator;
-	}
-
 	public void setTypeConverter(TypeConverter typeConverter) {
 		Assert.notNull(typeConverter, "TypeConverter must not be null");
 		this.typeConverter = typeConverter;
@@ -153,6 +130,15 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return this.typeConverter;
 	}
 
+	public void setTypeComparator(TypeComparator typeComparator) {
+		Assert.notNull(typeComparator, "TypeComparator must not be null");
+		this.typeComparator = typeComparator;
+	}
+
+	public TypeComparator getTypeComparator() {
+		return this.typeComparator;
+	}
+
 	public void setOperatorOverloader(OperatorOverloader operatorOverloader) {
 		Assert.notNull(operatorOverloader, "OperatorOverloader must not be null");
 		this.operatorOverloader = operatorOverloader;
@@ -160,6 +146,22 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public OperatorOverloader getOperatorOverloader() {
 		return this.operatorOverloader;
+	}
+
+	public void setVariable(String name, Object value) {
+		this.variables.put(name, value);
+	}
+
+	public void setVariables(Map<String,Object> variables) {
+		this.variables.putAll(variables);
+	}
+
+	public void registerFunction(String name, Method method) {
+		this.variables.put(name, method);
+	}
+
+	public Object lookupVariable(String name) {
+		return this.variables.get(name);
 	}
 
 }
