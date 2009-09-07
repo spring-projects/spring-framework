@@ -27,18 +27,18 @@ import org.springframework.util.Assert;
  */
 public class BeanExpressionContext {
 
-	private final BeanFactory beanFactory;
+	private final ConfigurableBeanFactory beanFactory;
 
 	private final Scope scope;
 
 
-	public BeanExpressionContext(BeanFactory beanFactory, Scope scope) {
+	public BeanExpressionContext(ConfigurableBeanFactory beanFactory, Scope scope) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
 		this.scope = scope;
 	}
 
-	public final BeanFactory getBeanFactory() {
+	public final ConfigurableBeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
 
