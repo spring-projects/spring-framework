@@ -521,8 +521,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			rootDir = rootDirResource.getFile().getAbsoluteFile();
 		}
 		catch (IOException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cannot search for matching files underneath " + rootDirResource +
+			if (logger.isWarnEnabled()) {
+				logger.warn("Cannot search for matching files underneath " + rootDirResource +
 						" because it does not correspond to a directory in the file system", ex);
 			}
 			return Collections.emptySet();
@@ -563,7 +563,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	protected Set<File> retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
 		if (!rootDir.isDirectory()) {
-			throw new IllegalArgumentException("Resource path [" + rootDir + "] does not denote a directory");
+			throw new IllegalStateException(
+					"Resource path [" + rootDir.getAbsolutePath() + "] does not denote a directory");
+		}
+		if (!rootDir.canRead()) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Cannot search for matching files underneath directory [" + rootDir.getAbsolutePath() +
+						"] because the application is not allowed to read the directory");
+			}
+			return Collections.emptySet();
 		}
 		String fullPattern = StringUtils.replace(rootDir.getAbsolutePath(), File.separator, "/");
 		if (!pattern.startsWith("/")) {
@@ -591,12 +599,23 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		File[] dirContents = dir.listFiles();
 		if (dirContents == null) {
-			throw new IOException("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
+			}
+			return;
 		}
 		for (File content : dirContents) {
 			String currPath = StringUtils.replace(content.getAbsolutePath(), File.separator, "/");
 			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {
-				doRetrieveMatchingFiles(fullPattern, content, result);
+				if (!content.canRead()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Skipping subdirectory [" + dir.getAbsolutePath() +
+								"] because the application is not allowed to read the directory");
+					}
+				}
+				else {
+					doRetrieveMatchingFiles(fullPattern, content, result);
+				}
 			}
 			if (getPathMatcher().match(fullPattern, currPath)) {
 				result.add(content);
