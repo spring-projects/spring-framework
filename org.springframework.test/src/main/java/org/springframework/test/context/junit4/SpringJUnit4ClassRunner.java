@@ -45,6 +45,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestClassCall
 import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * <p>
@@ -307,11 +308,30 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 		Statement statement = methodInvoker(frameworkMethod, testInstance);
 		statement = possiblyExpectingExceptions(frameworkMethod, testInstance, statement);
+		statement = withRulesReflectively(frameworkMethod, testInstance, statement);
 		statement = withBefores(frameworkMethod, testInstance, statement);
 		statement = withAfters(frameworkMethod, testInstance, statement);
 		statement = withPotentialRepeat(frameworkMethod, testInstance, statement);
 		statement = withPotentialTimeout(frameworkMethod, testInstance, statement);
 
+		return statement;
+	}
+
+	/**
+	 * Invokes JUnit 4.7's private <code>withRules()</code> method using
+	 * reflection. This is necessary for backwards compatibility with the JUnit
+	 * 4.5 and 4.6 implementations of {@link BlockJUnit4ClassRunner}.
+	 */
+	private Statement withRulesReflectively(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
+		Method withRulesMethod = ReflectionUtils.findMethod(getClass(), "withRules", FrameworkMethod.class,
+			Object.class, Statement.class);
+		if (withRulesMethod != null) {
+			// Original JUnit 4.7 code:
+			// statement = withRules(frameworkMethod, testInstance, statement);
+			ReflectionUtils.makeAccessible(withRulesMethod);
+			statement = (Statement) ReflectionUtils.invokeMethod(withRulesMethod, this, frameworkMethod, testInstance,
+				statement);
+		}
 		return statement;
 	}
 
