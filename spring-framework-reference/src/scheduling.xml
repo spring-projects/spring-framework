@@ -3,7 +3,7 @@
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 
 <chapter id="scheduling">
-    <title>Asynchronous Execution, Scheduling, and Thread Pooling</title>
+    <title>Task Execution and Scheduling</title>
 	<section id="scheduling-introduction">
 		<title>Introduction</title>
 		<para>
@@ -479,9 +479,9 @@ public class TaskExecutorExample {
 			enumeration of values available for the 'rejection-policy' attribute on
 			the 'executor' element.</para>
 			<programlisting language="xml"><![CDATA[<task:executor id="executorWithCallerRunsPolicy"
-	               size="5-25"
-	               queue-capacity="100"
-	               rejection-policy="CALLER_RUNS"/>]]></programlisting>
+               size="5-25"
+               queue-capacity="100"
+               rejection-policy="CALLER_RUNS"/>]]></programlisting>
 		</section>
 
 		<section id="scheduling-task-namespace-scheduled-tasks">
@@ -496,10 +496,10 @@ public class TaskExecutorExample {
 			the name of a method to be invoked on that object. Here is a simple
 			example.</para>
 			<programlisting language="xml"><![CDATA[<task:scheduled-tasks scheduler="myScheduler">
-	    <task:scheduled ref="someObject" method="someMethod" fixed-delay="5000"/>
-	<task:scheduled-tasks/>
+    <task:scheduled ref="someObject" method="someMethod" fixed-delay="5000"/>
+<task:scheduled-tasks/>
 
-	<task:scheduler id="myScheduler" size="10"/>]]></programlisting>
+<task:scheduler id="myScheduler" size="10"/>]]></programlisting>
 
 			<para>As you can see, the scheduler is referenced by the outer element,
 			and each individual task includes the configuration of its trigger
@@ -508,15 +508,109 @@ public class TaskExecutorExample {
 			"fixed-rate", or for more control, a "cron" attribute could be provided
 			instead. Here's an example featuring these other options.</para>
 			<programlisting language="xml"><![CDATA[<task:scheduled-tasks scheduler="myScheduler">
-	    <task:scheduled ref="someObject" method="someMethod" fixed-rate="5000"/>
-	    <task:scheduled ref="anotherObject" method="anotherMethod" cron="*/5 * * * * MON-FRI"/>
-	<task:scheduled-tasks/>
+    <task:scheduled ref="someObject" method="someMethod" fixed-rate="5000"/>
+    <task:scheduled ref="anotherObject" method="anotherMethod" cron="*/5 * * * * MON-FRI"/>
+<task:scheduled-tasks/>
 
-	<task:scheduler id="myScheduler" size="10"/>]]></programlisting>
+<task:scheduler id="myScheduler" size="10"/>]]></programlisting>
 		</section>
 	</section>
 
-<section id="scheduling-quartz">
+	<section id="scheduling-annotation-support">
+		<title>Annotation Support for Scheduling and Asynchronous Execution</title>
+
+		<para>Spring 3.0 also adds annotation support for both task scheduling
+		and asynchronous method execution.</para>
+
+		<section id="scheduling-annotation-support-scheduled">
+			<title>The @Scheduled Annotation</title>
+
+			<para>The @Scheduled annotation can be added to a method along with 
+			trigger metadata. For example, the following method would be invoked
+			every 5 seconds with a fixed delay, meaning that the period will be
+			measured from the completion time of each preceding invocation.</para>
+			<programlisting language="java"><![CDATA[@Scheduled(fixedDelay=5000)
+public void doSomething() {
+    // something that should execute periodically
+}]]></programlisting>
+			<para>If a fixed rate execution is desired, simply change the property
+			name specified within the annotation. The following would be executed
+			every 5 seconds measured between the successive start times of each
+			invocation.</para>
+			<programlisting language="java"><![CDATA[@Scheduled(fixedRate=5000)
+public void doSomething() {
+    // something that should execute periodically
+}]]></programlisting>
+			<para>If simple periodic scheduling is not expressive enough, then a
+			cron expression may be provided. For example, the following will only
+			execute on weekdays.</para>
+			<programlisting language="java"><![CDATA[@Scheduled(cron="*/5 * * * * MON-FRI")
+public void doSomething() {
+    // something that should execute on weekdays only
+}]]></programlisting>
+			<para>Notice that the methods to be scheduled must have void returns
+			and must not expect any arguments. If the method needs to interact with
+			other objects from the Application Context, then those would typically
+			have been provided through dependency injection.</para>
+		</section>
+
+		<section id="scheduling-annotation-support-async">
+			<title>The @Async Annotation</title>
+
+			<para>The @Async annotation can be provided on a method so that
+			invocation of that method will occur asynchronously. In other words,
+			the caller will return immediately upon invocation and the actual
+			execution of the method will occur in a task that has been submitted to
+			a Spring TaskExecutor. In the simplest case, the annotation may be
+			applied to a void-returning method.</para>
+
+			<programlisting language="java"><![CDATA[@Async
+void doSomething() {
+    // this will be executed asynchronously
+}]]></programlisting>
+
+			<para>Unlike the methods annotated with the @Scheduled annotation,
+			these methods can expect arguments, because they will be invoked
+			in the "normal" way by callers at runtime rather than from a
+			scheduled task being managed by the container. For example, the
+			following is a legitimate application of the @Async annotation.
+			</para>
+			<programlisting language="java"><![CDATA[@Async
+void doSomething(String s) {
+    // this will be executed asynchronously
+}]]></programlisting>
+
+			<para>Even methods that return a value can be invoked asynchronously.
+			However, such methods are required to have a Future typed return value.
+			This still provides the benefit of asynchronous execution so that the
+			caller can perform other tasks prior to calling 'get()' on that Future.
+			</para>
+			<programlisting language="java"><![CDATA[@Async
+Future<String> returnSomething(int i) {
+    // this will be executed asynchronously
+}]]></programlisting>
+		</section>
+
+		<section id="scheduling-annotation-support-namespace">
+			<title>The &lt;annotation-driven&gt; Element</title>
+
+			<para>To enable both @Scheduled and @Async annotations, simply
+			include the 'annotation-driven' element from the task namespace in
+			your configuration.</para>
+			<programlisting language="xml"><![CDATA[<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
+
+<task:executor id="myExecutor" size="5"/>
+
+<task:scheduler id="myScheduler" size="10"/>}]]></programlisting>
+
+			<para>Notice that an executor reference is provided for handling
+			those tasks that correspond to methods with the @Async annotation,
+			and the scheduler reference is provided for managing those methods
+			annotated with @Scheduled.</para>
+		</section>
+	</section>
+
+	<section id="scheduling-quartz">
 		<title>Using the OpenSymphony Quartz Scheduler</title>
 		<para>Quartz uses <classname>Trigger</classname>, <classname>Job</classname> and 
 		<classname>JobDetail</classname> objects to realize scheduling of all kinds of jobs.
