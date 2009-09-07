@@ -19,6 +19,7 @@ Import-Template:
  javax.management.*;version="0";resolution:=optional,
  javax.naming.*;version="0";resolution:=optional,
  javax.persistence.*;version="[1.0.0, 3.0.0)";resolution:=optional,
+ javax.validation.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  javax.rmi.*;version="0";resolution:=optional,
  javax.xml.*;version="0";resolution:=optional,
  net.sf.cglib.*;version="[2.1.3, 2.2.0)";resolution:=optional,

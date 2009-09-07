@@ -40,8 +40,8 @@
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.1.2" conf="test->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="test->compile"/>
 		<dependency org="javax.xml.rpc" name="com.springsource.javax.xml.rpc" rev="1.1.0" conf="test->compile"/>
-		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.1.3" conf="test->compile"/>
-		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.6.0" conf="test->compile"/>
+		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.2.0" conf="test->compile"/>
+		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.6.2" conf="test->compile"/>
 		<dependency org="net.sourceforge.jasperreports" name="com.springsource.net.sf.jasperreports" rev="2.0.5" conf="test->compile"/>
 		<dependency org="net.sourceforge.jexcelapi" name="com.springsource.jxl" rev="2.6.6" conf="test->compile"/>
 		<dependency org="org.antlr" name="com.springsource.org.antlr" rev="3.0.1" conf="test->compile"/>

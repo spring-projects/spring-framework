@@ -347,6 +347,28 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/javax.validation/com.springsource.javax.validation/1.0.0.CR3/com.springsource.javax.validation-1.0.0.CR3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/javax.validation/com.springsource.javax.validation/1.0.0.CR3/com.springsource.javax.validation-sources-1.0.0.CR3.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.0.0.Beta2/com.springsource.org.hibernate.validator-4.0.0.Beta2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.0.0.Beta2/com.springsource.org.hibernate.validator-sources-4.0.0.Beta2.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
   <component name="copyright">
     <Base>
