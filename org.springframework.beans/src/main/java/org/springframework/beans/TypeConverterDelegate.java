@@ -165,13 +165,17 @@ class TypeConverterDelegate {
 
 		// No custom editor but custom ConversionService specified?
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
-		if (editor == null && conversionService != null && convertedValue != null &&
-				conversionService.canConvert(convertedValue.getClass(), requiredType)) {
+		if (editor == null && conversionService != null && convertedValue != null) {
+			TypeDescriptor typeDesc;
 			if (methodParam != null) {
-				return (T) conversionService.convert(convertedValue, new TypeDescriptor(methodParam));
+				typeDesc = (descriptor != null ?
+						new BeanTypeDescriptor(methodParam, descriptor) : new TypeDescriptor(methodParam));
 			}
 			else {
-				return conversionService.convert(convertedValue, requiredType);
+				typeDesc = TypeDescriptor.valueOf(requiredType);
+			}
+			if (conversionService.canConvert(convertedValue.getClass(), typeDesc)) {
+				return (T) conversionService.convert(convertedValue, typeDesc);
 			}
 		}
 
@@ -353,21 +357,26 @@ class TypeConverterDelegate {
 			convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
 		}
 
-		if (editor != null && convertedValue instanceof String) {
-			// Use PropertyEditor's setAsText in case of a String value.
-			if (logger.isTraceEnabled()) {
-				logger.trace("Converting String to [" + requiredType + "] using property editor [" + editor + "]");
-			}
-			String newTextValue = (String) convertedValue;
-			if (sharedEditor) {
-				// Synchronized access to shared editor instance.
-				synchronized (editor) {
+		if (convertedValue instanceof String) {
+			if (editor != null) {
+				// Use PropertyEditor's setAsText in case of a String value.
+				if (logger.isTraceEnabled()) {
+					logger.trace("Converting String to [" + requiredType + "] using property editor [" + editor + "]");
+				}
+				String newTextValue = (String) convertedValue;
+				if (sharedEditor) {
+					// Synchronized access to shared editor instance.
+					synchronized (editor) {
+						return doConvertTextValue(oldValue, newTextValue, editor);
+					}
+				}
+				else {
+					// Unsynchronized access to non-shared editor instance.
 					return doConvertTextValue(oldValue, newTextValue, editor);
 				}
 			}
-			else {
-				// Unsynchronized access to non-shared editor instance.
-				return doConvertTextValue(oldValue, newTextValue, editor);
+			else if (String.class.equals(requiredType)) {
+				returnValue = convertedValue;
 			}
 		}
 

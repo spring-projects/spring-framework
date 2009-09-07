@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.springframework.ui.format.Formatter;
 
@@ -33,11 +34,15 @@ import org.springframework.ui.format.Formatter;
  * @since 3.0
  * @see SimpleDateFormat 
  */
-public final class DateFormatter implements Formatter<Date> {
+public class DateFormatter implements Formatter<Date> {
 
 	private String pattern;
 
 	private int style = DateFormat.DEFAULT;
+
+	private TimeZone timeZone;
+
+	private boolean lenient = false;
 
 
 	/**
@@ -75,6 +80,22 @@ public final class DateFormatter implements Formatter<Date> {
 		this.style = style;
 	}
 
+	/**
+	 * Set the TimeZone to normalize the date values into, if any.
+	 */
+	public void setTimeZone(TimeZone timeZone) {
+		this.timeZone = timeZone;
+	}
+
+	/**
+	 * Specify whether or not parsing is to be lenient. Default is false.
+	 * <p>With lenient parsing, the parser may allow inputs that do not precisely match the format.
+	 * With strict parsing, inputs must match the format exactly.
+	 */
+	public void setLenient(boolean lenient) {
+		this.lenient = lenient;
+	}
+
 
 	public String format(Date date, Locale locale) {
 		if (date == null) {
@@ -99,7 +120,10 @@ public final class DateFormatter implements Formatter<Date> {
 		else {
 			dateFormat = DateFormat.getDateInstance(this.style, locale);
 		}
-		dateFormat.setLenient(false);
+		if (this.timeZone != null) {
+			dateFormat.setTimeZone(this.timeZone);
+		}
+		dateFormat.setLenient(this.lenient);
 		return dateFormat;
 	}
 

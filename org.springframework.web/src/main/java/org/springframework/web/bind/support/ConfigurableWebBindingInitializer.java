@@ -20,6 +20,7 @@ import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.ui.format.FormatterRegistry;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.WebRequest;
 
@@ -42,6 +43,8 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	private MessageCodesResolver messageCodesResolver;
 
 	private BindingErrorProcessor bindingErrorProcessor;
+
+	private Validator validator;
 
 	private FormatterRegistry formatterRegistry;
 
@@ -94,6 +97,20 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	}
 
 	/**
+	 * Set the Validator to apply after each binding step.
+	 */
+	public final void setValidator(Validator validator) {
+		this.validator = validator;
+	}
+
+	/**
+	 * Return the Validator to apply after each binding step, if any.
+	 */
+	public final Validator getValidator() {
+		return this.validator;
+	}
+
+	/**
 	 * Specify a FormatterRegistry which will apply to every DataBinder.
 	 */
 	public final void setFormatterRegistry(FormatterRegistry formatterRegistry) {
@@ -138,6 +155,10 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 		}
 		if (this.bindingErrorProcessor != null) {
 			binder.setBindingErrorProcessor(this.bindingErrorProcessor);
+		}
+		if (this.validator != null && binder.getTarget() != null &&
+				this.validator.supports(binder.getTarget().getClass())) {
+			binder.setValidator(this.validator);
 		}
 		if (this.formatterRegistry != null) {
 			binder.setFormatterRegistry(this.formatterRegistry);

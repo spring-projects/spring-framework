@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToBigDecimal implements Converter<String, BigDecimal> {
+class StringToBigDecimal implements Converter<String, BigDecimal> {
 
 	public BigDecimal convert(String source) {
 		return NumberUtils.parseNumber(source, BigDecimal.class);

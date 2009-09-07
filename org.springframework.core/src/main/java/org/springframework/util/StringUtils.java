@@ -356,7 +356,7 @@ public abstract class StringUtils {
 		}
 		int count = 0;
 		int pos = 0;
-		int idx = 0;
+		int idx;
 		while ((idx = str.indexOf(sub, pos)) != -1) {
 			++count;
 			pos = idx + sub.length();
@@ -997,7 +997,7 @@ public abstract class StringUtils {
 		}
 		else {
 			int pos = 0;
-			int delPos = 0;
+			int delPos;
 			while ((delPos = str.indexOf(delimiter, pos)) != -1) {
 				result.add(deleteAny(str.substring(pos, delPos), charsToDelete));
 				pos = delPos + delimiter.length();
@@ -1089,6 +1089,9 @@ public abstract class StringUtils {
 	public static String arrayToDelimitedString(Object[] arr, String delim) {
 		if (ObjectUtils.isEmpty(arr)) {
 			return "";
+		}
+		if (arr.length == 1) {
+			return ObjectUtils.nullSafeToString(arr[0]);
 		}
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < arr.length; i++) {

@@ -34,7 +34,7 @@ import org.springframework.util.NumberUtils;
  * @see java.math.BigDecimal
  * @see NumberUtils
  */
-public class NumberToCharacter implements Converter<Number, Character> {
+class NumberToCharacter implements Converter<Number, Character> {
 
 	public Character convert(Number source) {
 		return (char) source.shortValue();

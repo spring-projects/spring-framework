@@ -25,7 +25,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToInteger implements Converter<String, Integer> {
+class StringToInteger implements Converter<String, Integer> {
 
 	public Integer convert(String source) {
 		return NumberUtils.parseNumber(source, Integer.class);

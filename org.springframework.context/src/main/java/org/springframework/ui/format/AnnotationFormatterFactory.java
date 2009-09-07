@@ -27,8 +27,8 @@ import java.lang.annotation.Annotation;
  *
  * @author Keith Donald
  * @since 3.0 
- * @param <A> The type of Annotation this factory uses to create Formatter instances
- * @param <T> The type of Object Formatters created by this factory format
+ * @param <A> the type of Annotation this factory uses to create Formatter instances
+ * @param <T> the type of object that the factory's Formatters are dealing with
  */
 public interface AnnotationFormatterFactory<A extends Annotation, T> {
 	

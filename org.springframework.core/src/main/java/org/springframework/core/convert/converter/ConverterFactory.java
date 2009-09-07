@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.converter;
 
 /**
@@ -25,7 +26,7 @@ package org.springframework.core.convert.converter;
  * for example {@link Number} for a set of number subtypes.
  */
 public interface ConverterFactory<S, R> {
-	
+
 	/**
 	 * Get the converter to convert from S to target type T, where T is also an instance of R.
 	 * @param <T> the target type

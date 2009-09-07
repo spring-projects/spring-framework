@@ -25,7 +25,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToByte implements Converter<String, Byte> {
+class StringToByte implements Converter<String, Byte> {
 
 	public Byte convert(String source) {
 		return NumberUtils.parseNumber(source, Byte.class);

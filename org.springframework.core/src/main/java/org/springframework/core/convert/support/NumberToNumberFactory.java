@@ -38,7 +38,7 @@ import org.springframework.util.NumberUtils;
  * @see java.math.BigDecimal
  * @see NumberUtils
  */
-public class NumberToNumberFactory implements ConverterFactory<Number, Number> {
+class NumberToNumberFactory implements ConverterFactory<Number, Number> {
 
 	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
 		return new NumberToNumber<T>(targetType);

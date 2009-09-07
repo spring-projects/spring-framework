@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.StringUtils;
 
 /**
  * Converts a comma-delimited string to an array.
@@ -27,15 +28,18 @@ import org.springframework.core.convert.TypeDescriptor;
 @SuppressWarnings("unchecked")
 class StringToArray implements ConversionExecutor {
 
-	private ArrayToArray converter;
+	private final ArrayToArray converter;
 	
-	public StringToArray(TypeDescriptor sourceType, TypeDescriptor targetType, GenericConversionService conversionService) {
-		converter = new ArrayToArray(TypeDescriptor.valueOf(String[].class), targetType, conversionService);
+
+	public StringToArray(TypeDescriptor targetType, GenericConversionService conversionService) {
+		this.converter = new ArrayToArray(TypeDescriptor.valueOf(String[].class), targetType, conversionService);
 	}
 	
+
 	public Object execute(Object source) {
-		String string = (String) source;
-		String[] fields = string.split(",");
-		return converter.execute(fields);
+		String str = (String) source;
+		String[] fields = StringUtils.commaDelimitedListToStringArray(str);
+		return this.converter.execute(fields);
 	}
+
 }
