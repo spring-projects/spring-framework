@@ -278,11 +278,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	// Typical methods for creating and populating external bean instances
 	//-------------------------------------------------------------------------
 
-	public Object createBean(Class beanClass) throws BeansException {
+	@SuppressWarnings("unchecked")
+	public <T> T createBean(Class<T> beanClass) throws BeansException {
 		// Use prototype bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass);
 		bd.setScope(SCOPE_PROTOTYPE);
-		return createBean(beanClass.getName(), bd, null);
+		return (T) createBean(beanClass.getName(), bd, null);
 	}
 
 	public void autowireBean(Object existingBean) {
@@ -338,7 +339,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return autowireConstructor(beanClass.getName(), bd, null, null).getWrappedInstance();
 		}
 		else {
-			Object bean = null;
+			Object bean;
 			final BeanFactory parent = this;
 			
 			if (System.getSecurityManager() != null) {
@@ -419,38 +420,38 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object createBean(final String beanName, final RootBeanDefinition mbd, final Object[] args)
 			throws BeanCreationException {
 
-				if (logger.isDebugEnabled()) {
-					logger.debug("Creating instance of bean '" + beanName + "'");
-				}
-				// Make sure bean class is actually resolved at this point.
-				resolveBeanClass(mbd, beanName);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating instance of bean '" + beanName + "'");
+		}
+		// Make sure bean class is actually resolved at this point.
+		resolveBeanClass(mbd, beanName);
 
-				// Prepare method overrides.
-				try {
-					mbd.prepareMethodOverrides();
-				}
-				catch (BeanDefinitionValidationException ex) {
-					throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
-							beanName, "Validation of method overrides failed", ex);
-				}
+		// Prepare method overrides.
+		try {
+			mbd.prepareMethodOverrides();
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
+					beanName, "Validation of method overrides failed", ex);
+		}
 
-				try {
-					// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-					Object bean = resolveBeforeInstantiation(beanName, mbd);
-					if (bean != null) {
-						return bean;
-					}
-				}
-				catch (Throwable ex) {
-					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-							"BeanPostProcessor before instantiation of bean failed", ex);
-				}
+		try {
+			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			Object bean = resolveBeforeInstantiation(beanName, mbd);
+			if (bean != null) {
+				return bean;
+			}
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+					"BeanPostProcessor before instantiation of bean failed", ex);
+		}
 
-				Object beanInstance = doCreateBean(beanName, mbd, args);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Finished creating instance of bean '" + beanName + "'");
-				}
-				return beanInstance;
+		Object beanInstance = doCreateBean(beanName, mbd, args);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Finished creating instance of bean '" + beanName + "'");
+		}
+		return beanInstance;
 	}
 
 	/**
@@ -917,7 +918,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected BeanWrapper instantiateBean(final String beanName, final RootBeanDefinition mbd) {
 		try {
-			Object beanInstance = null;
+			Object beanInstance;
 			final BeanFactory parent = this;
 			if (System.getSecurityManager() != null) {
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
@@ -1467,10 +1468,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Called by invokeInitMethods.
 	 * <p>Can be overridden in subclasses for custom resolution of init
 	 * methods with arguments.
-	 * @param beanName the bean name in the factory (for debugging purposes)
-	 * @param bean the new bean instance we may need to initialize
-	 * @param initMethodName the name of the custom init method
-	 * @param enforceInitMethod indicates whether the defined init method needs to exist
 	 * @see #invokeInitMethods
 	 */
 	protected void invokeCustomInitMethod(String beanName, final Object bean, RootBeanDefinition mbd) throws Throwable {

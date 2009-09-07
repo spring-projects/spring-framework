@@ -121,7 +121,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
 	 */
-	Object createBean(Class beanClass) throws BeansException;
+	<T> T createBean(Class<T> beanClass) throws BeansException;
 
 	/**
 	 * Populate the given bean instance through applying after-instantiation callbacks
