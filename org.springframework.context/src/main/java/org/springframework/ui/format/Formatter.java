@@ -27,7 +27,7 @@ import java.util.Locale;
  * @param <T> the type of object this formatter can format
  */
 public interface Formatter<T> {
-	
+
 	/**
 	 * Format the object of type T for display.
 	 * @param object the object to format
@@ -35,13 +35,15 @@ public interface Formatter<T> {
 	 * @return the formatted display string
 	 */
 	String format(T object, Locale locale);
-	
+
 	/**
 	 * Parse an object from its formatted representation.
 	 * @param formatted a formatted representation
 	 * @param locale the user's locale
 	 * @return the parsed object
 	 * @throws ParseException when a parse exception occurs
+	 * @throws RuntimeException when thrown by coercion methods that are
+	 *
 	 */
 	T parse(String formatted, Locale locale) throws ParseException;
 

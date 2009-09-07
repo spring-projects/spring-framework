@@ -42,7 +42,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void executeConversion() {
-		converter.add(new StringToInteger());
+		converter.addConverter(new StringToInteger());
 		assertEquals(new Integer(3), converter.convert("3", Integer.class));
 	}
 
@@ -68,7 +68,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void addConverterNoSourceTargetClassInfoAvailable() {
 		try {
-			converter.add(new Converter() {
+			converter.addConverter(new Converter() {
 				public Object convert(Object source) throws Exception {
 					return source;
 				}
@@ -97,7 +97,7 @@ public class GenericConversionServiceTests {
 	
 	@Test
 	public void convertWrongTypeArgument() {
-		converter.add(new StringToInteger());
+		converter.addConverter(new StringToInteger());
 		try {
 			converter.convert("BOGUS", Integer.class);
 			fail("Should have failed");
@@ -108,7 +108,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertSuperSourceType() {
-		converter.add(new Converter<CharSequence, Integer>() {
+		converter.addConverter(new Converter<CharSequence, Integer>() {
 			public Integer convert(CharSequence source) throws Exception {
 				return Integer.valueOf(source.toString());
 			}
@@ -119,14 +119,14 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertObjectToPrimitive() {
-		converter.add(new StringToInteger());
+		converter.addConverter(new StringToInteger());
 		Integer three = converter.convert("3", int.class);
 		assertEquals(3, three.intValue());
 	}
 
 	@Test
 	public void convertArrayToArray() {
-		converter.add(new StringToInteger());
+		converter.addConverter(new StringToInteger());
 		Integer[] result = converter.convert(new String[] { "1", "2", "3" }, Integer[].class);
 		assertEquals(new Integer(1), result[0]);
 		assertEquals(new Integer(2), result[1]);
@@ -135,7 +135,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertArrayToPrimitiveArray() {
-		converter.add(new StringToInteger());
+		converter.addConverter(new StringToInteger());
 		int[] result = converter.convert(new String[] { "1", "2", "3" }, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
@@ -154,7 +154,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertArrayToListGenericTypeConversion() throws Exception {
-		converter.add(new StringToInteger());
+		converter.addConverter(new StringToInteger());
 		List<Integer> result = (List<Integer>) converter.convert(new String[] { "1", "2", "3" }, new TypeDescriptor(getClass().getDeclaredField("genericList")));
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
@@ -192,7 +192,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertListToArrayWithComponentConversion() {
-		converter.add(new StringToInteger());
+		converter.addConverter(new StringToInteger());
 		List<String> list = new ArrayList<String>();
 		list.add("1");
 		list.add("2");
@@ -210,8 +210,8 @@ public class GenericConversionServiceTests {
 		Map<String, String> foo = new HashMap<String, String>();
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
-		converter.add(new StringToInteger());
-		converter.add(new StringToEnumFactory().getConverter(FooEnum.class));
+		converter.addConverter(new StringToInteger());
+		converter.addConverter(new StringToEnumFactory().getConverter(FooEnum.class));
 		Map<String, FooEnum> map = (Map<String, FooEnum>) converter.convert(foo, new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(map.get(1), FooEnum.BAR);
 		assertEquals(map.get(2), FooEnum.BAZ);
@@ -228,7 +228,7 @@ public class GenericConversionServiceTests {
 	
 	@Test
 	public void convertStringToArrayWithElementConversion() {
-		converter.add(new StringToInteger());		
+		converter.addConverter(new StringToInteger());		
 		Integer[] result = converter.convert("1,2,3", Integer[].class);
 		assertEquals(3, result.length);
 		assertEquals(new Integer(1), result[0]);

@@ -832,7 +832,7 @@ public final class DefaultListableBeanFactoryTests {
 	public void testCustomConverter() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		DefaultConversionService conversionService = new DefaultConversionService();
-		conversionService.add(new Converter<String, Float>() {
+		conversionService.addConverter(new Converter<String, Float>() {
 			public Float convert(String source) throws Exception {
 				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 				return nf.parse(source).floatValue();

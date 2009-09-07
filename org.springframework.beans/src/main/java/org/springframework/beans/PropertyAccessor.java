@@ -89,7 +89,8 @@ public interface PropertyAccessor {
 	Class getPropertyType(String propertyName) throws BeansException;
 
 	/**
-	 * Return a type descriptor for the specified property.
+	 * Return a type descriptor for the specified property:
+	 * preferably from the read method, falling back to the write method.
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,

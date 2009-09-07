@@ -26,7 +26,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Keith Donald
  * @since 3.0
  */
-public class ObjectToString implements Converter<Object, String> {
+class ObjectToString implements Converter<Object, String> {
 
 	public String convert(Object source) {
 		return source.toString();

@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.converter.Converter;
 
 /**
- * Converts String to a Boolean..
+ * Converts String to a Boolean.
  *
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToBoolean implements Converter<String, Boolean> {
+class StringToBoolean implements Converter<String, Boolean> {
 
 	public Boolean convert(String source) {
 		if (source.equals("true")) {

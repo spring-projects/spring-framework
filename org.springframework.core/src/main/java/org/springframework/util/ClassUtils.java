@@ -776,7 +776,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return the original class, or a primitive wrapper for the original primitive type
 	 */
-	public static Class resolvePrimitiveIfNecessary(Class clazz) {
+	public static Class<?> resolvePrimitiveIfNecessary(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isPrimitive() ? primitiveTypeToWrapperMap.get(clazz) : clazz);
 	}

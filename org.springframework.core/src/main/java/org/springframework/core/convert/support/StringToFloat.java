@@ -25,7 +25,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToFloat implements Converter<String, Float> {
+class StringToFloat implements Converter<String, Float> {
 
 	public Float convert(String source) {
 		return NumberUtils.parseNumber(source, Float.class);

@@ -25,7 +25,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToLong implements Converter<String, Long> {
+class StringToLong implements Converter<String, Long> {
 
 	public Long convert(String source) {
 		return NumberUtils.parseNumber(source, Long.class);

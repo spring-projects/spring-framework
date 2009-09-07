@@ -24,14 +24,14 @@ package org.springframework.core.convert.converter;
 public interface ConverterRegistry {
 	
 	/**
-	 * Add a converter to this registry.
+	 * Add a plain converter to this registry.
 	 */
-	void add(Converter<?, ?> converter);
+	void addConverter(Converter<?, ?> converter);
 
 	/**
-	 * Add a converter factory to this registry.
+	 * Add a factory-created converter to this registry.
 	 */
-	void add(ConverterFactory<?, ?> converterFactory);
+	void addConverter(ConverterFactory<?, ?> converterFactory);
 
 	/**
 	 * Remove the conversion logic from the sourceType to the targetType.

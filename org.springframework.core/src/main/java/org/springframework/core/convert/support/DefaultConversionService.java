@@ -21,6 +21,7 @@ package org.springframework.core.convert.support;
  * converters for a number of standard Java types like Class, Number, Boolean and so on.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class DefaultConversionService extends GenericConversionService {
@@ -29,22 +30,22 @@ public class DefaultConversionService extends GenericConversionService {
 	 * Create a new default conversion service, installing the default converters.
 	 */
 	public DefaultConversionService() {
-		add(new StringToByte());
-		add(new StringToBoolean());
-		add(new StringToCharacter());
-		add(new StringToShort());
-		add(new StringToInteger());
-		add(new StringToLong());
-		add(new StringToFloat());
-		add(new StringToDouble());
-		add(new StringToBigInteger());
-		add(new StringToBigDecimal());
-		add(new StringToLocale());
-		add(new NumberToCharacter());
-		add(new ObjectToString());
-		add(new StringToEnumFactory());
-		add(new NumberToNumberFactory());
-		add(new CharacterToNumberFactory());
+		addConverter(new StringToByte());
+		addConverter(new StringToBoolean());
+		addConverter(new StringToCharacter());
+		addConverter(new StringToShort());
+		addConverter(new StringToInteger());
+		addConverter(new StringToLong());
+		addConverter(new StringToFloat());
+		addConverter(new StringToDouble());
+		addConverter(new StringToBigInteger());
+		addConverter(new StringToBigDecimal());
+		addConverter(new StringToLocale());
+		addConverter(new NumberToCharacter());
+		addConverter(new ObjectToString());
+		addConverter(new StringToEnumFactory());
+		addConverter(new NumberToNumberFactory());
+		addConverter(new CharacterToNumberFactory());
 	}
 
 }

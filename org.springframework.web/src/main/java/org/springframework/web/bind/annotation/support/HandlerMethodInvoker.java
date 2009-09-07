@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Conventions;
@@ -172,6 +173,7 @@ public class HandlerMethodInvoker {
 			String attrName = null;
 			boolean required = false;
 			String defaultValue = null;
+			boolean validate = false;
 			int found = 0;
 			Annotation[] paramAnns = methodParam.getParameterAnnotations();
 
@@ -210,6 +212,9 @@ public class HandlerMethodInvoker {
 					ModelAttribute attr = (ModelAttribute) paramAnn;
 					attrName = attr.value();
 					found++;
+				}
+				else if ("Valid".equals(paramAnn.annotationType().getSimpleName())) {
+					validate = true;
 				}
 			}
 
@@ -260,10 +265,10 @@ public class HandlerMethodInvoker {
 				args[i] = resolvePathVariable(pathVarName, methodParam, webRequest, handler);
 			}
 			else if (attrName != null) {
-				WebDataBinder binder = resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
+				WebRequestDataBinder binder = resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
 				boolean assignBindingResult = (args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 				if (binder.getTarget() != null) {
-					doBind(webRequest, binder, !assignBindingResult);
+					doBind(binder, webRequest, validate, !assignBindingResult);
 				}
 				args[i] = binder.getTarget();
 				if (assignBindingResult) {
@@ -401,7 +406,7 @@ public class HandlerMethodInvoker {
 			}
 			paramValue = checkValue(paramName, paramValue, paramType);
 		}
-		WebDataBinder binder = createBinder(webRequest, null, paramName);
+		WebRequestDataBinder binder = new WebRequestDataBinder(null, paramName);
 		initBinder(handlerForInitBinderCall, paramName, binder, webRequest);
 		return binder.convertIfNecessary(paramValue, paramType, methodParam);
 	}
@@ -428,7 +433,7 @@ public class HandlerMethodInvoker {
 			}
 			headerValue = checkValue(headerName, headerValue, paramType);
 		}
-		WebDataBinder binder = createBinder(webRequest, null, headerName);
+		WebRequestDataBinder binder = new WebRequestDataBinder(null, headerName);
 		initBinder(handlerForInitBinderCall, headerName, binder, webRequest);
 		return binder.convertIfNecessary(headerValue, paramType, methodParam);
 	}
@@ -495,7 +500,7 @@ public class HandlerMethodInvoker {
 			}
 			cookieValue = checkValue(cookieName, cookieValue, paramType);
 		}
-		WebDataBinder binder = createBinder(webRequest, null, cookieName);
+		WebRequestDataBinder binder = new WebRequestDataBinder(null, cookieName);
 		initBinder(handlerForInitBinderCall, cookieName, binder, webRequest);
 		return binder.convertIfNecessary(cookieValue, paramType, methodParam);
 	}
@@ -518,7 +523,7 @@ public class HandlerMethodInvoker {
 			pathVarName = getRequiredParameterName(methodParam);
 		}
 		String pathVarValue = resolvePathVariable(pathVarName, paramType, webRequest);
-		WebDataBinder binder = createBinder(webRequest, null, pathVarName);
+		WebRequestDataBinder binder = new WebRequestDataBinder(null, pathVarName);
 		initBinder(handlerForInitBinderCall, pathVarName, binder, webRequest);
 		return binder.convertIfNecessary(pathVarValue, paramType, methodParam);
 	}
@@ -557,7 +562,7 @@ public class HandlerMethodInvoker {
 		return value;
 	}
 
-	private WebDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
+	private WebRequestDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
 			ExtendedModelMap implicitModel, NativeWebRequest webRequest, Object handler)
 			throws Exception {
 
@@ -580,7 +585,7 @@ public class HandlerMethodInvoker {
 		else {
 			bindObject = BeanUtils.instantiateClass(paramType);
 		}
-		WebDataBinder binder = createBinder(webRequest, bindObject, name);
+		WebRequestDataBinder binder = new WebRequestDataBinder(bindObject, name);
 		initBinder(handler, name, binder, webRequest);
 		return binder;
 	}
@@ -609,7 +614,7 @@ public class HandlerMethodInvoker {
 					(isSessionAttr || isBindingCandidate(attrValue))) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
 				if (mavModel != null && !model.containsKey(bindingResultKey)) {
-					WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
+					WebRequestDataBinder binder = new WebRequestDataBinder(attrValue, attrName);
 					initBinder(handler, attrName, binder, webRequest);
 					mavModel.put(bindingResultKey, binder.getBindingResult());
 				}
@@ -653,15 +658,15 @@ public class HandlerMethodInvoker {
 		throw new IllegalStateException(message);
 	}
 
-	protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
-		return new WebRequestDataBinder(target, objectName);
-	}
+	protected void doBind(WebRequestDataBinder binder, NativeWebRequest webRequest, boolean validate, boolean failOnErrors)
+			throws Exception {
 
-	protected void doBind(NativeWebRequest webRequest, WebDataBinder binder, boolean failOnErrors) throws Exception {
-		WebRequestDataBinder requestBinder = (WebRequestDataBinder) binder;
-		requestBinder.bind(webRequest);
+		binder.bind(webRequest);
+		if (validate) {
+			binder.validate();
+		}
 		if (failOnErrors) {
-			requestBinder.closeNoCatch();
+			binder.closeNoCatch();
 		}
 	}
 

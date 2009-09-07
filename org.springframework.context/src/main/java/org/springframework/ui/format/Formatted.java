@@ -36,6 +36,6 @@ public @interface Formatted {
 	/**
 	 * The Formatter that handles the formatting for the annotated element.
 	 */
-	Class<?> value();
+	Class<? extends Formatter> value();
 
 }

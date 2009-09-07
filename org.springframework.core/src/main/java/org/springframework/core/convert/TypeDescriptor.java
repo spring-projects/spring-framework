@@ -37,7 +37,10 @@ import org.springframework.util.ClassUtils;
  */
 public class TypeDescriptor {
 
-	public final static TypeDescriptor NULL = new TypeDescriptor((Class<?>) null);
+	/**
+	 * Constant defining an 'empty' TypeDescriptor.
+	 */
+	public static final TypeDescriptor NULL = new TypeDescriptor();
 
 
 	private Class<?> type;
@@ -50,17 +53,20 @@ public class TypeDescriptor {
 
 
 	/**
-	 * Creates a new descriptor for the given type.
-	 * Use this constructor when a conversion point comes from a source such as a Map or collection, where no additional context is available.
-	 * @param type the actual type
+	 * Create a new descriptor for the given type.
+	 * <p>Use this constructor when a conversion point comes from a source such as a Map
+	 * or Collection, where no additional context is available.
+	 * @param type the actual type to wrap
 	 */
 	public TypeDescriptor(Class<?> type) {
+		Assert.notNull(type, "Type must not be null");
 		this.type = type;
 	}
 
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
-	 * Use this constructor when a target conversion point originates from a method parameter, such as a setter method argument.
+	 * <p>Use this constructor when a target conversion point originates from a method parameter,
+	 * such as a setter method argument.
 	 * @param methodParameter the MethodParameter to wrap
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
@@ -76,6 +82,12 @@ public class TypeDescriptor {
 	public TypeDescriptor(Field field) {
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
+	}
+
+	/**
+	 * Internal constructor for a NULL descriptor.
+	 */
+	private TypeDescriptor() {
 	}
 
 
@@ -212,7 +224,7 @@ public class TypeDescriptor {
 	public Annotation[] getAnnotations() {
 		if (this.field != null) {
 			if (this.cachedFieldAnnotations == null) {
-				this.cachedFieldAnnotations = field.getAnnotations();
+				this.cachedFieldAnnotations = this.field.getAnnotations();
 			}
 			return this.cachedFieldAnnotations;
 		}
@@ -317,7 +329,7 @@ public class TypeDescriptor {
 	 */
 	public static TypeDescriptor valueOf(Class type) {
 		// TODO needs a cache for common type descriptors
-		return new TypeDescriptor(type);
+		return (type != null ? new TypeDescriptor(type) : NULL);
 	}
 
 	/**

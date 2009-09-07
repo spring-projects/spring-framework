@@ -42,6 +42,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -73,12 +75,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.ui.format.support.GenericFormatterRegistry;
 import org.springframework.ui.format.date.DateFormatter;
+import org.springframework.ui.format.support.GenericFormatterRegistry;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -433,13 +436,13 @@ public class ServletAnnotationControllerTests {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller",
-						new RootBeanDefinition(MyCommandProvidingFormController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyCommandProvidingFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition registryDef = new RootBeanDefinition(GenericFormatterRegistry.class);
 				registryDef.getPropertyValues().addPropertyValue("formatters", new DateFormatter("yyyy-MM-dd"));
 				RootBeanDefinition initializerDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 				initializerDef.getPropertyValues().addPropertyValue("formatterRegistry", registryDef);
+				initializerDef.getPropertyValues().addPropertyValue("validator", new RootBeanDefinition(LocalValidatorFactoryBean.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", initializerDef);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
@@ -469,8 +472,7 @@ public class ServletAnnotationControllerTests {
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
-				adapterDef.getPropertyValues()
-						.addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
+				adapterDef.getPropertyValues().addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -1227,6 +1229,20 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	public static class ValidTestBean extends TestBean {
+
+		@NotNull
+		private String validCountry;
+
+		public void setValidCountry(String validCountry) {
+			this.validCountry = validCountry;
+		}
+
+		public String getValidCountry() {
+			return this.validCountry;
+		}
+	}
+
 	@Controller
 	public static class MyModelFormController {
 
@@ -1253,16 +1269,20 @@ public class ServletAnnotationControllerTests {
 
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(@RequestParam T defaultName,
-				Map<String, Object> model,
-				@RequestParam Date date) {
+		private ValidTestBean createTestBean(@RequestParam T defaultName,
+				Map<String, Object> model, @RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
-			return new TestBean(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
+			ValidTestBean tb = new ValidTestBean();
+			tb.setName(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
+			return tb;
 		}
 
 		@Override
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand") @Valid TestBean tb, BindingResult errors, ModelMap model) {
+			if (!errors.hasFieldErrors("validCountry")) {
+				throw new IllegalStateException("Declarative validation not applied");
+			}
 			return super.myHandle(tb, errors, model);
 		}
 
@@ -1306,6 +1326,9 @@ public class ServletAnnotationControllerTests {
 		@InitBinder
 		private void initBinder(WebDataBinder binder) {
 			binder.initBeanPropertyAccess();
+			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
+			vf.afterPropertiesSet();
+			binder.setValidator(vf);
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
@@ -1319,6 +1342,9 @@ public class ServletAnnotationControllerTests {
 		@SuppressWarnings("unused")
 		@InitBinder({"myCommand", "date"})
 		private void initBinder(WebDataBinder binder, String date, @RequestParam("date") String[] date2) {
+			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
+			vf.afterPropertiesSet();
+			binder.setValidator(vf);
 			assertEquals("2007-10-02", date);
 			assertEquals(1, date2.length);
 			assertEquals("2007-10-02", date2[0]);
@@ -1331,6 +1357,9 @@ public class ServletAnnotationControllerTests {
 	private static class MyWebBindingInitializer implements WebBindingInitializer {
 
 		public void initBinder(WebDataBinder binder, WebRequest request) {
+			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
+			vf.afterPropertiesSet();
+			binder.setValidator(vf);
 			assertNotNull(request.getLocale());
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
@@ -1496,8 +1525,8 @@ public class ServletAnnotationControllerTests {
 					if (tb == null) {
 						tb = (TestBean) model.get("myCommand");
 					}
-					if (tb.getName().endsWith("myDefaultName")) {
-						assertTrue(tb.getDate().getYear() == 107);
+					if (tb.getName() != null && tb.getName().endsWith("myDefaultName")) {
+						assertEquals(107, tb.getDate().getYear());
 					}
 					Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
 					if (errors == null) {
@@ -1701,11 +1730,8 @@ public class ServletAnnotationControllerTests {
 
 	public static class MyModelAndViewResolver implements ModelAndViewResolver {
 
-		public ModelAndView resolveModelAndView(Method handlerMethod,
-				Class handlerType,
-				Object returnValue,
-				ExtendedModelMap implicitModel,
-				NativeWebRequest webRequest) {
+		public ModelAndView resolveModelAndView(Method handlerMethod, Class handlerType,
+				Object returnValue, ExtendedModelMap implicitModel, NativeWebRequest webRequest) {
 			if (returnValue instanceof MySpecialArg) {
 				return new ModelAndView(new View() {
 					public String getContentType() {
@@ -1736,7 +1762,6 @@ public class ServletAnnotationControllerTests {
 		public void param(@RequestParam("myParam") int myParam, Writer writer) throws IOException {
 			writer.write("myParam-" + myParam);
 		}
-
 	}
 
 	@Controller
@@ -1757,7 +1782,6 @@ public class ServletAnnotationControllerTests {
 			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
 			writer.write("test-" + date.getYear());
 		}
-
 	}
 
 }

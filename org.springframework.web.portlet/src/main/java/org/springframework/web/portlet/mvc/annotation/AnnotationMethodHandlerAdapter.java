@@ -54,7 +54,6 @@ import javax.servlet.http.Cookie;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.StylerUtils;
@@ -66,7 +65,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,7 +81,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
-import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -335,26 +332,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		return mav;
 	}
 
-
-	/**
-	 * Template method for creating a new PortletRequestDataBinder instance.
-	 * <p>The default implementation creates a standard PortletRequestDataBinder.
-	 * This can be overridden for custom PortletRequestDataBinder subclasses.
-	 * @param request current portlet request
-	 * @param target the target object to bind onto (or <code>null</code>
-	 * if the binder is just used to convert a plain parameter value)
-	 * @param objectName the objectName of the target object
-	 * @return the PortletRequestDataBinder instance to use
-	 * @throws Exception in case of invalid state or arguments
-	 * @see PortletRequestDataBinder#bind(javax.portlet.PortletRequest)
-	 * @see PortletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
-	 */
-	protected PortletRequestDataBinder createBinder(
-			PortletRequest request, Object target, String objectName) throws Exception {
-
-		return new PortletRequestDataBinder(target, objectName);
-	}
-
 	/**
 	 * Build a HandlerMethodResolver for the given handler type.
 	 */
@@ -577,25 +554,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		@Override
 		protected void raiseSessionRequiredException(String message) throws Exception {
 			throw new PortletSessionRequiredException(message);
-		}
-
-		@Override
-		protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
-				throws Exception {
-
-			return AnnotationMethodHandlerAdapter.this.createBinder(
-					(PortletRequest) webRequest.getNativeRequest(), target, objectName);
-		}
-
-		@Override
-		protected void doBind(NativeWebRequest webRequest, WebDataBinder binder, boolean failOnErrors)
-				throws Exception {
-
-			PortletRequestDataBinder servletBinder = (PortletRequestDataBinder) binder;
-			servletBinder.bind((PortletRequest) webRequest.getNativeRequest());
-			if (failOnErrors) {
-				servletBinder.closeNoCatch();
-			}
 		}
 
 		@Override

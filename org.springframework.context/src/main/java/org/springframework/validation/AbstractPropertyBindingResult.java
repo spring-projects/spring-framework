@@ -106,11 +106,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	@Override
 	protected Object formatFieldValue(String field, Object value) {
 		String fixedField = fixedField(field);
-		TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
-		Formatter<Object> formatter = (this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-		if (formatter != null) {
-			return formatter.format(value, LocaleContextHolder.getLocale());
-		}
+		// Try custom editor...
 		PropertyEditor customEditor = getCustomEditor(fixedField);
 		if (customEditor != null) {
 			customEditor.setValue(value);
@@ -121,6 +117,13 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 				return textValue;
 			}
 		}
+		// Try custom formatter...
+		TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
+		Formatter<Object> formatter = (this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
+		if (formatter != null) {
+			return formatter.format(value, LocaleContextHolder.getLocale());
+		}
+		// Nothing found: return value as-is.
 		return value;
 	}
 
@@ -144,14 +147,18 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	public PropertyEditor findEditor(String field, Class valueType) {
-		TypeDescriptor td = (valueType != null ? TypeDescriptor.valueOf(valueType) :
-				getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)));
-		final Formatter<Object> formatter =
-				(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-		if (formatter != null) {
-			return new FormattingPropertyEditorAdapter(formatter);
+		PropertyEditor editor = super.findEditor(field, valueType);
+		if (editor == null) {
+			TypeDescriptor td = (field != null ?
+					getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) :
+					TypeDescriptor.valueOf(valueType));
+			Formatter<Object> formatter =
+					(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
+			if (formatter != null) {
+				editor = new FormattingPropertyEditorAdapter(formatter);
+			}
 		}
-		return super.findEditor(field, valueType);
+		return editor;
 	}
 
 

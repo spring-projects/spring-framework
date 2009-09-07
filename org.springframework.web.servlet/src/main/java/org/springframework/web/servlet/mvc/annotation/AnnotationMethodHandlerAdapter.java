@@ -47,7 +47,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
@@ -74,8 +73,6 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -374,25 +371,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 	/**
-	 * Template method for creating a new ServletRequestDataBinder instance.
-	 * <p>The default implementation creates a standard ServletRequestDataBinder.
-	 * This can be overridden for custom ServletRequestDataBinder subclasses.
-	 * @param request current HTTP request
-	 * @param target the target object to bind onto (or <code>null</code>
-	 * if the binder is just used to convert a plain parameter value)
-	 * @param objectName the objectName of the target object
-	 * @return the ServletRequestDataBinder instance to use
-	 * @throws Exception in case of invalid state or arguments
-	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
-	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
-	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName)
-			throws Exception {
-
-		return new ServletRequestDataBinder(target, objectName);
-	}
-
-	/**
 	 * Build a HandlerMethodResolver for the given handler type.
 	 */
 	private ServletHandlerMethodResolver getMethodResolver(Object handler) {
@@ -615,25 +593,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		@Override
 		protected void raiseSessionRequiredException(String message) throws Exception {
 			throw new HttpSessionRequiredException(message);
-		}
-
-		@Override
-		protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
-				throws Exception {
-
-			return AnnotationMethodHandlerAdapter.this
-					.createBinder((HttpServletRequest) webRequest.getNativeRequest(), target, objectName);
-		}
-
-		@Override
-		protected void doBind(NativeWebRequest webRequest, WebDataBinder binder, boolean failOnErrors)
-				throws Exception {
-
-			ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
-			servletBinder.bind((ServletRequest) webRequest.getNativeRequest());
-			if (failOnErrors) {
-				servletBinder.closeNoCatch();
-			}
 		}
 
 		@Override

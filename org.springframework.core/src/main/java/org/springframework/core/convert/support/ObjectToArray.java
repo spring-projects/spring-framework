@@ -30,7 +30,7 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 class ObjectToArray implements ConversionExecutor {
 
-	private final TypeDescriptor targetArrayType;
+	private final Class elementType;
 
 	private final ConversionExecutor elementConverter;
 	
@@ -38,15 +38,15 @@ class ObjectToArray implements ConversionExecutor {
 	public ObjectToArray(TypeDescriptor sourceObjectType, TypeDescriptor targetArrayType,
 			GenericConversionService conversionService) {
 
-		this.targetArrayType = targetArrayType;
+		this.elementType = targetArrayType.getElementType();
 		this.elementConverter = conversionService.getConversionExecutor(
-				sourceObjectType.getType(), TypeDescriptor.valueOf(targetArrayType.getElementType()));
+				sourceObjectType.getType(), TypeDescriptor.valueOf(this.elementType));
 	}
 
 
 	public Object execute(Object source) throws ConversionFailedException {
-		Object array = Array.newInstance(targetArrayType.getElementType(), 1);
-		Object element = elementConverter.execute(source);
+		Object array = Array.newInstance(this.elementType, 1);
+		Object element = this.elementConverter.execute(source);
 		Array.set(array, 0, element);		
 		return array;
 	}

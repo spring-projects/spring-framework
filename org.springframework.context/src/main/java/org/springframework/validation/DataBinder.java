@@ -36,8 +36,8 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.ui.format.FormatterRegistry;
-import org.springframework.ui.format.support.GenericFormatterRegistry;
 import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
+import org.springframework.ui.format.support.GenericFormatterRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -134,6 +134,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	private String[] requiredFields;
 
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
+
+	private Validator validator;
 
 	private FormatterRegistry formatterRegistry;
 
@@ -444,6 +446,23 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Set the Validator to apply after each binding step.
+	 */
+	public void setValidator(Validator validator) {
+		if (validator != null && (getTarget() != null && !validator.supports(getTarget().getClass()))) {
+			throw new IllegalStateException("Invalid target for Validator [" + validator + "]: " + getTarget());
+		}
+		this.validator = validator;
+	}
+
+	/**
+	 * Return the Validator to apply after each binding step, if any.
+	 */
+	public Validator getValidator() {
+		return this.validator;
+	}
+
+	/**
 	 * Set the FormatterRegistry to use for obtaining Formatters in preference
 	 * to JavaBeans PropertyEditors.
 	 */
@@ -632,6 +651,18 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 	}
 
+
+	/**
+	 * Invoke the specified Validator, if any.
+	 * @see #setValidator(Validator)
+	 * @see #getBindingResult()
+	 */
+	public void validate() {
+		Validator validator = getValidator();
+		if (validator != null) {
+			validator.validate(getTarget(), getBindingResult());
+		}
+	}
 
 	/**
 	 * Close this DataBinder, which may result in throwing

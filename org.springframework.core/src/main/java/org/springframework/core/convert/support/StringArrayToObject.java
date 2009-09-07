@@ -18,28 +18,28 @@ package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Converts a comma-delimited string to a collection.
+ * Converts a String array to a single element.
  *
- * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-@SuppressWarnings("unchecked")
-class StringToCollection implements ConversionExecutor {
+class StringArrayToObject implements ConversionExecutor {
 
-	private final ArrayToCollection converter;
+	private final ConversionExecutor elementConverter;
 
 
-	public StringToCollection(TypeDescriptor sourceType, TypeDescriptor targetType, GenericConversionService conversionService) {
-		this.converter = new ArrayToCollection(sourceType, targetType, conversionService);
+	public StringArrayToObject(TypeDescriptor targetType, GenericConversionService conversionService) {
+		this.elementConverter = conversionService.getConversionExecutor(String.class, targetType);
 	}
 
 
 	public Object execute(Object source) throws ConversionFailedException {
-		String string = (String) source;
-		String[] fields = string.split(",");
-		return this.converter.execute(fields);
+		String str = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(source));
+		return this.elementConverter.execute(str);
 	}
 
 }

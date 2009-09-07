@@ -1,9 +1,21 @@
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.ui.format;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -13,14 +25,20 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Locale;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
 import org.springframework.ui.format.support.GenericFormatterRegistry;
 
+/**
+ * @author Keith Donald
+ * @author Juergen Hoeller
+ */
 public class GenericFormatterRegistryTests {
 
 	private GenericFormatterRegistry registry;
@@ -32,8 +50,8 @@ public class GenericFormatterRegistryTests {
 
 	@Test
 	public void testAdd() throws ParseException {
-		registry.add(new IntegerFormatter());
-		Formatter formatter = registry.getFormatter(typeDescriptor(Integer.class));
+		registry.addFormatterByType(new IntegerFormatter());
+		Formatter formatter = registry.getFormatter(Integer.class);
 		String formatted = formatter.format(new Integer(3), Locale.US);
 		assertEquals("3", formatted);
 		Integer i = (Integer) formatter.parse("3", Locale.US);
@@ -42,23 +60,38 @@ public class GenericFormatterRegistryTests {
 
 	@Test
 	public void testAddByObjectType() {
-		registry.add(BigInteger.class, new IntegerFormatter());
-		Formatter formatter = registry.getFormatter(typeDescriptor(BigInteger.class));
+		registry.addFormatterByType(BigInteger.class, new IntegerFormatter());
+		Formatter formatter = registry.getFormatter(BigInteger.class);
 		String formatted = formatter.format(new BigInteger("3"), Locale.US);
 		assertEquals("3", formatted);
 	}
 
 	@Test
-	public void testAddAnnotationFormatterFactory() throws Exception {
-		registry.add(new CurrencyAnnotationFormatterFactory());
+	public void testAddByAnnotation() throws Exception {
+		registry.addFormatterByAnnotation(Currency.class, new CurrencyFormatter());
 		Formatter formatter = registry.getFormatter(new TypeDescriptor(getClass().getField("currencyField")));
 		String formatted = formatter.format(new BigDecimal("5.00"), Locale.US);
 		assertEquals("$5.00", formatted);
 	}
 
 	@Test
+	public void testAddAnnotationFormatterFactory() throws Exception {
+		registry.addFormatterByAnnotation(new CurrencyAnnotationFormatterFactory());
+		Formatter formatter = registry.getFormatter(new TypeDescriptor(getClass().getField("currencyField")));
+		String formatted = formatter.format(new BigDecimal("5.00"), Locale.US);
+		assertEquals("$5.00", formatted);
+	}
+
+	@Test
+	public void testGetDefaultFormatterFromMetaAnnotation() throws Exception {
+		Formatter formatter = registry.getFormatter(new TypeDescriptor(getClass().getField("smartCurrencyField")));
+		String formatted = formatter.format(new BigDecimal("5.00"), Locale.US);
+		assertEquals("$5.00", formatted);
+	}
+
+	@Test
 	public void testGetDefaultFormatterForType() {
-		Formatter formatter = registry.getFormatter(typeDescriptor(Address.class));
+		Formatter formatter = registry.getFormatter(Address.class);
 		Address address = new Address();
 		address.street = "12345 Bel Aire Estates";
 		address.city = "Palm Bay";
@@ -70,33 +103,44 @@ public class GenericFormatterRegistryTests {
 	
 	@Test
 	public void testGetNoFormatterForType() {
-		assertNull(registry.getFormatter(typeDescriptor(Integer.class)));
+		assertNull(registry.getFormatter(Integer.class));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testGetFormatterCannotConvert() {
-		registry.add(Integer.class, new AddressFormatter());
+		registry.addFormatterByType(Integer.class, new AddressFormatter());
 	}
 	
+
 	@Currency
 	public BigDecimal currencyField;
 
-	private static TypeDescriptor typeDescriptor(Class<?> clazz) {
-		return TypeDescriptor.valueOf(clazz);
+	@SmartCurrency
+	public BigDecimal smartCurrencyField;
+
+	@Target({ElementType.METHOD, ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface Currency {
 	}
 
-	public static class CurrencyAnnotationFormatterFactory implements
-			AnnotationFormatterFactory<Currency, BigDecimal> {
+	@Target({ElementType.METHOD, ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Formatted(CurrencyFormatter.class)
+	public @interface SmartCurrency {
+	}
+
+	public static class CurrencyAnnotationFormatterFactory implements AnnotationFormatterFactory<Currency, Number> {
 		
-		private CurrencyFormatter currencyFormatter = new CurrencyFormatter();
+		private final CurrencyFormatter currencyFormatter = new CurrencyFormatter();
 		
-		public Formatter<BigDecimal> getFormatter(Currency annotation) {
-			return currencyFormatter;
+		public Formatter<Number> getFormatter(Currency annotation) {
+			return this.currencyFormatter;
 		}
 	}
 	
 	@Formatted(AddressFormatter.class)
 	public static class Address {
+
 		private String street;
 		private String city;
 		private String state;
@@ -148,7 +192,7 @@ public class GenericFormatterRegistryTests {
 					.append("zip", zip).toString();
 		}
 	}
-	
+
 	public static class AddressFormatter implements Formatter<Address> {
 
 		public String format(Address address, Locale locale) {
@@ -164,14 +208,6 @@ public class GenericFormatterRegistryTests {
 			address.setZip(fields[3]);
 			return address;
 		}
-
-	}
-	
-	@Target( { ElementType.METHOD, ElementType.FIELD })
-	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
-	public @interface Currency {
-
 	}
 
 }

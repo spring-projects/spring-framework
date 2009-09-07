@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import java.math.BigInteger;
@@ -26,7 +27,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToBigInteger implements Converter<String, BigInteger> {
+class StringToBigInteger implements Converter<String, BigInteger> {
 
 	public BigInteger convert(String source) {
 		return NumberUtils.parseNumber(source, BigInteger.class);

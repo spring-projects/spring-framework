@@ -333,10 +333,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
 				if (pd.getReadMethod() != null) {
-					return new TypeDescriptor(new MethodParameter(pd.getReadMethod(), -1));
+					return new BeanTypeDescriptor(new MethodParameter(pd.getReadMethod(), -1), pd);
 				}
 				else if (pd.getWriteMethod() != null) {
-					return new TypeDescriptor(new MethodParameter(pd.getWriteMethod(), 0));
+					return new BeanTypeDescriptor(BeanUtils.getWriteMethodParameter(pd), pd);
 				}
 			}
 		}
@@ -947,7 +947,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								writeMethod.invoke(object, value);
 								return null;
 							}
-						},acc);
+						}, acc);
 					} catch (PrivilegedActionException ex) {
 						throw ex.getException();
 					}

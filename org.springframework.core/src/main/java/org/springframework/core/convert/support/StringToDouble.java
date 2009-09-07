@@ -25,7 +25,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToDouble implements Converter<String, Double> {
+class StringToDouble implements Converter<String, Double> {
 
 	public Double convert(String source) {
 		return NumberUtils.parseNumber(source, Double.class);

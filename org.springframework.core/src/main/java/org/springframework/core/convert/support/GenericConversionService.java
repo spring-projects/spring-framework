@@ -45,8 +45,8 @@ import org.springframework.util.ClassUtils;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0
- * @see #add(Converter)
- * @see #add(ConverterFactory)
+ * @see #addConverter(Converter)
+ * @see #addConverter(ConverterFactory)
  */
 public class GenericConversionService implements ConversionService, ConverterRegistry {
 
@@ -61,23 +61,23 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	/**
 	 * Registers the converters in the set provided.
-	 * JavaBean-friendly alternative to calling {@link #add(Converter)}.
-	 * @see #add(Converter)
+	 * JavaBean-friendly alternative to calling {@link #addConverter(Converter)}.
+	 * @see #addConverter(Converter)
 	 */
 	public void setConverters(Set<Converter> converters) {
 		for (Converter converter : converters) {
-			add(converter);
+			addConverter(converter);
 		}
 	}
 
 	/**
 	 * Registers the converters in the set provided.
-	 * JavaBean-friendly alternative to calling {@link #add(ConverterFactory)}.
-	 * @see #add(ConverterFactory)
+	 * JavaBean-friendly alternative to calling {@link #addConverter(ConverterFactory)}.
+	 * @see #addConverter(ConverterFactory)
 	 */
 	public void setConverterFactories(Set<ConverterFactory> converters) {
 		for (ConverterFactory converterFactory : converters) {
-			add(converterFactory);
+			addConverter(converterFactory);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	// implementing ConverterRegistry
 	
-	public void add(Converter converter) {
+	public void addConverter(Converter converter) {
 		List<Class> typeInfo = getRequiredTypeInfo(converter);
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> your Converter<S, T> converts between");
@@ -108,7 +108,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		getSourceMap(sourceType).put(targetType, converter);
 	}
 
-	public void add(ConverterFactory<?, ?> converterFactory) {
+	public void addConverter(ConverterFactory<?, ?> converterFactory) {
 		List<Class> typeInfo = getRequiredTypeInfo(converterFactory);
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> your ConverterFactory<S, T> creates Converters to convert between");
@@ -153,12 +153,12 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		else {
 			throw new ConverterNotFoundException(source.getClass(), targetType.getType(),
-					"No converter found that can convert from sourceType [" + source.getClass().getName()
-							+ "] to targetType [" + targetType.getName() + "]");
+					"No converter found that can convert from source type [" + source.getClass().getName() +
+							"] to target type [" + targetType.getName() + "]");
 		}
 	}
 
-	ConversionExecutor getConversionExecutor(Class<?> sourceClass, TypeDescriptor targetType)
+	ConversionExecutor getConversionExecutor(final Class<?> sourceClass, final TypeDescriptor targetType)
 			throws ConverterNotFoundException {
 
 		Assert.notNull(sourceClass, "The sourceType to convert from is required");
@@ -175,8 +175,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			else if (targetType.isCollection()) {
 				if (targetType.isAbstractClass()) {
 					throw new IllegalArgumentException("Conversion target class [" + targetType.getName()
-							+ "] is invalid; cannot convert to abstract collection types--"
-							+ "request an interface or concrete implementation instead");
+							+ "] is invalid; cannot convert to abstract collection types. "
+							+ "Request an interface or a concrete implementation instead!");
 				}
 				return new ArrayToCollection(sourceType, targetType, this);
 			}
@@ -190,9 +190,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				}
 			}
 			else {
-				if (targetType.getType().equals(String.class)) {
-					// array to string
-					return null;
+				if (sourceType.getElementType().equals(String.class)) {
+					return new StringArrayToObject(targetType, this);
 				}
 				else {
 					// array to object
@@ -210,14 +209,15 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			else if (targetType.isMap()) {
 				if (sourceType.getElementType().equals(String.class)) {
 					return new StringCollectionToMap(sourceType, targetType, this);
-				} else {
+				}
+				else {
 					// object collection to map
 					return null;
 				}
 			}
 			else {
 				if (targetType.getType().equals(String.class)) {
-					// collection to string;
+					// collection to string
 					return null;
 				}
 				else {
@@ -255,7 +255,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		if (targetType.isArray()) {
 			if (sourceType.getType().equals(String.class)) {
-				return new StringToArray(sourceType, targetType, this);
+				return new StringToArray(targetType, this);
 			}
 			else {
 				return new ObjectToArray(sourceType, targetType, this);
@@ -281,9 +281,21 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (sourceType.isAssignableTo(targetType)) {
 			return NoOpConversionExecutor.INSTANCE;
 		}
-		Converter converter = findRegisteredConverter(ClassUtils.resolvePrimitiveIfNecessary(sourceType.getType()), ClassUtils.resolvePrimitiveIfNecessary(targetType.getType()));
+		Converter converter = findRegisteredConverter(
+				ClassUtils.resolvePrimitiveIfNecessary(sourceClass),
+				ClassUtils.resolvePrimitiveIfNecessary(targetType.getType()));
 		if (converter != null) {
 			return new StaticConversionExecutor(sourceType, targetType, converter);
+		}
+		else if (this.parent instanceof GenericConversionService) {
+			return ((GenericConversionService) this.parent).getConversionExecutor(sourceClass, targetType);
+		}
+		else if (this.parent != null && this.parent.canConvert(sourceClass, targetType)){
+			return new ConversionExecutor() {
+				public Object execute(Object source) {
+					return parent.convert(source, targetType);
+				}
+			};
 		}
 		else {
 			return null;
@@ -356,7 +368,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return sourceMap;
 	}
 
-	private Converter findRegisteredConverter(Class<?> sourceType, Class<?> targetType) {
+	protected <T> Converter findRegisteredConverter(Class<?> sourceType, Class<T> targetType) {
 		if (sourceType.isInterface()) {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
 			classQueue.addFirst(sourceType);

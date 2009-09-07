@@ -16,16 +16,13 @@
 
 package org.springframework.ui.format.support;
 
-import java.text.ParseException;
-
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.FormatterRegistry;
-import org.springframework.ui.format.support.GenericFormatterRegistry;
 import org.springframework.util.Assert;
 
 /**
@@ -36,11 +33,9 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class FormattingConversionServiceAdapter implements ConversionService {
+public class FormattingConversionServiceAdapter extends GenericConversionService {
 
 	private final FormatterRegistry formatterRegistry;
-
-	private final ConversionService targetConversionService;
 
 
 	/**
@@ -51,41 +46,37 @@ public class FormattingConversionServiceAdapter implements ConversionService {
 		Assert.notNull(formatterRegistry, "FormatterRegistry must not be null");
 		this.formatterRegistry = formatterRegistry;
 		if (formatterRegistry instanceof GenericFormatterRegistry) {
-			this.targetConversionService = ((GenericFormatterRegistry) formatterRegistry).getConversionService();
+			setParent(((GenericFormatterRegistry) formatterRegistry).getConversionService());
 		}
 		else {
-			this.targetConversionService = new DefaultConversionService();
+			setParent(new DefaultConversionService());
 		}
 	}
 
 
-	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		return canConvert(sourceType, TypeDescriptor.valueOf(targetType));
-	}
-
-	public boolean canConvert(Class<?> sourceType, TypeDescriptor targetType) {
-		return (this.formatterRegistry.getFormatter(targetType) != null ||
-				this.targetConversionService.canConvert(sourceType, targetType));
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T convert(Object source, Class<T> targetType) {
-		return (T) convert(source, TypeDescriptor.valueOf(targetType));
-	}
-
-	public Object convert(Object source, TypeDescriptor targetType) {
-		if (source instanceof String) {
-			Formatter formatter = this.formatterRegistry.getFormatter(targetType);
+	@Override
+	protected <T> Converter findRegisteredConverter(Class<?> sourceType, Class<T> targetType) {
+		if (String.class.equals(sourceType)) {
+			Formatter<T> formatter = this.formatterRegistry.getFormatter(targetType);
 			if (formatter != null) {
-				try {
-					return formatter.parse((String) source, LocaleContextHolder.getLocale());
-				}
-				catch (ParseException ex) {
-					throw new ConversionFailedException(source, String.class, targetType.getType(), ex);
-				}
+				return new FormattingConverter<T>(formatter);
 			}
 		}
-		return this.targetConversionService.convert(source, targetType);
+		return super.findRegisteredConverter(sourceType, targetType);
+	}
+
+
+	private static class FormattingConverter<T> implements Converter<String, T> {
+
+		private final Formatter<T> formatter;
+
+		public FormattingConverter(Formatter<T> formatter) {
+			this.formatter = formatter;
+		}
+
+		public T convert(String source) throws Exception {
+			return this.formatter.parse(source, LocaleContextHolder.getLocale());
+		}
 	}
 
 }

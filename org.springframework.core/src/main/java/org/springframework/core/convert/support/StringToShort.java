@@ -25,7 +25,7 @@ import org.springframework.util.NumberUtils;
  * @author Keith Donald
  * @since 3.0
  */
-public class StringToShort implements Converter<String, Short> {
+class StringToShort implements Converter<String, Short> {
 
 	public Short convert(String source) {
 		return NumberUtils.parseNumber(source, Short.class);
