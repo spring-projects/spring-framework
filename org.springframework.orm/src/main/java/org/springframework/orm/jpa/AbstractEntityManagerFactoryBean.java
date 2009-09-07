@@ -112,7 +112,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 */
 	public void setPersistenceProviderClass(Class<? extends PersistenceProvider> persistenceProviderClass) {
 		Assert.isAssignable(PersistenceProvider.class, persistenceProviderClass);
-		this.persistenceProvider = (PersistenceProvider) BeanUtils.instantiateClass(persistenceProviderClass);
+		this.persistenceProvider = BeanUtils.instantiateClass(persistenceProviderClass);
 	}
 
 	/**
