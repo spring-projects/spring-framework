@@ -34,7 +34,7 @@
 	<classpathentry kind="var" path="IVY_CACHE/javax.servlet/com.springsource.javax.servlet.jsp.jstl/1.1.2/com.springsource.javax.servlet.jsp.jstl-1.1.2.jar" sourcepath="/IVY_CACHE/javax.servlet/com.springsource.javax.servlet.jsp.jstl/1.1.2/com.springsource.javax.servlet.jsp.jstl-sources-1.1.2.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.xml.rpc/com.springsource.javax.xml.rpc/1.1.0/com.springsource.javax.xml.rpc-1.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar" sourcepath="/IVY_CACHE/javax.transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-sources-1.1.0.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-2.1.3.jar" sourcepath="/IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-sources-2.1.3.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.2.0/com.springsource.net.sf.cglib-2.2.0.jar" sourcepath="/IVY_CACHE/net.sourceforge.cglib/com.springsource.net.sf.cglib/2.1.3/com.springsource.net.sf.cglib-sources-2.1.3.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.jexcelapi/com.springsource.jxl/2.6.6/com.springsource.jxl-2.6.6.jar" sourcepath="/IVY_CACHE/net.sourceforge.jexcelapi/com.springsource.jxl/2.6.6/com.springsource.jxl-sources-2.6.6.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.jasperreports/com.springsource.net.sf.jasperreports/2.0.5/com.springsource.net.sf.jasperreports-2.0.5.jar" sourcepath="/IVY_CACHE/net.sourceforge.jasperreports/com.springsource.net.sf.jasperreports/2.0.5/com.springsource.net.sf.jasperreports-sources-2.0.5.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.dom4j/com.springsource.org.dom4j/1.6.1/com.springsource.org.dom4j-1.6.1.jar" sourcepath="/IVY_CACHE/org.dom4j/com.springsource.org.dom4j/1.6.1/com.springsource.org.dom4j-sources-1.6.1.jar"/>
@@ -84,6 +84,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.serp/com.springsource.serp/1.13.1/com.springsource.serp-1.13.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-2.0.0.jar" sourcepath="/IVY_CACHE/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-sources-2.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-4.7.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.7.0.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.0/com.springsource.net.sf.ehcache-1.6.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-1.6.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

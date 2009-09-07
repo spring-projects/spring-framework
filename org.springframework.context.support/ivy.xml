@@ -32,7 +32,7 @@
 		<dependency org="com.opensymphony.quartz" name="com.springsource.org.quartz" rev="1.6.2" conf="optional, quartz->compile"/>
 		<dependency org="javax.activation" name="com.springsource.javax.activation" rev="1.1.0" conf="provided->compile"/>
 		<dependency org="javax.mail" name="com.springsource.javax.mail" rev="1.4.0" conf="optional, mail->compile"/>
-		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.6.0" conf="optional, ehcache->compile"/>
+		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.6.2" conf="optional, ehcache->compile"/>
 		<dependency org="net.sourceforge.jasperreports" name="com.springsource.net.sf.jasperreports" rev="2.0.5" conf="optional, jasper-reports->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.collections" rev="3.2.0" conf="optional, commons-collections->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile->compile"/>

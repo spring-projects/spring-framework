@@ -87,7 +87,7 @@
                     conf="test->compile"/>
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
 		<dependency org="org.jaxen" name="com.springsource.org.jaxen" rev="1.1.1" conf="test->compile"/>
-		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.1.3" conf="test->compile"/>
+		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.2.0" conf="test->compile"/>
 		<dependency org="org.mozilla.javascript" name="com.springsource.org.mozilla.javascript" rev="1.7.0.R2"
                     conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration"
