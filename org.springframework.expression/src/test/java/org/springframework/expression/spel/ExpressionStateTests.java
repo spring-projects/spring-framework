@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel;
 
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
-
 
 /**
  * Tests for the expression state object - some features are not yet exploited in the language (eg nested scopes)
@@ -47,7 +47,6 @@ public class ExpressionStateTests extends ExpressionTestCase {
 	// Local variables are in variable scopes which come and go during evaluation.  Normal variables are
 	// accessible through the evaluation context
 	
-	
 	@Test
 	public void testLocalVariables() {
 		ExpressionState state = getState();
@@ -62,7 +61,6 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		state.setLocalVariable("foo",null);
 		value = state.lookupLocalVariable("foo");
 		Assert.assertEquals(null,value);
-		
 	}
 
 	@Test
@@ -119,8 +117,8 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		ExpressionState state = getState();
 		Assert.assertEquals(Inventor.class,state.getRootContextObject().getValue().getClass());
 
-		state.getEvaluationContext().setRootObject(null);
-		Assert.assertEquals(null,state.getRootContextObject().getValue());
+		((StandardEvaluationContext) state.getEvaluationContext()).setRootObject(null);
+		Assert.assertEquals(null, state.getRootContextObject().getValue());
 		
 		state = new ExpressionState(new StandardEvaluationContext());
 		Assert.assertEquals(TypedValue.NULL_TYPED_VALUE,state.getRootContextObject());
@@ -259,4 +257,5 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		ExpressionState state = new ExpressionState(context);
 		return state;
 	}
+
 }

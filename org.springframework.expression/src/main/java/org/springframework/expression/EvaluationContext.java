@@ -21,11 +21,11 @@ import java.util.List;
 /**
  * Expressions are executed in an evaluation context. It is in this context that references
  * are resolved when encountered during expression evaluation.
- * 
- * There is a default implementation of the EvaluationContext,
+ *
+ * <p>There is a default implementation of the EvaluationContext,
  * {@link org.springframework.expression.spel.support.StandardEvaluationContext}
  * that can be extended, rather than having to implement everything.
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -36,27 +36,6 @@ public interface EvaluationContext {
 	 * @return the root context object against which unqualified properties/methods/etc should be resolved
 	 */
 	TypedValue getRootObject();
-	
-
-	/**
-	 * @param rootObject the root object against which unqualified properties/methods/etc should be resolved
-	 */
-	void setRootObject(Object object);
-
-
-	/**
-	 * Set a named variable within this execution context to a specified value.
-	 * @param name variable to set
-	 * @param value value to be placed in the variable
-	 */
-	void setVariable(String name, Object value);
-
-	/**
-	 * Look up a named variable within this execution context.
-	 * @param name variable to lookup
-	 * @return the value of the variable
-	 */
-	Object lookupVariable(String name);
 
 	/**
 	 * @return a list of resolvers that will be asked in turn to locate a constructor
@@ -79,19 +58,33 @@ public interface EvaluationContext {
 	TypeLocator getTypeLocator();
 
 	/**
-	 * @return a type comparator for comparing pairs of objects for equality.
-	 */
-	TypeComparator getTypeComparator();
-
-	/**
 	 * @return a type converter that can convert (or coerce) a value from one type to another.
 	 */
 	TypeConverter getTypeConverter();
+
+	/**
+	 * @return a type comparator for comparing pairs of objects for equality.
+	 */
+	TypeComparator getTypeComparator();
 
 	/**
 	 * @return an operator overloader that may support mathematical operations between more than the standard set of
 	 * types
 	 */
 	OperatorOverloader getOperatorOverloader();
+
+	/**
+	 * Set a named variable within this evaluation context to a specified value.
+	 * @param name variable to set
+	 * @param value value to be placed in the variable
+	 */
+	void setVariable(String name, Object value);
+
+	/**
+	 * Look up a named variable within this evaluation context.
+	 * @param name variable to lookup
+	 * @return the value of the variable
+	 */
+	Object lookupVariable(String name);
 
 }
