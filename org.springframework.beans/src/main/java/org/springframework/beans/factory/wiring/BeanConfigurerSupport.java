@@ -151,11 +151,13 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 			Throwable rootCause = ex.getMostSpecificCause();
 			if (rootCause instanceof BeanCurrentlyInCreationException) {
 				BeanCreationException bce = (BeanCreationException) rootCause;
-				if (logger.isDebugEnabled() && this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
-					logger.debug("Failed to create target bean '" + bce.getBeanName() +
-							"' while configuring object of type [" + beanInstance.getClass().getName() +
-							"] - probably due to a circular reference. This is a common startup situation " +
-							"and usually not fatal. Proceeding without injection. Original exception: " + ex);
+				if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to create target bean '" + bce.getBeanName() +
+								"' while configuring object of type [" + beanInstance.getClass().getName() +
+								"] - probably due to a circular reference. This is a common startup situation " +
+								"and usually not fatal. Proceeding without injection. Original exception: " + ex);
+					}
 					return;
 				}
 			}
