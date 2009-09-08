@@ -20,15 +20,18 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
- * Miscellaneous object utility methods. Mainly for internal use within the
- * framework; consider Jakarta's Commons Lang for a more comprehensive suite
- * of object utilities.
+ * Miscellaneous object utility methods.
+ *
+ * <p>Mainly for internal use within the framework; consider
+ * <a href="http://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
+ * for a more comprehensive suite of object utilities.
+ *
+ * <p>Thanks to Alex Ruiz for contributing several enhancements to this class!
  *
  * @author Juergen Hoeller
  * @author Keith Donald
  * @author Rod Johnson
  * @author Rob Harrop
- * @author Alex Ruiz
  * @since 19.03.2004
  * @see org.apache.commons.lang.ObjectUtils
  */
