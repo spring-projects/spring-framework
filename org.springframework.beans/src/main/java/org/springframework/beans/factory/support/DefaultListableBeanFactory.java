@@ -808,10 +808,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Object beanInstance = entry.getValue();
 			if (isPrimary(candidateBeanName, beanInstance)) {
 				if (primaryBeanName != null) {
-					throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),
-							"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
+					boolean candidateLocal = containsBeanDefinition(candidateBeanName);
+					boolean primaryLocal = containsBeanDefinition(primaryBeanName);
+					if (candidateLocal == primaryLocal) {
+						throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),
+								"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
+					}
+					else if (candidateLocal && !primaryLocal) {
+						primaryBeanName = candidateBeanName;
+					}
 				}
-				primaryBeanName = candidateBeanName;
+				else {
+					primaryBeanName = candidateBeanName;
+				}
 			}
 			if (primaryBeanName == null &&
 					(this.resolvableDependencies.values().contains(beanInstance) ||
