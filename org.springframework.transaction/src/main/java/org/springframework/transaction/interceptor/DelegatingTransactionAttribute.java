@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.io.Serializable;
 
-import org.springframework.util.Assert;
+import org.springframework.transaction.support.DelegatingTransactionDefinition;
 
 /**
  * {@link TransactionAttribute} implementation that delegates all calls to a given target
@@ -29,7 +29,8 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 1.2
  */
-public abstract class DelegatingTransactionAttribute implements TransactionAttribute, Serializable {
+public abstract class DelegatingTransactionAttribute extends DelegatingTransactionDefinition
+		implements TransactionAttribute, Serializable {
 
 	private final TransactionAttribute targetAttribute;
 
@@ -39,30 +40,10 @@ public abstract class DelegatingTransactionAttribute implements TransactionAttri
 	 * @param targetAttribute the target TransactionAttribute to delegate to
 	 */
 	public DelegatingTransactionAttribute(TransactionAttribute targetAttribute) {
-		Assert.notNull(targetAttribute, "Target attribute must not be null");
+		super(targetAttribute);
 		this.targetAttribute = targetAttribute;
 	}
 
-
-	public int getPropagationBehavior() {
-		return this.targetAttribute.getPropagationBehavior();
-	}
-
-	public int getIsolationLevel() {
-		return this.targetAttribute.getIsolationLevel();
-	}
-
-	public int getTimeout() {
-		return this.targetAttribute.getTimeout();
-	}
-
-	public boolean isReadOnly() {
-		return this.targetAttribute.isReadOnly();
-	}
-
-	public String getName() {
-		return this.targetAttribute.getName();
-	}
 
 	public String getQualifier() {
 		return this.targetAttribute.getQualifier();
@@ -70,22 +51,6 @@ public abstract class DelegatingTransactionAttribute implements TransactionAttri
 
 	public boolean rollbackOn(Throwable ex) {
 		return this.targetAttribute.rollbackOn(ex);
-	}
-
-
-	@Override
-	public boolean equals(Object obj) {
-		return this.targetAttribute.equals(obj);
-	}
-
-	@Override
-	public int hashCode() {
-		return this.targetAttribute.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return this.targetAttribute.toString();
 	}
 
 }

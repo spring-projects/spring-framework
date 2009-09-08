@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -38,7 +37,7 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager. Developed and tested against Hibernate 3.2.
+ * Hibernate EntityManager. Developed and tested against Hibernate 3.3.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -50,6 +49,9 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
+		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+			getSession(entityManager).getTransaction().setTimeout(definition.getTimeout());
+		}
 		super.beginTransaction(entityManager, definition);
 		return prepareTransaction(entityManager, definition.isReadOnly(), definition.getName());
 	}

@@ -35,6 +35,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.DelegatingTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -299,7 +300,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 					"on a single DataSource, no matter whether JDO or JDBC access.");
 		}
 
-		PersistenceManager pm = null;
+		PersistenceManager pm;
 
 		try {
 			if (txObject.getPersistenceManagerHolder() == null ||
@@ -314,13 +315,19 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 			pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
 
 			// Delegate to JdoDialect for actual transaction begin.
-			Object transactionData = getJdoDialect().beginTransaction(pm.currentTransaction(), definition);
+			final int timeoutToUse = determineTimeout(definition);
+			Object transactionData = getJdoDialect().beginTransaction(pm.currentTransaction(),
+					new DelegatingTransactionDefinition(definition) {
+						@Override
+						public int getTimeout() {
+							return timeoutToUse;
+						}
+					});
 			txObject.setTransactionData(transactionData);
 
 			// Register transaction timeout.
-			int timeout = determineTimeout(definition);
-			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getPersistenceManagerHolder().setTimeoutInSeconds(timeout);
+			if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getPersistenceManagerHolder().setTimeoutInSeconds(timeoutToUse);
 			}
 
 			// Register the JDO PersistenceManager's JDBC Connection for the DataSource, if set.
@@ -328,8 +335,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 				ConnectionHandle conHandle = getJdoDialect().getJdbcConnection(pm, definition.isReadOnly());
 				if (conHandle != null) {
 					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
-					if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-						conHolder.setTimeoutInSeconds(timeout);
+					if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
