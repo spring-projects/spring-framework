@@ -16,8 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -32,17 +36,27 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class DependencyDescriptor {
+public class DependencyDescriptor implements Serializable {
 
-	private MethodParameter methodParameter;
+	private transient MethodParameter methodParameter;
 
-	private Field field;
+	private transient Field field;
+
+	private Class declaringClass;
+
+	private String methodName;
+
+	private Class[] parameterTypes;
+
+	private int parameterIndex;
+
+	private String fieldName;
 
 	private final boolean required;
 
 	private final boolean eager;
 
-	private Annotation[] fieldAnnotations;
+	private transient Annotation[] fieldAnnotations;
 
 
 	/**
@@ -65,6 +79,15 @@ public class DependencyDescriptor {
 	public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
+		this.declaringClass = methodParameter.getDeclaringClass();
+		if (this.methodParameter.getMethod() != null) {
+			this.methodName = methodParameter.getMethod().getName();
+			this.parameterTypes = methodParameter.getMethod().getParameterTypes();
+		}
+		else {
+			this.parameterTypes = methodParameter.getConstructor().getParameterTypes();
+		}
+		this.parameterIndex = methodParameter.getParameterIndex();
 		this.required = required;
 		this.eager = eager;
 	}
@@ -89,6 +112,8 @@ public class DependencyDescriptor {
 	public DependencyDescriptor(Field field, boolean required, boolean eager) {
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
+		this.declaringClass = field.getDeclaringClass();
+		this.fieldName = field.getName();
 		this.required = required;
 		this.eager = eager;
 	}
@@ -157,6 +182,14 @@ public class DependencyDescriptor {
 	}
 
 	/**
+	 * Determine the generic type of the wrapped parameter/field.
+	 * @return the generic type (never <code>null</code>)
+	 */
+	public Type getGenericDependencyType() {
+		return (this.field != null ? this.field.getGenericType() : this.methodParameter.getGenericParameterType());
+	}
+
+	/**
 	 * Determine the generic element type of the wrapped Collection parameter/field, if any.
 	 * @return the generic type, or <code>null</code> if none
 	 */
@@ -198,6 +231,34 @@ public class DependencyDescriptor {
 		}
 		else {
 			return this.methodParameter.getParameterAnnotations();
+		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Restore reflective handles (which are unfortunately not serializable)
+		try {
+			if (this.fieldName != null) {
+				this.field = this.declaringClass.getDeclaredField(this.fieldName);
+			}
+			else if (this.methodName != null) {
+				this.methodParameter = new MethodParameter(
+						this.declaringClass.getDeclaredMethod(this.methodName, this.parameterTypes), this.parameterIndex);
+			}
+			else {
+				this.methodParameter = new MethodParameter(
+						this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
+			}
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Could not find original class structure", ex);
 		}
 	}
 

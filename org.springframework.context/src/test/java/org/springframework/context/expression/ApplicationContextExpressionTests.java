@@ -17,6 +17,7 @@
 package org.springframework.context.expression;
 
 import java.util.Properties;
+import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.StopWatch;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Juergen Hoeller
@@ -47,7 +49,7 @@ public class ApplicationContextExpressionTests {
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 	@Test
-	public void genericApplicationContext() {
+	public void genericApplicationContext() throws Exception {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 
@@ -139,7 +141,11 @@ public class ApplicationContextExpressionTests {
 			assertEquals("XXXmyNameYYY42ZZZ", tb3.name);
 			assertEquals(42, tb3.age);
 			assertEquals("123 UK", tb3.country);
+			assertEquals("123 UK", tb3.countryFactory.getObject());
 			assertSame(tb0, tb3.tb);
+
+			tb3 = (ValueTestBean) SerializationTestUtils.serializeAndDeserialize(tb3);
+			assertEquals("123 UK", tb3.countryFactory.getObject());
 
 			ConstructorValueTestBean tb4 = ac.getBean("tb4", ConstructorValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb4.name);
@@ -198,7 +204,7 @@ public class ApplicationContextExpressionTests {
 	}
 
 
-	public static class ValueTestBean {
+	public static class ValueTestBean implements Serializable {
 
 		@Autowired @Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ")
 		public String name;
@@ -209,8 +215,11 @@ public class ApplicationContextExpressionTests {
 		@Value("${code} #{systemProperties.country}")
 		public String country;
 
+		@Value("${code} #{systemProperties.country}")
+		public ObjectFactory<String> countryFactory;
+
 		@Autowired @Qualifier("original")
-		public TestBean tb;
+		public transient TestBean tb;
 	}
 
 
