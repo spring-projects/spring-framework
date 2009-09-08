@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.BeanUtils;
 
 /**
  * Subclass of {@link AdaptableJobFactory} that also supports Spring-style
@@ -68,8 +67,8 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 * from the scheduler context, job data map and trigger data map.
 	 */
 	@Override
-	protected Object createJobInstance(TriggerFiredBundle bundle) {
-		Object job = BeanUtils.instantiateClass(bundle.getJobDetail().getJobClass());
+	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
+		Object job = bundle.getJobDetail().getJobClass().newInstance();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(job);
 		if (isEligibleForPropertyPopulation(bw.getWrappedInstance())) {
 			MutablePropertyValues pvs = new MutablePropertyValues();
@@ -79,8 +78,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 			pvs.addPropertyValues(bundle.getJobDetail().getJobDataMap());
 			pvs.addPropertyValues(bundle.getTrigger().getJobDataMap());
 			if (this.ignoredUnknownProperties != null) {
-				for (int i = 0; i < this.ignoredUnknownProperties.length; i++) {
-					String propName = this.ignoredUnknownProperties[i];
+				for (String propName : this.ignoredUnknownProperties) {
 					if (pvs.contains(propName) && !bw.isWritableProperty(propName)) {
 						pvs.removePropertyValue(propName);
 					}
