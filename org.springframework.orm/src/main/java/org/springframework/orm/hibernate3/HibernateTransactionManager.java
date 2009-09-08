@@ -539,7 +539,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 			}
 
-			Transaction hibTx = null;
+			Transaction hibTx;
 
 			// Register transaction timeout.
 			int timeout = determineTimeout(definition);

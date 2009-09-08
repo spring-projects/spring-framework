@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
  * Subclass of Spring's standard LocalSessionFactoryBean for Hibernate,
  * supporting JDK 1.5+ annotation metadata for mappings.
  *
- * <p>Note: This class requires Hibernate 3.2 or higher, with the
+ * <p>Note: This class requires Hibernate 3.2 or later, with the
  * Java Persistence API and the Hibernate Annotations add-on present.
  *
  * <p>Example for an AnnotationSessionFactoryBean bean definition:
@@ -240,8 +240,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * @param config the current AnnotationConfiguration object
 	 * @throws HibernateException in case of Hibernate initialization errors
 	 */
-	protected void postProcessAnnotationConfiguration(AnnotationConfiguration config)
-			throws HibernateException {
+	protected void postProcessAnnotationConfiguration(AnnotationConfiguration config) throws HibernateException {
 	}
 
 }
