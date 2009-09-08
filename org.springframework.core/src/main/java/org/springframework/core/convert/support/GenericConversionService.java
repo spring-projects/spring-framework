@@ -161,8 +161,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	ConversionExecutor getConversionExecutor(final Class<?> sourceClass, final TypeDescriptor targetType)
 			throws ConverterNotFoundException {
 
-		Assert.notNull(sourceClass, "The sourceType to convert from is required");
-		Assert.notNull(targetType, "The targetType to convert to is required");
+		Assert.notNull(sourceClass, "Source type to convert from is required");
+		Assert.notNull(targetType, "Target type to convert to is required");
 		if (targetType.getType() == null) {
 			return NoOpConversionExecutor.INSTANCE;
 		}
@@ -281,9 +281,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (sourceType.isAssignableTo(targetType)) {
 			return NoOpConversionExecutor.INSTANCE;
 		}
-		Converter converter = findRegisteredConverter(
-				ClassUtils.resolvePrimitiveIfNecessary(sourceClass),
-				ClassUtils.resolvePrimitiveIfNecessary(targetType.getType()));
+		Converter converter = findConverter(sourceClass, targetType);
 		if (converter != null) {
 			return new StaticConversionExecutor(sourceType, targetType, converter);
 		}
@@ -368,7 +366,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return sourceMap;
 	}
 
-	protected <T> Converter findRegisteredConverter(Class<?> sourceType, Class<T> targetType) {
+	protected Converter findConverter(Class<?> sourceType, TypeDescriptor targetType) {
+		return findRegisteredConverter(
+				ClassUtils.resolvePrimitiveIfNecessary(sourceType),
+				ClassUtils.resolvePrimitiveIfNecessary(targetType.getType()));
+	}
+
+	private Converter findRegisteredConverter(Class<?> sourceType, Class<?> targetType) {
 		if (sourceType.isInterface()) {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
 			classQueue.addFirst(sourceType);
