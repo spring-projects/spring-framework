@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
@@ -131,7 +130,7 @@ public class CronTriggerBean extends CronTrigger
 	}
 
 
-	public void afterPropertiesSet() throws ParseException {
+	public void afterPropertiesSet() throws Exception {
 		if (getName() == null) {
 			setName(this.beanName);
 		}
