@@ -18,6 +18,7 @@ package org.springframework.ui.format.support;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -53,28 +54,27 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 		}
 	}
 
-
 	@Override
-	protected <T> Converter findRegisteredConverter(Class<?> sourceType, Class<T> targetType) {
+	protected Converter findConverter(Class<?> sourceType, TypeDescriptor targetType) {
 		if (String.class.equals(sourceType)) {
-			Formatter<T> formatter = this.formatterRegistry.getFormatter(targetType);
+			Formatter formatter = this.formatterRegistry.getFormatter(targetType);
 			if (formatter != null) {
-				return new FormattingConverter<T>(formatter);
+				return new FormattingConverter(formatter);
 			}
 		}
-		return super.findRegisteredConverter(sourceType, targetType);
+		return super.findConverter(sourceType, targetType);
 	}
 
 
-	private static class FormattingConverter<T> implements Converter<String, T> {
+	private static class FormattingConverter implements Converter<String, Object> {
 
-		private final Formatter<T> formatter;
+		private final Formatter formatter;
 
-		public FormattingConverter(Formatter<T> formatter) {
+		public FormattingConverter(Formatter formatter) {
 			this.formatter = formatter;
 		}
 
-		public T convert(String source) throws Exception {
+		public Object convert(String source) throws Exception {
 			return this.formatter.parse(source, LocaleContextHolder.getLocale());
 		}
 	}
