@@ -42,6 +42,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.DelegatingTransactionDefinition;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
@@ -327,13 +328,19 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
 
 			// Delegate to JpaDialect for actual transaction begin.
-			Object transactionData = getJpaDialect().beginTransaction(em, definition);
+			final int timeoutToUse = determineTimeout(definition);
+			Object transactionData = getJpaDialect().beginTransaction(em,
+					new DelegatingTransactionDefinition(definition) {
+						@Override
+						public int getTimeout() {
+							return timeoutToUse;
+						}
+					});
 			txObject.setTransactionData(transactionData);
 
 			// Register transaction timeout.
-			int timeout = determineTimeout(definition);
-			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getEntityManagerHolder().setTimeoutInSeconds(timeout);
+			if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getEntityManagerHolder().setTimeoutInSeconds(timeoutToUse);
 			}
 
 			// Register the JPA EntityManager's JDBC Connection for the DataSource, if set.
@@ -341,8 +348,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				ConnectionHandle conHandle = getJpaDialect().getJdbcConnection(em, definition.isReadOnly());
 				if (conHandle != null) {
 					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
-					if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-						conHolder.setTimeoutInSeconds(timeout);
+					if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Exposing JPA transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
