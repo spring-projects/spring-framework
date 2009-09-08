@@ -225,7 +225,6 @@ public class GenericBean<T> {
 		this.customEnum = customEnum;
 	}
 
-
 	public static GenericBean createInstance(Set<Integer> integerSet) {
 		return new GenericBean(integerSet);
 	}

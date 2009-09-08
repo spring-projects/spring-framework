@@ -19,7 +19,7 @@
 		</property>
 	</bean>
 
-	<bean id="testBean" class="org.springframework.jmx.export.annotation.AnnotationTestBean">
+	<bean id="testBean" class="org.springframework.jmx.export.annotation.AnnotationTestSubBean">
 		<property name="name">
 			<value>TEST</value>
 		</property>

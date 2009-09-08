@@ -101,6 +101,9 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
 		A annotation = getAnnotation(method, annotationType);
 		Class<?> cl = method.getDeclaringClass();
+		if(annotation == null) {
+			annotation = searchForAnnotationOnInterfaces(method, annotationType, cl.getInterfaces());
+		}
 		while (annotation == null) {
 			cl = cl.getSuperclass();
 			if (cl == null || cl == Object.class) {
@@ -109,9 +112,30 @@ public abstract class AnnotationUtils {
 			try {
 				Method equivalentMethod = cl.getDeclaredMethod(method.getName(), method.getParameterTypes());
 				annotation = getAnnotation(equivalentMethod, annotationType);
+				if(annotation == null) {
+					annotation = searchForAnnotationOnInterfaces(method, annotationType, cl.getInterfaces());
+				}
 			}
 			catch (NoSuchMethodException ex) {
 				// We're done...
+			}
+		}
+		return annotation;
+	}
+
+	private static <A extends Annotation> A searchForAnnotationOnInterfaces(Method method, Class<A> annotationType, Class[] ifaces) {
+		A annotation = null;
+		for (Class<?> iface : ifaces) {
+			Method equivalentMethod = null;
+			try {
+				equivalentMethod = iface.getDeclaredMethod(method.getName(), method.getParameterTypes());
+				annotation = getAnnotation(equivalentMethod, annotationType);
+			}
+			catch (NoSuchMethodException e) {
+				// skip this interface - it doesn't have the method
+			}
+			if (annotation != null) {
+				break;
 			}
 		}
 		return annotation;

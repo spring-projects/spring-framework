@@ -16,16 +16,31 @@
 
 package org.springframework.jmx.export.annotation;
 
+import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.modelmbean.ModelMBeanOperationInfo;
+
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.export.assembler.AbstractMetadataAssemblerTests;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 
-/**
- * @author Rob Harrop
- */
+/** @author Rob Harrop */
 public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerTests {
 
 	private static final String OBJECT_NAME = "bean:name=testBean4";
+
+	public void testAttributeFromInterface() throws Exception {
+		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
+		ModelMBeanAttributeInfo attr = inf.getAttribute("Colour");
+		assertTrue("The name attribute should be writable", attr.isWritable());
+		assertTrue("The name attribute should be readable", attr.isReadable());
+	}
+
+	public void testOperationFromInterface() throws Exception {
+		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
+		ModelMBeanOperationInfo op = inf.getOperation("fromInterface");
+		assertNotNull(op);
+	}
 
 	protected JmxAttributeSource getAttributeSource() {
 		return new AnnotationJmxAttributeSource();
@@ -36,11 +51,20 @@ public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerT
 	}
 
 	protected IJmxTestBean createJmxTestBean() {
-		return new AnnotationTestBean();
+		return new AnnotationTestSubBean();
 	}
 
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/annotation/annotations.xml";
 	}
 
+	@Override
+	protected int getExpectedAttributeCount() {
+		return super.getExpectedAttributeCount() + 1;
+	}
+
+	@Override
+	protected int getExpectedOperationCount() {
+		return super.getExpectedOperationCount() + 3;
+	}
 }

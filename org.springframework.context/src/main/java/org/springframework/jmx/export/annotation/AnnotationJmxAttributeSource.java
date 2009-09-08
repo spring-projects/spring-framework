@@ -63,7 +63,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
 	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedAttribute ann =
-				AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedAttribute.class);
+				AnnotationUtils.findAnnotation(method, org.springframework.jmx.export.annotation.ManagedAttribute.class);
 		if (ann == null) {
 			return null;
 		}
@@ -77,7 +77,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
 	public ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedMetric ann =
-				AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedMetric.class);
+				AnnotationUtils.findAnnotation(method, org.springframework.jmx.export.annotation.ManagedMetric.class);
 		if (ann == null) {
 			return null;
 		}
@@ -92,7 +92,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			throw new InvalidMetadataException(
 					"The ManagedOperation attribute is not valid for JavaBean properties. Use ManagedAttribute instead.");
 		}
-		Annotation ann = AnnotationUtils.getAnnotation(method, org.springframework.jmx.export.annotation.ManagedOperation.class);
+		Annotation ann = AnnotationUtils.findAnnotation(method, org.springframework.jmx.export.annotation.ManagedOperation.class);
 		if (ann == null) {
 			return null;
 		}
@@ -104,7 +104,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 	public ManagedOperationParameter[] getManagedOperationParameters(Method method)
 			throws InvalidMetadataException {
 
-		ManagedOperationParameters params = AnnotationUtils.getAnnotation(method, ManagedOperationParameters.class);
+		ManagedOperationParameters params = AnnotationUtils.findAnnotation(method, ManagedOperationParameters.class);
 		ManagedOperationParameter[] result = null;
 		if (params == null) {
 			result = new ManagedOperationParameter[0];
