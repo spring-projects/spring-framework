@@ -21,6 +21,8 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -508,14 +510,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 					if (isFactoryBean(beanName)) {
 						final FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-						boolean isEagerInit = false;
-						
+						boolean isEagerInit;
 						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
 							isEagerInit = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 								public Boolean run() {
-									return Boolean.valueOf(((SmartFactoryBean) factory).isEagerInit());
+									return ((SmartFactoryBean) factory).isEagerInit();
 								}
-							}, getAccessControlContext()).booleanValue();
+							}, getAccessControlContext());
 						}
 						else {
 							isEagerInit = factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit(); 
@@ -634,14 +635,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	//---------------------------------------------------------------------
-	// Implementation of superclass abstract methods
+	// Dependency resolution functionality
 	//---------------------------------------------------------------------
 
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-		Class<?> type = descriptor.getDependencyType();
+		if (ObjectFactory.class.equals(descriptor.getDependencyType())) {
+			return new DependencyObjectFactory(descriptor, beanName);
+		}
+		else {
+			return doResolveDependency(descriptor, descriptor.getDependencyType(), beanName, autowiredBeanNames, typeConverter);
+		}
+	}
+
+	protected Object doResolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
 		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 		if (value != null) {
@@ -649,7 +659,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				String strVal = resolveEmbeddedValue((String) value);
 				value = evaluateBeanDefinitionString(strVal, getMergedBeanDefinition(beanName));
 			}
-			return typeConverter.convertIfNecessary(value, type);
+			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
+			return converter.convertIfNecessary(value, type);
 		}
 
 		if (type.isArray()) {
@@ -904,6 +915,40 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Cannot deserialize BeanFactory with id " + this.id + ": factory has been garbage-collected");
 			}
 			return result;
+		}
+	}
+
+
+	/**
+	 * Serializable ObjectFactory for lazy resolution of a dependency.
+	 */
+	private class DependencyObjectFactory implements ObjectFactory, Serializable {
+
+		private final DependencyDescriptor descriptor;
+
+		private final String beanName;
+
+		private final Class type;
+
+		public DependencyObjectFactory(DependencyDescriptor descriptor, String beanName) {
+			this.descriptor = descriptor;
+			this.beanName = beanName;
+			this.type = determineObjectFactoryType();
+		}
+
+		private Class determineObjectFactoryType() {
+			Type type = this.descriptor.getGenericDependencyType();
+			if (type instanceof ParameterizedType) {
+				Type arg = ((ParameterizedType) type).getActualTypeArguments()[0];
+				if (arg instanceof Class) {
+					return (Class) arg;
+				}
+			}
+			return Object.class;
+		}
+
+		public Object getObject() throws BeansException {
+			return doResolveDependency(this.descriptor, this.type, this.beanName, null, null);
 		}
 	}
 

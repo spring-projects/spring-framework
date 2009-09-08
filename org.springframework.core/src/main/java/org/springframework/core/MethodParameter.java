@@ -49,7 +49,9 @@ public class MethodParameter {
 
 	private final int parameterIndex;
 
-	private Class parameterType;
+	private Class<?> parameterType;
+
+	private Type genericParameterType;
 
 	private Annotation[] parameterAnnotations;
 
@@ -167,7 +169,7 @@ public class MethodParameter {
 	/**
 	 * Set a resolved (generic) parameter type.
 	 */
-	void setParameterType(Class parameterType) {
+	void setParameterType(Class<?> parameterType) {
 		this.parameterType = parameterType;
 	}
 
@@ -175,7 +177,7 @@ public class MethodParameter {
 	 * Return the type of the method/constructor parameter.
 	 * @return the parameter type (never <code>null</code>)
 	 */
-	public Class getParameterType() {
+	public Class<?> getParameterType() {
 		if (this.parameterType == null) {
 			if (this.parameterIndex < 0) {
 				this.parameterType = (this.method != null ? this.method.getReturnType() : null);
@@ -187,6 +189,24 @@ public class MethodParameter {
 			}
 		}
 		return this.parameterType;
+	}
+
+	/**
+	 * Return the generic type of the method/constructor parameter.
+	 * @return the parameter type (never <code>null</code>)
+	 */
+	public Type getGenericParameterType() {
+		if (this.genericParameterType == null) {
+			if (this.parameterIndex < 0) {
+				this.genericParameterType = (this.method != null ? this.method.getGenericReturnType() : null);
+			}
+			else {
+				this.genericParameterType = (this.method != null ?
+					this.method.getGenericParameterTypes()[this.parameterIndex] :
+					this.constructor.getGenericParameterTypes()[this.parameterIndex]);
+			}
+		}
+		return this.genericParameterType;
 	}
 
 	/**
