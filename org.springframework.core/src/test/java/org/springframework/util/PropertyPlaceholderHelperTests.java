@@ -22,7 +22,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /** @author Rob Harrop */
-public class PropertyPlaceholderUtilsTests {
+public class PropertyPlaceholderHelperTests {
+
+	private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}");
 
 	@Test
 	public void testWithProperties() {
@@ -30,7 +32,7 @@ public class PropertyPlaceholderUtilsTests {
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
 
-		assertEquals("foo=bar", PropertyPlaceholderUtils.replacePlaceholders(text, props));
+		assertEquals("foo=bar", this.helper.replacePlaceholders(text, props));
 	}
 
 	@Test
@@ -40,7 +42,7 @@ public class PropertyPlaceholderUtilsTests {
 		props.setProperty("foo", "bar");
 		props.setProperty("bar", "baz");
 
-		assertEquals("foo=bar,bar=baz", PropertyPlaceholderUtils.replacePlaceholders(text, props));
+		assertEquals("foo=bar,bar=baz", this.helper.replacePlaceholders(text, props));
 	}
 
 	@Test
@@ -50,7 +52,7 @@ public class PropertyPlaceholderUtilsTests {
 		props.setProperty("bar", "${baz}");
 		props.setProperty("baz", "bar");
 
-		assertEquals("foo=bar", PropertyPlaceholderUtils.replacePlaceholders(text, props));
+		assertEquals("foo=bar", this.helper.replacePlaceholders(text, props));
 	}
 
 	@Test
@@ -60,7 +62,7 @@ public class PropertyPlaceholderUtilsTests {
 		props.setProperty("bar", "bar");
 		props.setProperty("inner", "ar");
 
-		assertEquals("foo=bar", PropertyPlaceholderUtils.replacePlaceholders(text, props));
+		assertEquals("foo=bar", this.helper.replacePlaceholders(text, props));
 	}
 
 	@Test
@@ -68,7 +70,7 @@ public class PropertyPlaceholderUtilsTests {
 		String text = "foo=${foo}";
 
 		assertEquals("foo=bar",
-				PropertyPlaceholderUtils.replacePlaceholders(text, new PropertyPlaceholderUtils.PlaceholderResolver() {
+				this.helper.replacePlaceholders(text, new PropertyPlaceholderHelper.PlaceholderResolver() {
 
 					public String resolvePlaceholder(String placeholderName) {
 						if ("foo".equals(placeholderName)) {
@@ -87,6 +89,16 @@ public class PropertyPlaceholderUtilsTests {
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
 		
-		assertEquals("foo=bar,bar=${bar}", PropertyPlaceholderUtils.replacePlaceholders(text, props));
+		assertEquals("foo=bar,bar=${bar}", this.helper.replacePlaceholders(text, props));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testUnresolvedPlaceholderAsError() {
+		String text = "foo=${foo},bar=${bar}";
+		Properties props = new Properties();
+		props.setProperty("foo", "bar");
+
+		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", false);
+		assertEquals("foo=bar,bar=${bar}", helper.replacePlaceholders(text, props));
 	}
 }
