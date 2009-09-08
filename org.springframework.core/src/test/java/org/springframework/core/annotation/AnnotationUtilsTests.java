@@ -188,6 +188,22 @@ public class AnnotationUtilsTests {
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class));
 	}
 
+	@Test
+	public void testFindAnnotationFromInterface() throws Exception {
+
+		Method method = ImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
+	@Test
+	public void testFindAnnotationFromInterfaceOnSuper() throws Exception {
+
+		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
 	public static interface AnnotatedInterface {
 
 		@Order(0)
@@ -284,6 +300,25 @@ public class AnnotationUtilsTests {
 	}
 
 	public static class SubNonInheritedAnnotationClass extends NonInheritedAnnotationClass {
+	}
+
+
+	public static interface InterfaceWithAnnotatedMethod {
+
+		@Order
+		void foo();
+	}
+
+	public static class ImplementsInterfaceWithAnnotatedMethod implements InterfaceWithAnnotatedMethod {
+
+		public void foo() {
+		}
+	}
+
+	public static class SubOfImplementsInterfaceWithAnnotatedMethod extends ImplementsInterfaceWithAnnotatedMethod {
+
+		public void foo() {
+		}
 	}
 
 }
