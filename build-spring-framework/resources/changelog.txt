@@ -11,6 +11,8 @@ Changes in version 3.0.0.RC1 (2009-09-14)
 * revised AccessControlContext access from BeanFactory
 * BeanFactory's default type conversion falls back to String constructor on target type
 * BeanFactory tries to create unknown collection implementation types via default constructor
+* BeanFactory supports ObjectFactory as a dependency type for @Autowired and @Value
+* BeanFactory prefers local primary bean to primary bean in parent factory
 * support for default "conversionService" bean in an ApplicationContext
 * MBeanServerFactoryBean returns JDK 1.5 platform MBeanServer for agent id "" (empty String)
 * changed NamedParameter/SimpleJdbcOperations parameter signatures to accept any Map value type 
@@ -20,11 +22,13 @@ Changes in version 3.0.0.RC1 (2009-09-14)
 * JSR-303 support for validation of @MVC hander method arguments driven by @Valid annotations
 * @RequestMapping annotation now supported for annotated interfaces (and JDK proxies) as well
 * refined response handling for @ExceptionHandler methods
-* deprecated @NotTransactional annotation for test classes in favor of @BeforeTransaction
-* SpringJUnit4ClassRunner once again supports collective timeouts for repeated tests
-* SpringJUnit4ClassRunner is now compatible with JUnit 4.5, 4.6, and 4.7
+* Jpa/JdoTransactionManager passes resolved timeout into Jpa/JdoDialect's beginTransaction
+* HibernateJpaDialect applies timeout onto native Hibernate Transaction before begin call
 * Spring's Hibernate support is now compatible with Hibernate 3.5 beta 1 as well
 * Spring's JPA support is now fully compatible with JPA 2.0 as in EclipseLink 2.0.0.M7
+* SpringJUnit4ClassRunner is now compatible with JUnit 4.5, 4.6, and 4.7
+* SpringJUnit4ClassRunner once again supports collective timeouts for repeated tests
+* deprecated @NotTransactional annotation for test classes in favor of @BeforeTransaction
 
 
 Changes in version 3.0.0.M4 (2009-08-10)
