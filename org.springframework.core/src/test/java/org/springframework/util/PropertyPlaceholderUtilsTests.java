@@ -44,6 +44,26 @@ public class PropertyPlaceholderUtilsTests {
 	}
 
 	@Test
+	public void testRecurseInProperty() {
+		String text = "foo=${bar}";
+		Properties props = new Properties();
+		props.setProperty("bar", "${baz}");
+		props.setProperty("baz", "bar");
+
+		assertEquals("foo=bar", PropertyPlaceholderUtils.replacePlaceholders(text, props));
+	}
+
+	@Test
+	public void testRecurseInPlaceholder() {
+		String text = "foo=${b${inner}}";
+		Properties props = new Properties();
+		props.setProperty("bar", "bar");
+		props.setProperty("inner", "ar");
+
+		assertEquals("foo=bar", PropertyPlaceholderUtils.replacePlaceholders(text, props));
+	}
+
+	@Test
 	public void testWithResolver() {
 		String text = "foo=${foo}";
 

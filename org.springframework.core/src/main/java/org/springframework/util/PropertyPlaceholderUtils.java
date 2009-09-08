@@ -17,6 +17,8 @@
 package org.springframework.util;
 
 import java.util.Properties;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Utility class for working with Strings that have placeholder values in them. A placeholder takes the form
@@ -63,29 +65,75 @@ public class PropertyPlaceholderUtils {
 	 * @return the supplied value with placeholders replaced inline.
 	 */
 	public static String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
-		StringBuilder result = new StringBuilder(value);
+		return parseStringValue(value, placeholderResolver, new HashSet<String>());
+	}
 
-		int startIndex = result.indexOf(PLACEHOLDER_PREFIX);
+	protected static String parseStringValue(String strVal, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
+		StringBuilder buf = new StringBuilder(strVal);
+
+		int startIndex = strVal.indexOf(PLACEHOLDER_PREFIX);
 		while (startIndex != -1) {
-			int endIndex = result.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
+			int endIndex = findPlaceholderEndIndex(buf, startIndex);
 			if (endIndex != -1) {
-				String placeholder = result.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
-				int nextIndex = endIndex + PLACEHOLDER_SUFFIX.length();
+				String placeholder = buf.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
+				if (!visitedPlaceholders.add(placeholder)) {
+					throw new IllegalArgumentException(
+							"Circular placeholder reference '" + placeholder + "' in property definitions");
+				}
+				// Recursive invocation, parsing placeholders contained in the placeholder key.
+				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
 
+				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal != null) {
-					result.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
-					nextIndex = startIndex + propVal.length();
+					// Recursive invocation, parsing placeholders contained in the
+					// previously resolved placeholder value.
+					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
+					buf.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
+
+					//if (logger.isTraceEnabled()) {
+					//	logger.trace("Resolved placeholder '" + placeholder + "'");
+					//}
+
+					startIndex = buf.indexOf(PLACEHOLDER_PREFIX, startIndex + propVal.length());
+				}
+				else  {
+					// Proceed with unprocessed value.
+					startIndex = buf.indexOf(PLACEHOLDER_PREFIX, endIndex + PLACEHOLDER_SUFFIX.length());
 				}
 
-				startIndex = result.indexOf(PLACEHOLDER_PREFIX, nextIndex);
+				visitedPlaceholders.remove(placeholder);
 			}
 			else {
 				startIndex = -1;
 			}
 		}
 
-		return result.toString();
+		return buf.toString();
+	}
+
+	private static int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
+		int index = startIndex + PLACEHOLDER_PREFIX.length();
+		int withinNestedPlaceholder = 0;
+		while (index < buf.length()) {
+			if (StringUtils.substringMatch(buf, index, PLACEHOLDER_SUFFIX)) {
+				if (withinNestedPlaceholder > 0) {
+					withinNestedPlaceholder--;
+					index = index + PLACEHOLDER_PREFIX.length() - 1;
+				}
+				else {
+					return index;
+				}
+			}
+			else if (StringUtils.substringMatch(buf, index, PLACEHOLDER_PREFIX)) {
+				withinNestedPlaceholder++;
+				index = index + PLACEHOLDER_PREFIX.length();
+			}
+			else {
+				index++;
+			}
+		}
+		return -1;
 	}
 
 	/**

@@ -16,17 +16,19 @@
 
 package org.springframework.util;
 
+import org.springframework.util.PropertyPlaceholderUtils.PlaceholderResolver;
+
 /**
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
- * <p>A text may contain <code>${...}</code> placeholders, to be resolved as
- * system properties: e.g. <code>${user.dir}</code>.
+ * <p>A text may contain <code>${...}</code> placeholders, to be resolved as system properties: e.g.
+ * <code>${user.dir}</code>.
  *
  * @author Juergen Hoeller
- * @since 1.2.5
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
  * @see System#getProperty(String)
+ * @since 1.2.5
  */
 public abstract class SystemPropertyUtils {
 
@@ -36,51 +38,39 @@ public abstract class SystemPropertyUtils {
 	/** Suffix for system property placeholders: "}" */
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-
 	/**
-	 * Resolve ${...} placeholders in the given text,
-	 * replacing them with corresponding system property values.
+	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
+	 *
 	 * @param text the String to resolve
 	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
 	 * @see #PLACEHOLDER_SUFFIX
 	 */
-	public static String resolvePlaceholders(String text) {
-		StringBuilder result = new StringBuilder(text);
+	public static String resolvePlaceholders(final String text) {
+		return PropertyPlaceholderUtils.replacePlaceholders(text, new PlaceholderResolver() {
 
-		int startIndex = result.indexOf(PLACEHOLDER_PREFIX);
-		while (startIndex != -1) {
-			int endIndex = result.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
-			if (endIndex != -1) {
-				String placeholder = result.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
-				int nextIndex = endIndex + PLACEHOLDER_SUFFIX.length();
+			public String resolvePlaceholder(String placeholderName) {
+				String propVal = null;
 				try {
-					String propVal = System.getProperty(placeholder);
+					propVal = System.getProperty(placeholderName);
 					if (propVal == null) {
 						// Fall back to searching the system environment.
-						propVal = System.getenv(placeholder);
+						propVal = System.getenv(placeholderName);
 					}
-					if (propVal != null) {
-						result.replace(startIndex, endIndex + PLACEHOLDER_SUFFIX.length(), propVal);
-						nextIndex = startIndex + propVal.length();
-					}
-					else {
-						System.err.println("Could not resolve placeholder '" + placeholder + "' in [" + text +
+
+					if (propVal == null) {
+						System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" + text +
 								"] as system property: neither system property nor environment variable found");
 					}
 				}
 				catch (Throwable ex) {
-					System.err.println("Could not resolve placeholder '" + placeholder + "' in [" + text +
+					System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" + text +
 							"] as system property: " + ex);
-				}
-				startIndex = result.indexOf(PLACEHOLDER_PREFIX, nextIndex);
-			}
-			else {
-				startIndex = -1;
-			}
-		}
 
-		return result.toString();
+				}
+				return propVal;
+			}
+		});
 	}
 
 }

@@ -32,6 +32,14 @@ public class SystemPropertyUtilsTests {
 	}
 
 	@Test
+	public void testRecursiveFromSystemProperty() {
+		System.setProperty("test.prop", "foo=${bar}");
+		System.setProperty("bar", "baz");
+		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
+		assertEquals("foo=baz", resolved);
+	}
+
+	@Test
 	public void testReplaceFromEnv() {
 		Map<String,String> env = System.getenv();
 		if(env.containsKey("PATH")) {
