@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.factory.parsing.DefaultsDefinition;
 
 /**
- * Simple JavaBean that holds the defaults specified at the <code>%lt;beans&gt;</code>
+ * Simple JavaBean that holds the defaults specified at the <code>&lt;beans&gt;</code>
  * level in a standard Spring XML bean definition document:
- * <code>default-lazy-init</code>, <code>default-autowire</code>, etc
+ * <code>default-lazy-init</code>, <code>default-autowire</code>, etc.
  *
  * @author Juergen Hoeller
  * @since 2.0.2
