@@ -16,7 +16,7 @@
 
 package org.springframework.util;
 
-import org.springframework.util.PropertyPlaceholderUtils.PlaceholderResolver;
+import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
 /**
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
@@ -38,6 +38,7 @@ public abstract class SystemPropertyUtils {
 	/** Suffix for system property placeholders: "}" */
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
+	private static final PropertyPlaceholderHelper HELPER = new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
 	 *
@@ -47,7 +48,7 @@ public abstract class SystemPropertyUtils {
 	 * @see #PLACEHOLDER_SUFFIX
 	 */
 	public static String resolvePlaceholders(final String text) {
-		return PropertyPlaceholderUtils.replacePlaceholders(text, new PlaceholderResolver() {
+		return HELPER.replacePlaceholders(text, new PlaceholderResolver() {
 
 			public String resolvePlaceholder(String placeholderName) {
 				String propVal = null;
