@@ -18,16 +18,17 @@ package org.springframework.beans.factory.config;
 
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
-import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
+import org.springframework.util.PropertyPlaceholderHelper;
+import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
 /**
  * A property resource configurer that resolves placeholders in bean property values of
@@ -134,7 +135,6 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	private String beanName;
 
 	private BeanFactory beanFactory;
-
 
 	/**
 	 * Set the prefix that a placeholder string starts with.
@@ -248,7 +248,6 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		this.beanFactory = beanFactory;
 	}
 
-
 	@Override
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
 			throws BeansException {
@@ -265,7 +264,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 				try {
 					visitor.visitBeanDefinition(bd);
 				}
-				catch (BeanDefinitionStoreException ex) {
+				catch (Exception ex) {
 					throw new BeanDefinitionStoreException(bd.getResourceDescription(), curName, ex.getMessage());
 				}
 			}
@@ -276,87 +275,6 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 		// New in Spring 3.0: resolve placeholders in embedded values such as annotation attributes.
 		beanFactoryToProcess.addEmbeddedValueResolver(valueResolver);
-	}
-
-	/**
-	 * Parse the given String value recursively, to be able to resolve
-	 * nested placeholders (when resolved property values in turn contain
-	 * placeholders again).
-	 * @param strVal the String value to parse
-	 * @param props the Properties to resolve placeholders against
-	 * @param visitedPlaceholders the placeholders that have already been visited
-	 * during the current resolution attempt (used to detect circular references
-	 * between placeholders). Only non-null if we're parsing a nested placeholder.
-	 * @throws BeanDefinitionStoreException if invalid values are encountered
-	 * @see #resolvePlaceholder(String, java.util.Properties, int)
-	 */
-	protected String parseStringValue(String strVal, Properties props, Set<String> visitedPlaceholders)
-		throws BeanDefinitionStoreException {
-
-		StringBuilder buf = new StringBuilder(strVal);
-
-		int startIndex = strVal.indexOf(this.placeholderPrefix);
-		while (startIndex != -1) {
-			int endIndex = findPlaceholderEndIndex(buf, startIndex);
-			if (endIndex != -1) {
-				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
-				if (!visitedPlaceholders.add(placeholder)) {
-					throw new BeanDefinitionStoreException(
-							"Circular placeholder reference '" + placeholder + "' in property definitions");
-				}
-				// Recursive invocation, parsing placeholders contained in the placeholder key.
-				placeholder = parseStringValue(placeholder, props, visitedPlaceholders);
-				// Now obtain the value for the fully resolved key...
-				String propVal = resolvePlaceholder(placeholder, props, this.systemPropertiesMode);
-				if (propVal != null) {
-					// Recursive invocation, parsing placeholders contained in the
-					// previously resolved placeholder value.
-					propVal = parseStringValue(propVal, props, visitedPlaceholders);
-					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Resolved placeholder '" + placeholder + "'");
-					}
-					startIndex = buf.indexOf(this.placeholderPrefix, startIndex + propVal.length());
-				}
-				else if (this.ignoreUnresolvablePlaceholders) {
-					// Proceed with unprocessed value.
-					startIndex = buf.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
-				}
-				else {
-					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
-				}
-				visitedPlaceholders.remove(placeholder);
-			}
-			else {
-				startIndex = -1;
-			}
-		}
-
-		return buf.toString();
-	}
-
-	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
-		int index = startIndex + this.placeholderPrefix.length();
-		int withinNestedPlaceholder = 0;
-		while (index < buf.length()) {
-			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix)) {
-				if (withinNestedPlaceholder > 0) {
-					withinNestedPlaceholder--;
-					index = index + this.placeholderSuffix.length();
-				}
-				else {
-					return index;
-				}
-			}
-			else if (StringUtils.substringMatch(buf, index, this.placeholderPrefix)) {
-				withinNestedPlaceholder++;
-				index = index + this.placeholderPrefix.length();
-			}
-			else {
-				index++;
-			}
-		}
-		return -1;
 	}
 
 	/**
@@ -439,15 +357,31 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 */
 	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
 
-		private final Properties props;
+		private final PropertyPlaceholderHelper helper;
+
+		private final PlaceholderResolver resolver;
 
 		public PlaceholderResolvingStringValueResolver(Properties props) {
-			this.props = props;
+			this.helper = new PropertyPlaceholderHelper(placeholderPrefix, placeholderSuffix, ignoreUnresolvablePlaceholders);
+			this.resolver = new PropertyPlaceholderConfigurerResolver(props);
 		}
 
 		public String resolveStringValue(String strVal) throws BeansException {
-			String value = parseStringValue(strVal, this.props, new HashSet<String>());
+			String value = this.helper.replacePlaceholders(strVal, this.resolver);
 			return (value.equals(nullValue) ? null : value);
+		}
+	}
+
+	private class PropertyPlaceholderConfigurerResolver implements PlaceholderResolver {
+
+		private final Properties props;
+
+		private PropertyPlaceholderConfigurerResolver(Properties props) {
+			this.props = props;
+		}
+
+		public String resolvePlaceholder(String placeholderName) {
+			return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName, props, systemPropertiesMode);
 		}
 	}
 
