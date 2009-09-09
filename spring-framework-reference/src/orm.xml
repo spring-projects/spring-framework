@@ -17,12 +17,12 @@
     Dependency Injection. <!--Identify *these support packages*. Do you mean Hibernate, JPA, etc? Is it correct to call them support packages? 
 TR: REVISED, PLS REVIEW. Changed to say features instead of packages. Reverted the "first-class support" sentence above since it is not 
 IoC itself providing the support.-->They can participate in Spring's resource
-    and transaction management,and they comply with Spring's generic
+    and transaction management, and they comply with Spring's generic
     transaction and DAO exception hierarchies. The recommended integration
     style is to code DAOs against plain Hibernate, JPA, and JDO APIs. The
     older style of using Spring's DAO templates is no longer recommended;
     however, coverage of this style can be found in the <xref
-    linkend="classic-spring-orm" /> Appendix.</para>
+    linkend="classic-spring-orm" /> in the appendices.</para>
 
     <para>Spring adds significant enhancements to the ORM layer of your choice
     when you create data access applications. You can leverage as much of the
@@ -407,7 +407,7 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 
       <para>Furthermore, transaction semantics like propagation behavior and
       isolation level can be changed in a configuration file and do not affect
-      the business service implementations. <!--give context to example; what is it showing, what is its purpose? TR: REVISED, PLS REVIEW. Added some context.--></para>
+      the business service implementations.<!--give context to example; what is it showing, what is its purpose? TR: REVISED, PLS REVIEW. Added some context.--></para>
 
       <para>The following example shows how you can configure an AOP
       transaction interceptor, using XML, for a simple service class:</para>
