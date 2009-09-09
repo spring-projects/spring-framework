@@ -219,7 +219,9 @@
 		<property name="databaseProductNames">
 			<list>
 				<value>Sybase SQL Server</value>
+				<value>SQL Server</value>
 				<value>Adaptive Server Enterprise</value>
+				<value>ASE</value> <!-- name as returned by jTDS driver -->
 				<value>sql server</value> <!-- name as returned by jTDS driver -->
 			</list>
 		</property>
