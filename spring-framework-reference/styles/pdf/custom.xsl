@@ -283,6 +283,18 @@
 		<xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
 		<xsl:attribute name="space-after.maximum">0.1em</xsl:attribute>
 	</xsl:attribute-set>
+	<xsl:attribute-set name="section.title.level4.properties">
+		<xsl:attribute name="space-before.optimum">0.3em</xsl:attribute>
+		<xsl:attribute name="space-before.minimum">0.3em</xsl:attribute>
+		<xsl:attribute name="space-before.maximum">0.3em</xsl:attribute>
+		<xsl:attribute name="font-size">
+			<xsl:value-of select="$body.font.master * 0.9"/>
+			<xsl:text>pt</xsl:text>
+		</xsl:attribute>
+		<xsl:attribute name="space-after.optimum">0.1em</xsl:attribute>
+		<xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
+		<xsl:attribute name="space-after.maximum">0.1em</xsl:attribute>
+	</xsl:attribute-set>
 
 <!-- Use code syntax highlighting -->
 	<xsl:param name="highlight.source" select="1"/>
