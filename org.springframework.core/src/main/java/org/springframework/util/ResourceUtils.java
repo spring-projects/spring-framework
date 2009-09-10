@@ -256,7 +256,6 @@ public abstract class ResourceUtils {
 		String protocol = url.getProtocol();
 		return (URL_PROTOCOL_JAR.equals(protocol) ||
 				URL_PROTOCOL_ZIP.equals(protocol) ||
-				URL_PROTOCOL_VFSZIP.equals(protocol) ||
 				URL_PROTOCOL_WSJAR.equals(protocol) ||
 				(URL_PROTOCOL_CODE_SOURCE.equals(protocol) && url.getPath().indexOf(JAR_URL_SEPARATOR) != -1));
 	}

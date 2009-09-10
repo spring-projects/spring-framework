@@ -45,6 +45,15 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.jboss.vfs/com.springsource.org.jboss.virtual/2.1.0.GA/com.springsource.org.jboss.virtual-2.1.0.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
   <component name="copyright">
     <Base>

@@ -37,6 +37,7 @@
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0"
 					conf="test->compile"/>
 		<dependency org="org.codehaus.woodstox" name="com.springsource.com.ctc.wstx" rev="3.2.7" conf="test->compile"/>
+		<dependency org="org.jboss.vfs" name="com.springsource.org.jboss.virtual" rev="2.1.0.GA" />
 
 	</dependencies>
 
