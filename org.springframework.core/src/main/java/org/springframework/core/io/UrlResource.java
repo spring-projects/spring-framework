@@ -28,6 +28,7 @@ import java.net.URLConnection;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.core.io.support.ResourceHandlingUtils;
 
 /**
  * {@link Resource} implementation for <code>java.net.URL</code> locators.
@@ -163,10 +164,10 @@ public class UrlResource extends AbstractResource {
 	@Override
 	public File getFile() throws IOException {
 		if (this.uri != null) {
-			return ResourceUtils.getFile(this.uri, getDescription());
+			return ResourceHandlingUtils.getFile(this.uri, getDescription());
 		}
 		else {
-			return ResourceUtils.getFile(this.url, getDescription());
+			return ResourceHandlingUtils.getFile(this.url, getDescription());
 		}
 	}
 
@@ -178,7 +179,7 @@ public class UrlResource extends AbstractResource {
 	protected File getFileForLastModifiedCheck() throws IOException {
 		if (ResourceUtils.isJarURL(this.url)) {
 			URL actualUrl = ResourceUtils.extractJarFileURL(this.url);
-			return ResourceUtils.getFile(actualUrl);
+			return ResourceHandlingUtils.getFile(actualUrl);
 		}
 		else {
 			return getFile();

@@ -154,6 +154,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
+ * @author Marius Bogoevici
  * @since 1.0.2
  * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
@@ -334,8 +335,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Resource[] rootDirResources = getResources(rootDirPath);
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		for (Resource rootDirResource : rootDirResources) {
-			rootDirResource = resolveRootDirResource(rootDirResource);
-			if (isJarResource(rootDirResource)) {
+			if (ResourceHandlingUtils.useResourceHandlingDelegate(rootDirResource.getURL())) {
+				result.addAll(ResourceHandlingUtils.findMatchingResourcesByDelegate(rootDirResource, subPattern, getPathMatcher()));
+			} else if (isJarResource(rootDirResource)) {
 				result.addAll(doFindPathMatchingJarResources(rootDirResource, subPattern));
 			}
 			else {

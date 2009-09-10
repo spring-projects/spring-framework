@@ -27,6 +27,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.core.io.support.ResourceHandlingUtils;
 
 /**
  * {@link Resource} implementation for class path resources.
@@ -48,7 +49,6 @@ public class ClassPathResource extends AbstractResource {
 	private ClassLoader classLoader;
 
 	private Class clazz;
-
 
 	/**
 	 * Create a new ClassPathResource for ClassLoader usage.
@@ -174,7 +174,7 @@ public class ClassPathResource extends AbstractResource {
 	 */
 	@Override
 	public File getFile() throws IOException {
-		return ResourceUtils.getFile(getURL(), getDescription());
+		return ResourceHandlingUtils.getFile(getURL(), getDescription());
 	}
 
 	/**
@@ -186,10 +186,10 @@ public class ClassPathResource extends AbstractResource {
 		URL url = getURL();
 		if (ResourceUtils.isJarURL(url)) {
 			URL actualUrl = ResourceUtils.extractJarFileURL(url);
-			return ResourceUtils.getFile(actualUrl);
+			return ResourceHandlingUtils.getFile(actualUrl);
 		}
 		else {
-			return ResourceUtils.getFile(url, getDescription());
+			return ResourceHandlingUtils.getFile(url, getDescription());
 		}
 	}
 
