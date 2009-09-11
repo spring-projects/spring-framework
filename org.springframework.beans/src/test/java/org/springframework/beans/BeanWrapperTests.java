@@ -1462,6 +1462,21 @@ public final class BeanWrapperTests {
 		}
 	}
 
+	@Test
+	public void testGenericEnum() {
+		EnumConsumer consumer = new EnumConsumer();
+		BeanWrapper bw = new BeanWrapperImpl(consumer);
+		bw.setPropertyValue("enumValue", TestEnum.class.getName() + ".TEST_VALUE");
+		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
+	}
+
+	@Test
+	public void testWildcardedGenericEnum() {
+		WildcardEnumConsumer consumer = new WildcardEnumConsumer();
+		BeanWrapper bw = new BeanWrapperImpl(consumer);
+		bw.setPropertyValue("enumValue", TestEnum.class.getName() + ".TEST_VALUE");
+		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
+	}
 
 	private static class DifferentTestBean extends TestBean {
 		// class to test naming of beans in a BeanWrapper error message
@@ -1745,6 +1760,34 @@ public final class BeanWrapperTests {
 		public boolean isAccessed() {
 			return this.accessed;
 		}
+	}
+
+	public static class EnumConsumer {
+		private Enum<TestEnum> enumValue;
+
+		public Enum<TestEnum> getEnumValue() {
+			return enumValue;
+		}
+
+		public void setEnumValue(Enum<TestEnum> enumValue) {
+			this.enumValue = enumValue;
+		}
+	}
+
+	public static class WildcardEnumConsumer {
+		private Enum<?> enumValue;
+
+		public Enum<?> getEnumValue() {
+			return enumValue;
+		}
+
+		public void setEnumValue(Enum<?> enumValue) {
+			this.enumValue = enumValue;
+		}
+	}
+
+	public enum TestEnum {
+		TEST_VALUE
 	}
 
 }
