@@ -77,10 +77,11 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * the local name of the supplied {@link Element}.
 	 */
 	private BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
-		BeanDefinitionParser parser = this.parsers.get(element.getLocalName());
+		String localName = parserContext.getDelegate().getLocalName(element);
+		BeanDefinitionParser parser = this.parsers.get(localName);
 		if (parser == null) {
 			parserContext.getReaderContext().fatal(
-					"Cannot locate BeanDefinitionParser for element [" + element.getLocalName() + "]", element);
+					"Cannot locate BeanDefinitionParser for element [" + localName + "]", element);
 		}
 		return parser;
 	}
@@ -102,11 +103,12 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 */
 	private BeanDefinitionDecorator findDecoratorForNode(Node node, ParserContext parserContext) {
 		BeanDefinitionDecorator decorator = null;
+		String localName = parserContext.getDelegate().getLocalName(node);
 		if (node instanceof Element) {
-			decorator = this.decorators.get(node.getLocalName());
+			decorator = this.decorators.get(localName);
 		}
 		else if (node instanceof Attr) {
-			decorator = this.attributeDecorators.get(node.getLocalName());
+			decorator = this.attributeDecorators.get(localName);
 		}
 		else {
 			parserContext.getReaderContext().fatal(
@@ -114,7 +116,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 		}
 		if (decorator == null) {
 			parserContext.getReaderContext().fatal("Cannot locate BeanDefinitionDecorator for " +
-					(node instanceof Element ? "element" : "attribute") + " [" + node.getLocalName() + "]", node);
+					(node instanceof Element ? "element" : "attribute") + " [" + localName + "]", node);
 		}
 		return decorator;
 	}

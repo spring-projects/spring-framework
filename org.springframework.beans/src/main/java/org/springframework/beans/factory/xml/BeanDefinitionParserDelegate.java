@@ -1417,4 +1417,14 @@ public class BeanDefinitionParserDelegate {
 	public boolean nodeNameEquals(Node node, String desiredName) {
 		return DomUtils.nodeNameEquals(node, desiredName);
 	}
+
+	/**
+	 * Gets the local name for the supplied {@link Node}. The default implementation calls {@link Node#getLocalName}.
+	 * Subclasses may override the default implementation to provide a different mechanism for getting the local name.
+	 * @param node the <code>Node</code>
+	 * @return the local name of the supplied <code>Node</code>.
+	 */
+	public String getLocalName(Node node) {
+		return node.getLocalName();
+	}
 }
