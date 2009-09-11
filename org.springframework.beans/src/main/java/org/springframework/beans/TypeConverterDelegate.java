@@ -232,18 +232,8 @@ class TypeConverterDelegate {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
-					// Try field lookup as fallback: for JDK 1.5 enum or custom enum
-					// with values defined as static fields. Resulting value still needs
-					// to be checked, hence we don't return it right away.
-					try {
-						Field enumField = requiredType.getField(trimmedValue);
-						convertedValue = enumField.get(null);
-					}
-					catch (Throwable ex) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
-						}
-					}
+					
+					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
 				}
 			}
 
@@ -270,6 +260,52 @@ class TypeConverterDelegate {
 		return (T) convertedValue;
 	}
 
+	private Object attemptToConvertStringToEnum(Class<?> requiredType, String trimmedValue, Object currentConvertedValue) {
+		Object convertedValue = currentConvertedValue;
+
+		if(Enum.class.equals(requiredType)) {
+			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
+			int index = trimmedValue.lastIndexOf(".");
+			if(index > - 1) {
+				String enumType = trimmedValue.substring(0, index);
+				String fieldName = trimmedValue.substring(index + 1);
+
+				ClassLoader loader = this.targetObject.getClass().getClassLoader();
+
+				try {
+					Class<?> enumValueType = loader.loadClass(enumType);
+					Field enumField = enumValueType.getField(fieldName);
+					convertedValue = enumField.get(null);
+				} catch(ClassNotFoundException ex) {
+					if(logger.isTraceEnabled()) {
+						logger.trace("Enum class [" + enumType + "] cannot be loaded from [" + loader + "]", ex);
+					}
+				}
+				catch (Throwable ex) {
+					if(logger.isTraceEnabled()) {
+						logger.trace("Field [" + fieldName + "] isn't an enum value for type [" + enumType + "]", ex);
+					}
+				}
+			}
+		}
+		if (convertedValue == currentConvertedValue) {
+			// Try field lookup as fallback: for JDK 1.5 enum or custom enum
+			// with values defined as static fields. Resulting value still needs
+			// to be checked, hence we don't return it right away.
+			try {
+				Field enumField = requiredType.getField(trimmedValue);
+				convertedValue = enumField.get(null);
+			}
+			catch (Throwable ex) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
+
+				}
+			}
+		}
+
+		return convertedValue;
+	}
 	/**
 	 * Find a default editor for the given type.
 	 * @param requiredType the type to find an editor for
