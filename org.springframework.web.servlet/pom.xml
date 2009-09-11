@@ -72,11 +72,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>taglibs</groupId>
-      <artifactId>standard</artifactId>
-      <version>1.1.2</version>
-    </dependency>
-    <dependency>
       <groupId>net.sourceforge.jexcelapi</groupId>
       <artifactId>jxl</artifactId>
       <version>2.6.3</version>
