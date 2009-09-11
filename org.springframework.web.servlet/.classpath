@@ -48,5 +48,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.tiles/com.springsource.org.apache.tiles.core/2.1.2.osgi/com.springsource.org.apache.tiles.core-2.1.2.osgi.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.tiles/com.springsource.org.apache.tiles.jsp/2.1.2/com.springsource.org.apache.tiles.jsp-2.1.2.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.tiles/com.springsource.org.apache.tiles.servlet/2.1.2/com.springsource.org.apache.tiles.servlet-2.1.2.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/javax.validation/com.springsource.javax.validation/1.0.0.CR3/com.springsource.javax.validation-1.0.0.CR3.jar" sourcepath="/IVY_CACHE/javax.validation/com.springsource.javax.validation/1.0.0/com.springsource.javax.validation-sources-1.0.0.CR3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
