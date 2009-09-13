@@ -54,11 +54,12 @@ import org.springframework.util.CollectionUtils;
  * @see javax.validation.ValidatorFactory
  * @see javax.validation.Validator
  * @see javax.validation.Validation#buildDefaultValidatorFactory()
+ * @see javax.validation.ValidatorFactory#getValidator()
  */
 public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, Validator, ApplicationContextAware, InitializingBean {
 
-	private Class<? extends ValidationProvider> providerClass;
+	private Class providerClass;
 
 	private MessageInterpolator messageInterpolator;
 
@@ -153,6 +154,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		Configuration configuration = (this.providerClass != null ?
 				Validation.byProvider(this.providerClass).configure() :
