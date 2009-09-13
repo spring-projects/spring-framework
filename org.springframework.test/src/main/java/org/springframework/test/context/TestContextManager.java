@@ -30,6 +30,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * <p>
@@ -201,9 +202,23 @@ public class TestContextManager {
 					logger.trace("Retrieved @TestExecutionListeners [" + testExecutionListeners
 							+ "] for declaring class [" + declaringClass + "].");
 				}
-				Class<? extends TestExecutionListener>[] classes = testExecutionListeners.value();
-				if (classes != null) {
-					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(classes));
+
+				Class<? extends TestExecutionListener>[] valueListenerClasses = testExecutionListeners.value();
+				Class<? extends TestExecutionListener>[] listenerClasses = testExecutionListeners.listeners();
+				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
+					String msg = String.format(
+						"Test class [%s] has been configured with @TestExecutionListeners' 'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
+						declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
+						ObjectUtils.nullSafeToString(listenerClasses));
+					logger.error(msg);
+					throw new IllegalStateException(msg);
+				}
+				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
+					listenerClasses = valueListenerClasses;
+				}
+
+				if (listenerClasses != null) {
+					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
 				declaringClass = (testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(
 					annotationType, declaringClass.getSuperclass())

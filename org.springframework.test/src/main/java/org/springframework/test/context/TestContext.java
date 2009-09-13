@@ -245,13 +245,10 @@ public class TestContext extends AttributeAccessorSupport {
 			String[] valueLocations = contextConfiguration.value();
 			String[] locations = contextConfiguration.locations();
 			if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
-				String msg = "Test class ["
-						+ declaringClass
-						+ "] has been configured with @ContextConfiguration's 'value' ["
-						+ ObjectUtils.nullSafeToString(valueLocations)
-						+ "] and 'locations' ["
-						+ ObjectUtils.nullSafeToString(locations)
-						+ "] attributes. Only one declaration of resource locations is permitted per @ContextConfiguration annotation.";
+				String msg = String.format(
+					"Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] and 'locations' [%s] attributes. Only one declaration of resource locations is permitted per @ContextConfiguration annotation.",
+					declaringClass, ObjectUtils.nullSafeToString(valueLocations),
+					ObjectUtils.nullSafeToString(locations));
 				logger.error(msg);
 				throw new IllegalStateException(msg);
 			}
