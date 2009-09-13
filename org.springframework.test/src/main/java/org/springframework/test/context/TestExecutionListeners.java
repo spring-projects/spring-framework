@@ -52,7 +52,12 @@ public @interface TestExecutionListeners {
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
 	 */
-	Class<? extends TestExecutionListener>[] value();
+	Class<? extends TestExecutionListener>[] listeners() default {};
+
+	/**
+	 * Alias for {@link #listeners() listeners}.
+	 */
+	Class<? extends TestExecutionListener>[] value() default {};
 
 	/**
 	 * <p>
