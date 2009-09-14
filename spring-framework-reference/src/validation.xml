@@ -1406,7 +1406,7 @@ public class MyController {
 				</para>
 				<note>
 					<para>
-						The @Valid annotation is part of the standard JSR-303 Bean Validation API, and not a Spring-specific construct.
+						The @Valid annotation is part of the standard JSR-303 Bean Validation API, and is not a Spring-specific construct.
 					</para>
 				</note>
 			</section>
@@ -1414,7 +1414,7 @@ public class MyController {
 				<title>Configuring a Validator for use by Spring MVC</title>
 				<para>
 					The Validator instance invoked when a @Valid method argument is encountered may be configured in two ways.
-					First, you may call binder.setValidator(Validator) within a @Controller's @InitBinder callback method.
+					First, you may call binder.setValidator(Validator) within a @Controller's @InitBinder callback.
 					This allows you to configure a Validator instance per @Controller class:
 				</para>
 				<programlisting language="java"><![CDATA[
@@ -1453,7 +1453,7 @@ public class MyController {
 					With JSR-303, the default <code>javax.validation.Validator</code> implementation is generic.
 					A single instance typically coordinates the validation of <emphasis>all</emphasis> application objects that declare validation constraints.
 					To configure such a general purpose Validator for use by Spring MVC, simply inject a <code>LocalValidatorFactoryBean</code> reference into the <code>WebBindingInitializer</code>.
-					<code>LocalValidatorFactoryBean</code> already implements <code>org.springframework.validation.Validator</code>, and delegates to the JSR-303 provider underneath.
+					<code>LocalValidatorFactoryBean</code> already implements <code>org.springframework.validation.Validator</code>, delegating to the JSR-303 provider underneath.
 				</para>
 				<para>
 					A full configuration example showing injection of a JSR-303 backed Validator into Spring MVC is shown below:
