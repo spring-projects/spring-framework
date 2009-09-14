@@ -1408,14 +1408,15 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Determines whether the name of the supplied node is equal to the supplied name.
-	 * The default implementation delegates to {@link DomUtils#nodeNameEquals}.
-	 * Subclasses may override the default implementatino to provide a different mechanism for comparing node names.
+	 * The default implementation checks the supplied desired name against both {@link Node#getNodeName)
+	 * and {@link #getLoclName}.
+	 * Subclasses may override the default implementation to provide a different mechanism for comparing node names.
 	 * @param node the node to compare
 	 * @param desiredName the name to check for
 	 * @return <code>true</code> if the names are equal otherwise <code>false</code>.
 	 */
 	public boolean nodeNameEquals(Node node, String desiredName) {
-		return DomUtils.nodeNameEquals(node, desiredName);
+		return desiredName.equals(node.getNodeName()) || desiredName.equals(getLocalName(node));
 	}
 
 	/**
