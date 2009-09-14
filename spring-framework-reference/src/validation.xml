@@ -1217,9 +1217,9 @@ public interface FormatterRegistry {
 			Third, Spring MVC now has support for declaratively validating @Controller inputs.
 		</para>
 		<section id="validation.beanvalidation.overview">
-			<title>Overview of the Bean Validation API (JSR-303)</title>
+			<title>Overview of the JSR-303 Bean Validation API</title>
 			<para>
-				The Bean Validation API (JSR-303) standardizes validation constraint declaration and metadata for the Java platform.
+				JSR-303 standardizes validation constraint declaration and metadata for the Java platform.
 				Using this API, you annotate domain model properties with declarative validation constraints and the runtime enforces them.
 				There are a number of built-in constraints you can can take advantage of.
 				You may also define your own custom constraints.
