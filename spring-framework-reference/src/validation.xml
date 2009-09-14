@@ -1323,7 +1323,7 @@ public class MyService {
 					This allows your custom ConstraintValidators to benefit from dependency injection like any other Spring bean.
 				</para>
 				<para>
-					Shown below is an example of a custom Constraint declaration, followed by an associated <code>ConstraintValidator</code> implementation that uses Spring for dependency injection:
+					Shown below is an example of a custom @Constraint declaration, followed by an associated <code>ConstraintValidator</code> implementation that uses Spring for dependency injection:
 				</para>
 				<programlisting language="java"><![CDATA[
 @Target({ElementType.METHOD, ElementType.FIELD})
@@ -1359,7 +1359,7 @@ public class MyConstraintValidator implements ConstraintValidator {
 		<section id="validation.binder">
 			<title>Configuring a DataBinder</title>
 			<para>
-				Since Spring 3, a DataBinder instance can now be configured with a Validator.
+				Since Spring 3, a DataBinder instance can be configured with a Validator.
 				Once configured, the Validator may be invoked by calling <code>binder.validate()</code>.
 				Any validation Errors are automatically added to the binder's BindingResults.
 			</para>
