@@ -1384,13 +1384,13 @@ BindingResults results = binder.getBindingResults();}]]>
 		<section id="validation.mvc">
 			<title>Spring MVC 3 Validation</title>
 			<para>
-				Spring MVC 3 now has the ability to automatically validate @Controller method arguments after binding.
-				Before version 3, it was up to the developer to manually invoke object Validation logic.
+				Beginning with Spring 3, Spring MVC has the ability to automatically validate @Controller inputs.
+				In previous versions it was up to the developer to manually invoke validation logic.
 			</para>
 			<section id="validation.mvc.triggering">
 				<title>Triggering @Controller Method Argument Validation</title>
 				<para>
-					To trigger validation of a @Controller method argument, simply annotate the argument as @Valid:
+					To trigger validation of a @Controller input, simply annotate the input argument as @Valid:
 				</para>
 				<programlisting language="java"><![CDATA[
 @Controller
@@ -1473,8 +1473,8 @@ public class MyController {
 <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />]]>
 				</programlisting>
 				<para>
-					With this configuration, anytime a @Valid @Controller method argument is encountered, it will be validated by the JSR-303 provider.
-					JSR-303, in turn, will enforce any constraints declared against the argument.
+					With this configuration, anytime a @Valid @Controller input is encountered, it will be validated by the JSR-303 provider.
+					JSR-303, in turn, will enforce any constraints declared against the input.
 					Any ConstaintViolations will automatically be exposed as BindingResults renderable by standard Spring MVC form tags.
 				</para>
 			</section>
