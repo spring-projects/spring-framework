@@ -51,11 +51,12 @@ import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.AnnotationConfigUtils;
@@ -186,13 +187,30 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
-	public void defaultParamMissing() throws Exception {
+	public void defaultParameters() throws Exception {
 		initServlet(DefaultValueParamController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("foo-bar", response.getContentAsString());
+	}
+
+	@Test
+	public void defaultExpressionParameters() throws Exception {
+		initServlet(DefaultExpressionValueParamController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myPath.do");
+		request.setContextPath("/myApp");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		System.setProperty("myHeader", "bar");
+		try {
+			servlet.service(request, response);
+		}
+		finally {
+			System.clearProperty("myHeader");
+		}
+		assertEquals("foo-bar-/myApp", response.getContentAsString());
 	}
 
 	@Test
@@ -281,13 +299,15 @@ public class ServletAnnotationControllerTests {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
-	private void initServlet(final Class<?> controllerclass) throws ServletException {
+	private void initServlet(final Class<?> controllerClass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
-					throws BeansException {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerclass));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
+				RootBeanDefinition ppc = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+				ppc.getPropertyValues().addPropertyValue("properties", "myKey=foo");
+				wac.registerBeanDefinition("ppc", ppc);
 				wac.refresh();
 				return wac;
 			}
@@ -1612,6 +1632,18 @@ public class ServletAnnotationControllerTests {
 				@RequestHeader(defaultValue = "bar") String header,
 				HttpServletResponse response) throws IOException {
 			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header));
+		}
+	}
+
+	@Controller
+	public static class DefaultExpressionValueParamController {
+
+		@RequestMapping("/myPath.do")
+		public void myHandle(@RequestParam(value = "id", defaultValue = "${myKey}") String id,
+				@RequestHeader(defaultValue = "#{systemProperties.myHeader}") String header,
+				@Value("#{request.contextPath}") String contextPath, HttpServletResponse response)
+				throws IOException {
+			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header) + "-" + contextPath);
 		}
 	}
 

@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Conventions;
 import org.springframework.core.GenericTypeResolver;
@@ -68,11 +69,11 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartRequest;
 
 /**
- * Support class for invoking an annotated handler method. Operates on the introspection results of a {@link
- * HandlerMethodResolver} for a specific handler type.
+ * Support class for invoking an annotated handler method. Operates on the introspection results of a
+ * {@link HandlerMethodResolver} for a specific handler type.
  *
- * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter} and {@link
- * org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.
+ * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter} and
+ * {@link org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -213,6 +214,9 @@ public class HandlerMethodInvoker {
 					attrName = attr.value();
 					found++;
 				}
+				else if (Value.class.isInstance(paramAnn)) {
+					defaultValue = ((Value) paramAnn).value();
+				}
 				else if ("Valid".equals(paramAnn.annotationType().getSimpleName())) {
 					validate = true;
 				}
@@ -227,6 +231,9 @@ public class HandlerMethodInvoker {
 				Object argValue = resolveCommonArgument(methodParam, webRequest);
 				if (argValue != WebArgumentResolver.UNRESOLVED) {
 					args[i] = argValue;
+				}
+				else if (defaultValue != null) {
+					args[i] = resolveDefaultValue(defaultValue);
 				}
 				else {
 					Class paramType = methodParam.getParameterType();
@@ -399,7 +406,7 @@ public class HandlerMethodInvoker {
 		}
 		if (paramValue == null) {
 			if (StringUtils.hasText(defaultValue)) {
-				paramValue = defaultValue;
+				paramValue = resolveDefaultValue(defaultValue);
 			}
 			else if (required) {
 				raiseMissingParameterException(paramName, paramType);
@@ -426,7 +433,7 @@ public class HandlerMethodInvoker {
 		}
 		if (headerValue == null) {
 			if (StringUtils.hasText(defaultValue)) {
-				headerValue = defaultValue;
+				headerValue = resolveDefaultValue(defaultValue);
 			}
 			else if (required) {
 				raiseMissingHeaderException(headerName, paramType);
@@ -493,7 +500,7 @@ public class HandlerMethodInvoker {
 		Object cookieValue = resolveCookieValue(cookieName, paramType, webRequest);
 		if (cookieValue == null) {
 			if (StringUtils.hasText(defaultValue)) {
-				cookieValue = defaultValue;
+				cookieValue = resolveDefaultValue(defaultValue);
 			}
 			else if (required) {
 				raiseMissingCookieException(cookieName, paramType);
@@ -668,6 +675,10 @@ public class HandlerMethodInvoker {
 		if (failOnErrors) {
 			binder.closeNoCatch();
 		}
+	}
+
+	protected Object resolveDefaultValue(String value) {
+		return value;
 	}
 
 	protected Object resolveCommonArgument(MethodParameter methodParameter, NativeWebRequest webRequest)

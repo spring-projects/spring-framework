@@ -53,11 +53,15 @@ import javax.portlet.WindowState;
 import javax.servlet.http.Cookie;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.StylerUtils;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -78,6 +82,7 @@ import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
@@ -112,7 +117,7 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  * @see #setWebBindingInitializer
  * @see #setSessionAttributeStore
  */
-public class AnnotationMethodHandlerAdapter extends PortletContentGenerator implements HandlerAdapter {
+public class AnnotationMethodHandlerAdapter extends PortletContentGenerator implements HandlerAdapter, BeanFactoryAware {
 
 	private static final String IMPLICIT_MODEL_ATTRIBUTE = "org.springframework.web.portlet.mvc.ImplicitModel";
 
@@ -130,6 +135,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	private WebArgumentResolver[] customArgumentResolvers;
 
 	private ModelAndViewResolver[] customModelAndViewResolvers;
+
+	private ConfigurableBeanFactory beanFactory;
+
+	private BeanExpressionContext expressionContext;
 
 	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
@@ -231,6 +240,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	 */
 	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+			this.expressionContext = new BeanExpressionContext(this.beanFactory, new RequestScope());
+		}
 	}
 
 
@@ -543,7 +559,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		public PortletHandlerMethodInvoker(HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore,
-					parameterNameDiscoverer, customArgumentResolvers, new HttpMessageConverter[0]);
+					parameterNameDiscoverer, customArgumentResolvers, null);
 		}
 
 		@Override
@@ -554,6 +570,19 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		@Override
 		protected void raiseSessionRequiredException(String message) throws Exception {
 			throw new PortletSessionRequiredException(message);
+		}
+
+		@Override
+		protected Object resolveDefaultValue(String value) {
+			if (beanFactory == null) {
+				return value;
+			}
+			String placeholdersResolved = beanFactory.resolveEmbeddedValue(value);
+			BeanExpressionResolver exprResolver = beanFactory.getBeanExpressionResolver();
+			if (exprResolver == null) {
+				return value;
+			}
+			return exprResolver.evaluate(placeholdersResolved, expressionContext);
 		}
 
 		@Override
