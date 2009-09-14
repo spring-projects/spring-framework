@@ -35,6 +35,8 @@ import org.w3c.dom.NodeList;
  */
 public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+	private static final String ELEMENT_SCHEDULED = "scheduled";
+
 	@Override
 	protected boolean shouldGenerateId() {
 		return true;
@@ -53,7 +55,7 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node child = childNodes.item(i);
-			if (!(child instanceof Element) || !child.getLocalName().equals("scheduled")) {
+			if (!isScheduledElement(child, parserContext)) {
 				continue;
 			}
 			Element taskElement = (Element) child;
@@ -97,6 +99,11 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 		builder.addPropertyValue("cronTasks", cronTaskMap);
 		builder.addPropertyValue("fixedDelayTasks", fixedDelayTaskMap);
 		builder.addPropertyValue("fixedRateTasks", fixedRateTaskMap);
+	}
+
+	private boolean isScheduledElement(Node node, ParserContext parserContext) {
+		return node.getNodeType() == Node.ELEMENT_NODE &&
+				ELEMENT_SCHEDULED.equals(parserContext.getDelegate().getLocalName(node));
 	}
 
 	private String createRunnableBean(String ref, String method, Element taskElement, ParserContext parserContext) {

@@ -106,7 +106,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				String localName = node.getLocalName();
+				String localName = parserContext.getDelegate().getLocalName(node);
 				if (POINTCUT.equals(localName)) {
 					parsePointcut((Element) node, parserContext);
 				}
@@ -216,7 +216,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			boolean adviceFoundAlready = false;
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Node node = nodeList.item(i);
-				if (isAdviceNode(node)) {
+				if (isAdviceNode(node, parserContext)) {
 					if (!adviceFoundAlready) {
 						adviceFoundAlready = true;
 						if (!StringUtils.hasText(aspectName)) {
@@ -264,12 +264,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * '<code>before</code>', '<code>after</code>', '<code>after-returning</code>',
 	 * '<code>after-throwing</code>' or '<code>around</code>'.
 	 */
-	private boolean isAdviceNode(Node aNode) {
+	private boolean isAdviceNode(Node aNode, ParserContext parserContext) {
 		if (!(aNode instanceof Element)) {
 			return false;
 		}
 		else {
-			String name = aNode.getLocalName();
+			String name = parserContext.getDelegate().getLocalName(aNode);
 			return (BEFORE.equals(name) || AFTER.equals(name) || AFTER_RETURNING_ELEMENT.equals(name) ||
 					AFTER_THROWING_ELEMENT.equals(name) || AROUND.equals(name));
 		}
@@ -317,7 +317,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			List<BeanDefinition> beanDefinitions, List<BeanReference> beanReferences) {
 
 		try {
-			this.parseState.push(new AdviceEntry(adviceElement.getLocalName()));
+			this.parseState.push(new AdviceEntry(parserContext.getDelegate().getLocalName(adviceElement)));
 
 			// create the method factory bean
 			RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
@@ -366,7 +366,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			RootBeanDefinition methodDef, RootBeanDefinition aspectFactoryDef,
 			List<BeanDefinition> beanDefinitions, List<BeanReference> beanReferences) {
 
-		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
+		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement, parserContext));
 		adviceDefinition.setSource(parserContext.extractSource(adviceElement));
 
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY, aspectName);
@@ -407,8 +407,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	/**
 	 * Gets the advice implementation class corresponding to the supplied {@link Element}.
 	 */
-	private Class getAdviceClass(Element adviceElement) {
-		String elementName = adviceElement.getLocalName();
+	private Class getAdviceClass(Element adviceElement, ParserContext parserContext) {
+		String elementName = parserContext.getDelegate().getLocalName(adviceElement);
 		if (BEFORE.equals(elementName)) {
 			return AspectJMethodBeforeAdvice.class;
 		}
