@@ -72,11 +72,15 @@
       <groupId>org.apache.derby</groupId>
       <artifactId>com.springsource.org.apache.derby</artifactId>
       <version>10.5.1000001.764942</version>
-    </dependency>   
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>com.springsource.org.apache.derby.client</artifactId>
       <version>10.5.1000001.764942</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
