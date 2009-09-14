@@ -31,7 +31,7 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
 /** @author Arjen Poutsma */
-public class MappingJacksonHttpMessageConverterTest {
+public class MappingJacksonHttpMessageConverterTests {
 
 	private MappingJacksonHttpMessageConverter<MyBean> converter;
 
