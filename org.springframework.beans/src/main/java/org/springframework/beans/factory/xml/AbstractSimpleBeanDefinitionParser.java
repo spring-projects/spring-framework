@@ -124,11 +124,11 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * @see #extractPropertyName(String) 
 	 */
 	@Override
-	protected final void doParse(Element element, BeanDefinitionBuilder builder) {
+	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		NamedNodeMap attributes = element.getAttributes();
 		for (int x = 0; x < attributes.getLength(); x++) {
 			Attr attribute = (Attr) attributes.item(x);
-			if (isEligibleAttribute(attribute)) {
+			if (isEligibleAttribute(attribute, parserContext)) {
 				String propertyName = extractPropertyName(attribute.getLocalName());
 				Assert.state(StringUtils.hasText(propertyName),
 						"Illegal property name returned from 'extractPropertyName(String)': cannot be null or empty.");
@@ -144,12 +144,31 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * <p>The default implementation considers any attribute as eligible,
 	 * except for the "id" attribute and namespace declaration attributes.
 	 * @param attribute the XML attribute to check
+	 * @param parserContext the <code>ParserContext</code>
 	 * @see #isEligibleAttribute(String)
 	 */
+	protected boolean isEligibleAttribute(Attr attribute, ParserContext parserContext) {
+		boolean eligible = isEligibleAttribute(attribute);
+		if(!eligible) {
+			String fullName = attribute.getName();
+			eligible = (!fullName.equals("xmlns") && !fullName.startsWith("xmlns:") &&
+					isEligibleAttribute(parserContext.getDelegate().getLocalName(attribute)));
+		}
+		return eligible;
+	}
+
+	/**
+	 * Determine whether the given attribute is eligible for being
+	 * turned into a corresponding bean property value.
+	 * <p>The default implementation considers any attribute as eligible,
+	 * except for the "id" attribute and namespace declaration attributes.
+	 * @param attribute the XML attribute to check
+	 * @see #isEligibleAttribute(String)
+	 * @deprecated in favour of {@link #isEligibleAttribute(org.w3c.dom.Attr, ParserContext)}
+	 */
+	@Deprecated
 	protected boolean isEligibleAttribute(Attr attribute) {
-		String fullName = attribute.getName();
-		return (!fullName.equals("xmlns") && !fullName.startsWith("xmlns:") &&
-				isEligibleAttribute(attribute.getLocalName()));
+		return false;
 	}
 
 	/**

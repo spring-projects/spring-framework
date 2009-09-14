@@ -119,7 +119,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			readerContext.error(ex.getMessage(), readerContext.extractSource(element), ex.getCause());
 		}
 
-		parseTypeFilters(element, scanner, readerContext);
+		parseTypeFilters(element, scanner, readerContext, parserContext);
 
 		return scanner;
 	}
@@ -194,7 +194,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	protected void parseTypeFilters(
-			Element element, ClassPathBeanDefinitionScanner scanner, XmlReaderContext readerContext) {
+			Element element, ClassPathBeanDefinitionScanner scanner, XmlReaderContext readerContext, ParserContext parserContext) {
 
 		// Parse exclude and include filter elements.
 		ClassLoader classLoader = scanner.getResourceLoader().getClassLoader();
@@ -202,7 +202,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				String localName = node.getLocalName();
+				String localName = parserContext.getDelegate().getLocalName(node);
 				try {
 					if (INCLUDE_FILTER_ELEMENT.equals(localName)) {
 						TypeFilter typeFilter = createTypeFilter((Element) node, classLoader);
