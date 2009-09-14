@@ -27,6 +27,7 @@ import org.quartz.Scheduler;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
+import org.springframework.util.Assert;
 
 /**
  * Convenience subclass of Quartz's {@link org.quartz.CronTrigger} class,
@@ -70,6 +71,7 @@ public class CronTriggerBean extends CronTrigger
 
 	private String beanName;
 
+	private long startDelay;
 
 	/**
 	 * Register objects in the JobDataMap via a given Map.
@@ -121,6 +123,20 @@ public class CronTriggerBean extends CronTrigger
 		this.jobDetail = jobDetail;
 	}
 
+	/**
+	 * Set the start delay in milliseconds.
+	 * <p>The start delay is added to the current system time
+	 * (when the bean starts) to control the {@link #setStartTime start time}
+	 * of the trigger.
+	 * <p>If the start delay is non-zero it will <strong>always</strong>
+	 * take precedence over start time.
+	 * @param startDelay the start delay, in milliseconds.
+	 */
+	public void setStartDelay(long startDelay) {
+		Assert.state(startDelay >= 0, "Start delay cannot be negative.");
+		this.startDelay = startDelay;
+	}
+
 	public JobDetail getJobDetail() {
 		return this.jobDetail;
 	}
@@ -131,6 +147,10 @@ public class CronTriggerBean extends CronTrigger
 
 
 	public void afterPropertiesSet() throws Exception {
+		if(this.startDelay > 0) {
+			setStartTime(new Date(System.currentTimeMillis() + this.startDelay));
+		}
+
 		if (getName() == null) {
 			setName(this.beanName);
 		}
