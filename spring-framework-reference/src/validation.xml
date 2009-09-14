@@ -1388,7 +1388,7 @@ BindingResults results = binder.getBindingResults();}]]>
 				In previous versions it was up to the developer to manually invoke validation logic.
 			</para>
 			<section id="validation.mvc.triggering">
-				<title>Triggering @Controller Method Argument Validation</title>
+				<title>Triggering @Controller Input Validation</title>
 				<para>
 					To trigger validation of a @Controller input, simply annotate the input argument as @Valid:
 				</para>
