@@ -46,6 +46,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -88,6 +93,7 @@ import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
@@ -120,18 +126,16 @@ import org.springframework.web.util.WebUtils;
  * @see #setWebBindingInitializer
  * @see #setSessionAttributeStore
  */
-public class AnnotationMethodHandlerAdapter extends WebContentGenerator implements HandlerAdapter {
+public class AnnotationMethodHandlerAdapter extends WebContentGenerator implements HandlerAdapter, BeanFactoryAware {
 
 	/**
 	 * Log category to use when no mapped handler is found for a request.
-	 *
 	 * @see #pageNotFoundLogger
 	 */
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
 	/**
 	 * Additional logger to use when no mapped handler is found for a request.
-	 *
 	 * @see #PAGE_NOT_FOUND_LOG_CATEGORY
 	 */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
@@ -156,12 +160,16 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	private ModelAndViewResolver[] customModelAndViewResolvers;
 
-	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
-			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
-
 	private HttpMessageConverter<?>[] messageConverters =
 			new HttpMessageConverter[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
 					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
+
+	private ConfigurableBeanFactory beanFactory;
+
+	private BeanExpressionContext expressionContext;
+
+	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
+			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
 
 
 	public AnnotationMethodHandlerAdapter() {
@@ -316,6 +324,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	 */
 	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
 		this.messageConverters = messageConverters;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+			this.expressionContext = new BeanExpressionContext(this.beanFactory, new RequestScope());
+		}
 	}
 
 
@@ -593,6 +608,19 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		@Override
 		protected void raiseSessionRequiredException(String message) throws Exception {
 			throw new HttpSessionRequiredException(message);
+		}
+
+		@Override
+		protected Object resolveDefaultValue(String value) {
+			if (beanFactory == null) {
+				return value;
+			}
+			String placeholdersResolved = beanFactory.resolveEmbeddedValue(value);
+			BeanExpressionResolver exprResolver = beanFactory.getBeanExpressionResolver();
+			if (exprResolver == null) {
+				return value;
+			}
+			return exprResolver.evaluate(placeholdersResolved, expressionContext);
 		}
 
 		@Override
