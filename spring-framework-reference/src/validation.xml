@@ -1278,7 +1278,7 @@ public class Person {
 				<title>Injecting a Validator</title>
 				<para>
 					LocalValidatorFactoryBean implements both <code>javax.validation.Validator</code> and <code>org.springframework.validation.Validator</code>.
-					Inject a reference to one of these two interfaces into beans that need to invoke validation logic.
+					You may inject a reference to one of these two interfaces into beans that need to invoke validation logic.
 				</para>
 				<para>
 					Inject a reference to <code>javax.validation.Validator</code> if you prefer to work with the JSR-303 API directly:
@@ -1295,7 +1295,7 @@ public class MyService {
 }]]>
 				</programlisting>
 				<para>
-					Inject a reference to <code>org.springframework.validation.Validator</code> if your bean depends on the existing Spring Validation API:
+					Inject a reference to <code>org.springframework.validation.Validator</code> if your bean requires the Spring Validation API:
 				</para>
 				<programlisting language="java"><![CDATA[
 import org.springframework.validation.Validator;
@@ -1315,15 +1315,15 @@ public class MyService {
 					Each JSR-303 validation constraint consists of two parts.
 					First, a @Constraint annotation that declares the constraint and its configurable properties.
 					Second, an implementation of the <code>javax.validation.ConstraintValidator</code> interface that implements the constraint's behavior.
-					To associate a declaration with an implementation, each @Constraint annotation references its corresponding ValidationConstraint implementation class.
-					At runtime, the <code>ConstraintValidatorFactory</code> then creates instances of this class when the constraint annotation is encountered in your domain model.
+					To associate a declaration with an implementation, each @Constraint annotation references a corresponding ValidationConstraint implementation class.
+					At runtime, a <code>ConstraintValidatorFactory</code> instantiates the referenced implementation when the constraint annotation is encountered in your domain model.
 				</para>
 				<para>
-					The <code>LocalValidatorFactoryBean</code> automatically configures a <code>SpringConstraintValidatorFactory</code> that uses Spring to create ConstraintValidator instances.
+					By default, the <code>LocalValidatorFactoryBean</code> configures a <code>SpringConstraintValidatorFactory</code> that uses Spring to create ConstraintValidator instances.
 					This allows your custom ConstraintValidators to benefit from dependency injection like any other Spring bean.
 				</para>
 				<para>
-					Below is an example of a custom constraint declaration and implementation that uses Spring dependency injection:
+					Shown below is an example of a custom Constraint declaration, followed by an associated <code>ConstraintValidator</code> implementation that uses Spring for dependency injection:
 				</para>
 				<programlisting language="java"><![CDATA[
 @Target({ElementType.METHOD, ElementType.FIELD})
@@ -1344,14 +1344,14 @@ public class MyConstraintValidator implements ConstraintValidator {
 }]]>
 				</programlisting>
 				<para>
-					As you can see, the ConstraintValidator implementation above can have its dependencies @Autowired by Spring like any other bean.
+					As you can see, a ConstraintValidator implementation may have its dependencies @Autowired like any other Spring bean.
 				</para>			
 			</section>
 			<section id="validation.beanvalidation.spring.other">
 				<title>Additional Configuration Options</title>
 				<para>
 					The default <code>LocalValidatorFactoryBean</code> configuration should prove sufficient for most cases.
-					There are a number of other explicit configuration options for various JSR-303 constructs, from message interpolation to traversal resolution.
+					There are a number of other configuration options for various JSR-303 constructs, from message interpolation to traversal resolution.
 					See the JavaDocs of LocalValidatorFactoryBean more information on these options.
 				</para>
 			</section>
@@ -1360,20 +1360,21 @@ public class MyConstraintValidator implements ConstraintValidator {
 			<title>Configuring a DataBinder</title>
 			<para>
 				Since Spring 3, a DataBinder instance can now be configured with a Validator.
-				Once configured, the Validator may be subsequently invoked by calling <code>binder.validate()</code>.
+				Once configured, the Validator may be invoked by calling <code>binder.validate()</code>.
 				Any validation Errors are automatically added to the binder's BindingResults.
 			</para>
 			<para>
-				When working with the DataBinder programatically, this feature can be used to invoke validation logic after binding to a target object:
+				When working with the DataBinder programatically, this can be used to invoke validation logic after binding to a target object:
 			</para>
 			<programlisting language="java"><![CDATA[
-DataBinder binder = new DataBinder(new Foo());
+Foo target = new Foo();
+DataBinder binder = new DataBinder(target);
 binder.setValidator(new FooValidator());
 
-// bind to Foo
+// bind to the target object
 binder.bind(propertyValues);
 
-// validate Foo
+// validate the target object
 binder.validate();
 
 // get BindingResults that include any validation errors
@@ -1449,10 +1450,10 @@ public class MyController {
 			<section id="validation.mvc.jsr303">
 				<title>Configuring a JSR-303 Validator for use by Spring MVC</title>
 				<para>
-					With JSR-303, the default <code>javax.validation.Validator</code> implementation is quite generic.
+					With JSR-303, the default <code>javax.validation.Validator</code> implementation is generic.
 					A single instance typically coordinates the validation of <emphasis>all</emphasis> application objects that declare validation constraints.
-					To configure such a Validator for use by Spring MVC, simply inject a <code>LocalValidatorFactoryBean</code> reference into the <code>WebBindingInitializer</code>.
-					<code>LocalValidatorFactoryBean</code> already implements <code>org.springframework.validation.Validation</code>, delegating to the JSR-303 provider underneath.
+					To configure such a general purpose Validator for use by Spring MVC, simply inject a <code>LocalValidatorFactoryBean</code> reference into the <code>WebBindingInitializer</code>.
+					<code>LocalValidatorFactoryBean</code> already implements <code>org.springframework.validation.Validator</code>, and delegates to the JSR-303 provider underneath.
 				</para>
 				<para>
 					A full configuration example showing injection of a JSR-303 backed Validator into Spring MVC is shown below:
@@ -1472,7 +1473,9 @@ public class MyController {
 <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />]]>
 				</programlisting>
 				<para>
-					With this configuration, anytime a @Valid @Controller method argument is encountered, it will be validated using the JSR-303 provider.
+					With this configuration, anytime a @Valid @Controller method argument is encountered, it will be validated by the JSR-303 provider.
+					JSR-303, in turn, will enforce any constraints declared against the argument.
+					Any ConstaintViolations will automatically be exposed as BindingResults renderable by standard Spring MVC form tags.
 				</para>
 			</section>
 		</section>
