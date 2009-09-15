@@ -366,12 +366,13 @@ public class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 	}
 
 
-	@RequestScoped
 	@Named("request")
+	@RequestScoped
 	public static class RequestScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface {
 	}
 
 
+	@Named
 	@SessionScoped
 	public static class SessionScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface {
 	}
