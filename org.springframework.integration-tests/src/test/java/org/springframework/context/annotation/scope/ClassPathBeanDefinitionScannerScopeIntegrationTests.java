@@ -36,6 +36,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Mark Fisher
@@ -318,6 +319,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
+	@Component
 	@Scope("singleton")
 	public static class SingletonScopedTestBean extends ScopedTestBean {
 	}
@@ -327,11 +329,13 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
+	@Component
 	@Scope("request")
 	public static class RequestScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface {
 	}
 
 
+	@Component
 	@Scope("session")
 	public static class SessionScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface {
 	}

@@ -168,13 +168,10 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
-		this.includeFilters.add(new AnnotationTypeFilter(Scope.class));
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) cl.loadClass("javax.inject.Named"))));
-			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) cl.loadClass("javax.inject.Scope"))));
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
