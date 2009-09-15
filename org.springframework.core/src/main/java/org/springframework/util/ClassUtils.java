@@ -689,18 +689,12 @@ public abstract class ClassUtils {
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
-		Method result = method;
+		Method specificMethod = null;
 		if (method != null && !Modifier.isPrivate(method.getModifiers()) &&
 				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
-			try {
-				result = targetClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
-			}
-			catch (NoSuchMethodException ex) {
-				// Perhaps the target class doesn't implement this method:
-				// that's fine, just use the original method.
-			}
+			specificMethod = ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
 		}
-		return result;
+		return (specificMethod != null ? specificMethod : method);
 	}
 
 	/**
@@ -716,14 +710,11 @@ public abstract class ClassUtils {
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
 			Method method = clazz.getDeclaredMethod(methodName, args);
-			if ((method.getModifiers() & Modifier.STATIC) != 0) {
-				return method;
-			}
+			return ((method.getModifiers() & Modifier.STATIC) != 0 ? method : null);
 		}
 		catch (NoSuchMethodException ex) {
 			return null;
 		}
-		return null;
 	}
 
 

@@ -72,18 +72,19 @@ public class HandlerMethodResolver {
 	 */
 	public void init(Class<?> handlerType) {
 		Class<?>[] handlerTypes =
-				Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[]{handlerType};
+				Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[] {handlerType};
 		for (final Class<?> currentHandlerType : handlerTypes) {
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
-					if (isHandlerMethod(ClassUtils.getMostSpecificMethod(method, currentHandlerType))) {
-						handlerMethods.add(ClassUtils.getMostSpecificMethod(method, currentHandlerType));
+					Method specificMethod = ClassUtils.getMostSpecificMethod(method, currentHandlerType);
+					if (isHandlerMethod(specificMethod)) {
+						handlerMethods.add(specificMethod);
 					}
 					else if (method.isAnnotationPresent(InitBinder.class)) {
-						initBinderMethods.add(ClassUtils.getMostSpecificMethod(method, currentHandlerType));
+						initBinderMethods.add(specificMethod);
 					}
 					else if (method.isAnnotationPresent(ModelAttribute.class)) {
-						modelAttributeMethods.add(ClassUtils.getMostSpecificMethod(method, currentHandlerType));
+						modelAttributeMethods.add(specificMethod);
 					}
 				}
 			});
