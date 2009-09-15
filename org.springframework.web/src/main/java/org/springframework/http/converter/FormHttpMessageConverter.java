@@ -33,6 +33,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write form data.
@@ -47,7 +48,7 @@ import org.springframework.util.StringUtils;
  */
 public class FormHttpMessageConverter extends AbstractHttpMessageConverter<MultiValueMap<String, String>> {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+	public static final Charset DEFAULT_CHARSET = Charset.forName(WebUtils.DEFAULT_CHARACTER_ENCODING);
 
 	/** Creates a new instance of the {@code FormHttpMessageConverter}. */
 	public FormHttpMessageConverter() {
