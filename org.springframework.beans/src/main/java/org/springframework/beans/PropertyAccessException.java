@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,11 +55,25 @@ public abstract class PropertyAccessException extends BeansException implements 
 
 	/**
 	 * Return the PropertyChangeEvent that resulted in the problem.
-	 * May be <code>null</code>; only available if an actual bean property
+	 * <p>May be <code>null</code>; only available if an actual bean property
 	 * was affected.
 	 */
 	public PropertyChangeEvent getPropertyChangeEvent() {
 		return this.propertyChangeEvent;
+	}
+
+	/**
+	 * Return the name of the affected property, if available.
+	 */
+	public String getPropertyName() {
+		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getPropertyName() : null);
+	}
+
+	/**
+	 * Return the affected value that was about to be set, if any.
+	 */
+	public Object getValue() {
+		return (this.propertyChangeEvent != null ? this.propertyChangeEvent.getNewValue() : null);
 	}
 
 }

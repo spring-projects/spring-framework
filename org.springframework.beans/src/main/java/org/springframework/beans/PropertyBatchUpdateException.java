@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Combined exception, composed of individual PropertyAccessException instances.
@@ -60,19 +61,18 @@ public class PropertyBatchUpdateException extends BeansException {
 
 	/**
 	 * Return an array of the propertyAccessExceptions stored in this object.
-	 * Will return the empty array (not null) if there were no errors.
+	 * <p>Will return the empty array (not <code>null</code>) if there were no errors.
 	 */
 	public final PropertyAccessException[] getPropertyAccessExceptions() {
 		return this.propertyAccessExceptions;
 	}
 
 	/**
-	 * Return the exception for this field, or <code>null</code> if there isn't one.
+	 * Return the exception for this field, or <code>null</code> if there isn't any.
 	 */
 	public PropertyAccessException getPropertyAccessException(String propertyName) {
-		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
-			PropertyAccessException pae = this.propertyAccessExceptions[i];
-			if (propertyName.equals(pae.getPropertyChangeEvent().getPropertyName())) {
+		for (PropertyAccessException pae : this.propertyAccessExceptions) {
+			if (ObjectUtils.nullSafeEquals(propertyName, pae.getPropertyName())) {
 				return pae;
 			}
 		}
