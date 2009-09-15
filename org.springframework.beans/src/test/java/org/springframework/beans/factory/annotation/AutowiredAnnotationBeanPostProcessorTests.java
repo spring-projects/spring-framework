@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,6 +143,32 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
 		assertSame(bf, bean.getBeanFactory());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testExtendedResourceInjectionWithSkippedOverriddenMethods() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition annotatedBd = new RootBeanDefinition(OverriddenExtendedResourceInjectionBean.class);
+		bf.registerBeanDefinition("annotatedBean", annotatedBd);
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		NestedTestBean ntb = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean", ntb);
+
+		OverriddenExtendedResourceInjectionBean bean = (OverriddenExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertNull(bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertSame(ntb, bean.getNestedTestBean());
+		assertNull(bean.getBeanFactory());
+		assertTrue(bean.baseInjected);
+		assertTrue(bean.subInjected);
 		bf.destroySingletons();
 	}
 
@@ -934,7 +960,9 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
-		private BeanFactory beanFactory;
+		protected BeanFactory beanFactory;
+
+		public boolean baseInjected = false;
 
 		public ExtendedResourceInjectionBean() {
 		}
@@ -948,6 +976,11 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		private void inject(ITestBean testBean4, T nestedTestBean) {
 			this.testBean4 = testBean4;
 			this.nestedTestBean = nestedTestBean;
+		}
+
+		@Autowired
+		private void inject(ITestBean testBean4) {
+			this.baseInjected = true;
 		}
 
 		@Autowired
@@ -975,6 +1008,27 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 
 	public static class TypedExtendedResourceInjectionBean extends ExtendedResourceInjectionBean<NestedTestBean> {
 
+	}
+
+
+	public static class OverriddenExtendedResourceInjectionBean extends ExtendedResourceInjectionBean<NestedTestBean> {
+
+		public boolean subInjected = false;
+
+		@Override
+		public void setTestBean2(TestBean testBean2) {
+			super.setTestBean2(testBean2);
+		}
+
+		@Override
+		protected void initBeanFactory(BeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
+		@Autowired
+		private void inject(ITestBean testBean4) {
+			this.subInjected = true;
+		}
 	}
 
 

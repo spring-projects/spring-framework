@@ -689,16 +689,18 @@ public abstract class ClassUtils {
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
-		if (method != null && targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
+		Method result = method;
+		if (method != null && !Modifier.isPrivate(method.getModifiers()) &&
+				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
 			try {
-				method = targetClass.getMethod(method.getName(), method.getParameterTypes());
+				result = targetClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
 			}
 			catch (NoSuchMethodException ex) {
 				// Perhaps the target class doesn't implement this method:
 				// that's fine, just use the original method.
 			}
 		}
-		return method;
+		return result;
 	}
 
 	/**
