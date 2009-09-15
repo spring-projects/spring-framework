@@ -18,7 +18,7 @@ package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,9 +38,11 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link AutowireCandidateResolver} implementation that matches bean definition
- * qualifiers against qualifier annotations on the field or parameter to be autowired.
- * Also supports suggested expression values through a value annotation.
+ * {@link AutowireCandidateResolver} implementation that matches bean definition qualifiers
+ * against {@link Qualifier qualifier annotations} on the field or parameter to be autowired.
+ * Also supports suggested expression values through a {@link Value value} annotation.
+ *
+ * <p>Also supports JSR-330's {@link javax.inject.Qualifier} annotation, if available.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -51,7 +53,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver, BeanFactoryAware {
 
-	private final Set<Class<? extends Annotation>> qualifierTypes;
+	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<Class<? extends Annotation>>();
 
 	private Class<? extends Annotation> valueAnnotationType = Value.class;
 
@@ -61,10 +63,18 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	/**
 	 * Create a new QualifierAnnotationAutowireCandidateResolver
 	 * for Spring's standard {@link Qualifier} annotation.
+	 * <p>Also supports JSR-330's {@link javax.inject.Qualifier} annotation, if available.
 	 */
+	@SuppressWarnings("unchecked")
 	public QualifierAnnotationAutowireCandidateResolver() {
-		this.qualifierTypes = new HashSet<Class<? extends Annotation>>(1);
 		this.qualifierTypes.add(Qualifier.class);
+		ClassLoader cl = QualifierAnnotationAutowireCandidateResolver.class.getClassLoader();
+		try {
+			this.qualifierTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Qualifier"));
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-330 API not available - simply skip.
+		}
 	}
 
 	/**
@@ -74,7 +84,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 */
 	public QualifierAnnotationAutowireCandidateResolver(Class<? extends Annotation> qualifierType) {
 		Assert.notNull(qualifierType, "'qualifierType' must not be null");
-		this.qualifierTypes = new HashSet<Class<? extends Annotation>>(1);
 		this.qualifierTypes.add(qualifierType);
 	}
 
@@ -85,7 +94,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 */
 	public QualifierAnnotationAutowireCandidateResolver(Set<Class<? extends Annotation>> qualifierTypes) {
 		Assert.notNull(qualifierTypes, "'qualifierTypes' must not be null");
-		this.qualifierTypes = new HashSet<Class<? extends Annotation>>(qualifierTypes);
+		this.qualifierTypes.addAll(qualifierTypes);
 	}
 
 

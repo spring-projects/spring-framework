@@ -83,6 +83,8 @@ import org.springframework.util.ReflectionUtils;
  * a special case of such a general config method. Such config methods
  * do not have to be public.
  *
+ * <p>Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
+ *
  * <p>Note: A default AutowiredAnnotationBeanPostProcessor will be registered
  * by the "context:annotation-config" and "context:component-scan" XML tags.
  * Remove or turn off the default annotation configuration there if you intend
@@ -100,8 +102,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
 
-	@SuppressWarnings("unchecked")
-	private Class<? extends Annotation>[] autowiredAnnotationTypes = new Class[] {Autowired.class, Value.class};
+	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
+			new LinkedHashSet<Class<? extends Annotation>>();
 	
 	private String requiredParameterName = "required";
 	
@@ -119,19 +121,23 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 
 	/**
-	 * Set the 'autowired' annotation types, to be used on constructors, fields,
-	 * setter methods and arbitrary config methods.
-	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation, as well as {@link Value} and raw
-	 * use of the {@link Qualifier} annotation.
-	 * <p>This setter property exists so that developers can provide their own
-	 * (non-Spring-specific) annotation types to indicate that a member is
-	 * supposed to be autowired.
+	 * Create a new AutowiredAnnotationBeanPostProcessor
+	 * for Spring's standard {@link Autowired} annotation.
+	 * <p>Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
 	 */
-	public void setAutowiredAnnotationTypes(Class<? extends Annotation>[] autowiredAnnotationTypes) {
-		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
-		this.autowiredAnnotationTypes = autowiredAnnotationTypes;
+	@SuppressWarnings("unchecked")
+	public AutowiredAnnotationBeanPostProcessor() {
+		this.autowiredAnnotationTypes.add(Autowired.class);
+		this.autowiredAnnotationTypes.add(Value.class);
+		ClassLoader cl = AutowiredAnnotationBeanPostProcessor.class.getClassLoader();
+		try {
+			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Inject"));
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-330 API not available - simply skip.
+		}
 	}
+
 
 	/**
 	 * Set the 'autowired' annotation type, to be used on constructors, fields,
@@ -142,10 +148,26 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * (non-Spring-specific) annotation type to indicate that a member is
 	 * supposed to be autowired.
 	 */
-	@SuppressWarnings("unchecked")
 	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
 		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
-		this.autowiredAnnotationTypes = new Class[] {autowiredAnnotationType};
+		this.autowiredAnnotationTypes.clear();
+		this.autowiredAnnotationTypes.add(autowiredAnnotationType);
+	}
+
+	/**
+	 * Set the 'autowired' annotation types, to be used on constructors, fields,
+	 * setter methods and arbitrary config methods.
+	 * <p>The default autowired annotation type is the Spring-provided
+	 * {@link Autowired} annotation, as well as {@link Value} and raw
+	 * use of the {@link Qualifier} annotation.
+	 * <p>This setter property exists so that developers can provide their own
+	 * (non-Spring-specific) annotation types to indicate that a member is
+	 * supposed to be autowired.
+	 */
+	public void setAutowiredAnnotationTypes(Set<Class<? extends Annotation>> autowiredAnnotationTypes) {
+		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
+		this.autowiredAnnotationTypes.clear();
+		this.autowiredAnnotationTypes.addAll(autowiredAnnotationTypes);
 	}
 
 	/**

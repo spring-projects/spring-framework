@@ -199,6 +199,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		for (String basePackage : basePackages) {
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
+				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (candidate instanceof AbstractBeanDefinition) {
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
@@ -219,8 +221,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				}
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-					definitionHolder = applyScope(definitionHolder, scopeMetadata);
+					definitionHolder = applyScopedProxyMode(definitionHolder, scopeMetadata);
 					beanDefinitions.add(definitionHolder);
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
@@ -301,19 +302,17 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 	/**
 	 * Apply the specified scope to the given bean definition.
-	 * @param definitionHolder the bean definition to configure
-	 * @param scopeMetadata the corresponding scope metadata
+	 * @param definition the bean definition to configure
+	 * @param metadata the corresponding scope metadata
 	 * @return the final bean definition to use (potentially a proxy)
 	 */
-	private BeanDefinitionHolder applyScope(BeanDefinitionHolder definitionHolder, ScopeMetadata scopeMetadata) {
-		String scope = scopeMetadata.getScopeName();
-		ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();
-		definitionHolder.getBeanDefinition().setScope(scope);
+	private BeanDefinitionHolder applyScopedProxyMode(BeanDefinitionHolder definition, ScopeMetadata metadata) {
+		ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
 		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
-			return definitionHolder;
+			return definition;
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
-		return ScopedProxyCreator.createScopedProxy(definitionHolder, this.registry, proxyTargetClass);
+		return ScopedProxyCreator.createScopedProxy(definition, this.registry, proxyTargetClass);
 	}
 
 

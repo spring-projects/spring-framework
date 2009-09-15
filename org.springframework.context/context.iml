@@ -22,6 +22,7 @@
     <orderEntry type="library" name="Commons Logging" level="project" />
     <orderEntry type="library" name="Commons Pool" level="project" />
     <orderEntry type="library" name="EasyMock" level="project" />
+    <orderEntry type="library" name="javax.inject" level="project" />
     <orderEntry type="library" name="JUnit" level="project" />
     <orderEntry type="library" name="Log4j" level="project" />
     <orderEntry type="library" name="SLF4j" level="project" />

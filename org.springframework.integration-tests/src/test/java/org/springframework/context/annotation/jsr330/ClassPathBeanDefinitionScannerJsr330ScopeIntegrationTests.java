@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package org.springframework.context.annotation.jsr330;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.junit.After;
 import static org.junit.Assert.*;
@@ -22,14 +29,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
+import org.springframework.context.annotation.ScopeMetadata;
+import org.springframework.context.annotation.ScopeMetadataResolver;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.GenericWebApplicationContext;
@@ -39,7 +47,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
+public class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 
 	private static final String DEFAULT_NAME = "default";
 
@@ -47,7 +55,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 	private ServletRequestAttributes oldRequestAttributes;
 
-	private ServletRequestAttributes newRequestAttributes; 
+	private ServletRequestAttributes newRequestAttributes;
 
 	private ServletRequestAttributes oldRequestAttributesWithSession;
 
@@ -75,10 +83,20 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 
 	@Test
+	public void testPrototype() {
+		ApplicationContext context = createContext(ScopedProxyMode.NO);
+		ScopedTestBean bean = (ScopedTestBean) context.getBean("prototype");
+		assertTrue(context.isPrototype("prototype"));
+		assertFalse(context.isSingleton("prototype"));
+	}
+
+	@Test
 	public void testSingletonScopeWithNoProxy() {
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
 		ApplicationContext context = createContext(ScopedProxyMode.NO);
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("singleton");
+		assertTrue(context.isSingleton("singleton"));
+		assertFalse(context.isPrototype("singleton"));
 
 		// should not be a proxy
 		assertFalse(AopUtils.isAopProxy(bean));
@@ -232,7 +250,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		assertTrue(bean instanceof AnotherScopeTestInterface);
 
 		assertEquals(DEFAULT_NAME, bean.getName());
-		bean.setName(MODIFIED_NAME);	
+		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// this is a proxy so it should be reset to default
@@ -260,7 +278,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		assertTrue(bean instanceof SessionScopedTestBean);
 
 		assertEquals(DEFAULT_NAME, bean.getName());
-		bean.setName(MODIFIED_NAME);	
+		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// this is a proxy so it should be reset to default
@@ -277,32 +295,42 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
-	private ApplicationContext createContext(ScopedProxyMode scopedProxyMode) {
+	private ApplicationContext createContext(final ScopedProxyMode scopedProxyMode) {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, false);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
-		scanner.addIncludeFilter(new AnnotationTypeFilter(ScopeTestComponent.class));
-		scanner.setBeanNameGenerator(new BeanNameGenerator() {
-			public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-				String beanClassName = ClassUtils.getShortName(definition.getBeanClassName());
-				int begin = beanClassName.lastIndexOf('.') + 1;
-				int end = beanClassName.lastIndexOf("ScopedTestBean");
-				return beanClassName.substring(begin, end).toLowerCase();
+		scanner.setScopeMetadataResolver(new ScopeMetadataResolver() {
+			public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
+				ScopeMetadata metadata = new ScopeMetadata();
+				if (definition instanceof AnnotatedBeanDefinition) {
+					AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
+					for (String type : annDef.getMetadata().getAnnotationTypes()) {
+						if (type.equals(javax.inject.Singleton.class.getName())) {
+							metadata.setScopeName(BeanDefinition.SCOPE_SINGLETON);
+							break;
+						}
+						else if (annDef.getMetadata().getMetaAnnotationTypes(type).contains(javax.inject.Scope.class.getName())) {
+							metadata.setScopeName(type.substring(type.length() - 13, type.length() - 6).toLowerCase());
+							metadata.setScopedProxyMode(scopedProxyMode);
+							break;
+						}
+						else if (type.startsWith("javax.inject")) {
+							metadata.setScopeName(BeanDefinition.SCOPE_PROTOTYPE);
+						}
+					}
+				}
+				return metadata;
 			}
 		});
-		scanner.setScopedProxyMode(scopedProxyMode);
 
 		// Scan twice in order to find errors in the bean definition compatibility check.
 		scanner.scan(getClass().getPackage().getName());
 		scanner.scan(getClass().getPackage().getName());
 
+		context.registerAlias("classPathBeanDefinitionScannerJsr330ScopeIntegrationTests.SessionScopedTestBean", "session");
 		context.refresh();
 		return context;
 	}
-
-
- 	public static @interface ScopeTestComponent {
- 	}
 
 
  	public static interface IScopedTestBean {
@@ -323,8 +351,14 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
-	@ScopeTestComponent
-	public static class SingletonScopedTestBean extends ScopedTestBean { 
+	@Named("prototype")
+	public static class PrototypeScopedTestBean extends ScopedTestBean {
+	}
+
+
+	@Named("singleton")
+	@Singleton
+	public static class SingletonScopedTestBean extends ScopedTestBean {
 	}
 
 
@@ -332,15 +366,28 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 	}
 
 
-	@Scope("request")
-	@ScopeTestComponent
-	public static class RequestScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface { 
+	@RequestScoped
+	@Named("request")
+	public static class RequestScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface {
 	}
 
 
-	@Scope("session")
-	@ScopeTestComponent
+	@SessionScoped
 	public static class SessionScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface {
+	}
+
+
+	@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@javax.inject.Scope
+	public static @interface RequestScoped {
+	}
+
+
+	@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@javax.inject.Scope
+	public static @interface SessionScoped {
 	}
 
 }

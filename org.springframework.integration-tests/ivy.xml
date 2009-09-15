@@ -30,6 +30,7 @@
 		<dependency org="javax.ejb" name="com.springsource.javax.ejb" rev="3.0.0" conf="test->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="test->compile"/>
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08" conf="test->compile"/>
+		<dependency org="javax.inject" name="com.springsource.javax.inject" rev="0.9.0.PFD" conf="test->compile"/>
 		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.1.0" conf="test->compile"/>
 		<dependency org="javax.jms" name="com.springsource.javax.jms" rev="1.1.0" conf="test->compile"/>
 		<dependency org="javax.mail" name="com.springsource.javax.mail" rev="1.4.0" conf="test->compile"/>
