@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,12 +62,11 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 
 	public void processPropertyAccessException(PropertyAccessException ex, BindingResult bindingResult) {
 		// Create field error with the exceptions's code, e.g. "typeMismatch".
-		String field = ex.getPropertyChangeEvent().getPropertyName();
-		Object value = ex.getPropertyChangeEvent().getNewValue();
+		String field = ex.getPropertyName();
 		String[] codes = bindingResult.resolveMessageCodes(ex.getErrorCode(), field);
 		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), field);
 		bindingResult.addError(new FieldError(
-				bindingResult.getObjectName(), field, value, true,
+				bindingResult.getObjectName(), field, ex.getValue(), true,
 				codes, arguments, ex.getLocalizedMessage()));
 	}
 
@@ -83,8 +82,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 	 */
 	protected Object[] getArgumentsForBindError(String objectName, String field) {
 		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
-		String defaultMessage = field;
-		return new Object[] {new DefaultMessageSourceResolvable(codes, defaultMessage)};
+		return new Object[] {new DefaultMessageSourceResolvable(codes, field)};
 	}
 
 }
