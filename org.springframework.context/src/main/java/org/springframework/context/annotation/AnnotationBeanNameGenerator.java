@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.springframework.util.StringUtils;
  * themselves annotated with 
  * {@link org.springframework.stereotype.Component @Component}.
  *
+ * <p>Also supports JSR-330's {@link javax.inject.Named} annotation, if available.
+ *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
  * letter lower-cased). For example:
@@ -52,6 +54,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.stereotype.Repository#value()
  * @see org.springframework.stereotype.Service#value()
  * @see org.springframework.stereotype.Controller#value()
+ * @see javax.inject.Named#value()
  */
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
@@ -107,7 +110,8 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 			Set<String> metaAnnotationTypes, Map<String, Object> attributes) {
 
 		boolean isStereotype = annotationType.equals(COMPONENT_ANNOTATION_CLASSNAME) ||
-				(metaAnnotationTypes != null && metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME));
+				(metaAnnotationTypes != null && metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME)) ||
+				annotationType.equals("javax.inject.Named");
 		return (isStereotype && attributes != null && attributes.containsKey("value"));
 	}
 

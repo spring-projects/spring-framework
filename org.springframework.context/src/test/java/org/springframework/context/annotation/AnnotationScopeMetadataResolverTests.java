@@ -16,6 +16,12 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Retention;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,6 +75,15 @@ public final class AnnotationScopeMetadataResolverTests {
 		assertEquals(ScopedProxyMode.TARGET_CLASS, scopeMetadata.getScopedProxyMode());
 	}
 
+	@Test
+	public void testCustomRequestScope() {
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithCustomRequestScope.class);
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
+		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
+		assertEquals("request", scopeMetadata.getScopeName());
+		assertEquals(ScopedProxyMode.NO, scopeMetadata.getScopedProxyMode());
+	}
+
 	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullScopedProxyMode() {
 		new AnnotationScopeMetadataResolver(null);
@@ -92,6 +107,19 @@ public final class AnnotationScopeMetadataResolverTests {
 
 	@Scope(value="request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 	private static final class AnnotatedWithScopedProxy {
+	}
+
+
+	@CustomRequestScope
+	private static final class AnnotatedWithCustomRequestScope {
+	}
+
+
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Scope("request")
+	public @interface CustomRequestScope {
+
 	}
 
 }

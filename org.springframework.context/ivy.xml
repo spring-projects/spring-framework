@@ -35,9 +35,10 @@
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="optional, backport-util-concurrent->compile"/>
 		<dependency org="javax.annotation" name="com.springsource.javax.annotation" rev="1.0.0" conf="provided, ejb->compile"/>
 		<dependency org="javax.ejb" name="com.springsource.javax.ejb" rev="3.0.0" conf="provided, ejb->compile"/>
+		<dependency org="javax.inject" name="com.springsource.javax.inject" rev="0.9.0.PFD" conf="provided->compile"/>
 		<dependency org="javax.jms" name="com.springsource.javax.jms" rev="1.1.0" conf="provided, jms->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="provided, jpa->compile"/>
-		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.CR3"/>
+		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.CR3" conf="provided->compile"/>
 		<dependency org="javax.xml.ws" name="com.springsource.javax.xml.ws" rev="2.1.1" conf="provided, ws->compile"/>
 		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.2.0" conf="optional, bytecode-proxy->compile"/>
 		<dependency org="org.aopalliance" name="com.springsource.org.aopalliance" rev="1.0.0" conf="compile->compile"/>
@@ -45,7 +46,6 @@
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="optional, aspectj->compile"/>
 		<dependency org="org.beanshell" name="com.springsource.bsh" rev="2.0.0.b4" conf="optional, beanshell->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.3" conf="optional, groovy->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.0.Beta2"/>
 		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.2.0" conf="optional, jruby->compile"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="compile->compile"/>
@@ -60,6 +60,7 @@
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" conf="test->runtime"/>
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.0.Beta2" conf="test->runtime"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
 		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->runtime"/>
 	</dependencies>

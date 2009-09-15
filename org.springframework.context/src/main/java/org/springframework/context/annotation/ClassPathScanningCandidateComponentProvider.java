@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -164,8 +165,20 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	 * {@link Repository @Repository}, {@link Service @Service}, and
 	 * {@link Controller @Controller} stereotype annotations.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+		this.includeFilters.add(new AnnotationTypeFilter(Scope.class));
+		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
+		try {
+			this.includeFilters.add(new AnnotationTypeFilter(
+					((Class<? extends Annotation>) cl.loadClass("javax.inject.Named"))));
+			this.includeFilters.add(new AnnotationTypeFilter(
+					((Class<? extends Annotation>) cl.loadClass("javax.inject.Scope"))));
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-330 API not available - simply skip.
+		}
 	}
 
 

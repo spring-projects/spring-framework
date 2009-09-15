@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.inject.Provider;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
@@ -642,8 +643,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-		if (ObjectFactory.class.equals(descriptor.getDependencyType())) {
+		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
 			return new DependencyObjectFactory(descriptor, beanName);
+		}
+		else if (descriptor.getDependencyType().getName().equals("javax.inject.Provider")) {
+			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
 		}
 		else {
 			return doResolveDependency(descriptor, descriptor.getDependencyType(), beanName, autowiredBeanNames, typeConverter);
@@ -958,6 +962,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		public Object getObject() throws BeansException {
 			return doResolveDependency(this.descriptor, this.type, this.beanName, null, null);
+		}
+	}
+
+
+	/**
+	 * Serializable ObjectFactory for lazy resolution of a dependency.
+	 */
+	private class DependencyProvider extends DependencyObjectFactory implements Provider {
+
+		public DependencyProvider(DependencyDescriptor descriptor, String beanName) {
+			super(descriptor, beanName);
+		}
+
+		public Object get() throws BeansException {
+			return getObject();
+		}
+	}
+
+
+	/**
+	 * Separate inner class for avoiding a hard dependency on the <code>javax.inject</code> API.
+	 */
+	private class DependencyProviderFactory {
+
+		public Object createDependencyProvider(DependencyDescriptor descriptor, String beanName) {
+			return new DependencyProvider(descriptor, beanName);
 		}
 	}
 
