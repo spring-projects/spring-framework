@@ -139,7 +139,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Abstract template method that writes the actualy body. Invoked from {@link #write(Object, HttpOutputMessage)}.
+	 * Abstract template method that writes the actual body. Invoked from {@link #write(Object, HttpOutputMessage)}.
 	 *
 	 * @param t the object to write to the output message
 	 * @param outputMessage the message to write to
