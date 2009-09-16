@@ -6,7 +6,7 @@ http://www.springsource.org
 Changes in version 3.0.0.RC1 (2009-09-14)
 -----------------------------------------
 
-* updated to AspectJ 1.6.5, Groovy 1.6.3, EHCache 1.6.2, and JUnit 4.7
+* updated to AspectJ 1.6.5, Groovy 1.6.3, EHCache 1.6.2, JUnit 4.7, and TestNG 5.10
 * refined PathMatchingResourcePatternResolver's treatment of non-readable directories
 * revised AccessControlContext access from BeanFactory
 * BeanFactory's default type conversion falls back to String constructor on target type
