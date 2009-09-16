@@ -25,17 +25,14 @@ import org.springframework.util.StringUtils;
  * @author Keith Donald
  * @since 3.0
  */
-@SuppressWarnings("unchecked")
 class StringToArray implements ConversionExecutor {
 
 	private final ArrayToArray converter;
-	
 
 	public StringToArray(TypeDescriptor targetType, GenericConversionService conversionService) {
 		this.converter = new ArrayToArray(TypeDescriptor.valueOf(String[].class), targetType, conversionService);
 	}
 	
-
 	public Object execute(Object source) {
 		String str = (String) source;
 		String[] fields = StringUtils.commaDelimitedListToStringArray(str);

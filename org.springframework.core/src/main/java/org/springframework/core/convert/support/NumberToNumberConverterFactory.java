@@ -21,7 +21,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.util.NumberUtils;
 
 /**
- * Converts from a Character to any JDK-standard Number implementation.
+ * Converts from any JDK-standard Number implementation to any other JDK-standard Number implementation.
  *
  * <p>Support Number classes including Byte, Short, Integer, Float, Double, Long, BigInteger, BigDecimal. This class
  * delegates to {@link NumberUtils#convertNumberToTargetClass(Number, Class)} to perform the conversion.
@@ -36,24 +36,24 @@ import org.springframework.util.NumberUtils;
  * @see java.lang.Float
  * @see java.lang.Double
  * @see java.math.BigDecimal
- * @see NumberUtils 
+ * @see NumberUtils
  */
-class CharacterToNumberFactory implements ConverterFactory<Character, Number> {
+class NumberToNumberConverterFactory implements ConverterFactory<Number, Number> {
 
-	public <T extends Number> Converter<Character, T> getConverter(Class<T> targetType) {
-		return new CharacterToNumber<T>(targetType);
+	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
+		return new NumberToNumber<T>(targetType);
 	}
 
-	private static class CharacterToNumber<T extends Number> implements Converter<Character, T> {
+	private static class NumberToNumber<T extends Number> implements Converter<Number, T> {
 
 		private final Class<T> targetType;
 		
-		public CharacterToNumber(Class<T> targetType) {
+		public NumberToNumber(Class<T> targetType) {
 			this.targetType = targetType;
 		}
 	
-		public T convert(Character source) {
-			return NumberUtils.convertNumberToTargetClass((short) source.charValue(), targetType);
+		public T convert(Number source) {
+			return NumberUtils.convertNumberToTargetClass(source, targetType);
 		}
 	}
 

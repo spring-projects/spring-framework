@@ -34,12 +34,10 @@ class MapToStringCollection implements ConversionExecutor {
 
 	private final ArrayToCollection collectionConverter;
 	
-
 	public MapToStringCollection(TypeDescriptor targetType, GenericConversionService conversionService) {
 		this.converter = new MapToStringArray(targetType, conversionService);
 		this.collectionConverter = new ArrayToCollection(TypeDescriptor.valueOf(String[].class), targetType, conversionService);
 	}
-
 
 	public Object execute(Object source) throws ConversionFailedException {
 		Map map = (Map) source;

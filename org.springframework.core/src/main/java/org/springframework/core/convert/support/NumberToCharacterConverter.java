@@ -19,18 +19,23 @@ package org.springframework.core.convert.support;
 import org.springframework.core.convert.converter.Converter;
 
 /**
- * Converts a String to a Character and back.
+ * Converts from any JDK-standard Number implementation to a Character.
  *
  * @author Keith Donald
  * @since 3.0
+ * @see java.lang.Character
+ * @see java.lang.Short
+ * @see java.lang.Integer
+ * @see java.lang.Long
+ * @see java.math.BigInteger
+ * @see java.lang.Float
+ * @see java.lang.Double
+ * @see java.math.BigDecimal
  */
-class StringToCharacter implements Converter<String, Character> {
+class NumberToCharacterConverter implements Converter<Number, Character> {
 
-	public Character convert(String source) {
-		if (source.length() != 1) {
-			throw new IllegalArgumentException("To be a Character the String '" + source + "' must have a length of 1");
-		}
-		return source.charAt(0);
+	public Character convert(Number source) {
+		return (char) source.shortValue();
 	}
 
 }

@@ -19,17 +19,18 @@ package org.springframework.core.convert.support;
 import org.springframework.core.convert.converter.Converter;
 
 /**
- * Simply calls {@link Object#toString()} to convert any object to a string.
- * Used by the {@link DefaultConversionService} as a fallback if there are
- * no other explicit to string converters registered.
+ * Converts a String to a Character and back.
  *
  * @author Keith Donald
  * @since 3.0
  */
-class ObjectToString implements Converter<Object, String> {
+class StringToCharacterConverter implements Converter<String, Character> {
 
-	public String convert(Object source) {
-		return source.toString();
+	public Character convert(String source) {
+		if (source.length() == 0) {
+			throw new IllegalArgumentException("Invalid value; to convert to a Character a String must have a length of 1 or greater");
+		}
+		return source.charAt(0);
 	}
 
 }

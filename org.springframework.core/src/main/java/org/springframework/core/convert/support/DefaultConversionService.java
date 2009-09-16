@@ -30,22 +30,15 @@ public class DefaultConversionService extends GenericConversionService {
 	 * Create a new default conversion service, installing the default converters.
 	 */
 	public DefaultConversionService() {
-		addConverter(new StringToByte());
-		addConverter(new StringToBoolean());
-		addConverter(new StringToCharacter());
-		addConverter(new StringToShort());
-		addConverter(new StringToInteger());
-		addConverter(new StringToLong());
-		addConverter(new StringToFloat());
-		addConverter(new StringToDouble());
-		addConverter(new StringToBigInteger());
-		addConverter(new StringToBigDecimal());
-		addConverter(new StringToLocale());
-		addConverter(new NumberToCharacter());
-		addConverter(new ObjectToString());
-		addConverter(new StringToEnumFactory());
-		addConverter(new NumberToNumberFactory());
-		addConverter(new CharacterToNumberFactory());
+		addConverter(new StringToBooleanConverter());
+		addConverter(new StringToCharacterConverter());
+		addConverter(new StringToLocaleConverter());
+		addConverter(new NumberToCharacterConverter());
+		addConverter(new ObjectToStringConverter());
+		addConverterFactory(new StringToNumberConverterFactory());
+		addConverterFactory(new StringToEnumConverterFactory());
+		addConverterFactory(new NumberToNumberConverterFactory());
+		addConverterFactory(new CharacterToNumberFactory());
 	}
 
 }

@@ -35,7 +35,6 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 
 	private final ConversionExecutor elementConverter;
 
-
 	public AbstractCollectionConverter(TypeDescriptor sourceCollectionType, TypeDescriptor targetCollectionType, GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 		this.sourceCollectionType = sourceCollectionType;
@@ -55,7 +54,6 @@ abstract class AbstractCollectionConverter implements ConversionExecutor {
 			this.elementConverter = NoOpConversionExecutor.INSTANCE;
 		}
 	}
-
 
 	/**
 	 * The collection type to convert to.

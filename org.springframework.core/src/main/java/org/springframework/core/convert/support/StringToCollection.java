@@ -30,11 +30,9 @@ class StringToCollection implements ConversionExecutor {
 
 	private final ArrayToCollection converter;
 
-
 	public StringToCollection(TypeDescriptor sourceType, TypeDescriptor targetType, GenericConversionService conversionService) {
 		this.converter = new ArrayToCollection(sourceType, targetType, conversionService);
 	}
-
 
 	public Object execute(Object source) throws ConversionFailedException {
 		String string = (String) source;
