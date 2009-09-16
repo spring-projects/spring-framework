@@ -48,4 +48,8 @@ public class AnnotationTestSubBean extends AnnotationTestBean implements IAnnota
 
 	public void fromInterface() {
 	}
+
+	public int getExpensiveToCalculate() {
+		return Integer.MAX_VALUE;
+	}
 }

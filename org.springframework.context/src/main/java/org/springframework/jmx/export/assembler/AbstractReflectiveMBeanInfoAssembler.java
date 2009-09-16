@@ -355,7 +355,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 					info.setDescriptor(desc);
 				}
 			}
-			else if (includeOperation(method, beanKey)) {
+
+			// allow getters and setters to be marked as operations directly
+			if (info == null && includeOperation(method, beanKey)) {
 				info = createModelMBeanOperationInfo(method, method.getName(), beanKey);
 				Descriptor desc = info.getDescriptor();
 				desc.setField(FIELD_ROLE, ROLE_OPERATION);

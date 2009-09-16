@@ -29,4 +29,7 @@ public interface IAnnotationTestBean {
 
 	@ManagedOperation
 	void fromInterface();
+
+	@ManagedOperation
+	int getExpensiveToCalculate();
 }

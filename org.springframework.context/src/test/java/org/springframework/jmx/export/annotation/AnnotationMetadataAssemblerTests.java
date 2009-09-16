@@ -42,6 +42,12 @@ public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerT
 		assertNotNull(op);
 	}
 
+	public void testOperationOnGetter() throws Exception {
+		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
+		ModelMBeanOperationInfo op = inf.getOperation("getExpensiveToCalculate");
+		assertNotNull(op);
+	}
+
 	protected JmxAttributeSource getAttributeSource() {
 		return new AnnotationJmxAttributeSource();
 	}
@@ -65,6 +71,6 @@ public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerT
 
 	@Override
 	protected int getExpectedOperationCount() {
-		return super.getExpectedOperationCount() + 3;
+		return super.getExpectedOperationCount() + 4;
 	}
 }
