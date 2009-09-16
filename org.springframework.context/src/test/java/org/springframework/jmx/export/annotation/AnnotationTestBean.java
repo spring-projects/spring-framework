@@ -110,4 +110,6 @@ public class AnnotationTestBean implements IJmxTestBean {
 		return 3;
 	}
 
+	
+
 }

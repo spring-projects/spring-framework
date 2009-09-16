@@ -156,11 +156,11 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	protected boolean includeOperation(Method method, String beanKey) {
 		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 		if (pd != null) {
-			return hasManagedAttribute(method);
+			if(hasManagedAttribute(method)) {
+				return true;
+			}
 		}
-		else {
-			return hasManagedOperation(method);
-		}
+		return hasManagedOperation(method);
 	}
 
 	/**

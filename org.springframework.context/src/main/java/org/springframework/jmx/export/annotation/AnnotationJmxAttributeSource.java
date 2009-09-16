@@ -87,11 +87,6 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 	}
 
 	public ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {
-		PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-		if (pd != null) {
-			throw new InvalidMetadataException(
-					"The ManagedOperation attribute is not valid for JavaBean properties. Use ManagedAttribute instead.");
-		}
 		Annotation ann = AnnotationUtils.findAnnotation(method, org.springframework.jmx.export.annotation.ManagedOperation.class);
 		if (ann == null) {
 			return null;
