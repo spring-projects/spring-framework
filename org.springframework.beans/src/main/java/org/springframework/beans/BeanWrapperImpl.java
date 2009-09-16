@@ -275,7 +275,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 
 	public PropertyDescriptor[] getPropertyDescriptors() {
-		return getCachedIntrospectionResults().getBeanInfo().getPropertyDescriptors();
+		return getCachedIntrospectionResults().getPropertyDescriptors();
 	}
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {

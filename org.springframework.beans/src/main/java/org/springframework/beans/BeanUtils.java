@@ -338,7 +338,7 @@ public abstract class BeanUtils {
 	 */
 	public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) throws BeansException {
 		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
-		return cr.getBeanInfo().getPropertyDescriptors();
+		return cr.getPropertyDescriptors();
 	}
 
 	/**

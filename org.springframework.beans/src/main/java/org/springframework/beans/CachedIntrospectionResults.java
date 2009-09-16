@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -266,6 +267,11 @@ public class CachedIntrospectionResults {
 
 	PropertyDescriptor getPropertyDescriptor(String propertyName) {
 		return this.propertyDescriptorCache.get(propertyName);
+	}
+
+	PropertyDescriptor[] getPropertyDescriptors() {
+		Collection<PropertyDescriptor> descriptorCollection = this.propertyDescriptorCache.values();
+		return descriptorCollection.toArray(new PropertyDescriptor[descriptorCollection.size()]);
 	}
 
 }

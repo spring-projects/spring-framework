@@ -249,6 +249,19 @@ public final class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "doSomethingWithAMultiDimensionalArray(java.lang.String[][])");
 	}
 
+	@Test
+    public void testSPR6063() {
+        PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
+
+        PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
+        assertEquals(String.class, keyDescr.getPropertyType());
+        for (PropertyDescriptor propertyDescriptor : descrs) {
+            if (propertyDescriptor.getName().equals(keyDescr.getName())) {
+                assertEquals(propertyDescriptor.getName() + " has unexpected type", keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
+            }
+        }
+    }
+
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
 	}
@@ -327,6 +340,40 @@ public final class BeanUtilsTests {
 		}
 
 		public void doSomethingWithAMultiDimensionalArray(String[][] strings) {
+		}
+	}
+
+	private interface MapEntry<K, V> {
+
+		K getKey();
+
+		void setKey(V value);
+
+		V getValue();
+
+		void setValue(V value);
+	}
+
+	private static class Bean implements MapEntry<String, String> {
+
+		private String key;
+
+		private String value;
+
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String aKey) {
+			key = aKey;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String aValue) {
+			value = aValue;
 		}
 	}
 
