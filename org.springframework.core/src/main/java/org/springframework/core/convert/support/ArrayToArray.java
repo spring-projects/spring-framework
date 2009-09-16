@@ -29,7 +29,6 @@ import org.springframework.core.convert.TypeDescriptor;
  * @author Juergen Hoeller
  * @since 3.0
  */
-@SuppressWarnings("unchecked")
 class ArrayToArray extends AbstractCollectionConverter {
 
 	public ArrayToArray(TypeDescriptor sourceArrayType, TypeDescriptor targetArrayType, GenericConversionService conversionService) {

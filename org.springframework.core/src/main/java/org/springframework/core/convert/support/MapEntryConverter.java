@@ -26,17 +26,14 @@ class MapEntryConverter {
 
 	public static final MapEntryConverter NO_OP_INSTANCE = new MapEntryConverter(null, null);
 
-
 	private final ConversionExecutor keyConverter;
 
 	private final ConversionExecutor valueConverter;
-
 
 	public MapEntryConverter(ConversionExecutor keyConverter, ConversionExecutor valueConverter) {
 		this.keyConverter = keyConverter;
 		this.valueConverter = valueConverter;
 	}
-
 
 	public Object convertKey(Object key) {
 		if (this.keyConverter != null) {

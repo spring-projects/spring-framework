@@ -35,15 +35,12 @@ class StaticConversionExecutor implements ConversionExecutor {
 
 	private final Converter converter;
 
-
 	public StaticConversionExecutor(TypeDescriptor sourceType, TypeDescriptor targetType, Converter converter) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.converter = converter;
 	}
 
-
-	@SuppressWarnings("unchecked")
 	public Object execute(Object source) throws ConversionFailedException {
 		if (source == null) {
 			return null;

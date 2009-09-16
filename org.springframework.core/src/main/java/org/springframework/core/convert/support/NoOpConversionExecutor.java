@@ -28,7 +28,6 @@ class NoOpConversionExecutor implements ConversionExecutor {
 
 	public static final ConversionExecutor INSTANCE = new NoOpConversionExecutor();
 	
-
 	private NoOpConversionExecutor() {
 	}
 

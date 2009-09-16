@@ -39,7 +39,6 @@ class MapToMap implements ConversionExecutor {
 
 	private final MapEntryConverter entryConverter;
 
-
 	/**
 	 * Creates a new map-to-map converter
 	 * @param sourceType the source map type
@@ -52,7 +51,6 @@ class MapToMap implements ConversionExecutor {
 		this.conversionService = conversionService;
 		this.entryConverter = createEntryConverter();
 	}
-
 
 	private MapEntryConverter createEntryConverter() {
 		if (this.sourceType.isMapEntryTypeKnown() && this.targetType.isMapEntryTypeKnown()) {

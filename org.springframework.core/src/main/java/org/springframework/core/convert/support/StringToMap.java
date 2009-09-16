@@ -32,7 +32,6 @@ import org.springframework.core.convert.TypeDescriptor;
  * @author Keith Donald
  * @since 3.0
  */
-@SuppressWarnings("unchecked")
 class StringToMap implements ConversionExecutor {
 
 	private StringArrayToMap converter;

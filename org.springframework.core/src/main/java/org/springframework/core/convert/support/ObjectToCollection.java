@@ -33,11 +33,9 @@ class ObjectToCollection implements ConversionExecutor {
 	private final TypeDescriptor targetCollectionType;
 
 	private final ConversionExecutor elementConverter;
-	
 
 	public ObjectToCollection(TypeDescriptor sourceObjectType, TypeDescriptor targetCollectionType,
 			GenericConversionService typeConverter) {
-
 		this.targetCollectionType = targetCollectionType;
 		Class<?> elementType = targetCollectionType.getElementType();
 		if (elementType != null) {
@@ -48,7 +46,6 @@ class ObjectToCollection implements ConversionExecutor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public Object execute(Object source) throws ConversionFailedException {
 		Collection collection = CollectionFactory.createCollection(this.targetCollectionType.getType(), 1);
 		collection.add(this.elementConverter.execute(source));

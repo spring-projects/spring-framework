@@ -34,15 +34,12 @@ class ObjectToArray implements ConversionExecutor {
 
 	private final ConversionExecutor elementConverter;
 	
-
 	public ObjectToArray(TypeDescriptor sourceObjectType, TypeDescriptor targetArrayType,
 			GenericConversionService conversionService) {
-
 		this.elementType = targetArrayType.getElementType();
 		this.elementConverter = conversionService.getConversionExecutor(
 				sourceObjectType.getType(), TypeDescriptor.valueOf(this.elementType));
 	}
-
 
 	public Object execute(Object source) throws ConversionFailedException {
 		Object array = Array.newInstance(this.elementType, 1);

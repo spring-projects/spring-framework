@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 3.0
  * @see #addConverter(Converter)
- * @see #addConverter(ConverterFactory)
+ * @see #addConverterFactory(ConverterFactory)
  */
 public class GenericConversionService implements ConversionService, ConverterRegistry {
 
@@ -57,7 +57,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * Each Map.Entry value is a Map that defines the targetType-to-Converter mappings for that source.
 	 */
 	private final Map<Class, Map<Class, Object>> sourceTypeConverters = new HashMap<Class, Map<Class, Object>>();
-
 
 	/**
 	 * Registers the converters in the set provided.
@@ -71,13 +70,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	/**
-	 * Registers the converters in the set provided.
-	 * JavaBean-friendly alternative to calling {@link #addConverter(ConverterFactory)}.
-	 * @see #addConverter(ConverterFactory)
+	 * Registers the converter factories in the set provided.
+	 * JavaBean-friendly alternative to calling {@link #addConverterFactory(ConverterFactory)}.
+	 * @see #addConverterFactory(ConverterFactory)
 	 */
 	public void setConverterFactories(Set<ConverterFactory> converters) {
 		for (ConverterFactory converterFactory : converters) {
-			addConverter(converterFactory);
+			addConverterFactory(converterFactory);
 		}
 	}
 
@@ -95,34 +94,32 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return this.parent;
 	}
 
-
 	// implementing ConverterRegistry
 	
 	public void addConverter(Converter converter) {
 		List<Class> typeInfo = getRequiredTypeInfo(converter);
 		if (typeInfo == null) {
-			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> your Converter<S, T> converts between");
+			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> your Converter<S, T> converts between; declare these types or implement ConverterInfo");
 		}
 		Class sourceType = typeInfo.get(0);
 		Class targetType = typeInfo.get(1);
 		getSourceMap(sourceType).put(targetType, converter);
 	}
 
-	public void addConverter(ConverterFactory<?, ?> converterFactory) {
+	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
 		List<Class> typeInfo = getRequiredTypeInfo(converterFactory);
 		if (typeInfo == null) {
-			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> your ConverterFactory<S, T> creates Converters to convert between");
+			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> your ConverterFactory<S, T> creates Converters to convert between; declare these types or implement ConverterInfo");
 		}
 		Class sourceType = typeInfo.get(0);
 		Class targetType = typeInfo.get(1);
 		getSourceMap(sourceType).put(targetType, converterFactory);
 	}
 
-	public void removeConverter(Class<?> sourceType, Class<?> targetType) {
+	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
 		Map sourceMap = getSourceMap(sourceType);
 		sourceMap.remove(targetType);
 	}
-
 
 	// implementing ConversionService
 
@@ -459,7 +456,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}		
 	}
 
-	@SuppressWarnings("unchecked")
 	private Converter getConverter(Map<Class, Object> converters, Class<?> currentClass, Class<?> targetType) {
 		Object converter = converters.get(currentClass);
 		if (converter == null) {

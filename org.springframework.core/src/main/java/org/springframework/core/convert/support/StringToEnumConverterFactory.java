@@ -27,12 +27,11 @@ import org.springframework.core.convert.converter.ConverterInfo;
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
-class StringToEnumFactory implements ConverterFactory<String, Enum> {
+class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
 		return new StringToEnum(targetType);
 	}
-
 
 	private class StringToEnum<T extends Enum> implements Converter<String, T>, ConverterInfo {
 
@@ -50,7 +49,7 @@ class StringToEnumFactory implements ConverterFactory<String, Enum> {
 			return this.enumType;
 		}
 
-		public T convert(String source) throws Exception {
+		public T convert(String source) {
 			if ("".equals(source)) {
 				// It's an empty enum identifier: reset the enum value to null.
 				return null;

@@ -37,13 +37,11 @@ class MapToStringArray implements ConversionExecutor {
 
 	private final MapEntryConverter entryConverter;
 
-
 	public MapToStringArray(TypeDescriptor targetType, GenericConversionService conversionService) {
 		this.targetType = targetType;
 		this.conversionService = conversionService;
 		this.entryConverter = createEntryConverter();
 	}
-
 
 	private MapEntryConverter createEntryConverter() {
 		if (this.targetType.isMapEntryTypeKnown()) {

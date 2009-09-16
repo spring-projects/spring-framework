@@ -16,28 +16,21 @@
 
 package org.springframework.core.convert.support;
 
+import java.util.Locale;
+
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.NumberUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Converts from any JDK-standard Number implementation to a Character.
+ * Converts a String to a Locale.
  *
  * @author Keith Donald
  * @since 3.0
- * @see java.lang.Character
- * @see java.lang.Short
- * @see java.lang.Integer
- * @see java.lang.Long
- * @see java.math.BigInteger
- * @see java.lang.Float
- * @see java.lang.Double
- * @see java.math.BigDecimal
- * @see NumberUtils
  */
-class NumberToCharacter implements Converter<Number, Character> {
+class StringToLocaleConverter implements Converter<String, Locale> {
 
-	public Character convert(Number source) {
-		return (char) source.shortValue();
+	public Locale convert(String source) {
+		return StringUtils.parseLocaleString(source);
 	}
 
 }

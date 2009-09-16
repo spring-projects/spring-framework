@@ -31,11 +31,9 @@ class StringArrayToObject implements ConversionExecutor {
 
 	private final ConversionExecutor elementConverter;
 
-
 	public StringArrayToObject(TypeDescriptor targetType, GenericConversionService conversionService) {
 		this.elementConverter = conversionService.getConversionExecutor(String.class, targetType);
 	}
-
 
 	public Object execute(Object source) throws ConversionFailedException {
 		String str = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(source));

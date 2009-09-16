@@ -16,21 +16,26 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Locale;
-
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.StringUtils;
 
 /**
- * Converts a String to a Locale.
+ * Converts String to a Boolean.
  *
  * @author Keith Donald
  * @since 3.0
  */
-class StringToLocale implements Converter<String, Locale> {
+class StringToBooleanConverter implements Converter<String, Boolean> {
 
-	public Locale convert(String source) {
-		return StringUtils.parseLocaleString(source);
+	public Boolean convert(String source) {
+		if (source.equals("true")) {
+			return Boolean.TRUE;
+		}
+		else if (source.equals("false")) {
+			return Boolean.FALSE;
+		}
+		else {
+			throw new IllegalArgumentException("Invalid boolean string '" + source + "'; expected 'true' or 'false'");
+		}
 	}
 
 }

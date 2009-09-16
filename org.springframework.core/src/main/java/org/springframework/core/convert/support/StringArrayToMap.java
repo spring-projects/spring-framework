@@ -40,14 +40,12 @@ class StringArrayToMap implements ConversionExecutor {
 
 	private final MapEntryConverter entryConverter;
 
-
 	public StringArrayToMap(TypeDescriptor sourceType, TypeDescriptor targetType, GenericConversionService conversionService) {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.conversionService = conversionService;
 		this.entryConverter = createEntryConverter();
 	}
-
 
 	private MapEntryConverter createEntryConverter() {
 		if (this.targetType.isMapEntryTypeKnown()) {
@@ -62,7 +60,6 @@ class StringArrayToMap implements ConversionExecutor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public Object execute(Object source) throws ConversionFailedException {
 		try {
 			int length = Array.getLength(source);

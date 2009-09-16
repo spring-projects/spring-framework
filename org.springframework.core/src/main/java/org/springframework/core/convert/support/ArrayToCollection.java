@@ -39,7 +39,6 @@ class ArrayToCollection extends AbstractCollectionConverter {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Object doExecute(Object sourceArray) throws Exception {
 		int length = Array.getLength(sourceArray);
 		Collection collection = CollectionFactory.createCollection(getTargetCollectionType(), length);
