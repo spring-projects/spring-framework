@@ -167,10 +167,10 @@ class BeanDefinitionValueResolver {
 				Object propKey = propEntry.getKey();
 				Object propValue = propEntry.getValue();
 				if (propKey instanceof TypedStringValue) {
-					propKey = evaluate(((TypedStringValue) propKey).getValue());
+					propKey = evaluate((TypedStringValue) propKey);
 				}
 				if (propValue instanceof TypedStringValue) {
-					propValue = evaluate(((TypedStringValue) propValue).getValue());
+					propValue = evaluate((TypedStringValue) propValue);
 				}
 				copy.put(propKey, propValue);
 			}
@@ -179,7 +179,7 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof TypedStringValue) {
 			// Convert value to target type here.
 			TypedStringValue typedStringValue = (TypedStringValue) value;
-			Object valueObject = evaluate(typedStringValue.getValue());
+			Object valueObject = evaluate(typedStringValue);
 			try {
 				Class<?> resolvedTargetType = resolveTargetType(typedStringValue);
 				if (resolvedTargetType != null) {
@@ -199,6 +199,19 @@ class BeanDefinitionValueResolver {
 		else {
 			return evaluate(value);
 		}
+	}
+
+	/**
+	 * Evaluate the given value as an expression, if necessary.
+	 * @param value the candidate value (may be an expression)
+	 * @return the resolved value
+	 */
+	protected Object evaluate(TypedStringValue value) {
+		Object result = this.beanFactory.evaluateBeanDefinitionString(value.getValue(), this.beanDefinition);
+		if (result != value.getValue()) {
+			value.setDynamic();
+		}
+		return result;
 	}
 
 	/**

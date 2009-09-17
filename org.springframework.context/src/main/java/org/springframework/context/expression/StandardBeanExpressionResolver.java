@@ -32,6 +32,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Standard implementation of the
@@ -109,6 +110,9 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 
 	public Object evaluate(String value, BeanExpressionContext evalContext) throws BeansException {
+		if (!StringUtils.hasLength(value)) {
+			return value;
+		}
 		try {
 			Expression expr = this.expressionCache.get(value);
 			if (expr == null) {
