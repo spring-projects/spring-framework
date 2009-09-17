@@ -16,6 +16,8 @@
 
 package org.springframework.ui.format.support;
 
+import java.text.ParseException;
+
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -66,6 +68,9 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 	}
 
 
+	/**
+	 * Adapter that exposes the Converter interface on top of a given Formatter.
+	 */
 	private static class FormattingConverter implements Converter<String, Object> {
 
 		private final Formatter formatter;
@@ -74,8 +79,13 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 			this.formatter = formatter;
 		}
 
-		public Object convert(String source) throws Exception {
-			return this.formatter.parse(source, LocaleContextHolder.getLocale());
+		public Object convert(String source) {
+			try {
+				return this.formatter.parse(source, LocaleContextHolder.getLocale());
+			}
+			catch (ParseException ex) {
+				throw new IllegalArgumentException("Could not convert formatted value '" + source + "'", ex);
+			}
 		}
 	}
 
