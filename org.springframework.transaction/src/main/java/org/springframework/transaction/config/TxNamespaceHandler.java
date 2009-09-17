@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
@@ -23,7 +25,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * declarative transaction management using either XML or using annotations.
  *
  * <p>This namespace handler is the central piece of functionality in the
- * Spring 2 transaction management facilities and offers two appraoched
+ * Spring transaction management facilities and offers two approaches
  * to declaratively manage transactions.
  *
  * <p>One approach uses transaction semantics defined in XML using the
@@ -36,6 +38,17 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * @since 2.0
  */
 public class TxNamespaceHandler extends NamespaceHandlerSupport {
+
+	static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
+
+	static final String DEFAULT_TRANSACTION_MANAGER_BEAN_NAME = "transactionManager";
+
+
+	static String getTransactionManagerName(Element element) {
+		return (element.hasAttribute(TRANSACTION_MANAGER_ATTRIBUTE) ?
+				element.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE) : DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
+	}
+
 
 	public void init() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
