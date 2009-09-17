@@ -44,6 +44,8 @@ public class TypedStringValue implements BeanMetadataElement {
 
 	private String specifiedTypeName;
 
+	private volatile boolean dynamic;
+
 
 	/**
 	 * Create a new {@link TypedStringValue} for the given String value.
@@ -183,6 +185,21 @@ public class TypedStringValue implements BeanMetadataElement {
 	 */
 	public String getSpecifiedTypeName() {
 		return this.specifiedTypeName;
+	}
+
+	/**
+	 * Mark this value as dynamic, i.e. as containing an expression
+	 * and hence not being subject to caching.
+	 */
+	public void setDynamic() {
+		this.dynamic = true;
+	}
+
+	/**
+	 * Return whether this value has been marked as dynamic.
+	 */
+	public boolean isDynamic() {
+		return this.dynamic;
 	}
 
 

@@ -16,8 +16,8 @@
 
 package org.springframework.context.expression;
 
-import java.util.Properties;
 import java.io.Serializable;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,14 +31,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.util.StopWatch;
 import org.springframework.util.SerializationTestUtils;
+import org.springframework.util.StopWatch;
 
 /**
  * @author Juergen Hoeller
@@ -166,6 +167,38 @@ public class ApplicationContextExpressionTests {
 			assertSame(tb0, tb6.tb);
 		}
 		finally {
+			System.getProperties().remove("country");
+		}
+	}
+
+	@Test
+	public void prototypeCreationReevaluatesExpressions() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+		RootBeanDefinition rbd = new RootBeanDefinition(PrototypeTestBean.class);
+		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
+		rbd.getPropertyValues().addPropertyValue("country2", new TypedStringValue("#{systemProperties.country}"));
+		ac.registerBeanDefinition("test", rbd);
+		ac.refresh();
+
+		try {
+			System.getProperties().put("name", "juergen1");
+			System.getProperties().put("country", "UK1");
+			PrototypeTestBean tb = (PrototypeTestBean) ac.getBean("test");
+			assertEquals("juergen1", tb.getName());
+			assertEquals("UK1", tb.getCountry());
+			assertEquals("UK1", tb.getCountry2());
+
+			System.getProperties().put("name", "juergen2");
+			System.getProperties().put("country", "UK2");
+			tb = (PrototypeTestBean) ac.getBean("test");
+			assertEquals("juergen2", tb.getName());
+			assertEquals("UK2", tb.getCountry());
+			assertEquals("UK2", tb.getCountry2());
+		}
+		finally {
+			System.getProperties().remove("name");
 			System.getProperties().remove("country");
 		}
 	}
@@ -299,6 +332,41 @@ public class ApplicationContextExpressionTests {
 		@Autowired @Qualifier("original")
 		public void setTb(TestBean tb) {
 			this.tb = tb;
+		}
+	}
+
+
+	public static class PrototypeTestBean {
+
+		public String name;
+
+		public String country;
+
+		public String country2;
+
+		@Value("#{systemProperties.name}")
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setCountry(String country) {
+			this.country = country;
+		}
+
+		public String getCountry() {
+			return country;
+		}
+
+		public void setCountry2(String country2) {
+			this.country2 = country2;
+		}
+
+		public String getCountry2() {
+			return country2;
 		}
 	}
 
