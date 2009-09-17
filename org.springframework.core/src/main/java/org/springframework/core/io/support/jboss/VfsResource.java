@@ -25,6 +25,7 @@ import java.net.URI;
 
 import org.jboss.virtual.VirtualFile;
 import org.jboss.virtual.VFSUtils;
+import org.jboss.virtual.VFS;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.AbstractResource;
@@ -115,9 +116,8 @@ class VfsResource extends AbstractResource {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public Resource createRelative(String relativePath) throws IOException {
-		return new VfsResource(file.findChild(relativePath));
+		return new VfsResource(VFS.getRoot(new URL(getURL(), relativePath)));
 	}
 
 	public String getFilename() {
