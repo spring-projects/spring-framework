@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,6 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 	private static final String JTA_TRANSACTION_MANAGER_CLASS_NAME =
 			"org.springframework.transaction.jta.JtaTransactionManager";
 
-	public static final String DEFAULT_TRANSACTION_MANAGER_BEAN_NAME =
-			AnnotationDrivenBeanDefinitionParser.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
-
 
 	private static final boolean weblogicPresent = ClassUtils.isPresent(
 			"weblogic.transaction.UserTransaction", JtaTransactionManagerBeanDefinitionParser.class.getClassLoader());
@@ -77,7 +74,7 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 
 	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
-		return DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
+		return TxNamespaceHandler.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
 	}
 
 }
