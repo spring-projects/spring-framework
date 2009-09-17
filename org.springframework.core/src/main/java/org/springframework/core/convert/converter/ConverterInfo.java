@@ -21,12 +21,10 @@ package org.springframework.core.convert.converter;
  *
  * Implementing this interface is required when registering converters that do not declare their
  * parameterized types S and T with a {@link org.springframework.core.convert.ConversionService}.
- * Such Converters are often dynamically created by a {@link ConverterFactory}.
  *
  * @author Keith Donald
  * @since 3.0
  * @see Converter
- * @see ConverterFactory
  */
 public interface ConverterInfo {
 

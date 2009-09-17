@@ -18,7 +18,6 @@ package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.core.convert.converter.ConverterInfo;
 
 /**
  * A factory for String to enum converters.
@@ -33,20 +32,12 @@ class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 		return new StringToEnum(targetType);
 	}
 
-	private class StringToEnum<T extends Enum> implements Converter<String, T>, ConverterInfo {
+	private class StringToEnum<T extends Enum> implements Converter<String, T> {
 
 		private final Class<T> enumType;
 		
 		public StringToEnum(Class<T> enumType) {
 			this.enumType = enumType;
-		}
-
-		public Class<String> getSourceType() {
-			return String.class;
-		}
-
-		public Class<T> getTargetType() {
-			return this.enumType;
 		}
 
 		public T convert(String source) {
