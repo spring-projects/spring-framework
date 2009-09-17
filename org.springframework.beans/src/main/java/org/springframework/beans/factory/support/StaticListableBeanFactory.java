@@ -112,8 +112,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return (T) bean;
 	}
 
-	@SuppressWarnings("unchecked")
-	public Object getBean(String name, Object[] args) throws BeansException {
+	public Object getBean(String name, Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
 					"StaticListableBeanFactory does not support explicit bean creation arguments)");
