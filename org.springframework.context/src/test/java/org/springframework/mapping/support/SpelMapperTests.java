@@ -14,7 +14,7 @@ public class SpelMapperTests {
 	private SpelMapper mapper = new SpelMapper();
 	
 	@Test
-	public void mapAutomatic() throws MappingException {
+	public void mapAutomatic() {
 		Map<String, Object> source = new HashMap<String, Object>();
 		source.put("name", "Keith");
 		source.put("age", 31);
@@ -45,7 +45,7 @@ public class SpelMapperTests {
 	}
 	
 	@Test
-	public void mapAutomaticWithExplictOverrides() throws MappingException {
+	public void mapAutomaticWithExplictOverrides() {
 		mapper.addMapping("test", "age");
 		
 		Map<String, Object> source = new HashMap<String, Object>();
@@ -63,7 +63,7 @@ public class SpelMapperTests {
 	}
 	
 	@Test
-	public void mapSameSourceFieldToMultipleTargets() throws MappingException {
+	public void mapSameSourceFieldToMultipleTargets() {
 		mapper.addMapping("test", "name");
 		mapper.addMapping("test", "favoriteSport");
 		
@@ -78,8 +78,36 @@ public class SpelMapperTests {
 		assertEquals(0, target.age);
 		assertEquals(Sport.FOOTBALL, target.favoriteSport);
 	}
+	
+	@Test
+	public void bean() {
+		
+	}
 
 
+	public static class Employee {
+		
+		private String name;
+		
+		private int age;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public int getAge() {
+			return age;
+		}
+
+		public void setAge(int age) {
+			this.age = age;
+		}
+		
+	}
 	
 	public static class Person {
 		
