@@ -27,14 +27,16 @@ import org.springframework.core.convert.converter.Converter;
 class StringToBooleanConverter implements Converter<String, Boolean> {
 
 	public Boolean convert(String source) {
-		if (source.equals("true")) {
+		if (source.equals("")) {
+			return null;
+		} else if (source.equals("true")) {
 			return Boolean.TRUE;
 		}
 		else if (source.equals("false")) {
 			return Boolean.FALSE;
 		}
 		else {
-			throw new IllegalArgumentException("Invalid boolean string '" + source + "'; expected 'true' or 'false'");
+			throw new IllegalArgumentException("Invalid boolean string '" + source + "'; expected \"\", 'true', or 'false'");
 		}
 	}
 
