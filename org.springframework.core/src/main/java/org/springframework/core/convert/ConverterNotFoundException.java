@@ -40,7 +40,6 @@ public class ConverterNotFoundException extends ConversionException {
 		this.targetType = targetType;
 	}
 
-
 	/**
 	 * Returns the source type that was requested to convert from.
 	 */
