@@ -42,7 +42,6 @@ public class TypeDescriptor {
 	 */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
-
 	private Class<?> type;
 
 	private MethodParameter methodParameter;
@@ -50,7 +49,6 @@ public class TypeDescriptor {
 	private Field field;
 
 	private Annotation[] cachedFieldAnnotations;
-
 
 	/**
 	 * Create a new descriptor for the given type.
@@ -89,7 +87,6 @@ public class TypeDescriptor {
 	 */
 	private TypeDescriptor() {
 	}
-
 
 	/**
 	 * Return the wrapped MethodParameter, if any.
@@ -132,8 +129,8 @@ public class TypeDescriptor {
 	 * Determine the declared type of the wrapped parameter/field.
 	 * Returns the Object wrapper type if the underlying type is a primitive.
 	 */
-	public Class getObjectType() {
-		Class type = getType();
+	public Class<?> getObjectType() {
+		Class<?> type = getType();
 		return type != null ? ClassUtils.resolvePrimitiveIfNecessary(type) : type;
 	}
 
@@ -336,8 +333,7 @@ public class TypeDescriptor {
 	 * @param type the class
 	 * @return the type descriptor
 	 */
-	public static TypeDescriptor valueOf(Class type) {
-		// TODO needs a cache for common type descriptors
+	public static TypeDescriptor valueOf(Class<?> type) {
 		return (type != null ? new TypeDescriptor(type) : NULL);
 	}
 
