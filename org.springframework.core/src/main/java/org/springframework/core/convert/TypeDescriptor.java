@@ -111,7 +111,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
-	 * @return the declared type (never <code>null</code>)
+	 * @return the declared type
 	 */
 	public Class<?> getType() {
 		if (this.type != null) {
@@ -126,6 +126,15 @@ public class TypeDescriptor {
 		else {
 			return null;
 		}
+	}
+
+	/**
+	 * Determine the declared type of the wrapped parameter/field.
+	 * Returns the Object wrapper type if the underlying type is a primitive.
+	 */
+	public Class getObjectType() {
+		Class type = getType();
+		return type != null ? ClassUtils.resolvePrimitiveIfNecessary(type) : type;
 	}
 
 	/**

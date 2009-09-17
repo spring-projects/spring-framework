@@ -27,12 +27,9 @@ import org.springframework.util.ClassUtils;
  */
 public class ConversionFailedException extends ConversionException {
 
-	private transient Object value;
-
 	private Class<?> sourceType;
 
-	private Class<?> targetType;
-
+	private TypeDescriptor targetType;
 
 	/**
 	 * Create a new conversion exception.
@@ -41,33 +38,10 @@ public class ConversionFailedException extends ConversionException {
 	 * @param targetType the value's target type
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionFailedException(Object value, Class<?> sourceType, Class<?> targetType, Throwable cause) {
+	public ConversionFailedException(Class<?> sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
 		super(buildDefaultMessage(value, sourceType, targetType, cause), cause);
-		this.value = value;
 		this.sourceType = sourceType;
 		this.targetType = targetType;
-	}
-
-	/**
-	 * Create a new conversion exception.
-	 * @param value the value we tried to convert
-	 * @param sourceType the value's original type
-	 * @param targetType the value's target type
-	 * @param message a descriptive message of what went wrong.
-	 */
-	public ConversionFailedException(Object value, Class<?> sourceType, Class<?> targetType, String message) {
-		super(message);
-		this.value = value;
-		this.sourceType = sourceType;
-		this.targetType = targetType;
-	}
-
-
-	/**
-	 * Return the actual value we tried to convert, an instance of {@link #getSourceType()}.
-	 */
-	public Object getValue() {
-		return this.value;
 	}
 
 	/**
@@ -80,15 +54,15 @@ public class ConversionFailedException extends ConversionException {
 	/**
 	 * Returns the target type we tried to convert the value to.
 	 */
-	public Class<?> getTargetType() {
+	public TypeDescriptor getTargetType() {
 		return this.targetType;
 	}
 
 
-	private static String buildDefaultMessage(Object value, Class<?> sourceType, Class<?> targetType, Throwable cause) {
+	private static String buildDefaultMessage(Object value, Class<?> sourceType, TypeDescriptor targetType, Throwable cause) {
 		return "Unable to convert value " + StylerUtils.style(value) + " from type '" +
 				ClassUtils.getQualifiedName(sourceType) + "' to type '" +
-				ClassUtils.getQualifiedName(targetType) + "'; reason = '" + cause.getMessage() + "'";
+				ClassUtils.getQualifiedName(targetType.getType()) + "'; reason = '" + cause.getMessage() + "'";
 	}
 
 }

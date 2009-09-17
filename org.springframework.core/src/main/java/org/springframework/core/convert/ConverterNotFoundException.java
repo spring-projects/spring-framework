@@ -28,15 +28,14 @@ public class ConverterNotFoundException extends ConversionException {
 
 	private final Class<?> targetType;
 
-
 	/**
 	 * Creates a new conversion executor not found exception.
 	 * @param sourceType the source type requested to convert from
 	 * @param targetType the target type requested to convert to
 	 * @param message a descriptive message
 	 */
-	public ConverterNotFoundException(Class<?> sourceType, Class<?> targetType, String message) {
-		super(message);
+	public ConverterNotFoundException(Class<?> sourceType, Class<?> targetType) {
+		super("No converter found capable of converting from [" + sourceType.getName() + "] to [" + targetType.getName() + "]");
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 	}

@@ -25,21 +25,6 @@ import java.util.Locale;
 
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.support.NumberToCharacter;
-import org.springframework.core.convert.support.NumberToNumberFactory;
-import org.springframework.core.convert.support.ObjectToString;
-import org.springframework.core.convert.support.StringToBigDecimal;
-import org.springframework.core.convert.support.StringToBigInteger;
-import org.springframework.core.convert.support.StringToBoolean;
-import org.springframework.core.convert.support.StringToByte;
-import org.springframework.core.convert.support.StringToCharacter;
-import org.springframework.core.convert.support.StringToDouble;
-import org.springframework.core.convert.support.StringToEnumFactory;
-import org.springframework.core.convert.support.StringToFloat;
-import org.springframework.core.convert.support.StringToInteger;
-import org.springframework.core.convert.support.StringToLocale;
-import org.springframework.core.convert.support.StringToLong;
-import org.springframework.core.convert.support.StringToShort;
 
 /**
  * Tests for the default converters in the converters package.
@@ -48,70 +33,64 @@ import org.springframework.core.convert.support.StringToShort;
  */
 public class DefaultConversionServiceTests {
 
-	@Test
-	public void testStringToByte() throws Exception {
-		StringToByte b = new StringToByte();
-		assertEquals(Byte.valueOf("1"), b.convert("1"));
-	}
-
+	private StringToNumberConverterFactory c = new StringToNumberConverterFactory();
+	
 	@Test
 	public void testStringToCharacter() {
-		StringToCharacter c = new StringToCharacter();
+		StringToCharacterConverter c = new StringToCharacterConverter();
 		assertEquals(Character.valueOf('1'), c.convert("1"));
 	}
 
 	@Test
 	public void testStringToBoolean() {
-		StringToBoolean c = new StringToBoolean();
+		StringToBooleanConverter c = new StringToBooleanConverter();
 		assertEquals(Boolean.valueOf(true), c.convert("true"));
 		assertEquals(Boolean.valueOf(false), c.convert("false"));
 	}
-	
+
+	@Test
+	public void testStringToByte() throws Exception {
+		assertEquals(Byte.valueOf("1"), c.getConverter(Byte.class).convert("1"));
+	}
+
 	@Test
 	public void testStringToShort() {
-		StringToShort c = new StringToShort();
-		assertEquals(Short.valueOf("1"), c.convert("1"));
+		assertEquals(Short.valueOf("1"), c.getConverter(Short.class).convert("1"));
 	}
 
 	@Test
 	public void testStringToInteger() {
-		StringToInteger c = new StringToInteger();
-		assertEquals(Integer.valueOf("1"), c.convert("1"));
+		assertEquals(Integer.valueOf("1"), c.getConverter(Integer.class).convert("1"));
 	}
 
 	@Test
 	public void testStringToLong() {
-		StringToLong c = new StringToLong();
-		assertEquals(Long.valueOf("1"), c.convert("1"));
+		assertEquals(Long.valueOf("1"), c.getConverter(Long.class).convert("1"));
 	}
 
 	@Test
 	public void testStringToFloat() {
-		StringToFloat c = new StringToFloat();
-		assertEquals(Float.valueOf("1.0"), c.convert("1.0"));
+		assertEquals(Float.valueOf("1.0"), c.getConverter(Float.class).convert("1.0"));
 	}
 
 	@Test
 	public void testStringToDouble() {
-		StringToDouble c = new StringToDouble();
-		assertEquals(Double.valueOf("1.0"), c.convert("1.0"));
+		assertEquals(Double.valueOf("1.0"), c.getConverter(Double.class).convert("1.0"));
 	}
 
 	@Test
 	public void testStringToBigInteger() {
-		StringToBigInteger c = new StringToBigInteger();
-		assertEquals(new BigInteger("1"), c.convert("1"));
+		assertEquals(new BigInteger("1"), c.getConverter(BigInteger.class).convert("1"));
 	}
 
 	@Test
 	public void testStringToBigDouble() {
-		StringToBigDecimal c = new StringToBigDecimal();
-		assertEquals(new BigDecimal("1.0"), c.convert("1.0"));
+		assertEquals(new BigDecimal("1.0"), c.getConverter(BigDecimal.class).convert("1.0"));
 	}
 
 	@Test
 	public void testStringToEnum() throws Exception {
-		Converter<String, Foo> c = new StringToEnumFactory().getConverter(Foo.class);
+		Converter<String, Foo> c = new StringToEnumConverterFactory().getConverter(Foo.class);
 		assertEquals(Foo.BAR, c.convert("BAR"));
 	}
 	
@@ -121,19 +100,19 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void testStringToLocale() {
-		StringToLocale c = new StringToLocale();
+		StringToLocaleConverter c = new StringToLocaleConverter();
 		assertEquals(Locale.ENGLISH, c.convert("en"));
 	}
 
 	@Test
 	public void testNumberToNumber() throws Exception {
-		Converter<Number, Long> c = new NumberToNumberFactory().getConverter(Long.class);
+		Converter<Number, Long> c = new NumberToNumberConverterFactory().getConverter(Long.class);
 		assertEquals(Long.valueOf(1), c.convert(Integer.valueOf(1)));
 	}
 	
 	@Test
 	public void testNumberToNumberNotSupportedNumber() throws Exception {
-		Converter<Number, CustomNumber> c = new NumberToNumberFactory().getConverter(CustomNumber.class);
+		Converter<Number, CustomNumber> c = new NumberToNumberConverterFactory().getConverter(CustomNumber.class);
 		try {
 			c.convert(Integer.valueOf(1));
 			fail("Should have failed");
@@ -144,13 +123,13 @@ public class DefaultConversionServiceTests {
 	
 	@Test
 	public void testNumberToCharacter() {
-		NumberToCharacter n = new NumberToCharacter();
+		NumberToCharacterConverter n = new NumberToCharacterConverter();
 		assertEquals(Character.valueOf('A'), n.convert(Integer.valueOf(65)));
 	}
 	
 	@Test
 	public void testObjectToString() {
-		ObjectToString o = new ObjectToString();
+		ObjectToStringConverter o = new ObjectToStringConverter();
 		assertEquals("3", o.convert(3));
 	}
 	

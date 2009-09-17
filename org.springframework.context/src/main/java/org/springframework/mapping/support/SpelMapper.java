@@ -51,19 +51,19 @@ public class SpelMapper implements Mapper<Object, Object> {
 		this.autoMappingEnabled = autoMappingEnabled;
 	}
 
-	public MappingConfiguration addMapping(String source, String target) {
+	public MappingConfiguration addMapping(String sourceExpression, String targetExpression) {
 		Expression sourceExp;
 		try {
-			sourceExp = expressionParser.parseExpression(source);
+			sourceExp = expressionParser.parseExpression(sourceExpression);
 		} catch (ParseException e) {
-			throw new IllegalArgumentException("The mapping source '" + source
+			throw new IllegalArgumentException("The mapping source '" + sourceExpression
 					+ "' is not a parseable value expression", e);
 		}
 		Expression targetExp;
 		try {
-			targetExp = expressionParser.parseExpression(target);
+			targetExp = expressionParser.parseExpression(targetExpression);
 		} catch (ParseException e) {
-			throw new IllegalArgumentException("The mapping target '" + source
+			throw new IllegalArgumentException("The mapping target '" + sourceExpression
 					+ "' is not a parseable property expression", e);
 		}
 		Mapping mapping = new Mapping(sourceExp, targetExp);
@@ -128,7 +128,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 	private boolean explicitlyMapped(String field) {
 		for (Mapping mapping : mappings) {
 			if (mapping.source.getExpressionString().equals(field)) {
-				return true; 
+				return true;
 			}
 		}
 		return false;
