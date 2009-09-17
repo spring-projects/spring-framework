@@ -833,9 +833,14 @@ public final class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		DefaultConversionService conversionService = new DefaultConversionService();
 		conversionService.addConverter(new Converter<String, Float>() {
-			public Float convert(String source) throws Exception {
-				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
-				return nf.parse(source).floatValue();
+			public Float convert(String source) {
+				try {
+					NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+					return nf.parse(source).floatValue();
+				}
+				catch (ParseException ex) {
+					throw new IllegalArgumentException(ex);
+				}
 			}
 		});
 		lbf.setConversionService(conversionService);
