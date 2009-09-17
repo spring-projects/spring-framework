@@ -30,34 +30,38 @@ public interface ConversionService {
 
 	/**
 	 * Returns true if objects of sourceType can be converted to targetType.
-	 * @param source the source to convert from (may be null)
-	 * @param targetType the target type to convert to
+	 * @param source the source type to convert from (required)
+	 * @param targetType the target type to convert to (required)
 	 * @return true if a conversion can be performed, false if not
 	 */
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 	
 	/**
-	 * Returns true if objects of sourceType can be converted to the type of the conversion point.
+	 * Convert the source to targetType.
 	 * @param source the source to convert from (may be null)
-	 * @param targetType context about the target type to convert to
+	 * @param targetType the target type to convert to (required)
+	 * @return the converted object, an instance of targetType
+	 * @throws ConversionException if an exception occurred
+	 */
+	<T> T convert(Object source, Class<T> targetType);
+
+	/**
+	 * Returns true if objects of sourceType can be converted to the targetType described by the TypeDescriptor.
+	 * The TypeDescriptor provides additional context about the point where conversion is needed, often an object property location.
+	 * This flavor of the canConvert operation is mainly for use by a data binding framework, and not by user code.
+	 * @param source the source type to convert from (required)
+	 * @param targetType context about the target type to convert to (required)
 	 * @return true if a conversion can be performed, false if not
 	 */
 	boolean canConvert(Class<?> sourceType, TypeDescriptor targetType);
 
 	/**
-	 * Convert the source to targetType.
+	 * Convert the source to the targetType described by the TypeDescriptor.
+	 * The TypeDescriptor provides additional context about the point where conversion is needed, often a object property location.
+	 * This flavor of the convert operation is mainly for use by a data binding framework, and not by user code.
 	 * @param source the source to convert from (may be null)
-	 * @param targetType the target type to convert to
-	 * @return the converted object, an instance of targetType, or <code>null</code> if a null source was provided
-	 * @throws ConversionException if an exception occurred
-	 */
-	<T> T convert(Object source, Class<T> targetType);
-	
-	/**
-	 * Convert the source to type T needed by the conversion point.
-	 * @param source the source to convert from (may be null)
-	 * @param targetType context about the target type to convert to
-	 * @return the converted object, an instance of {@link TypeDescriptor#getType()}</code>, or <code>null</code> if a null source was provided
+	 * @param targetType context about the target type to convert to (required)
+	 * @return the converted object, an instance of {@link TypeDescriptor#getType()}</code>
 	 * @throws ConversionException if an exception occurred
 	 */
 	Object convert(Object source, TypeDescriptor targetType);
