@@ -21,9 +21,9 @@ import java.text.ParseException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.convert.support.GenericConverter;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.FormatterRegistry;
 import org.springframework.util.Assert;
@@ -40,7 +40,6 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 
 	private final FormatterRegistry formatterRegistry;
 
-
 	/**
 	 * Create a new FormattingConversionServiceAdapter for the given FormatterRegistry.
 	 * @param formatterRegistry the FormatterRegistry to wrap
@@ -50,28 +49,26 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 		this.formatterRegistry = formatterRegistry;
 		if (formatterRegistry instanceof GenericFormatterRegistry) {
 			setParent(((GenericFormatterRegistry) formatterRegistry).getConversionService());
-		}
-		else {
+		} else {
 			setParent(new DefaultConversionService());
 		}
 	}
 
 	@Override
-	protected Converter findConverter(Class<?> sourceType, TypeDescriptor targetType) {
+	protected GenericConverter getConverter(Class sourceType, TypeDescriptor targetType) {
 		if (String.class.equals(sourceType)) {
 			Formatter formatter = this.formatterRegistry.getFormatter(targetType);
 			if (formatter != null) {
 				return new FormattingConverter(formatter);
 			}
 		}
-		return super.findConverter(sourceType, targetType);
+		return super.getConverter(sourceType, targetType);
 	}
-
 
 	/**
 	 * Adapter that exposes the Converter interface on top of a given Formatter.
 	 */
-	private static class FormattingConverter implements Converter<String, Object> {
+	private static class FormattingConverter implements GenericConverter {
 
 		private final Formatter formatter;
 
@@ -79,11 +76,10 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 			this.formatter = formatter;
 		}
 
-		public Object convert(String source) {
+		public Object convert(Object source, TypeDescriptor targetType) {
 			try {
-				return this.formatter.parse(source, LocaleContextHolder.getLocale());
-			}
-			catch (ParseException ex) {
+				return this.formatter.parse((String) source, LocaleContextHolder.getLocale());
+			} catch (ParseException ex) {
 				throw new IllegalArgumentException("Could not convert formatted value '" + source + "'", ex);
 			}
 		}

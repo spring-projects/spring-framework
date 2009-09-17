@@ -2,7 +2,7 @@ package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.TypeDescriptor;
 
-interface GenericConverter {
+public interface GenericConverter {
 	
 	Object convert(Object source, TypeDescriptor type);
 	

@@ -31,23 +31,24 @@ import org.springframework.core.convert.TypeDescriptor;
 class CollectionToCollectionGenericConverter implements GenericConverter {
 
 	private GenericConversionService conversionService;
-	
+
 	public CollectionToCollectionGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor targetType) {
 		Collection sourceCollection = (Collection) source;
 		Object firstNotNullElement = getFirstNotNullElement(sourceCollection);
 		if (firstNotNullElement == null) {
 			return compatibleCollectionWithoutElementConversion(sourceCollection, targetType);
 		}
-		Class targetElementType = targetType.getElementType(); 
+		Class targetElementType = targetType.getElementType();
 		if (targetElementType == null || targetElementType.isAssignableFrom(firstNotNullElement.getClass())) {
 			return compatibleCollectionWithoutElementConversion(sourceCollection, targetType);
 		}
 		Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		GenericConverter elementConverter = conversionService.getConverter(firstNotNullElement.getClass(), targetElementType);
+		GenericConverter elementConverter = conversionService.getConverter(firstNotNullElement.getClass(),
+				TypeDescriptor.valueOf(targetElementType));
 		for (Object element : sourceCollection) {
 			targetCollection.add(elementConverter.convert(element, TypeDescriptor.valueOf(targetElementType)));
 		}
@@ -65,7 +66,7 @@ class CollectionToCollectionGenericConverter implements GenericConverter {
 			return target;
 		}
 	}
-	
+
 	private Object getFirstNotNullElement(Collection collection) {
 		for (Object element : collection) {
 			if (element != null) {
@@ -74,5 +75,5 @@ class CollectionToCollectionGenericConverter implements GenericConverter {
 		}
 		return null;
 	}
-	
+
 }

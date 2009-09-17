@@ -54,10 +54,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	private ConversionService parent;
 
-	/**
-	 * An indexed map of Converters. Each Map.Entry key is a source class (S) that can be converted from.
-	 * Each Map.Entry value is a Map that defines the targetType-to-Converter mappings for that source.
-	 */
 	private final Map<Class, Map<Class, GenericConverter>> sourceTypeConverters = new HashMap<Class, Map<Class, GenericConverter>>();
 
 	public GenericConversionService() {
@@ -143,7 +139,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		Class sourceClass = ClassUtils.resolvePrimitiveIfNecessary(sourceType);
 		Class targetClass = targetType.getObjectType();
-		return getConverter(sourceClass, targetType.getObjectType()) != null || this.parent != null
+		return getConverter(sourceClass, targetType) != null || this.parent != null
 				&& this.parent.canConvert(sourceClass, targetClass);
 	}
 
@@ -161,7 +157,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return null;
 		}
 		Class sourceType = ClassUtils.resolvePrimitiveIfNecessary(source.getClass());
-		GenericConverter converter = getConverter(sourceType, targetType.getObjectType());
+		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
 			try {
 				return converter.convert(source, targetType);
@@ -181,7 +177,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	// subclassing hooks
 
-	protected GenericConverter getConverter(Class<?> sourceType, Class<?> targetType) {
+	protected GenericConverter getConverter(Class sourceType, TypeDescriptor targetType) {
 		if (sourceType.isInterface()) {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
 			classQueue.addFirst(sourceType);
@@ -223,7 +219,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	// internal helpers
 
-	private void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
+	private void addGenericConverter(Class sourceType, Class targetType, GenericConverter converter) {
 		getSourceMap(sourceType).put(targetType, converter);
 	}
 
@@ -287,7 +283,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return sourceMap;
 	}
 
-	private Map<Class, GenericConverter> getConvertersForSource(Class<?> sourceType) {
+	private Map<Class, GenericConverter> getConvertersForSource(Class sourceType) {
 		Map<Class, GenericConverter> converters = this.sourceTypeConverters.get(sourceType);
 		if (converters == null) {
 			converters = Collections.emptyMap();
@@ -295,10 +291,11 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return converters;
 	}
 
-	private GenericConverter getConverter(Map<Class, GenericConverter> converters, Class<?> targetType) {
-		if (targetType.isInterface()) {
+	private GenericConverter getConverter(Map<Class, GenericConverter> converters, TypeDescriptor targetType) {
+		Class targetClass = targetType.getObjectType();
+		if (targetClass.isInterface()) {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
-			classQueue.addFirst(targetType);
+			classQueue.addFirst(targetClass);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = classQueue.removeLast();
 				GenericConverter converter = converters.get(currentClass);
@@ -313,7 +310,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return converters.get(Object.class);
 		} else {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
-			classQueue.addFirst(targetType);
+			classQueue.addFirst(targetClass);
 			while (!classQueue.isEmpty()) {
 				Class currentClass = classQueue.removeLast();
 				GenericConverter converter = converters.get(currentClass);
