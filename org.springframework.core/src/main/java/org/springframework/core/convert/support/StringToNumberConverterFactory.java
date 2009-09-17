@@ -53,6 +53,9 @@ class StringToNumberConverterFactory implements ConverterFactory<String, Number>
 		}
 	
 		public T convert(String source) {
+			if ("".equals(source)) {
+				return null;
+			}
 			return NumberUtils.parseNumber(source, targetType);
 		}
 	}

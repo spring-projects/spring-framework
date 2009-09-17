@@ -40,12 +40,39 @@ public class DefaultConversionServiceTests {
 		StringToCharacterConverter c = new StringToCharacterConverter();
 		assertEquals(Character.valueOf('1'), c.convert("1"));
 	}
+	
+	@Test
+	public void testStringToCharacterEmptyString() {
+		StringToCharacterConverter c = new StringToCharacterConverter();
+		assertEquals(null, c.convert(""));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testStringToCharacterInvalidString() {
+		new StringToCharacterConverter().convert("invalid");
+	}
 
 	@Test
-	public void testStringToBoolean() {
+	public void testStringToBooleanTrue() {
 		StringToBooleanConverter c = new StringToBooleanConverter();
 		assertEquals(Boolean.valueOf(true), c.convert("true"));
+	}
+
+	@Test
+	public void testStringToBooleanFalse() {
+		StringToBooleanConverter c = new StringToBooleanConverter();
 		assertEquals(Boolean.valueOf(false), c.convert("false"));
+	}
+
+	@Test
+	public void testStringToBooleanEmptyString() {
+		StringToBooleanConverter c = new StringToBooleanConverter();
+		assertEquals(null, c.convert(""));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testStringToBooleanInvalidString() {
+		new StringToBooleanConverter().convert("invalid");
 	}
 
 	@Test
@@ -89,9 +116,25 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	public void testStringToNumber() {
+		assertEquals(new BigDecimal("1.0"), c.getConverter(Number.class).convert("1.0"));
+	}
+
+	@Test
+	public void testStringToNumberEmptyString() {
+		assertEquals(null, c.getConverter(Number.class).convert(""));
+	}
+
+	@Test
 	public void testStringToEnum() throws Exception {
 		Converter<String, Foo> c = new StringToEnumConverterFactory().getConverter(Foo.class);
 		assertEquals(Foo.BAR, c.convert("BAR"));
+	}
+	
+	@Test
+	public void testStringToEnumEmptyString() throws Exception {
+		Converter<String, Foo> c = new StringToEnumConverterFactory().getConverter(Foo.class);
+		assertEquals(null, c.convert(""));
 	}
 	
 	public static enum Foo {
