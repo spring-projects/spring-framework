@@ -393,7 +393,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 		catch (IllegalArgumentException ex) {
 			throw new TypeMismatchException(value, requiredType, ex);
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			throw new ConversionNotSupportedException(value, requiredType, ex);
 		}
 	}

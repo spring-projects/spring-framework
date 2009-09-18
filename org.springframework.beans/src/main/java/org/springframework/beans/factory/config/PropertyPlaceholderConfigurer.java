@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.HashSet;
 import java.util.Properties;
 
 import org.springframework.beans.BeansException;
@@ -24,11 +23,10 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
-import org.springframework.util.StringValueResolver;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
+import org.springframework.util.StringValueResolver;
 
 /**
  * A property resource configurer that resolves placeholders in bean property values of

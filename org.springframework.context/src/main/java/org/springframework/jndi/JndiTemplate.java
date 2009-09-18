@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class JndiTemplate {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up JNDI object with name [" + name + "]");
 		}
-		return execute(new JndiCallback() {
+		return execute(new JndiCallback<Object>() {
 			public Object doInContext(Context ctx) throws NamingException {
 				Object located = ctx.lookup(name);
 				if (located == null) {
@@ -193,7 +193,7 @@ public class JndiTemplate {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Binding JNDI object with name [" + name + "]");
 		}
-		execute(new JndiCallback() {
+		execute(new JndiCallback<Object>() {
 			public Object doInContext(Context ctx) throws NamingException {
 				ctx.bind(name, object);
 				return null;
@@ -212,7 +212,7 @@ public class JndiTemplate {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Rebinding JNDI object with name [" + name + "]");
 		}
-		execute(new JndiCallback() {
+		execute(new JndiCallback<Object>() {
 			public Object doInContext(Context ctx) throws NamingException {
 				ctx.rebind(name, object);
 				return null;
@@ -229,7 +229,7 @@ public class JndiTemplate {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Unbinding JNDI object with name [" + name + "]");
 		}
-		execute(new JndiCallback() {
+		execute(new JndiCallback<Object>() {
 			public Object doInContext(Context ctx) throws NamingException {
 				ctx.unbind(name);
 				return null;
