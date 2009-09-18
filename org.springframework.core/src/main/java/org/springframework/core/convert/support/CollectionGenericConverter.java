@@ -171,7 +171,15 @@ class CollectionGenericConverter implements GenericConverter {
 	}
 
 	private Object convertObjectToArray(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		throw new UnsupportedOperationException("Not yet implemented");
+		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
+		Object array = Array.newInstance(targetType.getElementType(), 1);
+		if (sourceType.isAssignableTo(targetElementType)) {
+			Array.set(array, 0, source);			
+		} else {
+			GenericConverter converter = conversionService.getConverter(sourceType, targetElementType);
+			Array.set(array, 0, converter.convert(source, sourceType, targetElementType));
+		}
+		return array;
 	}
 	
 	private boolean isCollectionToObject(TypeDescriptor sourceType, TypeDescriptor targetType) {
