@@ -55,8 +55,8 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 	}
 
 	@Override
-	protected GenericConverter getConverter(Class sourceType, TypeDescriptor targetType) {
-		if (String.class.equals(sourceType)) {
+	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (String.class.equals(sourceType.getType())) {
 			Formatter formatter = this.formatterRegistry.getFormatter(targetType);
 			if (formatter != null) {
 				return new FormattingConverter(formatter);
@@ -76,13 +76,18 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 			this.formatter = formatter;
 		}
 
-		public Object convert(Object source, TypeDescriptor targetType) {
+		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			throw new UnsupportedOperationException("Should not be called");
+		}
+		
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			try {
 				return this.formatter.parse((String) source, LocaleContextHolder.getLocale());
 			} catch (ParseException ex) {
 				throw new IllegalArgumentException("Could not convert formatted value '" + source + "'", ex);
 			}
 		}
+		
 	}
 
 }
