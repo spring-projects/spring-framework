@@ -307,10 +307,10 @@
 -->
 <#macro formCheckbox path attributes="">
 	<@bind path />
-	<#local checked><#if status.value?? && status.value?string=="true">true<#else>false</#if></#local>
-	<#local id><#if status.expression??>${status.expression}<#else>${path}</#if></#local>
+    <#assign id="${status.expression}">
+    <#assign isSelected = status.value?? && status.value?string=="true">
 	<input type="hidden" name="_${id}" value="on"/>
-	<input type="checkbox" id="${id}" name="${id}" checked="${checked}" ${attributes}/>
+	<input type="checkbox" id="${id}" name="${id}"<#if isSelected> checked="checked"</#if> ${attributes}/>
 </#macro>
 
 <#--
