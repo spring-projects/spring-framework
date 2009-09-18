@@ -28,38 +28,43 @@ import org.springframework.core.convert.TypeDescriptor;
  * @author Juergen Hoeller
  * @since 3.0
  */
-class CollectionToCollectionGenericConverter implements GenericConverter {
+class CollectionGenericConverter implements GenericConverter {
 
 	private GenericConversionService conversionService;
 
-	public CollectionToCollectionGenericConverter(GenericConversionService conversionService) {
+	public CollectionGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+	
+	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return sourceType.isCollection() && targetType.isCollection();
+	}
 
-	public Object convert(Object source, TypeDescriptor targetType) {
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Collection sourceCollection = (Collection) source;
-		Class targetElementType = targetType.getElementType();
-		if (targetElementType == null) {
+		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
+		if (targetElementType == TypeDescriptor.NULL) {
 			return compatibleCollectionWithoutElementConversion(sourceCollection, targetType);
 		}
-		Class sourceElementType = getElementType(sourceCollection);
-		if (sourceElementType == null || targetElementType.isAssignableFrom(sourceElementType)) {
+		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
+		if (sourceElementType == TypeDescriptor.NULL) {
+			sourceElementType = getElementType(sourceCollection);
+		}
+		if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
 			return compatibleCollectionWithoutElementConversion(sourceCollection, targetType);
 		}
 		Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		TypeDescriptor targetElementTypeDescriptor = TypeDescriptor.valueOf(targetElementType);
-		GenericConverter elementConverter = conversionService.getConverter(sourceElementType,
-				targetElementTypeDescriptor);
+		GenericConverter elementConverter = conversionService.getConverter(sourceElementType, targetElementType);
 		for (Object element : sourceCollection) {
-			targetCollection.add(elementConverter.convert(element, targetElementTypeDescriptor));
+			targetCollection.add(elementConverter.convert(element, sourceElementType, targetElementType));
 		}
 		return targetCollection;
 	}
 
-	private Class getElementType(Collection collection) {
+	private TypeDescriptor getElementType(Collection collection) {
 		for (Object element : collection) {
 			if (element != null) {
-				return element.getClass();
+				return TypeDescriptor.valueOf(element.getClass());
 			}
 		}
 		return null;

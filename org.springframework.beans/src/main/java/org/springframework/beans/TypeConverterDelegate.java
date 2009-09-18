@@ -174,7 +174,7 @@ class TypeConverterDelegate {
 			else {
 				typeDesc = TypeDescriptor.valueOf(requiredType);
 			}
-			if (conversionService.canConvert(convertedValue.getClass(), typeDesc)) {
+			if (conversionService.matches(convertedValue.getClass(), typeDesc)) {
 				return (T) conversionService.convert(convertedValue, typeDesc);
 			}
 		}

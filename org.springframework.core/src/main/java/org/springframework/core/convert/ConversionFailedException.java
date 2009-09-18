@@ -16,9 +16,6 @@
 
 package org.springframework.core.convert;
 
-import org.springframework.core.style.StylerUtils;
-import org.springframework.util.ClassUtils;
-
 /**
  * Thrown when an attempt to execute a type conversion fails.
  *
@@ -27,7 +24,7 @@ import org.springframework.util.ClassUtils;
  */
 public class ConversionFailedException extends ConversionException {
 
-	private Class<?> sourceType;
+	private TypeDescriptor sourceType;
 
 	private TypeDescriptor targetType;
 
@@ -38,7 +35,7 @@ public class ConversionFailedException extends ConversionException {
 	 * @param targetType the value's target type
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionFailedException(Class<?> sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
+	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
 		super(buildDefaultMessage(value, sourceType, targetType, cause), cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
@@ -47,7 +44,7 @@ public class ConversionFailedException extends ConversionException {
 	/**
 	 * Return the source type we tried to convert the value from.
 	 */
-	public Class<?> getSourceType() {
+	public TypeDescriptor getSourceType() {
 		return this.sourceType;
 	}
 
@@ -58,11 +55,10 @@ public class ConversionFailedException extends ConversionException {
 		return this.targetType;
 	}
 
-
-	private static String buildDefaultMessage(Object value, Class<?> sourceType, TypeDescriptor targetType, Throwable cause) {
-		return "Unable to convert value " + StylerUtils.style(value) + " from type '" +
-				ClassUtils.getQualifiedName(sourceType) + "' to type '" +
-				ClassUtils.getQualifiedName(targetType.getType()) + "'; reason = '" + cause.getMessage() + "'";
+	private static String buildDefaultMessage(Object value, TypeDescriptor sourceType, TypeDescriptor targetType,
+			Throwable cause) {
+		return "Unable to convert value " + value + " from type [" + sourceType.getName() + "] to type ["
+				+ targetType.getName() + "]; reason = '" + cause.getMessage() + "'";
 	}
 
 }

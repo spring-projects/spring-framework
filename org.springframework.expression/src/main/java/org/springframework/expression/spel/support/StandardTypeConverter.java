@@ -38,26 +38,24 @@ import org.springframework.util.Assert;
  */
 public class StandardTypeConverter implements TypeConverter {
 
-	private final ConversionService typeConverter;
-
+	private final ConversionService conversionService;
 
 	public StandardTypeConverter() {
-		this.typeConverter = new DefaultConversionService();
+		this.conversionService = new DefaultConversionService();
 	}
 
 	public StandardTypeConverter(ConversionService typeConverter) {
 		Assert.notNull(typeConverter, "ConversionService must not be null");
-		this.typeConverter = typeConverter;
+		this.conversionService = typeConverter;
 	}
 
-
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		return this.typeConverter.canConvert(sourceType, targetType);
+		return this.conversionService.canConvert(sourceType, targetType);
 	}
 
 	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 		try {
-			return this.typeConverter.convert(value, typeDescriptor);
+			return this.conversionService.convert(value, TypeDescriptor.forObject(value), typeDescriptor);
 		}
 		catch (ConverterNotFoundException cenfe) {
 			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
