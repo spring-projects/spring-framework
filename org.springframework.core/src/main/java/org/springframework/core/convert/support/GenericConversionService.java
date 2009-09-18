@@ -58,6 +58,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	public GenericConversionService() {
 		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionGenericConverter(this));
+		addGenericConverter(Map.class, Map.class, new MapToMapGenericConverter(this));
 	}
 
 	/**
