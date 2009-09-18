@@ -31,6 +31,12 @@ public class DefaultConversionService extends GenericConversionService {
 	 * Create a new default conversion service, installing the default converters.
 	 */
 	public DefaultConversionService() {
+		initDefaultConverters();
+	}
+	
+	// subclassing hooks
+	
+	protected void initDefaultConverters() {
 		addConverter(new StringToBooleanConverter());
 		addConverter(new StringToCharacterConverter());
 		addConverter(new StringToLocaleConverter());

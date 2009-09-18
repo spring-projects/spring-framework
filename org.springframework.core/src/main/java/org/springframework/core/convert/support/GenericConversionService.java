@@ -58,9 +58,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	private final Set<GenericConverter> matchableConverters = new LinkedHashSet<GenericConverter>();
 
 	public GenericConversionService() {
-		addGenericConverter(new CollectionGenericConverter(this));
-		addGenericConverter(new MapGenericConverter(this));
-		addGenericConverter(new ArrayGenericConverter(this));
+		initGenericConverters();
 	}
 
 	/**
@@ -183,6 +181,16 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	// subclassing hooks
 
+	protected void initGenericConverters() {
+		addGenericConverter(new CollectionGenericConverter(this));
+		addGenericConverter(new MapGenericConverter(this));
+		addGenericConverter(new ArrayGenericConverter(this));
+	}
+
+	protected void addGenericConverter(GenericConverter converter) {
+		this.matchableConverters.add(converter);
+	}
+
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		GenericConverter converter = matchConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
 		if (converter == null) {
@@ -196,10 +204,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	// internal helpers
-
-	private void addGenericConverter(GenericConverter converter) {
-		this.matchableConverters.add(converter);
-	}
 
 	private List<Class> getRequiredTypeInfo(Object converter) {
 		List<Class> typeInfo = new ArrayList<Class>(2);
