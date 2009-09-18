@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
@@ -45,6 +47,7 @@ import org.springframework.beans.propertyeditors.CharacterEditor;
 import org.springframework.beans.propertyeditors.CharsetEditor;
 import org.springframework.beans.propertyeditors.ClassArrayEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
+import org.springframework.beans.propertyeditors.CurrencyEditor;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomMapEditor;
@@ -55,6 +58,7 @@ import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PatternEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
+import org.springframework.beans.propertyeditors.TimeZoneEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.convert.ConversionService;
@@ -151,24 +155,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	/**
 	 * Actually register the default editors for this registry instance.
-	 * @see org.springframework.beans.propertyeditors.ByteArrayPropertyEditor
-	 * @see org.springframework.beans.propertyeditors.ClassEditor
-	 * @see org.springframework.beans.propertyeditors.CharacterEditor
-	 * @see org.springframework.beans.propertyeditors.CustomBooleanEditor
-	 * @see org.springframework.beans.propertyeditors.CustomNumberEditor
-	 * @see org.springframework.beans.propertyeditors.CustomCollectionEditor
-	 * @see org.springframework.beans.propertyeditors.CustomMapEditor
-	 * @see org.springframework.beans.propertyeditors.FileEditor
-	 * @see org.springframework.beans.propertyeditors.InputStreamEditor
-	 * @see org.springframework.jndi.JndiTemplateEditor
-	 * @see org.springframework.beans.propertyeditors.LocaleEditor
-	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
-	 * @see org.springframework.beans.PropertyValuesEditor
-	 * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
-	 * @see org.springframework.core.io.ResourceEditor
-	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
-	 * @see org.springframework.transaction.interceptor.TransactionAttributeSourceEditor
-	 * @see org.springframework.beans.propertyeditors.URLEditor
 	 */
 	private void doRegisterDefaultEditors() {
 		this.defaultEditors = new HashMap<Class, PropertyEditor>(64);
@@ -178,12 +164,14 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Charset.class, new CharsetEditor());
 		this.defaultEditors.put(Class.class, new ClassEditor());
 		this.defaultEditors.put(Class[].class, new ClassArrayEditor());
+		this.defaultEditors.put(Currency.class, new CurrencyEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
 		this.defaultEditors.put(Pattern.class, new PatternEditor());
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
 		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
+		this.defaultEditors.put(TimeZone.class, new TimeZoneEditor());
 		this.defaultEditors.put(URI.class, new URIEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 
