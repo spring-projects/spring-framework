@@ -184,7 +184,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	protected void initGenericConverters() {
 		addGenericConverter(new CollectionGenericConverter(this));
 		addGenericConverter(new MapGenericConverter(this));
-		addGenericConverter(new ArrayGenericConverter(this));
 	}
 
 	protected void addGenericConverter(GenericConverter converter) {

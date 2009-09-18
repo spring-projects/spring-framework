@@ -186,7 +186,6 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	@Ignore
 	public void convertListToArray() {
 		List<String> list = new ArrayList<String>();
 		list.add("1");
@@ -199,7 +198,6 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	@Ignore
 	public void convertListToArrayWithComponentConversion() {
 		converter.addConverterFactory(new StringToNumberConverterFactory());
 		List<String> list = new ArrayList<String>();
