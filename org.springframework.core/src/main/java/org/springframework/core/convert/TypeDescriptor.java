@@ -179,6 +179,13 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Return the element type as a type descriptor.
+	 */
+	public TypeDescriptor getElementTypeDescriptor() {
+		return TypeDescriptor.valueOf(getElementType());
+	}
+
+	/**
 	 * Is this type a {@link Map} type?
 	 */
 	public boolean isMap() {
@@ -222,6 +229,14 @@ public class TypeDescriptor {
 		else {
 			return null;
 		}
+	}
+
+	public TypeDescriptor getMapKeyTypeDescriptor() {
+		return TypeDescriptor.valueOf(getMapKeyType());
+	}
+
+	public TypeDescriptor getMapValueTypeDescriptor() {
+		return TypeDescriptor.valueOf(getMapValueType());
 	}
 
 	/**

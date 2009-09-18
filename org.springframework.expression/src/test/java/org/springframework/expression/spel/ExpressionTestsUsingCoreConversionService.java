@@ -101,21 +101,11 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		private final DefaultConversionService service = new DefaultConversionService();
 
 		public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-			return this.service.canConvert(sourceType, TypeDescriptor.valueOf(targetType));
+			return this.service.canConvert(sourceType, targetType);
 		}
 
-		public boolean canConvert(Class<?> sourceType, TypeDescriptor typeDescriptor) {
-			return this.service.canConvert(sourceType, typeDescriptor);
-		}
-
-		@SuppressWarnings("cast")
-		public <T> T convertValue(Object value, Class<T> targetType) throws EvaluationException {
-			return (T) this.service.convert(value,TypeDescriptor.valueOf(targetType));
-		}
-
-		@SuppressWarnings("unchecked")
 		public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
-			return this.service.convert(value, typeDescriptor);
+			return this.service.convert(value, TypeDescriptor.forObject(value), typeDescriptor);
 		}
 	}
 

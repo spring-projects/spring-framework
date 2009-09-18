@@ -21,9 +21,9 @@ import org.springframework.core.convert.converter.ConverterFactory;
 
 /**
  * Uniform Converter interface used by GenericConversionService.
- * This interface is an internal detail of the GenericConversionService implementation.
+ * This interface is primarily an internal detail of the GenericConversionService implementation.
  * It should generally not be implemented by application code directly.
- * See {@link Converter} and {@link ConverterFactory} interfaces for public converter SPIs.
+ * See {@link Converter} and {@link ConverterFactory} interfaces for simpler public converter SPIs.
  * @author Keith Donald
  * @since 3.0
  * @see Converter
@@ -32,11 +32,20 @@ import org.springframework.core.convert.converter.ConverterFactory;
 public interface GenericConverter {
 
 	/**
+	 * Can this converter convert the sourceType to targetType.
+	 * @param sourceType context about the sourceType to convert to
+	 * @param targetType context about the targetType to convert to
+	 * @return true if so, false otherwise
+	 */
+	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+	
+	/**
 	 * Convert the source to the targetType described by the TypeDescriptor.
 	 * @param source the source object to convert (never null)
-	 * @param targetType the target type to convert to
+	 * @param sourceType context about the source type to convert from
+	 * @param targetType context about the target type to convert to
 	 * @return the converted object
 	 */
-	Object convert(Object source, TypeDescriptor targetType);
+	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

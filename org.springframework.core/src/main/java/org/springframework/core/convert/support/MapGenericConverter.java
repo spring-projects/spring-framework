@@ -5,33 +5,37 @@ import java.util.Map;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
 
-class MapToMapGenericConverter implements GenericConverter {
+class MapGenericConverter implements GenericConverter {
 
 	private GenericConversionService conversionService;
 
-	public MapToMapGenericConverter(GenericConversionService conversionService) {
+	public MapGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
-	public Object convert(Object source, TypeDescriptor targetType) {
+	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return sourceType.isMap() && targetType.isMap();
+	}
+
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Map sourceMap = (Map) source;
-		Class targetKeyType = targetType.getMapKeyType();
-		Class targetValueType = targetType.getMapValueType();
+		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
+		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
 		if (targetKeyType == null && targetValueType == null) {
 			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
 		}
-		Class[] sourceEntryTypes = getMapEntryTypes(sourceMap);
-		Class sourceKeyType = sourceEntryTypes[0];
-		Class sourceValueType = sourceEntryTypes[1];
+		TypeDescriptor[] sourceEntryTypes = getMapEntryTypes(sourceMap);
+		TypeDescriptor sourceKeyType = sourceEntryTypes[0];
+		TypeDescriptor sourceValueType = sourceEntryTypes[1];
 		if (sourceKeyType == null && sourceValueType == null) {
 			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
 		}
 		boolean keysCompatible = false;
-		if (targetKeyType != null && sourceKeyType != null && targetKeyType.isAssignableFrom(sourceKeyType)) {
+		if (sourceKeyType != null && targetKeyType != null && sourceKeyType.isAssignableTo(targetKeyType)) {
 			keysCompatible = true;
 		}
 		boolean valuesCompatible = false;
-		if (targetValueType != null && sourceValueType != null && targetValueType.isAssignableFrom(sourceValueType)) {
+		if (sourceValueType != null && targetValueType != null && sourceValueType.isAssignableTo(targetValueType)) {
 			valuesCompatible = true;
 		}
 		if (keysCompatible && valuesCompatible) {
@@ -46,7 +50,7 @@ class MapToMapGenericConverter implements GenericConverter {
 		return targetMap;
 	}
 
-	private Class[] getMapEntryTypes(Map sourceMap) {
+	private TypeDescriptor[] getMapEntryTypes(Map sourceMap) {
 		Class keyType = null;
 		Class valueType = null;
 		for (Object entry : sourceMap.entrySet()) {
@@ -63,7 +67,7 @@ class MapToMapGenericConverter implements GenericConverter {
 				break;
 			}
 		}
-		return new Class[] { keyType, valueType };
+		return new TypeDescriptor[] { TypeDescriptor.valueOf(keyType), TypeDescriptor.valueOf(valueType) };
 	}
 
 	private Map compatibleMapWithoutEntryConversion(Map source, TypeDescriptor targetType) {
@@ -82,26 +86,32 @@ class MapToMapGenericConverter implements GenericConverter {
 
 		private GenericConverter valueConverter;
 
-		private TypeDescriptor targetKeyTypeDescriptor;
+		private TypeDescriptor sourceKeyType;
 
-		private TypeDescriptor targetValueTypeDescriptor;
+		private TypeDescriptor sourceValueType;
+		
+		private TypeDescriptor targetKeyType;
+		
+		private TypeDescriptor targetValueType;
 
-		public MapEntryConverter(Class sourceKeyType, Class sourceValueType, Class targetKeyType,
-				Class targetValueType, boolean keysCompatible, boolean valuesCompatible,
+		public MapEntryConverter(TypeDescriptor sourceKeyType, TypeDescriptor sourceValueType, TypeDescriptor targetKeyType,
+				TypeDescriptor targetValueType, boolean keysCompatible, boolean valuesCompatible,
 				GenericConversionService conversionService) {
-			if (sourceKeyType != null && targetKeyType != null && !keysCompatible) {
-				this.targetKeyTypeDescriptor = TypeDescriptor.valueOf(targetKeyType);
-				this.keyConverter = conversionService.getConverter(sourceKeyType, targetKeyTypeDescriptor);
+			if (sourceKeyType != TypeDescriptor.NULL && targetKeyType != TypeDescriptor.NULL && !keysCompatible) {
+				this.keyConverter = conversionService.getConverter(sourceKeyType, targetKeyType);
+				this.sourceKeyType = sourceKeyType;
+				this.targetKeyType = targetKeyType;
 			}
-			if (sourceValueType != null && targetValueType != null && !valuesCompatible) {
-				this.targetValueTypeDescriptor = TypeDescriptor.valueOf(targetValueType);
-				this.valueConverter = conversionService.getConverter(sourceValueType, targetValueTypeDescriptor);
+			if (sourceValueType != TypeDescriptor.NULL && targetValueType != TypeDescriptor.NULL && !valuesCompatible) {
+				this.valueConverter = conversionService.getConverter(sourceValueType, targetValueType);
+				this.targetKeyType = targetKeyType;
+				this.targetValueType = targetValueType;
 			}
 		}
 
 		public Object convertKey(Object sourceKey) {
 			if (sourceKey != null && this.keyConverter != null) {
-				return this.keyConverter.convert(sourceKey, targetKeyTypeDescriptor);
+				return this.keyConverter.convert(sourceKey, sourceKeyType, targetKeyType);
 			} else {
 				return sourceKey;
 			}
@@ -109,7 +119,7 @@ class MapToMapGenericConverter implements GenericConverter {
 
 		public Object convertValue(Object sourceValue) {
 			if (sourceValue != null && this.valueConverter != null) {
-				return this.valueConverter.convert(sourceValue, targetValueTypeDescriptor);
+				return this.valueConverter.convert(sourceValue, sourceValueType, targetValueType);
 			} else {
 				return sourceValue;
 			}

@@ -18,10 +18,7 @@ package org.springframework.core.convert;
 
 /**
  * A service interface for type conversion. This is the entry point into the convert system.
- *
- * <p>Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
- * Call {@link #convert(Object, TypeDescriptor)} to perform a conversion with additional context
- * about the targetType to convert to.
+ * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
  *
  * @author Keith Donald
  * @since 3.0
@@ -35,7 +32,7 @@ public interface ConversionService {
 	 * @return true if a conversion can be performed, false if not
 	 */
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
-	
+
 	/**
 	 * Convert the source to targetType.
 	 * @param source the source to convert from (may be null)
@@ -46,24 +43,25 @@ public interface ConversionService {
 	<T> T convert(Object source, Class<T> targetType);
 
 	/**
-	 * Returns true if objects of sourceType can be converted to the targetType described by the TypeDescriptor.
-	 * The TypeDescriptor provides additional context about the point where conversion is needed, often an object property location.
+	 * Returns true if objects of sourceType can be converted to the targetType.
+	 * The TypeDescriptors provide additional context about the variable locations where conversion would occur, often object property locations.
 	 * This flavor of the canConvert operation is mainly for use by a data binding framework, and not by user code.
-	 * @param source the source type to convert from (required)
+	 * @param source context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
-	 * @return true if a conversion can be performed, false if not
+	 * @return true if a conversion can be performed between the source and target types, false if not
 	 */
-	boolean canConvert(Class<?> sourceType, TypeDescriptor targetType);
+	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
-	 * Convert the source to the targetType described by the TypeDescriptor.
-	 * The TypeDescriptor provides additional context about the point where conversion is needed, often a object property location.
+	 * Convert the source to targetTyp.
+	 * The TypeDescriptors provide additional context about the variable locations where conversion will occur, often object property locations.
 	 * This flavor of the convert operation is mainly for use by a data binding framework, and not by user code.
 	 * @param source the source to convert from (may be null)
+	 * @param sourceType context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
-	 * @return the converted object, an instance of {@link TypeDescriptor#getType()}</code>
+	 * @return the converted object, an instance of {@link TypeDescriptor#getObjectType()}</code>
 	 * @throws ConversionException if an exception occurred
 	 */
-	Object convert(Object source, TypeDescriptor targetType);
+	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

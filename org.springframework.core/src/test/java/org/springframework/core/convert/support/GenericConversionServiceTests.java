@@ -53,7 +53,7 @@ public class GenericConversionServiceTests {
 	public void executeConversionNullSource() {
 		assertEquals(null, converter.convert(null, Integer.class));
 	}
-	
+
 	@Test
 	public void executeCompatibleSource() {
 		assertEquals(Boolean.FALSE, converter.convert(false, boolean.class));
@@ -86,18 +86,17 @@ public class GenericConversionServiceTests {
 	public void convertNull() {
 		assertNull(converter.convert(null, Integer.class));
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
+
+	@Test(expected = IllegalArgumentException.class)
 	public void convertNullTargetClass() {
-		assertEquals("3", converter.convert("3", (Class<?>)null));
+		assertEquals("3", converter.convert("3", (Class<?>) null));
 	}
 
 	@Test
 	public void convertNullConversionPointType() {
-		assertEquals(null, converter.convert("3", TypeDescriptor.NULL));
+		assertEquals(null, converter.convert(3, TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
 	}
 
-	
 	@Test
 	public void convertWrongTypeArgument() {
 		converter.addConverterFactory(new StringToNumberConverterFactory());
@@ -128,7 +127,6 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	@Ignore
 	public void convertArrayToArray() {
 		converter.addConverterFactory(new StringToNumberConverterFactory());
 		Integer[] result = converter.convert(new String[] { "1", "2", "3" }, Integer[].class);
@@ -138,10 +136,17 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	@Ignore
 	public void convertArrayToPrimitiveArray() {
 		converter.addConverterFactory(new StringToNumberConverterFactory());
 		int[] result = converter.convert(new String[] { "1", "2", "3" }, int[].class);
+		assertEquals(1, result[0]);
+		assertEquals(2, result[1]);
+		assertEquals(3, result[2]);
+	}
+	
+	@Test
+	public void convertArrayToArrayAssignable() {
+		int[] result = converter.convert(new int[] { 1, 2, 3 }, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
 		assertEquals(3, result[2]);
@@ -162,7 +167,8 @@ public class GenericConversionServiceTests {
 	@Ignore
 	public void convertArrayToListGenericTypeConversion() throws Exception {
 		converter.addConverterFactory(new StringToNumberConverterFactory());
-		List<Integer> result = (List<Integer>) converter.convert(new String[] { "1", "2", "3" }, new TypeDescriptor(getClass().getDeclaredField("genericList")));
+		List<Integer> result = (List<Integer>) converter.convert(new String[] { "1", "2", "3" }, TypeDescriptor
+				.valueOf(String[].class), new TypeDescriptor(getClass().getDeclaredField("genericList")));
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
 		assertEquals(new Integer("3"), result.get(2));
@@ -221,12 +227,13 @@ public class GenericConversionServiceTests {
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
-		List<Integer> bar = (List<Integer>)converter.convert(foo, new TypeDescriptor(getClass().getField("genericList")));
+		List<Integer> bar = (List<Integer>) converter.convert(foo, TypeDescriptor.valueOf(List.class),
+				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(new Integer(1), bar.get(0));
 		assertEquals(new Integer(2), bar.get(1));
 		assertEquals(new Integer(3), bar.get(2));
 	}
-	
+
 	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
 
 	@Test
@@ -236,7 +243,8 @@ public class GenericConversionServiceTests {
 		foo.put("2", "BAZ");
 		converter.addConverterFactory(new StringToNumberConverterFactory());
 		converter.addConverterFactory(new StringToEnumConverterFactory());
-		Map<String, FooEnum> map = (Map<String, FooEnum>) converter.convert(foo, new TypeDescriptor(getClass().getField("genericMap")));
+		Map<String, FooEnum> map = (Map<String, FooEnum>) converter.convert(foo, TypeDescriptor.valueOf(Map.class),
+				new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(map.get(1), FooEnum.BAR);
 		assertEquals(map.get(2), FooEnum.BAZ);
 	}
@@ -250,18 +258,17 @@ public class GenericConversionServiceTests {
 		assertEquals("2", result[1]);
 		assertEquals("3", result[2]);
 	}
-	
+
 	@Test
 	@Ignore
 	public void convertStringToArrayWithElementConversion() {
-		converter.addConverterFactory(new StringToNumberConverterFactory());		
+		converter.addConverterFactory(new StringToNumberConverterFactory());
 		Integer[] result = converter.convert("1,2,3", Integer[].class);
 		assertEquals(3, result.length);
 		assertEquals(new Integer(1), result[0]);
 		assertEquals(new Integer(2), result[1]);
 		assertEquals(new Integer(3), result[2]);
 	}
-
 
 	public static enum FooEnum {
 		BAR, BAZ
