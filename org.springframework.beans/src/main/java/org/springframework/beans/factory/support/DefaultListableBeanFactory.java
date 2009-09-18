@@ -93,6 +93,19 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
+	private static Class javaxInjectProviderClass = null;
+
+	static {
+		ClassLoader cl = DefaultListableBeanFactory.class.getClassLoader();
+		try {
+			javaxInjectProviderClass = cl.loadClass("javax.inject.Provider");
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-330 API not available - Provider interface simply not supported then.
+		}
+	}
+
+
 	/** Map from serialized id to factory instance */
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
 			new ConcurrentHashMap<String, Reference<DefaultListableBeanFactory>>();
@@ -646,7 +659,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
 			return new DependencyObjectFactory(descriptor, beanName);
 		}
-		else if (descriptor.getDependencyType().getName().equals("javax.inject.Provider")) {
+		else if (descriptor.getDependencyType().equals(javaxInjectProviderClass)) {
 			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
 		}
 		else {

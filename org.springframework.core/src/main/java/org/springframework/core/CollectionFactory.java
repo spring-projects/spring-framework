@@ -34,7 +34,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -52,13 +51,9 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  */
 public abstract class CollectionFactory {
 
-	private static final String NAVIGABLE_SET_CLASS_NAME = "java.util.NavigableSet";
+	private static Class navigableSetClass = null;
 
-	private static final String NAVIGABLE_MAP_CLASS_NAME = "java.util.NavigableMap";
-
-	private static Class navigableSet = null;
-
-	private static Class navigableMap = null;
+	private static Class navigableMapClass = null;
 
 	private static final Set<Class> approximableCollectionTypes = new HashSet<Class>(10);
 
@@ -75,11 +70,12 @@ public abstract class CollectionFactory {
 		approximableMapTypes.add(SortedMap.class);
 
 		// New Java 6 collection interfaces
+		ClassLoader cl = CollectionFactory.class.getClassLoader();
 		try {
-			navigableSet = ClassUtils.forName(NAVIGABLE_SET_CLASS_NAME, CollectionFactory.class.getClassLoader());
-			navigableMap = ClassUtils.forName(NAVIGABLE_MAP_CLASS_NAME, CollectionFactory.class.getClassLoader());
-			approximableCollectionTypes.add(navigableSet);
-			approximableMapTypes.add(navigableMap);
+			navigableSetClass = cl.loadClass("java.util.NavigableSet");
+			navigableMapClass = cl.loadClass("java.util.NavigableMap");
+			approximableCollectionTypes.add(navigableSetClass);
+			approximableMapTypes.add(navigableMapClass);
 		}
 		catch (ClassNotFoundException ex) {
 			// not running on Java 6 or above...
@@ -240,7 +236,7 @@ public abstract class CollectionFactory {
 			if (List.class.equals(collectionType)) {
 				return new ArrayList(initialCapacity);
 			}
-			else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSet)) {
+			else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSetClass)) {
 				return new TreeSet();
 			}
 			else if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
@@ -307,7 +303,7 @@ public abstract class CollectionFactory {
 			if (Map.class.equals(mapType)) {
 				return new LinkedHashMap(initialCapacity);
 			}
-			else if (SortedMap.class.equals(mapType) || mapType.equals(navigableMap)) {
+			else if (SortedMap.class.equals(mapType) || mapType.equals(navigableMapClass)) {
 				return new TreeMap();
 			}
 			else {
