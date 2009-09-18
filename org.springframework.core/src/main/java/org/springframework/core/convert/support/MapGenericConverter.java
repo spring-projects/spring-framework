@@ -31,11 +31,11 @@ class MapGenericConverter implements GenericConverter {
 			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
 		}
 		boolean keysCompatible = false;
-		if (sourceKeyType != null && targetKeyType != null && sourceKeyType.isAssignableTo(targetKeyType)) {
+		if (sourceKeyType != TypeDescriptor.NULL && targetKeyType != TypeDescriptor.NULL && sourceKeyType.isAssignableTo(targetKeyType)) {
 			keysCompatible = true;
 		}
 		boolean valuesCompatible = false;
-		if (sourceValueType != null && targetValueType != null && sourceValueType.isAssignableTo(targetValueType)) {
+		if (sourceValueType != TypeDescriptor.NULL && targetValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetValueType)) {
 			valuesCompatible = true;
 		}
 		if (keysCompatible && valuesCompatible) {

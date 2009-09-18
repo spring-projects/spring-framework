@@ -67,7 +67,7 @@ class CollectionGenericConverter implements GenericConverter {
 				return TypeDescriptor.valueOf(element.getClass());
 			}
 		}
-		return null;
+		return TypeDescriptor.NULL;
 	}
 
 	private Collection compatibleCollectionWithoutElementConversion(Collection source, TypeDescriptor targetType) {
