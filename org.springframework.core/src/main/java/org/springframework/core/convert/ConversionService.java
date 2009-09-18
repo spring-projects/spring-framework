@@ -45,7 +45,7 @@ public interface ConversionService {
 	/**
 	 * Returns true if objects of sourceType can be converted to the targetType.
 	 * The TypeDescriptors provide additional context about the variable locations where conversion would occur, often object property locations.
-	 * This flavor of the canConvert operation is mainly for use by a data binding framework, and not by user code.
+	 * This flavor of the canConvert operation is mainly for use by a data mapping framework, and not by user code.
 	 * @param source context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
 	 * @return true if a conversion can be performed between the source and target types, false if not
@@ -55,7 +55,7 @@ public interface ConversionService {
 	/**
 	 * Convert the source to targetTyp.
 	 * The TypeDescriptors provide additional context about the variable locations where conversion will occur, often object property locations.
-	 * This flavor of the convert operation is mainly for use by a data binding framework, and not by user code.
+	 * This flavor of the convert operation is mainly for use by a data mapping framework, and not by user code.
 	 * @param source the source to convert from (may be null)
 	 * @param sourceType context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
