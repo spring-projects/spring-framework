@@ -280,8 +280,8 @@
 *#
 #macro( springFormCheckbox $path $attributes )
     #springBind($path)
- 	<input type="hidden" name="_${status.expression}" value="on"/>
-	<input type="checkbox" id="${status.expression}" name="${status.expression}" checked="#if("$!{status.value}"=="true")true#{else}false#end" ${attributes}/>
+    <input type="hidden" name="_${status.expression}" value="on"/>
+    <input type="checkbox" id="${status.expression}" name="${status.expression}"#if("$!{status.value}"=="true") checked="checked"#end ${attributes}/>
 #end
 
 #**
@@ -293,7 +293,7 @@
  * @param separator the html tag or other character list that should be used to
  *    separate each option. Typically '<br>'.
  * @param classOrStyle either the name of a CSS class element (which is defined in
- *    the template or an external CSS file) or an inline style.  If the value passed in here
+ *    the template or an external CSS file) or an inline style. If the value passed in here
  *    contains a colon (:) then a 'style=' attribute will be used, else a 'class=' attribute
  *    will be used.
 *#
