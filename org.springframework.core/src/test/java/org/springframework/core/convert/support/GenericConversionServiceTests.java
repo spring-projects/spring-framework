@@ -230,7 +230,6 @@ public class GenericConversionServiceTests {
 	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
 
 	@Test
-	@Ignore
 	public void convertMapToMap() throws Exception {
 		Map<String, String> foo = new HashMap<String, String>();
 		foo.put("1", "BAR");

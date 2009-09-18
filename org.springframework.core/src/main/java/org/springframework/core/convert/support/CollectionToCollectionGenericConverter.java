@@ -38,21 +38,31 @@ class CollectionToCollectionGenericConverter implements GenericConverter {
 
 	public Object convert(Object source, TypeDescriptor targetType) {
 		Collection sourceCollection = (Collection) source;
-		Object firstNotNullElement = getFirstNotNullElement(sourceCollection);
-		if (firstNotNullElement == null) {
+		Class targetElementType = targetType.getElementType();
+		if (targetElementType == null) {
 			return compatibleCollectionWithoutElementConversion(sourceCollection, targetType);
 		}
-		Class targetElementType = targetType.getElementType();
-		if (targetElementType == null || targetElementType.isAssignableFrom(firstNotNullElement.getClass())) {
+		Class sourceElementType = getElementType(sourceCollection);
+		if (sourceElementType == null || targetElementType.isAssignableFrom(sourceElementType)) {
 			return compatibleCollectionWithoutElementConversion(sourceCollection, targetType);
 		}
 		Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		GenericConverter elementConverter = conversionService.getConverter(firstNotNullElement.getClass(),
-				TypeDescriptor.valueOf(targetElementType));
+		TypeDescriptor targetElementTypeDescriptor = TypeDescriptor.valueOf(targetElementType);
+		GenericConverter elementConverter = conversionService.getConverter(sourceElementType,
+				targetElementTypeDescriptor);
 		for (Object element : sourceCollection) {
-			targetCollection.add(elementConverter.convert(element, TypeDescriptor.valueOf(targetElementType)));
+			targetCollection.add(elementConverter.convert(element, targetElementTypeDescriptor));
 		}
 		return targetCollection;
+	}
+
+	private Class getElementType(Collection collection) {
+		for (Object element : collection) {
+			if (element != null) {
+				return element.getClass();
+			}
+		}
+		return null;
 	}
 
 	private Collection compatibleCollectionWithoutElementConversion(Collection source, TypeDescriptor targetType) {
@@ -60,20 +70,9 @@ class CollectionToCollectionGenericConverter implements GenericConverter {
 			return source;
 		} else {
 			Collection target = CollectionFactory.createCollection(targetType.getType(), source.size());
-			for (Object element : source) {
-				target.addAll(source);
-			}
+			target.addAll(source);
 			return target;
 		}
-	}
-
-	private Object getFirstNotNullElement(Collection collection) {
-		for (Object element : collection) {
-			if (element != null) {
-				return element;
-			}
-		}
-		return null;
 	}
 
 }
