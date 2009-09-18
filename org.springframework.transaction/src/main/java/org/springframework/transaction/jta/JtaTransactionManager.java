@@ -50,7 +50,6 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,60 +65,36 @@ import org.springframework.util.StringUtils;
  * and for accessing a single resource with Hibernate (including transactional cache),
  * HibernateTransactionManager is appropriate, for example.
  *
- * <p>Transaction synchronization is active by default, to allow data access support
- * classes to register resources that are opened within the transaction for closing at
- * transaction completion time. Spring's support classes for JDBC, Hibernate, JDO etc
- * all perform such registration, allowing for reuse of the same Hibernate Session etc
- * within the transaction. Standard JTA does not even guarantee that for Connections
- * from a transactional JDBC DataSource: Spring's synchronization solves those issues.
- *
  * <p><b>For typical JTA transactions (REQUIRED, SUPPORTS, MANDATORY, NEVER), a plain
- * JtaTransactionManager definition is all you need, completely portable across all
- * J2EE servers.</b> This corresponds to the functionality of the JTA UserTransaction,
- * for which J2EE specifies a standard JNDI name ("java:comp/UserTransaction").
- * There is no need to configure a server-specific TransactionManager lookup for this
- * kind of JTA usage.
+ * JtaTransactionManager definition is all you need, portable across all J2EE servers.</b>
+ * This corresponds to the functionality of the JTA UserTransaction, for which J2EE
+ * specifies a standard JNDI name ("java:comp/UserTransaction"). There is no need to
+ * configure a server-specific TransactionManager lookup for this kind of JTA usage.
  *
- * <p><b>Note: Advanced JTA usage below. Dealing with these mechanisms is not
- * necessary for typical usage scenarios.</b>
+ * <p><b>Transaction suspension (REQUIRES_NEW, NOT_SUPPORTED) is just available with a
+ * JTA TransactionManager being registered.</b> Common TransactionManager locations are
+ * autodetected by JtaTransactionManager, provided that the "autodetectTransactionManager"
+ * flag is set to "true" (which it is by default).
  *
- * <p>Transaction suspension (REQUIRES_NEW, NOT_SUPPORTED) is just available with
- * a JTA TransactionManager being registered, via the "transactionManagerName" or
- * "transactionManager" property. The location of this well-defined JTA object is
- * <i>not</i> specified by J2EE; it is specific to each J2EE server, often kept
- * in JNDI like the JTA UserTransaction. Some well-known JNDI locations are:
- * <ul>
- * <li>"java:comp/UserTransaction" for Resin 2.x, Oracle OC4J (Orion),
- * JOnAS (JOTM), BEA WebLogic
- * <li>"java:comp/TransactionManager" for Resin 3.x
- * <li>"java:appserver/TransactionManager" for GlassFish
- * <li>"java:pm/TransactionManager" for Borland Enterprise Server and
- * Sun Application Server (Sun ONE 7 and later)
- * <li>"java:/TransactionManager" for JBoss Application Server
- * </ul>
- *
- * <p>All of these cases are autodetected by JtaTransactionManager, provided that the
- * "autodetectTransactionManager" flag is set to "true" (which it is by default).
- *
- * <p><b>Note: Support for the JTA TransactionManager interface is not required by J2EE.
+ * <p>Note: Support for the JTA TransactionManager interface is not required by J2EE.
  * Almost all J2EE servers expose it, but do so as extension to J2EE. There might be some
- * issues with compatibility, despite the TransactionManager interface being part of JTA.</b>
+ * issues with compatibility, despite the TransactionManager interface being part of JTA.
  * As a consequence, Spring provides various vendor-specific PlatformTransactionManagers,
  * which are recommended to be used if appropriate: {@link WebLogicJtaTransactionManager},
  * {@link WebSphereUowTransactionManager} and {@link OC4JJtaTransactionManager}.
  * For all other J2EE servers, the standard JtaTransactionManager is sufficient.
  *
- * <p><b>Consider using Spring 2.5's <code>tx:jta-transaction-manager</code> configuration
- * element for automatically picking the appropriate JTA platform transaction manager
- * (automatically detecting WebLogic, WebSphere and OC4J).</b>
- *
- * <p><b>This pure JtaTransactionManager supports timeouts but not per-transaction
- * isolation levels.</b> Custom subclasses may override {@link #doJtaBegin} for
+ * <p>This pure JtaTransactionManager class supports timeouts but not per-transaction
+ * isolation levels. Custom subclasses may override the {@link #doJtaBegin} method for
  * specific JTA extensions in order to provide this functionality; Spring includes
  * corresponding {@link WebLogicJtaTransactionManager} and {@link OC4JJtaTransactionManager}
  * classes, for BEA's WebLogic Server and Oracle's OC4J, respectively. Such adapters
  * for specific J2EE transaction coordinators may also expose transaction names for
  * monitoring; with standard JTA, transaction names will simply be ignored.
+ *
+ * <p><b>Consider using Spring's <code>tx:jta-transaction-manager</code> configuration
+ * element for automatically picking the appropriate JTA platform transaction manager
+ * (automatically detecting WebLogic, WebSphere and OC4J).</b>
  *
  * <p>JTA 1.1 adds the TransactionSynchronizationRegistry facility, as public Java EE 5
  * API in addition to the standard JTA UserTransaction handle. As of Spring 2.5, this
@@ -129,8 +104,7 @@ import org.springframework.util.StringUtils;
  * is available (or the JTA 1.1 API isn't available), then such synchronizations
  * will be registered via the (non-J2EE) JTA TransactionManager handle.
  *
- * <p>This class is serializable. However, active synchronizations do not survive
- * serialization.
+ * <p>This class is serializable. However, active synchronizations do not survive serialization.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
@@ -175,6 +149,18 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	private static final String TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME =
 			"javax.transaction.TransactionSynchronizationRegistry";
+
+	private static Class<?> transactionSynchronizationRegistryClass;
+
+	static {
+		ClassLoader cl = JtaTransactionManager.class.getClassLoader();
+		try {
+			transactionSynchronizationRegistryClass = cl.loadClass(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME);
+		}
+		catch (ClassNotFoundException ex) {
+			// JTA 1.1 API not available... simply proceed the JTA 1.0 way.
+		}
+	}
 
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
@@ -495,8 +481,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		else {
-			logger.warn("No JTA TransactionManager found: " +
-					"transaction suspension and synchronization with existing JTA transactions not available");
+			logger.warn("No JTA TransactionManager found: transaction suspension not available");
 		}
 	}
 
@@ -599,19 +584,16 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setJndiTemplate
 	 * @see #setTransactionSynchronizationRegistryName
 	 */
-	protected Object lookupTransactionSynchronizationRegistry(String registryName)
-			throws TransactionSystemException {
+	protected Object lookupTransactionSynchronizationRegistry(String registryName) throws TransactionSystemException {
+		if (transactionSynchronizationRegistryClass == null) {
+			throw new TransactionSystemException(
+					"JTA 1.1 [" + TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME + "] API not available");
+		}
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieving JTA TransactionSynchronizationRegistry from JNDI location [" + registryName + "]");
 			}
-			Class<?> registryClass = ClassUtils.forName(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME,
-					JtaTransactionManager.class.getClassLoader());
-			return getJndiTemplate().lookup(registryName, registryClass);
-		}
-		catch (ClassNotFoundException ex) {
-			throw new TransactionSystemException(
-					"JTA 1.1 [" + TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME + "] not available");
+			return getJndiTemplate().lookup(registryName, transactionSynchronizationRegistryClass);
 		}
 		catch (NamingException ex) {
 			throw new TransactionSystemException(
@@ -731,46 +713,43 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected Object findTransactionSynchronizationRegistry(UserTransaction ut, TransactionManager tm)
 			throws TransactionSystemException {
 
-		try {
-			Class<?> registryClass = ClassUtils.forName(TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME,
-					JtaTransactionManager.class.getClassLoader());
-
-			// If we came here, we might be on Java EE 5, since the JTA 1.1 API is present.
-			if (this.userTransactionObtainedFromJndi) {
-				// UserTransaction has already been obtained from JNDI, so the
-				// TransactionSynchronizationRegistry probably sits there as well.
-				String jndiName = DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME;
-				try {
-					Object tsr = getJndiTemplate().lookup(jndiName, registryClass);
-					if (logger.isDebugEnabled()) {
-						logger.debug("JTA TransactionSynchronizationRegistry found at default JNDI location [" + jndiName + "]");
-					}
-					return tsr;
-				}
-				catch (NamingException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(
-								"No JTA TransactionSynchronizationRegistry found at default JNDI location [" + jndiName + "]", ex);
-					}
-				}
+		if (transactionSynchronizationRegistryClass == null) {
+			// JTA 1.1 API not present - skip.
+			if (logger.isDebugEnabled()) {
+			    logger.debug("JTA 1.1 [" + TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME + "] API not available");
 			}
-
-			// Check whether the UserTransaction or TransactionManager implements it...
-			if (registryClass.isInstance(ut)) {
-				return ut;
-			}
-			if (registryClass.isInstance(tm)) {
-				return tm;
-			}
-
-			// OK, so no JTA 1.1 TransactionSynchronizationRegistry is available,
-			// despite the API being present...
 			return null;
 		}
-		catch (ClassNotFoundException ex) {
-			logger.debug("JTA 1.1 [" + TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME + "] not available");
-			return null;
+
+		// If we came here, we might be on Java EE 5, since the JTA 1.1 API is present.
+		if (this.userTransactionObtainedFromJndi) {
+			// UserTransaction has already been obtained from JNDI, so the
+			// TransactionSynchronizationRegistry probably sits there as well.
+			String jndiName = DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME;
+			try {
+				Object tsr = getJndiTemplate().lookup(jndiName, transactionSynchronizationRegistryClass);
+				if (logger.isDebugEnabled()) {
+					logger.debug("JTA TransactionSynchronizationRegistry found at default JNDI location [" + jndiName + "]");
+				}
+				return tsr;
+			}
+			catch (NamingException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							"No JTA TransactionSynchronizationRegistry found at default JNDI location [" + jndiName + "]", ex);
+				}
+			}
 		}
+		// Check whether the UserTransaction or TransactionManager implements it...
+		if (transactionSynchronizationRegistryClass.isInstance(ut)) {
+			return ut;
+		}
+		if (transactionSynchronizationRegistryClass.isInstance(tm)) {
+			return tm;
+		}
+		// OK, so no JTA 1.1 TransactionSynchronizationRegistry is available,
+		// despite the API being present...
+		return null;
 	}
 
 
