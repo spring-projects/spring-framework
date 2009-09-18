@@ -134,7 +134,7 @@ class CollectionGenericConverter implements GenericConverter {
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
 			if (sourceType.isAssignableTo(targetType)) {
-				return source;
+				return sourceCollection;
 			} else {
 				Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 				targetCollection.addAll(sourceCollection);
