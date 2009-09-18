@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
 public class TypeDescriptor {
 
 	/**
-	 * Constant defining an 'empty' TypeDescriptor.
+	 * Constant defining an 'unknown' TypeDescriptor.
 	 */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
@@ -231,10 +231,16 @@ public class TypeDescriptor {
 		}
 	}
 
+	/**
+	 * Returns map key type as a type descriptor.
+	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
 		return TypeDescriptor.valueOf(getMapKeyType());
 	}
 
+	/**
+	 * Returns map value type as a type descriptor.
+	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
 		return TypeDescriptor.valueOf(getMapValueType());
 	}
@@ -270,7 +276,7 @@ public class TypeDescriptor {
 	 */
 	public boolean isAssignableValue(Object obj) {
 		Class<?> type = getType();
-		return (type != null && ClassUtils.isAssignableValue(getType(), obj));
+		return type != null && ClassUtils.isAssignableValue(getType(), obj);
 	}
 
 	/**
@@ -279,7 +285,11 @@ public class TypeDescriptor {
 	 * @return true if this type is assignable to the target
 	 */
 	public boolean isAssignableTo(TypeDescriptor targetType) {
-		return ClassUtils.isAssignable(targetType.getType(), getType());
+		if (targetType == TypeDescriptor.NULL) {
+			return false;
+		}
+		Class<?> type = getType();
+		return type != null && ClassUtils.isAssignable(targetType.getType(), type);
 	}
 
 	/**
