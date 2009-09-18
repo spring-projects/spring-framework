@@ -140,16 +140,15 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static Class<? extends Annotation> ejbRefClass = null;
 
 	static {
+		ClassLoader cl = CommonAnnotationBeanPostProcessor.class.getClassLoader();
 		try {
-			webServiceRefClass = ClassUtils.forName("javax.xml.ws.WebServiceRef",
-					CommonAnnotationBeanPostProcessor.class.getClassLoader());
+			webServiceRefClass = (Class) cl.loadClass("javax.xml.ws.WebServiceRef");
 		}
 		catch (ClassNotFoundException ex) {
 			webServiceRefClass = null;
 		}
 		try {
-			ejbRefClass = ClassUtils.forName("javax.ejb.EJB",
-					CommonAnnotationBeanPostProcessor.class.getClassLoader());
+			ejbRefClass = (Class) cl.loadClass("javax.ejb.EJB");
 		}
 		catch (ClassNotFoundException ex) {
 			ejbRefClass = null;
