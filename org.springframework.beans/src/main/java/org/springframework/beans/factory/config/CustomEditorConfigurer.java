@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -146,6 +147,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
 			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
@@ -162,7 +164,8 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 				try {
 					requiredType = ClassUtils.forName(key, this.beanClassLoader);
 					Class editorClass = ClassUtils.forName(value, this.beanClassLoader);
-					beanFactory.registerCustomEditor(requiredType, editorClass);
+					Assert.isAssignable(PropertyEditor.class, editorClass);
+					beanFactory.registerCustomEditor(requiredType, (Class<? extends PropertyEditor>) editorClass);
 				}
 				catch (ClassNotFoundException ex) {
 					if (this.ignoreUnresolvableEditors) {
