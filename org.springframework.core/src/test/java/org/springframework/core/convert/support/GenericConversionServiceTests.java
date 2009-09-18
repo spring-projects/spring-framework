@@ -153,7 +153,6 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	@Ignore
 	public void convertArrayToListInterface() {
 		List<?> result = converter.convert(new String[] { "1", "2", "3" }, List.class);
 		assertEquals("1", result.get(0));
@@ -164,7 +163,6 @@ public class GenericConversionServiceTests {
 	public List<Integer> genericList = new ArrayList<Integer>();
 
 	@Test
-	@Ignore
 	public void convertArrayToListGenericTypeConversion() throws Exception {
 		converter.addConverterFactory(new StringToNumberConverterFactory());
 		List<Integer> result = (List<Integer>) converter.convert(new String[] { "1", "2", "3" }, TypeDescriptor
@@ -175,7 +173,6 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	@Ignore
 	public void convertArrayToListImpl() {
 		LinkedList<?> result = converter.convert(new String[] { "1", "2", "3" }, LinkedList.class);
 		assertEquals("1", result.get(0));
@@ -183,14 +180,9 @@ public class GenericConversionServiceTests {
 		assertEquals("3", result.get(2));
 	}
 
-	@Test
-	@Ignore
+	@Test(expected=ConversionFailedException.class)
 	public void convertArrayToAbstractList() {
-		try {
-			converter.convert(new String[] { "1", "2", "3" }, AbstractList.class);
-		} catch (IllegalArgumentException e) {
-
-		}
+		converter.convert(new String[] { "1", "2", "3" }, AbstractList.class);
 	}
 
 	@Test
