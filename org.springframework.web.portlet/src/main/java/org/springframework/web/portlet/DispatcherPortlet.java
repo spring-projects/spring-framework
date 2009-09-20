@@ -586,7 +586,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @throws BeansException if initialization failed
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 */
-	protected Object createDefaultStrategy(ApplicationContext context, Class clazz) throws BeansException {
+	protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) throws BeansException {
 		return context.getAutowireCapableBeanFactory().createBean(clazz);
 	}
 
@@ -700,7 +700,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		int interceptorIndex = -1;
 
 		try {
-			ModelAndView mv = null;
+			ModelAndView mv;
 			try {
 				// Check for forwarded exception from the action phase
 				PortletSession session = request.getPortletSession(false);
@@ -806,23 +806,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		int interceptorIndex = -1;
 
 		try {
-			ModelAndView mv = null;
+			ModelAndView mv;
 			try {
-				// Check for forwarded exception from the action phase
-				PortletSession session = request.getPortletSession(false);
-				if (session != null) {
-					if (request.getParameter(ACTION_EXCEPTION_RENDER_PARAMETER) != null) {
-						Exception ex = (Exception) session.getAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
-						if (ex != null) {
-							logger.debug("Render phase found exception caught during action phase - rethrowing it");
-							throw ex;
-						}
-					}
-					else {
-						session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
-					}
-				}
-
 				// Determine handler for the current request.
 				mappedHandler = getHandler(request, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
@@ -1063,7 +1048,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @throws Exception if there's a problem rendering the view
 	 */
 	protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
-		View view = null;
+		View view;
 		if (mv.isReference()) {
 			// We need to resolve the view name.
 			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), request);
