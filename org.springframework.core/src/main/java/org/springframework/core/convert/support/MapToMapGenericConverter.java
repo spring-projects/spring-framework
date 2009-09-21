@@ -5,16 +5,12 @@ import java.util.Map;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
 
-class MapGenericConverter implements GenericConverter {
+class MapToMapGenericConverter implements GenericConverter {
 
 	private GenericConversionService conversionService;
 
-	public MapGenericConverter(GenericConversionService conversionService) {
+	public MapToMapGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
-	}
-
-	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return sourceType.isMap() && targetType.isMap();
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

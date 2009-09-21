@@ -32,14 +32,6 @@ import org.springframework.core.convert.converter.ConverterFactory;
 public interface GenericConverter {
 
 	/**
-	 * Can this converter convert the sourceType to targetType.
-	 * @param sourceType context about the sourceType to convert to
-	 * @param targetType context about the targetType to convert to
-	 * @return true if so, false otherwise
-	 */
-	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
-	
-	/**
 	 * Convert the source to the targetType described by the TypeDescriptor.
 	 * @param source the source object to convert (never null)
 	 * @param sourceType context about the source type to convert from
