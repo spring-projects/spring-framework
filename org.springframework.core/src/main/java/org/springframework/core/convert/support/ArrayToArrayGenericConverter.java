@@ -17,6 +17,7 @@ package org.springframework.core.convert.support;
 
 import java.lang.reflect.Array;
 
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
 class ArrayToArrayGenericConverter implements GenericConverter {
@@ -34,7 +35,10 @@ class ArrayToArrayGenericConverter implements GenericConverter {
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		Object target = Array.newInstance(targetElementType.getType(), Array.getLength(source));
-		GenericConverter converter = conversionService.getConverter(sourceElementType, targetElementType);
+		GenericConverter converter = conversionService.getConverter(sourceElementType, targetElementType);		
+		if (converter == null) {
+			throw new ConverterNotFoundException(sourceType, targetType);
+		}
 		for (int i = 0; i < Array.getLength(target); i++) {
 			Array.set(target, i, converter.convert(Array.get(source, i), sourceElementType, targetElementType));
 		}

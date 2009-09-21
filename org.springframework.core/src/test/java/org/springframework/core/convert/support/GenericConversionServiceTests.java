@@ -19,6 +19,8 @@ package org.springframework.core.convert.support;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -263,6 +265,27 @@ public class GenericConversionServiceTests {
 		assertEquals(new Integer(1), result[0]);
 		assertEquals(new Integer(2), result[1]);
 		assertEquals(new Integer(3), result[2]);
+	}
+
+	@Test
+	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
+		try {
+			converter.convert("1", Integer[].class);
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}
+	}
+	
+	@Test
+	public void parent() {
+		GenericConversionService parent = new GenericConversionService();
+		converter.setParent(parent);
+		assertFalse(converter.canConvert(String.class, Integer.class));
+		try {
+			converter.convert("3", Integer.class);
+		} catch (ConverterNotFoundException e) {
+			
+		}
 	}
 
 	public static enum FooEnum {

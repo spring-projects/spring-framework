@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 import java.util.Collection;
 
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
 class ObjectToCollectionGenericConverter implements GenericConverter {
@@ -27,7 +28,7 @@ class ObjectToCollectionGenericConverter implements GenericConverter {
 	public ObjectToCollectionGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Collection target = CollectionFactory.createCollection(targetType.getType(), 1);
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
@@ -35,6 +36,9 @@ class ObjectToCollectionGenericConverter implements GenericConverter {
 			target.add(source);
 		} else {
 			GenericConverter converter = conversionService.getConverter(sourceType, targetElementType);
+			if (converter == null) {
+				throw new ConverterNotFoundException(sourceType, targetType);
+			}
 			target.add(converter.convert(source, sourceType, targetElementType));
 		}
 		return target;

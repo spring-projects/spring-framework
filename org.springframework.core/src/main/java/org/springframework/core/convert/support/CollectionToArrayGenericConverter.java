@@ -19,6 +19,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
 class CollectionToArrayGenericConverter implements GenericConverter {
@@ -44,6 +45,9 @@ class CollectionToArrayGenericConverter implements GenericConverter {
 			}
 		} else {
 			GenericConverter converter = conversionService.getConverter(sourceElementType, targetElementType);
+			if (converter == null) {
+				throw new ConverterNotFoundException(sourceType, targetType);
+			}			
 			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
 				Array.set(array, i, converter.convert(it.next(), sourceElementType, targetElementType));
 			}
