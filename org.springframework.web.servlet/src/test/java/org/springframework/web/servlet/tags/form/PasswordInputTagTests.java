@@ -23,6 +23,7 @@ import javax.servlet.jsp.tagext.Tag;
 /**
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Jeremy Grelle
  */
 public class PasswordInputTagTests extends InputTagTests {
 

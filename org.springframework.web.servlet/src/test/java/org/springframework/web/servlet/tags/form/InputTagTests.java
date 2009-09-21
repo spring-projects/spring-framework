@@ -29,6 +29,7 @@ import org.springframework.web.servlet.tags.NestedPathTag;
 /**
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Jeremy Grelle
  */
 public class InputTagTests extends AbstractFormTagTests {
 
@@ -149,6 +150,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		String onselect = "doSelect()";
 		String readonly = "true";
 		String autocomplete = "off";
+		String dynamicAttribute1 = "attr1";
+		String dynamicAttribute2 = "attr2";
 
 		this.tag.setId(id);
 		this.tag.setPath("name");
@@ -179,6 +182,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setOnselect(onselect);
 		this.tag.setReadonly(readonly);
 		this.tag.setAutocomplete(autocomplete);
+		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
+		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
 
 		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
@@ -217,6 +222,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "onselect", onselect);
 		assertContainsAttribute(output, "readonly", "readonly");
 		assertContainsAttribute(output, "autocomplete", autocomplete);
+		assertContainsAttribute(output, dynamicAttribute1, dynamicAttribute1);
+		assertContainsAttribute(output, dynamicAttribute2, dynamicAttribute2);
 	}
 
 	public void testWithNestedBind() throws Exception {

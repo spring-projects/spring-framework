@@ -38,6 +38,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Jeremy Grelle
  */
 public class OptionTagTests extends AbstractHtmlElementTagTests {
 
@@ -93,6 +94,31 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "value", "bar");
+		assertBlockTagContains(output, "Bar");
+	}
+	
+	public void testRenderWithDynamicAttributes() throws Exception {
+		String dynamicAttribute1 = "attr1";
+		String dynamicAttribute2 = "attr2";
+		
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		this.tag.setValue("bar");
+		this.tag.setLabel("Bar");
+		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
+		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
+		
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", "bar");
+		assertContainsAttribute(output, dynamicAttribute1, dynamicAttribute1);
+		assertContainsAttribute(output, dynamicAttribute2, dynamicAttribute2);
 		assertBlockTagContains(output, "Bar");
 	}
 
