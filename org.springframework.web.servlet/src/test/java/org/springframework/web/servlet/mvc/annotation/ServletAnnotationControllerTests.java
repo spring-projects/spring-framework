@@ -459,7 +459,6 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
-	@Ignore
 	public void commandProvidingFormControllerWithFormatter() throws Exception {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
