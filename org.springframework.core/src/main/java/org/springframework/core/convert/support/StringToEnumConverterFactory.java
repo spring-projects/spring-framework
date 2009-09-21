@@ -26,7 +26,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
-class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
+final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
 		return new StringToEnum(targetType);

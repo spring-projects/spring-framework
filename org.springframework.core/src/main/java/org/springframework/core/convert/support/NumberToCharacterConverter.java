@@ -32,7 +32,7 @@ import org.springframework.core.convert.converter.Converter;
  * @see java.lang.Double
  * @see java.math.BigDecimal
  */
-class NumberToCharacterConverter implements Converter<Number, Character> {
+final class NumberToCharacterConverter implements Converter<Number, Character> {
 
 	public Character convert(Number source) {
 		return (char) source.shortValue();

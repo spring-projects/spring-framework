@@ -24,7 +24,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Keith Donald
  * @since 3.0
  */
-class StringToBooleanConverter implements Converter<String, Boolean> {
+final class StringToBooleanConverter implements Converter<String, Boolean> {
 
 	public Boolean convert(String source) {
 		if (source.equals("")) {

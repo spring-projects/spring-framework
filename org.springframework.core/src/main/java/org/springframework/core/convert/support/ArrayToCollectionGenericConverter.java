@@ -22,9 +22,9 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
-class ArrayToCollectionGenericConverter implements GenericConverter {
+final class ArrayToCollectionGenericConverter implements GenericConverter {
 
-	private GenericConversionService conversionService;
+	private final GenericConversionService conversionService;
 
 	public ArrayToCollectionGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -40,7 +40,7 @@ class ArrayToCollectionGenericConverter implements GenericConverter {
 				collection.add(Array.get(source, i));
 			}
 		} else {
-			GenericConverter converter = conversionService.getConverter(sourceElementType, targetElementType);
+			GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceType, targetType);
 			}			

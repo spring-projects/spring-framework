@@ -22,11 +22,11 @@ package org.springframework.core.convert;
  * @author Keith Donald
  * @since 3.0
  */
-public class ConversionFailedException extends ConversionException {
+public final class ConversionFailedException extends ConversionException {
 
-	private TypeDescriptor sourceType;
+	private final TypeDescriptor sourceType;
 
-	private TypeDescriptor targetType;
+	private final TypeDescriptor targetType;
 
 	/**
 	 * Create a new conversion exception.

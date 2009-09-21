@@ -151,7 +151,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Assert.notNull(sourceType, "The source type to convert to is required");
+		Assert.notNull(sourceType, "The sourceType to convert to is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
 		if (source == null) {
 			return convertNull(sourceType, targetType);
@@ -344,7 +344,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		Map<Class, GenericConverter> sourceMap = sourceTypeConverters.get(sourceType);
 		if (sourceMap == null) {
 			sourceMap = new HashMap<Class, GenericConverter>();
-			sourceTypeConverters.put(sourceType, sourceMap);
+			this.sourceTypeConverters.put(sourceType, sourceMap);
 		}
 		return sourceMap;
 	}
@@ -410,7 +410,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return converter.convert(source);
+			return this.converter.convert(source);
 		}
 
 	}
@@ -424,7 +424,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return converterFactory.getConverter(targetType.getObjectType()).convert(source);
+			return this.converterFactory.getConverter(targetType.getObjectType()).convert(source);
 		}
 
 	}

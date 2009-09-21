@@ -20,9 +20,9 @@ import java.util.Collection;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
-class CollectionToObjectGenericConverter implements GenericConverter {
+final class CollectionToObjectGenericConverter implements GenericConverter {
 
-	private GenericConversionService conversionService;
+	private final GenericConversionService conversionService;
 
 	public CollectionToObjectGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -37,7 +37,7 @@ class CollectionToObjectGenericConverter implements GenericConverter {
 			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
 				return sourceCollection.iterator().next();
 			} else {
-				GenericConverter converter = conversionService.getConverter(sourceElementType, targetType);
+				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceType, targetType);
 				}				
