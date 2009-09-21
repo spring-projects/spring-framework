@@ -29,14 +29,14 @@ class ObjectToArrayGenericConverter implements GenericConverter {
 	
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		Object array = Array.newInstance(targetType.getElementType(), 1);
+		Object target = Array.newInstance(targetElementType.getType(), 1);
 		if (sourceType.isAssignableTo(targetElementType)) {
-			Array.set(array, 0, source);			
+			Array.set(target, 0, source);			
 		} else {
 			GenericConverter converter = conversionService.getConverter(sourceType, targetElementType);
-			Array.set(array, 0, converter.convert(source, sourceType, targetElementType));
+			Array.set(target, 0, converter.convert(source, sourceType, targetElementType));
 		}
-		return array;
+		return target;
 	}
 
 }
