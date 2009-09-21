@@ -150,7 +150,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		Assert.notNull(sourceType, "The source type to convert to is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
 		if (source == null) {
-			return null;
+			return convertNull(sourceType, targetType);
 		}
 		Assert.isTrue(sourceType != TypeDescriptor.NULL,
 				"The source TypeDescriptor must not be TypeDescriptor.NULL when source != null");
@@ -197,6 +197,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		getSourceMap(sourceType).put(targetType, converter);
 	}
 
+	protected Object convertNull(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return null;
+	}
+	
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return findConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
 	}
