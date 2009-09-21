@@ -135,7 +135,7 @@
     <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-nodep</artifactId>
-      <version>2.1_3</version>
+      <version>2.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -273,13 +273,12 @@
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
-      <version>1.6.2.RELEASE</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>org.codehaus.groovy</artifactId>
-      <version>1.5.1</version>
+      <version>1.6.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -297,7 +296,6 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -357,7 +355,7 @@
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>org.jruby</artifactId>
-      <version>1.1</version>
+      <version>1.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -453,7 +451,6 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.14</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -471,7 +468,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>

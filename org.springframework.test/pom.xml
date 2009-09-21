@@ -58,7 +58,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.7</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -75,7 +74,6 @@
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
-      <version>1.6.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -161,7 +159,7 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-cglib-repack</artifactId>
-      <version>2.1_3</version>
+      <version>2.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

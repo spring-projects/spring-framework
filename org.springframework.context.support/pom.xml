@@ -119,13 +119,11 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.14</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -137,7 +135,6 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>2.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
