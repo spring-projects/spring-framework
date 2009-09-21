@@ -43,7 +43,6 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Base implementation of a conversion service.
- * Initially empty, e.g. no converters are registered by default.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -99,7 +98,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	/**
 	 * Returns the parent of this conversion service. Could be null.
 	 */
-	public ConversionService getParent() {
+	public GenericConversionService getParent() {
 		return this.parent;
 	}
 
@@ -371,7 +370,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-	static class ConverterAdapter implements GenericConverter {
+	private static class ConverterAdapter implements GenericConverter {
 
 		private Converter converter;
 
@@ -385,7 +384,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	}
 
-	static class ConverterFactoryAdapter implements GenericConverter {
+	private static class ConverterFactoryAdapter implements GenericConverter {
 
 		private ConverterFactory converterFactory;
 

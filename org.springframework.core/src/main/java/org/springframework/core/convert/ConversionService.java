@@ -27,7 +27,7 @@ public interface ConversionService {
 
 	/**
 	 * Returns true if objects of sourceType can be converted to targetType.
-	 * @param source the source type to convert from (required)
+	 * @param sourceType the source type to convert from (required)
 	 * @param targetType the target type to convert to (required)
 	 * @return true if a conversion can be performed, false if not
 	 */
@@ -35,7 +35,7 @@ public interface ConversionService {
 
 	/**
 	 * Convert the source to targetType.
-	 * @param source the source to convert from (may be null)
+	 * @param source the source object to convert (may be null)
 	 * @param targetType the target type to convert to (required)
 	 * @return the converted object, an instance of targetType
 	 * @throws ConversionException if an exception occurred
@@ -45,21 +45,21 @@ public interface ConversionService {
 	/**
 	 * Returns true if objects of sourceType can be converted to the targetType.
 	 * The TypeDescriptors provide additional context about the variable locations where conversion would occur, often object property locations.
-	 * This flavor of the canConvert operation is mainly for use by a data mapping framework, and not by user code.
-	 * @param source context about the source type to convert from (required)
+	 * This flavor of the canConvert operation exists mainly for use by a general purpose data mapping framework, and not for use by user code.
+	 * @param sourceType context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
 	 * @return true if a conversion can be performed between the source and target types, false if not
 	 */
 	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
-	 * Convert the source to targetTyp.
+	 * Convert the source to targetType.
 	 * The TypeDescriptors provide additional context about the variable locations where conversion will occur, often object property locations.
-	 * This flavor of the convert operation is mainly for use by a data mapping framework, and not by user code.
-	 * @param source the source to convert from (may be null)
-	 * @param sourceType context about the source type to convert from (required)
+	 * This flavor of the convert operation exists mainly for use by a general purpose data mapping framework, and not for use by user code.
+	 * @param source the source object to convert (may be null)
+	 * @param sourceType context about the source type converting from (required)
 	 * @param targetType context about the target type to convert to (required)
-	 * @return the converted object, an instance of {@link TypeDescriptor#getObjectType()}</code>
+	 * @return the converted object, an instance of {@link TypeDescriptor#getObjectType() targetType}</code>
 	 * @throws ConversionException if an exception occurred
 	 */
 	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
