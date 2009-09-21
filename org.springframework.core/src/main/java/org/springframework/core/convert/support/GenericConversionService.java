@@ -53,7 +53,13 @@ import org.springframework.util.ClassUtils;
  */
 public class GenericConversionService implements ConversionService, ConverterRegistry {
 
-	private ConversionService parent;
+	private static final GenericConverter NO_OP_CONVERTER = new GenericConverter() {
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return source;
+		}
+	};
+	
+	private GenericConversionService parent;
 
 	private final Map<Class, Map<Class, GenericConverter>> sourceTypeConverters = new HashMap<Class, Map<Class, GenericConverter>>();
 
@@ -86,7 +92,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	/**
 	 * Set the parent of this conversion service. This is optional.
 	 */
-	public void setParent(ConversionService parent) {
+	public void setParent(GenericConversionService parent) {
 		this.parent = parent;
 	}
 
@@ -142,8 +148,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (targetType == TypeDescriptor.NULL) {
 			return true;
 		}
-		return getConverter(sourceType, targetType) != null || this.parent != null
-				&& this.parent.canConvert(sourceType, targetType);
+		return getConverter(sourceType, targetType) != null;
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -158,24 +163,12 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return null;
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
-		if (converter != null) {
-			try {
-				return converter.convert(source, sourceType, targetType);
-			} catch (ConversionFailedException e) {
-				throw e;
-			} catch (Exception e) {
-				throw new ConversionFailedException(sourceType, targetType, source, e);
-			}
-		} else {
-			if (this.parent != null) {
-				return this.parent.convert(source, sourceType, targetType);
-			} else {
-				if (targetType.isAssignableValue(source)) {
-					return source;
-				} else {
-					throw new ConverterNotFoundException(sourceType, targetType);
-				}
-			}
+		try {
+			return converter.convert(source, sourceType, targetType);
+		} catch (ConversionFailedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ConversionFailedException(sourceType, targetType, source, e);
 		}
 	}
 
@@ -200,9 +193,21 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	protected Object convertNull(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return null;
 	}
-	
+
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return findConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
+		GenericConverter converter = findConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
+		if (converter != null) {
+			return converter;
+		}
+		if (this.parent != null) {
+			return this.parent.getConverter(sourceType, targetType);
+		} else {
+			if (sourceType.isAssignableTo(targetType)) {
+				return NO_OP_CONVERTER;
+			} else {
+				throw new ConverterNotFoundException(sourceType, targetType);
+			}
+		}
 	}
 
 	// internal helpers
