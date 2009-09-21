@@ -93,6 +93,17 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
+	public void getDefaultMediaType() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		viewResolver.setDefaultContentType(new MediaType("application", "pdf"));
+		viewResolver.setIgnoreAcceptHeader(true);
+		List<MediaType> result = viewResolver.getMediaTypes(request);
+		assertEquals("Invalid amount of media types", 1, result.size());
+		assertEquals("Invalid content type", new MediaType("application", "pdf"), result.get(0));
+	}
+
+	@Test
 	public void resolveViewNameAcceptHeader() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");

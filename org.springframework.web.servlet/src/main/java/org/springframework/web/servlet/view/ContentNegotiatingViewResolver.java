@@ -64,25 +64,31 @@ import org.springframework.web.util.WebUtils;
  * request. This media type is determined by using the following criteria:
  * <ol>
  * <li>If the requested path has a file extension and if the {@link #setFavorPathExtension(boolean)} property is
- * <code>true</code>, the {@link #setMediaTypes(Map)  mediaTypes} property is inspected for a matching media type.</li>
+ * {@code true}, the {@link #setMediaTypes(Map) mediaTypes} property is inspected for a matching media type.</li>
  * <li>If the request contains a parameter defining the extension and if the {@link #setFavorParameter(boolean)}
- * property is <code>true</code>, the {@link #setMediaTypes(Map) mediaTypes} property is inspected for a matching media
- * type. The default name of the parameter is <code>format</code> and it can be configured using the
+ * property is <code>true</code>, the {@link #setMediaTypes(Map) mediaTypes} property is inspected for a matching
+ * media type. The default name of the parameter is <code>format</code> and it can be configured using the
  * {@link #setParameterName(String) parameterName} property.</li>
- * <li>If there is no match and if the Java Activation Framework (JAF) is present on the class path, {@link
- * FileTypeMap#getContentType(String)} is used.</li>
- * <li>If the previous steps did not result in a media type, the request {@code Accept} header is used.</li>
+ * <li>If there is no match in the {@link #setMediaTypes(Map) mediaTypes} property and if the Java Activation
+ * Framework (JAF) is present on the class path, {@link FileTypeMap#getContentType(String)} is used instead.</li>
+ * <li>If the previous steps did not result in a media type, and
+ * {@link #setIgnoreAcceptHeader(boolean) ignoreAcceptHeader} is {@code false}, the request {@code Accept} header is
+ * used.</li>
  * </ol>
+ *
  * Once the requested media type has been determined, this resolver queries each delegate view resolver for a
  * {@link View} and determines if the requested media type is {@linkplain MediaType#includes(MediaType) compatible}
  * with the view's {@linkplain View#getContentType() content type}). The most compatible view is returned.
  *
+ * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property, allowing you to
+ * override the views provided by the view resolvers. Note that these default views are offered as candicates, and
+ * still need have the content type requested (via file extension, parameter, or {@code Accept} header, described above).
+ * You can also set the {@linkplain #setDefaultContentType(MediaType) default content type} directly, which will be
+ * returned when the other mechanisms ({@code Accept} header, file extension or parameter) do not result in a match.
+ *
  * <p>For example, if the request path is {@code /view.html}, this view resolver will look for a view that has the
  * {@code text/html} content type (based on the {@code html} file extension). A request for {@code /view} with a {@code
  * text/html} request {@code Accept} header has the same result.
- *
- * <p>Additionally, this view resolver exposes the {@link #setDefaultViews(List) defaultViews} property, allowing you to
- * override the views provided by the view resolvers.
  *
  * @author Arjen Poutsma
  * @author Rostislav Hristov
@@ -103,7 +109,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private boolean favorPathExtension = true;
 
 	private boolean favorParameter = false;
-	
+
+	private boolean ignoreAcceptHeader = false;
+
 	private String parameterName = "format";
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
@@ -113,6 +121,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private List<View> defaultViews;
 
 	private List<ViewResolver> viewResolvers;
+
+	private MediaType defaultContentType;
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -135,25 +145,36 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	}
 
 	/**
-	 * Indicates whether a request parameter should be used to determine the requested media type, in favor
-	 * of looking at the {@code Accept} header. The default value is {@code false}.
+	 * Indicates whether a request parameter should be used to determine the requested media type, in favor of looking at
+	 * the {@code Accept} header. The default value is {@code false}.
 	 *
-	 * <p>For instance, when this flag is <code>true</code>, a request for {@code /hotels?format=pdf} will result in
-	 * an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined {@code
+	 * <p>For instance, when this flag is <code>true</code>, a request for {@code /hotels?format=pdf} will result in an
+	 * {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined {@code
 	 * text/html,application/xhtml+xml}.
 	 */
 	public void setFavorParameter(boolean favorParameter) {
 		this.favorParameter = favorParameter;
 	}
-	
+
 	/**
-	 * Sets the parameter name that can be used to determine the requested media type if the
-	 * {@link #setFavorParameter(boolean)} property is {@code true}. The default parameter name is {@code format}.
+	 * Sets the parameter name that can be used to determine the requested media type if the {@link
+	 * #setFavorParameter(boolean)} property is {@code true}. The default parameter name is {@code format}.
 	 */
 	public void setParameterName(String parameterName) {
 		this.parameterName = parameterName;
 	}
-	
+
+	/**
+	 * Indicates whether the HTTP {@code Accept} header should be ignored. Default is {@code false}.
+	 *
+	 * If set to {@code true}, this view resolver will only refer to the file extension and/or paramter, as indicated by
+	 * the {@link #setFavorPathExtension(boolean) favorPathExtension} and {@link #setFavorParameter(boolean)
+	 * favorParameter} properties.
+	 */
+	public void setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
+		this.ignoreAcceptHeader = ignoreAcceptHeader;
+	}
+
 	/**
 	 * Sets the mapping from file extensions to media types.
 	 *
@@ -169,11 +190,17 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 	}
 
-	/**
-	 * Sets the default views to use when a more specific view can not be obtained from the {@link ViewResolver} chain.
-	 */
+	/** Sets the default views to use when a more specific view can not be obtained from the {@link ViewResolver} chain. */
 	public void setDefaultViews(List<View> defaultViews) {
 		this.defaultViews = defaultViews;
+	}
+
+	/**
+	 * Sets the default content type. This content type will be used when file extension, parameter, nor {@code Accept}
+	 * header define a content-type, either through being disabled or empty.
+	 */
+	public void setDefaultContentType(MediaType defaultContentType) {
+		this.defaultContentType = defaultContentType;
 	}
 
 	/**
@@ -231,14 +258,15 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				return mediaTypes;
 			}
 		}
-		if (favorParameter) {		
+		if (favorParameter) {
 			if (request.getParameter(parameterName) != null) {
 				String parameterValue = request.getParameter(parameterName);
 				MediaType mediaType = getMediaTypeFromParameter(parameterValue);
 				if (mediaType != null) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Requested media type is '" + mediaType + "' (based on parameter '" +
-								parameterValue + "')");
+						logger.debug(
+								"Requested media type is '" + mediaType + "' (based on parameter '" + parameterName +
+										"'='" + parameterValue + "')");
 					}
 					List<MediaType> mediaTypes = new ArrayList<MediaType>();
 					mediaTypes.add(mediaType);
@@ -246,13 +274,18 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				}
 			}
 		}
-		String acceptHeader = request.getHeader(ACCEPT_HEADER);
-		if (StringUtils.hasText(acceptHeader)) {
-			List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Requested media types are " + mediaTypes + " (based on Accept header)");
+		if (!ignoreAcceptHeader) {
+			String acceptHeader = request.getHeader(ACCEPT_HEADER);
+			if (StringUtils.hasText(acceptHeader)) {
+				List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Requested media types are " + mediaTypes + " (based on Accept header)");
+				}
+				return mediaTypes;
 			}
-			return mediaTypes;
+		}
+		if (defaultContentType != null) {
+			return Collections.singletonList(defaultContentType);
 		}
 		else {
 			return Collections.emptyList();
@@ -286,12 +319,12 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 		return mediaType;
 	}
-	
+
 	/**
 	 * Determines the {@link MediaType} for the given parameter value.
 	 *
-	 * <p>The default implementation will check the {@linkplain #setMediaTypes(Map) media types} property for a
-	 * defined mapping.
+	 * <p>The default implementation will check the {@linkplain #setMediaTypes(Map) media types} property for a defined
+	 * mapping.
 	 *
 	 * <p>This method can be overriden to provide a different algorithm.
 	 *
@@ -345,9 +378,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 	}
 
-	/**
-	 * Inner class to avoid hard-coded JAF dependency.
-	 */
+	/** Inner class to avoid hard-coded JAF dependency. */
 	private static class ActivationMediaTypeFactory {
 
 		private static final FileTypeMap fileTypeMap;
