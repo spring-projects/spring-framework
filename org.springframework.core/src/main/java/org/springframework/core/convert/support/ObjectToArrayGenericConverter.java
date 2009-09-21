@@ -36,7 +36,7 @@ final class ObjectToArrayGenericConverter implements GenericConverter {
 		} else {
 			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
 			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetType);
+				throw new ConverterNotFoundException(sourceType, targetElementType);
 			}		
 			Array.set(target, 0, converter.convert(source, sourceType, targetElementType));
 		}

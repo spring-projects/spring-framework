@@ -28,7 +28,7 @@ final class CollectionToCollectionGenericConverter implements GenericConverter {
 	public CollectionToCollectionGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Collection sourceCollection = (Collection) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
@@ -40,7 +40,8 @@ final class CollectionToCollectionGenericConverter implements GenericConverter {
 			if (sourceType.isAssignableTo(targetType)) {
 				return sourceCollection;
 			} else {
-				Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
+				Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection
+						.size());
 				targetCollection.addAll(sourceCollection);
 				return targetCollection;
 			}
@@ -48,14 +49,14 @@ final class CollectionToCollectionGenericConverter implements GenericConverter {
 		Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 		if (converter == null) {
-			throw new ConverterNotFoundException(sourceType, targetType);
-		}		
+			throw new ConverterNotFoundException(sourceElementType, targetElementType);
+		}
 		for (Object element : sourceCollection) {
 			targetCollection.add(converter.convert(element, sourceElementType, targetElementType));
 		}
 		return targetCollection;
 	}
-	
+
 	private TypeDescriptor getElementType(Collection collection) {
 		for (Object element : collection) {
 			if (element != null) {

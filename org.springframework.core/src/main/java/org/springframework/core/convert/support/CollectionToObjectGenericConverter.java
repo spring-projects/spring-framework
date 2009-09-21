@@ -33,15 +33,19 @@ final class CollectionToObjectGenericConverter implements GenericConverter {
 		if (sourceCollection.size() == 0) {
 			return null;
 		} else {
+			Object firstElement = sourceCollection.iterator().next();			
 			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
+			if (sourceElementType == TypeDescriptor.NULL && firstElement != null) {
+				sourceElementType = TypeDescriptor.valueOf(firstElement.getClass());
+			}			
 			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
-				return sourceCollection.iterator().next();
+				return firstElement;
 			} else {
 				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 				if (converter == null) {
-					throw new ConverterNotFoundException(sourceType, targetType);
+					throw new ConverterNotFoundException(sourceElementType, targetType);
 				}				
-				return converter.convert(sourceCollection.iterator().next(), sourceElementType, targetType);
+				return converter.convert(firstElement, sourceElementType, targetType);
 			}
 		}
 	}
