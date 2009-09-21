@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -145,7 +146,7 @@ public class GenericConversionServiceTests {
 		assertEquals(2, result[1]);
 		assertEquals(3, result[2]);
 	}
-	
+
 	@Test
 	public void convertArrayToArrayAssignable() {
 		int[] result = converter.convert(new int[] { 1, 2, 3 }, int[].class);
@@ -182,7 +183,7 @@ public class GenericConversionServiceTests {
 		assertEquals("3", result.get(2));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void convertArrayToAbstractList() {
 		converter.convert(new String[] { "1", "2", "3" }, AbstractList.class);
 	}
@@ -242,6 +243,37 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void convertObjectToCollection() {
+		List<String> result = (List<String>) converter.convert("test", List.class);
+		assertEquals(1, result.size());
+		assertEquals("test", result.get(0));
+	}
+
+	@Test
+	public void convertObjectToCollectionWithElementConversion() throws Exception {
+		converter.addConverterFactory(new StringToNumberConverterFactory());		
+		List<Integer> result = (List<Integer>) converter.convert("3", TypeDescriptor.valueOf(String.class),
+				new TypeDescriptor(getClass().getField("genericList")));
+		assertEquals(1, result.size());
+		assertEquals(new Integer(3), result.get(0));
+	}
+
+	@Test
+	public void convertCollectionToObject() {
+		List<String> list = Collections.singletonList("test");
+		String result = converter.convert(list, String.class);
+		assertEquals("test", result);
+	}
+
+	@Test
+	public void convertCollectionToObjectWithElementConversion() {
+		converter.addConverterFactory(new StringToNumberConverterFactory());		
+		List<String> list = Collections.singletonList("3");		
+		Integer result = converter.convert(list, Integer.class);
+		assertEquals(new Integer(3), result);
+	}
+
+	@Test
 	public void convertObjectToArray() {
 		String[] result = converter.convert("test", String[].class);
 		assertEquals(1, result.length);
@@ -256,6 +288,21 @@ public class GenericConversionServiceTests {
 		assertEquals(new Integer(1), result[0]);
 	}
 
+	@Test
+	public void convertArrayToObject() {
+		String[] array = new String[] { "test" };
+		String result = converter.convert(array, String.class);
+		assertEquals("test", result);
+	}
+	
+	@Test
+	public void convertArrayToObjectWithElementConversion() {
+		converter.addConverterFactory(new StringToNumberConverterFactory());
+		String[] array = new String[] { "3" };
+		Integer result = converter.convert(array, Integer.class);
+		assertEquals(new Integer(3), result);
+	}
+	
 	@Test
 	@Ignore
 	public void convertStringToArrayWithElementConversion() {
@@ -275,7 +322,7 @@ public class GenericConversionServiceTests {
 			assertTrue(e.getCause() instanceof ConverterNotFoundException);
 		}
 	}
-	
+
 	@Test
 	public void parent() {
 		GenericConversionService parent = new GenericConversionService();
@@ -284,7 +331,7 @@ public class GenericConversionServiceTests {
 		try {
 			converter.convert("3", Integer.class);
 		} catch (ConverterNotFoundException e) {
-			
+
 		}
 	}
 

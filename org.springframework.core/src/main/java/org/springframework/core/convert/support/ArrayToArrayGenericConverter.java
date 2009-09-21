@@ -37,7 +37,7 @@ final class ArrayToArrayGenericConverter implements GenericConverter {
 		Object target = Array.newInstance(targetElementType.getType(), Array.getLength(source));
 		GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);		
 		if (converter == null) {
-			throw new ConverterNotFoundException(sourceType, targetType);
+			throw new ConverterNotFoundException(sourceElementType, targetElementType);
 		}
 		for (int i = 0; i < Array.getLength(target); i++) {
 			Array.set(target, i, converter.convert(Array.get(source, i), sourceElementType, targetElementType));

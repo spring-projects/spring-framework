@@ -39,7 +39,7 @@ final class ArrayToObjectGenericConverter implements GenericConverter {
 			} else {
 				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 				if (converter == null) {
-					throw new ConverterNotFoundException(sourceType, targetType);
+					throw new ConverterNotFoundException(sourceElementType, targetType);
 				}
 				return converter.convert(Array.get(source, 0), sourceElementType, targetType);
 			}

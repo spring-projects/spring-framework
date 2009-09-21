@@ -37,7 +37,7 @@ final class ObjectToCollectionGenericConverter implements GenericConverter {
 		} else {
 			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
 			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetType);
+				throw new ConverterNotFoundException(sourceType, targetElementType);
 			}
 			target.add(converter.convert(source, sourceType, targetElementType));
 		}

@@ -42,7 +42,7 @@ final class ArrayToCollectionGenericConverter implements GenericConverter {
 		} else {
 			GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetType);
+				throw new ConverterNotFoundException(sourceElementType, targetElementType);
 			}			
 			for (int i = 0; i < length; i++) {
 				collection.add(converter.convert(Array.get(source, i), sourceElementType, targetElementType));

@@ -46,7 +46,7 @@ final class CollectionToArrayGenericConverter implements GenericConverter {
 		} else {
 			GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetType);
+				throw new ConverterNotFoundException(sourceElementType, targetElementType);
 			}			
 			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
 				Array.set(array, i, converter.convert(it.next(), sourceElementType, targetElementType));
