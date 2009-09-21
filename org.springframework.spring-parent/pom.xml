@@ -30,7 +30,7 @@
       <layout>legacy</layout>
       <snapshots><enabled>false</enabled></snapshots>
     </repository>
-    <!-- for use with jexcelapi 2.6.8, portlet 2.0, hibernate 3.3.1-->
+    <!-- for use with jexcelapi 2.6.8, portlet 2.0, hibernate 3.3.1, javax.el/el-api 2.1 -->
     <repository>
       <id>jboss</id>
       <name>JBoss Repository</name>
@@ -77,16 +77,52 @@
         </exclusions>
       </dependency>
       <dependency>
+	<groupId>javax.inject</groupId>
+	<artifactId>com.springsource.javax.inject</artifactId>
+	<version>0.9.0.PFD</version>
+	<scope>provided</scope> 
+      </dependency>
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.6</version>
+        <version>4.7</version>
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>2.3</version>
-        <scope>test</scope>
+	<groupId>org.aspectj</groupId>
+	<artifactId>aspectjweaver</artifactId>
+	<version>1.6.5</version>
+	<optional>true</optional>
+      </dependency>
+      <dependency>
+	<groupId>org.easymock</groupId>
+	<artifactId>easymock</artifactId>
+	<version>2.5.1</version>
+	<scope>test</scope>
+      </dependency>
+      <dependency>
+	<groupId>log4j</groupId>
+	<artifactId>log4j</artifactId>
+        <version>1.2.15</version>
+	<scope>test</scope>
+	<exclusions>
+	  <exclusion>
+	    <groupId>javax.mail</groupId>
+	    <artifactId>mail</artifactId>
+	  </exclusion>
+	  <exclusion>
+	    <groupId>javax.jms</groupId>
+	    <artifactId>jms</artifactId>
+	  </exclusion>
+	  <exclusion>
+	    <groupId>com.sun.jdmk</groupId>
+	    <artifactId>jmxtools</artifactId>
+	  </exclusion>
+	  <exclusion>
+	    <groupId>com.sun.jmx</groupId>
+	    <artifactId>jmxri</artifactId>
+	  </exclusion>
+	</exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
