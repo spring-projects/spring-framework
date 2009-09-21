@@ -57,7 +57,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return source;
 		}
 	};
-	
+
 	private GenericConversionService parent;
 
 	private final Map<Class, Map<Class, GenericConverter>> sourceTypeConverters = new HashMap<Class, Map<Class, GenericConverter>>();
@@ -162,6 +162,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return null;
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
+		if (converter == null) {
+			throw new ConverterNotFoundException(sourceType, targetType);
+		}
 		try {
 			return converter.convert(source, sourceType, targetType);
 		} catch (ConversionFailedException e) {
@@ -173,6 +176,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	// subclassing hooks
 
+	/**
+	 * Hook to initialize the "generic" converters that require the full TypeDescriptor context to perform their conversion operations.
+	 */
 	protected void initGenericConverters() {
 		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayGenericConverter(this));
 		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionGenericConverter(this));
@@ -185,14 +191,39 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionGenericConverter(this));
 	}
 
+	/**
+	 * Registers a GenericConverter.
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
+	 * @param converter the generic converter.
+	 */
 	protected void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
 		getSourceMap(sourceType).put(targetType, converter);
 	}
 
+	/**
+	 * Hook method to convert a null value.
+	 * Default implementation simply returns <code>null</code>.
+	 * Subclasses may override to return a custom null objects for specific target types.
+	 * @param sourceType the sourceType
+	 * @param targetType the tagetType
+	 * @return the null object
+	 */
 	protected Object convertNull(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return null;
 	}
 
+	/**
+	 * Hook method to lookup the converter for a given sourceType/targetType pair.
+	 * First queries this ConversionService's converter map.
+	 * If no suitable Converter is found, and a {@link #setParent(GenericConversionService) parent} is set, then queries the parent.
+	 * If still no suitable Converter is found, returns a NO_OP Converter if the sourceType and targetType are assignable.
+	 * Returns <code>null</code> if this ConversionService simply cannot convert between sourceType and targetType.
+	 * Subclasses may override.
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
+	 * @return the generic converter that will perform the conversion, or <code>null</code> if no suitable converter was found
+	 */
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		GenericConverter converter = findConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
 		if (converter != null) {
@@ -204,7 +235,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			if (sourceType.isAssignableTo(targetType)) {
 				return NO_OP_CONVERTER;
 			} else {
-				throw new ConverterNotFoundException(sourceType, targetType);
+				return null;
 			}
 		}
 	}

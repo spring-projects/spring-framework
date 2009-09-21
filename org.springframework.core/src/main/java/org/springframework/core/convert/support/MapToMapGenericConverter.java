@@ -3,6 +3,7 @@ package org.springframework.core.convert.support;
 import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
 class MapToMapGenericConverter implements GenericConverter {
@@ -95,11 +96,17 @@ class MapToMapGenericConverter implements GenericConverter {
 				GenericConversionService conversionService) {
 			if (sourceKeyType != TypeDescriptor.NULL && targetKeyType != TypeDescriptor.NULL && !keysCompatible) {
 				this.keyConverter = conversionService.getConverter(sourceKeyType, targetKeyType);
+				if (this.keyConverter == null) {
+					throw new ConverterNotFoundException(sourceKeyType, targetKeyType);
+				}				
 				this.sourceKeyType = sourceKeyType;
 				this.targetKeyType = targetKeyType;
 			}
 			if (sourceValueType != TypeDescriptor.NULL && targetValueType != TypeDescriptor.NULL && !valuesCompatible) {
 				this.valueConverter = conversionService.getConverter(sourceValueType, targetValueType);
+				if (this.valueConverter == null) {
+					throw new ConverterNotFoundException(sourceValueType, targetValueType);
+				}				
 				this.targetKeyType = targetKeyType;
 				this.targetValueType = targetValueType;
 			}
