@@ -15,6 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
+import java.util.Collection;
+
 import org.springframework.core.convert.TypeDescriptor;
 
 class CollectionToObjectGenericConverter implements GenericConverter {
@@ -24,9 +26,19 @@ class CollectionToObjectGenericConverter implements GenericConverter {
 	public CollectionToObjectGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		throw new UnsupportedOperationException("Not yet implemented");
-	}
 
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		Collection sourceCollection = (Collection) source;
+		if (sourceCollection.size() == 0) {
+			return null;
+		} else {
+			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
+			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
+				return sourceCollection.iterator().next();
+			} else {
+				GenericConverter converter = conversionService.getConverter(sourceElementType, targetType);
+				return converter.convert(sourceCollection.iterator().next(), sourceElementType, targetType);
+			}
+		}
+	}
 }

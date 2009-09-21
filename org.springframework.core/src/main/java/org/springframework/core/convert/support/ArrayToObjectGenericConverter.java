@@ -15,6 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
+import java.lang.reflect.Array;
+
 import org.springframework.core.convert.TypeDescriptor;
 
 class ArrayToObjectGenericConverter implements GenericConverter {
@@ -26,7 +28,18 @@ class ArrayToObjectGenericConverter implements GenericConverter {
 	}
 	
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		throw new UnsupportedOperationException("Not yet implemented");
+		int length = Array.getLength(source);
+		if (length == 0) {
+			return null;
+		} else {
+			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
+			if (sourceElementType.isAssignableTo(targetType)) {
+				return Array.get(source, 0);
+			} else {
+				GenericConverter converter = conversionService.getConverter(sourceElementType, targetType);
+				return converter.convert(Array.get(source, 0), sourceElementType, targetType);
+			}
+		}
 	}
 
 }
