@@ -24,7 +24,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Keith Donald
  * @since 3.0
  */
-class StringToCharacterConverter implements Converter<String, Character> {
+final class StringToCharacterConverter implements Converter<String, Character> {
 
 	public Character convert(String source) {
 		if ("".equals(source)) {

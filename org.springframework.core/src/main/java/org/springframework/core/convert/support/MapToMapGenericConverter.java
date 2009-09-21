@@ -6,9 +6,9 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
-class MapToMapGenericConverter implements GenericConverter {
+final class MapToMapGenericConverter implements GenericConverter {
 
-	private GenericConversionService conversionService;
+	private final GenericConversionService conversionService;
 
 	public MapToMapGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -114,7 +114,7 @@ class MapToMapGenericConverter implements GenericConverter {
 
 		public Object convertKey(Object sourceKey) {
 			if (sourceKey != null && this.keyConverter != null) {
-				return this.keyConverter.convert(sourceKey, sourceKeyType, targetKeyType);
+				return this.keyConverter.convert(sourceKey, this.sourceKeyType, this.targetKeyType);
 			} else {
 				return sourceKey;
 			}
@@ -122,7 +122,7 @@ class MapToMapGenericConverter implements GenericConverter {
 
 		public Object convertValue(Object sourceValue) {
 			if (sourceValue != null && this.valueConverter != null) {
-				return this.valueConverter.convert(sourceValue, sourceValueType, targetValueType);
+				return this.valueConverter.convert(sourceValue, this.sourceValueType, this.targetValueType);
 			} else {
 				return sourceValue;
 			}

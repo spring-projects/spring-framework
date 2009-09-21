@@ -20,9 +20,9 @@ import java.lang.reflect.Array;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
-class ObjectToArrayGenericConverter implements GenericConverter {
+final class ObjectToArrayGenericConverter implements GenericConverter {
 
-	private GenericConversionService conversionService;
+	private final GenericConversionService conversionService;
 
 	public ObjectToArrayGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -34,7 +34,7 @@ class ObjectToArrayGenericConverter implements GenericConverter {
 		if (sourceType.isAssignableTo(targetElementType)) {
 			Array.set(target, 0, source);			
 		} else {
-			GenericConverter converter = conversionService.getConverter(sourceType, targetElementType);
+			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceType, targetType);
 			}		
