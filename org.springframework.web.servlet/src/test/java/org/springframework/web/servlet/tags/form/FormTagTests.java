@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Scott Andrews
+ * @author Jeremy Grelle
  */
 public class FormTagTests extends AbstractHtmlElementTagTests {
 	
@@ -68,6 +69,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String autocomplete = "off";
 		String cssClass = "myClass";
 		String cssStyle = "myStyle";
+		String dynamicAttribute1 = "attr1";
+		String dynamicAttribute2 = "attr2";
 
 		this.tag.setName(name);
 		this.tag.setCssClass(cssClass);
@@ -81,6 +84,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setOnsubmit(onsubmit);
 		this.tag.setOnreset(onreset);
 		this.tag.setAutocomplete(autocomplete);
+		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
+		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
@@ -110,6 +115,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "autocomplete", autocomplete);
 		assertContainsAttribute(output, "id", commandName);
 		assertContainsAttribute(output, "name", name);
+		assertContainsAttribute(output, dynamicAttribute1, dynamicAttribute1);
+		assertContainsAttribute(output, dynamicAttribute2, dynamicAttribute2);
 	}
 
 	public void testWithActionFromRequest() throws Exception {

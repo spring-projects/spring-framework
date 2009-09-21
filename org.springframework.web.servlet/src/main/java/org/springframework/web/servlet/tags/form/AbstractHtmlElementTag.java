@@ -16,20 +16,31 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.DynamicAttributes;
+
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Base class for databinding-aware JSP tags that render HTML element. Provides
  * a set of properties corresponding to the set of HTML attributes that are common
- * across elements.
+ * across elements.  
+ * 
+ * <p>Additionally, this base class allows for rendering non-standard attributes 
+ * as part of the tag's output.  These attributes are accessible to subclasses if 
+ * needed via the {@link AbstractHtmlElementTag#getDynamicAttributes() dynamicAttributes} 
+ * map.
  * 
  * @author Rob Harrop
+ * @author Jeremy Grelle
  * @since 2.0
  */
-public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElementTag {
+public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElementTag implements DynamicAttributes{
 
 	public static final String CLASS_ATTRIBUTE = "class";
 
@@ -97,6 +108,8 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	private String onkeyup;
 
 	private String onkeydown;
+	
+	private Map<String, Object> dynamicAttributes;
 
 
 	/**
@@ -369,7 +382,23 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	protected String getOnkeydown() {
 		return this.onkeydown;
 	}
-
+	
+	/**
+	 * Get the map of dynamic attributes. 
+	 */
+	protected Map<String, Object> getDynamicAttributes() {
+		return this.dynamicAttributes;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setDynamicAttribute(String uri, String localName, Object value ) throws JspException {
+		if (this.dynamicAttributes == null) {
+			this.dynamicAttributes = new HashMap<String, Object>();
+		}
+		dynamicAttributes.put(localName, value);
+	}
 
 	/**
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
@@ -383,6 +412,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 
 	/**
 	 * Writes the optional attributes configured via this base class to the supplied {@link TagWriter}.
+	 * The set of optional attributes that will be rendered includes any non-standard dynamic attributes.
 	 * Called by {@link #writeDefaultAttributes(TagWriter)}.
 	 */
 	protected void writeOptionalAttributes(TagWriter tagWriter) throws JspException {
@@ -403,6 +433,12 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		writeOptionalAttribute(tagWriter, ONKEYPRESS_ATTRIBUTE, getOnkeypress());
 		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, getOnkeyup());
 		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, getOnkeydown());
+		
+		if (!CollectionUtils.isEmpty(this.dynamicAttributes)) {
+			for (String attr : this.dynamicAttributes.keySet()) {
+				tagWriter.writeOptionalAttributeValue(attr, getDisplayString(this.dynamicAttributes.get(attr)));
+			}
+		}
 	}
 
 	/**

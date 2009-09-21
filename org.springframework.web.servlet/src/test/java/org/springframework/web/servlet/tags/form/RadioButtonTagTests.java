@@ -34,6 +34,7 @@ import org.springframework.validation.BindingResult;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Jeremy Grelle
  */
 public class RadioButtonTagTests extends AbstractFormTagTests {
 
@@ -51,6 +52,29 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	public void testWithCheckedValue() throws Exception {
+		String dynamicAttribute1 = "attr1";
+		String dynamicAttribute2 = "attr2";
+		
+		this.tag.setPath("sex");
+		this.tag.setValue("M");
+		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
+		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
+		
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		assertTagOpened(output);
+		assertTagClosed(output);
+		assertContainsAttribute(output, "name", "sex");
+		assertContainsAttribute(output, "type", "radio");
+		assertContainsAttribute(output, "value", "M");
+		assertContainsAttribute(output, "checked", "checked");
+		assertContainsAttribute(output, dynamicAttribute1, dynamicAttribute1);
+		assertContainsAttribute(output, dynamicAttribute2, dynamicAttribute2);
+	}
+	
+	public void testWithCheckedValueAndDynamicAttributes() throws Exception {
 		this.tag.setPath("sex");
 		this.tag.setValue("M");
 		int result = this.tag.doStartTag();
