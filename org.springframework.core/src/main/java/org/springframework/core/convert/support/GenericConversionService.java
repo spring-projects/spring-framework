@@ -16,13 +16,14 @@
 
 package org.springframework.core.convert.support;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterInfo;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Base implementation of a conversion service.
@@ -54,8 +56,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	private ConversionService parent;
 
 	private final Map<Class, Map<Class, GenericConverter>> sourceTypeConverters = new HashMap<Class, Map<Class, GenericConverter>>();
-
-	private final Set<GenericConverter> matchableConverters = new LinkedHashSet<GenericConverter>();
 
 	public GenericConversionService() {
 		initGenericConverters();
@@ -182,24 +182,23 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	// subclassing hooks
 
 	protected void initGenericConverters() {
-		addGenericConverter(new CollectionGenericConverter(this));
-		addGenericConverter(new MapGenericConverter(this));
+		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayGenericConverter(this));
+		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionGenericConverter(this));
+		addGenericConverter(Object[].class, Object.class, new ArrayToObjectGenericConverter(this));
+		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionGenericConverter(this));
+		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayGenericConverter(this));
+		addGenericConverter(Collection.class, Object.class, new CollectionToObjectGenericConverter(this));
+		addGenericConverter(Map.class, Map.class, new MapToMapGenericConverter(this));
+		addGenericConverter(Object.class, Object[].class, new ObjectToArrayGenericConverter(this));
+		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionGenericConverter(this));
 	}
 
-	protected void addGenericConverter(GenericConverter converter) {
-		this.matchableConverters.add(converter);
+	protected void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
+		getSourceMap(sourceType).put(targetType, converter);
 	}
 
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		GenericConverter converter = matchConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
-		if (converter == null) {
-			for (GenericConverter matchableConverter : this.matchableConverters) {
-				if (matchableConverter.canConvert(sourceType, targetType)) {
-					return matchableConverter;
-				}
-			}
-		}
-		return converter;
+		return findConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
 	}
 
 	// internal helpers
@@ -255,7 +254,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return null;
 	}
 
-	private GenericConverter matchConverterByClassPair(Class sourceType, Class targetType) {
+	private GenericConverter findConverterByClassPair(Class sourceType, Class targetType) {
 		if (sourceType.isInterface()) {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
 			classQueue.addFirst(sourceType);
@@ -283,8 +282,15 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				if (converter != null) {
 					return converter;
 				}
-				if (currentClass.getSuperclass() != null) {
-					classQueue.addFirst(currentClass.getSuperclass());
+				if (currentClass.isArray()) {
+					Class componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
+					if (componentType.getSuperclass() != null) {
+						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
+					}
+				} else {
+					if (currentClass.getSuperclass() != null) {
+						classQueue.addFirst(currentClass.getSuperclass());
+					}
 				}
 				Class[] interfaces = currentClass.getInterfaces();
 				for (Class ifc : interfaces) {
@@ -337,8 +343,15 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				if (converter != null) {
 					return converter;
 				}
-				if (currentClass.getSuperclass() != null) {
-					classQueue.addFirst(currentClass.getSuperclass());
+				if (currentClass.isArray()) {
+					Class componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
+					if (componentType.getSuperclass() != null) {
+						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
+					}
+				} else {
+					if (currentClass.getSuperclass() != null) {
+						classQueue.addFirst(currentClass.getSuperclass());
+					}
 				}
 				Class[] interfaces = currentClass.getInterfaces();
 				for (Class ifc : interfaces) {
@@ -357,10 +370,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			this.converter = converter;
 		}
 
-		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			throw new UnsupportedOperationException("Should not be called");
-		}
-
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return converter.convert(source);
 		}
@@ -373,10 +382,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 		public ConverterFactoryAdapter(ConverterFactory converterFactory) {
 			this.converterFactory = converterFactory;
-		}
-
-		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			throw new UnsupportedOperationException("Should not be called");
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

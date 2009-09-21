@@ -76,10 +76,6 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 			this.formatter = formatter;
 		}
 
-		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			throw new UnsupportedOperationException("Should not be called");
-		}
-		
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			try {
 				return this.formatter.parse((String) source, LocaleContextHolder.getLocale());
