@@ -43,28 +43,24 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Base class for transactional aspects, such as the AOP Alliance
- * {@link TransactionInterceptor} or an AspectJ aspect.
+ * Base class for transactional aspects, such as the {@link TransactionInterceptor}
+ * or an AspectJ aspect.
  *
- * <p>This enables the underlying Spring transaction infrastructure to be used
- * easily to implement an aspect for any aspect system.
+ * <p>This enables the underlying Spring transaction infrastructure to be used easily
+ * to implement an aspect for any aspect system.
  *
- * <p>Subclasses are responsible for calling methods in this class in the
- * correct order.
+ * <p>Subclasses are responsible for calling methods in this class in the correct order.
  *
- * <p>If no transaction name has been specified in the
- * <code>TransactionAttribute</code>, the exposed name will be the
- * <code>fully-qualified class name + "." + method name</code>
+ * <p>If no transaction name has been specified in the <code>TransactionAttribute</code>,
+ * the exposed name will be the <code>fully-qualified class name + "." + method name</code>
  * (by default).
  *
- * <p>Uses the <b>Strategy</b> design pattern. A
- * <code>PlatformTransactionManager</code> implementation will perform the
- * actual transaction management, and a <code>TransactionAttributeSource</code>
- * is used for determining transaction definitions.
+ * <p>Uses the <b>Strategy</b> design pattern. A <code>PlatformTransactionManager</code>
+ * implementation will perform the actual transaction management, and a
+ * <code>TransactionAttributeSource</code> is used for determining transaction definitions.
  *
- * <p>A transaction aspect is serializable if it's
- * <code>PlatformTransactionManager</code> and
- * <code>TransactionAttributeSource</code> are serializable.
+ * <p>A transaction aspect is serializable if its <code>PlatformTransactionManager</code>
+ * and <code>TransactionAttributeSource</code> are serializable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -234,7 +230,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Determine the specific transaction manager to use for the given transaction.
 	 */
 	protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
-		if (this.transactionManager != null) {
+		if (this.transactionManager != null || this.beanFactory == null) {
 			return this.transactionManager;
 		}
 		PlatformTransactionManager chosen = null;
