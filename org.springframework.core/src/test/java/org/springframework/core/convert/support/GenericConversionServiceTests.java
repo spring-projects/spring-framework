@@ -96,7 +96,7 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	public void convertNullConversionPointType() {
+	public void convertNullTypeDescriptor() {
 		assertEquals(null, converter.convert(3, TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
 	}
 
@@ -304,7 +304,6 @@ public class GenericConversionServiceTests {
 	}
 	
 	@Test
-	@Ignore
 	public void convertStringToArrayWithElementConversion() {
 		converter.addConverterFactory(new StringToNumberConverterFactory());
 		Integer[] result = converter.convert("1,2,3", Integer[].class);

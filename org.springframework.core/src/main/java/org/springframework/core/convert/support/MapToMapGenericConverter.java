@@ -1,5 +1,7 @@
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
@@ -114,7 +116,7 @@ final class MapToMapGenericConverter implements GenericConverter {
 
 		public Object convertKey(Object sourceKey) {
 			if (sourceKey != null && this.keyConverter != null) {
-				return this.keyConverter.convert(sourceKey, this.sourceKeyType, this.targetKeyType);
+				return invokeConverter(this.keyConverter, sourceKey, this.sourceKeyType, this.targetKeyType);
 			} else {
 				return sourceKey;
 			}
@@ -122,7 +124,7 @@ final class MapToMapGenericConverter implements GenericConverter {
 
 		public Object convertValue(Object sourceValue) {
 			if (sourceValue != null && this.valueConverter != null) {
-				return this.valueConverter.convert(sourceValue, this.sourceValueType, this.targetValueType);
+				return invokeConverter(this.valueConverter, sourceValue, this.sourceValueType, this.targetValueType);
 			} else {
 				return sourceValue;
 			}

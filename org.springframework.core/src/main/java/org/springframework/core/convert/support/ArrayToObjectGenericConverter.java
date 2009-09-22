@@ -15,6 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.lang.reflect.Array;
 
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -27,7 +29,7 @@ final class ArrayToObjectGenericConverter implements GenericConverter {
 	public ArrayToObjectGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		int length = Array.getLength(source);
 		if (length == 0) {
@@ -41,7 +43,7 @@ final class ArrayToObjectGenericConverter implements GenericConverter {
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceElementType, targetType);
 				}
-				return converter.convert(Array.get(source, 0), sourceElementType, targetType);
+				return invokeConverter(converter, Array.get(source, 0), sourceElementType, targetType);
 			}
 		}
 	}
