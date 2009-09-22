@@ -15,6 +15,9 @@
  */
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getElementType;
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -29,7 +32,7 @@ final class CollectionToArrayGenericConverter implements GenericConverter {
 	public CollectionToArrayGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Collection sourceCollection = (Collection) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
@@ -38,7 +41,7 @@ final class CollectionToArrayGenericConverter implements GenericConverter {
 		}
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		Object array = Array.newInstance(targetElementType.getType(), sourceCollection.size());
-		int i = 0;		
+		int i = 0;
 		if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
 			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
 				Array.set(array, i, it.next());
@@ -47,21 +50,14 @@ final class CollectionToArrayGenericConverter implements GenericConverter {
 			GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceElementType, targetElementType);
-			}			
+			}
 			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
-				Array.set(array, i, converter.convert(it.next(), sourceElementType, targetElementType));
+				Object sourceElement = it.next();
+				Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetElementType);
+				Array.set(array, i, targetElement);
 			}
 		}
 		return array;
-	}
-	
-	private TypeDescriptor getElementType(Collection collection) {
-		for (Object element : collection) {
-			if (element != null) {
-				return TypeDescriptor.valueOf(element.getClass());
-			}
-		}
-		return TypeDescriptor.NULL;
 	}
 
 }

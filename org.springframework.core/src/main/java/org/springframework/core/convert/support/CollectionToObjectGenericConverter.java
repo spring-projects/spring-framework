@@ -15,6 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.util.Collection;
 
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -45,7 +47,7 @@ final class CollectionToObjectGenericConverter implements GenericConverter {
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceElementType, targetType);
 				}				
-				return converter.convert(firstElement, sourceElementType, targetType);
+				return invokeConverter(converter, firstElement, sourceElementType, targetType);
 			}
 		}
 	}

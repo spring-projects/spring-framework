@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -58,7 +59,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	};
 
-
 	private final Map<Class, Map<Class, GenericConverter>> sourceTypeConverters = new HashMap<Class, Map<Class, GenericConverter>>();
 
 	private ConversionService parent;
@@ -69,11 +69,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	};
 
-
 	public GenericConversionService() {
 		initGenericConverters();
 	}
-
 
 	/**
 	 * Registers the converters in the set provided.
@@ -111,7 +109,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return this.parent;
 	}
 
-
 	// implementing ConverterRegistry
 
 	public void addConverter(Converter converter) {
@@ -139,7 +136,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
 		getSourceMap(sourceType).remove(targetType);
 	}
-
 
 	// implementing ConversionService
 
@@ -177,15 +173,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (converter == null) {
 			throw new ConverterNotFoundException(sourceType, targetType);
 		}
-		try {
-			return converter.convert(source, sourceType, targetType);
-		}
-		catch (ConversionFailedException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new ConversionFailedException(sourceType, targetType, source, ex);
-		}
+		return invokeConverter(converter, source, sourceType, targetType);
 	}
 
 	// subclassing hooks
@@ -203,6 +191,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		addGenericConverter(Map.class, Map.class, new MapToMapGenericConverter(this));
 		addGenericConverter(Object.class, Object[].class, new ObjectToArrayGenericConverter(this));
 		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionGenericConverter(this));
+		addGenericConverter(String.class, Object[].class, new StringToArrayGenericConverter(this));
 	}
 
 	/**
@@ -242,20 +231,16 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		GenericConverter converter = findConverterByClassPair(sourceType.getObjectType(), targetType.getObjectType());
 		if (converter != null) {
 			return converter;
-		}
-		else if (this.parent != null && this.parent.canConvert(sourceType, targetType)) {
+		} else if (this.parent != null && this.parent.canConvert(sourceType, targetType)) {
 			return this.parentConverterAdapter;
-		}
-		else {
+		} else {
 			if (sourceType.isAssignableTo(targetType)) {
 				return NO_OP_CONVERTER;
-			}
-			else {
+			} else {
 				return null;
 			}
 		}
 	}
-
 
 	// internal helpers
 
@@ -298,12 +283,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 						if (typeInfo.size() == 2) {
 							return typeInfo;
 						}
-					}
-					else if (Converter.class.isAssignableFrom((Class) rawType)) {
+					} else if (Converter.class.isAssignableFrom((Class) rawType)) {
 						return getConverterTypeInfo((Class) rawType);
 					}
-				}
-				else if (Converter.class.isAssignableFrom((Class) ifc)) {
+				} else if (Converter.class.isAssignableFrom((Class) ifc)) {
 					return getConverterTypeInfo((Class) ifc);
 				}
 			}
@@ -330,8 +313,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			}
 			Map<Class, GenericConverter> objectConverters = getConvertersForSource(Object.class);
 			return getConverter(objectConverters, targetType);
-		}
-		else {
+		} else {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
 			classQueue.addFirst(sourceType);
 			while (!classQueue.isEmpty()) {
@@ -393,8 +375,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				}
 			}
 			return converters.get(Object.class);
-		}
-		else {
+		} else {
 			LinkedList<Class> classQueue = new LinkedList<Class>();
 			classQueue.addFirst(targetType);
 			while (!classQueue.isEmpty()) {
@@ -408,8 +389,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 					if (componentType.getSuperclass() != null) {
 						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
 					}
-				}
-				else {
+				} else {
 					if (currentClass.getSuperclass() != null) {
 						classQueue.addFirst(currentClass.getSuperclass());
 					}
@@ -422,7 +402,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return null;
 		}
 	}
-
 
 	private static class ConverterAdapter implements GenericConverter {
 
@@ -437,7 +416,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return this.converter.convert(source);
 		}
 	}
-
 
 	private static class ConverterFactoryAdapter implements GenericConverter {
 

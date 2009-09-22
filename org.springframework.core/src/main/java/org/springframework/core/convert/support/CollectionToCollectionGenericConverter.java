@@ -15,6 +15,9 @@
  */
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getElementType;
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.util.Collection;
 
 import org.springframework.core.CollectionFactory;
@@ -40,30 +43,20 @@ final class CollectionToCollectionGenericConverter implements GenericConverter {
 			if (sourceType.isAssignableTo(targetType)) {
 				return sourceCollection;
 			} else {
-				Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection
-						.size());
-				targetCollection.addAll(sourceCollection);
-				return targetCollection;
+				Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
+				target.addAll(sourceCollection);
+				return target;
 			}
 		}
-		Collection targetCollection = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
+		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 		if (converter == null) {
 			throw new ConverterNotFoundException(sourceElementType, targetElementType);
 		}
 		for (Object element : sourceCollection) {
-			targetCollection.add(converter.convert(element, sourceElementType, targetElementType));
+			target.add(invokeConverter(converter, element, sourceElementType, targetElementType));
 		}
-		return targetCollection;
-	}
-
-	private TypeDescriptor getElementType(Collection collection) {
-		for (Object element : collection) {
-			if (element != null) {
-				return TypeDescriptor.valueOf(element.getClass());
-			}
-		}
-		return TypeDescriptor.NULL;
+		return target;
 	}
 
 }

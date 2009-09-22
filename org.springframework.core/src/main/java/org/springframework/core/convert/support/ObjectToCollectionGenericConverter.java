@@ -15,6 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.util.Collection;
 
 import org.springframework.core.CollectionFactory;
@@ -39,7 +41,7 @@ final class ObjectToCollectionGenericConverter implements GenericConverter {
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceType, targetElementType);
 			}
-			target.add(converter.convert(source, sourceType, targetElementType));
+			target.add(invokeConverter(converter, source, sourceType, targetElementType));
 		}
 		return target;
 	}

@@ -15,6 +15,8 @@
  */
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 
@@ -29,7 +31,7 @@ final class ArrayToCollectionGenericConverter implements GenericConverter {
 	public ArrayToCollectionGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		int length = Array.getLength(source);
 		Collection collection = CollectionFactory.createCollection(targetType.getType(), length);
@@ -43,9 +45,11 @@ final class ArrayToCollectionGenericConverter implements GenericConverter {
 			GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceElementType, targetElementType);
-			}			
+			}
 			for (int i = 0; i < length; i++) {
-				collection.add(converter.convert(Array.get(source, i), sourceElementType, targetElementType));
+				Object sourceElement = Array.get(source, i);
+				Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetElementType);
+				collection.add(targetElement);
 			}
 		}
 		return collection;
