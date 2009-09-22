@@ -184,14 +184,17 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	protected void initGenericConverters() {
 		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayGenericConverter(this));
 		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionGenericConverter(this));
+		addGenericConverter(Object[].class, String.class, new ArrayToStringGenericConverter(this));
 		addGenericConverter(Object[].class, Object.class, new ArrayToObjectGenericConverter(this));
 		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionGenericConverter(this));
 		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayGenericConverter(this));
+		addGenericConverter(Collection.class, String.class, new CollectionToStringGenericConverter(this));
 		addGenericConverter(Collection.class, Object.class, new CollectionToObjectGenericConverter(this));
 		addGenericConverter(Map.class, Map.class, new MapToMapGenericConverter(this));
+		addGenericConverter(String.class, Object[].class, new StringToArrayGenericConverter(this));
+		addGenericConverter(String.class, Collection.class, new StringToCollectionGenericConverter(this));
 		addGenericConverter(Object.class, Object[].class, new ObjectToArrayGenericConverter(this));
 		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionGenericConverter(this));
-		addGenericConverter(String.class, Object[].class, new StringToArrayGenericConverter(this));
 	}
 
 	/**
