@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.jms.Topic;
 
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ErrorHandler;
 
 /**
  * Abstract base class for message listener containers. Can either host
@@ -44,7 +45,11 @@ import org.springframework.util.Assert;
  * is to <b>never</b> propagate an exception thrown by a message listener up to
  * the JMS provider. Instead, it will log any such exception at the error level.
  * This means that from the perspective of the attendant JMS provider no such
- * listener will ever fail.
+ * listener will ever fail. However, if error handling is necessary, then
+ * any implementation of the {@link ErrorHandler} strategy may be provided to
+ * the {@link #setErrorHandler(ErrorHandler)} method. Note that JMSExceptions
+ * <b>will</b> be passed to the ErrorHandler in addition to (but after) being
+ * passed to an {@link ExceptionListener}, if one has been provided.
  *
  * <p>The listener container offers the following message acknowledgment options:
  * <ul>
@@ -131,6 +136,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private String durableSubscriptionName;
 
 	private ExceptionListener exceptionListener;
+
+	private ErrorHandler errorHandler;
 
 	private boolean exposeListenerSession = true;
 
@@ -340,6 +347,15 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	public ExceptionListener getExceptionListener() {
 		return this.exceptionListener;
+	}
+
+	/**
+	 * Set an ErrorHandler to be invoked in case of any uncaught exceptions thrown
+	 * while processing a Message. By default there will be <b>no</b> ErrorHandler
+	 * so that error-level logging is the only result.
+	 */
+	public void setErrorHandler(ErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
 	}
 
 	/**
@@ -642,8 +658,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		}
 		if (isActive()) {
 			// Regular case: failed while active.
-			// Log at error level.
-			logger.warn("Execution of JMS message listener failed", ex);
+			// Invoke ErrorHandler if available.
+			invokeErrorHandler(ex);
 		}
 		else {
 			// Rare case: listener thread failed after container shutdown.
@@ -661,6 +677,20 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		ExceptionListener exceptionListener = getExceptionListener();
 		if (exceptionListener != null) {
 			exceptionListener.onException(ex);
+		}
+	}
+
+	/**
+	 * Invoke the registered ErrorHandler, if any. Log at error level otherwise.
+	 * @param ex the uncaught error that arose during JMS processing.
+	 * @see #setErrorHandler
+	 */
+	protected void invokeErrorHandler(Throwable ex) {
+		if (this.errorHandler != null) {
+			this.errorHandler.handleError(ex);
+		}
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Execution of JMS message listener failed, and no ErrorHandler has been set.", ex);
 		}
 	}
 

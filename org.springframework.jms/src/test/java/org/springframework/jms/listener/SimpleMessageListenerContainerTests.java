@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,20 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
 
+import org.easymock.EasyMock;
 import org.easymock.MockControl;
 import org.easymock.internal.AlwaysMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
+import org.springframework.util.ErrorHandler;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Mark Fisher
  */
 public class SimpleMessageListenerContainerTests extends AbstractMessageListenerContainerTests {
 
@@ -378,6 +381,64 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		mockSession.verify();
 		mockConnection.verify();
 		mockConnectionFactory.verify();
+	}
+
+	@Test
+	public void testRegisteredErrorHandlerIsInvokedOnException() throws Exception {
+		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
+
+		Session session = EasyMock.createMock(Session.class);
+
+		// Queue gets created in order to create MessageConsumer for that Destination...
+		session.createQueue(DESTINATION_NAME);
+		EasyMock.expectLastCall().andReturn(QUEUE_DESTINATION);
+		// and then the MessageConsumer gets created...
+		session.createConsumer(QUEUE_DESTINATION, null); // no MessageSelector...
+		EasyMock.expectLastCall().andReturn(messageConsumer);
+		// an exception is thrown, so the rollback logic is being applied here...
+		session.getTransacted();
+		EasyMock.expectLastCall().andReturn(false);
+		EasyMock.replay(session);
+
+		Connection connection = EasyMock.createMock(Connection.class);
+		connection.setExceptionListener(this.container);
+		// session gets created in order to register MessageListener...
+		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
+		EasyMock.expectLastCall().andReturn(session);
+		// and the connection is start()ed after the listener is registered...
+		connection.start();
+		EasyMock.replay(connection);
+
+		ConnectionFactory connectionFactory = EasyMock.createMock(ConnectionFactory.class);
+		connectionFactory.createConnection();
+		EasyMock.expectLastCall().andReturn(connection);
+		EasyMock.replay(connectionFactory);
+
+		final IllegalStateException theException = new IllegalStateException("intentional test failure");
+
+		this.container.setConnectionFactory(connectionFactory);
+		this.container.setDestinationName(DESTINATION_NAME);
+		this.container.setMessageListener(new SessionAwareMessageListener() {
+			public void onMessage(Message message, Session session) throws JMSException {
+				throw theException;
+			}
+		});
+
+		ErrorHandler errorHandler = EasyMock.createMock(ErrorHandler.class);
+		errorHandler.handleError(theException);
+		EasyMock.expectLastCall();
+		EasyMock.replay(errorHandler);
+		this.container.setErrorHandler(errorHandler);
+		this.container.afterPropertiesSet();
+
+		// manually trigger an Exception with the above bad MessageListener...
+		Message message = EasyMock.createMock(Message.class);
+		EasyMock.replay(message);
+
+		// a Throwable from a MessageListener MUST simply be swallowed...
+		messageConsumer.sendMessage(message);
+
+		EasyMock.verify(errorHandler, message, session, connection, connectionFactory);
 	}
 
 	@Test
