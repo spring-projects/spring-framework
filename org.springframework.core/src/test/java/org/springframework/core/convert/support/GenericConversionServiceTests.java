@@ -418,6 +418,21 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void convertObjectToMap() {
+		Map result = conversionService.convert("foo=bar bar=baz", Map.class);
+		assertEquals("bar", result.get("foo"));
+		assertEquals("baz", result.get("bar"));
+	}
+
+	@Test
+	public void convertObjectToMapWithConversion() throws Exception {
+		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
+		Map result = (Map) conversionService.convert(1L, TypeDescriptor.valueOf(Integer.class), new TypeDescriptor(
+				getClass().getField("genericMap2")));
+		assertEquals(new Long(1), result.get(1L));
+	}
+
+	@Test
 	public void convertStringArrayToMap() {
 		Map result = conversionService.convert(new String[] { "foo=bar", "bar=baz", "baz=boop" }, Map.class);
 		assertEquals("bar", result.get("foo"));

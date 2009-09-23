@@ -38,7 +38,7 @@ class MapEntryConverter {
 			if (this.valueConverter == null) {
 				throw new ConverterNotFoundException(sourceValueType, targetValueType);
 			}				
-			this.targetKeyType = targetKeyType;
+			this.sourceValueType = sourceValueType;
 			this.targetValueType = targetValueType;
 		}
 	}
