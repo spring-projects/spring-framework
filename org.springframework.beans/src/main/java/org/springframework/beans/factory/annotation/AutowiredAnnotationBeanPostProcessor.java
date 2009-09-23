@@ -95,12 +95,11 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
- * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
-	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
 			new LinkedHashSet<Class<? extends Annotation>>();
@@ -144,7 +143,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * Set the 'autowired' annotation type, to be used on constructors, fields,
 	 * setter methods and arbitrary config methods.
 	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation.
+	 * {@link Autowired} annotation, as well as {@link Value}.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a member is
 	 * supposed to be autowired.
@@ -159,8 +158,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * Set the 'autowired' annotation types, to be used on constructors, fields,
 	 * setter methods and arbitrary config methods.
 	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation, as well as {@link Value} and raw
-	 * use of the {@link Qualifier} annotation.
+	 * {@link Autowired} annotation, as well as {@link Value}.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation types to indicate that a member is
 	 * supposed to be autowired.
@@ -299,9 +297,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
-	 * 'Native' processing method for direct calls with an arbitrary target
-	 * instance, resolving all of its fields and methods which are annotated
-	 * with <code>@Autowired</code>.
+	 * 'Native' processing method for direct calls with an arbitrary target instance,
+	 * resolving all of its fields and methods which are annotated with <code>@Autowired</code>.
 	 * @param bean the target instance to process
 	 */
 	public void processInjection(Object bean) throws BeansException {
