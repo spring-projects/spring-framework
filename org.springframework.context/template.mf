@@ -35,7 +35,7 @@ Import-Template:
  org.springframework.beans.*;version="[3.0.0, 3.0.1)",
  org.springframework.core.*;version="[3.0.0, 3.0.1)",
  org.springframework.expression.*;version="[3.0.0, 3.0.1)";resolution:=optional,
- org.springframework.instrument.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.instrument.*;version="0";resolution:=optional,
  org.springframework.util.*;version="[3.0.0, 3.0.1)",
  org.xml.sax.*;version="0";resolution:=optional,
  org.w3c.dom.*;version="0";resolution:=optional
