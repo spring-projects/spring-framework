@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -308,6 +309,29 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void convertMapToStringArray() throws Exception {
+		Map<String, String> foo = new LinkedHashMap<String, String>();
+		foo.put("1", "BAR");
+		foo.put("2", "BAZ");
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		String[] result = conversionService.convert(foo, String[].class);
+		assertEquals("1=BAR", result[0]);
+		assertEquals("2=BAZ", result[1]);
+	}
+
+	@Test
+	public void convertMapToStringArrayWithElementConversion() throws Exception {
+		Map<Integer, FooEnum> foo = new LinkedHashMap<Integer, FooEnum>();
+		foo.put(1, FooEnum.BAR);
+		foo.put(2, FooEnum.BAZ);
+		conversionService.addConverter(new ObjectToStringConverter());
+		String[] result = (String[]) conversionService.convert(foo, new TypeDescriptor(getClass()
+				.getField("genericMap")), TypeDescriptor.valueOf(String[].class));
+		assertEquals("1=BAR", result[0]);
+		assertEquals("2=BAZ", result[1]);
+	}
+
+	@Test
 	public void convertStringToArray() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		String[] result = conversionService.convert("1,2,3", String[].class);
@@ -403,8 +427,8 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertStringArrayToMapWithElementConversion() throws Exception {
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());		
-		conversionService.addConverterFactory(new StringToEnumConverterFactory());		
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
 		Map result = (Map) conversionService.convert(new String[] { "1=BAR", "2=BAZ" }, TypeDescriptor
 				.valueOf(String[].class), new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(FooEnum.BAR, result.get(1));
@@ -421,10 +445,10 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertStringToMapWithElementConversion() throws Exception {
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());		
-		conversionService.addConverterFactory(new StringToEnumConverterFactory());		
-		Map result = (Map) conversionService.convert("1=BAR 2=BAZ", TypeDescriptor
-				.valueOf(String.class), new TypeDescriptor(getClass().getField("genericMap")));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		Map result = (Map) conversionService.convert("1=BAR 2=BAZ", TypeDescriptor.valueOf(String.class),
+				new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(FooEnum.BAR, result.get(1));
 		assertEquals(FooEnum.BAZ, result.get(2));
 	}
