@@ -32,12 +32,17 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.virtual.VFS;
+import org.jboss.virtual.VirtualFile;
+import org.jboss.virtual.VirtualFileVisitor;
+import org.jboss.virtual.VisitorAttributes;
 
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.VfsResource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -335,10 +340,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Resource[] rootDirResources = getResources(rootDirPath);
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		for (Resource rootDirResource : rootDirResources) {
-			if (ResourceHandlingUtils.useResourceHandlingDelegate(rootDirResource.getURL())) {
-				result.addAll(ResourceHandlingUtils.findMatchingResourcesByDelegate(rootDirResource, subPattern, getPathMatcher()));
-			} else if (isJarResource(rootDirResource)) {
+			if (isJarResource(rootDirResource)) {
 				result.addAll(doFindPathMatchingJarResources(rootDirResource, subPattern));
+			}
+			else if (rootDirResource.getURL().getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirResource, subPattern, getPathMatcher()));
 			}
 			else {
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
@@ -622,6 +628,66 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (getPathMatcher().match(fullPattern, currPath)) {
 				result.add(content);
 			}
+		}
+	}
+
+
+	/**
+	 * Inner delegate class, avoiding a hard JBoss VFS API dependency at runtime.
+	 */
+	private static class VfsResourceMatchingDelegate {
+
+		public static Set<Resource> findMatchingResources(Resource rootResource, String locationPattern, PathMatcher pathMatcher) throws IOException {
+			VirtualFile root = VFS.getRoot(rootResource.getURL());
+			PatternVirtualFileVisitor visitor = new PatternVirtualFileVisitor(root.getPathName(), locationPattern, pathMatcher);
+			root.visit(visitor);
+			return visitor.getResources();
+		}
+	}
+
+
+	/**
+	 * VFS visitor for path matching purposes.
+	 */
+	private static class PatternVirtualFileVisitor implements VirtualFileVisitor {
+
+		private final String subPattern;
+
+		private final PathMatcher pathMatcher;
+
+		private final String rootPath;
+
+		private final Set<Resource> resources = new LinkedHashSet<Resource>();
+
+		public PatternVirtualFileVisitor(String rootPath, String subPattern, PathMatcher pathMatcher) {
+			this.subPattern = subPattern;
+			this.pathMatcher = pathMatcher;
+			this.rootPath = (rootPath.length() == 0 || rootPath.endsWith("/") ? rootPath : rootPath + "/");
+		}
+
+		public VisitorAttributes getAttributes() {
+			return VisitorAttributes.RECURSE;
+		}
+
+		public void visit(VirtualFile vf) {
+			if (this.pathMatcher.match(this.subPattern, vf.getPathName().substring(this.rootPath.length()))) {
+				this.resources.add(new VfsResource(vf));
+			}
+		}
+
+		public Set<Resource> getResources() {
+			return this.resources;
+		}
+
+		public int size() {
+			return this.resources.size();
+		}
+
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("sub-pattern: ").append(this.subPattern);
+			sb.append(", resources: ").append(this.resources);
+			return sb.toString();
 		}
 	}
 
