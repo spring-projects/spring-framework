@@ -59,7 +59,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  *
  * <p>Transaction synchronization is a generic mechanism for registering callbacks
  * that get invoked at transaction completion time. This is mainly used internally
- * by the data access support classes for JDBC, Hibernate, JDO, etc when running
+ * by the data access support classes for JDBC, Hibernate, JPA, etc when running
  * within a JTA transaction: They register resources that are opened within the
  * transaction for closing at transaction completion time, allowing e.g. for reuse
  * of the same Hibernate Session within the transaction. The same mechanism can
@@ -109,7 +109,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private static final Constants constants = new Constants(AbstractPlatformTransactionManager.class);
 
 
-	/** Transient to optimize serialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private int transactionSynchronization = SYNCHRONIZATION_ALWAYS;
