@@ -26,8 +26,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
-import org.springframework.scheduling.support.ErrorHandler;
 import org.springframework.scheduling.support.SimpleTriggerContext;
+import org.springframework.util.ErrorHandler;
 
 /**
  * Internal adapter that reschedules an underlying {@link Runnable} according

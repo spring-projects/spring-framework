@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
-import org.springframework.scheduling.support.ErrorHandler;
+import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -196,8 +196,8 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	 */
 	protected Runnable getRunnableToSchedule(ScheduledExecutorTask task) {
 		return this.continueScheduledExecutionAfterException
-				? new DelegatingErrorHandlingRunnable(task.getRunnable(), ErrorHandler.LOG_AND_SUPPRESS)
-				: new DelegatingErrorHandlingRunnable(task.getRunnable(), ErrorHandler.LOG_AND_PROPAGATE);
+				? new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_SUPPRESS_ERROR_HANDLER)
+				: new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_PROPAGATE_ERROR_HANDLER);
 	}
 
 

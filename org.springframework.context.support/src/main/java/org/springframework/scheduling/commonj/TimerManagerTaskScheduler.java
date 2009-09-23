@@ -27,9 +27,9 @@ import commonj.timers.TimerListener;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
-import org.springframework.scheduling.support.ErrorHandler;
 import org.springframework.scheduling.support.SimpleTriggerContext;
+import org.springframework.scheduling.support.TaskUtils;
+import org.springframework.util.ErrorHandler;
 
 /**
  * Implementation of Spring's {@link TaskScheduler} interface, wrapping
@@ -87,9 +87,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	}
 
 	private Runnable errorHandlingTask(Runnable delegate, boolean isRepeatingTask) {
-		ErrorHandler errorHandler = this.errorHandler != null ? this.errorHandler
-				: (isRepeatingTask ? ErrorHandler.LOG_AND_SUPPRESS : ErrorHandler.LOG_AND_PROPAGATE);
-		return new DelegatingErrorHandlingRunnable(delegate, errorHandler);
+		return TaskUtils.decorateTaskWithErrorHandler(delegate, this.errorHandler, isRepeatingTask);
 	}
 
 

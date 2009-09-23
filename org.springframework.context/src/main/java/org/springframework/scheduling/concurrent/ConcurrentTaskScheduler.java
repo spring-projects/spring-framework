@@ -27,8 +27,9 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.support.ErrorHandler;
+import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ErrorHandler;
 
 /**
  * Adapter that takes a JDK 1.5 <code>java.util.concurrent.ScheduledExecutorService</code>
@@ -180,7 +181,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	private Runnable errorHandlingTask(Runnable task, boolean isRepeatingTask) {
-		return TaskUtils.errorHandlingTask(task, this.errorHandler, isRepeatingTask);
+		return TaskUtils.decorateTaskWithErrorHandler(task, this.errorHandler, isRepeatingTask);
 	}
 
 }

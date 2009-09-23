@@ -14,31 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.support;
+package org.springframework.util;
 
 /**
- * A strategy for handling errors that occur during asynchronous
- * execution of tasks that have been submitted to a TaskScheduler.
+ * A strategy for handling errors. This is especially useful for handling
+ * errors that occur during asynchronous execution of tasks that have been
+ * submitted to a TaskScheduler. In such cases, it may not be possible to
+ * throw the error to the original caller.
  * 
  * @author Mark Fisher
  * @since 3.0.
  */
 public interface ErrorHandler {
-
-	/**
-	 * An ErrorHandler strategy that will log the Exception but perform
-	 * no further handling. This will suppress the error so that
-	 * subsequent executions of the task will not be prevented.
-	 */
-	static final ErrorHandler LOG_AND_SUPPRESS = new LoggingErrorHandler();
-
-	/**
-	 * An ErrorHandler strategy that will log at error level and then
-	 * re-throw the Exception. Note: this will typically prevent subsequent
-	 * execution of a scheduled task.
-	 */
-	static final ErrorHandler LOG_AND_PROPAGATE = new PropagatingErrorHandler();
-
 
 	void handleError(Throwable t);
 
