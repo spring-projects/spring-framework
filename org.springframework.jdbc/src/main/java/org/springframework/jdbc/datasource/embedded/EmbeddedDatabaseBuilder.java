@@ -26,7 +26,7 @@ import org.springframework.core.io.ResourceLoader;
  * <p>Usage example:
  * <pre>
  * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
- * EmbeddedDatabase db = builder.script("schema.sql").script("test-data.sql").build();
+ * EmbeddedDatabase db = builder.script("schema.sql").script("data.sql").build();
  * db.shutdown();
  * </pre>
  *
@@ -90,7 +90,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @return this, for fluent call chaining
 	 */
 	public EmbeddedDatabaseBuilder script(String sqlResource) {
-		this.databasePopulator.addScript(resourceLoader.getResource(sqlResource));
+		this.databasePopulator.addScript(this.resourceLoader.getResource(sqlResource));
 		return this;
 	}
 
@@ -105,12 +105,12 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Factory method that builds a default EmbeddedDatabase instance.
-	 * The default instance is HSQL with a schema created from "classpath:schema.sql"
-	 * and test-data loaded from "classpath:test-data.sql".
+	 * <p>The default instance is HSQL with a schema created from "classpath:schema.sql"
+	 * and data loaded from "classpath:data.sql".
 	 * @return an embedded database
 	 */
 	public static EmbeddedDatabase buildDefault() {
-		return new EmbeddedDatabaseBuilder().script("schema.sql").script("test-data.sql").build();
+		return new EmbeddedDatabaseBuilder().script("schema.sql").script("data.sql").build();
 	}
 
 	/**
