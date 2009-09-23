@@ -34,7 +34,7 @@ import org.junit.Test;
 
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
-import org.springframework.scheduling.support.ErrorHandler;
+import org.springframework.util.ErrorHandler;
 
 /**
  * @author Mark Fisher

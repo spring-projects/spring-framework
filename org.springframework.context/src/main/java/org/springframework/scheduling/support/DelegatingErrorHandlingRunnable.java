@@ -17,6 +17,7 @@
 package org.springframework.scheduling.support;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ErrorHandler;
 
 /**
  * Runnable wrapper that catches any exception or error thrown from its
