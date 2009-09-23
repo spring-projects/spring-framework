@@ -26,9 +26,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.core.io.support.ResourceHandlingUtils;
 
 /**
  * {@link Resource} implementation for <code>java.net.URL</code> locators.
@@ -39,7 +37,7 @@ import org.springframework.core.io.support.ResourceHandlingUtils;
  * @since 28.12.2003
  * @see java.net.URL
  */
-public class UrlResource extends AbstractResource {
+public class UrlResource extends AbstractFileResolvingResource {
 
 	/**
 	 * Original URL, used for actual access.
@@ -164,25 +162,10 @@ public class UrlResource extends AbstractResource {
 	@Override
 	public File getFile() throws IOException {
 		if (this.uri != null) {
-			return ResourceHandlingUtils.getFile(this.uri, getDescription());
+			return super.getFile(this.uri);
 		}
 		else {
-			return ResourceHandlingUtils.getFile(this.url, getDescription());
-		}
-	}
-
-	/**
-	 * This implementation determines the underlying File
-	 * (or jar file, in case of a resource in a jar/zip).
-	 */
-	@Override
-	protected File getFileForLastModifiedCheck() throws IOException {
-		if (ResourceUtils.isJarURL(this.url)) {
-			URL actualUrl = ResourceUtils.extractJarFileURL(this.url);
-			return ResourceHandlingUtils.getFile(actualUrl);
-		}
-		else {
-			return getFile();
+			return super.getFile();
 		}
 	}
 

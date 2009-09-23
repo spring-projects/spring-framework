@@ -16,7 +16,6 @@
 
 package org.springframework.core.io;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,9 +24,7 @@ import java.net.URL;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.core.io.support.ResourceHandlingUtils;
 
 /**
  * {@link Resource} implementation for class path resources.
@@ -42,13 +39,14 @@ import org.springframework.core.io.support.ResourceHandlingUtils;
  * @see java.lang.ClassLoader#getResourceAsStream(String)
  * @see java.lang.Class#getResourceAsStream(String)
  */
-public class ClassPathResource extends AbstractResource {
+public class ClassPathResource extends AbstractFileResolvingResource {
 
 	private final String path;
 
 	private ClassLoader classLoader;
 
 	private Class clazz;
+
 
 	/**
 	 * Create a new ClassPathResource for ClassLoader usage.
@@ -165,32 +163,6 @@ public class ClassPathResource extends AbstractResource {
 					getDescription() + " cannot be resolved to URL because it does not exist");
 		}
 		return url;
-	}
-
-	/**
-	 * This implementation returns a File reference for the underlying class path
-	 * resource, provided that it refers to a file in the file system.
-	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URL, String)
-	 */
-	@Override
-	public File getFile() throws IOException {
-		return ResourceHandlingUtils.getFile(getURL(), getDescription());
-	}
-
-	/**
-	 * This implementation determines the underlying File
-	 * (or jar file, in case of a resource in a jar/zip).
-	 */
-	@Override
-	protected File getFileForLastModifiedCheck() throws IOException {
-		URL url = getURL();
-		if (ResourceUtils.isJarURL(url)) {
-			URL actualUrl = ResourceUtils.extractJarFileURL(url);
-			return ResourceHandlingUtils.getFile(actualUrl);
-		}
-		else {
-			return ResourceHandlingUtils.getFile(url, getDescription());
-		}
 	}
 
 	/**

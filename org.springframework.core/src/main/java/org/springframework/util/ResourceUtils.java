@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,9 @@ public abstract class ResourceUtils {
 
 	/** URL protocol for an entry from a JBoss jar file: "vfszip" */
 	public static final String URL_PROTOCOL_VFSZIP = "vfszip";
+
+	/** URL protocol for a JBoss VFS resource: "vfs" */
+	public static final String URL_PROTOCOL_VFS = "vfs";
 
 	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
 	public static final String URL_PROTOCOL_WSJAR = "wsjar";
@@ -257,7 +260,7 @@ public abstract class ResourceUtils {
 		return (URL_PROTOCOL_JAR.equals(protocol) ||
 				URL_PROTOCOL_ZIP.equals(protocol) ||
 				URL_PROTOCOL_WSJAR.equals(protocol) ||
-				(URL_PROTOCOL_CODE_SOURCE.equals(protocol) && url.getPath().indexOf(JAR_URL_SEPARATOR) != -1));
+				(URL_PROTOCOL_CODE_SOURCE.equals(protocol) && url.getPath().contains(JAR_URL_SEPARATOR)));
 	}
 
 	/**
