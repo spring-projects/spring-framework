@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.annotation;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -66,13 +68,11 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5
  * @see #setInitAnnotationType
  * @see #setDestroyAnnotationType
- * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
  */
 public class InitDestroyAnnotationBeanPostProcessor
 		implements DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, PriorityOrdered, Serializable {
 
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private Class<? extends Annotation> initAnnotationType;
 
@@ -221,6 +221,19 @@ public class InitDestroyAnnotationBeanPostProcessor
 			}
 		});
 		return newMetadata;
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		this.logger = LogFactory.getLog(getClass());
 	}
 
 
