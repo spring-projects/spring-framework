@@ -182,6 +182,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * Hook to initialize the "generic" converters that require the full TypeDescriptor context to perform their conversion operations.
 	 */
 	protected void initGenericConverters() {
+		addGenericConverter(String[].class, Map.class, new StringArrayToMapGenericConverter(this));
 		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayGenericConverter(this));
 		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionGenericConverter(this));
 		addGenericConverter(Object[].class, String.class, new ArrayToStringGenericConverter(this));
@@ -193,6 +194,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		addGenericConverter(Map.class, Map.class, new MapToMapGenericConverter(this));
 		addGenericConverter(String.class, Object[].class, new StringToArrayGenericConverter(this));
 		addGenericConverter(String.class, Collection.class, new StringToCollectionGenericConverter(this));
+		addGenericConverter(String.class, Map.class, new StringToMapGenericConverter(this));
 		addGenericConverter(Object.class, Object[].class, new ObjectToArrayGenericConverter(this));
 		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionGenericConverter(this));
 	}
