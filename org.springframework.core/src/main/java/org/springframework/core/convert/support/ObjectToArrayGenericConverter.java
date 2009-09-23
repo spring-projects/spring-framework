@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.StringUtils;
 
 final class ObjectToArrayGenericConverter implements GenericConverter {
 
@@ -32,17 +33,35 @@ final class ObjectToArrayGenericConverter implements GenericConverter {
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		Object target = Array.newInstance(targetElementType.getType(), 1);
-		if (sourceType.isAssignableTo(targetElementType)) {
-			Array.set(target, 0, source);
-		} else {
-			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetElementType);
+		if (sourceType.typeEquals(String.class)) {
+			String string = (String) source;
+			String[] fields = StringUtils.commaDelimitedListToStringArray(string);
+			if (sourceType.isAssignableTo(targetElementType)) {
+				return fields;
+			} else {
+				Object target = Array.newInstance(targetElementType.getType(), fields.length);
+				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
+				if (converter == null) {
+					throw new ConverterNotFoundException(sourceType, targetElementType);
+				}
+				for (int i = 0; i < fields.length; i++) {
+					Array.set(target, i, invokeConverter(converter, fields[i], sourceType, targetElementType));
+				}
+				return target;
 			}
-			Array.set(target, 0, invokeConverter(converter, source, sourceType, targetElementType));
+		} else {
+			Object target = Array.newInstance(targetElementType.getType(), 1);
+			if (sourceType.isAssignableTo(targetElementType)) {
+				Array.set(target, 0, source);
+			} else {
+				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
+				if (converter == null) {
+					throw new ConverterNotFoundException(sourceType, targetElementType);
+				}
+				Array.set(target, 0, invokeConverter(converter, source, sourceType, targetElementType));
+			}
+			return target;
 		}
-		return target;
 	}
 
 }

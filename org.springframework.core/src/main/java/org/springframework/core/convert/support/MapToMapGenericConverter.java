@@ -1,6 +1,5 @@
 package org.springframework.core.convert.support;
 
-
 import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
@@ -28,22 +27,25 @@ final class MapToMapGenericConverter implements GenericConverter {
 			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
 		}
 		boolean keysCompatible = false;
-		if (sourceKeyType != TypeDescriptor.NULL && targetKeyType != TypeDescriptor.NULL && sourceKeyType.isAssignableTo(targetKeyType)) {
+		if (sourceKeyType != TypeDescriptor.NULL && targetKeyType != TypeDescriptor.NULL
+				&& sourceKeyType.isAssignableTo(targetKeyType)) {
 			keysCompatible = true;
 		}
 		boolean valuesCompatible = false;
-		if (sourceValueType != TypeDescriptor.NULL && targetValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetValueType)) {
+		if (sourceValueType != TypeDescriptor.NULL && targetValueType != TypeDescriptor.NULL
+				&& sourceValueType.isAssignableTo(targetValueType)) {
 			valuesCompatible = true;
 		}
 		if (keysCompatible && valuesCompatible) {
 			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
 		}
 		Map targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
-		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetKeyType, targetValueType, keysCompatible, valuesCompatible, conversionService);
+		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetKeyType,
+				targetValueType, keysCompatible, valuesCompatible, conversionService);
 		for (Object entry : sourceMap.entrySet()) {
 			Map.Entry sourceMapEntry = (Map.Entry) entry;
 			Object targetKey = converter.convertKey(sourceMapEntry.getKey());
-			Object targetValue = converter.convertValue(sourceMapEntry.getValue()); 
+			Object targetValue = converter.convertValue(sourceMapEntry.getValue());
 			targetMap.put(targetKey, targetValue);
 		}
 		return targetMap;

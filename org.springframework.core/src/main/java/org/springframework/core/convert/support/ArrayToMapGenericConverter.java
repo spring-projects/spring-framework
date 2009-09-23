@@ -15,20 +15,20 @@
  */
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.asList;
+
 import org.springframework.core.convert.TypeDescriptor;
 
-final class StringToMapGenericConverter implements GenericConverter {
+final class ArrayToMapGenericConverter implements GenericConverter {
 
-	private final StringArrayToMapGenericConverter converter;
-	
-	public StringToMapGenericConverter(GenericConversionService conversionService) {
-		this.converter = new StringArrayToMapGenericConverter(conversionService);
+	private final GenericConverter helperConverter;
+
+	public ArrayToMapGenericConverter(GenericConversionService conversionService) {
+		this.helperConverter = new CollectionToMapGenericConverter(conversionService);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		String string = (String) source;
-		String[] properties = string.split(" ");
-		return this.converter.convert(properties, TypeDescriptor.valueOf(String[].class), targetType);
+		return this.helperConverter.convert(asList(source), sourceType, targetType);
 	}
 
 }

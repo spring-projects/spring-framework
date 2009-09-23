@@ -182,27 +182,21 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * Hook to initialize the "generic" converters that require the full TypeDescriptor context to perform their conversion operations.
 	 */
 	protected void initGenericConverters() {
-		addGenericConverter(String[].class, Map.class, new StringArrayToMapGenericConverter(this));
 		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayGenericConverter(this));
 		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionGenericConverter(this));
-		addGenericConverter(Object[].class, String.class, new ArrayToStringGenericConverter(this));
+		addGenericConverter(Object[].class, Map.class, new ArrayToMapGenericConverter(this));
 		addGenericConverter(Object[].class, Object.class, new ArrayToObjectGenericConverter(this));
-		// TODO Collection->Map
 		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionGenericConverter(this));
 		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayGenericConverter(this));
-		addGenericConverter(Collection.class, String.class, new CollectionToStringGenericConverter(this));
+		addGenericConverter(Collection.class, Map.class, new CollectionToMapGenericConverter(this));
 		addGenericConverter(Collection.class, Object.class, new CollectionToObjectGenericConverter(this));
 		addGenericConverter(Map.class, Map.class, new MapToMapGenericConverter(this));
-		addGenericConverter(Map.class, String[].class, new MapToStringArrayGenericConverter(this));
-		// TODO Map->Collection
-		// TODO Map->String
-		// TODO Map->Object
-		addGenericConverter(String.class, Object[].class, new StringToArrayGenericConverter(this));
-		addGenericConverter(String.class, Collection.class, new StringToCollectionGenericConverter(this));
-		addGenericConverter(String.class, Map.class, new StringToMapGenericConverter(this));
+		addGenericConverter(Map.class, Object[].class, new MapToArrayGenericConverter(this));
+		addGenericConverter(Map.class, Collection.class, new MapToCollectionGenericConverter(this));
+		addGenericConverter(Map.class, Object.class, new MapToObjectGenericConverter(this));
 		addGenericConverter(Object.class, Object[].class, new ObjectToArrayGenericConverter(this));
 		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionGenericConverter(this));
-		// TODO Object->Map
+		addGenericConverter(Object.class, Map.class, new ObjectToMapGenericConverter(this));
 	}
 
 	/**
