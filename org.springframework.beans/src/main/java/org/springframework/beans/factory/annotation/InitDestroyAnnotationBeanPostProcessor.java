@@ -21,10 +21,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -119,18 +119,18 @@ public class InitDestroyAnnotationBeanPostProcessor
 		if (beanType != null) {
 			LifecycleMetadata metadata = findLifecycleMetadata(beanType);
 			for (Iterator<LifecycleElement> it = metadata.getInitMethods().iterator(); it.hasNext();) {
-				String methodName = calculateMethodIdentifierInHierarchy(it.next().getMethod());
-				if (!beanDefinition.isExternallyManagedInitMethod(methodName)) {
-					beanDefinition.registerExternallyManagedInitMethod(methodName);
+				String methodIdentifier = it.next().getIdentifier();
+				if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
+					beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
 				}
 				else {
 					it.remove();
 				}
 			}
 			for (Iterator<LifecycleElement> it = metadata.getDestroyMethods().iterator(); it.hasNext();) {
-				String methodName = calculateMethodIdentifierInHierarchy(it.next().getMethod());
-				if (!beanDefinition.isExternallyManagedDestroyMethod(methodName)) {
-					beanDefinition.registerExternallyManagedDestroyMethod(methodName);
+				String methodIdentifier = it.next().getIdentifier();
+				if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {
+					beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
 				}
 				else {
 					it.remove();
@@ -176,15 +176,6 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 	}
 
-
-	private String calculateMethodIdentifierInHierarchy(Method method) {
-		if (Modifier.isPrivate(method.getModifiers())) {
-			return method.getDeclaringClass() + "." + method.getName();
-		}
-		else {
-			return method.getName();
-		}
-	}
 
 	private LifecycleMetadata findLifecycleMetadata(Class clazz) {
 		if (this.lifecycleMetadataCache == null) {
@@ -238,15 +229,18 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 */
 	private class LifecycleMetadata {
 
-		private final Set<LifecycleElement> initMethods = new LinkedHashSet<LifecycleElement>();
+		private final LinkedList<LifecycleElement> initMethods = new LinkedList<LifecycleElement>();
 
-		private final Set<LifecycleElement> destroyMethods = new LinkedHashSet<LifecycleElement>();
+		private final LinkedList<LifecycleElement> destroyMethods = new LinkedList<LifecycleElement>();
 
 		public void addInitMethod(Method method) {
-			this.initMethods.add(new LifecycleElement(method));
+			LifecycleElement element = new LifecycleElement(method);
+			if (!this.initMethods.contains(element)) {
+				this.initMethods.addFirst(element);
+			}
 		}
 
-		public Set<LifecycleElement> getInitMethods() {
+		public Collection<LifecycleElement> getInitMethods() {
 			return this.initMethods;
 		}
 
@@ -263,10 +257,13 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void addDestroyMethod(Method method) {
-			this.destroyMethods.add(new LifecycleElement(method));
+			LifecycleElement element = new LifecycleElement(method);
+			if (!this.destroyMethods.contains(element)) {
+				this.destroyMethods.addLast(element);
+			}
 		}
 
-		public Set<LifecycleElement> getDestroyMethods() {
+		public Collection<LifecycleElement> getDestroyMethods() {
 			return this.destroyMethods;
 		}
 
@@ -291,15 +288,23 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 		private final Method method;
 
+		private final String identifier;
+
 		public LifecycleElement(Method method) {
 			if (method.getParameterTypes().length != 0) {
 				throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
 			}
 			this.method = method;
+			this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
+					method.getDeclaringClass() + "." + method.getName() : method.getName());
 		}
 
 		public Method getMethod() {
 			return this.method;
+		}
+
+		public String getIdentifier() {
+			return this.identifier;
 		}
 
 		public void invoke(Object target) throws Throwable {
@@ -316,13 +321,12 @@ public class InitDestroyAnnotationBeanPostProcessor
 				return false;
 			}
 			LifecycleElement otherElement = (LifecycleElement) other;
-			return (this.method.getName().equals(otherElement.method.getName()) &&
-					this.method.getDeclaringClass().equals(otherElement.method.getDeclaringClass()));
+			return (this.identifier.equals(otherElement.identifier));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.method.getName().hashCode();
+			return this.identifier.hashCode();
 		}
 	}
 

@@ -17,15 +17,14 @@
 package org.springframework.context.annotation;
 
 import java.util.Properties;
-
-import static org.junit.Assert.*;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.beans.INestedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.NestedTestBean;
@@ -33,8 +32,8 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
@@ -356,6 +355,9 @@ public class CommonAnnotationBeanPostProcessorTests {
 			if (this.testBean == null || this.testBean2 == null) {
 				throw new IllegalStateException("Resources not injected");
 			}
+			if (!this.initCalled) {
+				throw new IllegalStateException("Superclass init method not called yet");
+			}
 			if (this.init2Called) {
 				throw new IllegalStateException("Already called");
 			}
@@ -372,6 +374,9 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@PreDestroy
 		protected void destroy2() {
+			if (this.destroyCalled) {
+				throw new IllegalStateException("Superclass destroy called too soon");
+			}
 			if (this.destroy2Called) {
 				throw new IllegalStateException("Already called");
 			}
@@ -380,6 +385,9 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@PreDestroy
 		private void destroy() {
+			if (this.destroyCalled) {
+				throw new IllegalStateException("Superclass destroy called too soon");
+			}
 			if (this.destroy3Called) {
 				throw new IllegalStateException("Already called");
 			}
