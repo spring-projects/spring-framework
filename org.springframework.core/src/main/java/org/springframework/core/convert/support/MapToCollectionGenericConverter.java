@@ -15,44 +15,49 @@
  */
 package org.springframework.core.convert.support;
 
-import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
 
-final class MapToStringArrayGenericConverter implements GenericConverter {
+final class MapToCollectionGenericConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public MapToStringArrayGenericConverter(GenericConversionService conversionService) {
+	public MapToCollectionGenericConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Map sourceMap = (Map) source;
 		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
-		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();		
+		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		boolean keysCompatible = false;
-		if (sourceKeyType.isAssignableTo(targetElementType)) {
+		if (targetElementType == TypeDescriptor.NULL || sourceKeyType.isAssignableTo(targetElementType)) {
 			keysCompatible = true;
 		}
 		boolean valuesCompatible = false;
-		if (sourceValueType.isAssignableTo(targetElementType)) {
+		if (targetElementType == TypeDescriptor.NULL || sourceValueType.isAssignableTo(targetElementType)) {
 			valuesCompatible = true;
-		}		
-		Object array = Array.newInstance(targetElementType.getType(), sourceMap.size());
-		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetElementType, targetElementType, keysCompatible, valuesCompatible, conversionService);		
-		int i = 0;
-		for (Object entry : sourceMap.entrySet()) {
-			Map.Entry mapEntry = (Map.Entry) entry;
-			Object key = mapEntry.getKey();
-			Object value = mapEntry.getValue();
-			String property = converter.convertKey(key) + "=" + converter.convertValue(value);
-			Array.set(array, i, property);
-			i++;
 		}
-		return array;		
+		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceMap.size());
+		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetElementType,
+				targetElementType, keysCompatible, valuesCompatible, conversionService);
+		if (targetElementType.getType().equals(String.class)) {
+			for (Object entry : sourceMap.entrySet()) {
+				Map.Entry mapEntry = (Map.Entry) entry;
+				String property = converter.convertKey(mapEntry.getKey()) + "="
+						+ converter.convertValue(mapEntry.getValue());
+				target.add(property);
+			}
+		} else {
+			for (Object value : sourceMap.values()) {
+				target.add(value);
+			}			
+		}
+		return target;
 	}
 
 }

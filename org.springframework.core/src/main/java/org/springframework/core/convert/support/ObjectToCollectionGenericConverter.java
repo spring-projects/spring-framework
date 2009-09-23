@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.StringUtils;
 
 final class ObjectToCollectionGenericConverter implements GenericConverter {
 
@@ -32,18 +33,41 @@ final class ObjectToCollectionGenericConverter implements GenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Collection target = CollectionFactory.createCollection(targetType.getType(), 1);
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
-			target.add(source);
-		} else {
-			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetElementType);
+		if (sourceType.typeEquals(String.class)) {
+			String string = (String) source;
+			String[] fields = StringUtils.commaDelimitedListToStringArray(string);
+			Collection target = CollectionFactory.createCollection(targetType.getType(), fields.length);
+			if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
+				for (int i = 0; i < fields.length; i++) {
+					target.add(fields[i]);				
+				}
+			} else {
+				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
+				if (converter == null) {
+					throw new ConverterNotFoundException(sourceType, targetElementType);
+				}
+				for (int i = 0; i < fields.length; i++) {
+					String sourceElement = fields[i];
+					Object targetElement = invokeConverter(converter, sourceElement, sourceType, targetElementType);
+					target.add(targetElement);				
+				}
 			}
-			target.add(invokeConverter(converter, source, sourceType, targetElementType));
+			return target;
+
+		} else {
+			Collection target = CollectionFactory.createCollection(targetType.getType(), 1);			
+			if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
+				target.add(source);
+			} else {
+				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
+				if (converter == null) {
+					throw new ConverterNotFoundException(sourceType, targetElementType);
+				}
+				target.add(invokeConverter(converter, source, sourceType, targetElementType));
+			}
+			return target;
 		}
-		return target;
 	}
 
 }

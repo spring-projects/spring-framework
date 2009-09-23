@@ -15,20 +15,25 @@
  */
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.asList;
+import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
 
-final class ArrayToObjectGenericConverter implements GenericConverter {
+final class MapToArrayGenericConverter implements GenericConverter {
 
-	private CollectionToObjectGenericConverter helperConverter;
+	private final GenericConverter mapToCollectionHelperConverter;
 
-	public ArrayToObjectGenericConverter(GenericConversionService conversionService) {
-		this.helperConverter = new CollectionToObjectGenericConverter(conversionService);
+	private final GenericConverter collectionToArrayHelperConverter;
+
+	public MapToArrayGenericConverter(GenericConversionService conversionService) {
+		this.mapToCollectionHelperConverter = new MapToCollectionGenericConverter(conversionService);
+		this.collectionToArrayHelperConverter = new CollectionToArrayGenericConverter(conversionService);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.convert(asList(source), sourceType, targetType);
+		TypeDescriptor collectionType = TypeDescriptor.collection(List.class, targetType.getElementTypeDescriptor());
+		Object collection = this.mapToCollectionHelperConverter.convert(source, sourceType, collectionType);
+		return this.collectionToArrayHelperConverter.convert(collection, collectionType, targetType);
 	}
 
 }

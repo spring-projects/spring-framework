@@ -44,6 +44,8 @@ public class TypeDescriptor {
 
 	private Class<?> type;
 
+	private TypeDescriptor elementType;
+
 	private MethodParameter methodParameter;
 
 	private Field field;
@@ -88,6 +90,11 @@ public class TypeDescriptor {
 	private TypeDescriptor() {
 	}
 
+	private TypeDescriptor(Class collectionType, TypeDescriptor elementType) {
+		this.type = collectionType;
+		this.elementType = elementType;
+	}
+
 	/**
 	 * Return the wrapped MethodParameter, if any.
 	 * <p>Note: Either MethodParameter or Field is available.
@@ -113,14 +120,11 @@ public class TypeDescriptor {
 	public Class<?> getType() {
 		if (this.type != null) {
 			return this.type;
-		}
-		else if (this.field != null) {
+		} else if (this.field != null) {
 			return this.field.getType();
-		}
-		else if (this.methodParameter != null) {
+		} else if (this.methodParameter != null) {
 			return this.methodParameter.getParameterType();
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -135,14 +139,22 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Does the underyling declared type equal the type provided?
+	 * @param type the type to test against
+	 */
+	public boolean typeEquals(Class<?> type) {
+		Class<?> thisType = getType();
+		return thisType != null ? thisType.equals(type) : false;
+	}
+
+	/**
 	 * Returns the name of this type; the fully qualified classname.
 	 */
 	public String getName() {
 		Class<?> type = getType();
 		if (type != null) {
 			return getType().getName();
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -167,22 +179,24 @@ public class TypeDescriptor {
 	 * Returns null if the type is neither an array or collection.
 	 */
 	public Class<?> getElementType() {
-		if (isArray()) {
-			return getArrayComponentType();
-		}
-		else if (isCollection()) {
-			return getCollectionElementType();
-		}
-		else {
-			return null;
-		}
+		return getElementTypeDescriptor().getType();
 	}
 
 	/**
 	 * Return the element type as a type descriptor.
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
-		return TypeDescriptor.valueOf(getElementType());
+		if (elementType != null) {
+			return elementType;
+		} else {
+			if (isArray()) {
+				return TypeDescriptor.valueOf(getArrayComponentType());
+			} else if (isCollection()) {
+				return TypeDescriptor.valueOf(getCollectionElementType());
+			} else {
+				return TypeDescriptor.NULL;
+			}			
+		}
 	}
 
 	/**
@@ -191,7 +205,7 @@ public class TypeDescriptor {
 	public boolean isMap() {
 		return isTypeAssignableTo(Map.class);
 	}
-	
+
 	/**
 	 * Is this descriptor for a map where the key type and value type are known? 
 	 */
@@ -206,11 +220,9 @@ public class TypeDescriptor {
 	public Class<?> getMapKeyType() {
 		if (this.field != null) {
 			return GenericCollectionTypeResolver.getMapKeyFieldType(field);
-		}
-		else if (this.methodParameter != null) {
+		} else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -222,11 +234,9 @@ public class TypeDescriptor {
 	public Class<?> getMapValueType() {
 		if (this.field != null) {
 			return GenericCollectionTypeResolver.getMapValueFieldType(this.field);
-		}
-		else if (this.methodParameter != null) {
+		} else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -254,11 +264,9 @@ public class TypeDescriptor {
 				this.cachedFieldAnnotations = this.field.getAnnotations();
 			}
 			return this.cachedFieldAnnotations;
-		}
-		else if (this.methodParameter != null) {
+		} else if (this.methodParameter != null) {
 			return this.methodParameter.getMethod().getAnnotations();
-		}
-		else {
+		} else {
 			return new Annotation[0];
 		}
 	}
@@ -300,10 +308,9 @@ public class TypeDescriptor {
 		if (isArray()) {
 			// TODO should properly handle multi dimensional arrays
 			stringValue.append(getArrayComponentType().getName()).append("[]");
-		}
-		else {
+		} else {
 			Class<?> clazz = getType();
-			if (clazz==null) {
+			if (clazz == null) {
 				return "null";
 			}
 			stringValue.append(clazz.getName());
@@ -312,8 +319,7 @@ public class TypeDescriptor {
 				if (collectionType != null) {
 					stringValue.append("<").append(collectionType.getName()).append(">");
 				}
-			}
-			else if (isMap()) {
+			} else if (isMap()) {
 				Class<?> keyType = getMapKeyType();
 				Class<?> valType = getMapValueType();
 				if (keyType != null && valType != null) {
@@ -325,7 +331,6 @@ public class TypeDescriptor {
 		return stringValue.toString();
 	}
 
-
 	// internal helpers
 
 	private Class<?> getArrayComponentType() {
@@ -336,20 +341,17 @@ public class TypeDescriptor {
 	private Class<?> getCollectionElementType() {
 		if (this.type != null) {
 			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type);
-		}
-		else if (this.field != null) {
+		} else if (this.field != null) {
 			return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
-		}
-		else {
+		} else {
 			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
 		}
 	}
-	
+
 	private boolean isTypeAssignableTo(Class<?> clazz) {
 		Class<?> type = getType();
 		return (type != null && ClassUtils.isAssignable(clazz, type));
 	}
-
 
 	// static factory methods
 
@@ -369,6 +371,18 @@ public class TypeDescriptor {
 	 */
 	public static TypeDescriptor forObject(Object object) {
 		return (object == null ? NULL : valueOf(object.getClass()));
+	}
+
+	public String toString() {
+		if (this == TypeDescriptor.NULL) {
+			return "[TypeDescriptor.NULL]";
+		} else {
+			return "[TypeDescriptor type=" + getType().getName() + "]";
+		}
+	}
+
+	public static TypeDescriptor collection(Class<?> type, TypeDescriptor elementType) {
+		return new TypeDescriptor(type, elementType);
 	}
 
 }

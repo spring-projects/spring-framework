@@ -15,7 +15,11 @@
  */
 package org.springframework.core.convert.support;
 
+import java.lang.reflect.Array;
+import java.util.AbstractList;
 import java.util.Collection;
+import java.util.List;
+import java.util.RandomAccess;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -38,5 +42,28 @@ final class ConversionUtils {
 			}
 		}
 		return TypeDescriptor.NULL;
+	}
+	
+
+	public static List asList(Object array) {
+		return new ArrayList(array);
+	}
+	
+	private static class ArrayList extends AbstractList implements RandomAccess, java.io.Serializable {
+
+		private Object array;
+
+		ArrayList(Object array) {
+			this.array = array;
+		}
+
+		public int size() {
+			return Array.getLength(array);
+		}
+
+		public Object get(int index) {
+			return Array.get(array, index);
+		}
+		
 	}
 }

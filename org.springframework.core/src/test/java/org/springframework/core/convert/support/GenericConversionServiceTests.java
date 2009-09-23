@@ -454,6 +454,48 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void convertMapToString() {
+		Map<String, String> foo = new LinkedHashMap<String, String>();
+		foo.put("1", "BAR");
+		foo.put("2", "BAZ");
+		String result = conversionService.convert(foo, String.class);
+		assertEquals("1=BAR 2=BAZ", result);
+	}
+
+	@Test
+	public void convertMapToStringWithConversion() throws Exception {
+		Map<Integer, FooEnum> foo = new LinkedHashMap<Integer, FooEnum>();
+		foo.put(1, FooEnum.BAR);
+		foo.put(2, FooEnum.BAZ);
+		conversionService.addConverter(new ObjectToStringConverter());
+		String result = (String) conversionService.convert(foo, new TypeDescriptor(getClass().getField("genericMap")),
+				TypeDescriptor.valueOf(String.class));
+		assertEquals("1=BAR 2=BAZ", result);
+	}
+
+	@Test
+	public void convertMapToObject() {
+		Map<Long, Long> foo = new LinkedHashMap<Long, Long>();
+		foo.put(1L, 1L);
+		foo.put(2L, 2L);
+		Long result = conversionService.convert(foo, Long.class);
+		assertEquals(new Long(1), result);
+	}
+
+	public Map<Long, Long> genericMap2 = new HashMap<Long, Long>();
+
+	@Test
+	public void convertMapToObjectWithConversion() throws Exception {
+		Map<Long, Long> foo = new LinkedHashMap<Long, Long>();
+		foo.put(1L, 1L);
+		foo.put(2L, 2L);
+		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
+		Integer result = (Integer) conversionService.convert(foo,
+				new TypeDescriptor(getClass().getField("genericMap2")), TypeDescriptor.valueOf(Integer.class));
+		assertEquals(new Integer(1), result);
+	}
+
+	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
 		try {
 			conversionService.convert("1", Integer[].class);
