@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 
+import com.caucho.hessian.HessianException;
+import com.caucho.hessian.client.HessianConnectionException;
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianRuntimeException;
 import com.caucho.hessian.io.SerializerFactory;
@@ -220,16 +222,21 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 			return invocation.getMethod().invoke(this.hessianProxy, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof HessianRuntimeException) {
-				HessianRuntimeException hre = (HessianRuntimeException) ex.getTargetException();
-				Throwable rootCause = (hre.getRootCause() != null ? hre.getRootCause() : hre);
-				throw convertHessianAccessException(rootCause);
+			Throwable targetEx = ex.getTargetException();
+			if (targetEx instanceof HessianConnectionException) {
+				throw convertHessianAccessException(targetEx);
 			}
-			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
-				UndeclaredThrowableException utex = (UndeclaredThrowableException) ex.getTargetException();
+			else if (targetEx instanceof HessianException || targetEx instanceof HessianRuntimeException) {
+				Throwable cause = targetEx.getCause();
+				throw convertHessianAccessException(cause != null ? cause : targetEx);
+			}
+			else if (targetEx instanceof UndeclaredThrowableException) {
+				UndeclaredThrowableException utex = (UndeclaredThrowableException) targetEx;
 				throw convertHessianAccessException(utex.getUndeclaredThrowable());
 			}
-			throw ex.getTargetException();
+			else {
+				throw targetEx;
+			}
 		}
 		catch (Throwable ex) {
 			throw new RemoteProxyFailureException(
@@ -247,7 +254,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	 * @return the RemoteAccessException to throw
 	 */
 	protected RemoteAccessException convertHessianAccessException(Throwable ex) {
-		if (ex instanceof ConnectException) {
+		if (ex instanceof HessianConnectionException || ex instanceof ConnectException) {
 			return new RemoteConnectFailureException(
 					"Cannot connect to Hessian remote service at [" + getServiceUrl() + "]", ex);
 		}

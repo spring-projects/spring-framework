@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,16 +148,18 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 			return invocation.getMethod().invoke(this.burlapProxy, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof BurlapRuntimeException) {
-				BurlapRuntimeException bre = (BurlapRuntimeException) ex.getTargetException();
-				Throwable rootCause = (bre.getRootCause() != null ? bre.getRootCause() : bre);
-				throw convertBurlapAccessException(rootCause);
+			Throwable targetEx = ex.getTargetException();
+			if (targetEx instanceof BurlapRuntimeException) {
+				Throwable cause = targetEx.getCause();
+				throw convertBurlapAccessException(cause != null ? cause : targetEx);
 			}
-			else if (ex.getTargetException() instanceof UndeclaredThrowableException) {
-				UndeclaredThrowableException utex = (UndeclaredThrowableException) ex.getTargetException();
+			else if (targetEx instanceof UndeclaredThrowableException) {
+				UndeclaredThrowableException utex = (UndeclaredThrowableException) targetEx;
 				throw convertBurlapAccessException(utex.getUndeclaredThrowable());
 			}
-			throw ex.getTargetException();
+			else {
+				throw targetEx;
+			}
 		}
 		catch (Throwable ex) {
 			throw new RemoteProxyFailureException(
