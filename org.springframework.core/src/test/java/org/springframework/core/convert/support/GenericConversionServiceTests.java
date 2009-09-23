@@ -206,7 +206,7 @@ public class GenericConversionServiceTests {
 		String result = conversionService.convert(new String[0], String.class);
 		assertEquals("", result);
 	}
-	
+
 	@Test
 	public void convertArrayToObject() {
 		Object[] array = new Object[] { 3L };
@@ -272,7 +272,8 @@ public class GenericConversionServiceTests {
 	public void convertCollectionToStringWithElementConversion() throws Exception {
 		conversionService.addConverter(new ObjectToStringConverter());
 		List<Integer> list = Arrays.asList(new Integer[] { 3, 5 });
-		String result = (String) conversionService.convert(list, new TypeDescriptor(getClass().getField("genericList")), TypeDescriptor.valueOf(String.class));
+		String result = (String) conversionService.convert(list,
+				new TypeDescriptor(getClass().getField("genericList")), TypeDescriptor.valueOf(String.class));
 		assertEquals("3,5", result);
 	}
 
@@ -302,8 +303,8 @@ public class GenericConversionServiceTests {
 		conversionService.addConverterFactory(new StringToEnumConverterFactory());
 		Map<String, FooEnum> map = (Map<String, FooEnum>) conversionService.convert(foo, TypeDescriptor
 				.valueOf(Map.class), new TypeDescriptor(getClass().getField("genericMap")));
-		assertEquals(map.get(1), FooEnum.BAR);
-		assertEquals(map.get(2), FooEnum.BAZ);
+		assertEquals(FooEnum.BAR, map.get(1));
+		assertEquals(FooEnum.BAZ, map.get(2));
 	}
 
 	@Test
@@ -346,7 +347,8 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertStringToCollectionWithElementConversion() throws Exception {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("genericList")));
+		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
+				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(3, result.size());
 		assertEquals(new Integer(1), result.get(0));
 		assertEquals(new Integer(2), result.get(1));
@@ -389,6 +391,42 @@ public class GenericConversionServiceTests {
 		Integer[] result = conversionService.convert(3L, Integer[].class);
 		assertEquals(1, result.length);
 		assertEquals(new Integer(3), result[0]);
+	}
+
+	@Test
+	public void convertStringArrayToMap() {
+		Map result = conversionService.convert(new String[] { "foo=bar", "bar=baz", "baz=boop" }, Map.class);
+		assertEquals("bar", result.get("foo"));
+		assertEquals("baz", result.get("bar"));
+		assertEquals("boop", result.get("baz"));
+	}
+
+	@Test
+	public void convertStringArrayToMapWithElementConversion() throws Exception {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());		
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());		
+		Map result = (Map) conversionService.convert(new String[] { "1=BAR", "2=BAZ" }, TypeDescriptor
+				.valueOf(String[].class), new TypeDescriptor(getClass().getField("genericMap")));
+		assertEquals(FooEnum.BAR, result.get(1));
+		assertEquals(FooEnum.BAZ, result.get(2));
+	}
+
+	@Test
+	public void convertStringToMap() {
+		Map result = conversionService.convert("foo=bar bar=baz baz=boop", Map.class);
+		assertEquals("bar", result.get("foo"));
+		assertEquals("baz", result.get("bar"));
+		assertEquals("boop", result.get("baz"));
+	}
+
+	@Test
+	public void convertStringToMapWithElementConversion() throws Exception {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());		
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());		
+		Map result = (Map) conversionService.convert("1=BAR 2=BAZ", TypeDescriptor
+				.valueOf(String.class), new TypeDescriptor(getClass().getField("genericMap")));
+		assertEquals(FooEnum.BAR, result.get(1));
+		assertEquals(FooEnum.BAZ, result.get(2));
 	}
 
 	@Test
