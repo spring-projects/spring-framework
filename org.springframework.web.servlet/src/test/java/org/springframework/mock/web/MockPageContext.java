@@ -275,7 +275,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public ExpressionEvaluator getExpressionEvaluator() {
-		return new MockExpressionEvaluator(this);
+		throw new UnsupportedOperationException();
 	}
 
 	public ELContext getELContext() {
