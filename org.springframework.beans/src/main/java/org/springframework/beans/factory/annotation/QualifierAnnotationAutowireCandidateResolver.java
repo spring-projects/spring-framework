@@ -214,15 +214,14 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			}
 			if (targetAnnotation == null) {
 				// look for matching annotation on the target class
-				Class<?> beanType = null;
 				if (this.beanFactory != null) {
-					beanType = this.beanFactory.getType(bdHolder.getBeanName());
+					Class<?> beanType = this.beanFactory.getType(bdHolder.getBeanName());
+					if (beanType != null) {
+						targetAnnotation = ClassUtils.getUserClass(beanType).getAnnotation(type);
+					}
 				}
-				else if (bd.hasBeanClass()) {
-					beanType = bd.getBeanClass();
-				}
-				if (beanType != null) {
-					targetAnnotation = ClassUtils.getUserClass(beanType).getAnnotation(type);
+				if (targetAnnotation == null && bd.hasBeanClass()) {
+					targetAnnotation = ClassUtils.getUserClass(bd.getBeanClass()).getAnnotation(type);
 				}
 			}
 			if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
