@@ -120,10 +120,16 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>rhino</groupId>
-      <artifactId>js</artifactId>
-      <version>1.7R1</version>
-      <scope>test</scope>
+      <groupId>org.apache.tiles</groupId>
+      <artifactId>tiles-servlet</artifactId>
+      <version>2.1.2</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>apache-taglibs</groupId>
+      <artifactId>standard</artifactId>
+      <version>1.1.2</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>velocity</groupId>
@@ -135,6 +141,12 @@
       <groupId>velocity-tools</groupId>
       <artifactId>velocity-tools-view</artifactId>
       <version>1.4</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.0.1</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -246,6 +258,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>rhino</groupId>
+      <artifactId>js</artifactId>
+      <version>1.7R1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>3.3.1.GA</version>
@@ -260,17 +278,21 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>jfree</groupId>
-      <artifactId>jfreechart</artifactId>
-      <version>1.0.7</version>
-      <scope>runtime</scope>
-      <optional>true</optional>
+      <groupId>javax.validation</groupId>
+      <artifactId>com.springsource.javax.validation</artifactId>
+      <version>1.0.0.CR3</version>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.0.1</version>
-      <optional>true</optional>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>4.0.0.Beta2</version>
+      <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jcl</artifactId>
+      <version>1.5.3</version>
+      <scope>test</scope>
+    </dependency> 
   </dependencies>
 </project>
