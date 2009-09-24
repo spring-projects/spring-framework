@@ -222,7 +222,8 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 				return true;
 			}
-			else if (metadata.isAnnotated(Component.class.getName())) {
+			else if (metadata.isAnnotated(Component.class.getName()) ||
+					metadata.hasAnnotatedMethods(Bean.class.getName())) {
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 				return true;
 			}

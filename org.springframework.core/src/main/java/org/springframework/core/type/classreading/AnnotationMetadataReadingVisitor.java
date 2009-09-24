@@ -100,6 +100,15 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		return this.attributeMap.get(annotationType);
 	}
 
+	public boolean hasAnnotatedMethods(String annotationType) {
+		for (MethodMetadata method : this.methodMetadataSet) {
+			if (method.isAnnotated(annotationType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (MethodMetadata method : this.methodMetadataSet) {
