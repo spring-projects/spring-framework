@@ -75,7 +75,7 @@ public abstract class GenericTypeResolver {
 	 * @param clazz the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
 	 */
-	public static Class resolveParameterType(MethodParameter methodParam, Class clazz) {
+	public static Class<?> resolveParameterType(MethodParameter methodParam, Class clazz) {
 		Type genericType = getTargetType(methodParam);
 		Assert.notNull(clazz, "Class must not be null");
 		Map<TypeVariable, Type> typeVariableMap = getTypeVariableMap(clazz);
@@ -92,7 +92,7 @@ public abstract class GenericTypeResolver {
 	 * @param clazz the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
 	 */
-	public static Class resolveReturnType(Method method, Class clazz) {
+	public static Class<?> resolveReturnType(Method method, Class clazz) {
 		Assert.notNull(method, "Method must not be null");
 		Type genericType = method.getGenericReturnType();
 		Assert.notNull(clazz, "Class must not be null");
@@ -102,15 +102,68 @@ public abstract class GenericTypeResolver {
 	}
 
 	/**
-	 * Resolve the given type variable against the given class.
-	 * @param tv the type variable to resolve
-	 * @param clazz the class that defines the type variable
-	 * somewhere in its inheritance hierarchy
-	 * @return the resolved type that the variable can get replaced with,
-	 * or <code>null</code> if none found
+	 * Resolve the single type argument of the given generic interface against
+	 * the given target class which is assumed to implement the generic interface
+	 * and possibly declare a concrete type for its type variable.
+	 * @param clazz the target class to check against
+	 * @param genericIfc the generic interface to resolve the type argument from
+	 * @return the resolved type of the argument, or <code>null</code> if not resolvable
 	 */
-	public static Type resolveTypeVariable(TypeVariable tv, Class clazz) {
-		return getTypeVariableMap(clazz).get(tv);
+	public static Class<?> resolveTypeArgument(Class clazz, Class genericIfc) {
+		Class[] typeArgs = resolveTypeArguments(clazz, genericIfc);
+		if (typeArgs == null) {
+			return null;
+		}
+		if (typeArgs.length != 1) {
+			throw new IllegalArgumentException("Expected 1 type argument on generic interface [" +
+					genericIfc.getName() + "] but found " + typeArgs.length);
+		}
+		return typeArgs[0];
+	}
+
+	/**
+	 * Resolve the type arguments of the given generic interface against the given
+	 * target class which is assumed to implement the generic interface and possibly
+	 * declare concrete types for its type variables.
+	 * @param clazz the target class to check against
+	 * @param genericIfc the generic interface to resolve the type argument from
+	 * @return the resolved type of each argument, with the array size matching the
+	 * number of actual type arguments, or <code>null</code> if not resolvable
+	 */
+	public static Class[] resolveTypeArguments(Class clazz, Class genericIfc) {
+		return doResolveTypeArguments(clazz, clazz, genericIfc);
+	}
+
+	private static Class[] doResolveTypeArguments(Class ownerClass, Class classToIntrospect, Class genericIfc) {
+		while (classToIntrospect != null) {
+			Type[] ifcs = classToIntrospect.getGenericInterfaces();
+			for (Type ifc : ifcs) {
+				if (ifc instanceof ParameterizedType) {
+					ParameterizedType paramIfc = (ParameterizedType) ifc;
+					Type rawType = paramIfc.getRawType();
+					if (genericIfc.equals(rawType)) {
+						Type[] typeArgs = paramIfc.getActualTypeArguments();
+						Class[] result = new Class[typeArgs.length];
+						for (int i = 0; i < typeArgs.length; i++) {
+							Type arg = typeArgs[i];
+							if (arg instanceof TypeVariable) {
+								arg = getTypeVariableMap(ownerClass).get((TypeVariable) arg);
+							}
+							result[i] = (arg instanceof Class ? (Class) arg : Object.class);
+						}
+						return result;
+					}
+					else if (genericIfc.isAssignableFrom((Class) rawType)) {
+						return doResolveTypeArguments(ownerClass, (Class) rawType, genericIfc);
+					}
+				}
+				else if (genericIfc.isAssignableFrom((Class) ifc)) {
+					return doResolveTypeArguments(ownerClass, (Class) ifc, genericIfc);
+				}
+			}
+			classToIntrospect = classToIntrospect.getSuperclass();
+		}
+		return null;
 	}
 
 

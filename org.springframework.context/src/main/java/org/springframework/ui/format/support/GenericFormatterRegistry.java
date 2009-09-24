@@ -17,9 +17,6 @@
 package org.springframework.ui.format.support;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -182,18 +179,20 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 	// implementing FormatterRegistry
 
 	public void addFormatterByType(Class<?> type, Formatter<?> formatter) {
-		Class<?> formattedObjectType = getFormattedObjectType(formatter.getClass());
+		Class<?> formattedObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
 		if (!this.conversionService.canConvert(formattedObjectType, type)) {
-			throw new IllegalArgumentException("Unable to register Formatter " + formatter + " for type [" + type.getName() + "]; not able to convert from [" + formattedObjectType.getName() + "] to parse");
+			throw new IllegalArgumentException("Unable to register Formatter " + formatter + " for type [" +
+					type.getName() + "]; not able to convert from [" + formattedObjectType.getName() + "] to parse");
 		}
 		if (!this.conversionService.canConvert(type, formattedObjectType)) {
-			throw new IllegalArgumentException("Unable to register Formatter " + formatter + " for type [" + type.getName() + "]; not able to convert to [" + formattedObjectType.getName() + "] to format");
+			throw new IllegalArgumentException("Unable to register Formatter " + formatter + " for type [" +
+					type.getName() + "]; not able to convert to [" + formattedObjectType.getName() + "] to format");
 		}		
 		this.typeFormatters.put(type, formatter);
 	}
 
 	public <T> void addFormatterByType(Formatter<T> formatter) {
-		Class formattedObjectType = getFormattedObjectType(formatter.getClass());
+		Class<?> formattedObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
 		this.typeFormatters.put(formattedObjectType, formatter);
 	}
 
@@ -202,7 +201,13 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 	}
 
 	public <A extends Annotation, T> void addFormatterByAnnotation(AnnotationFormatterFactory<A, T> factory) {
-		this.annotationFormatters.put(getAnnotationType(factory.getClass()), factory);
+		Class[] typeArgs = GenericTypeResolver.resolveTypeArguments(factory.getClass(), AnnotationFormatterFactory.class);
+		if (typeArgs == null) {
+			throw new IllegalArgumentException(
+					"Unable to extract Annotation type A argument from AnnotationFormatterFactory [" +
+							factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
+		}
+		this.annotationFormatters.put(typeArgs[0], factory);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -218,7 +223,7 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 			formatter = getTypeFormatter(type.getType());
 		}
 		if (formatter != null) {
-			Class<?> formattedObjectType = getFormattedObjectType(formatter.getClass());
+			Class<?> formattedObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
 			if (!type.getType().isAssignableFrom(formattedObjectType)) {
 				return new ConvertingFormatter(type.getType(), formattedObjectType, formatter);
 			}
@@ -228,66 +233,6 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 
 
 	// internal helpers
-
-	private Class getFormattedObjectType(Class formatterClass) {
-		Class classToIntrospect = formatterClass;
-		while (classToIntrospect != null) {
-			Type[] ifcs = classToIntrospect.getGenericInterfaces();
-			for (Type ifc : ifcs) {
-				if (ifc instanceof ParameterizedType) {
-					ParameterizedType paramIfc = (ParameterizedType) ifc;
-					Type rawType = paramIfc.getRawType();
-					if (Formatter.class.equals(rawType)) {
-						Type arg = paramIfc.getActualTypeArguments()[0];
-						if (arg instanceof TypeVariable) {
-							arg = GenericTypeResolver.resolveTypeVariable((TypeVariable) arg, formatterClass);
-						}
-						if (arg instanceof Class) {
-							return (Class) arg;
-						}
-					}
-					else if (Formatter.class.isAssignableFrom((Class) rawType)) {
-						return getFormattedObjectType((Class) rawType);
-					}
-				}
-				else if (Formatter.class.isAssignableFrom((Class) ifc)) {
-					return getFormattedObjectType((Class) ifc);
-				}
-			}
-			classToIntrospect = classToIntrospect.getSuperclass();
-		}
-		return null;
-	}
-
-	private Class getAnnotationType(Class factoryClass) {
-		Class classToIntrospect = factoryClass;
-		while (classToIntrospect != null) {
-			Type[] ifcs = classToIntrospect.getGenericInterfaces();
-			for (Type ifc : ifcs) {
-				if (ifc instanceof ParameterizedType) {
-					ParameterizedType paramIfc = (ParameterizedType) ifc;
-					Type rawType = paramIfc.getRawType();
-					if (AnnotationFormatterFactory.class.equals(rawType)) {
-						Type arg = paramIfc.getActualTypeArguments()[0];
-						if (arg instanceof TypeVariable) {
-							arg = GenericTypeResolver.resolveTypeVariable((TypeVariable) arg, factoryClass);
-						}
-						if (arg instanceof Class) {
-							return (Class) arg;
-						}
-					} else if (AnnotationFormatterFactory.class.isAssignableFrom((Class) rawType)) {
-						return getAnnotationType((Class) rawType);
-					}
-				} else if (AnnotationFormatterFactory.class.isAssignableFrom((Class) ifc)) {
-					return getAnnotationType((Class) ifc);
-				}
-			}
-			classToIntrospect = classToIntrospect.getSuperclass();
-		}
-		throw new IllegalArgumentException(
-				"Unable to extract Annotation type A argument from AnnotationFormatterFactory [" +
-						factoryClass.getName() + "]; does the factory parameterize the <A> generic type?");
-	}
 
 	@SuppressWarnings("unchecked")
 	private Formatter getAnnotationFormatter(TypeDescriptor type) {
