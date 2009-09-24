@@ -40,6 +40,7 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 
 	private final FormatterRegistry formatterRegistry;
 
+
 	/**
 	 * Create a new FormattingConversionServiceAdapter for the given FormatterRegistry.
 	 * @param formatterRegistry the FormatterRegistry to wrap
@@ -49,10 +50,12 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 		this.formatterRegistry = formatterRegistry;
 		if (formatterRegistry instanceof GenericFormatterRegistry) {
 			setParent(((GenericFormatterRegistry) formatterRegistry).getConversionService());
-		} else {
+		}
+		else {
 			setParent(new DefaultConversionService());
 		}
 	}
+
 
 	@Override
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -64,6 +67,7 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 		}
 		return super.getConverter(sourceType, targetType);
 	}
+
 
 	/**
 	 * Adapter that exposes the Converter interface on top of a given Formatter.
@@ -79,7 +83,8 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			try {
 				return this.formatter.parse((String) source, LocaleContextHolder.getLocale());
-			} catch (ParseException ex) {
+			}
+			catch (ParseException ex) {
 				throw new IllegalArgumentException("Could not convert formatted value '" + source + "'", ex);
 			}
 		}
