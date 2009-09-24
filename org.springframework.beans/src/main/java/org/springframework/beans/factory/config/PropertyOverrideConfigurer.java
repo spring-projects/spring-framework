@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanInitializationException;
 
 /**
@@ -84,9 +85,9 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
 	/**
 	 * Set whether to ignore invalid keys. Default is "false".
-	 * <p>If you ignore invalid keys, keys that do not follow the
-	 * 'beanName.property' format will just be logged as warning.
-	 * This allows to have arbitrary other keys in a properties file.
+	 * <p>If you ignore invalid keys, keys that do not follow the 'beanName.property' format
+	 * (or refer to invalid bean names or properties) will just be logged at debug level.
+	 * This allows one to have arbitrary other keys in a properties file.
 	 */
 	public void setIgnoreInvalidKeys(boolean ignoreInvalidKeys) {
 		this.ignoreInvalidKeys = ignoreInvalidKeys;
@@ -138,13 +139,15 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	 * Apply the given property value to the corresponding bean.
 	 */
 	protected void applyPropertyValue(
-	    ConfigurableListableBeanFactory factory, String beanName, String property, String value) {
+			ConfigurableListableBeanFactory factory, String beanName, String property, String value) {
 
 		BeanDefinition bd = factory.getBeanDefinition(beanName);
 		while (bd.getOriginatingBeanDefinition() != null) {
 			bd = bd.getOriginatingBeanDefinition();
 		}
-		bd.getPropertyValues().addPropertyValue(property, value);
+		PropertyValue pv = new PropertyValue(property, value);
+		pv.setOptional(this.ignoreInvalidKeys);
+		bd.getPropertyValues().addPropertyValue(pv);
 	}
 
 
