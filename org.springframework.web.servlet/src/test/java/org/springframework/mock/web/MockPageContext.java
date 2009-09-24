@@ -33,7 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.el.Expression;
 import javax.servlet.jsp.el.ExpressionEvaluator;
+import javax.servlet.jsp.el.FunctionMapper;
 import javax.servlet.jsp.el.VariableResolver;
 
 import org.springframework.util.Assert;
@@ -275,7 +278,15 @@ public class MockPageContext extends PageContext {
 	}
 
 	public ExpressionEvaluator getExpressionEvaluator() {
-		throw new UnsupportedOperationException();
+		return new ExpressionEvaluator() {
+			public Expression parseExpression(String expression, Class expectedType, FunctionMapper fMapper) throws ELException {
+				throw new UnsupportedOperationException();
+			}
+			public Object evaluate(String expression, Class expectedType, VariableResolver vResolver, FunctionMapper fMapper) throws ELException {
+				String key = expression.substring(2, expression.length() - 1);
+				return findAttribute(key);
+			}
+		};
 	}
 
 	public ELContext getELContext() {
