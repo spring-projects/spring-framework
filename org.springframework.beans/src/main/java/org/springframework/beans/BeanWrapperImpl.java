@@ -867,10 +867,17 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			if (pd == null || !pd.getWriteMethod().getDeclaringClass().isInstance(this.object)) {
 				pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 				if (pd == null || pd.getWriteMethod() == null) {
-					PropertyMatches matches = PropertyMatches.forProperty(propertyName, getRootClass());
-					throw new NotWritablePropertyException(
-							getRootClass(), this.nestedPath + propertyName,
-							matches.buildErrorMessage(), matches.getPossibleMatches());
+					if (pv.isOptional()) {
+						logger.debug("Ignoring optional value for property '" + actualName +
+								"' - property not found on bean class [" + getRootClass().getName() + "]");
+						return;
+					}
+					else {
+						PropertyMatches matches = PropertyMatches.forProperty(propertyName, getRootClass());
+						throw new NotWritablePropertyException(
+								getRootClass(), this.nestedPath + propertyName,
+								matches.buildErrorMessage(), matches.getPossibleMatches());
+					}
 				}
 				pv.getOriginalPropertyValue().resolvedDescriptor = pd;
 			}

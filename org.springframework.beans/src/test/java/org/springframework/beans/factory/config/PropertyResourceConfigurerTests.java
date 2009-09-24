@@ -25,7 +25,6 @@ import java.util.prefs.Preferences;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import test.beans.IndexedTestBean;
 import test.beans.TestBean;
@@ -281,8 +280,11 @@ public final class PropertyResourceConfigurerTests {
 			Properties props = new Properties();
 			props.setProperty("argh", "hgra");
 			props.setProperty("tb2.name", "test");
+			props.setProperty("tb2.nam", "test");
+			props.setProperty("tb3.name", "test");
 			poc.setProperties(props);
 			poc.postProcessBeanFactory(factory);
+			assertEquals("test", factory.getBean("tb2", TestBean.class).getName());
 		}
 		{
 			PropertyOverrideConfigurer poc = new PropertyOverrideConfigurer();
@@ -294,7 +296,8 @@ public final class PropertyResourceConfigurerTests {
 			poc.setOrder(0); // won't actually do anything since we're not processing through an app ctx
 			try {
 				poc.postProcessBeanFactory(factory);
-			} catch (BeanInitializationException ex) {
+			}
+			catch (BeanInitializationException ex) {
 				// prove that the processor chokes on the invalid key
 				assertTrue(ex.getMessage().toLowerCase().contains("argh"));
 			}

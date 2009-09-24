@@ -47,6 +47,8 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 	private Object source;
 
+	private boolean optional = false;
+
 	private boolean converted = false;
 
 	private Object convertedValue;
@@ -80,6 +82,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		this.name = original.getName();
 		this.value = original.getValue();
 		this.source = original.getSource();
+		this.optional = original.isOptional();
 		this.converted = original.converted;
 		this.convertedValue = original.convertedValue;
 		this.conversionNecessary = original.conversionNecessary;
@@ -99,6 +102,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		this.name = original.getName();
 		this.value = newValue;
 		this.source = original;
+		this.optional = original.isOptional();
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
 		this.resolvedDescriptor = original.resolvedDescriptor;
@@ -134,6 +138,14 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 			original = (PropertyValue) original.source;
 		}
 		return original;
+	}
+
+	public void setOptional(boolean optional) {
+		this.optional = optional;
+	}
+
+	public boolean isOptional() {
+		return this.optional;
 	}
 
 	/**
