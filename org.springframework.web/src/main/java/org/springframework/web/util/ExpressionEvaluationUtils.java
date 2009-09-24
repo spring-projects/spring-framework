@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,15 @@
 
 package org.springframework.web.util;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.Expression;
 
 import org.springframework.util.Assert;
 
 /**
  * Convenience methods for accessing JSP 2.0's
  * {@link javax.servlet.jsp.el.ExpressionEvaluator}.
- *
- * <p>This class will by default use standard <code>evaluate</code> calls.
- * If your application server happens to be inefficient in that respect,
- * consider setting Spring's "cacheJspExpressions" context-param in
- * <code>web.xml</code> to "true", which will use <code>parseExpression</code>
- * calls with cached Expression objects instead.
  *
  * <p>The evaluation methods check if the value contains "${" before
  * invoking the EL evaluator, treating the value as "normal" expression
@@ -45,26 +34,12 @@ import org.springframework.util.Assert;
  * @author Alef Arendsen
  * @since 11.07.2003
  * @see javax.servlet.jsp.el.ExpressionEvaluator#evaluate
- * @see javax.servlet.jsp.el.ExpressionEvaluator#parseExpression
  */
 public abstract class ExpressionEvaluationUtils {
-
-	/**
-	 * JSP 2.0 expression cache parameter at the servlet context level
-	 * (i.e. a context-param in <code>web.xml</code>): "cacheJspExpressions".
-	 */
-	public static final String EXPRESSION_CACHE_CONTEXT_PARAM = "cacheJspExpressions";
 
 	public static final String EXPRESSION_PREFIX = "${";
 
 	public static final String EXPRESSION_SUFFIX = "}";
-
-
-	private static final String EXPRESSION_CACHE_FLAG_CONTEXT_ATTR =
-			ExpressionEvaluationUtils.class.getName() + ".CACHE_JSP_EXPRESSIONS";
-
-	private static final String EXPRESSION_CACHE_MAP_CONTEXT_ATTR =
-			ExpressionEvaluationUtils.class.getName() + ".JSP_EXPRESSION_CACHE";
 
 
 	/**
@@ -90,7 +65,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * the result class
 	 */
 	public static Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
-	    throws JspException {
+			throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
 			return doEvaluate(attrName, attrValue, resultClass, pageContext);
@@ -113,7 +88,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * @throws JspException in case of parsing errors
 	 */
 	public static Object evaluate(String attrName, String attrValue, PageContext pageContext)
-	    throws JspException {
+			throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
 			return doEvaluate(attrName, attrValue, Object.class, pageContext);
@@ -132,7 +107,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * @throws JspException in case of parsing errors
 	 */
 	public static String evaluateString(String attrName, String attrValue, PageContext pageContext)
-	    throws JspException {
+			throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
 			return (String) doEvaluate(attrName, attrValue, String.class, pageContext);
@@ -170,7 +145,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * @throws JspException in case of parsing errors
 	 */
 	public static boolean evaluateBoolean(String attrName, String attrValue, PageContext pageContext)
-	    throws JspException {
+			throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
 			return (Boolean) doEvaluate(attrName, attrValue, Boolean.class, pageContext);
@@ -202,14 +177,14 @@ public abstract class ExpressionEvaluationUtils {
 		try {
 			if (resultClass.isAssignableFrom(String.class)) {
 				StringBuilder resultValue = null;
-				int exprPrefixIndex = -1;
+				int exprPrefixIndex;
 				int exprSuffixIndex = 0;
 				do {
 					exprPrefixIndex = attrValue.indexOf(EXPRESSION_PREFIX, exprSuffixIndex);
 					if (exprPrefixIndex != -1) {
 						int prevExprSuffixIndex = exprSuffixIndex;
 						exprSuffixIndex = attrValue.indexOf(EXPRESSION_SUFFIX, exprPrefixIndex + EXPRESSION_PREFIX.length());
-						String expr = null;
+						String expr;
 						if (exprSuffixIndex != -1) {
 							exprSuffixIndex += EXPRESSION_SUFFIX.length();
 							expr = attrValue.substring(exprPrefixIndex, exprSuffixIndex);
@@ -253,79 +228,8 @@ public abstract class ExpressionEvaluationUtils {
 	private static Object evaluateExpression(String exprValue, Class resultClass, PageContext pageContext)
 			throws ELException {
 
-		Map<ExpressionCacheKey, Expression> expressionCache = getJspExpressionCache(pageContext);
-		if (expressionCache != null) {
-			// We are supposed to explicitly create and cache JSP Expression objects.
-			ExpressionCacheKey cacheKey = new ExpressionCacheKey(exprValue, resultClass);
-			Expression expr = expressionCache.get(cacheKey);
-			if (expr == null) {
-				expr = pageContext.getExpressionEvaluator().parseExpression(exprValue, resultClass, null);
-				expressionCache.put(cacheKey, expr);
-			}
-			return expr.evaluate(pageContext.getVariableResolver());
-		}
-		else {
-			// We're simply calling the JSP 2.0 evaluate method straight away.
-			return pageContext.getExpressionEvaluator().evaluate(
-					exprValue, resultClass, pageContext.getVariableResolver(), null);
-		}
-	}
-
-	/**
-	 * Determine whether JSP 2.0 expressions are supposed to be cached
-	 * and return the corresponding cache Map, or <code>null</code> if
-	 * caching is not enabled.
-	 * @param pageContext current JSP PageContext
-	 * @return the cache Map, or <code>null</code> if caching is disabled
-	 */
-	@SuppressWarnings("unchecked")
-	private static Map<ExpressionCacheKey, Expression> getJspExpressionCache(PageContext pageContext) {
-		ServletContext servletContext = pageContext.getServletContext();
-		Map<ExpressionCacheKey, Expression> cacheMap =
-				(Map<ExpressionCacheKey, Expression>) servletContext.getAttribute(EXPRESSION_CACHE_MAP_CONTEXT_ATTR);
-		if (cacheMap == null) {
-			Boolean cacheFlag = (Boolean) servletContext.getAttribute(EXPRESSION_CACHE_FLAG_CONTEXT_ATTR);
-			if (cacheFlag == null) {
-				cacheFlag = Boolean.valueOf(servletContext.getInitParameter(EXPRESSION_CACHE_CONTEXT_PARAM));
-				servletContext.setAttribute(EXPRESSION_CACHE_FLAG_CONTEXT_ATTR, cacheFlag);
-			}
-			if (cacheFlag) {
-				cacheMap = Collections.synchronizedMap(new HashMap<ExpressionCacheKey, Expression>());
-				servletContext.setAttribute(EXPRESSION_CACHE_MAP_CONTEXT_ATTR, cacheMap);
-			}
-		}
-		return cacheMap;
-	}
-
-
-	/**
-	 * Cache key class for JSP 2.0 Expression objects.
-	 */
-	private static class ExpressionCacheKey {
-
-		private final String value;
-		private final Class resultClass;
-		private final int hashCode;
-
-		public ExpressionCacheKey(String value, Class resultClass) {
-			this.value = value;
-			this.resultClass = resultClass;
-			this.hashCode = this.value.hashCode() * 29 + this.resultClass.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof ExpressionCacheKey)) {
-				return false;
-			}
-			ExpressionCacheKey other = (ExpressionCacheKey) obj;
-			return (this.value.equals(other.value) && this.resultClass.equals(other.resultClass));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.hashCode;
-		}
+		return pageContext.getExpressionEvaluator().evaluate(
+				exprValue, resultClass, pageContext.getVariableResolver(), null);
 	}
 
 }
