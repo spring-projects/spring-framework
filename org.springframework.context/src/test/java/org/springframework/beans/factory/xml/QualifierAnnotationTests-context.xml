@@ -45,4 +45,10 @@
 
 	<bean id="testProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean"/>
 
+	<bean id="thetaClient" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$MultiQualifierClient"/>
+
+    <bean id="thetaFactory" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$QualifiedFactoryBean"/>
+
+    <bean id="thetaImpl" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$ThetaImpl"/>
+	
 </beans>

@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
@@ -181,13 +182,20 @@ public final class QualifierAnnotationTests {
 		QualifierAnnotationAutowireCandidateResolver resolver = (QualifierAnnotationAutowireCandidateResolver)
 				context.getDefaultListableBeanFactory().getAutowireCandidateResolver();
 		resolver.addQualifierType(MultipleAttributeQualifier.class);
-		context.registerSingleton("testBean", QualifiedByAttributesTestBean.class);
+		context.registerSingleton("testBean", MultiQualifierClient.class);
 		context.refresh();
-		QualifiedByAttributesTestBean testBean = (QualifiedByAttributesTestBean) context.getBean("testBean");
-		Person moeSenior = testBean.getMoeSenior();
-		Person moeJunior = testBean.getMoeJunior();
-		assertEquals("Moe Sr.", moeSenior.getName());
-		assertEquals("Moe Jr.", moeJunior.getName());
+
+		MultiQualifierClient testBean = (MultiQualifierClient) context.getBean("testBean");
+
+		assertNotNull( testBean.factoryTheta);
+		assertNotNull( testBean.implTheta);
+	}
+
+	@Test
+	public void testInterfaceWithOneQualifiedFactoryAndOneQualifiedBean() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
+		reader.loadBeanDefinitions(CONFIG_LOCATION);
 	}
 
 
@@ -351,6 +359,47 @@ public final class QualifierAnnotationTests {
 		String name();
 
 		int age();
+	}
+
+
+	private static final String FACTORY_QUALIFIER = "FACTORY";
+
+	private static final String IMPL_QUALIFIER = "IMPL";
+
+
+	public static class MultiQualifierClient {
+
+		@Autowired @Qualifier(FACTORY_QUALIFIER)
+		public Theta factoryTheta;
+
+		@Autowired @Qualifier(IMPL_QUALIFIER)
+		public Theta implTheta;
+	}
+
+
+	public interface Theta {
+	}
+
+
+	@Qualifier(IMPL_QUALIFIER)
+	public static class ThetaImpl implements Theta {
+	}
+
+
+	@Qualifier(FACTORY_QUALIFIER)
+	public static class QualifiedFactoryBean implements FactoryBean<Theta> {
+
+		public Theta getObject() {
+			return new Theta() {};
+		}
+
+		public Class<Theta> getObjectType() {
+			return Theta.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
 	}
 
 }
