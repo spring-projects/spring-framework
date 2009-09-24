@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.context.support;
 
-import static org.junit.Assert.*;
-
 import java.io.FileNotFoundException;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -40,9 +41,8 @@ import org.springframework.util.StringUtils;
  * that contains ${..} tokens in its 'location' property requires being tested through an ApplicationContext
  * as opposed to using only a BeanFactory during testing.
  * 
- * @see org.springframework.beans.factory.config.PropertyResourceConfigurerTests;
- * 
  * @author Chris Beams
+ * @see org.springframework.beans.factory.config.PropertyResourceConfigurerTests
  */
 public class PropertyResourceConfigurerIntegrationTests {
 	
@@ -102,8 +102,8 @@ public class PropertyResourceConfigurerIntegrationTests {
 			/* the above hack doesn't work since the exception message is created without
 			   the leading / stripped so the test fails.  Changed 17/11/04. DD */
 			//assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1);		
-			assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1 ||
-			    ex.getMessage().indexOf(userDir + "/test//" + userDir) != -1);
+			assertTrue(ex.getMessage().contains(userDir + "/test/" + userDir) ||
+					ex.getMessage().contains(userDir + "/test//" + userDir));
 		}
 	}
 
@@ -118,12 +118,11 @@ public class PropertyResourceConfigurerIntegrationTests {
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
-			fail("Should have thrown BeanDefinitionStoreException");
+			fail("Should have thrown BeanCreationException");
 		}
-		catch (BeanInitializationException ex) {
+		catch (BeanCreationException ex) {
 			// expected
-			assertTrue(ex.getCause() instanceof FileNotFoundException);
-			assertTrue(ex.getMessage().indexOf("myprop") != -1);
+			assertTrue(ex.getMessage().contains("myprop"));
 		}
 	}
 
