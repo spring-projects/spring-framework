@@ -19,12 +19,15 @@
       <version>3.2.1</version>
       <optional>true</optional>
     </dependency>
+    <!-- can't find hessian 3.2.1 in a public repo -->
+    <!--
     <dependency>
       <groupId>com.caucho</groupId>
       <artifactId>hessian</artifactId>
       <version>3.1.5</version>
       <optional>true</optional>
     </dependency>
+    -->
     <dependency>
       <groupId>javax.el</groupId>
       <artifactId>el-api</artifactId>
