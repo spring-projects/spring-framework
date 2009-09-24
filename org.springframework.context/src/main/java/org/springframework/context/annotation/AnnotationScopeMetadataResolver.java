@@ -24,8 +24,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.util.Assert;
 
 /**
- * A {@link ScopeMetadataResolver} implementation that (by default) checks for
- * the presence of the {@link Scope} annotation on the bean class.
+ * A {@link ScopeMetadataResolver} implementation that by default checks for
+ * the presence of Spring's {@link Scope} annotation on the bean class.
  *
  * <p>The exact type of annotation that is checked for is configurable via the
  * {@link #setScopeAnnotationType(Class)} property.
@@ -70,7 +70,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		Assert.notNull(scopeAnnotationType, "'scopeAnnotationType' must not be null");
 		this.scopeAnnotationType = scopeAnnotationType;
 	}
-	
+
 
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();

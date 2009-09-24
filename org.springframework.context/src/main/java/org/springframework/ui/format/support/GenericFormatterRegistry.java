@@ -245,10 +245,12 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 						if (arg instanceof Class) {
 							return (Class) arg;
 						}
-					} else if (Formatter.class.isAssignableFrom((Class) rawType)) {
+					}
+					else if (Formatter.class.isAssignableFrom((Class) rawType)) {
 						return getFormattedObjectType((Class) rawType);
 					}
-				} else if (Formatter.class.isAssignableFrom((Class) ifc)) {
+				}
+				else if (Formatter.class.isAssignableFrom((Class) ifc)) {
 					return getFormattedObjectType((Class) ifc);
 				}
 			}
