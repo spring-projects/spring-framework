@@ -16,10 +16,6 @@
 
 package org.springframework.context.event;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.GenericTypeResolver;
@@ -48,13 +44,15 @@ public class GenericApplicationListenerAdapter implements SmartApplicationListen
 		this.delegate = delegate;
 	}
 
+
 	@SuppressWarnings("unchecked")
 	public void onApplicationEvent(ApplicationEvent event) {
 		this.delegate.onApplicationEvent(event);
 	}
 
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-		return getGenericEventType(this.delegate.getClass()).isAssignableFrom(eventType);
+		Class typeArg = GenericTypeResolver.resolveTypeArgument(this.delegate.getClass(), ApplicationListener.class);
+		return (typeArg == null || typeArg.isAssignableFrom(eventType));
 	}
 
 	public boolean supportsSourceType(Class<?> sourceType) {
@@ -63,38 +61,6 @@ public class GenericApplicationListenerAdapter implements SmartApplicationListen
 
 	public int getOrder() {
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
-	}
-
-
-	@SuppressWarnings("unchecked")
-	private Class<? extends ApplicationEvent> getGenericEventType(Class<? extends ApplicationListener> currentClass) {
-		Class classToIntrospect = currentClass;
-		while (classToIntrospect != null) {
-			Type[] ifcs = classToIntrospect.getGenericInterfaces();
-			for (Type ifc : ifcs) {
-				if (ifc instanceof ParameterizedType) {
-					ParameterizedType paramIfc = (ParameterizedType) ifc;
-					Type rawType = paramIfc.getRawType();
-					if (ApplicationListener.class.equals(rawType)) {
-						Type arg = paramIfc.getActualTypeArguments()[0];
-						if (arg instanceof TypeVariable) {
-							arg = GenericTypeResolver.resolveTypeVariable((TypeVariable) arg, this.delegate.getClass());
-						}
-						if (arg instanceof Class) {
-							return (Class) arg;
-						}
-					}
-					else if (ApplicationListener.class.isAssignableFrom((Class) rawType)) {
-						return getGenericEventType((Class) rawType);
-					}
-				}
-				else if (ApplicationListener.class.isAssignableFrom((Class) ifc)) {
-					return getGenericEventType((Class) ifc);
-				}
-			}
-			classToIntrospect = classToIntrospect.getSuperclass();
-		}
-		return ApplicationEvent.class;
 	}
 
 }
