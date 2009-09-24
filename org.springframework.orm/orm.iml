@@ -19,6 +19,7 @@
     <orderEntry type="module" module-name="transaction" />
     <orderEntry type="module" module-name="web" />
     <orderEntry type="library" name="AOP Alliance" level="project" />
+    <orderEntry type="library" name="Commons Collections" level="project" />
     <orderEntry type="library" name="Commons Logging" level="project" />
     <orderEntry type="library" name="EasyMock" level="project" />
     <orderEntry type="library" name="JUnit" level="project" />
@@ -121,11 +122,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-1.0.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-1.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-sources-1.0.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-sources-1.1.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
