@@ -35,8 +35,9 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
- * relative URL, by default exposing all model attributes as HTTP query
- * parameters.
+ * relative URL. By default all primitive model attributes (or collections
+ * thereof) are exposed as HTTP query parameters, but this behavior can be changed
+ * by overriding the {@link #isEligibleProperty(String, Object)} method.
  *
  * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
  * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
