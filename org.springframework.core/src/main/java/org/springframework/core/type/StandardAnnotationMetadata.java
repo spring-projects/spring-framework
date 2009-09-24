@@ -128,6 +128,25 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return null;
 	}
 
+	public boolean hasAnnotatedMethods(String annotationType) {
+		Method[] methods = getIntrospectedClass().getDeclaredMethods();
+		for (Method method : methods) {
+			for (Annotation ann : method.getAnnotations()) {
+				if (ann.annotationType().getName().equals(annotationType)) {
+					return true;
+				}
+				else {
+					for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+						if (metaAnn.annotationType().getName().equals(annotationType)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();

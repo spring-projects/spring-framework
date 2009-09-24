@@ -84,6 +84,12 @@ public interface AnnotationMetadata extends ClassMetadata {
 	Map<String, Object> getAnnotationAttributes(String annotationType);
 
 	/**
+	 * Determine whether the underlying class has any methods that are
+	 * annotated (or meta-annotated) with the given annotation type.
+	 */
+	boolean hasAnnotatedMethods(String annotationType);
+
+	/**
 	 * Retrieve the method metadata for all methods that are annotated
 	 * (or meta-annotated) with the given annotation type.
 	 * <p>For any returned method, {@link MethodMetadata#isAnnotated} will
