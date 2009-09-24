@@ -31,10 +31,10 @@ import org.springframework.transaction.SavepointManager;
  * <p>Supports delegating savepoint-related methods to a transaction object
  * that implements the {@link SavepointManager} interface.
  *
- * <p><b>NOTE:</b> This is <i>not</i> intended to be used for other
- * PlatformTransactionManager implementations, in particular not for
- * mock transaction managers. Use {@link SimpleTransactionStatus} or
- * a mock for the plain TransactionStatus interface instead.
+ * <p><b>NOTE:</b> This is <i>not</i> intended for use with other PlatformTransactionManager
+ * implementations, in particular not for mock transaction managers in testing environments.
+ * Use the alternative {@link SimpleTransactionStatus} class or a mock for the plain
+ * {@link org.springframework.transaction.TransactionStatus} interface instead.
  *
  * @author Juergen Hoeller
  * @since 19.01.2004
@@ -77,7 +77,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * for this transaction, if any
 	 */
 	public DefaultTransactionStatus(
-	    Object transaction, boolean newTransaction, boolean newSynchronization,
+			Object transaction, boolean newTransaction, boolean newSynchronization,
 			boolean readOnly, boolean debug, Object suspendedResources) {
 
 		this.transaction = transaction;
@@ -87,6 +87,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 		this.debug = debug;
 		this.suspendedResources = suspendedResources;
 	}
+
 
 	/**
 	 * Return the underlying transaction object.
