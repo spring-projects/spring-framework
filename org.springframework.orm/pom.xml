@@ -11,7 +11,6 @@
     <relativePath>../org.springframework.spring-parent</relativePath>
     <version>3.0.0.BUILD-SNAPSHOT</version>
   </parent>
-
   <dependencies>
     <dependency>
       <groupId>toplink.essentials</groupId>
@@ -43,7 +42,6 @@
       <version>1.1.0</version>
       <optional>true</optional>
     </dependency>
-
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>org.eclipse.persistence.core</artifactId>
@@ -68,34 +66,24 @@
       <version>1.0.1</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>3.3.1.GA</version>
       <optional>true</optional>
     </dependency>
-
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-cglib-repack</artifactId>
       <version>2.1_3</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-nodep</artifactId>
       <version>2.2</version>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
-      <version>1.5.2</version>
-    </dependency>
-
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-annotations</artifactId>
