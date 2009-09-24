@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,18 +38,22 @@ public abstract class SystemPropertyUtils {
 	/** Suffix for system property placeholders: "}" */
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-	private static final PropertyPlaceholderHelper HELPER = new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
+	/** Value separator for system property placeholders: "}" */
+	public static final String VALUE_SEPARATOR = ":";
+
+	private static final PropertyPlaceholderHelper helper =
+			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
+
+
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
-	 *
 	 * @param text the String to resolve
 	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
 	 * @see #PLACEHOLDER_SUFFIX
 	 */
 	public static String resolvePlaceholders(final String text) {
-		return HELPER.replacePlaceholders(text, new PlaceholderResolver() {
-
+		return helper.replacePlaceholders(text, new PlaceholderResolver() {
 			public String resolvePlaceholder(String placeholderName) {
 				String propVal = null;
 				try {

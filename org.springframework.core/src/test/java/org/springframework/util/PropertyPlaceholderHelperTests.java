@@ -18,10 +18,12 @@ package org.springframework.util;
 
 import java.util.Properties;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
 
-/** @author Rob Harrop */
+/**
+ * @author Rob Harrop
+ */
 public class PropertyPlaceholderHelperTests {
 
 	private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}");
@@ -98,7 +100,8 @@ public class PropertyPlaceholderHelperTests {
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
 
-		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", false);
+		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", null, false);
 		assertEquals("foo=bar,bar=${bar}", helper.replacePlaceholders(text, props));
 	}
+
 }

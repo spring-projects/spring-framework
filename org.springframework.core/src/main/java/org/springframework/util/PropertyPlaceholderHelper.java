@@ -16,18 +16,18 @@
 
 package org.springframework.util;
 
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility class for working with Strings that have placeholder values in them. A placeholder takes the form
- * <code>${name}</code>. Using <code>PropertyPlaceholderUtils</code> these placeholders can be substituted for
- * user-supplied values. <p> Values for substitution can be supplied using a {@link Properties} instance or using a
- * {@link PlaceholderResolver}.
+ * <code>${name}</code>. Using <code>PropertyPlaceholderHelper</code> these placeholders can be substituted for
+ * user-supplied values. <p> Values for substitution can be supplied using a {@link Properties} instance or
+ * using a {@link PlaceholderResolver}.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -35,46 +35,49 @@ import org.apache.commons.logging.LogFactory;
  */
 public class PropertyPlaceholderHelper {
 
-	private static final Log LOGGER = LogFactory.getLog(PropertyPlaceholderHelper.class);
+	private static final Log logger = LogFactory.getLog(PropertyPlaceholderHelper.class);
 
 	private final String placeholderPrefix;
 
 	private final String placeholderSuffix;
 
+	private final String valueSeparator;
+
 	private final boolean ignoreUnresolvablePlaceholders;
 
+
 	/**
-	 * Creates a new <code>PropertyPlaceholderHelper</code> that uses the supplied prefix and suffix. Unresolvable
-	 * placeholders are ignored.
-	 *
+	 * Creates a new <code>PropertyPlaceholderHelper</code> that uses the supplied prefix and suffix.
+	 * Unresolvable placeholders are ignored.
 	 * @param placeholderPrefix the prefix that denotes the start of a placeholder.
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder.
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix) {
-		this(placeholderPrefix, placeholderSuffix, true);
+		this(placeholderPrefix, placeholderSuffix, null, true);
 	}
 
 	/**
 	 * Creates a new <code>PropertyPlaceholderHelper</code> that uses the supplied prefix and suffix.
-	 *
 	 * @param placeholderPrefix the prefix that denotes the start of a placeholder.
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder.
 	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should be ignored
 	 * (<code>true</code>) or cause an exception (<code>false</code>).
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
-			boolean ignoreUnresolvablePlaceholders) {
-		Assert.notNull(placeholderPrefix, "Argument 'placeholderPrefix' must not be null.");
-		Assert.notNull(placeholderSuffix, "Argument 'placeholderSuffix' must not be null.");
+			String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
+
+		Assert.notNull(placeholderPrefix, "placeholderPrefix must not be null");
+		Assert.notNull(placeholderSuffix, "placeholderSuffix must not be null");
 		this.placeholderPrefix = placeholderPrefix;
 		this.placeholderSuffix = placeholderSuffix;
+		this.valueSeparator = valueSeparator;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
 
+
 	/**
-	 * Replaces all placeholders of format <code>${name}</code> with the corresponding property from the supplied {@link
-	 * Properties}.
-	 *
+	 * Replaces all placeholders of format <code>${name}</code> with the corresponding property
+	 * from the supplied {@link Properties}.
 	 * @param value the value containing the placeholders to be replaced.
 	 * @param properties the <code>Properties</code> to use for replacement.
 	 * @return the supplied value with placeholders replaced inline.
@@ -82,7 +85,6 @@ public class PropertyPlaceholderHelper {
 	public String replacePlaceholders(String value, final Properties properties) {
 		Assert.notNull(properties, "Argument 'properties' must not be null.");
 		return replacePlaceholders(value, new PlaceholderResolver() {
-
 			public String resolvePlaceholder(String placeholderName) {
 				return properties.getProperty(placeholderName);
 			}
@@ -90,9 +92,8 @@ public class PropertyPlaceholderHelper {
 	}
 
 	/**
-	 * Replaces all placeholders of format <code>${name}</code> with the value returned from the supplied {@link
-	 * PlaceholderResolver}.
-	 *
+	 * Replaces all placeholders of format <code>${name}</code> with the value returned from the supplied
+	 * {@link PlaceholderResolver}.
 	 * @param value the value containing the placeholders to be replaced.
 	 * @param placeholderResolver the <code>PlaceholderResolver</code> to use for replacement.
 	 * @return the supplied value with placeholders replaced inline.
@@ -102,8 +103,9 @@ public class PropertyPlaceholderHelper {
 		return parseStringValue(value, placeholderResolver, new HashSet<String>());
 	}
 
-	protected String parseStringValue(String strVal, PlaceholderResolver placeholderResolver,
-			Set<String> visitedPlaceholders) {
+	protected String parseStringValue(
+			String strVal, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
+
 		StringBuilder buf = new StringBuilder(strVal);
 
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
@@ -120,14 +122,25 @@ public class PropertyPlaceholderHelper {
 
 				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
+				if (propVal == null && this.valueSeparator != null) {
+					int separatorIndex = placeholder.indexOf(this.valueSeparator);
+					if (separatorIndex != -1) {
+						String actualPlaceholder = placeholder.substring(0, separatorIndex);
+						String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
+						propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);
+						if (propVal == null) {
+							propVal = defaultValue;
+						}
+					}
+				}
 				if (propVal != null) {
 					// Recursive invocation, parsing placeholders contained in the
 					// previously resolved placeholder value.
 					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
 
-					if (LOGGER.isTraceEnabled()) {
-						LOGGER.trace("Resolved placeholder '" + placeholder + "'");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Resolved placeholder '" + placeholder + "'");
 					}
 
 					startIndex = buf.indexOf(this.placeholderPrefix, startIndex + propVal.length());
@@ -174,19 +187,19 @@ public class PropertyPlaceholderHelper {
 		return -1;
 	}
 
+
 	/**
 	 * Strategy interface used to resolve replacement values for placeholders contained in Strings.
-	 *
 	 * @see PropertyPlaceholderHelper
 	 */
 	public static interface PlaceholderResolver {
 
 		/**
 		 * Resolves the supplied placeholder name into the replacement value.
-		 *
 		 * @param placeholderName the name of the placeholder to resolve.
 		 * @return the replacement value or <code>null</code> if no replacement is to be made.
 		 */
 		String resolvePlaceholder(String placeholderName);
 	}
+
 }
