@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,14 @@ import javax.servlet.jsp.el.VariableResolver;
 
 import junit.framework.TestCase;
 
-import org.junit.Ignore;
 import org.springframework.mock.web.MockExpressionEvaluator;
 import org.springframework.mock.web.MockPageContext;
-import org.springframework.mock.web.MockServletContext;
 
 /**
  * @author Aled Arendsen
  * @author Juergen Hoeller
  * @since 16.09.2003
  */
-@Ignore // calls to deprecated getVariableResolver() are throwing UOEs
 public class ExpressionEvaluationUtilsTests extends TestCase {
 
 	public void testIsExpressionLanguage() {
@@ -156,7 +153,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		assertTrue(ExpressionEvaluationUtils.evaluateBoolean("test", "true", ctx));
 	}
 
-	public void testEvaluateWithoutCaching() throws Exception {
+	public void testRepeatedEvaluate() throws Exception {
 		PageContext ctx = new CountingMockPageContext();
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
 		ctx.setAttribute("bla", "blie");
@@ -175,29 +172,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		assertEquals(4, eval.evaluateCount);
 	}
 
-	public void testEvaluateWithCaching() throws Exception {
-		PageContext ctx = new CountingMockPageContext();
-		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
-		ctx.setAttribute("bla", "blie");
-		ctx.setAttribute("blo", "blue");
-
-		MockServletContext sc = (MockServletContext) ctx.getServletContext();
-		sc.addInitParameter(ExpressionEvaluationUtils.EXPRESSION_CACHE_CONTEXT_PARAM, "true");
-
-		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
-		assertEquals(1, eval.parseExpressionCount);
-
-		assertEquals("blue", ExpressionEvaluationUtils.evaluate("test", "${blo}", String.class, ctx));
-		assertEquals(2, eval.parseExpressionCount);
-
-		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
-		assertEquals(2, eval.parseExpressionCount);
-
-		assertEquals("blue", ExpressionEvaluationUtils.evaluate("test", "${blo}", String.class, ctx));
-		assertEquals(2, eval.parseExpressionCount);
-	}
-
-	public void testEvaluateWithConcatenationWithoutCaching() throws Exception {
+	public void testEvaluateWithComplexConcatenation() throws Exception {
 		PageContext ctx = new CountingMockPageContext();
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
 		ctx.setAttribute("bla", "blie");
@@ -222,36 +197,6 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		o = ExpressionEvaluationUtils.evaluate("test", expr, Object.class, ctx);
 		assertEquals("blietextblue", o);
 		assertEquals(8, eval.evaluateCount);
-	}
-
-	public void testEvaluateWithConcatenationWithCaching() throws Exception {
-		PageContext ctx = new CountingMockPageContext();
-		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
-		ctx.setAttribute("bla", "blie");
-		ctx.setAttribute("blo", "blue");
-
-		MockServletContext sc = (MockServletContext) ctx.getServletContext();
-		sc.addInitParameter(ExpressionEvaluationUtils.EXPRESSION_CACHE_CONTEXT_PARAM, "true");
-
-		String expr = "text${bla}text${blo}text";
-		Object o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals("textblietextbluetext", o);
-		assertEquals(2, eval.parseExpressionCount);
-
-		expr = "${bla}text${blo}text";
-		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals("blietextbluetext", o);
-		assertEquals(2, eval.parseExpressionCount);
-
-		expr = "${bla}text${blo}";
-		o = ExpressionEvaluationUtils.evaluate("test", expr, String.class, ctx);
-		assertEquals("blietextblue", o);
-		assertEquals(2, eval.parseExpressionCount);
-
-		expr = "${bla}text${blo}";
-		o = ExpressionEvaluationUtils.evaluate("test", expr, Object.class, ctx);
-		assertEquals("blietextblue", o);
-		assertEquals(2, eval.parseExpressionCount);
 	}
 
 
