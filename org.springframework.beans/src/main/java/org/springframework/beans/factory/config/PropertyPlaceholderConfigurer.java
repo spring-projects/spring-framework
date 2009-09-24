@@ -99,6 +99,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	/** Default placeholder suffix: "}" */
 	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
 
+	/** Default value separator: ":" */
+	public static final String DEFAULT_VALUE_SEPARATOR = ":";
+
 
 	/** Never check system properties. */
 	public static final int SYSTEM_PROPERTIES_MODE_NEVER = 0;
@@ -121,6 +124,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	private String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
 
 	private String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
+
+	private String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
@@ -360,7 +365,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		private final PlaceholderResolver resolver;
 
 		public PlaceholderResolvingStringValueResolver(Properties props) {
-			this.helper = new PropertyPlaceholderHelper(placeholderPrefix, placeholderSuffix, ignoreUnresolvablePlaceholders);
+			this.helper = new PropertyPlaceholderHelper(
+					placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
 			this.resolver = new PropertyPlaceholderConfigurerResolver(props);
 		}
 
@@ -369,6 +375,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			return (value.equals(nullValue) ? null : value);
 		}
 	}
+
 
 	private class PropertyPlaceholderConfigurerResolver implements PlaceholderResolver {
 

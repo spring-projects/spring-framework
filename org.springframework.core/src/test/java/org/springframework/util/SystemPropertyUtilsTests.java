@@ -18,33 +18,54 @@ package org.springframework.util;
 
 import java.util.Map;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
 
-/** @author Rob Harrop */
+/**
+ * @author Rob Harrop
+ * @author Juergen Hoeller
+ */
 public class SystemPropertyUtilsTests {
 
 	@Test
 	public void testReplaceFromSystemProperty() {
 		System.setProperty("test.prop", "bar");
-		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
-		assertEquals("bar", resolved);
+		try {
+			String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
+			assertEquals("bar", resolved);
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
+	}
+
+	@Test
+	public void testReplaceWithDefault() {
+		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:foo}");
+		assertEquals("foo", resolved);
 	}
 
 	@Test
 	public void testRecursiveFromSystemProperty() {
 		System.setProperty("test.prop", "foo=${bar}");
 		System.setProperty("bar", "baz");
-		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
-		assertEquals("foo=baz", resolved);
+		try {
+			String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
+			assertEquals("foo=baz", resolved);
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+			System.getProperties().remove("bar");
+		}
 	}
 
 	@Test
 	public void testReplaceFromEnv() {
 		Map<String,String> env = System.getenv();
-		if(env.containsKey("PATH")) {
+		if (env.containsKey("PATH")) {
 			String text = "${PATH}";
 			assertEquals(env.get("PATH"), SystemPropertyUtils.resolvePlaceholders(text));
 		}
 	}
+
 }
