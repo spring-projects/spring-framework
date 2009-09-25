@@ -8,7 +8,7 @@
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.core,org.springframework.core"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.expression,org.springframework.expression"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.instrument,org.springframework.instrument"/>
-<project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.instrument.classloading,org.springframework.instrument.classloading"/>
+<project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.instrument.tomcat,org.springframework.instrument.tomcat"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.jdbc,org.springframework.jdbc"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.jms,org.springframework.jms"/>
 <project reference="0.9.3,https://src.springframework.org/svn/spring-framework/trunk/org.springframework.orm,org.springframework.orm"/>

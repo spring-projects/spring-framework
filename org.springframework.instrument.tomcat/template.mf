@@ -1,5 +1,5 @@
-Bundle-SymbolicName: org.springframework.instrument.classloading
-Bundle-Name: Spring Instrument Classloading
+Bundle-SymbolicName: org.springframework.instrument.tomcat
+Bundle-Name: Spring Instrument Tomcat Weaver
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Template: 
