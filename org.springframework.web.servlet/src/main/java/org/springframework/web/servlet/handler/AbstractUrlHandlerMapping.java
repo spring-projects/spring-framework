@@ -170,6 +170,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				rawHandler = getDefaultHandler();
 			}
 			if (rawHandler != null) {
+				// Bean name or resolved handler?
+				if (rawHandler instanceof String) {
+					String handlerName = (String) rawHandler;
+					rawHandler = getApplicationContext().getBean(handlerName);
+				}
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, null);
 			}
@@ -200,6 +205,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		// Direct match?
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
+			// Bean name or resolved handler?
+			if (handler instanceof String) {
+				String handlerName = (String) handler;
+				handler = getApplicationContext().getBean(handlerName);
+			}
 			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath, null);
 		}
@@ -213,6 +223,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 		if (bestPathMatch != null) {
 			handler = this.handlerMap.get(bestPathMatch);
+			// Bean name or resolved handler?
+			if (handler instanceof String) {
+				String handlerName = (String) handler;
+				handler = getApplicationContext().getBean(handlerName);
+			}
 			validateHandler(handler, request);
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPathMatch, urlPath);
 			Map<String, String> uriTemplateVariables =
@@ -248,11 +263,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	protected Object buildPathExposingHandler(
 			Object rawHandler, String pathWithinMapping, Map<String, String> uriTemplateVariables) {
 
-		// Bean name or resolved handler?
-		if (rawHandler instanceof String) {
-			String handlerName = (String) rawHandler;
-			rawHandler = getApplicationContext().getBean(handlerName);
-		}
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
 		chain.addInterceptor(new PathExposingHandlerInterceptor(pathWithinMapping));
 		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
@@ -353,7 +363,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * as value.
 	 * @see #getDefaultHandler()
 	 */
-	public final Map getHandlerMap() {
+	public final Map<String, Object> getHandlerMap() {
 		return Collections.unmodifiableMap(this.handlerMap);
 	}
 

@@ -30,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -186,11 +187,9 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 */
 	@Override
 	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
-		Class handlerClass = (handler instanceof String ?
-				getApplicationContext().getType((String) handler) : handler.getClass());
-		RequestMapping mapping = this.cachedMappings.get(handlerClass);
+		RequestMapping mapping = this.cachedMappings.get(handler.getClass());
 		if (mapping == null) {
-			mapping = AnnotationUtils.findAnnotation(handlerClass, RequestMapping.class);
+			mapping = AnnotationUtils.findAnnotation(handler.getClass(), RequestMapping.class);
 		}
 		if (mapping != null) {
 			validateMapping(mapping, request);
@@ -217,6 +216,13 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		String[] mappedParams = mapping.params();
 		if (!ServletAnnotationMappingUtils.checkParameters(mappedParams, request)) {
 			throw new UnsatisfiedServletRequestParameterException(mappedParams, request.getParameterMap());
+		}
+
+		String[] mappedHeaders = mapping.headers();
+		if (!ServletAnnotationMappingUtils.checkHeaders(mappedHeaders, request)) {
+			throw new ServletRequestBindingException("Header conditions \"" +
+					StringUtils.arrayToDelimitedString(mappedHeaders, ", ") +
+					"\" not met for actual request");
 		}
 	}
 
