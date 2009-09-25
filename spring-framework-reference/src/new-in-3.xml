@@ -68,8 +68,8 @@
     <sidebar id="new-in-3-intro-work-in-progress">
       <title>Note:</title>
 
-      <para>This document is not yet available. It will
-      be available for the Spring 3.0 final release.</para>
+      <para>This document is not yet available. It will be available for the
+      Spring 3.0 final release.</para>
     </sidebar>
   </section>
 
@@ -186,7 +186,8 @@
       </listitem>
 
       <listitem>
-        <para>General-purpose type conversion system and UI field formatting system</para>
+        <para>General-purpose type conversion system and UI field formatting
+        system</para>
       </listitem>
 
       <listitem>
@@ -384,15 +385,18 @@ public class AppConfig {
     </section>
 
     <section id="new-feature-convert-and-format">
-      <title>General purpose type conversion system and UI field formatting system</title>
-      <para>
-		A general purpose <link linkend="core.convert">type conversion system</link> has been introduced.
-		The system is currently used by SpEL for type coersion, and may also be used by a Spring Container when binding bean property values.
-	  </para>
-	  <para>
-		In addition, a <link linkend="ui.format">ui.format</link> system has been introduced for formatting UI field values.
-		This system provides a simpler and more robust alternative to JavaBean PropertyEditors in UI environments such as Spring MVC.
-	  </para>
+      <title>General purpose type conversion system and UI field formatting
+      system</title>
+
+      <para>A general purpose <link linkend="core.convert">type conversion
+      system</link> has been introduced. The system is currently used by SpEL
+      for type coersion, and may also be used by a Spring Container when
+      binding bean property values.</para>
+
+      <para>In addition, a <link linkend="ui.format">ui.format</link> system
+      has been introduced for formatting UI field values. This system provides
+      a simpler and more robust alternative to JavaBean PropertyEditors in UI
+      environments such as Spring MVC.</para>
     </section>
 
     <section id="new-feature-oxm">
@@ -431,9 +435,9 @@ public class AppConfig {
         the <emphasis>Object to XML mapping</emphasis> functionality mentioned
         earlier.</para>
 
-        <para>Refer to the section on <link linkend="mvc">MVC</link> and
-        <link linkend="rest-resttemplate">the RestTemplate</link>
-        for more information.</para>
+        <para>Refer to the section on <link linkend="mvc">MVC</link> and <link
+        linkend="rest-resttemplate">the RestTemplate</link> for more
+        information.</para>
       </section>
 
       <section>
@@ -452,9 +456,8 @@ public class AppConfig {
     <section id="new-feature-validation">
       <title>Declarative model validation</title>
 
-      <para>Hibernate Validator, JSR 303</para>
-
-      <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
+      <para>JSR 303 support using Hibernate Validator as the
+      implementation.</para>
     </section>
 
     <section id="new-feature-jee-6">
@@ -464,7 +467,7 @@ public class AppConfig {
       use of the new @Async annotation (or EJB 3.1's @Asynchronous
       annotation).</para>
 
-      <para>JSF 2.0, JPA 2.0, etc</para>
+      <para>JSR 303, JSF 2.0, JPA 2.0, etc</para>
 
       <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>
