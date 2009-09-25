@@ -191,6 +191,7 @@
       <entry name="*.dtd" />
       <entry name="*.xsd" />
       <entry name="*.tld" />
+      <entry name="*.vm" />
       <entry name="*.ftl" />
       <entry name="*.sql" />
       <entry name="*.types" />
