@@ -9,6 +9,6 @@
 
 	<task:scheduler id="defaultScheduler"/>
 
-	<task:scheduler id="customScheduler" size="42"/>
+	<task:scheduler id="customScheduler" pool-size="42"/>
 
 </beans>

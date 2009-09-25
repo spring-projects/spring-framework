@@ -53,20 +53,20 @@ public class ExecutorBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 			builder.addPropertyValue("queueCapacity", queueCapacity);
 		}
 		this.configureRejectionPolicy(element, builder);
-		String size = element.getAttribute("size");
-		if (!StringUtils.hasText(size)) {
+		String poolSize = element.getAttribute("pool-size");
+		if (!StringUtils.hasText(poolSize)) {
 			return;
 		}
 		Integer[] range = null;
 		try {
-			int separatorIndex = size.indexOf('-');
+			int separatorIndex = poolSize.indexOf('-');
 			if (separatorIndex != -1) {
 				range = new Integer[2];
-				range[0] = Integer.valueOf(size.substring(0, separatorIndex));
-				range[1] = Integer.valueOf(size.substring(separatorIndex + 1, size.length()));
+				range[0] = Integer.valueOf(poolSize.substring(0, separatorIndex));
+				range[1] = Integer.valueOf(poolSize.substring(separatorIndex + 1, poolSize.length()));
 				if (range[0] > range[1]) {
 					parserContext.getReaderContext().error(
-							"Lower bound of size range must not exceed the upper bound.", element);
+							"Lower bound of pool-size range must not exceed the upper bound.", element);
 				}
 				if (!StringUtils.hasText(queueCapacity)) {
 					// no queue-capacity provided, so unbounded
@@ -84,13 +84,13 @@ public class ExecutorBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 				}
 			}
 			else {
-				Integer value = Integer.valueOf(size);
+				Integer value = Integer.valueOf(poolSize);
 				range = new Integer[] {value, value};
 			}
 		}
 		catch (NumberFormatException ex) {
-			parserContext.getReaderContext().error("Invalid size value [" + size + "]: only " +
-					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported.",
+			parserContext.getReaderContext().error("Invalid pool-size value [" + poolSize + "]: only single " +
+					"maximum integer (e.g. \"5\") and minimum-maximum range (e.g. \"3-5\") are supported.",
 					element, ex);
 		}
 		if (range != null) {
@@ -138,8 +138,8 @@ public class ExecutorBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 	}
 
 	private boolean shouldUseBackport(Element element) {
-		String size = element.getAttribute("size");
-		return StringUtils.hasText(size) && size.startsWith("0")
+		String poolSize = element.getAttribute("pool-size");
+		return StringUtils.hasText(poolSize) && poolSize.startsWith("0")
 				&& JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16;
 	}
 
