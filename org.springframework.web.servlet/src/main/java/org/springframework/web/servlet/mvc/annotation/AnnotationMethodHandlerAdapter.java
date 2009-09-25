@@ -341,7 +341,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		if (handler.getClass().getAnnotation(SessionAttributes.class) != null) {
+		if (AnnotationUtils.findAnnotation(handler.getClass(), SessionAttributes.class) != null) {
 			// Always prevent caching in case of session attribute management.
 			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
 			// Prepare cached set of session attributes names.
@@ -706,9 +706,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				Object returnValue,
 				ExtendedModelMap implicitModel,
 				ServletWebRequest webRequest) throws Exception {
-
-			if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
-				ResponseStatus responseStatus = handlerMethod.getAnnotation(ResponseStatus.class);
+			
+			ResponseStatus responseStatus = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
+			if (responseStatus != null) {
 				HttpServletResponse response = webRequest.getResponse();
 				response.setStatus(responseStatus.value().value());
 				responseArgumentUsed = true;
@@ -725,8 +725,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 			}
 
-			if (returnValue != null && handlerMethod.isAnnotationPresent(ResponseBody.class)) {
-				handleRequestBody(returnValue, webRequest);
+			if (returnValue != null && AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
+				handleResponseBody(returnValue, webRequest);
 			}
 
 			if (returnValue instanceof ModelAndView) {
@@ -740,7 +740,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			else if (returnValue instanceof View) {
 				return new ModelAndView((View) returnValue).addAllObjects(implicitModel);
 			}
-			else if (handlerMethod.isAnnotationPresent(ModelAttribute.class)) {
+			else if (AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class) != null) {
 				addReturnValueAsModelAttribute(handlerMethod, handlerType, returnValue, implicitModel);
 				return new ModelAndView().addAllObjects(implicitModel);
 			}
@@ -771,7 +771,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		@SuppressWarnings("unchecked")
-		private void handleRequestBody(Object returnValue, ServletWebRequest webRequest) throws ServletException, IOException {
+		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest) throws ServletException, IOException {
 			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
 			List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
 			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());

@@ -64,7 +64,17 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertEquals("Invalid view name returned", "BindException", mav.getViewName());
 		assertEquals("Invalid status code returned", 406, response.getStatus());
 	}
-
+	
+	@Test
+	public void inherited()	{
+		IOException ex = new IOException();
+		InheritedController controller = new InheritedController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "GenericError", mav.getViewName());
+		assertEquals("Invalid status code returned", 500, response.getStatus());
+	}
+	
 	@Test(expected = IllegalStateException.class)
 	public void ambiguous() {
 		IllegalArgumentException ex = new IllegalArgumentException();
@@ -86,6 +96,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	private static class SimpleController {
 
 		@ExceptionHandler(IOException.class)
+		@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 		public String handleIOException(IOException ex, HttpServletRequest request) {
 			return ClassUtils.getShortName(ex.getClass());
 		}
@@ -101,6 +112,15 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 
+	}
+
+	@Controller
+	private static class InheritedController extends SimpleController
+	{
+		@Override
+		public String handleIOException(IOException ex, HttpServletRequest request)	{
+			return "GenericError";
+		}
 	}
 
 	@Controller
