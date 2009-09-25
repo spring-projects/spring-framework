@@ -62,7 +62,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="size" type="xsd:string" use="optional">
+			<xsd:attribute name="pool-size" type="xsd:string" use="optional">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The size of the ScheduledExecutorService's thread pool. The default is 1.
@@ -88,7 +88,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="size" type="xsd:string" use="optional">
+			<xsd:attribute name="pool-size" type="xsd:string" use="optional">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The size of the executor's thread pool as either a single value or a range
