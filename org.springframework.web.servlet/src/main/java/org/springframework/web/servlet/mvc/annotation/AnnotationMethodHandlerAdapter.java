@@ -454,7 +454,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 					if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 &&
 							resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
 						match = false;
-					} else {
+					}
+					else {
 						for (RequestMethod requestMethod : mappingInfo.methods) {
 							allowedMethods.add(requestMethod.toString());
 						}						
@@ -786,7 +787,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 							for (MediaType acceptedMediaType : acceptedMediaTypes) {
 								if (supportedMediaType.includes(acceptedMediaType)) {
 									messageConverter.write(returnValue, outputMessage);
-									responseArgumentUsed = true;
+									this.responseArgumentUsed = true;
 									return;
 								}
 							}
@@ -811,8 +812,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		String[] headers = new String[0];
 
-		String bestMatchedPath() {
-			return matchedPaths.isEmpty() ? null : matchedPaths.get(0);
+		public String bestMatchedPath() {
+			return (!this.matchedPaths.isEmpty() ? this.matchedPaths.get(0) : null);
 		}
 
 		public boolean matches(HttpServletRequest request) {

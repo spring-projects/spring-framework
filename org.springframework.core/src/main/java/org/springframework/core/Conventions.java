@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public abstract class Conventions {
 	 */
 	public static String getVariableName(Object value) {
 		Assert.notNull(value, "Value must not be null");
-		Class valueClass = null;
+		Class valueClass;
 		boolean pluralize = false;
 
 		if (value.getClass().isArray()) {
@@ -107,7 +107,7 @@ public abstract class Conventions {
 	 */
 	public static String getVariableNameForParameter(MethodParameter parameter) {
 		Assert.notNull(parameter, "MethodParameter must not be null");
-		Class valueClass = null;
+		Class valueClass;
 		boolean pluralize = false;
 
 		if (parameter.getParameterType().isArray()) {
@@ -173,7 +173,7 @@ public abstract class Conventions {
 			return getVariableName(value);
 		}
 
-		Class valueClass = null;
+		Class valueClass;
 		boolean pluralize = false;
 
 		if (resolvedType.isArray()) {
