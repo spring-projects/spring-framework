@@ -6,8 +6,9 @@ http://www.springsource.org
 Changes in version 3.0.0.RC1 (2009-09-25)
 -----------------------------------------
 
-* upgraded to AspectJ 1.6.5, Groovy 1.6.3, EHCache 1.6.2, JUnit 4.7, and TestNG 5.10
-* introduced early support for JSR-330 "javax.inject" annotations
+* upgraded to CGLIB 2.2, AspectJ 1.6.5, Groovy 1.6.3, EHCache 1.6.2, JUnit 4.7, TestNG 5.10
+* introduced early support for JSR-330 "javax.inject" annotations (for autowiring)
+* introduced early support for JSR-303 Bean Validation (setup and MVC integration)
 * added default editors for "java.util.Currency" and "java.util.TimeZone"
 * refined PathMatchingResourcePatternResolver's treatment of non-readable directories
 * PathMatchingResourcePatternResolver understands VFS resources (i.e. works on JBoss 5.x)
@@ -18,6 +19,7 @@ Changes in version 3.0.0.RC1 (2009-09-25)
 * BeanFactory's default type conversion falls back to String constructor on target type
 * BeanFactory tries to create unknown collection implementation types via default constructor
 * BeanFactory supports ObjectFactory as a dependency type for @Autowired and @Value
+* BeanFactory supports JSR-330 Provider interface as a dependency type for @Inject
 * BeanFactory prefers local primary bean to primary bean in parent factory
 * protected @Autowired method can be overridden with non-annotated method to suppress injection
 * private @Autowired methods with same signature will be called individually across a hierarchy
@@ -28,15 +30,17 @@ Changes in version 3.0.0.RC1 (2009-09-25)
 * changed NamedParameter/SimpleJdbcOperations parameter signatures to accept any Map value type 
 * refined logging in JMS SingleConnectionFactory and DefaultMessageListenerContainer
 * introduced "ui.format" package as an alternative to PropertyEditors for data binding
-* introduced initial JSR-303 Bean Validation support in "validation.beanvalidation" package
-* JSR-303 support for validation of @MVC hander method arguments driven by @Valid annotations
 * @RequestMapping annotation now supported for annotated interfaces (and JDK proxies) as well
 * @RequestParam and co support placeholders and expressions in their defaultValue attributes
 * @Value expressions supported as MVC handler method arguments as well (against request scope)
+* JSR-303 support for validation of @MVC handler method arguments driven by @Valid annotations
 * refined response handling for @ExceptionHandler methods
+* @ResponseStatus usage in handler methods detected by RedirectView
 * all @SessionAttributes get exposed to the model before handler method execution
+* @Event/ResourceMapping uniquely mapped to through event/resource id, even across controllers
 * MultipartRequest is available as a mixin interface on (Native)WebRequest as well
 * removed outdated "cacheJspExpressions" feature from ExpressionEvaluationUtils
+* introduced common ErrorHandler strategy, supported by message listener container
 * Jpa/JdoTransactionManager passes resolved timeout into Jpa/JdoDialect's beginTransaction
 * HibernateJpaDialect applies timeout onto native Hibernate Transaction before begin call
 * Spring's Hibernate support is now compatible with Hibernate 3.5 beta 1 as well
