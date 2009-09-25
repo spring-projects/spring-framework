@@ -731,6 +731,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 			if (returnValue != null && AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
 				handleResponseBody(returnValue, webRequest);
+				return null;
 			}
 
 			if (returnValue instanceof ModelAndView) {
