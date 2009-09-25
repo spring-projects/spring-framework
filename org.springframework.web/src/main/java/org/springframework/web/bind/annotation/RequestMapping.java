@@ -28,11 +28,13 @@ import java.lang.annotation.Target;
  * environments, with the semantics adapting to the concrete environment.
  *
  * <p><b>NOTE:</b> Method-level mappings are only allowed to narrow the mapping
- * expressed at the class level (if any). HTTP paths / portlet modes need to
- * uniquely map onto specific handler beans, with any given path / mode only
- * allowed to be mapped onto one specific handler bean (not spread across
- * multiple handler beans). It is strongly recommended to co-locate related
- * handler methods into the same bean.
+ * expressed at the class level (if any). In the Servlet case, an HTTP path needs to
+ * uniquely map onto one specific handler bean (not spread across multiple handler beans);
+ * the remaining mapping parameters and conditions are effectively assertions only.
+ * In the Portlet case, a portlet mode in combination with specific parameter conditions
+ * needs to uniquely map onto one specific handler bean, with all conditions evaluated
+ * for mapping purposes. It is strongly recommended to co-locate related handler methods
+ * into the same bean and therefore keep the mappings simple and intuitive.
  *
  * <p>Handler methods which are annotated with this annotation are allowed
  * to have very flexible signatures. They may have arguments of the following
@@ -256,7 +258,10 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this header restriction (i.e. the type-level restriction
 	 * gets checked before the handler method is even resolved).
+	 * <p>Maps against HttpServletRequest headers in a Servlet environment,
+	 * and against PortletRequest properties in a Portlet 2.0 environment.
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] headers() default {}; 
+
 }

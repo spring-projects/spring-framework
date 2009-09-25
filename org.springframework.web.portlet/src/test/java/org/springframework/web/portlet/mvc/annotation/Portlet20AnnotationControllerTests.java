@@ -474,6 +474,7 @@ public class Portlet20AnnotationControllerTests {
 				RootBeanDefinition bd = new RootBeanDefinition(MyPortlet20DispatchingController.class);
 				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
 				wac.registerBeanDefinition("controller", bd);
+				wac.registerBeanDefinition("controller2", new RootBeanDefinition(DetailsController.class));
 				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
 				wac.refresh();
 				return wac;
@@ -517,6 +518,88 @@ public class Portlet20AnnotationControllerTests {
 		assertEquals("myLargeView-value3", response.getContentAsString());
 
 		eventRequest = new MockEventRequest(new MockEvent("event2"));
+		eventResponse = new MockEventResponse();
+		portlet.processEvent(eventRequest, eventResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(eventResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value4", response.getContentAsString());
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.NORMAL);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		MockResourceRequest resourceRequest = new MockResourceRequest("resource1");
+		MockResourceResponse resourceResponse = new MockResourceResponse();
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertEquals("myResource", resourceResponse.getContentAsString());
+
+		resourceRequest = new MockResourceRequest("resource2");
+		resourceResponse = new MockResourceResponse();
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertEquals("myDefaultResource", resourceResponse.getContentAsString());
+	}
+
+	@Test
+	public void eventDispatchingController() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
+				wac.setPortletContext(new MockPortletContext());
+				RootBeanDefinition bd = new RootBeanDefinition(MyPortlet20DispatchingController.class);
+				bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+				wac.registerBeanDefinition("controller", bd);
+				wac.registerBeanDefinition("controller2", new RootBeanDefinition(DetailsController.class));
+				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
+				wac.refresh();
+				return wac;
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest();
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView", response.getContentAsString());
+
+		MockActionRequest actionRequest = new MockActionRequest("this");
+		MockActionResponse actionResponse = new MockActionResponse();
+		portlet.processAction(actionRequest, actionResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value", response.getContentAsString());
+
+		actionRequest = new MockActionRequest();
+		actionRequest.addParameter("action", "details");
+		actionResponse = new MockActionResponse();
+		portlet.processAction(actionRequest, actionResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-details", response.getContentAsString());
+
+		MockEventRequest eventRequest = new MockEventRequest(new MockEvent("event1"));
+		eventRequest.setParameters(actionRequest.getParameterMap());
+		MockEventResponse eventResponse = new MockEventResponse();
+		portlet.processEvent(eventRequest, eventResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(eventResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value3", response.getContentAsString());
+
+		eventRequest = new MockEventRequest(new MockEvent("event3"));
+		eventRequest.setParameters(actionRequest.getParameterMap());
 		eventResponse = new MockEventResponse();
 		portlet.processEvent(eventRequest, eventResponse);
 
@@ -916,6 +999,22 @@ public class Portlet20AnnotationControllerTests {
 		public void myResource(Writer writer) throws IOException {
 			writer.write("myResource");
 		}
+	}
+
+
+	@Controller
+	@RequestMapping("VIEW")
+	private static class DetailsController {
+
+		@EventMapping("event3")
+		public void myHandle2(EventResponse response) throws IOException {
+			response.setRenderParameter("test", "value4");
+		}
+
+		@ActionMapping(params = "action=details")
+		public void renderDetails(ActionRequest request, ActionResponse response, Model model) {
+			response.setRenderParameter("test", "details");
+	    }
 
 		@ResourceMapping
 		public void myDefaultResource(Writer writer) throws IOException {
