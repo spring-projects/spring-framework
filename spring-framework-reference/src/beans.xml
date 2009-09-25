@@ -1077,11 +1077,11 @@ public class ExampleBean {
         properties themselves are not set until the bean <emphasis>is actually
         created</emphasis>. Beans that are singleton-scoped and set to be
         pre-instantiated (the default) are created when the container is
-        created. Scopes are defined in <xref
-        linkend="beans-factory-scopes" /> Otherwise, the bean is created only
-        when it is requested. Creation of a bean potentially causes a graph of
-        beans to be created, as the bean's dependencies and its dependencies'
-        dependencies (and so on) are created and assigned.</para>
+        created. Scopes are defined in <xref linkend="beans-factory-scopes" />
+        Otherwise, the bean is created only when it is requested. Creation of
+        a bean potentially causes a graph of beans to be created, as the
+        bean's dependencies and its dependencies' dependencies (and so on) are
+        created and assigned.</para>
 
         <sidebar>
           <title>Circular dependencies</title>
@@ -2232,7 +2232,8 @@ support=support@example.co.uk</programlisting>
 
       <para>If you use Java 5 and thus have access to source-level
       annotations, you may find <literal><xref
-      linkend="metadata-annotations-required" /></literal> to be of interest.</para>
+      linkend="metadata-annotations-required" /></literal> to be of
+      interest.</para>
     </section>
 
     <section id="beans-factory-method-injection">
@@ -2566,13 +2567,16 @@ public class ReplacementComputeValue implements MethodReplacer {
         </tbody>
       </tgroup>
     </table>
+
     <note>
       <title>Thread-scoped beans</title>
-      <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is available, but is
-      not registered by default. For more information, see the documentation for
-      <ulink url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/SimpleThreadScope.html">SimpleThreadScope</ulink>.
+
+      <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is
+      available, but is not registered by default. For more information, see
+      the documentation for <ulink
+      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/SimpleThreadScope.html">SimpleThreadScope</ulink>.
       For instructions on how to register this or any other custom scope, see
-      <xref linkend="beans-factory-scopes-custom-using"/>.</para>
+      <xref linkend="beans-factory-scopes-custom-using" />.</para>
     </note>
 
     <section id="beans-factory-scopes-singleton">
@@ -3111,10 +3115,12 @@ public class ReplacementComputeValue implements MethodReplacer {
         <para>Suppose that you write your custom
         <interfacename>Scope</interfacename> implementation, and then register
         it as below.</para>
+
         <note>
-            <para>The example below uses <literal>SimpleThreadScope</literal>
-            which is included with Spring, but not registered by default. The instructions
-            would be the same for your own custom <literal>Scope</literal> implementations.</para>
+          <para>The example below uses <literal>SimpleThreadScope</literal>
+          which is included with Spring, but not registered by default. The
+          instructions would be the same for your own custom
+          <literal>Scope</literal> implementations.</para>
         </note>
 
         <programlisting language="java">
@@ -3528,8 +3534,7 @@ public final class Boot {
       <interfacename>BeanFactory</interfacename> type if the field,
       constructor, or method in question carries the
       <interfacename>@Autowired</interfacename> annotation. For more
-      information, see <xref
-      linkend="beans-autowired-annotation" />.</para>
+      information, see <xref linkend="beans-autowired-annotation" />.</para>
 
       <para>When an ApplicationContext creates a class that implements the
       <interfacename>org.springframework.beans.factory.BeanNameAware</interfacename>
@@ -3846,12 +3851,12 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         <para>Using callback interfaces or annotations in conjunction with a
         custom <interfacename>BeanPostProcessor</interfacename> implementation
         is a common means of extending the Spring IoC container. An example is
-        shown in <xref linkend="metadata-annotations-required" /> which demonstrates the
-        usage of a custom <interfacename>BeanPostProcessor</interfacename>
-        implementation that ships with the Spring distribution which ensures
-        that JavaBean properties on beans that are marked with an (arbitrary)
-        annotation are actually (configured to be) dependency-injected with a
-        value.</para>
+        shown in <xref linkend="metadata-annotations-required" /> which
+        demonstrates the usage of a custom
+        <interfacename>BeanPostProcessor</interfacename> implementation that
+        ships with the Spring distribution which ensures that JavaBean
+        properties on beans that are marked with an (arbitrary) annotation are
+        actually (configured to be) dependency-injected with a value.</para>
       </section>
     </section>
 
@@ -4178,12 +4183,16 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     adds support for JSR-250 annotations such as
     <interfacename>@Resource</interfacename>,
     <interfacename>@PostConstruct</interfacename>, and
-    <interfacename>@PreDestroy</interfacename>. Use of these annotations also
-    requires that certain <interfacename>BeanPostProcessors</interfacename> be
-    registered within the Spring container. As always, you can register them
-    as individual bean definitions, but they can also be implicitly registered
-    by including the following tag in an XML-based Spring configuration
-    (notice the inclusion of the <literal>context</literal> namespace):</para>
+    <interfacename>@PreDestroy</interfacename>. Spring 3.0 adds support for
+    JSR-330 (Dependency Injection for Java) annotations contained in the
+    javax.inject package such as <classname>@Inject</classname>,
+    <literal>@Qualifier, @Named, and @Provider</literal> if the JSR330 jar is
+    present on the classpath. Use of these annotations also requires that
+    certain <interfacename>BeanPostProcessors</interfacename> be registered
+    within the Spring container. As always, you can register them as
+    individual bean definitions, but they can also be implicitly registered by
+    including the following tag in an XML-based Spring configuration (notice
+    the inclusion of the <literal>context</literal> namespace):</para>
 
     <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -4250,11 +4259,21 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     </section>
 
     <section id="beans-autowired-annotation">
-      <title><interfacename>@Autowired</interfacename></title>
+      <title><interfacename>@Autowired and @Inject</interfacename></title>
 
       <para>As expected, you can apply the
       <interfacename>@Autowired</interfacename> annotation to "traditional"
       setter methods:</para>
+
+      <note>
+        <para>JSR 330's @Inject annotation can be used in place of Spring's
+        <interfacename>@Autowired</interfacename> in the examples below.
+        <interfacename>@Inject</interfacename> does not have a required
+        property unlike Spring's <interfacename>@Autowire</interfacename>
+        annotation which as a required property to indicate if the value being
+        injected is optional. This behavior is enabled automatically if you
+        have the JSR 330 jar on the classpath.</para>
+      </note>
 
       <programlisting language="java">public class SimpleMovieLister {
 
@@ -4423,6 +4442,14 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       matches so that a specific bean is chosen for each argument. In the
       simplest case, this can be a plain descriptive value:</para>
 
+      <note>
+        <para>Note that the JSR 330 <interfacename>@Qualifier</interfacename>
+        annotation can only be applied as a meta-annotation unlike Spring's
+        @Qualifier which takes a string property to discriminate among
+        multiple injection candidates and can be placed on annotation as well
+        as types, fields, methods, contstructors and parameters.</para>
+      </note>
+
       <programlisting language="java">public class MovieRecommender {
 
     @Autowired
@@ -4536,6 +4563,14 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       define an annotation and provide the
       <interfacename>@Qualifier</interfacename> annotation within your
       definition:</para>
+
+      <note>
+        <para>You can use JSR 330's <interfacename>@Qualifier
+        </interfacename>annotation in the manner described below in place of
+        Spring's <interfacename>@Qualifier</interfacename> annotation. This
+        behavior is enabled automatically if you have the JSR 330 jar on the
+        classpath.</para>
+      </note>
 
       <programlisting language="java">@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
@@ -5046,6 +5081,18 @@ public class JpaMovieFinder implements MovieFinder {
         by including the <emphasis>annotation-config</emphasis> attribute with
         a value of false.</para>
       </note>
+
+      <note>
+        <para>In Spring 3.0 RC1 you can use JSR 330's
+        <interfacename>@Named</interfacename> annotation in place of
+        stereotpye annotations and they will be automatically detected during
+        component-scanning. The value of the
+        <interfacename>@Named</interfacename> property will be used as the
+        Bean Name. At this time Spring default for bean scope will be applied
+        when using @Named. This behavior as well as mapping of JSR 330 and
+        JSR299 scopes is planned for Spring 3.0 GA assuming the JSRs are
+        stable at that time.</para>
+      </note>
     </section>
 
     <section id="beans-scanning-filters">
@@ -5129,8 +5176,7 @@ public class JpaMovieFinder implements MovieFinder {
 
               <entry>A custom implementation of the
               <interfacename>org.springframework.core.type
-              .TypeFilter</interfacename>
-              interface.</entry>
+              .TypeFilter</interfacename> interface.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -5194,7 +5240,8 @@ public class FactoryMethodComponent {
       annotations that can be specified are <literal>@Scope</literal>,
       <literal>@Lazy</literal>, and custom qualifier annotations. Autowired
       fields and methods are supported as previously discussed, with
-      additional support for autowiring of <literal>@Bean</literal> methods:</para>
+      additional support for autowiring of <literal>@Bean</literal>
+      methods:</para>
 
       <programlisting language="java">@Component
 public class FactoryMethodComponent {
@@ -5265,12 +5312,20 @@ public class FactoryMethodComponent {
       <interfacename>@Service</interfacename>, and
       <interfacename>@Controller</interfacename>) that contains a
       <literal>name</literal> value will thereby provide that name to the
-      corresponding bean definition. If such an annotation contains no
-      <literal>name</literal> value or for any other detected component (such
-      as those discovered by custom filters), the default bean name generator
-      returns the uncapitalized non-qualified class name. For example, if the
-      following two components were detected, the names would be myMovieLister
-      and movieFinderImpl:</para>
+      corresponding bean definition.</para>
+
+      <note>
+        <para>JSR 330's @Named annotation can be used as a mean to both detect
+        components and to provide them with a name. This behavior is enabled
+        automatically if you have the JSR 330 jar on the classpath.</para>
+      </note>
+
+      <para>If such an annotation contains no <literal>name</literal> value or
+      for any other detected component (such as those discovered by custom
+      filters), the default bean name generator returns the uncapitalized
+      non-qualified class name. For example, if the following two components
+      were detected, the names would be myMovieLister and
+      movieFinderImpl:</para>
 
       <programlisting language="java">@Service("myMovieLister")
 public class SimpleMovieLister {
@@ -5516,7 +5571,8 @@ public class AppConfig {
         <interfacename>@Configuration</interfacename>-annotated class supports
         the regular lifecycle callbacks. Any classes defined with the @Bean
         annotation can use the @PostConstruct and @PreDestroy annotations from
-        JSR-250, see <link linkend="beans-factory-lifecycle-combined-effects">JSR-250
+        JSR-250, see <link
+        linkend="beans-factory-lifecycle-combined-effects">JSR-250
         annotations</link> for further details.</para>
 
         <para>The regular Spring <link
@@ -5528,8 +5584,7 @@ public class AppConfig {
         <para>The standard set of <code>*Aware</code> interfaces such as
         <code><link
         linkend="beans-beanfactory">BeanFactoryAware</link></code>,
-        <code><link
-        linkend="beans-factory-aware">BeanNameAware</link></code>,
+        <code><link linkend="beans-factory-aware">BeanNameAware</link></code>,
         <code><link
         linkend="context-functionality-messagesource">MessageSourceAware</link></code>,
         <code><link
