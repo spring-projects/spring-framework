@@ -124,7 +124,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 		@Override
 		protected boolean useWeakValue(Class key, Map<Comparable, LabeledEnum> value) {
 			if (!ClassUtils.isCacheSafe(key, AbstractCachingLabeledEnumResolver.this.getClass().getClassLoader())) {
-				if (logger.isDebugEnabled()) {
+				if (logger != null && logger.isDebugEnabled()) {
 					logger.debug("Not strongly caching class [" + key.getName() + "] because it is not cache-safe");
 				}
 				return true;

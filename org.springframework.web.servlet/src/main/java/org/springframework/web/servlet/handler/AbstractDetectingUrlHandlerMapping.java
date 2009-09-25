@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 				getApplicationContext().getBeanNamesForType(Object.class));
 
 		// Take any bean name that we can determine URLs for.
-		for (int i = 0; i < beanNames.length; i++) {
-			String beanName = beanNames[i];
+		for (String beanName : beanNames) {
 			String[] urls = determineUrlsForHandler(beanName);
 			if (!ObjectUtils.isEmpty(urls)) {
 				// URL paths found: Let's consider it a handler.
@@ -84,7 +83,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Rejected bean name '" + beanNames[i] + "': no URL paths identified");
+					logger.debug("Rejected bean name '" + beanName + "': no URL paths identified");
 				}
 			}
 		}
