@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Base class for multipart resolvers that use Jakarta Commons FileUpload
- * 1.1 or higher.
+ * 1.2 or above.
  *
  * <p>Provides common configuration properties and parsing functionality
  * for multipart requests, using a Map of Spring CommonsMultipartFile instances
@@ -220,7 +220,7 @@ public abstract class CommonsFileUploadSupport {
 		// Extract multipart files and multipart parameters.
 		for (FileItem fileItem : fileItems) {
 			if (fileItem.isFormField()) {
-				String value = null;
+				String value;
 				if (encoding != null) {
 					try {
 						value = fileItem.getString(encoding);
