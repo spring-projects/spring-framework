@@ -22,9 +22,14 @@
 
 		<all-bundles target="doc" buildpathRef="doc.projects"/>
 
+		<delete>
+		  <fileset dir="${basedir}/../spring-framework-reference" includes="**/*.zip"/>
+		</delete>
+
 		<all-bundles target="package" buildpathRef="doc.projects">
 			<property name="package.output.dir" value="${package.output.dir}"/>
 		</all-bundles>
+
 		<!-- Reference Document END-->
 
 		<copy todir="${package.output.dir}">
