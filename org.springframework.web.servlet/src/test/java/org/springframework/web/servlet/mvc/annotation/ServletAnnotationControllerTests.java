@@ -117,6 +117,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.NestedServletException;
 
 /**
@@ -1029,6 +1030,16 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void responseStatusRedirect() throws ServletException, IOException {
+		initServlet(ResponseStatusRedirectController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(201, response.getStatus());
+	}
+
+	@Test
 	public void mavResolver() throws ServletException, IOException {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -1755,6 +1766,16 @@ public class ServletAnnotationControllerTests {
 		@ResponseStatus(HttpStatus.CREATED)
 		public void handle(Writer writer) throws IOException {
 			writer.write("something");
+		}
+	}
+
+	@Controller
+	public static class ResponseStatusRedirectController {
+
+		@RequestMapping("/something")
+		@ResponseStatus(HttpStatus.CREATED)
+		public RedirectView handle(Writer writer) throws IOException {
+			return new RedirectView("somelocation.html", false, false);
 		}
 	}
 
