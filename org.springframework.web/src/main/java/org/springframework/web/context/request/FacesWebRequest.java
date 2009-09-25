@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,19 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * {@link WebRequest} adapter for a JSF {@link javax.faces.context.FacesContext}.
@@ -34,6 +39,9 @@ import org.springframework.util.StringUtils;
  */
 public class FacesWebRequest extends FacesRequestAttributes implements NativeWebRequest {
 
+	private MultipartRequest multipartRequest;
+
+
 	/**
 	 * Create a new FacesWebRequest adapter for the given FacesContext.
 	 * @param facesContext the current FacesContext
@@ -41,6 +49,9 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 	 */
 	public FacesWebRequest(FacesContext facesContext) {
 		super(facesContext);
+		if (facesContext.getExternalContext().getRequest() instanceof MultipartRequest) {
+			this.multipartRequest = (MultipartRequest) facesContext.getExternalContext().getRequest();
+		}
 	}
 
 
@@ -105,7 +116,6 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 		return false;
 	}
 
-
 	public String getDescription(boolean includeClientInfo) {
 		ExternalContext externalContext = getExternalContext();
 		StringBuilder sb = new StringBuilder();
@@ -122,6 +132,44 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 		}
 		return sb.toString();
 	}
+
+
+	@SuppressWarnings("unchecked")
+	public Iterator<String> getFileNames() {
+		if (this.multipartRequest == null) {
+			return (Iterator<String>) Collections.EMPTY_SET.iterator();
+		}
+		return this.multipartRequest.getFileNames();
+	}
+
+	public MultipartFile getFile(String name) {
+		if (this.multipartRequest == null) {
+			return null;
+		}
+		return this.multipartRequest.getFile(name);
+	}
+
+	public List<MultipartFile> getFiles(String name) {
+		if (this.multipartRequest == null) {
+			return null;
+		}
+		return this.multipartRequest.getFiles(name);
+	}
+
+	public Map<String, MultipartFile> getFileMap() {
+		if (this.multipartRequest == null) {
+			return Collections.emptyMap();
+		}
+		return this.multipartRequest.getFileMap();
+	}
+
+	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
+		if (this.multipartRequest == null) {
+			return new LinkedMultiValueMap<String, MultipartFile>();
+		}
+		return this.multipartRequest.getMultiFileMap();
+	}
+
 
 	@Override
 	public String toString() {

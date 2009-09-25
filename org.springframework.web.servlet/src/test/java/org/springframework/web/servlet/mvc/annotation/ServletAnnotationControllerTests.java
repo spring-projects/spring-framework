@@ -102,6 +102,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -117,7 +118,6 @@ import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.NestedServletException;
 
 /**
@@ -291,6 +291,39 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertTrue(EmptyParameterListHandlerMethodController.called);
 		assertEquals("", response.getContentAsString());
+	}
+
+	@Test
+	public void sessionAttributeExposure() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySessionAttributesController.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(ModelExposingViewResolver.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPage");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		HttpSession session = request.getSession();
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+
+		request = new MockHttpServletRequest("POST", "/myPage");
+		request.setSession(session);
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
 	}
 
 	@Test
@@ -1030,16 +1063,6 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
-	public void responseStatusRedirect() throws ServletException, IOException {
-		initServlet(ResponseStatusRedirectController.class);
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
-		assertEquals(201, response.getStatus());
-	}
-
-	@Test
 	public void mavResolver() throws ServletException, IOException {
 		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -1245,6 +1268,25 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/nonEmptyParameterListHandler")
 		public void nonEmptyParameterListHandler(HttpServletResponse response) {
+		}
+	}
+
+	@Controller
+	@RequestMapping("/myPage")
+	@SessionAttributes({"object1", "object2"})
+	public static class MySessionAttributesController {
+
+		@RequestMapping(method = RequestMethod.GET)
+		public String get(Model model) {
+			model.addAttribute("object1", new Object());
+			model.addAttribute("object2", new Object());
+			return "myPage";
+		}
+
+		@RequestMapping(method = RequestMethod.POST)
+		public String post(@ModelAttribute("object1") Object object1) {
+			//do something with object1
+			return "myPage";
 		}
 	}
 
@@ -1592,6 +1634,20 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	private static class ModelExposingViewResolver implements ViewResolver {
+
+		public View resolveViewName(String viewName, Locale locale) throws Exception {
+			return new View() {
+				public String getContentType() {
+					return null;
+				}
+				public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+					request.getSession().setAttribute("model", model);
+				}
+			};
+		}
+	}
+
 	public static class ParentController {
 
 		@RequestMapping(method = RequestMethod.GET)
@@ -1768,17 +1824,6 @@ public class ServletAnnotationControllerTests {
 			writer.write("something");
 		}
 	}
-
-	@Controller
-	public static class ResponseStatusRedirectController {
-
-		@RequestMapping("/something")
-		@ResponseStatus(HttpStatus.CREATED)
-		public RedirectView handle(Writer writer) throws IOException {
-			return new RedirectView("somelocation.html", false, false);
-		}
-	}
-
 
 	@Controller
 	public static class ModelAndViewResolverController {

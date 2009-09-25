@@ -66,7 +66,6 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * Support class for invoking an annotated handler method. Operates on the introspection results of a
@@ -127,21 +126,32 @@ public class HandlerMethodInvoker {
 		Method handlerMethodToInvoke = BridgeMethodResolver.findBridgedMethod(handlerMethod);
 		try {
 			boolean debug = logger.isDebugEnabled();
+			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
+				Object attrValue = this.sessionAttributeStore.retrieveAttribute(webRequest, attrName);
+				if (attrValue != null) {
+					implicitModel.addAttribute(attrName, attrValue);
+				}
+			}
 			for (Method attributeMethod : this.methodResolver.getModelAttributeMethods()) {
 				Method attributeMethodToInvoke = BridgeMethodResolver.findBridgedMethod(attributeMethod);
 				Object[] args = resolveHandlerArguments(attributeMethodToInvoke, handler, webRequest, implicitModel);
 				if (debug) {
 					logger.debug("Invoking model attribute method: " + attributeMethodToInvoke);
 				}
-				Object attrValue = doInvokeMethod(attributeMethodToInvoke, handler, args);
 				String attrName = AnnotationUtils.findAnnotation(attributeMethodToInvoke, ModelAttribute.class).value();
+				if (!"".equals(attrName) && implicitModel.containsAttribute(attrName)) {
+					continue;
+				}
+				Object attrValue = doInvokeMethod(attributeMethodToInvoke, handler, args);
 				if ("".equals(attrName)) {
 					Class resolvedType = GenericTypeResolver.resolveReturnType(
 							attributeMethodToInvoke, handler.getClass());
 					attrName = Conventions.getVariableNameForReturnType(
 							attributeMethodToInvoke, resolvedType, attrValue);
 				}
-				implicitModel.addAttribute(attrName, attrValue);
+				if (!implicitModel.containsAttribute(attrName)) {
+					implicitModel.addAttribute(attrName, attrValue);
+				}
 			}
 			Object[] args = resolveHandlerArguments(handlerMethodToInvoke, handler, webRequest, implicitModel);
 			if (debug) {
@@ -394,14 +404,14 @@ public class HandlerMethodInvoker {
 		if (paramName.length() == 0) {
 			paramName = getRequiredParameterName(methodParam);
 		}
-		Object paramValue = null;
-		if (webRequest.getNativeRequest() instanceof MultipartRequest) {
-			paramValue = ((MultipartRequest) webRequest.getNativeRequest()).getFile(paramName);
-		}
+		Object paramValue = webRequest.getFile(paramName);
 		if (paramValue == null) {
 			String[] paramValues = webRequest.getParameterValues(paramName);
-			if (paramValues != null) {
+			if (paramValues != null && !paramType.isArray()) {
 				paramValue = (paramValues.length == 1 ? paramValues[0] : paramValues);
+			}
+			else {
+				paramValue = paramValues;
 			}
 		}
 		if (paramValue == null) {

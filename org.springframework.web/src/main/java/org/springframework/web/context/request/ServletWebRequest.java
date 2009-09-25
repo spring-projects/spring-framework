@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -25,8 +27,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * {@link WebRequest} adapter for an {@link javax.servlet.http.HttpServletRequest}.
@@ -41,6 +47,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
 
 
+	private MultipartRequest multipartRequest;
+
 	private HttpServletResponse response;
 
 	private boolean notModified = false;
@@ -52,6 +60,9 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 */
 	public ServletWebRequest(HttpServletRequest request) {
 		super(request);
+		if (request instanceof MultipartRequest) {
+			this.multipartRequest = (MultipartRequest) request;
+		}
 	}
 
 	/**
@@ -60,7 +71,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 * @param response current HTTP response (for automatic last-modified handling)
 	 */
 	public ServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		super(request);
+		this(request);
 		this.response = response;
 	}
 
@@ -133,7 +144,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getRequest().isSecure();
 	}
 
-
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp >= 0 && !this.notModified &&
 				(this.response == null || !this.response.containsHeader(HEADER_LAST_MODIFIED))) {
@@ -155,7 +165,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return this.notModified;
 	}
 
-
 	public String getDescription(boolean includeClientInfo) {
 		HttpServletRequest request = getRequest();
 		StringBuilder sb = new StringBuilder();
@@ -176,6 +185,44 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		}
 		return sb.toString();
 	}
+
+
+	@SuppressWarnings("unchecked")
+	public Iterator<String> getFileNames() {
+		if (this.multipartRequest == null) {
+			return (Iterator<String>) Collections.EMPTY_SET.iterator();
+		}
+		return this.multipartRequest.getFileNames();
+	}
+
+	public MultipartFile getFile(String name) {
+		if (this.multipartRequest == null) {
+			return null;
+		}
+		return this.multipartRequest.getFile(name);
+	}
+
+	public List<MultipartFile> getFiles(String name) {
+		if (this.multipartRequest == null) {
+			return null;
+		}
+		return this.multipartRequest.getFiles(name);
+	}
+
+	public Map<String, MultipartFile> getFileMap() {
+		if (this.multipartRequest == null) {
+			return Collections.emptyMap();
+		}
+		return this.multipartRequest.getFileMap();
+	}
+
+	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
+		if (this.multipartRequest == null) {
+			return new LinkedMultiValueMap<String, MultipartFile>();
+		}
+		return this.multipartRequest.getMultiFileMap();
+	}
+
 
 	@Override
 	public String toString() {
