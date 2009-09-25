@@ -89,12 +89,7 @@
 	</exclusion>
       </exclusions>
     </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-      <scope>compile</scope>
-    </dependency>
+    <!-- common logging dependency is in spring-core -->
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
@@ -269,6 +264,12 @@
       <version>3.3.1.GA</version>
       <scope>test</scope>
       <optional>true</optional>
+      <exclusions>
+	<exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>

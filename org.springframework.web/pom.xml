@@ -19,15 +19,6 @@
       <version>3.2.1</version>
       <optional>true</optional>
     </dependency>
-    <!-- can't find hessian 3.2.1 in a public repo -->
-    <!--
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>hessian</artifactId>
-      <version>3.1.5</version>
-      <optional>true</optional>
-    </dependency>
-    -->
     <dependency>
       <groupId>javax.el</groupId>
       <artifactId>el-api</artifactId>
@@ -100,12 +91,7 @@
       <version>3.1</version>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-      <scope>compile</scope>
-    </dependency>
+    <!-- common logging dependency is in spring-core -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
