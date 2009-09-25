@@ -37,7 +37,6 @@
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="optional->compile"/>
-		<dependency org="org.springframework" name="org.springframework.instrument.classloading" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.jdbc" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.orm" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="optional->compile"/>

@@ -3,7 +3,7 @@
 
 	<path id="bundles">
 		<pathelement location="../org.springframework.instrument"/>
-		<pathelement location="../org.springframework.instrument.classloading"/>
+		<pathelement location="../org.springframework.instrument.tomcat"/>
 		<pathelement location="../org.springframework.asm"/>
 		<pathelement location="../org.springframework.core"/>
 		<pathelement location="../org.springframework.expression"/>

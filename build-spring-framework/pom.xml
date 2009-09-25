@@ -56,7 +56,7 @@
   <modules>
     <module>../org.springframework.spring-parent</module>
     <module>../org.springframework.instrument</module>
-    <module>../org.springframework.instrument.classloading</module>
+    <module>../org.springframework.instrument.tomcat</module>
     <module>../org.springframework.asm</module>
     <module>../org.springframework.core</module>
     <module>../org.springframework.expression</module>
