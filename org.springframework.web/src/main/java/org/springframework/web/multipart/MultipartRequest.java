@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.multipart;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.util.MultiValueMap;
 
@@ -56,6 +56,7 @@ public interface MultipartRequest {
 	 * or an empty list if it does not exist.
 	 * @param name a String specifying the parameter name of the multipart file
 	 * @return the uploaded content in the form of a {@link MultipartFile} list
+	 * @since 3.0
 	 */
 	List<MultipartFile> getFiles(String name);
 
@@ -72,8 +73,8 @@ public interface MultipartRequest {
 	 * @return a map containing the parameter names as keys, and a list of
 	 * {@link MultipartFile} objects as values
 	 * @see MultipartFile
+	 * @since 3.0
 	 */
 	MultiValueMap<String, MultipartFile> getMultiFileMap();
-
 
 }
