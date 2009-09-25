@@ -3,20 +3,26 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.RC1 (2009-09-21)
+Changes in version 3.0.0.RC1 (2009-09-25)
 -----------------------------------------
 
 * upgraded to AspectJ 1.6.5, Groovy 1.6.3, EHCache 1.6.2, JUnit 4.7, and TestNG 5.10
 * introduced early support for JSR-330 "javax.inject" annotations
 * added default editors for "java.util.Currency" and "java.util.TimeZone"
 * refined PathMatchingResourcePatternResolver's treatment of non-readable directories
+* PathMatchingResourcePatternResolver understands VFS resources (i.e. works on JBoss 5.x)
 * revised AccessControlContext access from BeanFactory
+* AbstractBeanDefinitionParser can deal with null return value as well
+* PropertyOverrideConfigurer's "ignoreInvalidKeys" ignores invalid property names as well
+* PropertyPlaceholderConfigurer supports "${myKey:myDefaultValue}" defaulting syntax
 * BeanFactory's default type conversion falls back to String constructor on target type
 * BeanFactory tries to create unknown collection implementation types via default constructor
 * BeanFactory supports ObjectFactory as a dependency type for @Autowired and @Value
 * BeanFactory prefers local primary bean to primary bean in parent factory
 * protected @Autowired method can be overridden with non-annotated method to suppress injection
-* private @Autowired methods with same signature will be called individually across a hierarchy 
+* private @Autowired methods with same signature will be called individually across a hierarchy
+* @PostConstruct processed top-down (base class first); @PreDestroy bottom-up (subclass first)
+* ConfigurationClassPostProcessor detect @Bean methods on registered plain bean classes as well
 * support for default "conversionService" bean in an ApplicationContext
 * MBeanServerFactoryBean returns JDK 1.5 platform MBeanServer for agent id "" (empty String)
 * changed NamedParameter/SimpleJdbcOperations parameter signatures to accept any Map value type 
@@ -28,6 +34,9 @@ Changes in version 3.0.0.RC1 (2009-09-21)
 * @RequestParam and co support placeholders and expressions in their defaultValue attributes
 * @Value expressions supported as MVC handler method arguments as well (against request scope)
 * refined response handling for @ExceptionHandler methods
+* all @SessionAttributes get exposed to the model before handler method execution
+* MultipartRequest is available as a mixin interface on (Native)WebRequest as well
+* removed outdated "cacheJspExpressions" feature from ExpressionEvaluationUtils
 * Jpa/JdoTransactionManager passes resolved timeout into Jpa/JdoDialect's beginTransaction
 * HibernateJpaDialect applies timeout onto native Hibernate Transaction before begin call
 * Spring's Hibernate support is now compatible with Hibernate 3.5 beta 1 as well
