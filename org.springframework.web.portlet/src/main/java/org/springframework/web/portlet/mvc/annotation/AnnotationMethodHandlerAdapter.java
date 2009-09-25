@@ -385,13 +385,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.value(), renderMapping.params());
 			}
 			if (resourceMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), resourceMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), new String[0]);
 			}
 			if (eventMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.EVENT_PHASE, eventMapping.value(), eventMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.EVENT_PHASE, eventMapping.value(), new String[0]);
 			}
 			if (requestMapping != null) {
-				mappingInfo.initStandardMapping(requestMapping.value(), requestMapping.method(), requestMapping.params());
+				mappingInfo.initStandardMapping(requestMapping.value(), requestMapping.method(),
+						requestMapping.params(), requestMapping.headers());
 				if (mappingInfo.phase == null) {
 					mappingInfo.phase = determineDefaultPhase(method);
 				}
@@ -466,19 +467,21 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 
-	private static class RequestMappingInfo  {
+	private static class RequestMappingInfo {
 
-		public Set<PortletMode> modes = new HashSet<PortletMode>();
+		public final Set<PortletMode> modes = new HashSet<PortletMode>();
 
 		public String phase;
 
 		public String value;
 
-		public Set<String> methods = new HashSet<String>();
+		public final Set<String> methods = new HashSet<String>();
 
 		public String[] params = new String[0];
 
-		public void initStandardMapping(String[] modes, RequestMethod[] methods, String[] params) {
+		public String[] headers = new String[0];
+
+		public void initStandardMapping(String[] modes, RequestMethod[] methods, String[] params, String[] headers) {
 			for (String mode : modes) {
 				this.modes.add(new PortletMode(mode));
 			}
@@ -486,6 +489,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				this.methods.add(method.name());
 			}
 			this.params = StringUtils.mergeStringArrays(this.params, params);
+			this.headers = StringUtils.mergeStringArrays(this.headers, headers);
 		}
 
 		public void initPhaseMapping(String phase, String value, String[] params) {
@@ -527,7 +531,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 			}
 			return PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
-					PortletAnnotationMappingUtils.checkParameters(this.params, request);
+					PortletAnnotationMappingUtils.checkParameters(this.params, request) &&
+					PortletAnnotationMappingUtils.checkHeaders(this.headers, request);
 		}
 
 		public boolean isBetterMatchThan(RequestMappingInfo other) {
@@ -545,7 +550,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 					ObjectUtils.nullSafeEquals(this.phase, other.phase) &&
 					ObjectUtils.nullSafeEquals(this.value, other.value) &&
 					this.methods.equals(other.methods) &&
-					Arrays.equals(this.params, other.params));
+					Arrays.equals(this.params, other.params) &&
+					Arrays.equals(this.headers, other.headers));
 		}
 
 		@Override

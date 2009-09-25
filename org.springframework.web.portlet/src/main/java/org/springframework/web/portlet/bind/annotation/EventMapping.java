@@ -34,30 +34,19 @@ import org.springframework.web.bind.annotation.Mapping;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Mapping
+@Mapping()
 public @interface EventMapping {
 
 	/**
 	 * The name of the event to be handled.
+	 * This name uniquely identifies an event within a portlet mode.
 	 * <p>Typically the local name of the event, but fully qualified names
 	 * with a "{...}" namespace part will be mapped correctly as well.
-	 * <p>If not specified, the render method will be invoked for any
+	 * <p>If not specified, the handler method will be invoked for any
 	 * event request within its general mapping.
 	 * @see javax.portlet.EventRequest#getEvent()
 	 * @see javax.portlet.Event#getName()
 	 */
-	String value();
-
-	/**
-	 * The parameters of the mapped request, narrowing the primary mapping.
-	 * <p>Same format for any environment: a sequence of "myParam=myValue" style
-	 * expressions, with a request only mapped if each such parameter is found
-	 * to have the given value. "myParam" style expressions are also supported,
-	 * with such parameters having to be present in the request (allowed to have
-	 * any value). Finally, "!myParam" style expressions indicate that the
-	 * specified parameter is <i>not</i> supposed to be present in the request.
-	 * @see org.springframework.web.bind.annotation.RequestMapping#params()
-	 */
-	String[] params() default {};
+	String value() default "";
 
 }

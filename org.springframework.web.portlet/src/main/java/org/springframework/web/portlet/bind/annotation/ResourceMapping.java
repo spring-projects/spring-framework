@@ -34,27 +34,16 @@ import org.springframework.web.bind.annotation.Mapping;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Mapping
+@Mapping()
 public @interface ResourceMapping {
 
 	/**
 	 * The id of the resource to be handled.
-	 * <p>If not specified, the render method will be invoked for any
+	 * This id uniquely identifies a resource within a portlet mode.
+	 * <p>If not specified, the handler method will be invoked for any
 	 * resource request within its general mapping.
 	 * @see javax.portlet.ResourceRequest#getResourceID()
 	 */
 	String value() default "";
-
-	/**
-	 * The parameters of the mapped request, narrowing the primary mapping.
-	 * <p>Same format for any environment: a sequence of "myParam=myValue" style
-	 * expressions, with a request only mapped if each such parameter is found
-	 * to have the given value. "myParam" style expressions are also supported,
-	 * with such parameters having to be present in the request (allowed to have
-	 * any value). Finally, "!myParam" style expressions indicate that the
-	 * specified parameter is <i>not</i> supposed to be present in the request.
-	 * @see org.springframework.web.bind.annotation.RequestMapping#params()
-	 */
-	String[] params() default {};
 
 }
