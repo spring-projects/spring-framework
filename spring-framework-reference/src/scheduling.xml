@@ -397,11 +397,11 @@ public class TaskExecutorExample {
 			<para>The following element will create a
 			<classname>ThreadPoolTaskScheduler</classname> instance with the
 			specified thread pool size.</para>
-			<programlisting language="xml"><![CDATA[<task:scheduler id="scheduler" size="10"/>]]></programlisting>
+			<programlisting language="xml"><![CDATA[<task:scheduler id="scheduler" pool-size="10"/>]]></programlisting>
 
-			<para>The value provided for the "id" attribute will be used as the
+			<para>The value provided for the 'id' attribute will be used as the
 			prefix for thread names within the pool. The 'scheduler' element is
-			relatively straightforward. If you do not provide a 'size' attribute,
+			relatively straightforward. If you do not provide a 'pool-size' attribute,
 			the default thread pool will only have a single thread. There are no
 			other configuration options for the scheduler.</para>
 		</section>
@@ -410,10 +410,10 @@ public class TaskExecutorExample {
 			<title>The 'executor' element</title>
 			<para>The following will create a
 			<classname>ThreadPoolTaskExecutor</classname> instance:
-			<programlisting language="xml"><![CDATA[<task:executor id="executor" size="10"/>]]></programlisting>
+			<programlisting language="xml"><![CDATA[<task:executor id="executor" pool-size="10"/>]]></programlisting>
 			</para>
 
-			<para>As with the scheduler above, the value provided for the "id"
+			<para>As with the scheduler above, the value provided for the 'id'
 			attribute will be used as the prefix for thread names within the pool.
 			As far as the pool size is concerned, the 'executor' element supports
 			more configuration options than the 'scheduler' element. For one thing,
@@ -422,10 +422,10 @@ public class TaskExecutorExample {
 			thread pool may have different values for the <emphasis>core</emphasis>
 			and the <emphasis>max</emphasis> size. If a single value is provided
 			then the executor will have a fixed-size thread pool (the core and max
-			sizes are the same). However, the 'executor' element's 'size' attribute
-			also accepts a range in the form of "m-n".
+			sizes are the same). However, the 'executor' element's 'pool-size' attribute
+			also accepts a range in the form of "min-max".
 			<programlisting language="xml"><![CDATA[<task:executor id="executorWithPoolSizeRange"
-	               size="5-25"
+	               pool-size="5-25"
 	               queue-capacity="100"/>]]></programlisting>
 			</para>
 
@@ -451,8 +451,8 @@ public class TaskExecutorExample {
 			is unbounded, then the max size has no effect at all. Since the
 			executor will always try the queue before creating a new thread beyond
 			the core size, a queue must have a finite capacity for the thread pool
-			to grow beyond the core size (this is why a "fixed-size" pool is the
-			only sensible case when using an unbounded queue).</para>
+			to grow beyond the core size (this is why a <emphasis>fixed size</emphasis>
+			pool is the only sensible case when using an unbounded queue).</para>
 
 			<para>In a moment, we will review the effects of the keep-alive setting
 			which adds yet another factor to consider when providing a pool size
@@ -479,7 +479,7 @@ public class TaskExecutorExample {
 			enumeration of values available for the 'rejection-policy' attribute on
 			the 'executor' element.</para>
 			<programlisting language="xml"><![CDATA[<task:executor id="executorWithCallerRunsPolicy"
-               size="5-25"
+               pool-size="5-25"
                queue-capacity="100"
                rejection-policy="CALLER_RUNS"/>]]></programlisting>
 		</section>
@@ -499,7 +499,7 @@ public class TaskExecutorExample {
     <task:scheduled ref="someObject" method="someMethod" fixed-delay="5000"/>
 <task:scheduled-tasks/>
 
-<task:scheduler id="myScheduler" size="10"/>]]></programlisting>
+<task:scheduler id="myScheduler" pool-size="10"/>]]></programlisting>
 
 			<para>As you can see, the scheduler is referenced by the outer element,
 			and each individual task includes the configuration of its trigger
@@ -512,7 +512,7 @@ public class TaskExecutorExample {
     <task:scheduled ref="anotherObject" method="anotherMethod" cron="*/5 * * * * MON-FRI"/>
 <task:scheduled-tasks/>
 
-<task:scheduler id="myScheduler" size="10"/>]]></programlisting>
+<task:scheduler id="myScheduler" pool-size="10"/>]]></programlisting>
 		</section>
 	</section>
 
@@ -599,9 +599,9 @@ Future<String> returnSomething(int i) {
 			your configuration.</para>
 			<programlisting language="xml"><![CDATA[<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
 
-<task:executor id="myExecutor" size="5"/>
+<task:executor id="myExecutor" pool-size="5"/>
 
-<task:scheduler id="myScheduler" size="10"/>}]]></programlisting>
+<task:scheduler id="myScheduler" pool-size="10"/>}]]></programlisting>
 
 			<para>Notice that an executor reference is provided for handling
 			those tasks that correspond to methods with the @Async annotation,
