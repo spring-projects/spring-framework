@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.web.portlet.context;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.portlet.PortletRequest;
@@ -25,9 +27,13 @@ import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * {@link org.springframework.web.context.request.WebRequest} adapter
@@ -38,6 +44,8 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public class PortletWebRequest extends PortletRequestAttributes implements NativeWebRequest {
 
+	private MultipartRequest multipartRequest;
+
 	private PortletResponse response;
 
 
@@ -47,6 +55,9 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	 */
 	public PortletWebRequest(PortletRequest request) {
 		super(request);
+		if (request instanceof MultipartRequest) {
+			this.multipartRequest = (MultipartRequest) request;
+		}
 	}
 
 	/**
@@ -55,7 +66,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	 * @param response current portlet response
 	 */
 	public PortletWebRequest(PortletRequest request, PortletResponse response) {
-		super(request);
+		this(request);
 		this.response = response;
 	}
 
@@ -133,7 +144,6 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return false;
 	}
 
-
 	public String getDescription(boolean includeClientInfo) {
 		PortletRequest request = getRequest();
 		StringBuilder result = new StringBuilder();
@@ -150,6 +160,44 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		}
 		return result.toString();
 	}
+
+
+	@SuppressWarnings("unchecked")
+	public Iterator<String> getFileNames() {
+		if (this.multipartRequest == null) {
+			return (Iterator<String>) Collections.EMPTY_SET.iterator();
+		}
+		return this.multipartRequest.getFileNames();
+	}
+
+	public MultipartFile getFile(String name) {
+		if (this.multipartRequest == null) {
+			return null;
+		}
+		return this.multipartRequest.getFile(name);
+	}
+
+	public List<MultipartFile> getFiles(String name) {
+		if (this.multipartRequest == null) {
+			return null;
+		}
+		return this.multipartRequest.getFiles(name);
+	}
+
+	public Map<String, MultipartFile> getFileMap() {
+		if (this.multipartRequest == null) {
+			return Collections.emptyMap();
+		}
+		return this.multipartRequest.getFileMap();
+	}
+
+	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
+		if (this.multipartRequest == null) {
+			return new LinkedMultiValueMap<String, MultipartFile>();
+		}
+		return this.multipartRequest.getMultiFileMap();
+	}
+
 
 	@Override
 	public String toString() {
