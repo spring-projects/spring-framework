@@ -26,6 +26,11 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods for decorating tasks with error handling.
+ * <p>
+ * <b>NOTE:</b> This class is intended for internal use by Spring's scheduler
+ * implementations. It is only public so that it may be accessed from
+ * implementations within other packages. It is <i>not</i> intended for general
+ * use and may change in the future.
  * 
  * @author Mark Fisher
  * @since 3.0
@@ -65,6 +70,12 @@ public abstract class TaskUtils {
 		return new DelegatingErrorHandlingRunnable(task, eh);
 	}
 
+	/**
+	 * Return the default {@link ErrorHandler} implementation based on the boolean
+	 * value indicating whether the task will be repeating or not. For repeating tasks
+	 * it will suppress errors, but for one-time tasks it will propagate. In both
+	 * cases, the error will be logged.
+	 */
 	public static ErrorHandler getDefaultErrorHandler(boolean isRepeatingTask) {
 		return (isRepeatingTask ? LOG_AND_SUPPRESS_ERROR_HANDLER : LOG_AND_PROPAGATE_ERROR_HANDLER);
 	}
