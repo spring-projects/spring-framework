@@ -57,6 +57,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -708,10 +709,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				ExtendedModelMap implicitModel,
 				ServletWebRequest webRequest) throws Exception {
 			
-			ResponseStatus responseStatus = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
-			if (responseStatus != null) {
-				HttpServletResponse response = webRequest.getResponse();
-				response.setStatus(responseStatus.value().value());
+			ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
+			if (responseStatusAnn != null) {
+				HttpStatus responseStatus = responseStatusAnn.value();
+				// to be picked up by the RedirectView
+				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, responseStatus);
+				webRequest.getResponse().setStatus(responseStatus.value());
 				responseArgumentUsed = true;
 			}
 

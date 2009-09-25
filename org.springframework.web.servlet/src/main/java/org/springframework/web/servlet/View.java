@@ -37,10 +37,19 @@ import javax.servlet.http.HttpServletResponse;
  * As this interface is stateless, view implementations should be thread-safe.
  *
  * @author Rod Johnson
+ * @author Arjen Poutsma
  * @see org.springframework.web.servlet.view.AbstractView
  * @see org.springframework.web.servlet.view.InternalResourceView
  */
 public interface View {
+
+	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains the response status code.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * View implementations.
+	 */
+	String RESPONSE_STATUS_ATTRIBUTE = View.class.getName() + ".responseStatus";
+
 
 	/**
 	 * Return the content type of the view, if predetermined.
