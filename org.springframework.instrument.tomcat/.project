@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.springframework.instrument.classloading</name>
+	<name>org.springframework.instrument.tomcat</name>
 	<comment></comment>
 	<projects>
 	</projects>
