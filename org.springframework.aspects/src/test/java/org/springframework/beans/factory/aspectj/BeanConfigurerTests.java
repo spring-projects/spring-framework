@@ -409,8 +409,8 @@ public class BeanConfigurerTests extends TestCase {
 	public static class CircularFactoryBean implements FactoryBean{
 
 		public CircularFactoryBean() {
-//			ValidAutowireByName autowired = new ValidAutowireByName();
-//			assertNull(autowired.getRamnivas());
+			ValidAutowireByName autowired = new ValidAutowireByName();
+			assertNull(autowired.getRamnivas());
 		}
 
 		public Object getObject() throws Exception {
