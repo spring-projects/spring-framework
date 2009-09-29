@@ -28,6 +28,7 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
@@ -112,6 +114,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/** The security context used for invoking the property methods */
 	private AccessControlContext acc;
 
+	private boolean autoGrowNestedPaths;
 
 	/**
 	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
@@ -247,6 +250,25 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 */
 	public final Class getRootClass() {
 		return (this.rootObject != null ? this.rootObject.getClass() : null);
+	}
+
+	/**
+	 * If this BeanWrapper should attempt to "autogrow" a nested path that contains a null value.
+	 * If true, a null path location will be populated with a default object value and traversed instead of resulting in a {@link NullValueInNestedPathException}.
+	 * Turning this flag on also enables auto-growth of collection elements when an index that is out of bounds is accessed.
+	 */
+	public boolean getAutoGrowNestedPaths() {
+		return this.autoGrowNestedPaths;
+	}
+
+	/**
+	 * Sets if this BeanWrapper should attempt to "autogrow" a nested path that contains a null value.
+	 * If true, a null path location will be populated with a default object value and traversed instead of resulting in a {@link NullValueInNestedPathException}.
+	 * Turning this flag on also enables auto-growth of collection elements when an index that is out of bounds is accessed.
+	 * Default is false.
+	 */
+	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
+		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
 
 	/**
@@ -484,7 +506,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		String canonicalName = tokens.canonicalName;
 		Object propertyValue = getPropertyValue(tokens);
 		if (propertyValue == null) {
-			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);
+			if (autoGrowNestedPaths) {
+				propertyValue = setDefaultValue(tokens);
+			} else {
+				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);				
+			}
 		}
 
 		// Lookup cached sub-BeanWrapper, create new one if not found.
@@ -507,6 +533,51 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return nestedBw;
 	}
 
+	private Object setDefaultValue(String propertyName) {
+		PropertyTokenHolder tokens = new PropertyTokenHolder();
+		tokens.actualName = propertyName;
+		tokens.canonicalName = propertyName;
+		setPropertyValue(tokens, createDefaultPropertyValue(tokens));
+		return getPropertyValue(tokens);
+	}
+
+	private Object setDefaultValue(PropertyTokenHolder tokens) {
+		setPropertyValue(tokens, createDefaultPropertyValue(tokens));
+		return getPropertyValue(tokens);
+	}
+	
+	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
+		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(tokens.actualName);		
+		Object defaultValue = newValue(pd.getPropertyType(), tokens.canonicalName);
+		return new PropertyValue(tokens.canonicalName, defaultValue);
+	}
+	
+	private Object newValue(Class<?> type, String name) {
+		try {
+			if (type.isArray()) {
+				Class<?> componentType = type.getComponentType();
+				// TODO - only handles 2-dimensional arrays
+				if (componentType.isArray()) {
+					Object array = Array.newInstance(componentType, 1);
+					Array.set(array, 0, Array.newInstance(componentType.getComponentType(), 0));
+					return array;
+				} else {
+					return Array.newInstance(componentType, 0);
+				}
+			} else {
+				if (Collection.class.isAssignableFrom(type)) {
+					return CollectionFactory.createCollection(type, 16);
+				} else {
+					return type.newInstance();
+				}
+			}
+		} catch (InstantiationException e) {
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate propertyType [" + type.getName() + "] to auto-grow nestd property path");
+		} catch (IllegalAccessException e) {
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate propertyType [" + type.getName() + "] to auto-grow nested property path");
+		}
+	}
+	
 	/**
 	 * Create a new nested BeanWrapper instance.
 	 * <p>Default implementation creates a BeanWrapperImpl instance.
@@ -611,22 +682,36 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			else {
 					value = readMethod.invoke(object, (Object[]) null);
 			}
-				
-			if (tokens.keys != null) {
+			
+			if (tokens.keys != null) {				
+				if (value == null) {
+					if (autoGrowNestedPaths) {
+						value = setDefaultValue(tokens.actualName);
+					} else {
+						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
+								"Cannot access indexed value of property referenced in indexed " +
+								"property path '" + propertyName + "': returned null");							
+					}
+				}			
+				String indexedPropertyName = tokens.actualName;
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
 					String key = tokens.keys[i];
 					if (value == null) {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +
-								"property path '" + propertyName + "': returned null");
+								"property path '" + propertyName + "': returned null");						
 					}
 					else if (value.getClass().isArray()) {
-						value = Array.get(value, Integer.parseInt(key));
+						int index = Integer.parseInt(key);
+						value = growArrayIfNecessary(value, index, indexedPropertyName);
+						value = Array.get(value, index);
 					}
 					else if (value instanceof List) {
+						int index = Integer.parseInt(key);						
 						List list = (List) value;
-						value = list.get(Integer.parseInt(key));
+						growCollectionIfNecessary(list, index, indexedPropertyName, pd, i + 1);						
+						value = list.get(index);
 					}
 					else if (value instanceof Set) {
 						// Apply index to Iterator in case of a Set.
@@ -661,6 +746,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								"Property referenced in indexed property path '" + propertyName +
 								"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");
 					}
+					indexedPropertyName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;					
 				}
 			}
 			return value;
@@ -688,6 +774,39 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 	}
 
+	private Object growArrayIfNecessary(Object array, int index, String name) {
+		if (!autoGrowNestedPaths) {
+			return array;
+		}
+		int length = Array.getLength(array);
+		if (index >= length) {
+			Class<?> componentType = array.getClass().getComponentType();
+			Object newArray = Array.newInstance(componentType, index + 1);
+			System.arraycopy(array, 0, newArray, 0, length);
+			for (int i = length; i < Array.getLength(newArray); i++) {
+				Array.set(newArray, i, newValue(componentType, name));
+			}
+			setPropertyValue(name, newArray);
+			return newArray;
+		} else {
+			return array;
+		}
+	}
+	
+	private void growCollectionIfNecessary(Collection collection, int index, String name, PropertyDescriptor pd, int nestingLevel) {
+		if (!autoGrowNestedPaths) {
+			return;
+		}
+		if (index >= collection.size()) {
+			Class elementType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(), nestingLevel);
+			if (elementType != null) {
+				for (int i = collection.size(); i < index + 1; i++) {
+					collection.add(newValue(elementType, name));
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
 		BeanWrapperImpl nestedBw;
