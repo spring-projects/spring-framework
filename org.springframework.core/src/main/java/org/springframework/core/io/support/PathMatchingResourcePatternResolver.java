@@ -570,9 +570,19 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @throws IOException if directory contents could not be retrieved
 	 */
 	protected Set<File> retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
+		if (!rootDir.exists()) {
+			// Silently skip non-existing directories.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Skipping [" + rootDir.getAbsolutePath() + "] because it does not exist");
+			}
+			return Collections.emptySet();
+		}
 		if (!rootDir.isDirectory()) {
-			throw new IllegalStateException(
-					"Resource path [" + rootDir.getAbsolutePath() + "] does not denote a directory");
+			// Complain louder if it exists but is no directory.
+			if (logger.isWarnEnabled()) {
+				logger.warn("Skipping [" + rootDir.getAbsolutePath() + "] because it does not denote a directory");
+			}
+			return Collections.emptySet();
 		}
 		if (!rootDir.canRead()) {
 			if (logger.isWarnEnabled()) {
