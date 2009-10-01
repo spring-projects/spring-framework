@@ -16,14 +16,13 @@
 
 package org.springframework.core.convert.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Locale;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.convert.converter.Converter;
 
 /**
@@ -56,12 +55,18 @@ public class DefaultConversionServiceTests {
 	public void testStringToBooleanTrue() {
 		StringToBooleanConverter c = new StringToBooleanConverter();
 		assertEquals(Boolean.valueOf(true), c.convert("true"));
+		assertEquals(Boolean.valueOf(true), c.convert("on"));
+		assertEquals(Boolean.valueOf(true), c.convert("yes"));
+		assertEquals(Boolean.valueOf(true), c.convert("1"));
 	}
 
 	@Test
 	public void testStringToBooleanFalse() {
 		StringToBooleanConverter c = new StringToBooleanConverter();
 		assertEquals(Boolean.valueOf(false), c.convert("false"));
+		assertEquals(Boolean.valueOf(false), c.convert("off"));
+		assertEquals(Boolean.valueOf(false), c.convert("no"));
+		assertEquals(Boolean.valueOf(false), c.convert("0"));
 	}
 
 	@Test
