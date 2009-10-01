@@ -577,6 +577,12 @@ boolean falseValue =
      parser.parseExpression("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 
 </programlisting>
+      <para>Each symbolic operator can also be specified as a purely alphabetic equivalent.  This avoids
+      problems where the symbols used have special meaning for the document type in which 
+      the expression is embedded (eg. an XML document).  The textual equivalents are shown
+      here: lt ('&lt;'), gt ('&gt;'), le ('&lt;='), ge ('&gt;='),
+      eq ('=='), ne ('!='), div ('/'), mod ('%'), not ('!').
+      These are case insensitive.</para>
       </section>
 
       <section>
