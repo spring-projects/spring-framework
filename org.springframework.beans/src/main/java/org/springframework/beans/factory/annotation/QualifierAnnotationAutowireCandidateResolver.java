@@ -157,7 +157,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			if (methodParam != null) {
 				Method method = methodParam.getMethod();
 				if (method == null || void.class.equals(method.getReturnType())) {
-					match = checkQualifiers(bdHolder, methodParam.getAnnotations());
+					match = checkQualifiers(bdHolder, methodParam.getMethodAnnotations());
 				}
 			}
 		}
@@ -274,7 +274,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		if (value == null) {
 			MethodParameter methodParam = descriptor.getMethodParameter();
 			if (methodParam != null) {
-				value = findValue(methodParam.getAnnotations());
+				value = findValue(methodParam.getMethodAnnotations());
 			}
 		}
 		return value;
