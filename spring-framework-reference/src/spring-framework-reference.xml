@@ -107,12 +107,16 @@
 				<firstname>Tareq</firstname>
 				<surname>Abedrabbo</surname>
 			</author>
+			<author>
+				<firstname>Andy</firstname>
+				<surname>Clement</surname>
+			</author>
 		</authorgroup>
 		<copyright>
 			<year>2004-2009</year>
 			<holder>Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu, Rob Harrop, Alef Arendsen, Thomas Risberg, Darren Davison, 
 				Dmitriy Kopylenko, Mark Pollack, Thierry Templier, Erwin Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, 
-                Costin Leau, Mark Fisher, Sam Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo
+                Costin Leau, Mark Fisher, Sam Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo, Andy Clement
 			</holder>
 		</copyright>
 		<legalnotice>

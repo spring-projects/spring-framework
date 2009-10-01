@@ -892,6 +892,35 @@ public class SystemArchitecture {
           </listitem>
         </itemizedlist>
       </section>
+      <section id="writing-good-pointcuts">
+        <title>Writing good pointcuts</title>
+
+        <para>During compilation, AspectJ processes pointcuts in order to try and optimize matching performance. Examining code 
+        and determining if each join point matches (statically or dynamically) a given pointcut is a costly process. (A dynamic 
+        match means the match cannot be fully determined from static analysis and a test will be placed in the code to 
+        determine if there is an actual match when the code is running). On first encountering a pointcut declaration, 
+        AspectJ will rewrite it into an optimal form for the matching process. What does this mean? Basically pointcuts 
+        are rewritten in DNF (Disjunctive Normal Form) and the components of the pointcut are sorted such that those 
+        components that are cheaper to evaluate are checked first. This means you do not have to worry about understanding 
+        the performance of various pointcut designators and may supply them in any order in a pointcut declaration.</para>
+        
+        <para>However, AspectJ can only work with what it is told, and for optimal performance of matching you should 
+        think about what they are trying to achieve and narrow the search space for matches as much as possible in the 
+        definition. The existing designators naturally fall into one of three groups: kinded, scoping and context:</para>
+        <itemizedlist>
+	        <listitem><para>Kinded designators are those which select a particular kind of join point. For example: execution, get, set, call, handler</para></listitem>
+    	    <listitem><para>Scoping designators are those which select a group of join points of interest (of probably many kinds). For example: within, withincode</para></listitem>
+        	<listitem><para>Contextual designators are those that match (and optionally bind) based on context. For example: this, target, @annotation</para></listitem>
+        </itemizedlist>
+        
+        <para>A well written pointcut should try and include at least the first two types (kinded and scoping), whilst 
+        the contextual designators may be included if wishing to match based on join point context, or bind that context 
+        for use in the advice. Supplying either just a kinded designator or just a contextual designator will work but 
+        could affect weaving performance (time and memory used) due to all the extra processing and analysis. Scoping 
+        designators are very fast to match and their usage means AspectJ can very quickly dismiss groups of 
+        join points that should not be further processed - that is why a good pointcut should always include 
+        one if possible.</para> 
+      </section>
     </section>
 
     <section id="aop-advice">
