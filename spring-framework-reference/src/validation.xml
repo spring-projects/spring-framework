@@ -918,10 +918,10 @@ public class MyService {
 		<title>Spring 3 UI Field Formatting</title>
 		<para>
 			<link linkend="core.convert"><filename>core.convert</filename></link> is a simple, general-purpose type conversion system.
-			It addresses <emphasis>one-way</emphasis> conversion from one type to another, and is not limited to just converting Strings.
+			It addresses <emphasis>one-way</emphasis> conversion from one type to another and is not limited to just converting Strings.
 			As discussed in the previous section, a Spring Container can be configured to use this system when binding bean property values.
 			In addition, the Spring Expression Language (SpEL) uses this system to coerce Expression values.
-			For example, when SpEL needs to coerse a Short to a Long to fullfill a expression.setValue attempt, the core.convert system performs the coersion.
+			For example, when SpEL needs to coerse a Short to a Long to fullfill an expression.setValue attempt, the core.convert system performs the coersion.
 		</para>
 		<para>
 			Now consider the type conversion requirements of a typical UI environment such as a web or desktop application.
@@ -930,8 +930,12 @@ public class MyService {
 			To directly address this, Spring 3 introduces a new <emphasis>ui.format</emphasis> system that provides a simple and robust alternative to PropertyEditors in a UI environment.
 		</para>
 		<para>
-			In general, use Converters when you need implement general-purpose type conversion logic; logic that may be invoked by the Spring Container, SpEL, or your own code as part of a <emphasis>one-way</emphasis> binding process.
-			Use Formatters when you're working in a UI environment such as a HTML form of a web application, and need to apply <emphasis>two-way</emphasis> parsing, formatting, and localization logic to form field values.
+			In general, use Converters when you need implement general-purpose type
+			conversion logic, logic that may be invoked by the Spring Container, SpEL, 
+			or your own code as part of a <emphasis>one-way</emphasis> binding process.
+			Use Formatters when you're working in a UI environment, such as an HTML form
+			of a web application, and need to apply <emphasis>two-way</emphasis> parsing, 
+			formatting, and localization logic to form field values.
 		</para>
 		<section id="ui-format-Formatter-SPI">
 			<title>Formatter SPI</title>
@@ -1068,7 +1072,8 @@ public @interface Currency {
 			<section id="ui-format-AnnotationFormatterFactory">
 				<title>AnnotationFormatterFactory</title>
 				<para>
-					If your custom annotation has attributes that configure Formatter instance behavior by property, implement a AnnotationFormatterFactory:
+					If your custom annotation has attributes that configure Formatter 
+					instance behavior by property, implement an AnnotationFormatterFactory:
 				</para>
 				<programlisting language="java"><![CDATA[
 package org.springframework.ui.format;
