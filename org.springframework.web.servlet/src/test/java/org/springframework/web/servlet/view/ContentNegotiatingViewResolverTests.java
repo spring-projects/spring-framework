@@ -93,14 +93,49 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
-	public void getDefaultMediaType() {
+	public void getDefaultContentType() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-		viewResolver.setDefaultContentType(new MediaType("application", "pdf"));
 		viewResolver.setIgnoreAcceptHeader(true);
+		viewResolver.setDefaultContentType(new MediaType("application", "pdf"));
 		List<MediaType> result = viewResolver.getMediaTypes(request);
 		assertEquals("Invalid amount of media types", 1, result.size());
 		assertEquals("Invalid content type", new MediaType("application", "pdf"), result.get(0));
+	}
+
+	@Test
+	public void resolveViewNameWithDefaultContentType() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+		viewResolver.setIgnoreAcceptHeader(true);
+		viewResolver.setDefaultContentType(new MediaType("application", "xml"));
+
+		ViewResolver viewResolverMock1 = createMock(ViewResolver.class);
+		ViewResolver viewResolverMock2 = createMock(ViewResolver.class);
+		List<ViewResolver> viewResolverMocks = new ArrayList<ViewResolver>();
+		viewResolverMocks.add(viewResolverMock1);
+		viewResolverMocks.add(viewResolverMock2);
+		viewResolver.setViewResolvers(viewResolverMocks);
+
+		View viewMock1 = createMock("application_xml", View.class);
+		View viewMock2 = createMock("text_html", View.class);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
+		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
+		expect(viewMock1.getContentType()).andReturn("application/xml");
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
+
+		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertSame("Invalid view", viewMock1, result);
+
+		verify(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
 	}
 
 	@Test
