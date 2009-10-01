@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.PropertyEditorRegistrySupport;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
@@ -90,7 +92,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
-	private Map<String, String> customEditors;
+	private Map<String, ?> customEditors;
 
 	private boolean ignoreUnresolvableEditors = false;
 
@@ -123,10 +125,11 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	 * Specify the custom editors to register via a {@link Map}, using the
 	 * class name of the required type as the key and the class name of the
 	 * associated {@link PropertyEditor} as value.
-	 * @param customEditors said <code>Map</code> of editors (can be <code>null</code>)
+	 * <p>Also supports {@link PropertyEditor} instances as values; however,
+	 * this is deprecated since Spring 2.0.7!
 	 * @see ConfigurableListableBeanFactory#registerCustomEditor
 	 */
-	public void setCustomEditors(Map<String, String> customEditors) {
+	public void setCustomEditors(Map<String, ?> customEditors) {
 		this.customEditors = customEditors;
 	}
 
@@ -156,16 +159,35 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 		}
 
 		if (this.customEditors != null) {
-			for (Map.Entry<String, String> entry : this.customEditors.entrySet()) {
+			for (Map.Entry<String, ?> entry : this.customEditors.entrySet()) {
 				String key = entry.getKey();
-				String value = entry.getValue();
+				Object value = entry.getValue();
 				Class requiredType = null;
 
 				try {
 					requiredType = ClassUtils.forName(key, this.beanClassLoader);
-					Class editorClass = ClassUtils.forName(value, this.beanClassLoader);
-					Assert.isAssignable(PropertyEditor.class, editorClass);
-					beanFactory.registerCustomEditor(requiredType, (Class<? extends PropertyEditor>) editorClass);
+					if (value instanceof PropertyEditor) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Passing PropertyEditor instances into CustomEditorConfigurer is deprecated: " +
+									"use PropertyEditorRegistrars or PropertyEditor class names instead. " +
+									"Offending key [" + key + "; offending editor instance: " + value);
+						}
+						beanFactory.addPropertyEditorRegistrar(
+								new SharedPropertyEditorRegistrar(requiredType, (PropertyEditor) value));
+					}
+					else if (value instanceof Class) {
+						beanFactory.registerCustomEditor(requiredType, (Class) value);
+					}
+					else if (value instanceof String) {
+						Class editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
+						Assert.isAssignable(PropertyEditor.class, editorClass);
+						beanFactory.registerCustomEditor(requiredType, (Class<? extends PropertyEditor>) editorClass);
+					}
+					else {
+						throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
+								key + "] is not of required type [" + PropertyEditor.class.getName() +
+								"] or a corresponding Class or String value indicating a PropertyEditor implementation");
+					}
 				}
 				catch (ClassNotFoundException ex) {
 					if (this.ignoreUnresolvableEditors) {
@@ -180,5 +202,30 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 			}
 		}
 	}
+
+
+	/**
+	 * PropertyEditorRegistrar that registers a (deprecated) shared editor.
+	 */
+	private static class SharedPropertyEditorRegistrar implements PropertyEditorRegistrar {
+
+		private final Class requiredType;
+
+		private final PropertyEditor sharedEditor;
+
+		public SharedPropertyEditorRegistrar(Class requiredType, PropertyEditor sharedEditor) {
+			this.requiredType = requiredType;
+			this.sharedEditor = sharedEditor;
+		}
+
+		public void registerCustomEditors(PropertyEditorRegistry registry) {
+			if (!(registry instanceof PropertyEditorRegistrySupport)) {
+				throw new IllegalArgumentException("Cannot registered shared editor " +
+						"on non-PropertyEditorRegistrySupport registry: " + registry);
+			}
+			((PropertyEditorRegistrySupport) registry).registerSharedEditor(this.requiredType, this.sharedEditor);
+		}
+	}
+
 
 }

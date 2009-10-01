@@ -266,7 +266,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * shared editor that might be used concurrently.
 	 * @param requiredType the type of the property
 	 * @param propertyEditor the shared editor to register
+	 * @deprecated as of Spring 3.0, in favor of PropertyEditorRegistrars or ConversionService usage
 	 */
+	@Deprecated
 	public void registerSharedEditor(Class requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
 		if (this.sharedEditors == null) {
