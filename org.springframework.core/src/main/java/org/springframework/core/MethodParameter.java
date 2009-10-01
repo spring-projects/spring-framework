@@ -31,10 +31,6 @@ import org.springframework.util.Assert;
  * a Method or Constructor plus a parameter index and a nested type index for
  * a declared generic type. Useful as a specification object to pass along.
  *
- * <p>Used by {@link GenericCollectionTypeResolver},
- * {@link org.springframework.beans.BeanWrapperImpl} and
- * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
- *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Andy Clement
@@ -212,8 +208,19 @@ public class MethodParameter {
 	/**
 	 * Return the annotations associated with the target method/constructor itself.
 	 */
-	public Annotation[] getAnnotations() {
+	public Annotation[] getMethodAnnotations() {
 		return (this.method != null ? this.method.getAnnotations() : this.constructor.getAnnotations());
+	}
+
+	/**
+	 * Return the method/constructor annotation of the given type, if available.
+	 * @param annotationType the annotation type to look for
+	 * @return the annotation object, or <code>null</code> if not found
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
+		return (this.method != null ? this.method.getAnnotation(annotationType) :
+				(T) this.constructor.getAnnotation(annotationType));
 	}
 
 	/**
@@ -221,11 +228,27 @@ public class MethodParameter {
 	 */
 	public Annotation[] getParameterAnnotations() {
 		if (this.parameterAnnotations == null) {
-			Annotation[][] annotationArray = (this.method != null) ?
-					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations();
+			Annotation[][] annotationArray = (this.method != null ?
+					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
 			this.parameterAnnotations = annotationArray[this.parameterIndex];
 		}
 		return this.parameterAnnotations;
+	}
+
+	/**
+	 * Return the parameter annotation of the given type, if available.
+	 * @param annotationType the annotation type to look for
+	 * @return the annotation object, or <code>null</code> if not found
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Annotation> T getParameterAnnotation(Class<T> annotationType) {
+		Annotation[] anns = getParameterAnnotations();
+		for (Annotation ann : anns) {
+			if (annotationType.isInstance(ann)) {
+				return (T) ann;
+			}
+		}
+		return null;
 	}
 
 	/**
