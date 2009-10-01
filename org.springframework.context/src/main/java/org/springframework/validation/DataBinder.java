@@ -344,7 +344,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #isAllowed(String)
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
 	 */
-	public void setAllowedFields(String[] allowedFields) {
+	public void setAllowedFields(String... allowedFields) {
 		this.allowedFields = PropertyAccessorUtils.canonicalPropertyNames(allowedFields);
 	}
 
@@ -368,7 +368,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #isAllowed(String)
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
 	 */
-	public void setDisallowedFields(String[] disallowedFields) {
+	public void setDisallowedFields(String... disallowedFields) {
 		this.disallowedFields = PropertyAccessorUtils.canonicalPropertyNames(disallowedFields);
 	}
 
@@ -390,7 +390,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #setBindingErrorProcessor
 	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
 	 */
-	public void setRequiredFields(String[] requiredFields) {
+	public void setRequiredFields(String... requiredFields) {
 		this.requiredFields = PropertyAccessorUtils.canonicalPropertyNames(requiredFields);
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder requires binding of required fields [" +
@@ -492,14 +492,17 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	// Implementation of PropertyEditorRegistry/TypeConverter interface
 	//---------------------------------------------------------------------
 
+	@SuppressWarnings("unchecked")
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, propertyEditor);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
+	@SuppressWarnings("unchecked")
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
@@ -671,6 +674,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @throws BindException if there were any errors in the bind operation
 	 * @see BindingResult#getModel()
 	 */
+	@SuppressWarnings("unchecked")
 	public Map close() throws BindException {
 		if (getBindingResult().hasErrors()) {
 			throw new BindException(getBindingResult());
