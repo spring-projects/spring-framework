@@ -18,6 +18,8 @@ package org.springframework.validation;
 
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Default {@link BindingErrorProcessor} implementation.
@@ -65,8 +67,12 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 		String field = ex.getPropertyName();
 		String[] codes = bindingResult.resolveMessageCodes(ex.getErrorCode(), field);
 		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), field);
+		Object rejectedValue = ex.getValue();
+		if (rejectedValue != null && rejectedValue.getClass().isArray()) {
+			rejectedValue = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(rejectedValue));
+		}
 		bindingResult.addError(new FieldError(
-				bindingResult.getObjectName(), field, ex.getValue(), true,
+				bindingResult.getObjectName(), field, rejectedValue, true,
 				codes, arguments, ex.getLocalizedMessage()));
 	}
 
