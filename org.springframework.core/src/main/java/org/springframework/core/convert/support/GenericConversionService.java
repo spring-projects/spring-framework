@@ -65,21 +65,21 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 
 	public GenericConversionService() {
-		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayGenericConverter(this));
-		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionGenericConverter(this));
-		addGenericConverter(Object[].class, Map.class, new ArrayToMapGenericConverter(this));
-		addGenericConverter(Object[].class, Object.class, new ArrayToObjectGenericConverter(this));
-		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionGenericConverter(this));
-		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayGenericConverter(this));
-		addGenericConverter(Collection.class, Map.class, new CollectionToMapGenericConverter(this));
-		addGenericConverter(Collection.class, Object.class, new CollectionToObjectGenericConverter(this));
-		addGenericConverter(Map.class, Map.class, new MapToMapGenericConverter(this));
-		addGenericConverter(Map.class, Object[].class, new MapToArrayGenericConverter(this));
-		addGenericConverter(Map.class, Collection.class, new MapToCollectionGenericConverter(this));
-		addGenericConverter(Map.class, Object.class, new MapToObjectGenericConverter(this));
-		addGenericConverter(Object.class, Object[].class, new ObjectToArrayGenericConverter(this));
-		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionGenericConverter(this));
-		addGenericConverter(Object.class, Map.class, new ObjectToMapGenericConverter(this));
+		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(this));
+		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionConverter(this));
+		addGenericConverter(Object[].class, Map.class, new ArrayToMapConverter(this));
+		addGenericConverter(Object[].class, Object.class, new ArrayToObjectConverter(this));
+		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionConverter(this));
+		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayConverter(this));
+		addGenericConverter(Collection.class, Map.class, new CollectionToMapConverter(this));
+		addGenericConverter(Collection.class, Object.class, new CollectionToObjectConverter(this));
+		addGenericConverter(Map.class, Map.class, new MapToMapConverter(this));
+		addGenericConverter(Map.class, Object[].class, new MapToArrayConverter(this));
+		addGenericConverter(Map.class, Collection.class, new MapToCollectionConverter(this));
+		addGenericConverter(Map.class, Object.class, new MapToObjectConverter(this));
+		addGenericConverter(Object.class, Object[].class, new ObjectToArrayConverter(this));
+		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionConverter(this));
+		addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(this));
 	}
 
 

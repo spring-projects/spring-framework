@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import java.util.Collection;
@@ -21,14 +22,21 @@ import java.util.Map;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
 
-final class MapToCollectionGenericConverter implements GenericConverter {
+/**
+ * Converts from a Map to a Collection.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class MapToCollectionConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public MapToCollectionGenericConverter(GenericConversionService conversionService) {
+	public MapToCollectionConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Map sourceMap = (Map) source;
 		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
@@ -52,7 +60,8 @@ final class MapToCollectionGenericConverter implements GenericConverter {
 						+ converter.convertValue(mapEntry.getValue());
 				target.add(property);
 			}
-		} else {
+		}
+		else {
 			for (Object value : sourceMap.values()) {
 				target.add(value);
 			}			

@@ -13,19 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
 
-final class MapToObjectGenericConverter implements GenericConverter {
+/**
+ * Converts from a Ma to a single Object.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class MapToObjectConverter implements GenericConverter {
 
 	private static final String DELIMITER = " ";
 
 	private final GenericConversionService conversionService;
 
-	public MapToObjectGenericConverter(GenericConversionService conversionService) {
+	public MapToObjectConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -34,10 +41,12 @@ final class MapToObjectGenericConverter implements GenericConverter {
 		if (sourceMap.size() == 0) {
 			if (targetType.typeEquals(String.class)) {
 				return "";
-			} else {
+			}
+			else {
 				return null;
 			}
-		} else {
+		}
+		else {
 			if (targetType.typeEquals(String.class)) {
 				TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
 				TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
@@ -62,7 +71,8 @@ final class MapToObjectGenericConverter implements GenericConverter {
 						i++;
 					}
 					return string.toString();
-				} else {
+				}
+				else {
 					MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetType, targetType,
 							keysCompatible, valuesCompatible, conversionService);
 					StringBuilder string = new StringBuilder();
@@ -80,7 +90,8 @@ final class MapToObjectGenericConverter implements GenericConverter {
 					}
 					return string.toString();
 				}
-			} else {
+			}
+			else {
 				TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
 				boolean valuesCompatible = false;
 				if (sourceValueType == TypeDescriptor.NULL || sourceValueType.isAssignableTo(targetType)) {
@@ -88,7 +99,8 @@ final class MapToObjectGenericConverter implements GenericConverter {
 				}
 				if (valuesCompatible) {
 					return sourceMap.values().iterator().next();
-				} else {
+				}
+				else {
 					MapEntryConverter converter = new MapEntryConverter(sourceValueType, sourceValueType, targetType, targetType,
 							true, valuesCompatible, conversionService);
 					Object value = sourceMap.values().iterator().next();
@@ -97,4 +109,5 @@ final class MapToObjectGenericConverter implements GenericConverter {
 			}
 		}
 	}
+
 }

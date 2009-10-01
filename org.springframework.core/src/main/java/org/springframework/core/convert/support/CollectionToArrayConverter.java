@@ -13,46 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getElementType;
 import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Iterator;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
-final class ArrayToCollectionGenericConverter implements GenericConverter {
+/**
+ * Converts from a Collection to an array.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class CollectionToArrayConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public ArrayToCollectionGenericConverter(GenericConversionService conversionService) {
+	public CollectionToArrayConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		int length = Array.getLength(source);
-		Collection collection = CollectionFactory.createCollection(targetType.getType(), length);
+		Collection sourceCollection = (Collection) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
+		if (sourceElementType == TypeDescriptor.NULL) {
+			sourceElementType = getElementType(sourceCollection);
+		}
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (targetElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
-			for (int i = 0; i < length; i++) {
-				collection.add(Array.get(source, i));
+		Object array = Array.newInstance(targetElementType.getType(), sourceCollection.size());
+		int i = 0;
+		if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
+			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
+				Array.set(array, i, it.next());
 			}
-		} else {
+		}
+		else {
 			GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceElementType, targetElementType);
 			}
-			for (int i = 0; i < length; i++) {
-				Object sourceElement = Array.get(source, i);
+			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
+				Object sourceElement = it.next();
 				Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetElementType);
-				collection.add(targetElement);
+				Array.set(array, i, targetElement);
 			}
 		}
-		return collection;
+		return array;
 	}
 
 }

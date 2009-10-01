@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import static org.springframework.core.convert.support.ConversionUtils.asList;
 
 import org.springframework.core.convert.TypeDescriptor;
 
-final class ArrayToArrayGenericConverter implements GenericConverter {
+/**
+ * Converts from a source array to a target array type.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class ArrayToArrayConverter implements GenericConverter {
 
 	private final GenericConverter helperConverter;
 
-	public ArrayToArrayGenericConverter(GenericConversionService conversionService) {
-		this.helperConverter = new CollectionToArrayGenericConverter(conversionService);
+	public ArrayToArrayConverter(GenericConversionService conversionService) {
+		this.helperConverter = new CollectionToArrayConverter(conversionService);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
