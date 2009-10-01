@@ -13,24 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getElementType;
+package org.springframework.core.convert.support;
 
 import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
+import static org.springframework.core.convert.support.ConversionUtils.*;
 
-final class CollectionToMapGenericConverter implements GenericConverter {
+/**
+ * Converts from a Collection to a Map.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class CollectionToMapConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public CollectionToMapGenericConverter(GenericConversionService conversionService) {
+	public CollectionToMapConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Collection sourceCollection = (Collection) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
@@ -56,13 +63,15 @@ final class CollectionToMapGenericConverter implements GenericConverter {
 					String[] property = parseProperty((String) element);
 					target.put(property[0], property[1]);
 				}
-			} else {
+			}
+			else {
 				for (Object element : sourceCollection) {
 					target.put(element, element);
 				}
 			}
 			return target;
-		} else {
+		}
+		else {
 			Map target = CollectionFactory.createMap(targetType.getType(), sourceCollection.size());
 			MapEntryConverter converter = new MapEntryConverter(sourceElementType, sourceElementType, targetKeyType,
 					targetValueType, keysCompatible, valuesCompatible, conversionService);
@@ -73,7 +82,8 @@ final class CollectionToMapGenericConverter implements GenericConverter {
 					Object targetValue = converter.convertValue(property[1]);
 					target.put(targetKey, targetValue);
 				}
-			} else {
+			}
+			else {
 				for (Object element : sourceCollection) {
 					Object targetKey = converter.convertKey(element);
 					Object targetValue = converter.convertValue(element);
@@ -87,8 +97,8 @@ final class CollectionToMapGenericConverter implements GenericConverter {
 	private String[] parseProperty(String string) {
 		String[] property = string.split("=");
 		if (property.length < 2) {
-			throw new IllegalArgumentException("Invalid String property '" + property
-					+ "'; properties should be in the format name=value");
+			throw new IllegalArgumentException("Invalid String property '" + string +
+					"'; properties should be in the format name=value");
 		}
 		return property;
 	}

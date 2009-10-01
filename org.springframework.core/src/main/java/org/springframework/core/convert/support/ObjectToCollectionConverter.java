@@ -13,21 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
 
-import java.lang.reflect.Array;
+import java.util.Collection;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.StringUtils;
 
-final class ObjectToArrayGenericConverter implements GenericConverter {
+/**
+ * Converts from a single Object to a Collection.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class ObjectToCollectionConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public ObjectToArrayGenericConverter(GenericConversionService conversionService) {
+	public ObjectToCollectionConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -36,29 +44,37 @@ final class ObjectToArrayGenericConverter implements GenericConverter {
 		if (sourceType.typeEquals(String.class)) {
 			String string = (String) source;
 			String[] fields = StringUtils.commaDelimitedListToStringArray(string);
-			if (sourceType.isAssignableTo(targetElementType)) {
-				return fields;
-			} else {
-				Object target = Array.newInstance(targetElementType.getType(), fields.length);
+			Collection target = CollectionFactory.createCollection(targetType.getType(), fields.length);
+			if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
+				for (int i = 0; i < fields.length; i++) {
+					target.add(fields[i]);				
+				}
+			}
+			else {
 				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceType, targetElementType);
 				}
 				for (int i = 0; i < fields.length; i++) {
-					Array.set(target, i, invokeConverter(converter, fields[i], sourceType, targetElementType));
+					String sourceElement = fields[i];
+					Object targetElement = invokeConverter(converter, sourceElement, sourceType, targetElementType);
+					target.add(targetElement);				
 				}
-				return target;
 			}
-		} else {
-			Object target = Array.newInstance(targetElementType.getType(), 1);
-			if (sourceType.isAssignableTo(targetElementType)) {
-				Array.set(target, 0, source);
-			} else {
+			return target;
+
+		}
+		else {
+			Collection target = CollectionFactory.createCollection(targetType.getType(), 1);			
+			if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
+				target.add(source);
+			}
+			else {
 				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceType, targetElementType);
 				}
-				Array.set(target, 0, invokeConverter(converter, source, sourceType, targetElementType));
+				target.add(invokeConverter(converter, source, sourceType, targetElementType));
 			}
 			return target;
 		}

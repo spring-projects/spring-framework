@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import static org.springframework.core.convert.support.ConversionUtils.getElementType;
@@ -23,13 +24,19 @@ import java.util.Collection;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
-final class CollectionToObjectGenericConverter implements GenericConverter {
+/**
+ * Converts from a Collection to a single Object.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class CollectionToObjectConverter implements GenericConverter {
 
 	private static final String DELIMITER = ",";
 
 	private final GenericConversionService conversionService;
 
-	public CollectionToObjectGenericConverter(GenericConversionService conversionService) {
+	public CollectionToObjectConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -38,10 +45,12 @@ final class CollectionToObjectGenericConverter implements GenericConverter {
 		if (sourceCollection.size() == 0) {
 			if (targetType.typeEquals(String.class)) {
 				return "";
-			} else {
+			}
+			else {
 				return null;
 			}
-		} else {
+		}
+		else {
 			if (targetType.typeEquals(String.class)) {
 				TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 				if (sourceElementType == TypeDescriptor.NULL) {
@@ -58,7 +67,8 @@ final class CollectionToObjectGenericConverter implements GenericConverter {
 						i++;
 					}
 					return string.toString();
-				} else {
+				}
+				else {
 					GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 					if (converter == null) {
 						throw new ConverterNotFoundException(sourceElementType, targetType);
@@ -75,7 +85,8 @@ final class CollectionToObjectGenericConverter implements GenericConverter {
 					}
 					return string.toString();
 				}
-			} else {
+			}
+			else {
 				Object firstElement = sourceCollection.iterator().next();
 				TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 				if (sourceElementType == TypeDescriptor.NULL && firstElement != null) {
@@ -83,7 +94,8 @@ final class CollectionToObjectGenericConverter implements GenericConverter {
 				}
 				if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
 					return firstElement;
-				} else {
+				}
+				else {
 					GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 					if (converter == null) {
 						throw new ConverterNotFoundException(sourceElementType, targetType);
@@ -93,4 +105,5 @@ final class CollectionToObjectGenericConverter implements GenericConverter {
 			}
 		}
 	}
+
 }

@@ -13,25 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getElementType;
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+package org.springframework.core.convert.support;
 
 import java.util.Collection;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import static org.springframework.core.convert.support.ConversionUtils.*;
 
-final class CollectionToCollectionGenericConverter implements GenericConverter {
+/**
+ * Converts from a source Collection to target Collection type.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+final class CollectionToCollectionConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public CollectionToCollectionGenericConverter(GenericConversionService conversionService) {
+	public CollectionToCollectionConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Collection sourceCollection = (Collection) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
@@ -42,7 +48,8 @@ final class CollectionToCollectionGenericConverter implements GenericConverter {
 		if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
 			if (sourceType.isAssignableTo(targetType)) {
 				return sourceCollection;
-			} else {
+			}
+			else {
 				Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 				target.addAll(sourceCollection);
 				return target;
