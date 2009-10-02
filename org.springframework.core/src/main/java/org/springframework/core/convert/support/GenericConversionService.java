@@ -130,7 +130,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		Class sourceType = typeInfo[0];
 		Class targetType = typeInfo[1];
-		getSourceMap(sourceType).put(targetType, new ConverterAdapter(converter));
+		getSourceMap(sourceType).put(targetType, new ConverterGenericConverter(converter));
 	}
 
 	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
@@ -141,7 +141,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		Class sourceType = typeInfo[0];
 		Class targetType = typeInfo[1];
-		getSourceMap(sourceType).put(targetType, new ConverterFactoryAdapter(converterFactory));
+		getSourceMap(sourceType).put(targetType, new ConverterFactoryGenericConverter(converterFactory));
 	}
 
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
@@ -188,7 +188,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return invokeConverter(converter, source, sourceType, targetType);
 	}
 
-
+	
 	// subclassing hooks
 
 	/**
@@ -242,10 +242,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-
+	
 	// internal helpers
 
-	private Class[] getRequiredTypeInfo(Object converter, Class ifc) {
+	private Class[] getRequiredTypeInfo(Object converter, Class genericIfc) {
 		Class[] typeInfo = new Class[2];
 		if (converter instanceof ConverterInfo) {
 			ConverterInfo info = (ConverterInfo) converter;
@@ -254,7 +254,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return typeInfo;
 		}
 		else {
-			return GenericTypeResolver.resolveTypeArguments(converter.getClass(), ifc);
+			return GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
 		}
 	}
 
@@ -367,36 +367,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				}
 			}
 			return null;
-		}
-	}
-
-
-	private static class ConverterAdapter implements GenericConverter {
-
-		private Converter converter;
-
-		public ConverterAdapter(Converter converter) {
-			this.converter = converter;
-		}
-
-		@SuppressWarnings("unchecked")
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return this.converter.convert(source);
-		}
-	}
-
-
-	private static class ConverterFactoryAdapter implements GenericConverter {
-
-		private ConverterFactory converterFactory;
-
-		public ConverterFactoryAdapter(ConverterFactory converterFactory) {
-			this.converterFactory = converterFactory;
-		}
-
-		@SuppressWarnings("unchecked")
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return this.converterFactory.getConverter(targetType.getObjectType()).convert(source);
 		}
 	}
 
