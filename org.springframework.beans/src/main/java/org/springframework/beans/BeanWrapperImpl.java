@@ -572,7 +572,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 		} catch (InstantiationException e) {
-			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate propertyType [" + type.getName() + "] to auto-grow nestd property path");
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate propertyType [" + type.getName() + "] to auto-grow nested property path");
 		} catch (IllegalAccessException e) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate propertyType [" + type.getName() + "] to auto-grow nested property path");
 		}
