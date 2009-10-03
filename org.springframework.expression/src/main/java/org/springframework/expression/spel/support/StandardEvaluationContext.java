@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 /**
  * Provides a default EvaluationContext implementation.
  *
- * <p>To resolved properties/methods/fields this context uses a reflection mechanism.
+ * <p>To resolve properties/methods/fields this context uses a reflection mechanism.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
