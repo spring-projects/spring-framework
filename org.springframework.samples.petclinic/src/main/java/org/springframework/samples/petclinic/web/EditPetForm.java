@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.web;
 
 import java.util.Collection;
@@ -10,18 +11,18 @@ import org.springframework.samples.petclinic.validation.PetValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.SessionStatus;
-import org.springframework.web.bind.WebDataBinder;
 
 /**
  * JavaBean Form controller that is used to edit an existing <code>Pet</code>.
- *
+ * 
  * @author Juergen Hoeller
  * @author Ken Krebs
  * @author Arjen Poutsma
@@ -32,6 +33,7 @@ import org.springframework.web.bind.WebDataBinder;
 public class EditPetForm {
 
 	private final Clinic clinic;
+
 
 	@Autowired
 	public EditPetForm(Clinic clinic) {
@@ -45,7 +47,7 @@ public class EditPetForm {
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
-		dataBinder.setDisallowedFields(new String[] {"id"});
+		dataBinder.setDisallowedFields("id");
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -55,7 +57,7 @@ public class EditPetForm {
 		return "pets/form";
 	}
 
-	@RequestMapping(method = {RequestMethod.PUT, RequestMethod.POST})
+	@RequestMapping(method = { RequestMethod.PUT, RequestMethod.POST })
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, SessionStatus status) {
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
