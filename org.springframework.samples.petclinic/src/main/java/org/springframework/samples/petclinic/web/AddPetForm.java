@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.web;
 
 import java.util.Collection;
@@ -11,19 +12,19 @@ import org.springframework.samples.petclinic.validation.PetValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.SessionStatus;
-import org.springframework.web.bind.WebDataBinder;
 
 /**
  * JavaBean form controller that is used to add a new <code>Pet</code> to the
  * system.
- *
+ * 
  * @author Juergen Hoeller
  * @author Ken Krebs
  * @author Arjen Poutsma
@@ -34,6 +35,7 @@ import org.springframework.web.bind.WebDataBinder;
 public class AddPetForm {
 
 	private final Clinic clinic;
+
 
 	@Autowired
 	public AddPetForm(Clinic clinic) {
@@ -47,7 +49,7 @@ public class AddPetForm {
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
-		dataBinder.setDisallowedFields(new String[] {"id"});
+		dataBinder.setDisallowedFields("id");
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
