@@ -24,7 +24,7 @@ package org.springframework.validation;
  * only objects in the web tier, the data-access tier, or the
  * whatever-tier. As such it is amenable to being used in any layer
  * of an application, and supports the encapsulation of validation
- * logic as first-class citizens in their own right.
+ * logic as a first-class citizen in its own right.
  *
  * <p>Find below a simple but complete <code>Validator</code>
  * implementation, which validates that the various {@link String}
@@ -55,7 +55,7 @@ package org.springframework.validation;
  * }</pre>
  *
  * <p>See also the Spring reference manual for a fuller discussion of
- * the <code>Validator</code> interface and it's role in a enterprise
+ * the <code>Validator</code> interface and it's role in an enterprise
  * application. 
  *
  * @author Rod Johnson
