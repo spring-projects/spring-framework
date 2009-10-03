@@ -3406,7 +3406,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope
           once, as explained in the preceding section.</para>
         </note>
 
-        <para>Multiple lifestyle mechanisms configured for the same bean, with
+        <para>Multiple lifecycle mechanisms configured for the same bean, with
         different initialization methods, are called as follows:</para>
 
         <itemizedlist>
@@ -4217,7 +4217,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"><classname>RequiredAnnotationBeanPostProcessor</classname></ulink>.)</para>
 
     <note>
-      <para>Note that <literal>&lt;context:annotation-config/&gt;</literal>
+      <para><literal>&lt;context:annotation-config/&gt;</literal>
       only looks for annotations on beans in the same application context in
       which it is defined. This means that, if you put
       <literal>&lt;context:annotation-config/&gt;</literal> in a
@@ -4270,9 +4270,9 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         <interfacename>@Autowired</interfacename> in the examples below.
         <interfacename>@Inject</interfacename> does not have a required
         property unlike Spring's <interfacename>@Autowire</interfacename>
-        annotation which as a required property to indicate if the value being
+        annotation which has a <literal>required</literal> property to indicate if the value being
         injected is optional. This behavior is enabled automatically if you
-        have the JSR 330 jar on the classpath.</para>
+        have the JSR 330 JAR on the classpath.</para>
       </note>
 
       <programlisting language="java">public class SimpleMovieLister {
@@ -4443,11 +4443,11 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       simplest case, this can be a plain descriptive value:</para>
 
       <note>
-        <para>Note that the JSR 330 <interfacename>@Qualifier</interfacename>
+        <para>JSR 330's <interfacename>@Qualifier</interfacename>
         annotation can only be applied as a meta-annotation unlike Spring's
         @Qualifier which takes a string property to discriminate among
-        multiple injection candidates and can be placed on annotation as well
-        as types, fields, methods, contstructors and parameters.</para>
+        multiple injection candidates and can be placed on annotations as well
+        as types, fields, methods, constructors, and parameters.</para>
       </note>
 
       <programlisting language="java">public class MovieRecommender {
@@ -4968,8 +4968,8 @@ public @interface MovieQualifier {
       project</ulink> are part of the core Spring Framework. This allows you
       to define beans using Java rather than using the traditional XML files.
       Take a look at the <interfacename>@Configuration</interfacename>,
-      <interfacename>@Bean, @Import,</interfacename> and
-      <interfacename>@DependsOn</interfacename> annotations for how to use
+      <interfacename>@Bean</interfacename>, <interfacename>@Import</interfacename>, and
+      <interfacename>@DependsOn</interfacename> annotations for examples of how to use
       these new features.</para>
     </note>
 
@@ -5088,9 +5088,9 @@ public class JpaMovieFinder implements MovieFinder {
         stereotpye annotations and they will be automatically detected during
         component-scanning. The value of the
         <interfacename>@Named</interfacename> property will be used as the
-        Bean Name. At this time Spring default for bean scope will be applied
+        Bean Name. At this time Spring defaults for bean scope will be applied
         when using @Named. This behavior as well as mapping of JSR 330 and
-        JSR299 scopes is planned for Spring 3.0 GA assuming the JSRs are
+        JSR 299 scopes is planned for Spring 3.0 GA assuming the JSRs are
         stable at that time.</para>
       </note>
     </section>
@@ -5315,9 +5315,9 @@ public class FactoryMethodComponent {
       corresponding bean definition.</para>
 
       <note>
-        <para>JSR 330's @Named annotation can be used as a mean to both detect
+        <para>JSR 330's @Named annotation can be used as a means to both detect
         components and to provide them with a name. This behavior is enabled
-        automatically if you have the JSR 330 jar on the classpath.</para>
+        automatically if you have the JSR 330 JAR on the classpath.</para>
       </note>
 
       <para>If such an annotation contains no <literal>name</literal> value or
@@ -6045,7 +6045,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       implements the <classname>MessageSourceAware</classname> interface is
       injected with the application context's
       <classname>MessageSource</classname> when the bean is created and
-      configured. <note>
+      configured.</para>
+      <note>
           <para><emphasis>As an alternative to
           <classname>ResourceBundleMessageSource</classname>, Spring provides
           a <classname>ReloadableResourceBundleMessageSource</classname>
@@ -6058,7 +6059,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
           (while efficiently caching them in between). Check out the
           <classname>ReloadableResourceBundleMessageSource</classname> javadoc
           for details.</para>
-        </note></para>
+      </note>
     </section>
 
     <section id="context-functionality-events">
@@ -6403,7 +6404,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       "META-INF/applicationContext.xml"), and drop the resulting RAR file into
       your application server's deployment directory.</para>
 
-      <para><note>
+      <note>
           <para>Such RAR deployment units are usually self-contained; they do
           not expose components to the outside world, not even to other
           modules of the same application. Interaction with a RAR-based
@@ -6414,7 +6415,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
           the outside, it could for example export RMI endpoints, which of
           course may be used by other application modules on the same
           machine.</para>
-        </note></para>
+        </note>
     </section>
   </section>
 
