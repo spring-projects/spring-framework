@@ -60,11 +60,12 @@ public class MappingException extends RuntimeException {
 	public void printStackTrace(PrintStream ps) {
 		super.printStackTrace(ps);
 		synchronized (ps) {
-			ps.println("Failure cause traces:");
+			ps.println();
+			ps.println("Mapping Failure Traces:");
 			int i = 1;
 			for (Iterator<MappingFailure> it = this.mappingFailures.iterator(); it.hasNext(); i++) {
 				MappingFailure failure = it.next();
-				ps.println("- MappingFailure #" + i + " Cause: ");
+				ps.println("- MappingFailure #" + i + ":");
 				Throwable t = failure.getCause();
 				if (t != null) {
 					t.printStackTrace(ps);
@@ -79,11 +80,12 @@ public class MappingException extends RuntimeException {
 	public void printStackTrace(PrintWriter pw) {
 		super.printStackTrace(pw);
 		synchronized (pw) {
-			pw.println("Failure cause traces:");
+			pw.println();
+			pw.println("Mapping Failure Traces:");
 			int i = 1;
 			for (Iterator<MappingFailure> it = this.mappingFailures.iterator(); it.hasNext(); i++) {
 				MappingFailure failure = it.next();
-				pw.println("- MappingFailure #" + i + " Cause: ");
+				pw.println("- MappingFailure #" + i + ":");
 				Throwable t = failure.getCause();
 				if (t != null) {
 					t.printStackTrace(pw);

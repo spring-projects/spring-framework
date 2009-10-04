@@ -1,6 +1,7 @@
 package org.springframework.mapping.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,15 +32,14 @@ public class SpelMapperTests {
 
 	@Test
 	public void mapExplicit() throws MappingException {
-		mapper.setAutoMappingEnabled(false);
-		mapper.addMapping("name");
-
 		Map<String, Object> source = new HashMap<String, Object>();
 		source.put("name", "Keith");
 		source.put("age", 31);
 
 		Person target = new Person();
 
+		mapper.setAutoMappingEnabled(false);
+		mapper.addMapping("name");
 		mapper.map(source, target);
 
 		assertEquals("Keith", target.name);
@@ -48,8 +48,6 @@ public class SpelMapperTests {
 
 	@Test
 	public void mapAutomaticWithExplictOverrides() {
-		mapper.addMapping("test", "age");
-
 		Map<String, Object> source = new HashMap<String, Object>();
 		source.put("name", "Keith");
 		source.put("test", "3");
@@ -57,6 +55,7 @@ public class SpelMapperTests {
 
 		Person target = new Person();
 
+		mapper.addMapping("test", "age");
 		mapper.map(source, target);
 
 		assertEquals("Keith", target.name);
@@ -65,15 +64,29 @@ public class SpelMapperTests {
 	}
 
 	@Test
-	public void mapSameSourceFieldToMultipleTargets() {
-		mapper.addMapping("test", "name");
-		mapper.addMapping("test", "favoriteSport");
+	public void mapAutomaticIgnoreUnknownField() {
+		Map<String, Object> source = new HashMap<String, Object>();
+		source.put("name", "Keith");
+		source.put("age", 31);
+		source.put("unknown", "foo");
 
+		Person target = new Person();
+
+		mapper.map(source, target);
+
+		assertEquals("Keith", target.name);
+		assertEquals(31, target.age);
+	}
+
+	@Test
+	public void mapSameSourceFieldToMultipleTargets() {
 		Map<String, Object> source = new HashMap<String, Object>();
 		source.put("test", "FOOTBALL");
 
 		Person target = new Person();
 
+		mapper.addMapping("test", "name");
+		mapper.addMapping("test", "favoriteSport");
 		mapper.map(source, target);
 
 		assertEquals("FOOTBALL", target.name);
@@ -92,7 +105,6 @@ public class SpelMapperTests {
 
 		mapper.addMapping("fullName", "name");
 		mapper.addMapping("sport", "favoriteSport");
-
 		mapper.map(source, target);
 
 		assertEquals("Keith Donald", target.name);
@@ -101,23 +113,45 @@ public class SpelMapperTests {
 	}
 
 	@Test
+	public void mapBeanDeep() {
+		PersonDto source = new PersonDto();
+		source.age = "0";
+		NestedDto nested = new NestedDto();
+		nested.foo = "bar";
+		source.setNested(nested);
+
+		Person target = new Person();
+
+		mapper.addMapping("nested.foo", "nested.foo");
+		mapper.map(source, target);
+
+		assertEquals("bar", target.nested.foo);
+	}
+
+	@Test
 	public void mapBeanNested() {
 		PersonDto source = new PersonDto();
 		source.setFullName("Keith Donald");
 		source.setAge("31");
 		source.setSport("FOOTBALL");
+		NestedDto nested = new NestedDto();
+		nested.foo = "bar";
+		source.setNested(nested);
 
 		Person target = new Person();
 
-		mapper.addMapping("fullName", "nested.fullName");
-		mapper.addMapping("age", "nested.age");
-		mapper.addMapping("sport", "nested.sport");
-
+		mapper.addMapping("fullName", "name");
+		mapper.addMapping("sport", "favoriteSport");
+		mapper.addMapping("nested", "nested").setConverter(new Converter<NestedDto, Nested>() {
+			public Nested convert(NestedDto source) {
+				return (Nested) new SpelMapper().map(source, new Nested());
+			}
+		});
 		mapper.map(source, target);
 
-		assertEquals("Keith Donald", target.getNested().getFullName());
-		assertEquals("31", target.nested.age);
-		assertEquals("FOOTBALL", target.nested.sport);
+		assertEquals("Keith Donald", target.name);
+		assertEquals(31, target.age);
+		assertEquals(Sport.FOOTBALL, target.favoriteSport);
 	}
 
 	@Test
@@ -132,11 +166,28 @@ public class SpelMapperTests {
 
 		mapper.setAutoMappingEnabled(false);
 		mapper.addMapping("sports", "favoriteSports");
-
 		mapper.map(source, target);
 
 		assertEquals(Sport.FOOTBALL, target.favoriteSports.get(0));
 		assertEquals(Sport.BASKETBALL, target.favoriteSports.get(1));
+	}
+
+	@Test
+	public void mapListFlatten() {
+		PersonDto source = new PersonDto();
+		List<String> sports = new ArrayList<String>();
+		sports.add("FOOTBALL");
+		sports.add("BASKETBALL");
+		source.setSports(sports);
+
+		Person target = new Person();
+
+		mapper.setAutoMappingEnabled(false);
+		mapper.addMapping("sports[0]", "favoriteSport");
+		mapper.map(source, target);
+
+		assertEquals(Sport.FOOTBALL, target.favoriteSport);
+		assertNull(target.favoriteSports);
 	}
 
 	@Test
@@ -187,7 +238,7 @@ public class SpelMapperTests {
 	public void mapFailure() {
 		Map<String, Object> source = new HashMap<String, Object>();
 		source.put("name", "Keith");
-		source.put("age", "bogus");
+		source.put("age", "invalid");
 		Person target = new Person();
 		try {
 			mapper.map(source, target);
@@ -208,7 +259,7 @@ public class SpelMapperTests {
 
 		private Map<String, String> friendRankings;
 
-		private NestedDto nestedDto;
+		private NestedDto nested;
 
 		public String getFullName() {
 			return fullName;
@@ -250,12 +301,12 @@ public class SpelMapperTests {
 			this.friendRankings = friendRankings;
 		}
 
-		public NestedDto getNestedDto() {
-			return nestedDto;
+		public NestedDto getNested() {
+			return nested;
 		}
 
-		public void setNestedDto(NestedDto nestedDto) {
-			this.nestedDto = nestedDto;
+		public void setNested(NestedDto nested) {
+			this.nested = nested;
 		}
 
 	}
@@ -277,7 +328,7 @@ public class SpelMapperTests {
 
 		private Sport favoriteSport;
 
-		private PersonDto nested;
+		private Nested nested;
 
 		// private Person cyclic;
 
@@ -317,11 +368,11 @@ public class SpelMapperTests {
 			this.favoriteSport = favoriteSport;
 		}
 
-		public PersonDto getNested() {
+		public Nested getNested() {
 			return nested;
 		}
 
-		public void setNested(PersonDto nested) {
+		public void setNested(Nested nested) {
 			this.nested = nested;
 		}
 
@@ -362,6 +413,20 @@ public class SpelMapperTests {
 			Person p = (Person) o;
 			return name.equals(p.name);
 		}
+	}
+
+	public static class Nested {
+
+		private String foo;
+
+		public String getFoo() {
+			return foo;
+		}
+
+		public void setFoo(String foo) {
+			this.foo = foo;
+		}
+
 	}
 
 	public enum Sport {

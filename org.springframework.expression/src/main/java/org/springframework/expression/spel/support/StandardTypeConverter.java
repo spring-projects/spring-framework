@@ -28,9 +28,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link TypeConverter} interface,
- * delegating to a core Spring {@link ConversionService}.
- *
+ * Default implementation of the {@link TypeConverter} interface, delegating to a core Spring {@link ConversionService}.
+ * 
  * @author Juergen Hoeller
  * @author Andy Clement
  * @since 3.0
@@ -56,12 +55,12 @@ public class StandardTypeConverter implements TypeConverter {
 	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 		try {
 			return this.conversionService.convert(value, TypeDescriptor.forObject(value), typeDescriptor);
-		}
-		catch (ConverterNotFoundException cenfe) {
-			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
-		}
-		catch (ConversionException ce) {
-			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR, value.getClass(), typeDescriptor.asString());
+		} catch (ConverterNotFoundException cenfe) {
+			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR, value != null ? value
+					.getClass() : null, typeDescriptor.asString());
+		} catch (ConversionException ce) {
+			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR, value != null ? value.getClass()
+					: null, typeDescriptor.asString());
 		}
 	}
 
