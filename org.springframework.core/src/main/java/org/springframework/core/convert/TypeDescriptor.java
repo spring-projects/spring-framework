@@ -160,6 +160,14 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Is this type a primitive type?
+	 */
+	public boolean isPrimitive() {
+		Class<?> type = getType();
+		return (type != null && type.isPrimitive());
+	}
+
+	/**
 	 * Is this type an array type?
 	 */
 	public boolean isArray() {
@@ -195,7 +203,7 @@ public class TypeDescriptor {
 				return TypeDescriptor.valueOf(getCollectionElementType());
 			} else {
 				return TypeDescriptor.NULL;
-			}			
+			}
 		}
 	}
 

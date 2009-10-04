@@ -91,14 +91,13 @@ public class GenericConversionServiceTests {
 		assertNull(conversionService.convert(null, Integer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
 	public void convertNullTargetClass() {
-		assertEquals("3", conversionService.convert("3", (Class<?>) null));
+		assertNull(conversionService.convert("3", (Class<?>) null));
 	}
 
 	@Test
 	public void convertNullTypeDescriptor() {
-		assertEquals(null, conversionService.convert(3, TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
+		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
 	}
 
 	@Test
@@ -132,6 +131,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertArrayToArray() {
+		conversionService.addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		Integer[] result = conversionService.convert(new String[] { "1", "2", "3" }, Integer[].class);
 		assertEquals(new Integer(1), result[0]);

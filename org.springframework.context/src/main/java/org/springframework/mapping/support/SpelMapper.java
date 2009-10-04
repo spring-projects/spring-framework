@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -60,27 +61,27 @@ public class SpelMapper implements Mapper<Object, Object> {
 		this.autoMappingEnabled = autoMappingEnabled;
 	}
 
-	public MappingConfiguration addMapping(String expression) {
-		return addMapping(expression, expression);
+	public MappingConfiguration addMapping(String fieldExpression) {
+		return addMapping(fieldExpression, fieldExpression);
 	}
 
 	public ConverterRegistry getConverterRegistry() {
 		return conversionService;
 	}
 
-	public MappingConfiguration addMapping(String sourceExpression, String targetExpression) {
+	public MappingConfiguration addMapping(String sourceFieldExpression, String targetFieldExpression) {
 		Expression sourceExp;
 		try {
-			sourceExp = sourceExpressionParser.parseExpression(sourceExpression);
+			sourceExp = sourceExpressionParser.parseExpression(sourceFieldExpression);
 		} catch (ParseException e) {
-			throw new IllegalArgumentException("The mapping source '" + sourceExpression
+			throw new IllegalArgumentException("The mapping source '" + sourceFieldExpression
 					+ "' is not a parseable value expression", e);
 		}
 		Expression targetExp;
 		try {
-			targetExp = targetExpressionParser.parseExpression(targetExpression);
+			targetExp = targetExpressionParser.parseExpression(targetFieldExpression);
 		} catch (ParseException e) {
-			throw new IllegalArgumentException("The mapping target '" + targetExpression
+			throw new IllegalArgumentException("The mapping target '" + targetFieldExpression
 					+ "' is not a parseable property expression", e);
 		}
 		Mapping mapping = new Mapping(sourceExp, targetExp);
@@ -88,33 +89,33 @@ public class SpelMapper implements Mapper<Object, Object> {
 		return mapping;
 	}
 
-	public void map(Object source, Object target) {
+	public Object map(Object source, Object target) {
 		EvaluationContext sourceContext = getMappingContext(source);
 		EvaluationContext targetContext = getMappingContext(target);
 		List<MappingFailure> failures = new LinkedList<MappingFailure>();
 		for (Mapping mapping : this.mappings) {
 			mapping.map(sourceContext, targetContext, failures);
 		}
-		Set<Mapping> autoMappings = getAutoMappings(source, target);
+		Set<Mapping> autoMappings = getAutoMappings(sourceContext, targetContext);
 		for (Mapping mapping : autoMappings) {
 			mapping.map(sourceContext, targetContext, failures);
 		}
 		if (!failures.isEmpty()) {
 			throw new MappingException(failures);
 		}
+		return target;
 	}
 
 	private EvaluationContext getMappingContext(Object object) {
 		return mappableTypeFactory.getMappableType(object).getEvaluationContext(object, this.conversionService);
 	}
 
-	private Set<Mapping> getAutoMappings(Object source, Object target) {
+	private Set<Mapping> getAutoMappings(EvaluationContext sourceContext, EvaluationContext targetContext) {
 		if (this.autoMappingEnabled) {
 			Set<Mapping> autoMappings = new LinkedHashSet<Mapping>();
-			Set<String> sourceFields = getMappableFields(source);
-			Set<String> targetFields = getMappableFields(target);
+			Set<String> sourceFields = getMappableFields(sourceContext.getRootObject().getValue());
 			for (String field : sourceFields) {
-				if (!explicitlyMapped(field) && targetFields.contains(field)) {
+				if (!explicitlyMapped(field)) {
 					Expression sourceExpression;
 					Expression targetExpression;
 					try {
@@ -129,8 +130,13 @@ public class SpelMapper implements Mapper<Object, Object> {
 						throw new IllegalArgumentException("The mapping target '" + field
 								+ "' is not a parseable value expression", e);
 					}
-					Mapping mapping = new Mapping(sourceExpression, targetExpression);
-					autoMappings.add(mapping);
+					try {
+						if (targetExpression.isWritable(targetContext)) {
+							autoMappings.add(new Mapping(sourceExpression, targetExpression));
+						}
+					} catch (EvaluationException e) {
+
+					}
 				}
 			}
 			return autoMappings;
@@ -145,7 +151,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	private boolean explicitlyMapped(String field) {
 		for (Mapping mapping : this.mappings) {
-			if (mapping.getSourceExpressionString().equals(field)) {
+			if (mapping.getSourceExpressionString().startsWith(field)) {
 				return true;
 			}
 		}

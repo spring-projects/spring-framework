@@ -27,8 +27,9 @@ public interface Mapper<S, T> {
 	 * Map the source to the target.
 	 * @param source the source to map from
 	 * @param target the target to map to
+	 * @return the mapped target object
 	 * @throws MappingException if the mapping process failed
 	 */
-	void map(S source, T target);
+	Object map(S source, T target);
 	
 }
