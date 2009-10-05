@@ -21,6 +21,7 @@
 	<dependencies>
 		<dependency org="javax.activation" name="com.springsource.javax.activation" rev="1.1.0" conf="provided->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="provided->compile"/>
+		<dependency org="javax.inject" name="com.springsource.javax.inject" rev="0.9.0.PFD" conf="test->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="provided->compile"/>
 		<dependency org="javax.portlet" name="com.springsource.javax.portlet" rev="2.0.0" conf="provided->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided->compile"/>
