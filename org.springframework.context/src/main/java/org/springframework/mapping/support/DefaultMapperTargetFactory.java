@@ -13,41 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.mapping;
+package org.springframework.mapping.support;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
- * Indicates an individual mapping failed.
- * TODO - other fields required here?
+ * Creates a mapping target by calling its default constructor.
  * @author Keith Donald
+ * @see BeanUtils#instantiate(Class)
  */
-public class MappingFailure {
+class DefaultMapperTargetFactory implements MapperTargetFactory {
 
-	private final Throwable cause;
-
-	/**
-	 * Create a new mapping failure caused by the exception.
-	 * @param cause the failure cause
-	 */
-	public MappingFailure(Throwable cause) {
-		this.cause = cause;
-	}
-
-	/**
-	 * The failure message.
-	 */
-	public String getMessage() {
-		return getCause().getMessage();
-	}
-
-	/**
-	 * The cause of this failure.
-	 */
-	public Throwable getCause() {
-		return cause;
-	}
-
-	public String toString() {
-		return "[MappingFailure cause = " + cause + "]";
+	public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return BeanUtils.instantiate(targetType.getType());
 	}
 
 }
