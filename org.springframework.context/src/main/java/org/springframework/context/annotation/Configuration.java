@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Documented;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,10 +52,11 @@ import org.springframework.stereotype.Component;
  * @author Rod Johnson
  * @author Chris Beams
  * @since 3.0
- * @see Bean
+ * @see Import
  * @see Lazy
- * @see Value
+ * @see Bean
  * @see ConfigurationClassPostProcessor;
+ * @see ConfigurationClassApplicationContext;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -62,4 +64,19 @@ import org.springframework.stereotype.Component;
 @Component
 public @interface Configuration {
 
+	/**
+	 * Explicitly specify the name of the Spring bean definition associated
+	 * with this Configuration class.  If left unspecified (the common case),
+	 * a bean name will be automatically generated.
+	 * 
+	 * <p>The custom name applies only if the Configuration class is picked up via
+	 * component scanning or supplied directly to a {@link ConfigurationClassApplicationContext}.
+	 * If the Configuration class is registered as a traditional XML bean definition,
+	 * the name/id of the bean element will take precedence.
+	 * 
+	 * @return the specified bean name, if any
+	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
+	 */
+	String value() default "";
+	
 }

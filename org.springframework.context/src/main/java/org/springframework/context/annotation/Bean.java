@@ -59,9 +59,11 @@ import org.springframework.beans.factory.annotation.Autowire;
  * @author Chris Beams
  * @since 3.0
  * @see Configuration
+ * @see DependsOn
  * @see Lazy
  * @see Primary
- * @see org.springframework.context.annotation.Scope
+ * @see Scope
+ * @see Value
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
