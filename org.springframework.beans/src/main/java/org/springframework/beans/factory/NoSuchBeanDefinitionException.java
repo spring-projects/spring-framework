@@ -56,13 +56,22 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	/**
 	 * Create a new NoSuchBeanDefinitionException.
 	 * @param type required type of bean
+	 */
+	public NoSuchBeanDefinitionException(Class type) {
+		super("No unique bean of type [" + type.getName() + "] is defined");
+		this.beanType = type;
+	}
+
+	/**
+	 * Create a new NoSuchBeanDefinitionException.
+	 * @param type required type of bean
 	 * @param message detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(Class type, String message) {
 		super("No unique bean of type [" + type.getName() + "] is defined: " + message);
 		this.beanType = type;
 	}
-
+	
 	/**
 	 * Create a new NoSuchBeanDefinitionException.
 	 * @param type required type of bean
