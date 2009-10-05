@@ -22,8 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.convert.support.GenericConverter;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -55,10 +59,14 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	private boolean autoMappingEnabled = true;
 
-	private final DefaultConversionService conversionService = new DefaultConversionService();
+	private MappingConversionService conversionService = new MappingConversionService();
 
 	public void setAutoMappingEnabled(boolean autoMappingEnabled) {
 		this.autoMappingEnabled = autoMappingEnabled;
+	}
+
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService.setParent(conversionService);
 	}
 
 	public MappingConfiguration addMapping(String fieldExpression) {
@@ -158,6 +166,20 @@ public class SpelMapper implements Mapper<Object, Object> {
 		return false;
 	}
 
+	private class MappingConversionService extends GenericConversionService {
+
+		public MappingConversionService() {
+			setParent(new DefaultConversionService());
+		}
+
+		@Override
+		protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			GenericConverter converter = super.getConverter(sourceType, targetType);
+			return converter != null ? converter : new MapperConverter(new SpelMapper());
+		}
+
+	}
+
 	private static class MappableTypeFactory {
 
 		private static final MapMappableType MAP_MAPPABLE_TYPE = new MapMappableType();
@@ -173,4 +195,5 @@ public class SpelMapper implements Mapper<Object, Object> {
 			}
 		}
 	}
+
 }

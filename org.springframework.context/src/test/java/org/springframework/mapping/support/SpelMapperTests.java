@@ -142,11 +142,7 @@ public class SpelMapperTests {
 
 		mapper.addMapping("fullName", "name");
 		mapper.addMapping("sport", "favoriteSport");
-		mapper.addMapping("nested", "nested").setConverter(new Converter<NestedDto, Nested>() {
-			public Nested convert(NestedDto source) {
-				return (Nested) new SpelMapper().map(source, new Nested());
-			}
-		});
+		mapper.addMapping("nested", "nested");
 		mapper.map(source, target);
 
 		assertEquals("Keith Donald", target.name);

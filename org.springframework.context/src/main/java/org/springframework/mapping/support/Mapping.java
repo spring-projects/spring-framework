@@ -26,6 +26,10 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.mapping.MappingFailure;
 
+/**
+ * An individual mapping definition between two fields.
+ * @author Keith Donald
+ */
 class Mapping implements MappingConfiguration {
 
 	private Expression source;
