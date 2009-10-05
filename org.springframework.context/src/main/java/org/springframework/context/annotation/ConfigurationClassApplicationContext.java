@@ -53,13 +53,13 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	private final Set<Class<?>> configClasses = new LinkedHashSet<Class<?>>();
 
 	/**
-	 * Create a new {@link ConfigurationClassApplicationContext}, loading bean 
+	 * Create a new {@link ConfigurationClassApplicationContext}, loading bean
 	 * definitions from the given {@literal configClasses} and automatically
 	 * refreshing the context. <p>Note: if zero classes are specified, the
 	 * context will <b>not</b> be refreshed automatically, assuming that
 	 * the user will subsequently call {@link #addConfigurationClass(Class)}
 	 * and then manually refresh.
-	 * 
+	 *
 	 * @param configClasses zero or more {@link Configuration} classes
 	 * @see #addConfigurationClass(Class)
 	 * @see #refresh()
@@ -68,14 +68,14 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 		if (configClasses.length == 0) {
 			return;
 		}
-		
+
 		for (Class<?> configClass : configClasses) {
 			addConfigurationClass(configClass);
 		}
-		
+
 		this.refresh();
 	}
-	
+
 	/**
 	 * Add a {@link Configuration} class to be processed. Allows for programmatically
 	 * building a {@link ConfigurationClassApplicationContext}. Note that
@@ -99,22 +99,22 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	 * class specified. Enables the default set of annotation configuration post
 	 * processors, such that {@literal @Autowired}, {@literal @Required}, and associated
 	 * annotations can be used within Configuration classes.
-	 * 
+	 *
 	 * <p>Configuration class bean definitions are registered with generated bean definition names.
-	 * 
+	 *
 	 * @see AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 * @see ConfigurationClassPostProcessor
 	 */
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
 			throws IOException, BeansException {
-		
+
 		// @Autowired and friends must be enabled by default when processing @Configuration classes
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
-		
+
 		for (Class<?> configClass : configClasses) {
 			AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(configClass).getBeanDefinition();
-			
+
 			String name = AnnotationUtils.findAnnotation(configClass, Configuration.class).value();
 			if (!StringUtils.hasLength(name)) {
 				name = new DefaultBeanNameGenerator().generateBeanName(def, beanFactory);
@@ -122,13 +122,13 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 
 			beanFactory.registerBeanDefinition(name, def);
 		}
-		
+
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 	}
 
 	/**
 	 * Return the bean instance that matches the given object type.
-	 * 
+	 *
 	 * @param <T>
 	 * @param requiredType type the bean must match; can be an interface or superclass.
 	 * {@literal null} is disallowed.
@@ -141,9 +141,9 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	@SuppressWarnings("unchecked")
 	public <T> T getBean(Class<T> requiredType) {
 		Assert.notNull(requiredType, "requiredType may not be null");
-		
+
 		Map<String, ?> beansOfType = this.getBeansOfType(requiredType);
-		
+
 		switch (beansOfType.size()) {
 			case 0:
 				throw new NoSuchBeanDefinitionException(requiredType);
