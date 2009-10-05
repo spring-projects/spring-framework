@@ -26,6 +26,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>com.springsource.javax.inject</artifactId>
+      <version>0.9.0.PFD</version>
+      <scope>test</scope> 
+    </dependency>
+    <dependency>
       <groupId>javax.persistence</groupId>
       <artifactId>persistence-api</artifactId>
       <version>1.0</version>

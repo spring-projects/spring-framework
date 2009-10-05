@@ -19,9 +19,11 @@ package org.springframework.test.context.junit4;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +50,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * <ul>
  * <li>{@link ContextConfiguration @ContextConfiguration}</li>
  * <li>{@link Autowired @Autowired}</li>
+ * <li>{@link Inject @Inject}</li>
  * <li>{@link Qualifier @Qualifier}</li>
  * <li>{@link Resource @Resource}</li>
  * <li>{@link ApplicationContextAware}</li>
@@ -59,10 +62,12 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * {@link ContextConfiguration#locations() locations} are explicitly declared
  * and since the {@link ContextConfiguration#loader() ContextLoader} is left set
  * to the default value of {@link GenericXmlContextLoader}, this test class's
- * dependencies will be injected via {@link Autowired @Autowired} and
- * {@link Resource @Resource} from beans defined in the
- * {@link ApplicationContext} loaded from the default classpath resource:
- * <code>&quot;/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>.
+ * dependencies will be injected via {@link Autowired @Autowired},
+ * {@link Inject @Inject}, and {@link Resource @Resource} from beans defined in
+ * the {@link ApplicationContext} loaded from the default classpath resource:
+ * 
+ * <code>&quot;/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
+ * .
  * </p>
  * 
  * @author Sam Brannen
@@ -93,12 +98,15 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	private Employee employee;
 
 	@Autowired
-	private Pet pet;
+	private Pet autowiredPet;
+
+	@Inject
+	private Pet injectedPet;
 
 	@Autowired(required = false)
 	protected Long nonrequiredLong;
 
-	@Resource()
+	@Resource
 	protected String foo;
 
 	protected String bar;
@@ -153,11 +161,14 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	}
 
 	@Test
-	public final void verifyAnnotationAutowiredFields() {
+	public final void verifyAnnotationAutowiredAndInjectedFields() {
 		assertNull("The nonrequiredLong field should NOT have been autowired.", this.nonrequiredLong);
 		assertEquals("The quux field should have been autowired via @Autowired and @Qualifier.", "Quux", this.quux);
-		assertNotNull("The pet field should have been autowired.", this.pet);
-		assertEquals("Fido", this.pet.getName());
+		assertNotNull("The pet field should have been autowired.", this.autowiredPet);
+		assertNotNull("The pet field should have been injected.", this.injectedPet);
+		assertEquals("Fido", this.autowiredPet.getName());
+		assertEquals("Fido", this.injectedPet.getName());
+		assertSame("@Autowired and @Inject pet should be the same object.", this.autowiredPet, this.injectedPet);
 	}
 
 	@Test
