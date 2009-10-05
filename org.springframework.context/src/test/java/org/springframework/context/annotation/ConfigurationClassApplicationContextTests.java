@@ -17,7 +17,9 @@
 package org.springframework.context.annotation;
 
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.equalTo;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.matchers.JUnitMatchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -127,6 +129,7 @@ public class ConfigurationClassApplicationContextTests {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void getBeanByTypeAmbiguityRaisesException() {
 		ConfigurationClassApplicationContext context = new ConfigurationClassApplicationContext(TwoTestBeanConfig.class);
@@ -134,11 +137,15 @@ public class ConfigurationClassApplicationContextTests {
 		try {
 			context.getBean(TestBean.class);
 		} catch (RuntimeException ex) {
-			assertThat(ex.getMessage(), equalTo(
-					"No unique bean of type [" + TestBean.class.getName() + "] is defined: " +
-					"2 matching bean definitions found (tb1,tb2). Consider qualifying with " +
-					"getBean(Class<T> beanType, String beanName) or declaring one bean definition as " +
-					"@" + Primary.class.getSimpleName()));
+			assertThat(ex.getMessage(),
+					allOf(
+						containsString("No unique bean of type [" + TestBean.class.getName() + "] is defined"),
+						containsString("2 matching bean definitions found"),
+						containsString("tb1"),
+						containsString("tb2"),
+						containsString("Consider qualifying with")
+					)
+				);
 		}
 	}
 	
