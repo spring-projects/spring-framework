@@ -59,13 +59,15 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	 * context will <b>not</b> be refreshed automatically, assuming that
 	 * the user will subsequently call {@link #addConfigurationClass(Class)}
 	 * and then manually refresh.
+	 * 
 	 * @param configClasses zero or more {@link Configuration} classes
 	 * @see #addConfigurationClass(Class)
 	 * @see #refresh()
 	 */
 	public ConfigurationClassApplicationContext(Class<?>... configClasses) {
-		if (configClasses.length == 0)
+		if (configClasses.length == 0) {
 			return;
+		}
 		
 		for (Class<?> configClass : configClasses) {
 			addConfigurationClass(configClass);
