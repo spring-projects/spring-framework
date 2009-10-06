@@ -44,6 +44,7 @@ public class MapperConverter implements GenericConverter {
 		if (source == null) {
 			return null;
 		}
+		// TODO - could detect cyclical reference here if had a mapping context? (source should not equal currently mapped object) 
 		Object target = this.mappingTargetFactory.createTarget(source, sourceType, targetType);
 		return this.mapper.map(source, target);
 	}

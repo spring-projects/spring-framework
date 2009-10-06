@@ -22,11 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.GenericConverter;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -55,7 +53,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 			SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull
 					| SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
 
-	private final Set<Mapping> mappings = new LinkedHashSet<Mapping>();
+	private final Set<SpelMapping> mappings = new LinkedHashSet<SpelMapping>();
 
 	private boolean autoMappingEnabled = true;
 
@@ -63,10 +61,6 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	public void setAutoMappingEnabled(boolean autoMappingEnabled) {
 		this.autoMappingEnabled = autoMappingEnabled;
-	}
-
-	public void setConversionService(ConversionService conversionService) {
-		this.conversionService.setParent(conversionService);
 	}
 
 	public MappingConfiguration addMapping(String fieldExpression) {
@@ -92,7 +86,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 			throw new IllegalArgumentException("The mapping target '" + targetFieldExpression
 					+ "' is not a parseable property expression", e);
 		}
-		Mapping mapping = new Mapping(sourceExp, targetExp);
+		SpelMapping mapping = new SpelMapping(sourceExp, targetExp);
 		this.mappings.add(mapping);
 		return mapping;
 	}
@@ -101,11 +95,11 @@ public class SpelMapper implements Mapper<Object, Object> {
 		EvaluationContext sourceContext = getMappingContext(source);
 		EvaluationContext targetContext = getMappingContext(target);
 		List<MappingFailure> failures = new LinkedList<MappingFailure>();
-		for (Mapping mapping : this.mappings) {
+		for (SpelMapping mapping : this.mappings) {
 			mapping.map(sourceContext, targetContext, failures);
 		}
-		Set<Mapping> autoMappings = getAutoMappings(sourceContext, targetContext);
-		for (Mapping mapping : autoMappings) {
+		Set<SpelMapping> autoMappings = getAutoMappings(sourceContext, targetContext);
+		for (SpelMapping mapping : autoMappings) {
 			mapping.map(sourceContext, targetContext, failures);
 		}
 		if (!failures.isEmpty()) {
@@ -118,9 +112,9 @@ public class SpelMapper implements Mapper<Object, Object> {
 		return mappableTypeFactory.getMappableType(object).getEvaluationContext(object, this.conversionService);
 	}
 
-	private Set<Mapping> getAutoMappings(EvaluationContext sourceContext, EvaluationContext targetContext) {
+	private Set<SpelMapping> getAutoMappings(EvaluationContext sourceContext, EvaluationContext targetContext) {
 		if (this.autoMappingEnabled) {
-			Set<Mapping> autoMappings = new LinkedHashSet<Mapping>();
+			Set<SpelMapping> autoMappings = new LinkedHashSet<SpelMapping>();
 			Set<String> sourceFields = getMappableFields(sourceContext.getRootObject().getValue());
 			for (String field : sourceFields) {
 				if (!explicitlyMapped(field)) {
@@ -140,7 +134,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 					}
 					try {
 						if (targetExpression.isWritable(targetContext)) {
-							autoMappings.add(new Mapping(sourceExpression, targetExpression));
+							autoMappings.add(new SpelMapping(sourceExpression, targetExpression));
 						}
 					} catch (EvaluationException e) {
 
@@ -158,7 +152,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 	}
 
 	private boolean explicitlyMapped(String field) {
-		for (Mapping mapping : this.mappings) {
+		for (SpelMapping mapping : this.mappings) {
 			if (mapping.getSourceExpressionString().startsWith(field)) {
 				return true;
 			}
@@ -166,16 +160,11 @@ public class SpelMapper implements Mapper<Object, Object> {
 		return false;
 	}
 
-	private class MappingConversionService extends GenericConversionService {
-
-		public MappingConversionService() {
-			setParent(new DefaultConversionService());
-		}
+	private static class MappingConversionService extends DefaultConversionService {
 
 		@Override
-		protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			GenericConverter converter = super.getConverter(sourceType, targetType);
-			return converter != null ? converter : new MapperConverter(new SpelMapper());
+		protected GenericConverter getDefaultConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return new MapperConverter(new SpelMapper());
 		}
 
 	}

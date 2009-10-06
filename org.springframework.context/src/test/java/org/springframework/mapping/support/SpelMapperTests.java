@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.mapping.MappingException;
@@ -122,7 +123,7 @@ public class SpelMapperTests {
 
 		Person target = new Person();
 
-		mapper.addMapping("nested.foo", "nested.foo");
+		mapper.addMapping("nested.foo");
 		mapper.map(source, target);
 
 		assertEquals("bar", target.nested.foo);
@@ -242,6 +243,22 @@ public class SpelMapperTests {
 			assertEquals(1, e.getMappingFailureCount());
 		}
 	}
+	
+	@Test
+	@Ignore
+	public void mapCyclic() {
+		Person source = new Person();
+		source.setName("Keith");
+		source.setAge(3);
+		source.setFavoriteSport(Sport.FOOTBALL);
+		source.cyclic = source;
+		Person target = new Person();
+		mapper.map(source, target);
+		assertEquals("Keith", target.getName());
+		assertEquals(3, target.getAge());
+		assertEquals(Sport.FOOTBALL, target.getFavoriteSport());
+		assertEquals(source.cyclic, target.cyclic);
+	}
 
 	public static class PersonDto {
 
@@ -326,7 +343,7 @@ public class SpelMapperTests {
 
 		private Nested nested;
 
-		// private Person cyclic;
+		private Person cyclic;
 
 		private List<Sport> favoriteSports;
 
@@ -372,7 +389,6 @@ public class SpelMapperTests {
 			this.nested = nested;
 		}
 
-		/*
 		public Person getCyclic() {
 			return cyclic;
 		}
@@ -380,7 +396,6 @@ public class SpelMapperTests {
 		public void setCyclic(Person cyclic) {
 			this.cyclic = cyclic;
 		}
-		*/
 
 		public List<Sport> getFavoriteSports() {
 			return favoriteSports;
