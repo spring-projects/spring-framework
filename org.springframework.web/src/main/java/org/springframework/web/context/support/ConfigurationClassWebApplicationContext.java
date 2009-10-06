@@ -19,10 +19,14 @@ package org.springframework.web.context.support;
 import java.io.IOException;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -88,9 +92,6 @@ public class ConfigurationClassWebApplicationContext extends AbstractRefreshable
 		for (String configLocation : getConfigLocations()) {
 			try {
 				Class<?> configClass = ClassUtils.getDefaultClassLoader().loadClass(configLocation);
-				if (AnnotationUtils.findAnnotation(configClass, Configuration.class) == null) {
-					throw new IllegalArgumentException("Class [" + configClass.getName() + "] is not annotated with @Configuration");
-				}
 				this.delegate.addConfigurationClass(configClass);
 			} catch (ClassNotFoundException ex) {
 				throw new IOException("Could not load @Configuration class [" + configLocation + "]", ex);
