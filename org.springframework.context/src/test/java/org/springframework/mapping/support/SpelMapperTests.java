@@ -132,23 +132,17 @@ public class SpelMapperTests {
 	@Test
 	public void mapBeanNested() {
 		PersonDto source = new PersonDto();
-		source.setFullName("Keith Donald");
-		source.setAge("31");
-		source.setSport("FOOTBALL");
 		NestedDto nested = new NestedDto();
 		nested.foo = "bar";
 		source.setNested(nested);
 
 		Person target = new Person();
 
-		mapper.addMapping("fullName", "name");
-		mapper.addMapping("sport", "favoriteSport");
-		mapper.addMapping("nested", "nested");
+		mapper.setAutoMappingEnabled(false);
+		mapper.addMapping("nested");
 		mapper.map(source, target);
 
-		assertEquals("Keith Donald", target.name);
-		assertEquals(31, target.age);
-		assertEquals(Sport.FOOTBALL, target.favoriteSport);
+		assertEquals("bar", target.nested.foo);
 	}
 
 	@Test
