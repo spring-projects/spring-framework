@@ -17,23 +17,14 @@
 package org.springframework.web.context.support;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ConfigurationClassPostProcessor;
+import org.springframework.context.annotation.ConfigurationClassApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 
 /**
@@ -57,15 +48,34 @@ import org.springframework.util.StringUtils;
  * to deliberately override certain bean definitions via an extra Configuration class.
  *
  * @author Chris Beams
- * @see org.springframework.context.annotation.ConfigurationClassApplicationContext
+ * @since 3.0
+ * @see ConfigurationClassApplicationContext
+ * @see ConfigurationClassApplicationContext.Delegate
  */
 public class ConfigurationClassWebApplicationContext extends AbstractRefreshableWebApplicationContext {
 
+	private final ConfigurationClassApplicationContext.Delegate delegate =
+			new ConfigurationClassApplicationContext.Delegate();
+
 	/**
+	 * Register a {@link BeanDefinition} for each {@link Configuration @Configuration}
+	 * class specified by {@link #getConfigLocations()}. Enables the default set of
+	 * annotation configuration post processors, such that {@literal @Autowired},
+	 * {@literal @Required}, and associated annotations can be used within Configuration
+	 * classes.
+	 *
+	 * <p>Configuration class bean definitions are registered with generated bean
+	 * definition names unless the {@literal value} attribute is provided to the
+	 * Configuration annotation.
+	 *
 	 * @throws IllegalArgumentException if configLocations array is null or empty
 	 * @throws IOException if any one configLocation is not loadable as a class
 	 * @throws IllegalArgumentException if any one loaded class is not annotated with {@literal @Configuration}
 	 * @see #getConfigLocations()
+	 * @see AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
+	 * @see ConfigurationClassPostProcessor
+	 * @see DefaultBeanNameGenerator
+	 * @see Configuration#value()
 	 */
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
@@ -75,54 +85,34 @@ public class ConfigurationClassWebApplicationContext extends AbstractRefreshable
 	 			"No config locations were specified. Is the 'contextConfigLocations' " +
 	 			"context-param and/or init-param set properly in web.xml?");
 
-		Set<Class<?>> configClasses = new LinkedHashSet<Class<?>>();
-
 		for (String configLocation : getConfigLocations()) {
 			try {
 				Class<?> configClass = ClassUtils.getDefaultClassLoader().loadClass(configLocation);
 				if (AnnotationUtils.findAnnotation(configClass, Configuration.class) == null) {
 					throw new IllegalArgumentException("Class [" + configClass.getName() + "] is not annotated with @Configuration");
 				}
-				configClasses.add(configClass);
+				this.delegate.addConfigurationClass(configClass);
 			} catch (ClassNotFoundException ex) {
 				throw new IOException("Could not load @Configuration class [" + configLocation + "]", ex);
 			}
 		}
 
-		// @Autowired and friends must be enabled by default when processing @Configuration classes
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
-
-		for (Class<?> configClass : configClasses) {
-			AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(configClass).getBeanDefinition();
-
-			String name = AnnotationUtils.findAnnotation(configClass, Configuration.class).value();
-			if (!StringUtils.hasLength(name)) {
-				name = new DefaultBeanNameGenerator().generateBeanName(def, beanFactory);
-			}
-
-			beanFactory.registerBeanDefinition(name, def);
-		}
-
-		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		this.delegate.loadBeanDefinitions(beanFactory);
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Return the bean instance that matches the given object type.
+	 *
+	 * @param <T>
+	 * @param requiredType type the bean must match; can be an interface or superclass.
+	 * {@literal null} is disallowed.
+	 * @return bean matching required type
+	 * @throws NoSuchBeanDefinitionException if there is not exactly one matching bean
+	 * found
+	 * @see org.springframework.beans.factory.ListableBeanFactory#getBeansOfType(Class)
+	 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
+	 */
 	public <T> T getBean(Class<T> requiredType) {
-		Assert.notNull(requiredType, "requiredType may not be null");
-
-		Map<String, ?> beansOfType = this.getBeansOfType(requiredType);
-
-		switch (beansOfType.size()) {
-			case 0:
-				throw new NoSuchBeanDefinitionException(requiredType);
-			case 1:
-				return (T) beansOfType.values().iterator().next();
-			default:
-				throw new NoSuchBeanDefinitionException(requiredType,
-						beansOfType.size() + " matching bean definitions found " +
-						"(" + StringUtils.collectionToCommaDelimitedString(beansOfType.keySet()) + "). " +
-						"Consider qualifying with getBean(Class<T> beanType, String beanName) or " +
-						"declaring one bean definition as @Primary");
-		}
+		return this.delegate.getBean(requiredType, this);
 	}
 }
