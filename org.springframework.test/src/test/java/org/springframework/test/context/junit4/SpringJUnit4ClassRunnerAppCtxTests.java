@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,9 +51,10 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * <ul>
  * <li>{@link ContextConfiguration @ContextConfiguration}</li>
  * <li>{@link Autowired @Autowired}</li>
- * <li>{@link Inject @Inject}</li>
  * <li>{@link Qualifier @Qualifier}</li>
  * <li>{@link Resource @Resource}</li>
+ * <li>{@link Inject @Inject}</li>
+ * <li>{@link Named @Named}</li>
  * <li>{@link ApplicationContextAware}</li>
  * <li>{@link BeanNameAware}</li>
  * <li>{@link InitializingBean}</li>
@@ -115,6 +117,10 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Qualifier("quux")
 	protected String quux;
 
+	@Inject
+	@Named("quux")
+	protected String namedQuux;
+
 
 	// ------------------------------------------------------------------------|
 
@@ -164,6 +170,10 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	public final void verifyAnnotationAutowiredAndInjectedFields() {
 		assertNull("The nonrequiredLong field should NOT have been autowired.", this.nonrequiredLong);
 		assertEquals("The quux field should have been autowired via @Autowired and @Qualifier.", "Quux", this.quux);
+		assertEquals("The namedFoo field should have been injected via @Inject and @Named.", "Quux", this.namedQuux);
+		assertSame("@Autowired/@Qualifier and @Inject/@Named quux should be the same object.", this.quux,
+			this.namedQuux);
+
 		assertNotNull("The pet field should have been autowired.", this.autowiredPet);
 		assertNotNull("The pet field should have been injected.", this.injectedPet);
 		assertEquals("Fido", this.autowiredPet.getName());
@@ -178,12 +188,12 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	}
 
 	@Test
-	public final void verifyResourceAnnotationWiredFields() {
-		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
+	public final void verifyResourceAnnotationInjectedFields() {
+		assertEquals("The foo field should have been injected via @Resource.", "Foo", this.foo);
 	}
 
 	@Test
-	public final void verifyResourceAnnotationWiredMethods() {
+	public final void verifyResourceAnnotationInjectedMethods() {
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
 
