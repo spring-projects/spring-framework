@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.AbstractRefreshableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -35,8 +36,8 @@ import org.springframework.util.StringUtils;
 
 
 /**
- * Standalone application context, accepting {@link Configuration}-annotated
- * class literals as input. Useful for test harnesses or any other scenario
+ * Standalone application context, accepting {@link Configuration @Configuration}
+ * -annotated class literals as input. Useful for test harnesses or any other scenario
  * where XML-based configuration is unnecessary or undesired.
  *
  * <p>In case of multiple Configuration classes, {@link Bean}
@@ -50,7 +51,8 @@ import org.springframework.util.StringUtils;
  */
 public class ConfigurationClassApplicationContext extends AbstractRefreshableApplicationContext {
 
-	private final Set<Class<?>> configClasses = new LinkedHashSet<Class<?>>();
+	private final ConfigurationClassApplicationContext.Delegate delegate =
+			new ConfigurationClassApplicationContext.Delegate();
 
 	/**
 	 * Create a new {@link ConfigurationClassApplicationContext}, loading bean
@@ -70,7 +72,7 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 		}
 
 		for (Class<?> configClass : configClasses) {
-			addConfigurationClass(configClass);
+			this.addConfigurationClass(configClass);
 		}
 
 		this.refresh();
@@ -88,10 +90,7 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	 * @see #refresh()
 	 */
 	public void addConfigurationClass(Class<?> configClass) {
-		Assert.notNull(
-				AnnotationUtils.findAnnotation(configClass, Configuration.class),
-				"Class [" + configClass.getName() + "] is not annotated with @Configuration");
-		this.configClasses.add(configClass);
+		this.delegate.addConfigurationClass(configClass);
 	}
 
 	/**
@@ -100,30 +99,18 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	 * processors, such that {@literal @Autowired}, {@literal @Required}, and associated
 	 * annotations can be used within Configuration classes.
 	 *
-	 * <p>Configuration class bean definitions are registered with generated bean definition names.
+	 * <p>Configuration class bean definitions are registered with generated bean definition
+	 * names unless the {@literal value} attribute is provided to the Configuration annotation.
 	 *
 	 * @see AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 * @see ConfigurationClassPostProcessor
+	 * @see DefaultBeanNameGenerator
+	 * @see Configuration#value()
 	 */
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
 			throws IOException, BeansException {
-
-		// @Autowired and friends must be enabled by default when processing @Configuration classes
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
-
-		for (Class<?> configClass : configClasses) {
-			AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(configClass).getBeanDefinition();
-
-			String name = AnnotationUtils.findAnnotation(configClass, Configuration.class).value();
-			if (!StringUtils.hasLength(name)) {
-				name = new DefaultBeanNameGenerator().generateBeanName(def, beanFactory);
-			}
-
-			beanFactory.registerBeanDefinition(name, def);
-		}
-
-		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		this.delegate.loadBeanDefinitions(beanFactory);
 	}
 
 	/**
@@ -138,24 +125,78 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	 * @see org.springframework.beans.factory.ListableBeanFactory#getBeansOfType(Class)
 	 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T getBean(Class<T> requiredType) {
-		Assert.notNull(requiredType, "requiredType may not be null");
-
-		Map<String, ?> beansOfType = this.getBeansOfType(requiredType);
-
-		switch (beansOfType.size()) {
-			case 0:
-				throw new NoSuchBeanDefinitionException(requiredType);
-			case 1:
-				return (T) beansOfType.values().iterator().next();
-			default:
-				throw new NoSuchBeanDefinitionException(requiredType,
-						beansOfType.size() + " matching bean definitions found " +
-						"(" + StringUtils.collectionToCommaDelimitedString(beansOfType.keySet()) + "). " +
-						"Consider qualifying with getBean(Class<T> beanType, String beanName) or " +
-						"declaring one bean definition as @Primary");
-		}
+		return this.delegate.getBean(requiredType, this);
 	}
 
+
+	/**
+	 * Encapsulates behavior common to {@link ConfigurationClassApplicationContext}
+	 * and its {@link org.springframework.web.context.support.ConfigurationClassWebApplicationContext}
+	 * variant.  Both classes already participate in mutually exclusive superclass
+	 * hierarchies, and this class allows for avoiding what would otherwise be a multiple
+	 * inheritance problem through composition.
+	 *
+	 * <p><strong>This class is public by necessity but should be considered private and
+	 * subject to change without notice.</strong>
+	 */
+	public static class Delegate {
+
+		private final Set<Class<?>> configClasses = new LinkedHashSet<Class<?>>();
+
+		/**
+		 * @see ConfigurationClassApplicationContext#addConfigurationClass(Class)
+		 */
+		public void addConfigurationClass(Class<?> configClass) {
+			Assert.notNull(
+					AnnotationUtils.findAnnotation(configClass, Configuration.class),
+					"Class [" + configClass.getName() + "] is not annotated with @Configuration");
+			this.configClasses.add(configClass);
+		}
+
+		/**
+		 * @see ConfigurationClassApplicationContext#loadBeanDefinitions(DefaultListableBeanFactory)
+		 */
+		public void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) {
+			// @Autowired and friends must be enabled by default when processing @Configuration classes
+			AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
+
+			for (Class<?> configClass : this.configClasses) {
+				AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(configClass).getBeanDefinition();
+
+				String name = AnnotationUtils.findAnnotation(configClass, Configuration.class).value();
+				if (!StringUtils.hasLength(name)) {
+					name = new DefaultBeanNameGenerator().generateBeanName(def, beanFactory);
+				}
+
+				beanFactory.registerBeanDefinition(name, def);
+			}
+
+			new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		}
+
+		/**
+		 * @see ConfigurationClassApplicationContext#getBean(Class)
+		 */
+		@SuppressWarnings("unchecked")
+		public <T> T getBean(Class<T> requiredType, AbstractApplicationContext context) {
+			Assert.notNull(requiredType, "requiredType may not be null");
+			Assert.notNull(context, "context may not be null");
+
+			Map<String, ?> beansOfType = context.getBeansOfType(requiredType);
+
+			switch (beansOfType.size()) {
+				case 0:
+					throw new NoSuchBeanDefinitionException(requiredType);
+				case 1:
+					return (T) beansOfType.values().iterator().next();
+				default:
+					throw new NoSuchBeanDefinitionException(requiredType,
+							beansOfType.size() + " matching bean definitions found " +
+							"(" + StringUtils.collectionToCommaDelimitedString(beansOfType.keySet()) + "). " +
+							"Consider qualifying with getBean(Class<T> beanType, String beanName) or " +
+							"declaring one bean definition as @Primary");
+			}
+		}
+	}
 }
