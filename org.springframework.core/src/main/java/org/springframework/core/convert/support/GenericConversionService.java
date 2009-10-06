@@ -69,7 +69,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * Generic converters for Collection types are registered.
 	 */
 	public GenericConversionService() {
-		// TODO should these only be registered in DefaultConversionService?
 		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(this));
 		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionConverter(this));
 		addGenericConverter(Object[].class, Map.class, new ArrayToMapConverter(this));
@@ -193,7 +192,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * @param targetType the target type to convert to
 	 * @param converter the generic converter.
 	 */
-	// TODO should this be public?
 	protected void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
 		getSourceMap(sourceType).put(targetType, converter);
 	}
@@ -219,7 +217,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * Hook method to lookup the converter for a given sourceType/targetType pair.
 	 * First queries this ConversionService's converter map.
 	 * If no suitable Converter is found, and a {@link #setParent parent} is set, then queries the parent.
-	 * If still no suitable Converter is found, returns a NO_OP Converter if the sourceType and targetType are assignable.
 	 * Returns <code>null</code> if this ConversionService simply cannot convert between sourceType and targetType.
 	 * Subclasses may override.
 	 * @param sourceType the source type to convert from
@@ -233,11 +230,24 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		} else if (this.parent != null && this.parent.canConvert(sourceType, targetType)) {
 			return this.parentConverterAdapter;
 		} else {
-			if (sourceType.isAssignableTo(targetType)) {
-				return NO_OP_CONVERTER;
-			} else {
-				return null;
-			}
+			return getDefaultConverter(sourceType, targetType);
+		}
+	}
+
+	/**
+	 * Return the default converter if no converter is found for the given sourceType/targetType pair.
+	 * Returns a NO_OP Converter if the sourceType is assignalbe to the targetType.
+	 * Returns <code>null</code> otherwise, indicating no suitable converter could be found.
+	 * Subclasses may override.
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
+	 * @return the default generic converter that will perform the conversion
+	 */
+	protected GenericConverter getDefaultConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (sourceType.isAssignableTo(targetType)) {
+			return NO_OP_CONVERTER;
+		} else {
+			return null;
 		}
 	}
 
