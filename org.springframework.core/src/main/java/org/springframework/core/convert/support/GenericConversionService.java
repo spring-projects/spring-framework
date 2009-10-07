@@ -183,15 +183,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return invokeConverter(converter, source, sourceType, targetType);
 	}
 
-	// subclassing hooks
-
 	/**
 	 * Registers a GenericConverter.
 	 * @param sourceType the source type to convert from
 	 * @param targetType the target type to convert to
 	 * @param converter the generic converter.
 	 */
-	protected void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
+	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
 		getSourceMap(sourceType).put(targetType, converter);
 	}
 
@@ -202,7 +200,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * @param targetType the target type to convert to
 	 * @param converter the converter.
 	 */
-	protected void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
+	public void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
 		addGenericConverter(sourceType, targetType, new ConverterAdapter(converter));
 	}
 
@@ -213,9 +211,11 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * @param targetType the target type to convert to
 	 * @param converter the converter.factory
 	 */
-	protected void addConverterFactory(Class<?> sourceType, Class<?> targetType, ConverterFactory<?, ?> converterFactory) {
+	public void addConverterFactory(Class<?> sourceType, Class<?> targetType, ConverterFactory<?, ?> converterFactory) {
 		addGenericConverter(sourceType, targetType, new ConverterFactoryAdapter(converterFactory));
 	}
+
+	// subclassing hooks
 
 	/**
 	 * Hook method to convert a null source.
