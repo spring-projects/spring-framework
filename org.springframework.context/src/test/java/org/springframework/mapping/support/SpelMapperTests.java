@@ -147,6 +147,31 @@ public class SpelMapperTests {
 	}
 
 	@Test
+	public void mapBeanNestedCustomMapper() {
+		PersonDto source = new PersonDto();
+		NestedDto nested = new NestedDto();
+		nested.foo = "bar";
+		source.setNested(nested);
+
+		Person target = new Person();
+
+		SpelMapper nestedMapper = new SpelMapper();
+		nestedMapper.setAutoMappingEnabled(false);
+		nestedMapper.addMapping("foo").setConverter(new Converter<String, String>() {
+			public String convert(String source) {
+				return source + " and baz";
+			}
+		});
+		mapper.addNestedMapper(NestedDto.class, Nested.class, nestedMapper);
+
+		mapper.setAutoMappingEnabled(false);
+		mapper.addMapping("nested");
+		mapper.map(source, target);
+
+		assertEquals("bar and baz", target.nested.foo);
+	}
+
+	@Test
 	public void mapList() {
 		PersonDto source = new PersonDto();
 		List<String> sports = new ArrayList<String>();
