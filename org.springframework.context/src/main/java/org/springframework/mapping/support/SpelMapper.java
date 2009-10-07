@@ -97,7 +97,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	public Object map(Object source, Object target) {
 		try {
-			SpelMappingContextHolder.push(source);
+			MappingContextHolder.push(source);
 			EvaluationContext sourceContext = getEvaluationContext(source);
 			EvaluationContext targetContext = getEvaluationContext(target);
 			List<MappingFailure> failures = new LinkedList<MappingFailure>();
@@ -113,7 +113,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 			}
 			return target;
 		} finally {
-			SpelMappingContextHolder.pop();
+			MappingContextHolder.pop();
 		}
 	}
 
@@ -124,7 +124,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 	private void doMap(SpelMapping mapping, EvaluationContext sourceContext, EvaluationContext targetContext,
 			List<MappingFailure> failures) {
 		if (logger.isDebugEnabled()) {
-			logger.debug(SpelMappingContextHolder.getLevel() + mapping);
+			logger.debug(MappingContextHolder.getLevel() + mapping);
 		}
 		mapping.map(sourceContext, targetContext, failures);
 	}
