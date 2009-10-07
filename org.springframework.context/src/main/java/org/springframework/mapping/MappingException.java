@@ -25,7 +25,7 @@ import java.util.List;
  * @see Mapper#map(Object, Object)
  * @author Keith Donald
  */
-public class MappingException extends RuntimeException {
+public final class MappingException extends RuntimeException {
 
 	private List<MappingFailure> mappingFailures;
 

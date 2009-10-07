@@ -15,23 +15,13 @@
  */
 package org.springframework.mapping.support;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.util.ClassUtils;
-
 /**
- * Creates a mapping target by calling its default constructor.
+ * Default mappable type factory that registers Map and Bean mappable types.
  * @author Keith Donald
- * @see BeanUtils#instantiate(Class)
  */
-final class DefaultMapperTargetFactory implements MapperTargetFactory {
-
-	public boolean supports(TypeDescriptor targetType) {
-		return ClassUtils.hasConstructor(targetType.getType(), null);
+final class DefaultMappableTypeFactory extends MappableTypeFactory {
+	public DefaultMappableTypeFactory() {
+		add(new MapMappableType());
+		add(new BeanMappableType());
 	}
-
-	public Object createTarget(TypeDescriptor targetType) {
-		return BeanUtils.instantiate(targetType.getType());
-	}
-
 }

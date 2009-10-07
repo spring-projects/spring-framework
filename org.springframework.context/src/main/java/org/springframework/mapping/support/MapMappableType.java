@@ -25,7 +25,11 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 
-class MapMappableType implements MappableType<Map<? extends Object, ? extends Object>> {
+final class MapMappableType implements MappableType<Map<? extends Object, ? extends Object>> {
+
+	public boolean isInstance(Object object) {
+		return object instanceof Map<?, ?>;
+	}
 
 	public Set<String> getFields(Map<? extends Object, ? extends Object> object) {
 		LinkedHashSet<String> fields = new LinkedHashSet<String>(object.size(), 1);

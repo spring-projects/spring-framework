@@ -15,23 +15,15 @@
  */
 package org.springframework.mapping.support;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.util.ClassUtils;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConverter;
 
-/**
- * Creates a mapping target by calling its default constructor.
- * @author Keith Donald
- * @see BeanUtils#instantiate(Class)
- */
-final class DefaultMapperTargetFactory implements MapperTargetFactory {
+final class MappingConversionService extends DefaultConversionService {
 
-	public boolean supports(TypeDescriptor targetType) {
-		return ClassUtils.hasConstructor(targetType.getType(), null);
-	}
-
-	public Object createTarget(TypeDescriptor targetType) {
-		return BeanUtils.instantiate(targetType.getType());
+	@Override
+	protected GenericConverter getDefaultConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return new MapperConverter(new SpelMapper());
 	}
 
 }

@@ -25,7 +25,11 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 
-class BeanMappableType implements MappableType<Object> {
+final class BeanMappableType implements MappableType<Object> {
+
+	public boolean isInstance(Object object) {
+		return true;
+	}
 
 	public Set<String> getFields(Object object) {
 		Set<String> fields = new LinkedHashSet<String>();
