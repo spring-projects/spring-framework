@@ -4,7 +4,7 @@ import java.util.Stack;
 
 import org.springframework.core.NamedThreadLocal;
 
-class SpelMappingContextHolder {
+class MappingContextHolder {
 
 	private static final ThreadLocal<Stack<Object>> mappingContextHolder = new NamedThreadLocal<Stack<Object>>(
 			"Mapping context");

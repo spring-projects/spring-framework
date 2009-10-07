@@ -46,7 +46,7 @@ public class MapperConverter implements GenericConverter {
 		if (source == null) {
 			return null;
 		}
-		if (SpelMappingContextHolder.contains(source)) {
+		if (MappingContextHolder.contains(source)) {
 			return source;
 		}
 		if (sourceType.isAssignableTo(targetType) && isCopyByReference(sourceType, targetType)) {
