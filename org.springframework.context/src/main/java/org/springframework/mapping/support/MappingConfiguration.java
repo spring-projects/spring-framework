@@ -50,4 +50,9 @@ public interface MappingConfiguration {
 	 */
 	MappingConfiguration setGenericConverter(GenericConverter converter);
 
+	/**
+	 * Configures that this mapping should be excluded (ignored and not executed).
+	 */
+	void setExclude();
+
 }

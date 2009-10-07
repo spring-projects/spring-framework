@@ -38,18 +38,14 @@ class SpelMapping implements MappingConfiguration {
 
 	private GenericConverter converter;
 
+	private boolean exclude;
+
 	public SpelMapping(Expression source, Expression target) {
 		this.source = source;
 		this.target = target;
 	}
 
-	public String getSourceExpressionString() {
-		return this.source.getExpressionString();
-	}
-
-	public String getTargetExpressionString() {
-		return this.target.getExpressionString();
-	}
+	// implementing MappingConfiguration
 
 	public MappingConfiguration setConverter(Converter<?, ?> converter) {
 		return setGenericConverter(new ConverterGenericConverter(converter));
@@ -64,8 +60,25 @@ class SpelMapping implements MappingConfiguration {
 		return this;
 	}
 
+	public void setExclude() {
+		this.exclude = true;
+	}
+
+	// public methods
+
+	public String getSourceExpressionString() {
+		return this.source.getExpressionString();
+	}
+
+	public String getTargetExpressionString() {
+		return this.target.getExpressionString();
+	}
+
 	public void map(EvaluationContext sourceContext, EvaluationContext targetContext,
 			Collection<MappingFailure> failures) {
+		if (exclude) {
+			return;
+		}
 		try {
 			Object value = this.source.getValue(sourceContext);
 			if (this.converter != null) {

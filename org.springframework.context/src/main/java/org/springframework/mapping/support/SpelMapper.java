@@ -122,7 +122,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 	 * @param nestedMapper the nested mapper
 	 */
 	public void addNestedMapper(Mapper<?, ?> nestedMapper) {
-		Class[] typeInfo = getRequiredTypeInfo(nestedMapper);
+		Class<?>[] typeInfo = getRequiredTypeInfo(nestedMapper);
 		addNestedMapper(typeInfo[0], typeInfo[1], nestedMapper);
 	}
 
@@ -132,7 +132,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 	 * @param targetType the target nested property type
 	 * @param nestedMapper the nested mapper
 	 */
-	public void addNestedMapper(Class sourceType, Class targetType, Mapper<?, ?> nestedMapper) {
+	public void addNestedMapper(Class<?> sourceType, Class<?> targetType, Mapper<?, ?> nestedMapper) {
 		this.conversionService.addGenericConverter(sourceType, targetType, new MapperConverter(nestedMapper));
 	}
 

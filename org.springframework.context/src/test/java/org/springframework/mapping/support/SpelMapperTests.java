@@ -82,6 +82,23 @@ public class SpelMapperTests {
 	}
 
 	@Test
+	public void mapAutomaticWithExclusions() {
+		Map<String, Object> source = new HashMap<String, Object>();
+		source.put("name", "Keith");
+		source.put("test", "3");
+		source.put("favoriteSport", "FOOTBALL");
+
+		Person target = new Person();
+
+		mapper.addMapping("test").setExclude();
+		mapper.map(source, target);
+
+		assertEquals("Keith", target.name);
+		assertEquals(0, target.age);
+		assertEquals(Sport.FOOTBALL, target.favoriteSport);
+	}
+
+	@Test
 	public void mapSameSourceFieldToMultipleTargets() {
 		Map<String, Object> source = new HashMap<String, Object>();
 		source.put("test", "FOOTBALL");
@@ -270,7 +287,6 @@ public class SpelMapperTests {
 				return names[0] + " P. " + names[1];
 			}
 		});
-
 		mapper.map(source, target);
 
 		assertEquals("Keith P. Donald", target.name);
