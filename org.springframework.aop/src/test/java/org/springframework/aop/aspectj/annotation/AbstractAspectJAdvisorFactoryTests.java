@@ -18,6 +18,8 @@ package org.springframework.aop.aspectj.annotation;
 import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
@@ -406,7 +408,22 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 				CannotBeUnlocked.class);
 		assertFalse("Type pattern must have excluded mixin", proxy instanceof Lockable);
 	}
-
+	/* prereq AspectJ 1.6.7
+	@Test
+	public void testIntroductionBasedOnAnnotationMatch_Spr5307() {
+		AnnotatedTarget target = new AnnotatedTargetImpl();
+		
+		List<Advisor> advisors = getFixture().getAdvisors(
+				new SingletonMetadataAwareAspectInstanceFactory(new MakeAnnotatedTypeModifiable(),"someBean"));
+		Object proxy = createProxy(target,
+				advisors,
+				AnnotatedTarget.class);
+		System.out.println(advisors.get(1));
+		assertTrue(proxy instanceof Lockable);
+		Lockable lockable = (Lockable)proxy;
+		lockable.locked();
+	}
+    */
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 	public void XtestIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
@@ -966,6 +983,21 @@ class MakeITestBeanModifiable extends AbstractMakeModifiable {
 
 }
 
+/**
+ * Adds a declare parents pointcut - spr5307
+ * @author Andy Clement
+ * @since 3.0
+ */
+@Aspect
+class MakeAnnotatedTypeModifiable extends AbstractMakeModifiable {
+	
+	@DeclareParents(value = "(@org.springframework.aop.aspectj.annotation.Measured *)",
+//	@DeclareParents(value = "(@Measured *)", // this would be a nice alternative...
+			defaultImpl=DefaultLockable.class)
+	public static Lockable mixin;
+
+}
+
 
 /**
  * Demonstrates introductions, AspectJ annotation style.
@@ -1024,8 +1056,20 @@ interface Modifiable {
 	
 }
 
+/**
+ * Used as a target.
+ * @author Andy Clement
+ */
+interface AnnotatedTarget {
+}
 
+@Measured
+class AnnotatedTargetImpl implements AnnotatedTarget {
+	
+}
 
+@Retention(RetentionPolicy.RUNTIME)
+@interface Measured {}
 
 class NotLockable {
 	
