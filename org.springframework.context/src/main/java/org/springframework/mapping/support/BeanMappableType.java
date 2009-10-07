@@ -40,8 +40,8 @@ class BeanMappableType implements MappableType<Object> {
 		return fields;
 	}
 
-	public EvaluationContext getEvaluationContext(Object instance, ConversionService conversionService) {
-		StandardEvaluationContext context = new StandardEvaluationContext(instance);
+	public EvaluationContext getEvaluationContext(Object object, ConversionService conversionService) {
+		StandardEvaluationContext context = new StandardEvaluationContext(object);
 		context.setTypeConverter(new StandardTypeConverter(conversionService));
 		return context;
 	}
