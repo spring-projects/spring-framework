@@ -27,7 +27,7 @@ import org.springframework.mapping.Mapper;
  * The default MapperTargetFactory instantiates a target by calling its default constructor.
  * @author Keith Donald
  */
-public class MapperConverter implements GenericConverter {
+public final class MapperConverter implements GenericConverter {
 
 	private Mapper mapper;
 

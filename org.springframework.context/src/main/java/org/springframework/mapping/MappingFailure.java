@@ -19,7 +19,7 @@ package org.springframework.mapping;
  * Indicates an individual mapping failed.
  * @author Keith Donald
  */
-public class MappingFailure {
+public final class MappingFailure {
 
 	private final Throwable cause;
 

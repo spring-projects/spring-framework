@@ -37,4 +37,10 @@ interface MappableType<T> {
 	 */
 	EvaluationContext getEvaluationContext(T object, ConversionService conversionService);
 
+	/**
+	 * Is this object to map an instanceof this mappable type?
+	 * @param object the object to test
+	 */
+	boolean isInstance(Object object);
+
 }
