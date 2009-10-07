@@ -45,7 +45,8 @@ class MappingContextHolder {
 	 * Is the source being mapped or has already been mapped?
 	 */
 	public static boolean contains(Object source) {
-		return getContext().contains(source);
+		Stack<Object> context = getContext();
+		return context != null ? context.contains(source) : false;
 	}
 
 	/**
