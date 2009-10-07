@@ -17,7 +17,6 @@ package org.springframework.mapping;
 
 /**
  * Indicates an individual mapping failed.
- * TODO - other fields required here?
  * @author Keith Donald
  */
 public class MappingFailure {
