@@ -43,6 +43,6 @@ public class MappableTypeFactory {
 			}
 		}
 		throw new IllegalArgumentException("Object of type [" + object.getClass().getName()
-				+ "] not mappable - no suitable MappableType exists");
+				+ "] is not mappable - no suitable MappableType exists");
 	}
 }

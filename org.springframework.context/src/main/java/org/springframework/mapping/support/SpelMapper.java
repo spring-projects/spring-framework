@@ -208,7 +208,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	// internal helpers
 
-	private Class[] getRequiredTypeInfo(Mapper mapper) {
+	private Class<?>[] getRequiredTypeInfo(Mapper<?, ?> mapper) {
 		return GenericTypeResolver.resolveTypeArguments(mapper.getClass(), Mapper.class);
 	}
 
