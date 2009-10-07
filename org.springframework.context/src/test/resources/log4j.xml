@@ -11,11 +11,7 @@
 		</layout>
 	</appender>
 
-	<logger name="org.springframework.beans">
-		<level value="warn" />
-	</logger>
-
-	<logger name="org.springframework.binding">
+	<logger name="org.springframework.mapping">
 		<level value="debug" />
 	</logger>
 

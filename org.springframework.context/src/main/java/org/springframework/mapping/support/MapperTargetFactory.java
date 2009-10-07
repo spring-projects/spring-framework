@@ -28,11 +28,19 @@ import org.springframework.mapping.Mapper;
 public interface MapperTargetFactory {
 
 	/**
+	 * Does this factory support creating mapping targets of the specified type
+	 * @param targetType the targe type
+	 * @return true if so, false otherwise
+	 */
+	public boolean supports(TypeDescriptor targetType);
+
+	/**
 	 * Create the target object to be mapped to.
 	 * @param source the source object to map from
 	 * @param sourceType the source object type descriptor
 	 * @param targetType the target object type descriptor
 	 * @return the target
 	 */
-	public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+	public Object createTarget(TypeDescriptor targetType);
+
 }

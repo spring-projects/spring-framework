@@ -47,11 +47,11 @@ final class NumberToNumberConverterFactory implements ConverterFactory<Number, N
 	private final static class NumberToNumber<T extends Number> implements Converter<Number, T> {
 
 		private final Class<T> targetType;
-		
+
 		public NumberToNumber(Class<T> targetType) {
 			this.targetType = targetType;
 		}
-	
+
 		public T convert(Number source) {
 			return NumberUtils.convertNumberToTargetClass(source, this.targetType);
 		}

@@ -15,6 +15,8 @@
  */
 package org.springframework.mapping.support;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.GenericConverter;
 import org.springframework.mapping.Mapper;
@@ -44,9 +46,33 @@ public class MapperConverter implements GenericConverter {
 		if (source == null) {
 			return null;
 		}
-		// TODO - could detect cyclical reference here if had a mapping context? (source should not equal currently mapped object) 
-		Object target = this.mappingTargetFactory.createTarget(source, sourceType, targetType);
-		return this.mapper.map(source, target);
+		if (SpelMappingContextHolder.contains(source)) {
+			return source;
+		}
+		if (sourceType.isAssignableTo(targetType) && isCopyByReference(sourceType, targetType)) {
+			return source;
+		}
+		return createAndMap(targetType, source, sourceType);
 	}
 
+	private boolean isCopyByReference(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (BeanUtils.isSimpleValueType(targetType.getType()) || Enum.class.isAssignableFrom(targetType.getType())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private Object createAndMap(TypeDescriptor targetType, Object source, TypeDescriptor sourceType) {
+		if (this.mappingTargetFactory.supports(targetType)) {
+			Object target = this.mappingTargetFactory.createTarget(targetType);
+			return this.mapper.map(source, target);
+		} else {
+			IllegalStateException cause = new IllegalStateException("["
+					+ this.mappingTargetFactory.getClass().getName() + "] does not support target type ["
+					+ targetType.getName() + "]");
+			throw new ConversionFailedException(sourceType, targetType, source, cause);
+		}
+
+	}
 }

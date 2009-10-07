@@ -33,7 +33,6 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.core.convert.converter.ConverterInfo;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -54,7 +53,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	};
 
-	private final Map<Class, Map<Class, GenericConverter>> sourceTypeConverters = new HashMap<Class, Map<Class, GenericConverter>>();
+	private final Map<Class, Map<Class, GenericConverter>> sourceTypeConverters = new HashMap<Class, Map<Class, GenericConverter>>(36);
 
 	private ConversionService parent;
 
@@ -132,7 +131,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		Class sourceType = typeInfo[0];
 		Class targetType = typeInfo[1];
-		getSourceMap(sourceType).put(targetType, new ConverterAdapter(converter));
+		addConverter(sourceType, targetType, converter);
 	}
 
 	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
@@ -143,7 +142,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		Class sourceType = typeInfo[0];
 		Class targetType = typeInfo[1];
-		getSourceMap(sourceType).put(targetType, new ConverterFactoryAdapter(converterFactory));
+		addConverterFactory(sourceType, targetType, converterFactory);
 	}
 
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
@@ -194,6 +193,28 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 */
 	protected void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
 		getSourceMap(sourceType).put(targetType, converter);
+	}
+
+	/**
+	 * Registers a Converter with the sourceType and targetType to index on specified explicitly.
+	 * This method performs better than {@link #addConverter(Converter)} because there parameterized types S and T don't have to be discovered.
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
+	 * @param converter the converter.
+	 */
+	protected void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
+		addGenericConverter(sourceType, targetType, new ConverterAdapter(converter));
+	}
+
+	/**
+	 * Registers a ConverterFactory with the sourceType and targetType to index on specified explicitly.
+	 * This method performs better than {@link #addConverter(ConverterFactory)} because there parameterized types S and T don't have to be discovered.
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
+	 * @param converter the converter.factory
+	 */
+	protected void addConverterFactory(Class<?> sourceType, Class<?> targetType, ConverterFactory<?, ?> converterFactory) {
+		addGenericConverter(sourceType, targetType, new ConverterFactoryAdapter(converterFactory));
 	}
 
 	/**
@@ -259,15 +280,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	private Class[] getRequiredTypeInfo(Object converter, Class genericIfc) {
-		Class[] typeInfo = new Class[2];
-		if (converter instanceof ConverterInfo) {
-			ConverterInfo info = (ConverterInfo) converter;
-			typeInfo[0] = info.getSourceType();
-			typeInfo[1] = info.getTargetType();
-			return typeInfo;
-		} else {
-			return GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
-		}
+		return GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
 	}
 
 	private GenericConverter findConverterByClassPair(Class sourceType, Class targetType) {
