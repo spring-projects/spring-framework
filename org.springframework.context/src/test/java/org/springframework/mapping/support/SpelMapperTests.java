@@ -198,7 +198,7 @@ public class SpelMapperTests {
 
 		Person target = new Person();
 
-		Mapper nestedMapper = new Mapper<NestedDto, Nested>() {
+		Mapper<NestedDto, Nested> nestedMapper = new Mapper<NestedDto, Nested>() {
 			public Object map(NestedDto source, Nested target) {
 				target.foo = source.foo + " and baz";
 				return target;
