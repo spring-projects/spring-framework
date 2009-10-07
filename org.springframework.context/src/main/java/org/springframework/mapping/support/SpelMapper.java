@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConverter;
@@ -39,11 +40,12 @@ import org.springframework.mapping.MappingException;
 import org.springframework.mapping.MappingFailure;
 
 /**
- * A generic object mapper implementation based on the Spring Expression Language (SpEL).
+ * A general-purpose object mapper implementation based on the Spring Expression Language (SpEL).
  * @author Keith Donald 
  * @see #setAutoMappingEnabled(boolean)
  * @see #addMapping(String)
  * @see #addMapping(String, String)
+ * @see #getConverterRegistry()
  */
 public class SpelMapper implements Mapper<Object, Object> {
 
@@ -63,18 +65,36 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	private MappingConversionService conversionService = new MappingConversionService();
 
+	/**
+	 * Sets whether "auto mapping" is enabled.
+	 * When enabled, source and target fields with the same name will automatically be mapped unless an explicit mapping override has been registered.
+	 * Set to false to require explicit registration of all source-to-target mapping rules.
+	 * Default is enabled (true).
+	 * @param autoMappingEnabled auto mapping status
+	 */
 	public void setAutoMappingEnabled(boolean autoMappingEnabled) {
 		this.autoMappingEnabled = autoMappingEnabled;
 	}
 
+	/**
+	 * Register a field mapping.
+	 * The source and target field expressions will be the same value.
+	 * For example, calling <code>addMapping("order")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>order</code> field on the target.
+	 * This is a convenience method for calling {@link #addMapping(String, String)} with the same source and target value..
+	 * @param fieldExpression the field mapping expression
+	 * @return this, for configuring additional field mapping options fluently
+	 */
 	public MappingConfiguration addMapping(String fieldExpression) {
 		return addMapping(fieldExpression, fieldExpression);
 	}
 
-	public ConverterRegistry getConverterRegistry() {
-		return conversionService;
-	}
-
+	/**
+	 * Register a mapping between a source and target field.
+	 * For example, calling <code>addMapping("order", "primaryOrder")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>primaryOrder</code> field on the target.
+	 * @param sourceFieldExpression the source field mapping expression
+	 * @param targetFieldExpression the target field mapping expression 
+	 * @return this, for configuring additional field mapping options fluently
+	 */
 	public MappingConfiguration addMapping(String sourceFieldExpression, String targetFieldExpression) {
 		Expression sourceExp;
 		try {
@@ -93,6 +113,16 @@ public class SpelMapper implements Mapper<Object, Object> {
 		SpelMapping mapping = new SpelMapping(sourceExp, targetExp);
 		this.mappings.add(mapping);
 		return mapping;
+	}
+
+	/**
+	 * Return this mapper's converter registry.
+	 * Allows for registration of simple type converters as well as converters that map nested objects using a Mapper.
+	 * @see Converter
+	 * @see MapperConverter
+	 */
+	public ConverterRegistry getConverterRegistry() {
+		return conversionService;
 	}
 
 	public Object map(Object source, Object target) {
@@ -116,6 +146,8 @@ public class SpelMapper implements Mapper<Object, Object> {
 			MappingContextHolder.pop();
 		}
 	}
+
+	// internal helpers
 
 	private EvaluationContext getEvaluationContext(Object object) {
 		return mappableTypeFactory.getMappableType(object).getEvaluationContext(object, this.conversionService);
