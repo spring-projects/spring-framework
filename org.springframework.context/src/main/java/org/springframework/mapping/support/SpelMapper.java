@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
@@ -117,6 +118,16 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	/**
 	 * Adds a Mapper to apply to complex nested property mappings of a specific sourceType/targetType pair.
+	 * The source and target types are determined by introspecting the parameterized types on the implementation's Mapper generic interface.
+	 * @param nestedMapper the nested mapper
+	 */
+	public void addNestedMapper(Mapper<?, ?> nestedMapper) {
+		Class[] typeInfo = getRequiredTypeInfo(nestedMapper);
+		addNestedMapper(typeInfo[0], typeInfo[1], nestedMapper);
+	}
+
+	/**
+	 * Adds a Mapper to apply to complex nested property mappings of a specific sourceType/targetType pair.
 	 * @param sourceType the source nested property type
 	 * @param targetType the target nested property type
 	 * @param nestedMapper the nested mapper
@@ -158,6 +169,10 @@ public class SpelMapper implements Mapper<Object, Object> {
 	}
 
 	// internal helpers
+
+	private Class[] getRequiredTypeInfo(Mapper mapper) {
+		return GenericTypeResolver.resolveTypeArguments(mapper.getClass(), Mapper.class);
+	}
 
 	private EvaluationContext getEvaluationContext(Object object) {
 		return mappableTypeFactory.getMappableType(object).getEvaluationContext(object, this.conversionService);

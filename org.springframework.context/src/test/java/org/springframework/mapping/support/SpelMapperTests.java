@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.mapping.Mapper;
 import org.springframework.mapping.MappingException;
 
 public class SpelMapperTests {
@@ -147,7 +148,7 @@ public class SpelMapperTests {
 	}
 
 	@Test
-	public void mapBeanNestedCustomMapper() {
+	public void mapBeanNestedCustomNestedMapper() {
 		PersonDto source = new PersonDto();
 		NestedDto nested = new NestedDto();
 		nested.foo = "bar";
@@ -163,6 +164,31 @@ public class SpelMapperTests {
 			}
 		});
 		mapper.addNestedMapper(NestedDto.class, Nested.class, nestedMapper);
+
+		mapper.setAutoMappingEnabled(false);
+		mapper.addMapping("nested");
+		mapper.map(source, target);
+
+		assertEquals("bar and baz", target.nested.foo);
+	}
+
+	@Test
+	public void mapBeanNestedCustomNestedMapperHandCoded() {
+		PersonDto source = new PersonDto();
+		NestedDto nested = new NestedDto();
+		nested.foo = "bar";
+		source.setNested(nested);
+
+		Person target = new Person();
+
+		Mapper nestedMapper = new Mapper<NestedDto, Nested>() {
+			public Object map(NestedDto source, Nested target) {
+				target.foo = source.foo + " and baz";
+				return target;
+			}
+
+		};
+		mapper.addNestedMapper(nestedMapper);
 
 		mapper.setAutoMappingEnabled(false);
 		mapper.addMapping("nested");
