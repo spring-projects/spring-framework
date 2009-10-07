@@ -7,13 +7,25 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.expression.AccessException;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.mapping.Mapper;
 import org.springframework.mapping.MappingException;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 
 public class SpelMapperTests {
 
@@ -337,6 +349,82 @@ public class SpelMapperTests {
 		assertTrue(item != target.getLineItem());
 		assertEquals(new BigDecimal("30.00"), target.getLineItem().getAmount());
 		assertEquals(source, target.getLineItem().getOrder());
+	}
+
+	@Test
+	public void mapCustomMappableType() throws Exception {
+		XmlDocumentLoader loader = new XmlDocumentLoader();
+		loader.setValidating(false);
+
+		Object source = loader.loadDocument(new ClassPathResource("order.xml", getClass())).getDocumentElement();
+		Order target = new Order();
+
+		MappableTypeFactory factory = new MappableTypeFactory();
+		factory.add(new ElementMappableType());
+		factory.add(new BeanMappableType());
+		mapper.setMappableTypeFactory(factory);
+		mapper.map(source, target);
+
+		assertEquals(1, target.getNumber());
+	}
+
+	static class ElementMappableType implements MappableType<Element> {
+
+		public boolean isInstance(Object object) {
+			return object instanceof Element;
+		}
+
+		public Set<String> getFields(Element object) {
+			NamedNodeMap map = object.getAttributes();
+			Set<String> fields = new LinkedHashSet<String>();
+			for (int i = 0; i < map.getLength(); i++) {
+				fields.add(map.item(i).getNodeName());
+			}
+			return fields;
+		}
+
+		public EvaluationContext getEvaluationContext(Element object, ConversionService conversionService) {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			context.setRootObject(object);
+			context.setTypeConverter(new StandardTypeConverter(conversionService));
+			context.addPropertyAccessor(new PropertyAccessor() {
+				public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+					Element e = (Element) target;
+					return e.hasAttribute(name);
+				}
+
+				public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+					return canRead(context, target, name);
+				}
+
+				public Class<?>[] getSpecificTargetClasses() {
+					return new Class[] { Element.class };
+				}
+
+				public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+					Element e = (Element) target;
+					return new TypedValue(e.getAttribute(name));
+				}
+
+				public void write(EvaluationContext context, Object target, String name, Object newValue)
+						throws AccessException {
+					Element e = (Element) target;
+					e.setAttribute(name, (String) newValue);
+				}
+			});
+			return context;
+		}
+
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void mapCustomMappableTypeNotSupported() throws Exception {
+		Order source = new Order();
+		Order target = new Order();
+
+		MappableTypeFactory factory = new MappableTypeFactory();
+		mapper.setMappableTypeFactory(factory);
+		mapper.map(source, target);
 	}
 
 	public static class Order {
