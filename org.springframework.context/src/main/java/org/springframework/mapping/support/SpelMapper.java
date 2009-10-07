@@ -116,6 +116,16 @@ public class SpelMapper implements Mapper<Object, Object> {
 	}
 
 	/**
+	 * Adds a Mapper to apply to complex nested property mappings of a specific sourceType/targetType pair.
+	 * @param sourceType the source nested property type
+	 * @param targetType the target nested property type
+	 * @param nestedMapper the nested mapper
+	 */
+	public void addNestedMapper(Class sourceType, Class targetType, Mapper<?, ?> nestedMapper) {
+		this.conversionService.addGenericConverter(sourceType, targetType, new MapperConverter(nestedMapper));
+	}
+
+	/**
 	 * Return this mapper's converter registry.
 	 * Allows for registration of simple type converters as well as converters that map nested objects using a Mapper.
 	 * @see Converter
