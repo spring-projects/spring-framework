@@ -17,6 +17,7 @@ package org.springframework.mapping.support;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.ClassUtils;
 
 /**
  * Creates a mapping target by calling its default constructor.
@@ -25,7 +26,11 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 class DefaultMapperTargetFactory implements MapperTargetFactory {
 
-	public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	public boolean supports(TypeDescriptor targetType) {
+		return ClassUtils.hasConstructor(targetType.getType(), null);
+	}
+
+	public Object createTarget(TypeDescriptor targetType) {
 		return BeanUtils.instantiate(targetType.getType());
 	}
 

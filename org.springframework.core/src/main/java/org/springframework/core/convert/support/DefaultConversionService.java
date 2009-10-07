@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert.support;
 
+import java.util.Locale;
 
 /**
  * Default implementation of a conversion service. Will automatically register <i>from string</i>
@@ -31,15 +32,15 @@ public class DefaultConversionService extends GenericConversionService {
 	 * Create a new default conversion service, installing the default converters.
 	 */
 	public DefaultConversionService() {
-		addConverter(new StringToBooleanConverter());
-		addConverter(new StringToCharacterConverter());
-		addConverter(new StringToLocaleConverter());
-		addConverter(new NumberToCharacterConverter());
-		addConverter(new ObjectToStringConverter());
-		addConverterFactory(new StringToNumberConverterFactory());
-		addConverterFactory(new StringToEnumConverterFactory());
-		addConverterFactory(new NumberToNumberConverterFactory());
-		addConverterFactory(new CharacterToNumberFactory());
+		addConverter(String.class, Boolean.class, new StringToBooleanConverter());
+		addConverter(String.class, Character.class, new StringToCharacterConverter());
+		addConverter(String.class, Locale.class, new StringToLocaleConverter());
+		addConverter(Number.class, Character.class, new NumberToCharacterConverter());
+		addConverter(Object.class, String.class, new ObjectToStringConverter());
+		addConverterFactory(String.class, Number.class, new StringToNumberConverterFactory());
+		addConverterFactory(String.class, Enum.class, new StringToEnumConverterFactory());
+		addConverterFactory(Number.class, Number.class, new NumberToNumberConverterFactory());
+		addConverterFactory(Character.class, Number.class, new CharacterToNumberFactory());
 	}
 
 }

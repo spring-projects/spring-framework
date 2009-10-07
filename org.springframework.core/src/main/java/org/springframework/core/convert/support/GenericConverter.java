@@ -37,7 +37,7 @@ public interface GenericConverter {
 
 	/**
 	 * Convert the source to the targetType described by the TypeDescriptor.
-	 * @param source the source object to convert (never <code>null</code>)
+	 * @param source the source object to convert (may be null)
 	 * @param sourceType context about the source type to convert from
 	 * @param targetType context about the target type to convert to
 	 * @return the converted object

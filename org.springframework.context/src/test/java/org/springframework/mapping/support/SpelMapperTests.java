@@ -2,13 +2,14 @@ package org.springframework.mapping.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.mapping.MappingException;
@@ -237,9 +238,8 @@ public class SpelMapperTests {
 			assertEquals(1, e.getMappingFailureCount());
 		}
 	}
-	
+
 	@Test
-	@Ignore
 	public void mapCyclic() {
 		Person source = new Person();
 		source.setName("Keith");
@@ -252,6 +252,72 @@ public class SpelMapperTests {
 		assertEquals(3, target.getAge());
 		assertEquals(Sport.FOOTBALL, target.getFavoriteSport());
 		assertEquals(source.cyclic, target.cyclic);
+	}
+
+	@Test
+	public void mapCyclicTypicalHibernateDomainModel() {
+		Order source = new Order();
+		source.setNumber(1);
+		LineItem item = new LineItem();
+		item.setAmount(new BigDecimal("30.00"));
+		item.setOrder(source);
+		source.setLineItem(item);
+
+		Order target = new Order();
+
+		mapper.map(source, target);
+		assertEquals(1, target.getNumber());
+		assertTrue(item != target.getLineItem());
+		assertEquals(new BigDecimal("30.00"), target.getLineItem().getAmount());
+		assertEquals(source, target.getLineItem().getOrder());
+	}
+
+	public static class Order {
+
+		private int number;
+
+		private LineItem lineItem;
+
+		public int getNumber() {
+			return number;
+		}
+
+		public void setNumber(int number) {
+			this.number = number;
+		}
+
+		public LineItem getLineItem() {
+			return lineItem;
+		}
+
+		public void setLineItem(LineItem lineItem) {
+			this.lineItem = lineItem;
+		}
+
+	}
+
+	public static class LineItem {
+
+		private BigDecimal amount;
+
+		private Order order;
+
+		public BigDecimal getAmount() {
+			return amount;
+		}
+
+		public void setAmount(BigDecimal amount) {
+			this.amount = amount;
+		}
+
+		public Order getOrder() {
+			return order;
+		}
+
+		public void setOrder(Order order) {
+			this.order = order;
+		}
+
 	}
 
 	public static class PersonDto {

@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -44,6 +46,8 @@ import org.springframework.mapping.MappingFailure;
  * @see #addMapping(String, String)
  */
 public class SpelMapper implements Mapper<Object, Object> {
+
+	private static final Log logger = LogFactory.getLog(SpelMapper.class);
 
 	private static final MappableTypeFactory mappableTypeFactory = new MappableTypeFactory();
 
@@ -92,24 +96,37 @@ public class SpelMapper implements Mapper<Object, Object> {
 	}
 
 	public Object map(Object source, Object target) {
-		EvaluationContext sourceContext = getMappingContext(source);
-		EvaluationContext targetContext = getMappingContext(target);
-		List<MappingFailure> failures = new LinkedList<MappingFailure>();
-		for (SpelMapping mapping : this.mappings) {
-			mapping.map(sourceContext, targetContext, failures);
+		try {
+			SpelMappingContextHolder.push(source);
+			EvaluationContext sourceContext = getEvaluationContext(source);
+			EvaluationContext targetContext = getEvaluationContext(target);
+			List<MappingFailure> failures = new LinkedList<MappingFailure>();
+			for (SpelMapping mapping : this.mappings) {
+				doMap(mapping, sourceContext, targetContext, failures);
+			}
+			Set<SpelMapping> autoMappings = getAutoMappings(sourceContext, targetContext);
+			for (SpelMapping mapping : autoMappings) {
+				doMap(mapping, sourceContext, targetContext, failures);
+			}
+			if (!failures.isEmpty()) {
+				throw new MappingException(failures);
+			}
+			return target;
+		} finally {
+			SpelMappingContextHolder.pop();
 		}
-		Set<SpelMapping> autoMappings = getAutoMappings(sourceContext, targetContext);
-		for (SpelMapping mapping : autoMappings) {
-			mapping.map(sourceContext, targetContext, failures);
-		}
-		if (!failures.isEmpty()) {
-			throw new MappingException(failures);
-		}
-		return target;
 	}
 
-	private EvaluationContext getMappingContext(Object object) {
+	private EvaluationContext getEvaluationContext(Object object) {
 		return mappableTypeFactory.getMappableType(object).getEvaluationContext(object, this.conversionService);
+	}
+
+	private void doMap(SpelMapping mapping, EvaluationContext sourceContext, EvaluationContext targetContext,
+			List<MappingFailure> failures) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(SpelMappingContextHolder.getLevel() + mapping);
+		}
+		mapping.map(sourceContext, targetContext, failures);
 	}
 
 	private Set<SpelMapping> getAutoMappings(EvaluationContext sourceContext, EvaluationContext targetContext) {

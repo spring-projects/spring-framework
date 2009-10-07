@@ -47,11 +47,11 @@ final class StringToNumberConverterFactory implements ConverterFactory<String, N
 	private static final class StringToNumber<T extends Number> implements Converter<String, T> {
 
 		private final Class<T> targetType;
-		
+
 		public StringToNumber(Class<T> targetType) {
 			this.targetType = targetType;
 		}
-	
+
 		public T convert(String source) {
 			if ("".equals(source)) {
 				return null;
