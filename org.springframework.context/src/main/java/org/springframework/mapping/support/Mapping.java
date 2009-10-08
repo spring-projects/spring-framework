@@ -29,6 +29,7 @@ import org.springframework.mapping.MappingFailure;
 /**
  * An individual mapping definition between two fields.
  * @author Keith Donald
+ * @since 3.0
  */
 class Mapping implements MappingConfiguration {
 
@@ -93,6 +94,11 @@ class Mapping implements MappingConfiguration {
 
 	public String toString() {
 		return "[Mapping<" + getSourceExpressionString() + " -> " + getTargetExpressionString() + ">]";
+	}
+
+	@Override
+	public void setExclude() {
+		// TODO Auto-generated method stub
 	}
 
 }
