@@ -96,7 +96,6 @@ class Mapping implements MappingConfiguration {
 		return "[Mapping<" + getSourceExpressionString() + " -> " + getTargetExpressionString() + ">]";
 	}
 
-	@Override
 	public void setExclude() {
 		// TODO Auto-generated method stub
 	}
