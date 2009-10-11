@@ -17,14 +17,13 @@ import org.springframework.samples.petclinic.web.VisitsAtomViewTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-		OwnerTests.class,
-		SimpleJdbcClinicTests.class,
-		HibernateClinicTests.class,
-		EntityManagerClinicTests.class,
-		HibernateEntityManagerClinicTests.class,
-		OpenJpaEntityManagerClinicTests.class,
-		VisitsAtomViewTest.class
+	OwnerTests.class,
+	SimpleJdbcClinicTests.class,
+	HibernateClinicTests.class,
+	EntityManagerClinicTests.class,
+	HibernateEntityManagerClinicTests.class,
+	OpenJpaEntityManagerClinicTests.class,
+	VisitsAtomViewTest.class
 })
-public class PetClinicSuiteTests {
-
+public class PetClinicTestSuite {
 }
