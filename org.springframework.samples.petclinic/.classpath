@@ -6,7 +6,7 @@
 	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-4.6.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.6.0/com.springsource.org.junit-sources-4.6.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-4.7.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.7.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-1.1.0.jar" sourcepath="/IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa/1.10/com.springsource.org.apache.openjpa-sources-1.10.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa.lib/1.0.2/com.springsource.org.apache.openjpa.lib-1.0.2.jar" sourcepath="/IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa.lib/1.0.2/com.springsource.org.apache.openjpa.lib-sources-1.0.2.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-1.0.2.jar" sourcepath="/IVY_CACHE/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-sources-1.0.2.jar"/>

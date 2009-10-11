@@ -42,10 +42,8 @@
 		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="latest.integration" conf="compile->compile"/>
 
 		<!-- test dependencies -->
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.6.0" conf="test->compile" />
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->compile" />
 		<dependency org="org.springframework" name="org.springframework.test" rev="latest.integration" conf="compile->compile"/>
-
-		<!--dependency org="org.springframework" name="org.springframework.test" rev="latest.integration" conf="test->compile"/-->
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.4.0.GA" conf="test->compile"/>
 
