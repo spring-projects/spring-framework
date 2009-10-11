@@ -6,7 +6,7 @@
 
 --------------------------------------------------------------------------------
 
-1) Download and install the MySQL database (e.g., MySQL Community Server 5.0.x),
+1) Download and install the MySQL database (e.g., MySQL Community Server 5.1.x),
    which can be found here: http://dev.mysql.com/downloads/
 
 2) Download Connector/J, the MySQL JDBC driver (e.g., Connector/J 5.1.x), which
