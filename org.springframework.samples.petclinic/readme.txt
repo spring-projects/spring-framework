@@ -59,10 +59,10 @@ Available build commands:
 - ant clean jar    --> cleans the project and builds the WAR
 
 After building the project with "ant clean jar", you will find the
-resulting WAR file in the "target" directory. By default, an embedded
-HSQLDB instance in configured. No other steps are necessary to get the
-data source up and running: you can simply deploy the built WAR file
-directly to your Servlet container.
+resulting WAR file in the "target/artifacts" directory. By default, an
+embedded HSQLDB instance in configured. No other steps are necessary to
+get the data source up and running: you can simply deploy the built WAR
+file directly to your Servlet container.
 
 For MySQL, you'll need to use the corresponding schema and SQL scripts in
 the "db/mysql" subdirectory. Follow the steps outlined in

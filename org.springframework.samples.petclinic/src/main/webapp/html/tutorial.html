@@ -13,7 +13,8 @@
 	<h1>The Spring PetClinic Application</h1>
 
    <table class="updated">
-	<tr><td>Updated:</td><td>21.OCT.2007</td><td>Sam Brannen</td></tr>
+	<tr><td>Updated:</td><td>11.OCT.2009</td><td>Sam Brannen (<strong>Work In Progress: not yet fully updated regarding Spring 3.0</strong>)</td></tr>
+	<tr><td></td><td>21.OCT.2007</td><td>Sam Brannen</td></tr>
 	<tr><td></td><td>30.JUN.2006</td><td>Costin Leau</td></tr>
 	<tr><td></td><td>01.DEC.2004</td><td>Ken Krebs</td></tr>
 	<tr><td></td><td>16.AUG.2003</td><td>Ken Krebs</td></tr>
@@ -134,7 +135,7 @@
 		specifically for Apache Tomcat. These files specify container-supplied
 		connection-pooled data sources. It is not necessary to use these files.
 		The application has been configured by default to use a data source
-		without connection pooling to simplify usage. Configuration details are
+		with connection pooling. Configuration details are
 		provided in the Developer Instructions section. The view technologies
 		that are to be used for rendering the application are Java Server Pages
 		(JSP) along with the Java Standard Tag Library (JSTL).
@@ -145,7 +146,7 @@
 		The sample application uses a relational database for data storage.
 		Support has been provided for a choice of 1 of 2 database selections,
 		MySql or HypersonicSQL. HypersonicSQL version 1.8.0 is the default
-		choice and a copy is provided with the application. It is possible to
+		choice. It is possible to
 		easily configure the application to use either database. Configuration
 		details are provided in the Developer Instructions section.
 	</p>
@@ -161,8 +162,7 @@
 	<ul>
 	  <li>Java SDK 1.5.x</li>
 	  <li>Ant 1.7.x</li>
-	  <li>Tomcat 5.x.x, or some other web application container</li>
-	  <li>JUnit 4.4 - needed to run the tests</li>
+	  <li>Tomcat 6.x.x, or some other Java Servlet container</li>
 	  <li>(Optional) MySQL 5.x with MySQL Connector/J 5.x</li>
 	</ul>
 
@@ -310,10 +310,10 @@
 	<p>
 		Spring supports the use of the Apache Commons Logging API. This API
 		provides the ability to use Java 1.4 loggers, the simple Commons loggers,
-		and Apache Log4J loggers. PetClinic uses Log4J to provide sophisticated
+		and Apache log4j loggers. PetClinic uses log4j to provide sophisticated
 		and configurable logging capabilities. The file,
-		<span style="font-weight: bold; font-style: italic;">war/WEB-INF/log4j.properties</span>
-		configures the definition of <strong>Log4j</strong>loggers.
+		<span style="font-weight: bold; font-style: italic;">src/main/resources/log4j.properties</span>
+		configures the definition of <strong>log4j</strong>loggers.
 	</p>
 
 	<h3>Business Layer</h3>
@@ -503,7 +503,7 @@
 		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.hibernate.HibernateClinic</span>.
 		To simplify using Hibernate, Spring provides the
 		<span style="font-weight: bold;">org.springframework.orm.hibernate3.LocalSessionFactoryBean</span>.
-		The Hibernate configuration is provided by the file <span style="font-style: italic;">src/petclinic.hbm.xml</span>.
+		The Hibernate configuration is provided by the file <span style="font-style: italic;">src/main/resources/petclinic.hbm.xml</span>.
 	</p>
 
 	<h3>Java Persistence API (JPA) Clinic Implementation</h3>
@@ -518,8 +518,8 @@
 		To simplify JPA usage, Spring provides (among other classes) the
 		<span style="font-weight: bold;">org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean</span>.
 		The JPA configuration is provided by
-		<span style="font-style: italic;">src/META-INF/orm.xml</span> and
-		<span style="font-style: italic;"> src/META-INF/persistence.xml.</span>
+		<span style="font-style: italic;">src/main/resources/META-INF/orm.xml</span> and
+		<span style="font-style: italic;"> src/main/resources/META-INF/persistence.xml.</span>
 	</p>
 
 	<h3>ApplicationContext</h3>
@@ -530,7 +530,7 @@
 		constitute the <span style="font-weight: bold;">Business/Persistence
 		Layer</span> of PetClinic. The following beans are defined in all 3
 		versions (1 per access strategy) of the PetClinic
-		<span style="font-style: italic;">war/WEB-INF/applicationContext-*.xml</span>
+		<span style="font-style: italic;">src/main/webapp/WEB-INF/applicationContext-*.xml</span>
 		file:
 	</p>
 
@@ -542,7 +542,7 @@
 		properties file, in this case, JDBC-related settings for the
 		<span style="font-weight: bold; font-style: italic;">dataSource</span> bean
 		described below
-		(see <span style="font-weight: bold; font-style: italic;">src/jdbc.properties</span>).
+		(see <span style="font-weight: bold; font-style: italic;">src/main/resources/jdbc.properties</span>).
 	  </li>
 	  <li><span style="font-weight: bold; font-style: italic;">dataSource</span>,
 		which is a singleton bean that defines the implementation of the source
@@ -571,14 +571,14 @@
 	</p>
 
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/web.xml</span>:
+	  <li><span style="font-weight: bold; font-style: italic;">src/main/webapp/WEB-INF/web.xml</span>:
 		the web application configuration file.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/petclinic-servlet.xml</span>:
+	  <li><span style="font-weight: bold; font-style: italic;">src/main/webapp/WEB-INF/petclinic-servlet.xml</span>:
 		configures the petclinic dispatcher servlet and the other controllers
 		and forms that it uses. The beans defined in this file reference the
 		Business/Persistence Layer beans defined in
 		<span style="font-style: italic;">applicationContext-*.xml.</span></li>
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/classes/messages*.properties</span>:
+	  <li><span style="font-weight: bold; font-style: italic;">src/main/resources/messages*.properties</span>:
 		configures the definition of internationalizable message resources.</li>
 	</ul>
 
@@ -652,15 +652,15 @@
 	  <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
 		a <span style="font-weight: bold;">"log4jConfigLocation"</span> context-param
 		is specified that sets the location of the
-		<span style="font-weight: bold;">Log4j</span> configuration file. The
+		<span style="font-weight: bold;">log4j</span> configuration file. The
 		default location for this file is
 		<span style="font-weight: bold; font-style: italic;">/WEB-INF/classes/log4j.properties</span>.
 		Specifying this parameter explicitly allows the location to be changed
 		from the default and is also used to cause periodic
-		<span style="font-weight: bold;">Log4j</span> configuration refresh checks.</li>
+		<span style="font-weight: bold;">log4j</span> configuration refresh checks.</li>
 	  <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
 		a <span style="font-weight: bold;">Log4jConfigListener</span> is
-		specified that will initialize <span style="font-weight: bold;">Log4j</span> using
+		specified that will initialize <span style="font-weight: bold;">log4j</span> using
 		the specified configuration file when the web app starts. The
 		<span style="font-weight: bold;">Log4jConfigListener</span> is commented out
 		in the file because of a conflict when using JBoss. It should also be
@@ -897,7 +897,7 @@
 		which displays a stack trace and normally wouldn't be used in a production
 		version of an application. It can be seen in action by entering a URL of
 		"editOwner.do" or "editPet.do" with an invalid request parameter, for example:
-		<a href="http://localhost:8080/petclinic/owner.do?ownerId=-1">/petclinic/owner.do?ownerId=-1</a>.
+		<a href="http://localhost:8080/org.springframework.samples.petclinic/owner.do?ownerId=-1">/petclinic/owner.do?ownerId=-1</a>.
 		The handlers for these URLs normally expect to see a respective "ownerId" or "petId"
 		request parameter corresponding to an Owner or Pet in the database. Thus,
 		these handlers will throw a <strong>DataAccessException</strong> when such
@@ -908,7 +908,7 @@
 		in a production version of an application. It can be seen in action by
 		entering a URL of "editOwner.do" or "editPet.do" without a valid request
 		parameter, for example:
-		<a href="http://localhost:8080/petclinic/owner.do">/petclinic/owner.do</a>.
+		<a href="http://localhost:8080/org.springframework.samples.petclinic/owner.do">/petclinic/owner.do</a>.
 		The handlers for these URLs normally expect to see a respective "ownerId" or "petId"
 		request parameter and throw a <strong>ServletException</strong> when such
 		a request parameter is not found.</li>
@@ -1025,60 +1025,28 @@
 	<h3>Downloads</h3>
 	<ul>
 	  <li>Download and install the
-	  	<a href="http://sourceforge.net/projects/springframework/" target="_blank">Spring Framework</a>
-	  	(examples, including PetClinic are provided)</li>
+	  	<a href="http://www.springsource.com/download/community?project=Spring%20Framework" target="_blank">Spring Framework</a>
+	  	(the PetClinic sample application is included)</li>
 	  <li>Download and install a <a href="http://java.sun.com/" target="_blank">Java</a>
 		Software Developer Kit, version 1.5 or later</li>
 	  <li>Download and install <a href="http://ant.apache.org" target="_blank">Apache Ant</a>,
 		preferably version 1.7.0 or later</li>
-	  <li>Download and install <a href="http://www.junit.org/" target="_blank">JUnit</a>,
-		preferably version 4.4 or later</li>
 	  <li>Download and install <a href="http://jakarta.apache.org/tomcat/index.html" target="_blank">Apache Tomcat</a>,
-		preferably version 5.5.x or later</li>
-	  <li>Download and install <a href="http://www.mysql.com/" target="_blank">MySQL</a>,
-		preferably version 5.0.x or later (optional)</li>
+		preferably version 6.0.18 or later</li>
+	  <li>Download and install <a href="http://dev.mysql.com/downloads/" target="_blank">MySQL</a>,
+		preferably version 5.1.x or later (optional)</li>
 	  <li><a href="http://hsqldb.sourceforge.net/" target="_blank">Hypersonic SQL</a>, and
 	  	<a href="http://hibernate.org/" target="_blank">Hibernate</a> are provided with the
 		application.</li>
 	  <li>PetClinic and Spring use the <a href="http://www.apache.org/" target="_blank">Apache</a>
-		<a href="http://jakarta.apache.org/commons/logging/" target="_blank">Commons Logging</a>
-		and <a href="http://jakarta.apache.org/log4j/docs/index.html" target="_blank">Log4J</a>
-		packages</li>
+		<a href="http://commons.apache.org/logging/" target="_blank">Commons Logging</a>
+		and <a href="http://logging.apache.org/log4j/1.2/apidocs/index.html" target="_blank">log4j</a>
+		packages.</li>
 	</ul>
 
 	<h3>Ant Setup</h3>
 	<p>
-		Make sure that the Ant executable is in your command shell path. Ant
-		will need to reference classes from <span style="font-weight: bold;">JUnit</span>
-		and the database(s) of interest. Place a copy of any needed jar files in
-		Ant's <span style="font-weight: bold; font-style: italic;">/lib</span> directory, i.e.:
-	</p>
-
-	<ul>
-      <li>JUnit - <span style="font-weight: bold; font-style: italic;">junit.jar</span></li>
-	  <li>HSQL - <span style="font-weight: bold; font-style: italic;">hsqldb.jar</span></li>
-	  <li>MYSQL - <span style="font-weight: bold; font-style: italic;">mysql-connector-java-5.1.5-bin.jar</span> or other</li>
-	</ul>
-
-	<h3>HSQL Setup</h3>
-	<p>
-		Create a new directory containing a copy of the entire contents of
-		the directory <span style="font-weight: bold; font-style: italic;">petclinic/db/hsqldb</span>.
-		The file <span style="font-weight: bold; font-style: italic;">petclinic.script</span>
-		is the data file that will be used by the server. It has been
-		initialized with some sample data. Start a server on the standard port
-		by executing <span style="font-weight: bold; font-style: italic;">server.sh</span>(Unix)
-		or <span style="font-weight: bold; font-style: italic;">server.bat</span> (Windows)
-		or alternatively edit the file to select a port of your choosing.
-		A useful database manager can be started by executing
-		<span style="font-weight: bold; font-style: italic;">manager.sh</span> (Unix)
-		or <span style="font-weight: bold; font-style: italic;">manager.bat</span> (Windows).
-		When the application opens, connect to the "HSQL Database Engine
-		Server" using the default parameters. This tool can also be used to
-		manage other databases. To use a different port, it will be necessary
-		to change the PetClinic Database Setup. It may also be necessary to
-		consult the HSQL documentation for instructions on how to change the port
-		the server uses.
+		Make sure that the Ant executable is in your command shell path.
 	</p>
 
 	<h3>MYSQL Setup (optional)</h3>
@@ -1126,15 +1094,15 @@
 		separate log file for the petclinic context. This will separate the
 		container logging for petclinic from that of the other webapps. This
 		should not be confused with the application log file provided through
-		<span style="font-weight: bold;">Log4j.</span></li>
+		<span style="font-weight: bold;">log4j.</span></li>
 	  <li>An Ant script (<span style="font-weight: bold; font-style: italic;">db/build.xml</span>)
 		has been provided that can be used to re-initialize either database. To
 		select or configure the data source and database used for the webapp and
 		for testing, you will need to edit the following files:
 		<ul>
-		  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/applicationContext-*.xml</span>:
+		  <li><span style="font-weight: bold; font-style: italic;">src/main/webapp/WEB-INF/applicationContext-*.xml</span>:
 			for configuring the DataSource in the webapp</li>
-		  <li><span style="font-weight: bold; font-style: italic;">src/jdbc.properties</span>:
+		  <li><span style="font-weight: bold; font-style: italic;">src/main/resources/jdbc.properties</span>:
 			for configuring JDBC connection settings for both the webapp and testing</li>
 		  <li><span style="font-weight: bold; font-style: italic;">build.properties</span>:
 			for running the &quot;tests&quot; target in Ant</li>
@@ -1145,12 +1113,11 @@
 	<h3>Building the PetClinic Application</h3>
 	<p>
 		Open a command line shell and navigate to the directory containing
-		PetClinic and execute &quot;ant&quot;. This will display a list of the Ant
+		PetClinic and execute &quot;ant -p&quot;. This will display a list of the Ant
 		targets that are available. Make sure the database is running and execute
-		&quot;ant all&quot;. This will run the Ant &quot;all&quot; target which
-		will clean and compile everything, generate Javadoc, and execute the tests,
-		including a live test using the database. The other Ant targets provide
-		subsets of this functionality.
+		&quot;ant clean test&quot;. This will run clean and compile everything
+		and execute the tests, including integration tests against an in-memory
+		database.
 	</p>
 
 	<h3>Deploying the PetClinic Application</h3>
@@ -1158,16 +1125,16 @@
 		Deploy the web application to the server in the usual way (see
 		<a href="#dbNotes">notes</a> regarding database setup). If you need
 		instructions for web application deployment, see the Tomcat
-		documentation for details. The Web ARchive file is
-		<span style="font-weight: bold; font-style: italic;">petclinic.war</span>
+		documentation for details. The Web Application aRrchive file is
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.war</span>
 		and can be found in the
-		<span style="font-weight: bold; font-style: italic;">dist</span> directory.
+		<span style="font-weight: bold; font-style: italic;">target/artifacts</span> directory.
 	</p>
 
 	<h3>Using the PetClinic Application</h3>
 	<p>
 		Make sure the PetClinic web application is running and browse to
-		<a href="http://localhost:8080/petclinic">http://localhost:8080/petclinic</a>.
+		<a href="http://localhost:8080/org.springframework.samples.petclinic/">http://localhost:8080/org.springframework.samples.petclinic/</a>.
 	</p>
 
   <table class="footer">
