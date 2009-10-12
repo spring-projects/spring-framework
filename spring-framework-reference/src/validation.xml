@@ -1465,7 +1465,7 @@ public class MyController {
 		<title>Spring 3 Object Mapping</title>
 		<para>
 			There are scenarios, particularly in large message-oriented business applications, where data and object transformation is required.
-			For example, consider a complex Web Service where there a separation exists between the data exchange model and the internal domain model used to structure business logic.
+			For example, consider a complex Web Service where there is a separation between the data exchange model and the internal domain model used to structure business logic.
 			In cases like this, a general-purpose data mapping facility can be useful for automating the mapping between these disparate models.
 			Spring 3 introduces such a facility built on the <link linkend="expressions-intro">Spring Expression Language</link> (SpEl).
 			This facility is described in this section.
