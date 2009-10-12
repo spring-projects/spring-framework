@@ -752,21 +752,21 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 		<title>Spring 3 Type Conversion</title>
 		<para>
 			Spring 3 introduces a <filename>core.convert</filename> package that provides a general type conversion system.
-			The system defines an SPI to implement type conversion logic, as well as an API to execute type conversions at runtime.
+			The system defines an API to implement type conversion logic, as well as an API to execute type conversions at runtime.
 			Within a Spring container, if configured, this system can be used as an alternative to PropertyEditors to convert externalized bean property value strings to required property types.
 			The public API may also be used anywhere in your application where type conversion is needed.
 		</para>
-		<section id="core-convert-Converter-SPI">
-			<title>Converter SPI</title>
+		<section id="core-convert-Converter-API">
+			<title>Converter API</title>
 			<para>
-				The SPI to implement type conversion logic is simple and strongly typed:
+				The API to implement type conversion logic is simple and strongly typed:
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.core.converter;
     
 public interface Converter<S, T> {
 
-    T convert(S source) throws Exception;    
+    T convert(S source);   
         
 }]]></programlisting>
 			<para>
@@ -774,7 +774,7 @@ public interface Converter<S, T> {
 				Parameterize S as the type you are converting from, and T as the type you are converting to.
 				For each call to convert(S), the source argument is guaranteed to be NOT null.
 				Your Converter may throw any Exception if conversion fails.
-				An IllegalArgumentException is often thrown to report an invalid source value.
+				An IllegalArgumentException should be thrown to report an invalid source value.
 				Take care to ensure your Converter implementation is thread-safe.
 			</para>
 			<para>
@@ -827,7 +827,7 @@ public class StringToEnumFactory implements ConverterFactory<String, Enum> {
             this.enumType = enumType;
         }
         
-        public T convert(String source) throws Exception {
+        public T convert(String source) {
             return (T) Enum.valueOf(this.enumType, source.trim());
         }
     }
@@ -837,8 +837,7 @@ public class StringToEnumFactory implements ConverterFactory<String, Enum> {
 			<title>ConversionService API</title>
 			<para>
 				The ConversionService defines a public API for executing type conversion logic at runtime.
-				Converters are <emphasis>always</emphasis> executed behind this API.
-				User code should not depend on the Converter SPI.
+				Converters are often executed behind this facade interface:
 			</para>
 			<programlisting language="java"><![CDATA[
 public interface ConversionService {
@@ -1461,6 +1460,295 @@ public class MyController {
 				</para>
 			</section>
 		</section>
+	</section>
+	<section id="org.springframework.mapping">
+		<title>Spring 3 Object Mapping</title>
+		<para>
+			There are scenarios, particularly in large message-oriented business applications, where data and object transformation is required.
+			For example, consider a complex Web Service where there a separation exists between the data exchange model and the internal domain model used to structure business logic.
+			In cases like this, a general-purpose data mapping facility can be useful for automating the mapping between these disparate models.
+			Spring 3 introduces such a facility built on the <link linkend="expressions-intro">Spring Expression Language</link> (SpEl).
+			This facility is described in this section.
+		</para>
+		<section id="mapping-Mapping-API">
+			<title>Mapper API</title>
+			<para>
+				The API to implement data mapping logic is simple and strongly typed:
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.mapping;
+    
+public interface Mapper<S, T> {
+
+    T map(S source, T target);   
+        
+}]]></programlisting>
+			<para>
+				To create your own Mapper, simply implement the interface above.
+				Parameterize S as the type you are mapping from, and T as the type you are mapping to.
+				The source and target arguments provided to you should never be null.
+				Your Mapper may throw any RuntimeException if mapping fails.
+				Take care to ensure your Mapper implementation is thread-safe.
+			</para>
+			<para>
+				Consider the following hand-coded Mapper example:
+			</para>
+			<programlisting language="java">
+public class PersonDtoPersonMapper implements Mapper&lt;PersonDto, Person&gt; {
+
+    public Person map(PersonDto source, Person target) {
+        String[] names = source.getName().split(" ");
+        target.setFirstName(names[0]);
+        target.setLastName(names[1]);
+        return target;
+    }
+    
+}</programlisting>
+			<para>
+				In this trivial example, the Mapper simply maps the PersonDto's <literal>name</literal> property to the Person's <literal>firstName</literal> and <literal>lastName</literal> properties.
+				The fully mapped Person object is then returned.
+			</para>
+		</section>
+		<section id="mapping.SpelMapper">
+			<title>General-purpose SpelMapper Implementation</title>
+			<para>
+				A general purpose object Mapper implementation exists in the <classname>org.springframework.mapping.support</classname> package named <classname>SpelMapper</classname>.
+				Built on the flexible Spring Expression Language (SpEL), this Mapper is capable of mapping between objects of all types, including JavaBeans, Arrays, Collections, and Maps.
+				It is also extensible and allows additional MappableTypes to be configured.
+			</para>
+			<section id="mapping.SpelMapper-usage">
+				<title>Usage</title>
+				<para>
+					To use a SpelMapper with its default configuration, simply construct one and call map:
+				</para>
+				<programlisting language="java"><![CDATA[
+SpelMapper mapper = new SpelMapper();
+mapper.map(aSource, aTarget);
+]]>
+				</programlisting>
+				<para>
+					By default, SpelMapper will map the fields on the source and target that have the same names.
+					If the field types differ, the mapping system will attempt a type coersion using Spring 3's <link linkend="core.convert">type conversion system</link>.
+					Nested bean properties are mapped recursively using the same algorithm.
+					Any mapping failures will trigger a MappingException to be thrown.
+					If there are multiple failures, they will be collected and returned in the MappingException thrown to the caller.
+				</para>
+				<para>
+					To illustrate this default behavior, consider the following source object type:
+				</para>
+				<programlisting language="java"><![CDATA[
+public class CreateAccountDto {
+    private String number;
+    private String name;
+    private AddressDto address;
+       
+    public static class AddressDto {
+        private String street;
+        private String zip;    
+    }
+}
+]]>
+				</programlisting>				
+				<para>
+					And the following target object type:
+				</para>
+				<programlisting language="java"><![CDATA[
+public class Account {
+    private Long number;
+    private String name;
+    private Address address;
+    
+    public static class Address {
+        private String street;
+        private String city
+        private String state;
+        private String zip;    
+    }
+}
+]]>
+				</programlisting>
+				<para>
+					Used in the following test case:
+				</para>
+				<programlisting language="java"><![CDATA[
+@Test
+public void testDefaultSpelMappingBehavior() {
+    CreateAccountDto source = new CreateAccountDto();
+    source.setNumber("123456789");
+    source.setName("Bob Sanders");
+    AddressDto nested = new AddressDto();
+    nested.setStreet("123 Maple Lane");
+    nested.setZip("35452");
+    source.setAddress(nested);
+    
+    Account target = new Account();
+    
+    SpelMapper mapper = new SpelMapper();
+    mapper.map(source, target);
+    
+    assertEquals(new Long(123456789), target.getNumber();
+    assertEquals("Bob Sanders", target.getName());
+    assertEquals("123 Maple Lane", target.getAddress().getStreet());
+    assertEquals("35452", target.getAddress().getZip());
+    assertNull(target.getAddress().getCity());
+    assertNull(target.getAddress().getState());
+}
+]]>
+				</programlisting>
+				<para>
+					In this example, the <literal>number</literal>, <literal>name</literal>, and <literal>address</literal> properties are automatically mapped since they are present on both the source and target objects.
+					The AccountDto's <literal>address</literal> property is a JavaBean, so its nested properties are also recursively mapped.
+					Recursively, the <literal>street</literal> and <literal>zip</literal> properties are automatically mapped since they are both present on the nested AddressDto and Address objects.
+					Nothing is mapped to the Address's <literal>city</literal> and <literal>state</literal> properties since these properties do not exist on the AddressDto source.
+				</para>
+			</section>
+			<section id="mapping.SpelMapper-Explicit">
+				<title>Registering Explicit Mappings</title>
+				<para>
+					When default mapping rules are not sufficient, explicit mapping rules can be registered by calling one of the <literal>mapper.addMapping(...)</literal> method variants.
+					Explicit mapping rules always override the default.
+					For example, suppose you need to map <literal>AccountDto.name</literal> to <literal>Account.fullName</literal>.
+					Since the two property names are not the same, default auto-mapping would never be performed.
+					Handle a situation like this by explicitly registering a mapping rule:
+				</para>
+				<programlisting language="java"><![CDATA[
+mapper.addMapping("name", "fullName");
+]]>
+				</programlisting>
+				<para>
+					In this example, the <literal>name</literal> property will be mapped to the <literal>fullName</literal> property when the mapper is executed.
+					No default mapping will be performed for the <literal>name</literal> since an explicit mapping rule has been configured for this property.
+				</para>
+				<section id="mapping.SpelMapper-Explicit-forcing">
+					<title>Forcing Explicit Mappings</title>
+					<para>
+						You can require that all mapping rules must be defined explicitly by disabling the "auto mapping" feature:
+					</para>
+					<programlisting language="java"><![CDATA[
+mapper.setAutoMappingEnabled(false);
+]]>
+					</programlisting>
+				</section>		
+			</section>
+			<section id="mapping.SpelMapper-CustomConverter">
+				<title>Registering Custom Field Converters</title>
+				<para>
+					Sometimes you need to apply field specific type conversion or data transformation logic when mapping a value.
+					Do this by registering a converter with a Mapping:
+				</para>
+				<programlisting language="java"><![CDATA[
+mapper.addMapping("name", "fullName").setConverter() { new Converter<String, String>() {
+    public String convert(String value) {
+        // do transformation
+        // return transformed value
+    }
+});
+]]>
+				</programlisting>
+			</section>
+			<section id="mapper.SpelMapper-IgnoringFields">
+				<title>Ignoring Fields</title>
+				<para>
+					Sometimes you need to exclude a specific field on a source object from being mapped.
+					Do this by marking a mapping as excluded:
+				</para>
+				<programlisting language="java"><![CDATA[
+mapper.addMapping("name").setExclude();
+]]>
+				</programlisting>
+			</section>
+			<section id="mapper.SpelMapper-CustomTypeConverters">
+				<title>Registering Custom Type Converters</title>
+				<para>
+					You can also install Converters to coerse values of different types in a custom way.
+					Do this by obtaining the mapper's ConverterRegistry:
+				</para>
+				<programlisting language="java"><![CDATA[
+mapper.getConverterRegistry().addConverter(new Converter<String, Date>() {
+    public Date convert(String value) {
+        // do conversion
+        // return transformed value    
+    }
+});
+]]>
+				</programlisting>
+				<para>
+					The example Converter above will be invoked anytime a String property is mapped to a Date property.
+				</para>			
+			</section>
+			<section id="mapper.SpelMapper-CustomNestedMappers">
+				<title>Registering Custom Nested Mappers</title>
+				<para>
+					When mapping between two large object graphs, you may need to register explicit mapping rules for nested bean properties.
+					Do this by adding a nested Mapper:
+				</para>
+				<programlisting language="java"><![CDATA[
+mapper.addNestedMapper(new Mapper<AddressDto, Address>() {
+    public Address map(AddressDto source, Address target) {
+        // do target bean mapping here
+        return target; 
+    }
+});
+]]>
+				</programlisting>
+				<para>
+					The example above registers a nested Mapper that will map nested AddressDto properties to nested Address properties.
+					This particular nested Mapper is "hand-coded", but it could have easily been another generic SpelMapper instance.
+					<methodname>addNestedMapper</methodname> is a convenience method for registering a Converter that delegates to a Mapper.
+				</para>
+			</section>
+			<section>
+				<title>Registering New Mappable Types</title>
+				<para>
+					By default, <classname>SpelMapper</classname> can map between JavaBean (Object), Collection, Array, and Map object structures.
+					The supported set of <emphasis>MappableTypes</emphasis> is extensible.
+					For example, you may wish to implement custom support for mapping XML element structures.
+				</para>
+				<para>
+					To implement your own custom MappableType, implement the <classname>MappableType</classname> interface:
+				</para>
+				<programlisting language="java"><![CDATA[
+public interface MappableType<T> {
+
+	boolean isInstance(Object object);
+
+	Set<String> getFields(T object);
+
+	EvaluationContext getEvaluationContext(T object, ConversionService conversionService);
+
+}
+]]>	
+				</programlisting>
+				<para>
+					To plugin your custom MappableType, inject a custom MappableTypeFactory into your SpelMapper:
+				</para>		
+				<programlisting language="java"><![CDATA[
+SpelMapper mapper = new SpelMapper();
+MappableTypeFactory factory = new MappableTypeFactory();
+factory.add(new MyCustomMappableType());
+factory.add(new MapMappableType());
+factory.add(new BeanMappableType());
+mapper.setMappableTypeFactory(factory);
+]]>	
+				</programlisting>
+				<note>
+					<para>
+						The Spring team encourages you to contribute any generally useful MappableType extensions back to the community.
+						Do this by filing a JIRA issue at <ulink url="http://jira.springframework.org">jira.springframework.org</ulink>.
+					</para>
+				</note>
+			</section>
+		</section>
+		<section id="org.springframework.mapping-FurtherReading">
+			<title>Further Reading</title>
+			<para>
+				Consult the JavaDocs of <classname>org.springframework.mapping.support.SpelMapper</classname> for more information on the implementation options.
+			</para>
+			<para>
+				Dozer is another general-purpose object mapper available in the open source Java community.
+				Check it out at <ulink url="http://dozer.sourceforge.net">dozer.sourceforge.net</ulink>.
+			</para>
+		</section>	
 	</section>
 	
 </chapter>
