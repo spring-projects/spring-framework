@@ -1505,8 +1505,8 @@ public class PersonDtoPersonMapper implements Mapper&lt;PersonDto, Person&gt; {
     
 }</programlisting>
 			<para>
-				In this trivial example, the Mapper simply maps the PersonDto's <literal>name</literal> property to the Person's <literal>firstName</literal> and <literal>lastName</literal> properties.
-				The fully mapped Person object is then returned.
+				In this trivial example, the Mapper maps the PersonDto's <literal>name</literal> property to the Person's <literal>firstName</literal> and <literal>lastName</literal> properties.
+				The fully mapped Person object is returned.
 			</para>
 		</section>
 		<section id="mapping.SpelMapper">
@@ -1529,7 +1529,7 @@ mapper.map(aSource, aTarget);
 				<para>
 					By default, SpelMapper will map the fields on the source and target that have the same names.
 					If the field types differ, the mapping system will attempt a type coersion using Spring 3's <link linkend="core.convert">type conversion system</link>.
-					Nested bean properties are mapped recursively using the same algorithm.
+					Nested bean properties are mapped recursively.
 					Any mapping failures will trigger a MappingException to be thrown.
 					If there are multiple failures, they will be collected and returned in the MappingException thrown to the caller.
 				</para>
@@ -1616,8 +1616,8 @@ mapper.addMapping("name", "fullName");
 ]]>
 				</programlisting>
 				<para>
-					In this example, the <literal>name</literal> property will be mapped to the <literal>fullName</literal> property when the mapper is executed.
-					No default mapping will be performed for the <literal>name</literal> since an explicit mapping rule has been configured for this property.
+					In this example, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
+					No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
 				</para>
 				<section id="mapping.SpelMapper-Explicit-forcing">
 					<title>Forcing Explicit Mappings</title>
@@ -1631,7 +1631,7 @@ mapper.setAutoMappingEnabled(false);
 				</section>		
 			</section>
 			<section id="mapping.SpelMapper-CustomConverter">
-				<title>Registering Custom Field Converters</title>
+				<title>Registering Custom Mapping Converters</title>
 				<para>
 					Sometimes you need to apply field specific type conversion or data transformation logic when mapping a value.
 					Do this by registering a converter with a Mapping:
@@ -1673,7 +1673,7 @@ mapper.getConverterRegistry().addConverter(new Converter<String, Date>() {
 ]]>
 				</programlisting>
 				<para>
-					The example Converter above will be invoked anytime a String property is mapped to a Date property.
+					The example Converter above will be invoked anytime a String field is mapped to a Date field.
 				</para>			
 			</section>
 			<section id="mapper.SpelMapper-CustomNestedMappers">
@@ -1698,7 +1698,7 @@ mapper.addNestedMapper(new Mapper<AddressDto, Address>() {
 				</para>
 			</section>
 			<section>
-				<title>Registering New Mappable Types</title>
+				<title>Registering Custom Mappable Types</title>
 				<para>
 					By default, <classname>SpelMapper</classname> can map between JavaBean (Object), Collection, Array, and Map object structures.
 					The supported set of <emphasis>MappableTypes</emphasis> is extensible.
