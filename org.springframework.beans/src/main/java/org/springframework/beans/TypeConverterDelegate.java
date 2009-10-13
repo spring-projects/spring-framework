@@ -24,6 +24,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -192,11 +193,7 @@ class TypeConverterDelegate {
 			// Try to apply some standard type conversion rules if appropriate.
 
 			if (convertedValue != null) {
-				if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
-					// We can stringify any primitive value...
-					return (T) convertedValue.toString();
-				}
-				else if (requiredType.isArray()) {
+				if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 				}
@@ -209,6 +206,13 @@ class TypeConverterDelegate {
 					// Convert keys and values to respective target type, if determined.
 					convertedValue = convertToTypedMap(
 							(Map) convertedValue, propertyName, requiredType, methodParam);
+				}
+				if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
+					convertedValue = Array.get(convertedValue, 0);
+				}
+				if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
+					// We can stringify any primitive value...
+					return (T) convertedValue.toString();
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
 					if (!requiredType.isInterface() && !requiredType.isEnum()) {
@@ -264,20 +268,19 @@ class TypeConverterDelegate {
 	private Object attemptToConvertStringToEnum(Class<?> requiredType, String trimmedValue, Object currentConvertedValue) {
 		Object convertedValue = currentConvertedValue;
 
-		if(Enum.class.equals(requiredType)) {
+		if (Enum.class.equals(requiredType)) {
 			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
 			int index = trimmedValue.lastIndexOf(".");
-			if(index > - 1) {
+			if (index > - 1) {
 				String enumType = trimmedValue.substring(0, index);
 				String fieldName = trimmedValue.substring(index + 1);
-
 				ClassLoader loader = this.targetObject.getClass().getClassLoader();
-
 				try {
 					Class<?> enumValueType = loader.loadClass(enumType);
 					Field enumField = enumValueType.getField(fieldName);
 					convertedValue = enumField.get(null);
-				} catch(ClassNotFoundException ex) {
+				}
+				catch (ClassNotFoundException ex) {
 					if(logger.isTraceEnabled()) {
 						logger.trace("Enum class [" + enumType + "] cannot be loaded from [" + loader + "]", ex);
 					}
@@ -289,6 +292,7 @@ class TypeConverterDelegate {
 				}
 			}
 		}
+
 		if (convertedValue == currentConvertedValue) {
 			// Try field lookup as fallback: for JDK 1.5 enum or custom enum
 			// with values defined as static fields. Resulting value still needs

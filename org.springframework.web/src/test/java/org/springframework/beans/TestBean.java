@@ -206,6 +206,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return (spouses != null ? spouses[0] : null);
 	}
 
+	public void setConcreteSpouse(TestBean spouse) {
+		this.spouses = new ITestBean[] {spouse};
+	}
+
+	public TestBean getConcreteSpouse() {
+		return (spouses != null ? (TestBean) spouses[0] : null);
+	}
+
 	public void setSpouse(ITestBean spouse) {
 		this.spouses = new ITestBean[] {spouse};
 	}
