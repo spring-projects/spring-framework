@@ -916,8 +916,8 @@ public class MyService {
 			It addresses <emphasis>one-way</emphasis> conversion from one type to another and is not limited to just converting Strings.
 			As discussed in the previous section, a Spring Container can be configured to use this system to bind bean property values.
 			In addition, the Spring Expression Language (SpEL) uses this system to coerce Expression values.
-			For example, when SpEL needs to coerce a <classname>Short</classname> to a <classname>Long</classname> to fullfill an
-			<function>expression.setValue()</function> attempt, the core.convert system performs the coersion.
+			For example, when SpEL needs to coerce a <classname>Short</classname> to a <classname>Long</classname> to fulfill an
+			<function>expression.setValue()</function> attempt, the core.convert system performs the coercion.
 		</para>
 		<para>
 			Now consider the type conversion requirements of a typical UI environment such as a web or desktop application.
@@ -1467,7 +1467,7 @@ public class MyController {
 			There are scenarios, particularly in large message-oriented business applications, where data and object transformation is required.
 			For example, consider a complex Web Service where there is a separation between the data exchange model and the internal domain model used to structure business logic.
 			In cases like this, a general-purpose data mapping facility can be useful for automating the mapping between these disparate models.
-			Spring 3 introduces such a facility built on the <link linkend="expressions-intro">Spring Expression Language</link> (SpEl).
+			Spring 3 introduces such a facility built on the <link linkend="expressions-intro">Spring Expression Language</link> (SpEL).
 			This facility is described in this section.
 		</para>
 		<section id="mapping-Mapping-API">
@@ -1523,12 +1523,10 @@ public class PersonDtoPersonMapper implements Mapper&lt;PersonDto, Person&gt; {
 				</para>
 				<programlisting language="java"><![CDATA[
 SpelMapper mapper = new SpelMapper();
-mapper.map(aSource, aTarget);
-]]>
-				</programlisting>
+mapper.map(aSource, aTarget);]]></programlisting>
 				<para>
 					By default, SpelMapper will map the fields on the source and target that have the same names.
-					If the field types differ, the mapping system will attempt a type coersion using Spring 3's <link linkend="core.convert">type conversion system</link>.
+					If the field types differ, the mapping system will attempt a type conversion using Spring 3's <link linkend="core.convert">type conversion system</link>.
 					Nested bean properties are mapped recursively.
 					Any mapping failures will trigger a MappingException to be thrown.
 					If there are multiple failures, they will be collected and returned in the MappingException thrown to the caller.
@@ -1546,9 +1544,7 @@ public class CreateAccountDto {
         private String street;
         private String zip;    
     }
-}
-]]>
-				</programlisting>				
+}]]></programlisting>				
 				<para>
 					And the following target object type:
 				</para>
@@ -1564,9 +1560,7 @@ public class Account {
         private String state;
         private String zip;    
     }
-}
-]]>
-				</programlisting>
+}]]></programlisting>
 				<para>
 					Used in the following test case:
 				</para>
@@ -1592,9 +1586,7 @@ public void testDefaultSpelMappingBehavior() {
     assertEquals("35452", target.getAddress().getZip());
     assertNull(target.getAddress().getCity());
     assertNull(target.getAddress().getState());
-}
-]]>
-				</programlisting>
+}]]></programlisting>
 				<para>
 					In this example, the <literal>number</literal>, <literal>name</literal>, and <literal>address</literal> properties are automatically mapped since they are present on both the source and target objects.
 					The AccountDto's <literal>address</literal> property is a JavaBean, so its nested properties are also recursively mapped.
@@ -1611,10 +1603,7 @@ public void testDefaultSpelMappingBehavior() {
 					Since the two property names are not the same, default auto-mapping would never be performed.
 					Handle a situation like this by explicitly registering a mapping rule:
 				</para>
-				<programlisting language="java"><![CDATA[
-mapper.addMapping("name", "fullName");
-]]>
-				</programlisting>
+				<programlisting language="java">mapper.addMapping("name", "fullName");</programlisting>
 				<para>
 					In this example, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
 					No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
@@ -1624,10 +1613,7 @@ mapper.addMapping("name", "fullName");
 					<para>
 						You can require that all mapping rules must be defined explicitly by disabling the "auto mapping" feature:
 					</para>
-					<programlisting language="java"><![CDATA[
-mapper.setAutoMappingEnabled(false);
-]]>
-					</programlisting>
+					<programlisting language="java">mapper.setAutoMappingEnabled(false);</programlisting>
 				</section>		
 			</section>
 			<section id="mapping.SpelMapper-CustomConverter">
@@ -1642,9 +1628,7 @@ mapper.addMapping("name", "fullName").setConverter() { new Converter<String, Str
         // do transformation
         // return transformed value
     }
-});
-]]>
-				</programlisting>
+});]]></programlisting>
 			</section>
 			<section id="mapper.SpelMapper-IgnoringFields">
 				<title>Ignoring Fields</title>
@@ -1652,15 +1636,12 @@ mapper.addMapping("name", "fullName").setConverter() { new Converter<String, Str
 					Sometimes you need to exclude a specific field on a source object from being mapped.
 					Do this by marking a mapping as excluded:
 				</para>
-				<programlisting language="java"><![CDATA[
-mapper.addMapping("name").setExclude();
-]]>
-				</programlisting>
+				<programlisting language="java">mapper.addMapping("name").setExclude();</programlisting>
 			</section>
 			<section id="mapper.SpelMapper-CustomTypeConverters">
 				<title>Registering Custom Type Converters</title>
 				<para>
-					You can also install Converters to coerse values of different types in a custom way.
+					You can also install Converters to convert values of different types in a custom way.
 					Do this by obtaining the mapper's ConverterRegistry:
 				</para>
 				<programlisting language="java"><![CDATA[
@@ -1669,9 +1650,7 @@ mapper.getConverterRegistry().addConverter(new Converter<String, Date>() {
         // do conversion
         // return transformed value    
     }
-});
-]]>
-				</programlisting>
+});]]></programlisting>
 				<para>
 					The example Converter above will be invoked anytime a String field is mapped to a Date field.
 				</para>			
@@ -1688,9 +1667,7 @@ mapper.addNestedMapper(new Mapper<AddressDto, Address>() {
         // do target bean mapping here
         return target; 
     }
-});
-]]>
-				</programlisting>
+});]]></programlisting>
 				<para>
 					The example above registers a nested Mapper that will map nested AddressDto properties to nested Address properties.
 					This particular nested Mapper is "hand-coded", but it could have easily been another generic SpelMapper instance.
@@ -1716,11 +1693,9 @@ public interface MappableType<T> {
 
 	EvaluationContext getEvaluationContext(T object, ConversionService conversionService);
 
-}
-]]>	
-				</programlisting>
+}]]>	</programlisting>
 				<para>
-					To plugin your custom MappableType, inject a custom MappableTypeFactory into your SpelMapper:
+					To plug in your custom MappableType, inject a custom MappableTypeFactory into your SpelMapper:
 				</para>		
 				<programlisting language="java"><![CDATA[
 SpelMapper mapper = new SpelMapper();
@@ -1728,9 +1703,7 @@ MappableTypeFactory factory = new MappableTypeFactory();
 factory.add(new MyCustomMappableType());
 factory.add(new MapMappableType());
 factory.add(new BeanMappableType());
-mapper.setMappableTypeFactory(factory);
-]]>	
-				</programlisting>
+mapper.setMappableTypeFactory(factory);]]></programlisting>
 				<note>
 					<para>
 						The Spring team encourages you to contribute any generally useful MappableType extensions back to the community.
