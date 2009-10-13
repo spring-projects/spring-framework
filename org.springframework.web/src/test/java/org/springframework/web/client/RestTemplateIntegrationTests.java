@@ -114,8 +114,8 @@ public class RestTemplateIntegrationTests {
 	}
 
 	@Test
-	public void optionsForAllow() {
-		Set<HttpMethod> allowed = template.optionsForAllow("http://localhost:8889/get");
+	public void optionsForAllow() throws URISyntaxException {
+		Set<HttpMethod> allowed = template.optionsForAllow(new URI("http://localhost:8889/get"));
 		assertEquals("Invalid response",
 				EnumSet.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE), allowed);
 	}

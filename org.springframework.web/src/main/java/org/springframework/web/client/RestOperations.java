@@ -57,6 +57,15 @@ public interface RestOperations {
 	 */
 	<T> T getForObject(String url, Class<T> responseType, Map<String, String> uriVariables) throws RestClientException;
 
+	/**
+	 * Retrieve a representation by doing a GET on the URL . The response (if any) is converted and returned.
+	 *
+	 * @param url the URL
+	 * @param responseType the type of the return value
+	 * @return the converted object
+	 */
+	<T> T getForObject(URI url, Class<T> responseType) throws RestClientException;
+
 	// HEAD
 
 	/**
@@ -79,6 +88,14 @@ public interface RestOperations {
 	 */
 	HttpHeaders headForHeaders(String url, Map<String, String> uriVariables) throws RestClientException;
 
+	/**
+	 * Retrieve all headers of the resource specified by the URL.
+	 *
+	 * @param url the URL
+	 * @return all HTTP headers of that resource
+	 */
+	HttpHeaders headForHeaders(URI url) throws RestClientException;
+
 	// POST
 
 	/**
@@ -88,6 +105,7 @@ public interface RestOperations {
 	 *
 	 * @param url the URL
 	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param uriVariables the variables to expand the template
 	 * @return the value for the <code>Location</code> header
 	 */
 	URI postForLocation(String url, Object request, String... uriVariables) throws RestClientException;
@@ -105,11 +123,22 @@ public interface RestOperations {
 	URI postForLocation(String url, Object request, Map<String, String> uriVariables) throws RestClientException;
 
 	/**
+	 * Create a new resource by POSTing the given object to the URL, and returns the value of the
+	 * <code>Location</code> header. This header typically indicates where the new resource is stored.
+	 *
+	 * @param url the URL
+	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @return the value for the <code>Location</code> header
+	 */
+	URI postForLocation(URI url, Object request) throws RestClientException;
+
+	/**
 	 * Create a new resource by POSTing the given object to the URI template, and returns the representation
 	 * found in the response. <p>URI Template variables are expanded using the given URI variables, if any.
 	 *
 	 * @param url the URL
 	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 */
 	<T> T postForObject(String url, Object request, Class<T> responseType, String... uriVariables)
@@ -121,10 +150,21 @@ public interface RestOperations {
 	 *
 	 * @param url the URL
 	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 */
 	<T> T postForObject(String url, Object request, Class<T> responseType, Map<String, String> uriVariables)
 			throws RestClientException;
+
+	/**
+	 * Create a new resource by POSTing the given object to the URL, and returns the representation
+	 * found in the response.
+	 *
+	 * @param url the URL
+	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @return the converted object
+	 */
+	<T> T postForObject(URI url, Object request, Class<T> responseType) throws RestClientException;
 
 	// PUT
 
@@ -148,6 +188,14 @@ public interface RestOperations {
 	 */
 	void put(String url, Object request, Map<String, String> uriVariables) throws RestClientException;
 
+	/**
+	 * Creates a new resource by PUTting the given object to URL.
+	 *
+	 * @param url the URL
+	 * @param request the Object to be PUT, may be <code>null</code>
+	 */
+	void put(URI url, Object request) throws RestClientException;
+
 	// DELETE
 
 	/**
@@ -166,6 +214,13 @@ public interface RestOperations {
 	 * @param uriVariables the variables to expand the template
 	 */
 	void delete(String url, Map<String, String> uriVariables) throws RestClientException;
+
+	/**
+	 * Delete the resources at the specified URL.
+	 *
+	 * @param url the URL
+	 */
+	void delete(URI url) throws RestClientException;
 
 	// OPTIONS
 
@@ -188,10 +243,18 @@ public interface RestOperations {
 	 */
 	Set<HttpMethod> optionsForAllow(String url, Map<String, String> uriVariables) throws RestClientException;
 
+	/**
+	 * Return the value of the Allow header for the given URL.
+	 *
+	 * @param url the URL
+	 * @return the value of the allow header
+	 */
+	Set<HttpMethod> optionsForAllow(URI url) throws RestClientException;
+
 	// general execution
 
 	/**
-	 * Execute the HTTP methods to the given URI, preparing the request with the {@link RequestCallback}, and reading the
+	 * Execute the HTTP methods to the given URI template, preparing the request with the {@link RequestCallback}, and reading the
 	 * response with a {@link ResponseExtractor}. <p>URI Template variables are expanded using the given URI variables, if
 	 * any.
 	 *
@@ -209,7 +272,7 @@ public interface RestOperations {
 			String... uriVariables) throws RestClientException;
 
 	/**
-	 * Execute the HTTP methods to the given URI, preparing the request with the {@link RequestCallback}, and reading the
+	 * Execute the HTTP methods to the given URI template, preparing the request with the {@link RequestCallback}, and reading the
 	 * response with a {@link ResponseExtractor}. <p>URI Template variables are expanded using the given URI variables
 	 * map.
 	 *
@@ -225,5 +288,20 @@ public interface RestOperations {
 			RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor,
 			Map<String, String> uriVariables) throws RestClientException;
+
+	/**
+	 * Execute the HTTP methods to the given URL, preparing the request with the {@link RequestCallback}, and reading the
+	 * response with a {@link ResponseExtractor}.
+	 *
+	 * @param url the URL
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param requestCallback object that prepares the request
+	 * @param responseExtractor object that extracts the return value from the response
+	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
+	 */
+	<T> T execute(URI url,
+			HttpMethod method,
+			RequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor) throws RestClientException;
 
 }
