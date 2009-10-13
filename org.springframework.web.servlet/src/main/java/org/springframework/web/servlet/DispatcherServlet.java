@@ -139,7 +139,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace. Only used when
 	 * "detectAllHandlerMappings" is turned off.
-	 *
 	 * @see #setDetectAllHandlerMappings
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
@@ -147,7 +146,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the HandlerAdapter object in the bean factory for this namespace. Only used when
 	 * "detectAllHandlerAdapters" is turned off.
-	 *
 	 * @see #setDetectAllHandlerAdapters
 	 */
 	public static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
@@ -155,7 +153,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the HandlerExceptionResolver object in the bean factory for this namespace. Only used when
 	 * "detectAllHandlerExceptionResolvers" is turned off.
-	 *
 	 * @see #setDetectAllHandlerExceptionResolvers
 	 */
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
@@ -166,7 +163,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the ViewResolver object in the bean factory for this namespace. Only used when
 	 * "detectAllViewResolvers" is turned off.
-	 *
 	 * @see #setDetectAllViewResolvers
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
@@ -177,28 +173,24 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Request attribute to hold the current web application context. Otherwise only the global web app context is
 	 * obtainable by tags etc.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getWebApplicationContext
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
 	/**
 	 * Request attribute to hold the current LocaleResolver, retrievable by views.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
 
 	/**
 	 * Request attribute to hold the current ThemeResolver, retrievable by views.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
 	 */
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
 
 	/**
 	 * Request attribute to hold the current ThemeSource, retrievable by views.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
 	 */
 	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
