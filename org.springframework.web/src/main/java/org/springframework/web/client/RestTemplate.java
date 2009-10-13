@@ -31,7 +31,6 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.HttpAccessor;
-import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -41,7 +40,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriTemplate;
 
 /**
- * <strong>The central class for client-side HTTP access.</strong>. It simplifies communication with HTTP servers, and
+ * <strong>The central class for client-side HTTP access.</strong> It simplifies communication with HTTP servers, and
  * enforces RESTful principles. It handles HTTP connections, leaving application code to provide URLs (with possible
  * template variables) and extract results.
  *
@@ -55,9 +54,11 @@ import org.springframework.web.util.UriTemplate;
  * <tr><td></td><td>{@link #postForObject}</td></tr>
  * <tr><td>PUT</td><td>{@link #put}</td></tr> <tr><td>any</td><td>{@link #execute}</td></tr> </table>
  *
- * <p>Each of these methods takes {@linkplain UriTemplate uri template} arguments in two forms: as a {@code String}
- * variable arguments array, or as a {@code Map<String, String>}. The string varargs variant expands the given template
- * variables in order, so that
+ * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}.
+ * Two variant take a {@code String} URI as first argument, and are capable of substituting any
+ * {@linkplain UriTemplate uri templates} in that URL using either a
+ * {@code String} variable arguments array, or a {@code Map<String, String>}. The string varargs variant expands the
+ * given template variables in order, so that
  * <pre>
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42",
  * "21");
@@ -70,6 +71,8 @@ import org.springframework.web.util.UriTemplate;
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
  * </pre>
  * will perform a GET on {@code http://example.com/hotels/42/rooms/42}.
+ * Alternatively, there are {@link URI} variant methods, which do not allow for URI templates, but allow you to reuse a
+ * single, expanded URI multiple times.
  *
  * <p>Objects passed to and returned from these methods are converted to and from HTTP messages by {@link
  * HttpMessageConverter} instances. Converters for the main mime types are registered by default, but you can also write
@@ -175,6 +178,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters), urlVariables);
 	}
 
+	public <T> T getForObject(URI url, Class<T> responseType) throws RestClientException {
+		checkForSupportedMessageConverter(responseType);
+		List<HttpMessageConverter<T>> supportedMessageConverters = getSupportedMessageConverters(responseType);
+		return execute(url, HttpMethod.GET, new AcceptHeaderRequestCallback<T>(supportedMessageConverters),
+				new HttpMessageConverterExtractor<T>(responseType, supportedMessageConverters));
+	}
+
 	// HEAD
 
 	public HttpHeaders headForHeaders(String url, String... urlVariables) throws RestClientException {
@@ -183,6 +193,10 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	public HttpHeaders headForHeaders(String url, Map<String, String> urlVariables) throws RestClientException {
 		return execute(url, HttpMethod.HEAD, null, this.headersExtractor, urlVariables);
+	}
+
+	public HttpHeaders headForHeaders(URI url) throws RestClientException {
+		return execute(url, HttpMethod.HEAD, null, this.headersExtractor);
 	}
 
 	// POST
@@ -203,6 +217,15 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		}
 		HttpHeaders headers =
 				execute(url, HttpMethod.POST, new PostPutCallback(request), this.headersExtractor, urlVariables);
+		return headers.getLocation();
+	}
+
+	public URI postForLocation(URI url, Object request)
+			throws RestClientException {
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
+		HttpHeaders headers = execute(url, HttpMethod.POST, new PostPutCallback(request), this.headersExtractor);
 		return headers.getLocation();
 	}
 
@@ -228,6 +251,16 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 				new HttpMessageConverterExtractor<T>(responseType, responseMessageConverters), uriVariables);
 	}
 
+	public <T> T postForObject(URI url, Object request, Class<T> responseType) throws RestClientException {
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
+		checkForSupportedMessageConverter(responseType);
+		List<HttpMessageConverter<T>> responseMessageConverters = getSupportedMessageConverters(responseType);
+		return execute(url, HttpMethod.POST, new PostPutCallback<T>(request, responseMessageConverters),
+				new HttpMessageConverterExtractor<T>(responseType, responseMessageConverters));
+	}
+
 	// PUT
 
 	public void put(String url, Object request, String... urlVariables) throws RestClientException {
@@ -244,6 +277,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		execute(url, HttpMethod.PUT, new PostPutCallback(request), null, urlVariables);
 	}
 
+	public void put(URI url, Object request) throws RestClientException {
+		if (request != null) {
+			checkForSupportedMessageConverter(request.getClass());
+		}
+		execute(url, HttpMethod.PUT, new PostPutCallback(request), null);
+	}
+
 	// DELETE
 
 	public void delete(String url, String... urlVariables) throws RestClientException {
@@ -252,6 +292,10 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	public void delete(String url, Map<String, String> urlVariables) throws RestClientException {
 		execute(url, HttpMethod.DELETE, null, null, urlVariables);
+	}
+
+	public void delete(URI url) throws RestClientException {
+		execute(url, HttpMethod.DELETE, null, null);
 	}
 
 	// OPTIONS
@@ -265,6 +309,12 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public Set<HttpMethod> optionsForAllow(String url, Map<String, String> urlVariables) throws RestClientException {
 
 		HttpHeaders headers = execute(url, HttpMethod.OPTIONS, null, this.headersExtractor, urlVariables);
+		return headers.getAllow();
+	}
+
+	public Set<HttpMethod> optionsForAllow(URI url) throws RestClientException {
+
+		HttpHeaders headers = execute(url, HttpMethod.OPTIONS, null, this.headersExtractor);
 		return headers.getAllow();
 	}
 
@@ -290,6 +340,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		UriTemplate uriTemplate = new UriTemplate(url);
 		URI expanded = uriTemplate.expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
+	}
+
+	public <T> T execute(URI url,
+			HttpMethod method,
+			RequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor) throws RestClientException {
+		return doExecute(url, method, requestCallback, responseExtractor);
 	}
 
 	/**
