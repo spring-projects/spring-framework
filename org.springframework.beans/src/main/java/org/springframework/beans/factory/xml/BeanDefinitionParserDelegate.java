@@ -518,8 +518,8 @@ public class BeanDefinitionParserDelegate {
 		}
 		else if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			// Spring 1.x "singleton" attribute
-			bd.setScope(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)) ? BeanDefinition.SCOPE_SINGLETON
-					: BeanDefinition.SCOPE_PROTOTYPE);
+			bd.setScope(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)) ?
+					BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
 		}
 		else if (containingBean != null) {
 			// Take default from containing bean in case of an inner bean definition.

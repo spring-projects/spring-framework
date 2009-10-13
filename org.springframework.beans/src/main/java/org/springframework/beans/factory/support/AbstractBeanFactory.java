@@ -426,10 +426,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (System.getSecurityManager() != null) {
 					return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 						public Boolean run() {
-							return Boolean.valueOf(((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
-									!factoryBean.isSingleton()));
+							return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
+									!factoryBean.isSingleton());
 						}
-					}, getAccessControlContext()).booleanValue();
+					}, getAccessControlContext());
 				}
 				else {
 					return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
@@ -1015,9 +1015,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (!this.customEditors.isEmpty()) {
 			for (Map.Entry<Class, Class<? extends PropertyEditor>> entry : this.customEditors.entrySet()) {
 				Class requiredType = entry.getKey();
-				Class editorClass = entry.getValue();
-				registry.registerCustomEditor(requiredType,
-						(PropertyEditor) BeanUtils.instantiateClass(editorClass));
+				Class<? extends PropertyEditor> editorClass = entry.getValue();
+				registry.registerCustomEditor(requiredType, BeanUtils.instantiateClass(editorClass));
 			}
 		}
 	}
@@ -1196,10 +1195,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd.hasBeanClass()) {
 				return mbd.getBeanClass();
 			}
-			
 			if (System.getSecurityManager() != null) {
 				return AccessController.doPrivileged(new PrivilegedExceptionAction<Class>() {
-
 					public Class run() throws Exception {
 						return doResolveBeanClass(mbd, typesToMatch);
 					}
@@ -1211,10 +1208,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		catch (PrivilegedActionException pae) {
 			ClassNotFoundException ex = (ClassNotFoundException) pae.getException();
-			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), (ClassNotFoundException) ex);
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), (ClassNotFoundException) ex);
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		}
 		catch (LinkageError err) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
