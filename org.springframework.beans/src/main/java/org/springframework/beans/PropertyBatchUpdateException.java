@@ -136,8 +136,7 @@ public class PropertyBatchUpdateException extends BeansException {
 		if (exType.isInstance(this)) {
 			return true;
 		}
-		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
-			PropertyAccessException pae = this.propertyAccessExceptions[i];
+		for (PropertyAccessException pae : this.propertyAccessExceptions) {
 			if (pae.contains(exType)) {
 				return true;
 			}
