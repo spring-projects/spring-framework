@@ -29,7 +29,7 @@ public interface MapperTargetFactory {
 
 	/**
 	 * Does this factory support creating mapping targets of the specified type
-	 * @param targetType the targe type
+	 * @param targetType the target type
 	 * @return true if so, false otherwise
 	 */
 	public boolean supports(TypeDescriptor targetType);
