@@ -473,8 +473,10 @@ public abstract class BeanUtils {
 	 * @return whether the given type represents a "simple" value type
 	 */
 	public static boolean isSimpleValueType(Class<?> clazz) {
-		return ClassUtils.isPrimitiveOrWrapper(clazz) || CharSequence.class.isAssignableFrom(clazz) ||
-				Number.class.isAssignableFrom(clazz) || Date.class.isAssignableFrom(clazz) ||
+		return ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.isEnum() ||
+				CharSequence.class.isAssignableFrom(clazz) ||
+				Number.class.isAssignableFrom(clazz) ||
+				Date.class.isAssignableFrom(clazz) ||
 				clazz.equals(URI.class) || clazz.equals(URL.class) ||
 				clazz.equals(Locale.class) || clazz.equals(Class.class);
 	}
