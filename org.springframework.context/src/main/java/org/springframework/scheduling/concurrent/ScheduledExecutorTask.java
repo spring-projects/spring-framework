@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,10 @@ import java.util.concurrent.TimeUnit;
  * uses a {@link Runnable} instance that is shared between repeated executions,
  * in contrast to Quartz which creates a new Job instance for each execution.
  *
- * <p>This class is analogous to the {@link org.springframework.scheduling.timer.ScheduledTimerTask}
- * class for the JDK 1.3 {@link java.util.Timer} facility.
- *
  * @author Juergen Hoeller
  * @since 2.0
  * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
  * @see java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
- * @see org.springframework.scheduling.timer.ScheduledTimerTask
  */
 public class ScheduledExecutorTask {
 

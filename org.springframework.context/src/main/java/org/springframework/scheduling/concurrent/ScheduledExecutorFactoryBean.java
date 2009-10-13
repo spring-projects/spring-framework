@@ -52,10 +52,6 @@ import org.springframework.util.ObjectUtils;
  * {@link #setContinueScheduledExecutionAfterException "continueScheduledExecutionAfterException"}
  * property to "true".
  *
- * <p>This class is analogous to the
- * {@link org.springframework.scheduling.timer.TimerFactoryBean}
- * class for the JDK 1.3 {@link java.util.Timer} facility.
- *
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setPoolSize

@@ -68,7 +68,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * transaction association) unless the TaskExecutor explicitly supports this.
 	 * @see org.springframework.core.task.SyncTaskExecutor
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
-	 * @see org.springframework.scheduling.timer.TimerTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;

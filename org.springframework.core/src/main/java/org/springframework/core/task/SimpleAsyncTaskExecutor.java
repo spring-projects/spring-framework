@@ -27,7 +27,7 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
 
 /**
- * TaskExecutor implementation that fires up a new Thread for each task,
+ * {@link TaskExecutor} implementation that fires up a new Thread for each task,
  * executing it asynchronously.
  *
  * <p>Supports limiting concurrent threads through the "concurrencyLimit"
@@ -41,7 +41,6 @@ import org.springframework.util.CustomizableThreadCreator;
  * @since 2.0
  * @see #setConcurrencyLimit
  * @see SyncTaskExecutor
- * @see org.springframework.scheduling.timer.TimerTaskExecutor
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
  * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
