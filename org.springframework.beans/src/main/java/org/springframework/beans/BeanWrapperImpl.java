@@ -114,7 +114,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/** The security context used for invoking the property methods */
 	private AccessControlContext acc;
 
-	private boolean autoGrowNestedPaths;
+	private boolean autoGrowNestedPaths = false;
+
 
 	/**
 	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
@@ -252,23 +253,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return (this.rootObject != null ? this.rootObject.getClass() : null);
 	}
 
-	/**
-	 * If this BeanWrapper should attempt to "autogrow" a nested path that contains a null value.
-	 * If true, a null path location will be populated with a default object value and traversed instead of resulting in a {@link NullValueInNestedPathException}.
-	 * Turning this flag on also enables auto-growth of collection elements when an index that is out of bounds is accessed.
-	 */
-	public boolean getAutoGrowNestedPaths() {
-		return this.autoGrowNestedPaths;
-	}
-
-	/**
-	 * Sets if this BeanWrapper should attempt to "autogrow" a nested path that contains a null value.
-	 * If true, a null path location will be populated with a default object value and traversed instead of resulting in a {@link NullValueInNestedPathException}.
-	 * Turning this flag on also enables auto-growth of collection elements when an index that is out of bounds is accessed.
-	 * Default is false.
-	 */
 	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
+	}
+
+	public boolean isAutoGrowNestedPaths() {
+		return this.autoGrowNestedPaths;
 	}
 
 	/**
@@ -506,9 +496,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		String canonicalName = tokens.canonicalName;
 		Object propertyValue = getPropertyValue(tokens);
 		if (propertyValue == null) {
-			if (autoGrowNestedPaths) {
+			if (this.autoGrowNestedPaths) {
 				propertyValue = setDefaultValue(tokens);
-			} else {
+			}
+			else {
 				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);				
 			}
 		}
@@ -561,20 +552,22 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					Object array = Array.newInstance(componentType, 1);
 					Array.set(array, 0, Array.newInstance(componentType.getComponentType(), 0));
 					return array;
-				} else {
+				}
+				else {
 					return Array.newInstance(componentType, 0);
 				}
-			} else {
+			}
+			else {
 				if (Collection.class.isAssignableFrom(type)) {
 					return CollectionFactory.createCollection(type, 16);
-				} else {
+				}
+				else {
 					return type.newInstance();
 				}
 			}
-		} catch (InstantiationException e) {
-			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate propertyType [" + type.getName() + "] to auto-grow nested property path");
-		} catch (IllegalAccessException e) {
-			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate propertyType [" + type.getName() + "] to auto-grow nested property path");
+		}
+		catch (Exception ex) {
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
 		}
 	}
 	
@@ -685,9 +678,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			
 			if (tokens.keys != null) {				
 				if (value == null) {
-					if (autoGrowNestedPaths) {
+					if (this.autoGrowNestedPaths) {
 						value = setDefaultValue(tokens.actualName);
-					} else {
+					}
+					else {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +
 								"property path '" + propertyName + "': returned null");							
@@ -775,7 +769,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 	private Object growArrayIfNecessary(Object array, int index, String name) {
-		if (!autoGrowNestedPaths) {
+		if (!this.autoGrowNestedPaths) {
 			return array;
 		}
 		int length = Array.getLength(array);
@@ -794,7 +788,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 	
 	private void growCollectionIfNecessary(Collection collection, int index, String name, PropertyDescriptor pd, int nestingLevel) {
-		if (!autoGrowNestedPaths) {
+		if (!this.autoGrowNestedPaths) {
 			return;
 		}
 		if (index >= collection.size()) {
