@@ -118,6 +118,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * using the given autowire mode.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param autowireMode by name or type, using the constants in this interface
+	 * @deprecated as of Spring 3.0, in favor of {@link #setAutowireMode} usage
 	 */
 	public RootBeanDefinition(Class beanClass, int autowireMode) {
 		super();
@@ -147,6 +148,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * providing property values.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param pvs the property values to apply
+	 * @deprecated as of Spring 3.0, in favor of {@link #getPropertyValues} usage
 	 */
 	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs) {
 		super(null, pvs);
@@ -178,6 +180,16 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public RootBeanDefinition(Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		super(cargs, pvs);
 		setBeanClass(beanClass);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a singleton,
+	 * providing constructor arguments and property values.
+	 * <p>Takes a bean class name to avoid eager loading of the bean class.
+	 * @param beanClassName the name of the class to instantiate
+	 */
+	public RootBeanDefinition(String beanClassName) {
+		setBeanClassName(beanClassName);
 	}
 
 	/**
