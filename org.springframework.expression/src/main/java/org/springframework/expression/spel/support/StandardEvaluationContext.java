@@ -47,15 +47,15 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private TypedValue rootObject;
 
-	private final List<ConstructorResolver> constructorResolvers = new ArrayList<ConstructorResolver>();
+	private List<ConstructorResolver> constructorResolvers;
 
-	private final List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
+	private List<MethodResolver> methodResolvers;
 
-	private final List<PropertyAccessor> propertyAccessors = new ArrayList<PropertyAccessor>();
+	private List<PropertyAccessor> propertyAccessors;
 
-	private TypeLocator typeLocator = new StandardTypeLocator();
+	private TypeLocator typeLocator;
 
-	private TypeConverter typeConverter = new StandardTypeConverter();
+	private TypeConverter typeConverter;
 
 	private TypeComparator typeComparator = new StandardTypeComparator();
 
@@ -65,9 +65,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 
 	public StandardEvaluationContext() {
-		this.methodResolvers.add(new ReflectiveMethodResolver());
-		this.constructorResolvers.add(new ReflectiveConstructorResolver());
-		this.propertyAccessors.add(new ReflectivePropertyResolver());
+		setRootObject(null);
 	}
 	
 	public StandardEvaluationContext(Object rootObject) {
@@ -77,7 +75,11 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 
 	public void setRootObject(Object rootObject) {
-		this.rootObject = new TypedValue(rootObject, TypeDescriptor.forObject(rootObject));
+		if (this.rootObject == null) {
+			this.rootObject = TypedValue.NULL_TYPED_VALUE; 
+		} else {
+			this.rootObject = new TypedValue(rootObject);//, TypeDescriptor.forObject(rootObject));
+		}
 	}
 
 	public void setRootObject(Object rootObject, TypeDescriptor typeDescriptor) {
@@ -89,27 +91,54 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public void addConstructorResolver(ConstructorResolver resolver) {
+		ensureConstructorResolversInitialized();
 		this.constructorResolvers.add(this.constructorResolvers.size() - 1, resolver);
 	}
-
+	
 	public List<ConstructorResolver> getConstructorResolvers() {
+		ensureConstructorResolversInitialized();
 		return this.constructorResolvers;
 	}
 
+	private void ensureConstructorResolversInitialized() {
+		if (this.constructorResolvers == null) {
+			this.constructorResolvers = new ArrayList<ConstructorResolver>();
+			this.constructorResolvers.add(new ReflectiveConstructorResolver());
+		}
+	}
+
 	public void addMethodResolver(MethodResolver resolver) {
+		ensureMethodResolversInitialized();
 		this.methodResolvers.add(this.methodResolvers.size() - 1, resolver);
 	}
 
 	public List<MethodResolver> getMethodResolvers() {
+		ensureMethodResolversInitialized();
 		return this.methodResolvers;
+	}
+	
+	private void ensureMethodResolversInitialized() {
+		if (this.methodResolvers == null) {
+			this.methodResolvers = new ArrayList<MethodResolver>();
+			this.methodResolvers.add(new ReflectiveMethodResolver());
+		}
 	}
 
 	public void addPropertyAccessor(PropertyAccessor accessor) {
+		ensurePropertyAccessorsInitialized();
 		this.propertyAccessors.add(this.propertyAccessors.size() - 1, accessor);
 	}
 
 	public List<PropertyAccessor> getPropertyAccessors() {
+		ensurePropertyAccessorsInitialized();
 		return this.propertyAccessors;
+	}
+
+	private void ensurePropertyAccessorsInitialized() {
+		if (this.propertyAccessors == null) {
+			this.propertyAccessors = new ArrayList<PropertyAccessor>();
+			this.propertyAccessors.add(new ReflectivePropertyResolver());
+		}
 	}
 
 	public void setTypeLocator(TypeLocator typeLocator) {
@@ -118,6 +147,9 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public TypeLocator getTypeLocator() {
+		if (this.typeLocator == null) {
+			 this.typeLocator = new StandardTypeLocator();
+		}
 		return this.typeLocator;
 	}
 
@@ -127,6 +159,9 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	public TypeConverter getTypeConverter() {
+		if (this.typeConverter == null) {
+			 this.typeConverter = new StandardTypeConverter();
+		}
 		return this.typeConverter;
 	}
 

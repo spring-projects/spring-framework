@@ -52,7 +52,6 @@ public class MethodReference extends SpelNodeImpl {
 		TypedValue currentContext = state.getActiveContextObject();
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-//			System.out.println(i);
 			arguments[i] = children[i].getValueInternal(state).getValue();
 		}
 		if (currentContext.getValue() == null) {

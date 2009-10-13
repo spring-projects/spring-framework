@@ -206,7 +206,6 @@ public class Indexer extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	@SuppressWarnings("unchecked")
 	private void setArrayElement(ExpressionState state, Object ctx, int idx, Object newValue, Class clazz) throws EvaluationException {
 		Class<?> arrayComponentType = clazz;
 		if (arrayComponentType == Integer.TYPE) {

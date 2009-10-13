@@ -33,7 +33,7 @@ public class TypedValue {
 
 	private final Object value;
 
-	private final TypeDescriptor typeDescriptor;
+	private TypeDescriptor typeDescriptor;
 	
 
 	/**
@@ -43,7 +43,7 @@ public class TypedValue {
 	 */
 	public TypedValue(Object value) {
 		this.value = value;
-		this.typeDescriptor = TypeDescriptor.forObject(value);
+		this.typeDescriptor = null;// initialized when/if requested
 	}
 	
 	/**
@@ -62,6 +62,9 @@ public class TypedValue {
 	}
 	
 	public TypeDescriptor getTypeDescriptor() {
+		if (this.typeDescriptor==null) {
+			this.typeDescriptor = TypeDescriptor.forObject(value);
+		}
 		return this.typeDescriptor;
 	}
 

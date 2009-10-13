@@ -20,6 +20,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
@@ -98,6 +99,10 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		expr = parser.parseExpression("abc", DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		o = expr.getValue();
 		Assert.assertEquals("abc", o.toString());
+
+		expr = parser.parseExpression("abc", DEFAULT_TEMPLATE_PARSER_CONTEXT);
+		o = expr.getValue((Object)null);
+		Assert.assertEquals("abc", o.toString());
 	}
 
 	@Test
@@ -106,12 +111,52 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		Expression ex = parser.parseExpression("hello ${'world'}", DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		checkString("hello world", ex.getValue());
 		checkString("hello world", ex.getValue(String.class));
+		checkString("hello world", ex.getValue((Object)null, String.class));
+		checkString("hello world", ex.getValue(new Rooty()));
+		checkString("hello world", ex.getValue(new Rooty(), String.class));
+
 		EvaluationContext ctx = new StandardEvaluationContext();
 		checkString("hello world", ex.getValue(ctx));
 		checkString("hello world", ex.getValue(ctx, String.class));
+		checkString("hello world", ex.getValue(ctx, null, String.class));
+		checkString("hello world", ex.getValue(ctx, new Rooty()));
+		checkString("hello world", ex.getValue(ctx, new Rooty(), String.class));
+		checkString("hello world", ex.getValue(ctx, new Rooty(), String.class));
 		Assert.assertEquals("hello ${'world'}", ex.getExpressionString());
 		Assert.assertFalse(ex.isWritable(new StandardEvaluationContext()));
+		Assert.assertFalse(ex.isWritable(new Rooty()));
+		Assert.assertFalse(ex.isWritable(new StandardEvaluationContext(), new Rooty()));
+
+		Assert.assertEquals(String.class,ex.getValueType());
+		Assert.assertEquals(String.class,ex.getValueType(ctx));
+		Assert.assertEquals(String.class,ex.getValueTypeDescriptor().getType());
+		Assert.assertEquals(String.class,ex.getValueTypeDescriptor(ctx).getType());
+		Assert.assertEquals(String.class,ex.getValueType(new Rooty()));
+		Assert.assertEquals(String.class,ex.getValueType(ctx, new Rooty()));
+		Assert.assertEquals(String.class,ex.getValueTypeDescriptor(new Rooty()).getType());
+		Assert.assertEquals(String.class,ex.getValueTypeDescriptor(ctx, new Rooty()).getType());
+		
+		try {
+			ex.setValue(ctx, null);
+			Assert.fail();
+		} catch (EvaluationException ee) {
+			// success
+		}
+		try {
+			ex.setValue((Object)null, null);
+			Assert.fail();
+		} catch (EvaluationException ee) {
+			// success
+		}
+		try {
+			ex.setValue(ctx, null, null);
+			Assert.fail();
+		} catch (EvaluationException ee) {
+			// success
+		}
 	}
+	
+	static class Rooty {}
 	
 	@Test
 	public void testNestedExpressions() throws Exception {
@@ -204,6 +249,16 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		Assert.assertEquals("abc", tpc.getExpressionPrefix());
 		Assert.assertEquals("def", tpc.getExpressionSuffix()); 
 		Assert.assertTrue(tpc.isTemplate());
+
+		tpc = new TemplateParserContext();
+		Assert.assertEquals("#{", tpc.getExpressionPrefix());
+		Assert.assertEquals("}", tpc.getExpressionSuffix()); 
+		Assert.assertTrue(tpc.isTemplate());
+		
+		ParserContext pc = ParserContext.TEMPLATE_EXPRESSION;
+		Assert.assertEquals("#{", pc.getExpressionPrefix());
+		Assert.assertEquals("}", pc.getExpressionSuffix()); 
+		Assert.assertTrue(pc.isTemplate());
 	}
 	
 	// ---

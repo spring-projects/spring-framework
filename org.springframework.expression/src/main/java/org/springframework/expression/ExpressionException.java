@@ -23,7 +23,7 @@ package org.springframework.expression;
  * @author Andy Clement
  * @since 3.0
  */
-public class ExpressionException extends Exception {
+public class ExpressionException extends RuntimeException {
 
 	protected String expressionString;
 	protected int position; // -1 if not known - but should be known in all reasonable cases

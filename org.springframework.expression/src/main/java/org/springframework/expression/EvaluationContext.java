@@ -33,7 +33,7 @@ import java.util.List;
 public interface EvaluationContext {
 
 	/**
-	 * @return the root context object against which unqualified properties/methods/etc should be resolved
+	 * @return the default root context object against which unqualified properties/methods/etc should be resolved.  This can be overridden when evaluating an expression.
 	 */
 	TypedValue getRootObject();
 

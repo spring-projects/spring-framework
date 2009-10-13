@@ -25,11 +25,6 @@ package org.springframework.expression;
  * to determine if it can read or write them. Property resolvers are considered to be ordered and each will be called in
  * turn. The only rule that affects the call order is that any naming the target class directly in
  * getSpecifiedTargetClasses() will be called first, before the general resolvers.
- *
- * <p>If the cost of locating the property is expensive, in relation to actually retrieving its value, consider extending
- * CacheablePropertyAccessor rather than directly implementing PropertyAccessor. A CacheablePropertyAccessor enables the
- * discovery (resolution) of the property to be done once and then an object (an executor) returned and cached by the
- * infrastructure that can be used repeatedly to retrieve the property value.
  * 
  * @author Andy Clement
  * @since 3.0
