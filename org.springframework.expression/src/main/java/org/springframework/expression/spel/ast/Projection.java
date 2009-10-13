@@ -45,7 +45,6 @@ public class Projection extends SpelNodeImpl {
 		this.nullSafe = nullSafe;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue op = state.getActiveContextObject();

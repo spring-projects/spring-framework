@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,8 +118,10 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		ExpressionState state = getState();
 		Assert.assertEquals(Inventor.class,state.getRootContextObject().getValue().getClass());
 
+		// although the root object is being set on the evaluation context, the value in the 'state' remains what it was when constructed
 		((StandardEvaluationContext) state.getEvaluationContext()).setRootObject(null);
-		Assert.assertEquals(null, state.getRootContextObject().getValue());
+		Assert.assertEquals(Inventor.class,state.getRootContextObject().getValue().getClass());
+		// Assert.assertEquals(null, state.getRootContextObject().getValue());
 		
 		state = new ExpressionState(new StandardEvaluationContext());
 		Assert.assertEquals(TypedValue.NULL_TYPED_VALUE,state.getRootContextObject());
@@ -132,6 +135,13 @@ public class ExpressionStateTests extends ExpressionTestCase {
 	public void testActiveContextObject() {
 		ExpressionState state = getState();
 		Assert.assertEquals(state.getRootContextObject().getValue(),state.getActiveContextObject().getValue());
+		
+		try {
+			state.popActiveContextObject();
+			Assert.fail("stack should be empty...");
+		} catch (EmptyStackException ese) {
+			// success
+		}
 		
 		state.pushActiveContextObject(new TypedValue(34));
 		Assert.assertEquals(34,state.getActiveContextObject().getValue());
@@ -166,6 +176,17 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		
 		state.exitScope();
 		Assert.assertNull(state.lookupLocalVariable("goo"));
+	}
+	
+	@Test
+	public void testRootObjectConstructor() {
+		EvaluationContext ctx = getContext();
+		// TypedValue root = ctx.getRootObject();
+		// supplied should override root on context
+		ExpressionState state = new ExpressionState(ctx,new TypedValue("i am a string"));
+		TypedValue stateRoot = state.getRootContextObject();
+		Assert.assertEquals(String.class,stateRoot.getTypeDescriptor().getType());
+		Assert.assertEquals("i am a string",stateRoot.getValue());
 	}
 	
 	@Test
@@ -256,6 +277,10 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		ExpressionState state = new ExpressionState(context);
 		return state;
+	}
+	
+	private EvaluationContext getContext() {
+		return TestScenarioCreator.getTestEvaluationContext();
 	}
 
 }

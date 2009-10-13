@@ -70,6 +70,15 @@ public class CompositeStringExpression implements Expression {
 		}
 		return sb.toString();
 	}
+	
+	public String getValue(Object rootObject) throws EvaluationException {
+		StringBuilder sb = new StringBuilder();
+		for (Expression expression : this.expressions) {
+			sb.append(ObjectUtils.getDisplayString(expression.getValue(rootObject)));
+		}
+		return sb.toString();
+	}
+
 
 	public Class getValueType(EvaluationContext context) {
 		return String.class;
@@ -107,6 +116,59 @@ public class CompositeStringExpression implements Expression {
 	
 	public Expression[] getExpressions() {
 		return expressions;
+	}
+
+
+	public <T> T getValue(Object rootObject, Class<T> desiredResultType) throws EvaluationException {
+		Object value = getValue(rootObject);
+		return ExpressionUtils.convert(null, value, desiredResultType);
+	}
+
+	public String getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
+		StringBuilder sb = new StringBuilder();
+		for (Expression expression : this.expressions) {
+			sb.append(ObjectUtils.getDisplayString(expression.getValue(context,rootObject)));
+		}
+		return sb.toString();
+	}
+
+	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType)
+			throws EvaluationException {
+		Object value = getValue(context,rootObject);
+		return ExpressionUtils.convert(context, value, desiredResultType);
+	}
+
+	public Class getValueType(Object rootObject) throws EvaluationException {
+		return String.class;
+	}
+
+	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return String.class;
+	}
+
+	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
+		return TypeDescriptor.valueOf(String.class);
+	}
+
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject)
+			throws EvaluationException {
+		return TypeDescriptor.valueOf(String.class);
+	}
+
+	public boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return false;
+	}
+
+	public void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException {
+		throw new EvaluationException(this.expressionString, "Cannot call setValue on a composite expression");
+	}
+
+	public boolean isWritable(Object rootObject) throws EvaluationException {
+		return false;
+	}
+
+	public void setValue(Object rootObject, Object value) throws EvaluationException {
+		throw new EvaluationException(this.expressionString, "Cannot call setValue on a composite expression");
 	}
 
 }

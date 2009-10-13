@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ParseException;
+import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.support.ReflectionHelper;
@@ -307,6 +308,82 @@ public class HelperTests extends ExpressionTestCase {
 //		Assert.assertEquals(0,rpr.read(ctx,t,"field3").getValue());
 		Assert.assertEquals(false,rpr.read(ctx,t,"property4").getValue());
 		Assert.assertTrue(rpr.canRead(ctx,t,"property4"));
+		
+	}
+	
+	@Test
+	public void testOptimalReflectivePropertyResolver() throws Exception {
+		ReflectivePropertyResolver rpr = new ReflectivePropertyResolver();
+		Tester t = new Tester();
+		t.setProperty("hello");
+		EvaluationContext ctx = new StandardEvaluationContext(t);
+//		Assert.assertTrue(rpr.canRead(ctx, t, "property"));
+//		Assert.assertEquals("hello",rpr.read(ctx, t, "property").getValue());
+//		Assert.assertEquals("hello",rpr.read(ctx, t, "property").getValue()); // cached accessor used
+		
+		PropertyAccessor optA = rpr.createOptimalAccessor(ctx, t, "property");
+		Assert.assertTrue(optA.canRead(ctx, t, "property"));
+		Assert.assertFalse(optA.canRead(ctx, t, "property2"));
+		try {
+			optA.canWrite(ctx, t, "property");
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+		try {
+			optA.canWrite(ctx, t, "property2");
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+		Assert.assertEquals("hello",optA.read(ctx, t, "property").getValue());
+		Assert.assertEquals("hello",optA.read(ctx, t, "property").getValue()); // cached accessor used
+
+		try {
+			optA.getSpecificTargetClasses();
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+		try {
+			optA.write(ctx,t,"property",null);
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+
+		optA = rpr.createOptimalAccessor(ctx, t, "field");
+		Assert.assertTrue(optA.canRead(ctx, t, "field"));
+		Assert.assertFalse(optA.canRead(ctx, t, "field2"));
+		try {
+			optA.canWrite(ctx, t, "field");
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+		try {
+			optA.canWrite(ctx, t, "field2");
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+		Assert.assertEquals(3,optA.read(ctx, t, "field").getValue());
+		Assert.assertEquals(3,optA.read(ctx, t, "field").getValue()); // cached accessor used
+
+		try {
+			optA.getSpecificTargetClasses();
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+		try {
+			optA.write(ctx,t,"field",null);
+			Assert.fail();
+		} catch (UnsupportedOperationException uoe) {
+			// success
+		}
+
+
 	}
 	
 

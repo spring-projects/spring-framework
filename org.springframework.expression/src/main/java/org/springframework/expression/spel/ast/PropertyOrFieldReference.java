@@ -30,6 +30,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.support.ReflectivePropertyResolver;
 
 /**
  * Represents a simple property or field reference.
@@ -57,9 +58,10 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue result = readProperty(state, this.name);
-		TypeDescriptor resultDescriptor = result.getTypeDescriptor();
+		
 		// Dynamically create the objects if the user has requested that optional behaviour
 		if (result.getValue()==null && state.configuredToDynamicallyCreateNullObjects() && nextChildIs(Indexer.class,PropertyOrFieldReference.class)) {
+			TypeDescriptor resultDescriptor = result.getTypeDescriptor();
 			// Creating lists and maps
 			if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
 				// Create a new collection or map ready for the indexer
@@ -130,7 +132,6 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	 */
 	private TypedValue readProperty(ExpressionState state, String name) throws EvaluationException {
 		TypedValue contextObject = state.getActiveContextObject();
-		EvaluationContext eContext = state.getEvaluationContext();
 		Object targetObject = contextObject.getValue();
 
 		if (targetObject == null && nullSafe) {
@@ -151,6 +152,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		Class<?> contextObjectClass = getObjectClass(contextObject.getValue());
 		List<PropertyAccessor> accessorsToTry = getPropertyAccessorsToTry(contextObjectClass, state);
+		EvaluationContext eContext = state.getEvaluationContext();
 
 		// Go through the accessors that may be able to resolve it. If they are a cacheable accessor then
 		// get the accessor and use it. If they are not cacheable but report they can read the property
@@ -159,6 +161,9 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			try {
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canRead(eContext, contextObject.getValue(), name)) {
+						if (accessor instanceof ReflectivePropertyResolver) {
+							accessor = ((ReflectivePropertyResolver)accessor).createOptimalAccessor(eContext, contextObject.getValue(), name);
+						}
 						this.cachedReadAccessor = accessor;
 						return accessor.read(eContext, contextObject.getValue(), name);
 					}
@@ -224,7 +229,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	public boolean isWritableProperty(String name, ExpressionState state) throws SpelEvaluationException {
 		Object contextObject = state.getActiveContextObject().getValue();
-		TypeDescriptor td = state.getActiveContextObject().getTypeDescriptor();
+//		TypeDescriptor td = state.getActiveContextObject().getTypeDescriptor();
 		EvaluationContext eContext = state.getEvaluationContext();
 
 		List<PropertyAccessor> resolversToTry = getPropertyAccessorsToTry(getObjectClass(contextObject),state);

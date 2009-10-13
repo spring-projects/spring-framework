@@ -37,15 +37,41 @@ public class LiteralExpressionTests {
 		EvaluationContext ctx = new StandardEvaluationContext();
 		checkString("somevalue", lEx.getValue(ctx));
 		checkString("somevalue", lEx.getValue(ctx, String.class));
+		checkString("somevalue", lEx.getValue(new Rooty()));
+		checkString("somevalue", lEx.getValue(new Rooty(), String.class));
+		checkString("somevalue", lEx.getValue(ctx, new Rooty()));
+		checkString("somevalue", lEx.getValue(ctx, new Rooty(),String.class));
 		Assert.assertEquals("somevalue", lEx.getExpressionString());
 		Assert.assertFalse(lEx.isWritable(new StandardEvaluationContext()));
+		Assert.assertFalse(lEx.isWritable(new Rooty()));
+		Assert.assertFalse(lEx.isWritable(new StandardEvaluationContext(), new Rooty()));
 	}
+	
+	static class Rooty {}
 
 	@Test
 	public void testSetValue() {
 		try {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
 			lEx.setValue(new StandardEvaluationContext(), "flibble");
+			Assert.fail("Should have got an exception that the value cannot be set");
+		}
+		catch (EvaluationException ee) {
+			// success, not allowed - whilst here, check the expression value in the exception
+			Assert.assertEquals(ee.getExpressionString(), "somevalue");
+		}
+		try {
+			LiteralExpression lEx = new LiteralExpression("somevalue");
+			lEx.setValue(new Rooty(), "flibble");
+			Assert.fail("Should have got an exception that the value cannot be set");
+		}
+		catch (EvaluationException ee) {
+			// success, not allowed - whilst here, check the expression value in the exception
+			Assert.assertEquals(ee.getExpressionString(), "somevalue");
+		}
+		try {
+			LiteralExpression lEx = new LiteralExpression("somevalue");
+			lEx.setValue(new StandardEvaluationContext(), new Rooty(), "flibble");
 			Assert.fail("Should have got an exception that the value cannot be set");
 		}
 		catch (EvaluationException ee) {
@@ -59,6 +85,12 @@ public class LiteralExpressionTests {
 		LiteralExpression lEx = new LiteralExpression("somevalue");
 		Assert.assertEquals(String.class, lEx.getValueType());
 		Assert.assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext()));
+		Assert.assertEquals(String.class, lEx.getValueType(new Rooty()));
+		Assert.assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext(), new Rooty()));
+		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor().getType());
+		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext()).getType());
+		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor(new Rooty()).getType());
+		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext(), new Rooty()).getType());
 	}
 
 	private void checkString(String expectedString, Object value) {
