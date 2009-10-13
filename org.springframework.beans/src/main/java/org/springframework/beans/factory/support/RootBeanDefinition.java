@@ -120,6 +120,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param autowireMode by name or type, using the constants in this interface
 	 * @deprecated as of Spring 3.0, in favor of {@link #setAutowireMode} usage
 	 */
+	@Deprecated
 	public RootBeanDefinition(Class beanClass, int autowireMode) {
 		super();
 		setBeanClass(beanClass);
@@ -150,6 +151,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the property values to apply
 	 * @deprecated as of Spring 3.0, in favor of {@link #getPropertyValues} usage
 	 */
+	@Deprecated
 	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs) {
 		super(null, pvs);
 		setBeanClass(beanClass);
