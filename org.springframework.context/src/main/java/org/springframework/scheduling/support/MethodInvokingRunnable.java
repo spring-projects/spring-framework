@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,18 +32,6 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Inherits common configuration properties from
  * {@link org.springframework.util.MethodInvoker}.
- *
- * <p>Useful to generically encapsulate a method invocation as timer task
- * for <code>java.util.Timer</code>, in combination with a
- * {@link org.springframework.scheduling.timer.DelegatingTimerTask} adapter.
- * Can also be used with JDK 1.5's <code>java.util.concurrent.Executor</code>
- * abstraction, which works with plain Runnables.
- *
- * <p>Extended by Spring's
- * {@link org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean}
- * adapter for <code>java.util.TimerTask</code>. Note that you can populate a
- * ScheduledTimerTask object with a plain MethodInvokingRunnable instance
- * as well, which will automatically get wrapped with a DelegatingTimerTask.
  *
  * @author Juergen Hoeller
  * @since 1.2.4

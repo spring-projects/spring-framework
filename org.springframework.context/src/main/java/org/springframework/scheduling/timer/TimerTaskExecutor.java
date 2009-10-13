@@ -39,7 +39,10 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see java.util.Timer
+ * @deprecated as of Spring 3.0, in favor of the <code>scheduling.concurrent</code>
+ * package which is based on Java 5's <code>java.util.concurrent.ExecutorService</code>
  */
+@Deprecated
 public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());

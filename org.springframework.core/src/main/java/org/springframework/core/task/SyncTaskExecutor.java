@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package org.springframework.core.task;
 
-import org.springframework.util.Assert;
-
 import java.io.Serializable;
 
+import org.springframework.util.Assert;
+
 /**
- * <code>TaskExecutor</code> implementation that executes each task
- * <i>synchronously</i> in the calling thread.
- * 
+ * {@link TaskExecutor} implementation that executes each task <i>synchronously</i>
+ * in the calling thread.
+ *
  * <p>Mainly intended for testing scenarios.
- * 
+ *
  * <p>Execution in the calling thread does have the advantage of participating
  * in it's thread context, for example the thread context class loader or the
  * thread's current transaction association. That said, in many cases,
@@ -33,9 +33,8 @@ import java.io.Serializable;
  * <code>TaskExecutor</code> instead for such scenarios.
  *
  * @author Juergen Hoeller
- * @see SimpleAsyncTaskExecutor
- * @see org.springframework.scheduling.timer.TimerTaskExecutor
  * @since 2.0
+ * @see SimpleAsyncTaskExecutor
  */
 public class SyncTaskExecutor implements TaskExecutor, Serializable {
 
