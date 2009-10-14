@@ -24,15 +24,14 @@ import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class HttpHeadersTests {
 
 	private HttpHeaders headers;
@@ -126,7 +125,6 @@ public class HttpHeadersTests {
 		assertEquals("Invalid If-None-Match header", "\"v2.6\", \"v2.7\"", headers.getFirst("If-None-Match"));
 	}
 
-
 	@Test
 	public void date() {
 		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
@@ -148,15 +146,33 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void dateOtherLocale() {
+		Locale defaultLocale = Locale.getDefault();
+		try {
+			Locale.setDefault(new Locale("nl", "nl"));
+			Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+			calendar.setTimeZone(TimeZone.getTimeZone("CET"));
+			long date = calendar.getTimeInMillis();
+			headers.setDate(date);
+			assertEquals("Invalid Date header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("date"));
+			assertEquals("Invalid Date header", date, headers.getDate());
+		}
+		finally {
+			Locale.setDefault(defaultLocale);
+		}
+	}
+
+	@Test
 	public void lastModified() {
 		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setLastModified(date);
 		assertEquals("Invalid Last-Modified header", date, headers.getLastModified());
-		assertEquals("Invalid Last-Modified header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("last-modified"));
+		assertEquals("Invalid Last-Modified header", "Thu, 18 Dec 2008 10:20:00 GMT",
+				headers.getFirst("last-modified"));
 	}
-	
+
 	@Test
 	public void expires() {
 		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
@@ -174,7 +190,8 @@ public class HttpHeadersTests {
 		long date = calendar.getTimeInMillis();
 		headers.setIfModifiedSince(date);
 		assertEquals("Invalid If-Modified-Since header", date, headers.getIfNotModifiedSince());
-		assertEquals("Invalid If-Modified-Since header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("if-modified-since"));
+		assertEquals("Invalid If-Modified-Since header", "Thu, 18 Dec 2008 10:20:00 GMT",
+				headers.getFirst("if-modified-since"));
 	}
 
 	@Test
@@ -192,7 +209,6 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Cache-Control header", cacheControl, headers.getCacheControl());
 		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
 	}
-
 
 
 }

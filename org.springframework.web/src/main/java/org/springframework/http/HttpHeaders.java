@@ -447,7 +447,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	private void setDate(String headerName, long date) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMATS[0]);
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMATS[0], Locale.US);
 		dateFormat.setTimeZone(GMT);
 		set(headerName, dateFormat.format(new Date(date)));
 	}
