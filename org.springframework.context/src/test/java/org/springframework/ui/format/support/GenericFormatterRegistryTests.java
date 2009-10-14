@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.ui.format;
+package org.springframework.ui.format.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -33,6 +33,9 @@ import org.junit.Test;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.ui.format.AnnotationFormatterFactory;
+import org.springframework.ui.format.Formatted;
+import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
 import org.springframework.ui.format.support.GenericFormatterRegistry;
