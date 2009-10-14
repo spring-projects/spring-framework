@@ -789,7 +789,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						for (Object o : messageConverter.getSupportedMediaTypes()) {
 							MediaType supportedMediaType = (MediaType) o;
 							for (MediaType acceptedMediaType : acceptedMediaTypes) {
-								if (supportedMediaType.includes(acceptedMediaType)) {
+								if (acceptedMediaType.includes(supportedMediaType)) {
 									messageConverter.write(returnValue, outputMessage);
 									this.responseArgumentUsed = true;
 									return;
