@@ -16,10 +16,13 @@
 
 package org.springframework.scheduling.support;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import org.springframework.util.StringUtils;
 
@@ -90,41 +93,55 @@ class CronSequenceGenerator {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
 
+		List<Integer> resets = new ArrayList<Integer>();
+
 		int second = calendar.get(Calendar.SECOND);
-		findNext(this.seconds, second, 60, calendar, Calendar.SECOND);
+		int updateSecond = findNext(this.seconds, second, 60, calendar, Calendar.SECOND, Collections.<Integer> emptyList());
+		if (second == updateSecond) {
+			resets.add(Calendar.SECOND);
+		}
 
 		int minute = calendar.get(Calendar.MINUTE);
-		findNext(this.minutes, minute, 60, calendar, Calendar.MINUTE, Calendar.SECOND);
+		int updateMinute = findNext(this.minutes, minute, 60, calendar, Calendar.MINUTE, resets);
+		if (minute == updateMinute) {
+			resets.add(Calendar.MINUTE);
+		}
 
 		int hour = calendar.get(Calendar.HOUR_OF_DAY);
-		findNext(this.hours, hour, 24, calendar, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND);
+		int updateHour = findNext(this.hours, hour, 24, calendar, Calendar.HOUR_OF_DAY, resets);
+		if (hour == updateHour) {
+			resets.add(Calendar.HOUR_OF_DAY);
+		}
 
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 		int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-		findNextDay(calendar, this.daysOfMonth, dayOfMonth, daysOfWeek, dayOfWeek, 366);
+		int updateDayOfMonth = findNextDay(calendar, this.daysOfMonth, dayOfMonth, daysOfWeek, dayOfWeek, 366, resets);
+		if (dayOfMonth == updateDayOfMonth) {
+			resets.add(Calendar.DAY_OF_MONTH);
+		}
 
 		int month = calendar.get(Calendar.MONTH);
-		findNext(this.months, month, 12, calendar, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY,
-				Calendar.MINUTE, Calendar.SECOND);
+		month = findNext(this.months, month, 12, calendar, Calendar.MONTH, resets);
 
 		return calendar.getTime();
 	}
 
-	private void findNextDay(
-			Calendar calendar, BitSet daysOfMonth, int dayOfMonth, BitSet daysOfWeek, int dayOfWeek, int max) {
+	private int findNextDay(Calendar calendar, BitSet daysOfMonth, int dayOfMonth, BitSet daysOfWeek,
+			int dayOfWeek, int max, List<Integer> resets) {
 
 		int count = 0;
 		// the DAY_OF_WEEK values in java.util.Calendar start with 1 (Sunday),
 		// but in the cron pattern, they start with 0, so we subtract 1 here
-		while ((!daysOfMonth.get(dayOfMonth) || !daysOfWeek.get(dayOfWeek-1)) && count++ < max) {
+		while ((!daysOfMonth.get(dayOfMonth) || !daysOfWeek.get(dayOfWeek - 1)) && count++ < max) {
 			calendar.add(Calendar.DAY_OF_MONTH, 1);
 			dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 			dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-			reset(calendar, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND);
+			reset(calendar, resets);
 		}
 		if (count > max) {
 			throw new IllegalStateException("Overflow in day for expression=" + this.expression);
 		}
+		return dayOfMonth;
 	}
 
 	/**
@@ -140,9 +157,9 @@ class CronSequenceGenerator {
 	 * ones of lower significance than the field of interest)
 	 * @return the value of the calendar field that is next in the sequence
 	 */
-	private void findNext(BitSet bits, int value, int max, Calendar calendar, int field, int... lowerOrders) {
+	private int findNext(BitSet bits, int value, int max, Calendar calendar, int field, List<Integer> lowerOrders) {
 		int nextValue = bits.nextSetBit(value);
-		//roll over if needed
+		// roll over if needed
 		if (nextValue == -1) {
 			calendar.add(field, max - value);
 			nextValue = bits.nextSetBit(0);
@@ -151,12 +168,13 @@ class CronSequenceGenerator {
 			calendar.set(field, nextValue);
 			reset(calendar, lowerOrders);
 		}
+		return nextValue;
 	}
 
 	/**
 	 * Reset the calendar setting all the fields provided to zero.
 	 */
-	private void reset(Calendar calendar, int... fields) {
+	private void reset(Calendar calendar, List<Integer> fields) {
 		for (int field : fields) {
 			calendar.set(field, 0);
 		}
@@ -203,7 +221,7 @@ class CronSequenceGenerator {
 
 	private void setDaysOfMonth(BitSet bits, String field, int max) {
 		// Days of month start with 1 (in Cron and Calendar) so add one
-		setDays(bits, field, max+1);
+		setDays(bits, field, max + 1);
 		// ... and remove it from the front
 		bits.clear(0);
 	}
@@ -244,7 +262,7 @@ class CronSequenceGenerator {
 		int[] result = new int[2];
 		if (field.contains("*")) {
 			result[0] = 0;
-			result[1] = max-1;
+			result[1] = max - 1;
 			return result;
 		}
 		if (!field.contains("-")) {
