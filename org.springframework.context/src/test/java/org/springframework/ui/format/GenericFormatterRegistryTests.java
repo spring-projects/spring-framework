@@ -17,6 +17,7 @@
 package org.springframework.ui.format;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -104,10 +105,8 @@ public class GenericFormatterRegistryTests {
 	}
 
 	@Test
-	public void testGetDefaultFormatterForTypeValueOfMethod() throws ParseException {
-		Formatter formatter = registry.getFormatter(TypeDescriptor.valueOf(Integer.class));
-		assertEquals("3", formatter.format(new Integer(3), null));
-		assertEquals(new Integer(3), formatter.parse("3", null));
+	public void testGetDefaultFormatterNull() throws ParseException {
+		assertNull(registry.getFormatter(TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

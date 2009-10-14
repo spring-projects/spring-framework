@@ -277,7 +277,7 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 		} else {
 			Formatted formattedAnnotation = annotationType.getAnnotation(Formatted.class);
 			if (formattedAnnotation != null) {
-				// annotation has @Formatted meta-annotation
+				// property annotation has @Formatted meta-annotation
 				Formatter formatter = createFormatter(formattedAnnotation.value());
 				addFormatterByAnnotation(annotationType, formatter);
 				return findFormatterHolderForAnnotation(annotation);
@@ -315,45 +315,13 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 			addFormatterByType(type, formatter);
 			return findFormatterHolderForType(type);
 		} else {
-			Method valueOfMethod = getValueOfMethod(type);
-			if (valueOfMethod != null) {
-				Formatter formatter = createFormatter(valueOfMethod);
-				addFormatterByType(type, formatter);
-				return findFormatterHolderForType(type);
-			} else {
-				return null;
-			}
+			return null;
 		}
 	}
 
 	private Formatter createFormatter(Class<? extends Formatter> formatterClass) {
 		return (this.applicationContext != null ? this.applicationContext.getAutowireCapableBeanFactory().createBean(
 				formatterClass) : BeanUtils.instantiate(formatterClass));
-	}
-
-	private Method getValueOfMethod(Class type) {
-		Method[] methods = type.getDeclaredMethods();
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
-			if ("valueOf".equals(method.getName()) && acceptsSingleStringParameterType(method)
-					&& Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers())) {
-				return method;
-			}
-		}
-		return null;
-	}
-
-	private boolean acceptsSingleStringParameterType(Method method) {
-		Class[] paramTypes = method.getParameterTypes();
-		if (paramTypes == null) {
-			return false;
-		} else {
-			return paramTypes.length == 1 && paramTypes[0] == String.class;
-		}
-	}
-
-	private Formatter createFormatter(Method valueOfMethod) {
-		return new ValueOfMethodFormatter(valueOfMethod);
 	}
 
 	private abstract static class AbstractFormatterHolder {
