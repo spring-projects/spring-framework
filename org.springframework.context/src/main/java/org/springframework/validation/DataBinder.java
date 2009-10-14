@@ -35,6 +35,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.ui.format.FormatterRegistry;
 import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
 import org.springframework.ui.format.support.GenericFormatterRegistry;
@@ -478,7 +479,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public FormatterRegistry getFormatterRegistry() {
 		if (this.formatterRegistry == null) {
-			this.formatterRegistry = new GenericFormatterRegistry();
+			GenericFormatterRegistry registry = new GenericFormatterRegistry();
+			registry.setConversionService(new DefaultConversionService());
+			this.formatterRegistry = registry;
 		}
 		else if (this.formatterRegistry instanceof GenericFormatterRegistry &&
 				((GenericFormatterRegistry) this.formatterRegistry).isShared()) {
