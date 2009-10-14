@@ -187,18 +187,19 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 		if (formattedObjectType != null && !type.isAssignableFrom(formattedObjectType)) {
 			if (this.conversionService == null) {
 				throw new IllegalStateException("Unable to index Formatter " + formatter + " under type ["
-						+ type.getName() + "]; unable to convert from [" + formattedObjectType.getName()
-						+ "] parsed by Formatter because this.conversionService is null");
+						+ type.getName() + "]; not able to convert from a [" + formattedObjectType.getName()
+						+ "] parsed by the Formatter to [" + type.getName()
+						+ "] because this.conversionService is null");
 			}
 			if (!this.conversionService.canConvert(formattedObjectType, type)) {
 				throw new IllegalArgumentException("Unable to index Formatter " + formatter + " under type ["
-						+ type.getName() + "]; not able to convert from [" + formattedObjectType.getName()
-						+ "] to parse");
+						+ type.getName() + "]; not able to convert from a [" + formattedObjectType.getName()
+						+ "] parsed by the Formatter to [" + type.getName() + "]");
 			}
 			if (!this.conversionService.canConvert(type, formattedObjectType)) {
 				throw new IllegalArgumentException("Unable to index Formatter " + formatter + " under type ["
 						+ type.getName() + "]; not able to convert to [" + formattedObjectType.getName()
-						+ "] to format");
+						+ "] to format a [" + type.getName() + "]");
 			}
 		}
 		this.typeFormatters.put(type, new FormatterHolder(formattedObjectType, formatter));

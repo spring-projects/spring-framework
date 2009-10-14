@@ -343,7 +343,8 @@ public class DataBinderTests extends TestCase {
 
 	private void doTestBindingWithDefaultFormatter(Object tb) {
 		DataBinder binder = new DataBinder(tb);
-		binder.setFormatterRegistry(new GenericFormatterRegistry());
+		// force formatter registry to be created
+		binder.getFormatterRegistry();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("number", "1,2");
 
