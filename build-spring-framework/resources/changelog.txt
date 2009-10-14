@@ -6,7 +6,8 @@ http://www.springsource.org
 Changes in version 3.0.0.RC2 (2009-##-##)
 -----------------------------------------
 
-* ClassUtils is now parametrized with Class<?> and Class<T> where appropriate.
+* DataBinder now accepts var-args to set allowed, disallowed, and required fields
+* ClassUtils is now parametrized with Class<?> and Class<T> where appropriate
 
 
 Changes in version 3.0.0.RC1 (2009-09-25)
