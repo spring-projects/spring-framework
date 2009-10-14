@@ -16,6 +16,8 @@
 
 package org.springframework.ui.format;
 
+import static org.junit.Assert.assertEquals;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,11 +27,10 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Locale;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.ui.format.number.CurrencyFormatter;
 import org.springframework.ui.format.number.IntegerFormatter;
@@ -46,12 +47,13 @@ public class GenericFormatterRegistryTests {
 	@Before
 	public void setUp() {
 		registry = new GenericFormatterRegistry();
+		registry.setConversionService(new DefaultConversionService());
 	}
 
 	@Test
 	public void testAdd() throws ParseException {
 		registry.addFormatterByType(new IntegerFormatter());
-		Formatter formatter = registry.getFormatter(Integer.class);
+		Formatter formatter = registry.getFormatter(TypeDescriptor.valueOf(Integer.class));
 		String formatted = formatter.format(new Integer(3), Locale.US);
 		assertEquals("3", formatted);
 		Integer i = (Integer) formatter.parse("3", Locale.US);
@@ -61,7 +63,7 @@ public class GenericFormatterRegistryTests {
 	@Test
 	public void testAddByObjectType() {
 		registry.addFormatterByType(BigInteger.class, new IntegerFormatter());
-		Formatter formatter = registry.getFormatter(BigInteger.class);
+		Formatter formatter = registry.getFormatter(TypeDescriptor.valueOf(BigInteger.class));
 		String formatted = formatter.format(new BigInteger("3"), Locale.US);
 		assertEquals("3", formatted);
 	}
@@ -91,7 +93,7 @@ public class GenericFormatterRegistryTests {
 
 	@Test
 	public void testGetDefaultFormatterForType() {
-		Formatter formatter = registry.getFormatter(Address.class);
+		Formatter formatter = registry.getFormatter(TypeDescriptor.valueOf(Address.class));
 		Address address = new Address();
 		address.street = "12345 Bel Aire Estates";
 		address.city = "Palm Bay";
@@ -100,17 +102,18 @@ public class GenericFormatterRegistryTests {
 		String formatted = formatter.format(address, Locale.US);
 		assertEquals("12345 Bel Aire Estates:Palm Bay:FL:12345", formatted);
 	}
-	
+
 	@Test
-	public void testGetNoFormatterForType() {
-		assertNull(registry.getFormatter(Integer.class));
+	public void testGetDefaultFormatterForTypeValueOfMethod() throws ParseException {
+		Formatter formatter = registry.getFormatter(TypeDescriptor.valueOf(Integer.class));
+		assertEquals("3", formatter.format(new Integer(3), null));
+		assertEquals(new Integer(3), formatter.parse("3", null));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetFormatterCannotConvert() {
 		registry.addFormatterByType(Integer.class, new AddressFormatter());
 	}
-	
 
 	@Currency
 	public BigDecimal currencyField;
@@ -118,26 +121,26 @@ public class GenericFormatterRegistryTests {
 	@SmartCurrency
 	public BigDecimal smartCurrencyField;
 
-	@Target({ElementType.METHOD, ElementType.FIELD})
+	@Target( { ElementType.METHOD, ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface Currency {
 	}
 
-	@Target({ElementType.METHOD, ElementType.FIELD})
+	@Target( { ElementType.METHOD, ElementType.FIELD })
 	@Retention(RetentionPolicy.RUNTIME)
 	@Formatted(CurrencyFormatter.class)
 	public @interface SmartCurrency {
 	}
 
 	public static class CurrencyAnnotationFormatterFactory implements AnnotationFormatterFactory<Currency, Number> {
-		
+
 		private final CurrencyFormatter currencyFormatter = new CurrencyFormatter();
-		
+
 		public Formatter<Number> getFormatter(Currency annotation) {
 			return this.currencyFormatter;
 		}
 	}
-	
+
 	@Formatted(AddressFormatter.class)
 	public static class Address {
 

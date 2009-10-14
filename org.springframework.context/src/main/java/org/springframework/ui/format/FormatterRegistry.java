@@ -46,16 +46,14 @@ public interface FormatterRegistry {
 	 * Adds a Formatter to this registry indexed by &lt;T&gt;.
 	 * <o>Calling <code>getFormatter(&lt;T&gt;.class)</code> returns <code>formatter</code>.
 	 * @param formatter the formatter
-	 * @param <T> the type of object the formatter formats
 	 */
-	<T> void addFormatterByType(Formatter<T> formatter);
+	void addFormatterByType(Formatter<?> formatter);
 
 	/**
 	 * Adds a Formatter to this registry indexed by the given annotation type.
 	 * <o>Calling <code>getFormatter(...)</code> on a field or accessor method
 	 * with the given annotation returns <code>formatter</code>.
 	 * @param formatter the formatter
-	 * @param <T> the type of object the formatter formats
 	 */
 	void addFormatterByAnnotation(Class<? extends Annotation> annotationType, Formatter<?> formatter);
 
@@ -64,16 +62,8 @@ public interface FormatterRegistry {
 	 * <o>Calling <code>getFormatter(...)</code> on a field or accessor method
 	 * with the given annotation returns <code>formatter</code>.
 	 * @param factory the annotation formatter factory
-	 * @param <A> the type of Annotation this factory uses to create Formatter instances
-	 * @param <T> the type of object that the factory's Formatters are dealing with
 	 */
-	<A extends Annotation, T> void addFormatterByAnnotation(AnnotationFormatterFactory<A, T> factory);
-
-	/**
-	 * Get the Formatter for the specified type.
-	 * @return the Formatter, or <code>null</code> if no suitable one is registered
-	 */
-	<T> Formatter<T> getFormatter(Class<T> targetType);
+	void addFormatterByAnnotation(AnnotationFormatterFactory<?, ?> factory);
 
 	/**
 	 * Get the Formatter for the type descriptor.
