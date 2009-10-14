@@ -31,22 +31,23 @@ import org.springframework.beans.factory.annotation.Autowire;
  * as follows:
  * 
  * <p>The Bean annotation does not provide attributes for scope, primary or lazy. Rather,
- * it should be used in conjunction with {@link Scope}, {@link Primary} and {@link Lazy}
- * annotations to acheive the same semantics.
+ * it should be used in conjunction with {@link Scope &#064;Scope},
+ * {@link Primary &#064;Primary}, and {@link Lazy &#064;Lazy} annotations to achieve the
+ * same semantics.
  * 
  * <p>While a {@link #name()} attribute is available, the default strategy for determining
  * the name of a bean is to use the name of the Bean method. This is convenient and
  * intuitive, but if explicit naming is desired, the {@link #name()} attribute may be used.
  * Also note that {@link #name()} accepts an array of strings. This is in order to allow
- * for specifying multiple names (aka aliases) for a single bean.
+ * for specifying multiple names (i.e., aliases) for a single bean.
  * 
  * <h3>Constraints</h3>
  * <ul>
- *     <li>Bean methods are valid only when declared within a {@link Configuration}-annotated class
+ *     <li>Bean methods are valid only when declared within an {@link Configuration &#064;Configuration}-annotated class
  * 	   <li>Bean methods must be non-void, non-final, non-private
  * 	   <li>Bean methods may not accept any arguments
  *     <li>Bean methods may throw any exception, which will be caught and handled
- *  by the Spring container on processing of the declaring {@link Configuration} class.
+ *  by the Spring container on processing of the declaring {@link Configuration &#064;Configuration} class.
  * </ul>
  * 
  * <h3>Usage</h3>
@@ -65,7 +66,7 @@ import org.springframework.beans.factory.annotation.Autowire;
  * @see Scope
  * @see Value
  */
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Target( { ElementType.METHOD, ElementType.ANNOTATION_TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Bean {
@@ -90,13 +91,13 @@ public @interface Bean {
 	String initMethod() default "";
 
 	/**
-	 * The optional name of a method to call on the bean instance during upon closing the
+	 * The optional name of a method to call on the bean instance upon closing the
 	 * application context, for example a {@literal close()} method on a {@literal DataSource}.
-	 * The method must have no arguments, but may throw any exception.
+	 * The method must have no arguments but may throw any exception.
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
-	 * factory which is always the case for singletons, but not guaranteed 
-     * for any other scope.
-	 * see {@link org.springframework.context.ConfigurableApplicationContext#close()}
+	 * factory, which is always the case for singletons but not guaranteed 
+	 * for any other scope.
+	 * @see {@link org.springframework.context.ConfigurableApplicationContext#close()}
 	 */
 	String destroyMethod() default "";
 
