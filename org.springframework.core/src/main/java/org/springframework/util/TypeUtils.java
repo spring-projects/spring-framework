@@ -38,6 +38,7 @@ public abstract class TypeUtils {
 	 * @param rhsType the value type that should be assigned to the target type
 	 * @return true if rhs is assignable to lhs
 	 */
+	@SuppressWarnings("unchecked")
 	public static boolean isAssignable(Type lhsType, Type rhsType) {
 		Assert.notNull(lhsType, "Left-hand side type must not be null");
 		Assert.notNull(rhsType, "Right-hand side type must not be null");
