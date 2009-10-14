@@ -28,14 +28,6 @@ import org.springframework.core.convert.converter.Converter;
  */
 final class ObjectToStringConverter implements Converter<Object, String> {
 
-	public Class<?> getSourceType() {
-		return Object.class;
-	}
-
-	public Class<?> getTargetType() {
-		return String.class;
-	}
-	
 	public String convert(Object source) {
 		return source.toString();
 	}
