@@ -58,6 +58,7 @@ import org.springframework.util.CollectionUtils;
  * @author Juergen Hoeller
  * @see org.springframework.aop.framework.AopProxy
  */
+@SuppressWarnings("unchecked")
 public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/** use serialVersionUID from Spring 2.0 for interoperability */
