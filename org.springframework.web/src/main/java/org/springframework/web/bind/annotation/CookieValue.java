@@ -54,7 +54,7 @@ public @interface CookieValue {
 	 * of the header missing in the request. Switch this to <code>false</code>
 	 * if you prefer a <code>null</value> in case of the header missing.
 	 * <p>Alternatively, provide a {@link #defaultValue() defaultValue},
-	 * which implicitely sets this flag to <code>false</code>.
+	 * which implicitly sets this flag to <code>false</code>.
 	 */
 	boolean required() default true;
 
