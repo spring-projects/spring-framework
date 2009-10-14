@@ -1121,6 +1121,16 @@ public class ServletAnnotationControllerTests {
 		assertEquals("myParam-42", response.getContentAsString());
 	}
 
+	@Test
+	public void bridgeMethods() throws Exception {
+		initServlet(TestControllerImpl.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/method");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+	}
+
+
 
 	/*
 	 * Controllers
@@ -1899,5 +1909,24 @@ public class ServletAnnotationControllerTests {
 			writer.write("test-" + date.getYear());
 		}
 	}
+
+	public interface TestController<T> {
+
+		ModelAndView method(T object);
+	}
+
+	public static class MyEntity {
+
+	}
+
+	@Controller
+	public static class TestControllerImpl implements TestController<MyEntity> {
+
+		@RequestMapping("/method")
+		public ModelAndView method(MyEntity object) {
+			return new ModelAndView("/something");
+		}
+	}
+	
 
 }

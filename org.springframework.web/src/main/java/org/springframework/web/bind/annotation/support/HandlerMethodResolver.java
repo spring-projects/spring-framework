@@ -77,7 +77,7 @@ public class HandlerMethodResolver {
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
 					Method specificMethod = ClassUtils.getMostSpecificMethod(method, currentHandlerType);
-					if (isHandlerMethod(specificMethod)) {
+					if (isHandlerMethod(method)) {
 						handlerMethods.add(specificMethod);
 					}
 					else if (method.isAnnotationPresent(InitBinder.class)) {
@@ -99,7 +99,7 @@ public class HandlerMethodResolver {
 	}
 
 	protected boolean isHandlerMethod(Method method) {
-		return AnnotationUtils.findAnnotation(method, RequestMapping.class) != null;
+		return method.isAnnotationPresent(RequestMapping.class);
 	}
 
 
