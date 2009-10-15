@@ -962,6 +962,7 @@ public interface Formatter<T> {
 				Several Formatter implementations are provided in subpackages of <filename>ui.format</filename> as a convenience.
 				The <filename>date</filename> package provides a DateFormatter to format java.util.Date objects with a java.text.DateFormat.
 				The <filename>number</filename> package provides a DecimalFormatter, IntegerFormatter, CurrencyFormatter, and PercentFormatter to format java.lang.Number objects using a java.text.NumberFormat.
+				The <filename>jodatime</filename> package provides a DateTimeFormatter to format Joda DateTime objects, a popular alternative to java.util.Date/Calendar.
 			</para>
 			<para>
 				Consider <classname>DateFormatter</classname> as an example <interfacename>Formatter</interfacename> implementation:				
@@ -1000,7 +1001,6 @@ public final class DateFormatter implements Formatter<Date> {
 }]]></programlisting>
 			<para>
 				The Spring team welcomes community-driven Formatter contributions; see <ulink url="http://jira.springframework.org">http://jira.springframework.org</ulink> to contribute.
-				In particular, the team hopes to integrate support for Joda Time and Money Formatters in the future.
 			</para>
 		</section>
 		<section id="ui-format-Formatted-Annotation">

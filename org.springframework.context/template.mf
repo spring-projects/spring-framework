@@ -29,6 +29,7 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.aspectj.weaver.*;version="[1.5.4, 2.0.0)";resolution:=optional,
  org.codehaus.groovy.*;version="[1.5.0, 2.0.0)";resolution:=optional,
+ org.joda.*;version="[1.6.0, 2.0.0)";resolution:=optional,
  org.jruby.*;version="[1.1.0, 2.0.0)";resolution:=optional,
  org.omg.CORBA.*;version="0";resolution:=optional,
  org.springframework.aop.*;version="[3.0.0, 3.0.1)";resolution:=optional,
