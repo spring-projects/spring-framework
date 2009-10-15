@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.expression.AccessException;
@@ -202,6 +203,41 @@ public class SpelMapperTests {
 	}
 
 	@Test
+	public void mapBeanNestedCustomNestedMapperCustomMappingTargetFactory() {
+		PersonDto source = new PersonDto();
+		final NestedDto nested = new NestedDto();
+		nested.foo = "bar";
+		source.setNested(nested);
+
+		Person target = new Person();
+
+		SpelMapper nestedMapper = new SpelMapper();
+		nestedMapper.setAutoMappingEnabled(false);
+		nestedMapper.addMapping("foo").setConverter(new Converter<String, String>() {
+			public String convert(String source) {
+				return source + " and baz";
+			}
+		});
+		mapper.addNestedMapper(NestedDto.class, Nested.class, nestedMapper, new MappingTargetFactory() {
+			public boolean supports(TypeDescriptor targetType) {
+				return true;
+			}
+			
+			public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+				NestedDto nestedDto = (NestedDto) source;
+				assertEquals(nested, nestedDto);
+				return new Nested();
+			}
+		});
+
+		mapper.setAutoMappingEnabled(false);
+		mapper.addMapping("nested");
+		mapper.map(source, target);
+
+		assertEquals("bar and baz", target.nested.foo);
+	}
+	
+	@Test
 	public void mapBeanNestedCustomNestedMapperHandCoded() {
 		PersonDto source = new PersonDto();
 		NestedDto nested = new NestedDto();
@@ -218,6 +254,37 @@ public class SpelMapperTests {
 
 		};
 		mapper.addNestedMapper(nestedMapper);
+
+		mapper.setAutoMappingEnabled(false);
+		mapper.addMapping("nested");
+		mapper.map(source, target);
+
+		assertEquals("bar and baz", target.nested.foo);
+	}
+	
+	@Test
+	public void mapBeanNestedCustomConverterDelegatingToMapper() {
+		PersonDto source = new PersonDto();
+		NestedDto nested = new NestedDto();
+		nested.foo = "bar";
+		source.setNested(nested);
+
+		Person target = new Person();
+
+		mapper.getConverterRegistry().addConverter(new Converter<NestedDto, Nested>() {
+			public Nested convert(NestedDto source) {
+				// allows construction of target to be controlled by the converter
+				Nested nested = new Nested();
+				// mapping can do whatever, here we delegate to nested SpelMapper
+				SpelMapper nestedMapper = new SpelMapper();
+				nestedMapper.addMapping("foo").setConverter(new Converter<String, String>() {
+					public String convert(String source) {
+						return source + " and baz";
+					}
+				});
+				return (Nested) nestedMapper.map(source, nested);
+			}
+		});
 
 		mapper.setAutoMappingEnabled(false);
 		mapper.addMapping("nested");

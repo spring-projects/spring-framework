@@ -24,7 +24,7 @@ import org.springframework.core.NamedThreadLocal;
  * @author Keith Donald
  * @see SpelMapper#map(Object, Object)
  */
-abstract class MappingContextHolder {
+public abstract class MappingContextHolder {
 
 	private static final ThreadLocal<Stack<Object>> mappingContextHolder = new NamedThreadLocal<Stack<Object>>(
 			"Mapping context");
