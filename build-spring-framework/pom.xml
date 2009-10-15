@@ -74,6 +74,7 @@
     <module>../org.springframework.web.servlet</module>
     <module>../org.springframework.web.portlet</module>
     <module>../org.springframework.test</module>
+    <module>../org.springframework.web.struts</module>
   </modules>
 
   <profiles>
