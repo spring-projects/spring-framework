@@ -24,7 +24,7 @@ import org.springframework.util.ClassUtils;
  * @author Keith Donald
  * @see BeanUtils#instantiate(Class)
  */
-final class DefaultMapperTargetFactory implements MapperTargetFactory {
+final class DefaultMappingTargetFactory implements MappingTargetFactory {
 
 	public boolean supports(TypeDescriptor targetType) {
 		return ClassUtils.hasConstructor(targetType.getType(), null);

@@ -126,7 +126,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 	/**
 	 * Adds a Mapper that will map the fields of a nested sourceType/targetType pair.
 	 * The source and target field types are determined by introspecting the parameterized types on the implementation's Mapper generic interface.
-	 * The target instance that is mapped is constructed by a {@link DefaultMapperTargetFactory}.
+	 * The target instance that is mapped is constructed by a {@link DefaultMappingTargetFactory}.
 	 * This method is a convenience method for {@link #addNestedMapper(Class, Class, Mapper)}.
 	 * @param nestedMapper the nested mapper
 	 */
@@ -138,25 +138,25 @@ public class SpelMapper implements Mapper<Object, Object> {
 	/**
 	 * Adds a Mapper that will map the fields of a nested sourceType/targetType pair.
 	 * The source and target field types are determined by introspecting the parameterized types on the implementation's Mapper generic interface.
-	 * The target instance that is mapped is constructed by the provided {@link MapperTargetFactory}.
-	 * This method is a convenience method for {@link #addNestedMapper(Class, Class, Mapper, MapperTargetFactory)}.
+	 * The target instance that is mapped is constructed by the provided {@link MappingTargetFactory}.
+	 * This method is a convenience method for {@link #addNestedMapper(Class, Class, Mapper, MappingTargetFactory)}.
 	 * @param nestedMapper the nested mapper
 	 * @param targetFactory the nested mapper's target factory
 	 */
-	public void addNestedMapper(Mapper<?, ?> nestedMapper, MapperTargetFactory targetFactory) {
+	public void addNestedMapper(Mapper<?, ?> nestedMapper, MappingTargetFactory targetFactory) {
 		Class<?>[] typeInfo = getRequiredTypeInfo(nestedMapper);
 		addNestedMapper(typeInfo[0], typeInfo[1], nestedMapper, targetFactory);
 	}
 
 	/**
 	 * Adds a Mapper that will map the fields of a nested sourceType/targetType pair.
-	 * The target instance that is mapped is constructed by a {@link DefaultMapperTargetFactory}.
+	 * The target instance that is mapped is constructed by a {@link DefaultMappingTargetFactory}.
 	 * @param sourceType the source nested object property type
 	 * @param targetType the target nested object property type
 	 * @param nestedMapper the nested mapper
 	 */
 	public void addNestedMapper(Class<?> sourceType, Class<?> targetType, Mapper<?, ?> nestedMapper) {
-		this.conversionService.addGenericConverter(sourceType, targetType, new MapperConverter(nestedMapper));
+		this.conversionService.addGenericConverter(sourceType, targetType, new MappingConverter(nestedMapper));
 	}
 
 	/**
@@ -167,8 +167,8 @@ public class SpelMapper implements Mapper<Object, Object> {
 	 * @param targetFactory the nested mapper's target factory
 	 */
 	public void addNestedMapper(Class<?> sourceType, Class<?> targetType, Mapper<?, ?> nestedMapper,
-			MapperTargetFactory targetFactory) {
-		this.conversionService.addGenericConverter(sourceType, targetType, new MapperConverter(nestedMapper));
+			MappingTargetFactory targetFactory) {
+		this.conversionService.addGenericConverter(sourceType, targetType, new MappingConverter(nestedMapper));
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 	 * Allows for registration of simple type Converters in addition to MapperConverters that map entire nested object structures using a Mapper.
 	 * To register the latter, consider using one of the {@link #addNestedMapper(Mapper) addNestedMapper} variants.
 	 * @see Converter
-	 * @see MapperConverter
+	 * @see MappingConverter
 	 */
 	public ConverterRegistry getConverterRegistry() {
 		return conversionService;

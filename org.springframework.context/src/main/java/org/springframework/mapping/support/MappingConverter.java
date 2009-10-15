@@ -23,21 +23,21 @@ import org.springframework.mapping.Mapper;
 
 /**
  * Adapts a Mapper to a Converter, allowing the conversion between two object types to be completed by a Mapper.
- * Delegates to a {@link MapperTargetFactory} to construct the conversion target object that will be mapped.
+ * Delegates to a {@link MappingTargetFactory} to construct the conversion target object that will be mapped.
  * The default MapperTargetFactory instantiates a target by calling its default constructor.
  * @author Keith Donald
  */
-public final class MapperConverter implements GenericConverter {
+public final class MappingConverter implements GenericConverter {
 
 	private Mapper mapper;
 
-	private MapperTargetFactory mappingTargetFactory;
+	private MappingTargetFactory mappingTargetFactory;
 
-	public MapperConverter(Mapper mapper) {
-		this(mapper, new DefaultMapperTargetFactory());
+	public MappingConverter(Mapper mapper) {
+		this(mapper, new DefaultMappingTargetFactory());
 	}
 
-	public MapperConverter(Mapper mapper, MapperTargetFactory mappingTargetFactory) {
+	public MappingConverter(Mapper mapper, MappingTargetFactory mappingTargetFactory) {
 		this.mapper = mapper;
 		this.mappingTargetFactory = mappingTargetFactory;
 	}

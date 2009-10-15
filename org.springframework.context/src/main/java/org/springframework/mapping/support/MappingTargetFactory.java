@@ -20,12 +20,12 @@ import org.springframework.mapping.Mapper;
 
 /**
  * A factory for customizing how the target of a map operation is constructed.
- * Used by a {@link MapperConverter} when executing a type conversion.
+ * Used by a {@link MappingConverter} when executing a type conversion.
  * @author Keith Donald
- * @see MapperConverter
+ * @see MappingConverter
  * @see Mapper#map(Object, Object)
  */
-public interface MapperTargetFactory {
+public interface MappingTargetFactory {
 
 	/**
 	 * Does this factory support creating mapping targets of the specified type
