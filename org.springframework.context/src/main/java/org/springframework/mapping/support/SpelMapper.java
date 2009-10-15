@@ -44,6 +44,8 @@ import org.springframework.util.Assert;
  * @see #setMappableTypeFactory(MappableTypeFactory)
  * @see #addMapping(String)
  * @see #addMapping(String, String)
+ * @see #addNestedMapper(Mapper)
+ * @see #addNestedMapper(Mapper, MappingTargetFactory)
  * @see #getConverterRegistry()
  */
 public class SpelMapper implements Mapper<Object, Object> {
