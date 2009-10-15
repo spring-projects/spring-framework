@@ -235,6 +235,29 @@ public class UriTemplateServletAnnotationControllerTests {
 		servlet.init(new MockServletConfig());
 	}
 
+	@Test
+	public void noDefaultSuffixPattern() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(ImplicitSubPathController.class));
+				RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+				mappingDef.getPropertyValues().addPropertyValue("useDefaultSuffixPattern", false);
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/hotel.with.dot");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-hotel.with.dot", response.getContentAsString());
+	}
+
 	/*
 	 * Controllers
 	 */
@@ -405,6 +428,5 @@ public class UriTemplateServletAnnotationControllerTests {
 		public void remove(@PathVariable long hotelId, Writer writer) {
 		}
 	}
-
 
 }
