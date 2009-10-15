@@ -30,7 +30,7 @@ final class DefaultMappingTargetFactory implements MappingTargetFactory {
 		return ClassUtils.hasConstructor(targetType.getType(), null);
 	}
 
-	public Object createTarget(TypeDescriptor targetType) {
+	public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return BeanUtils.instantiate(targetType.getType());
 	}
 

@@ -41,6 +41,6 @@ public interface MappingTargetFactory {
 	 * @param targetType the target object type descriptor
 	 * @return the target
 	 */
-	public Object createTarget(TypeDescriptor targetType);
+	public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }

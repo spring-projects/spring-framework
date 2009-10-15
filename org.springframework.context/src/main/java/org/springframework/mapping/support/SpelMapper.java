@@ -170,7 +170,8 @@ public class SpelMapper implements Mapper<Object, Object> {
 	 */
 	public void addNestedMapper(Class<?> sourceType, Class<?> targetType, Mapper<?, ?> nestedMapper,
 			MappingTargetFactory targetFactory) {
-		this.conversionService.addGenericConverter(sourceType, targetType, new MappingConverter(nestedMapper));
+		this.conversionService.addGenericConverter(sourceType, targetType, new MappingConverter(nestedMapper,
+				targetFactory));
 	}
 
 	/**

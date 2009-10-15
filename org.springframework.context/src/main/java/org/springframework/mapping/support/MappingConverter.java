@@ -33,10 +33,20 @@ public final class MappingConverter implements GenericConverter {
 
 	private MappingTargetFactory mappingTargetFactory;
 
+	/**
+	 * Creates a new Converter that delegates to the mapper to complete the type conversion process.
+	 * Uses a {@link DefaultMappingTargetFactory} to create the target object to map and return.
+	 * @param mapper the mapper
+	 */
 	public MappingConverter(Mapper mapper) {
 		this(mapper, new DefaultMappingTargetFactory());
 	}
 
+	/**
+	 * Creates a new Converter that delegates to the mapper to complete the type conversion process.
+	 * Uses the specified MappingTargetFactory to create the target object to map and return.
+	 * @param mapper the mapper
+	 */
 	public MappingConverter(Mapper mapper, MappingTargetFactory mappingTargetFactory) {
 		this.mapper = mapper;
 		this.mappingTargetFactory = mappingTargetFactory;
@@ -52,7 +62,7 @@ public final class MappingConverter implements GenericConverter {
 		if (sourceType.isAssignableTo(targetType) && isCopyByReference(sourceType, targetType)) {
 			return source;
 		}
-		return createAndMap(targetType, source, sourceType);
+		return createTargetAndMap(source, sourceType, targetType);
 	}
 
 	private boolean isCopyByReference(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -63,13 +73,13 @@ public final class MappingConverter implements GenericConverter {
 		}
 	}
 
-	private Object createAndMap(TypeDescriptor targetType, Object source, TypeDescriptor sourceType) {
+	private Object createTargetAndMap(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (this.mappingTargetFactory.supports(targetType)) {
-			Object target = this.mappingTargetFactory.createTarget(targetType);
+			Object target = this.mappingTargetFactory.createTarget(source, sourceType, targetType);
 			return this.mapper.map(source, target);
 		} else {
 			IllegalStateException cause = new IllegalStateException("["
-					+ this.mappingTargetFactory.getClass().getName() + "] does not support target type ["
+					+ this.mappingTargetFactory.getClass().getName() + "] does not support targetType ["
 					+ targetType.getName() + "]");
 			throw new ConversionFailedException(sourceType, targetType, source, cause);
 		}
