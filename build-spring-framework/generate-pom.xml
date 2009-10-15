@@ -25,6 +25,7 @@
           <pathelement location="../org.springframework.web.servlet"/>
           <pathelement location="../org.springframework.web.portlet"/>
           <pathelement location="../org.springframework.test"/>
+          <pathelement location="../org.springframework.web.struts"/>
   </path>
 
   <condition property="maven.extension" value=".bat" else="">
