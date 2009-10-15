@@ -56,7 +56,7 @@ public final class MappingConverter implements GenericConverter {
 	}
 
 	private boolean isCopyByReference(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (BeanUtils.isSimpleValueType(targetType.getType()) || Enum.class.isAssignableFrom(targetType.getType())) {
+		if (BeanUtils.isSimpleValueType(targetType.getType())) {
 			return true;
 		} else {
 			return false;
