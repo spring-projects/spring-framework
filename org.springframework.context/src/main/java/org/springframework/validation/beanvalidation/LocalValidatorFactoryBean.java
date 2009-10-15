@@ -57,7 +57,7 @@ import org.springframework.util.CollectionUtils;
  * @see javax.validation.ValidatorFactory#getValidator()
  */
 public class LocalValidatorFactoryBean extends SpringValidatorAdapter
-		implements ValidatorFactory, Validator, ApplicationContextAware, InitializingBean {
+		implements ValidatorFactory, ApplicationContextAware, InitializingBean {
 
 	private Class providerClass;
 
@@ -206,6 +206,14 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	public MessageInterpolator getMessageInterpolator() {
 		return this.validatorFactory.getMessageInterpolator();
+	}
+
+	public TraversableResolver getTraversableResolver() {
+		return this.validatorFactory.getTraversableResolver();
+	}
+
+	public ConstraintValidatorFactory getConstraintValidatorFactory() {
+		return this.validatorFactory.getConstraintValidatorFactory();
 	}
 
 }

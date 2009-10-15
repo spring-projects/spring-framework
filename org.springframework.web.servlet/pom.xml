@@ -280,13 +280,14 @@
     </dependency>
     <dependency>
       <groupId>javax.validation</groupId>
-      <artifactId>com.springsource.javax.validation</artifactId>
-      <version>1.0.0.CR3</version>
+      <artifactId>validation-api</artifactId>
+      <version>1.0.GA</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.0.0.Beta2</version>
+      <version>4.0.0.GA</version>
       <scope>test</scope>
     </dependency>
     <dependency>

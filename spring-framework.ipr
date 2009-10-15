@@ -981,6 +981,15 @@
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/javax.inject/com.springsource.javax.inject/0.9.0.PFD/com.springsource.javax.inject-sources-0.9.0.PFD.jar!/" />
       </SOURCES>
     </library>
+    <library name="javax.validation">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/javax.validation/com.springsource.javax.validation/1.0.0.GA/com.springsource.javax.validation-1.0.0.GA.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/javax.validation/com.springsource.javax.validation/1.0.0.GA/com.springsource.javax.validation-sources-1.0.0.GA.jar!/" />
+      </SOURCES>
+    </library>
   </component>
   <UsedPathMacros>
     <macro name="IVY_CACHE" />

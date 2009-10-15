@@ -24,14 +24,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import javax.validation.Constraint;
-import javax.validation.ConstraintPayload;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validation.HibernateValidationProvider;
+import org.hibernate.validator.HibernateValidator;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -66,7 +65,7 @@ public class ValidatorFactoryTests {
 	@Test
 	public void testSimpleValidationWithCustomProvider() throws Exception {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-		validator.setProviderClass(HibernateValidationProvider.class);
+		validator.setProviderClass(HibernateValidator.class);
 		validator.afterPropertiesSet();
 		ValidPerson person = new ValidPerson();
 		Set<ConstraintViolation<ValidPerson>> result = validator.validate(person);
@@ -182,7 +181,7 @@ public class ValidatorFactoryTests {
 
 		Class<?>[] groups() default {};
 
-		Class<? extends ConstraintPayload>[] payload() default {};
+		Class<?>[] payload() default {};
 	}
 
 
