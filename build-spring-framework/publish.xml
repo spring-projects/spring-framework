@@ -24,6 +24,7 @@
           <pathelement location="../org.springframework.web.servlet"/>
           <pathelement location="../org.springframework.web.portlet"/>
           <pathelement location="../org.springframework.test"/>
+          <pathelement location="../org.springframework.web.struts"/>
   </path>
 
   <path id="modules-with-only-pom-artifacts">
