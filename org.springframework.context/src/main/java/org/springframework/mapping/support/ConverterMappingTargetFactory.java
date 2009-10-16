@@ -15,15 +15,27 @@
  */
 package org.springframework.mapping.support;
 
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.Converter;
+
 /**
- * A single {@link SpelMapper} mapping.
+ * Creates a mapping target by calling a converter.
  * @author Keith Donald
  */
-interface SpelMapping {
+final class ConverterMappingTargetFactory implements MappingTargetFactory {
 
-	/**
-	 * Execute this mapping.
-	 * @param context the mapping context
-	 */
-	void map(SpelMappingContext context);
+	private Converter converter;
+
+	public ConverterMappingTargetFactory(Converter converter) {
+		this.converter = converter;
+	}
+
+	public boolean supports(TypeDescriptor targetType) {
+		return true;
+	}
+
+	public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.converter.convert(source);
+	}
+
 }

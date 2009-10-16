@@ -29,11 +29,11 @@ import org.springframework.ui.format.Formatter;
 public class DateTimeFormatter implements Formatter<DateTime> {
 
 	private org.joda.time.format.DateTimeFormatter formatter;
-
+	
 	/**
 	 * Creates a new {@link DateTimeFormatter} for the given JodaTime formatting pattern.
 	 * @param pattern
-	 * @see DateTimeFormat
+	 * @see DateTimeFormat#forPattern(String)
 	 */
 	public DateTimeFormatter(String pattern) {
 		this.formatter = DateTimeFormat.forPattern(pattern);
@@ -41,6 +41,7 @@ public class DateTimeFormatter implements Formatter<DateTime> {
 
 	/**
 	 * Creates a new {@link DateTimeFormatter} for the given JodaTime formatter.
+	 * @param formatter the Date Formatter instance
 	 */
 	public DateTimeFormatter(org.joda.time.format.DateTimeFormatter formatter) {
 		this.formatter = formatter;

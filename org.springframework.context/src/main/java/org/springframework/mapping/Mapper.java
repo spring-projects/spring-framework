@@ -30,6 +30,6 @@ public interface Mapper<S, T> {
 	 * @return the mapped target object
 	 * @throws MappingException if the mapping process failed
 	 */
-	Object map(S source, T target);
+	T map(S source, T target);
 	
 }
