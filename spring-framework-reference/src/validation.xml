@@ -1464,16 +1464,16 @@ public class MyController {
 	<section id="org.springframework.mapping">
 		<title>Spring 3 Object Mapping</title>
 		<para>
-			There are scenarios, particularly in large message-oriented business applications, where data and object transformation is required.
+			There are scenarios, particularly in large message-oriented business applications, where object transformation is required.
 			For example, consider a complex Web Service where there is a separation between the data exchange model and the internal domain model used to structure business logic.
-			In cases like this, a general-purpose data mapping facility can be useful for automating the mapping between these disparate models.
+			In cases like this, a general-purpose object-to-object mapping facility can be useful for automating the mapping between these disparate models.
 			Spring 3 introduces such a facility built on the <link linkend="expressions-intro">Spring Expression Language</link> (SpEL).
 			This facility is described in this section.
 		</para>
 		<section id="mapping-Mapping-API">
 			<title>Mapper API</title>
 			<para>
-				The API to implement data mapping logic is simple and strongly typed:
+				The API to implement object mapping logic is simple and strongly typed:
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.mapping;
@@ -1512,20 +1512,22 @@ public class PersonDtoPersonMapper implements Mapper&lt;PersonDto, Person&gt; {
 		<section id="mapping.SpelMapper">
 			<title>General-purpose SpelMapper Implementation</title>
 			<para>
-				A general purpose object Mapper implementation exists in the <classname>org.springframework.mapping.support</classname> package named <classname>SpelMapper</classname>.
-				Built on the flexible Spring Expression Language (SpEL), this Mapper is capable of mapping between objects of all types, including JavaBeans, Arrays, Collections, and Maps.
-				It is also extensible and allows additional MappableTypes to be configured.
+				A general purpose object-to-object mapping system exists in the <classname>org.springframework.mapping.support</classname> package.
+				Built on the flexible Spring Expression Language (SpEL), this system is capable of mapping between a variety of object types, including JavaBeans, Arrays, Collections, and Maps.
+				It can perform field-to-field, field-to-multi-field, and multi-field to field mappings.
+				It also can carry out type conversion and recursive mapping, often needed with rich object models.
 			</para>
 			<section id="mapping.SpelMapper-usage">
 				<title>Usage</title>
 				<para>
-					To use a SpelMapper with its default configuration, simply construct one and call map:
+					To obtain a general purpose object Mapper with its default configuration, simply call MappingFactory.getDefaultMapper().
+					Then invoke the Mapper by calling its <literal>map(Object, Object)</literal> operation:
 				</para>
 				<programlisting language="java"><![CDATA[
-SpelMapper mapper = new SpelMapper();
-mapper.map(aSource, aTarget);]]></programlisting>
+MappingFactory.defaultMapper().map(aSource, aTarget);]]>
+				</programlisting>
 				<para>
-					By default, SpelMapper will map the fields on the source and target that have the same names.
+					By default, the defaultMapper will map the fields on the source and target that have the same names.
 					If the field types differ, the mapping system will attempt a type conversion using Spring 3's <link linkend="core.convert">type conversion system</link>.
 					Nested bean properties are mapped recursively.
 					Any mapping failures will trigger a MappingException to be thrown.
@@ -1562,7 +1564,7 @@ public class Account {
     }
 }]]></programlisting>
 				<para>
-					Used in the following test case:
+					Now used in the following test case:
 				</para>
 				<programlisting language="java"><![CDATA[
 @Test
@@ -1577,8 +1579,7 @@ public void testDefaultSpelMappingBehavior() {
     
     Account target = new Account();
     
-    SpelMapper mapper = new SpelMapper();
-    mapper.map(source, target);
+    MapperFactory.getDefaultMapper().map(source, target);
     
     assertEquals(new Long(123456789), target.getNumber();
     assertEquals("Bob Sanders", target.getName());
@@ -1597,23 +1598,33 @@ public void testDefaultSpelMappingBehavior() {
 			<section id="mapping.SpelMapper-Explicit">
 				<title>Registering Explicit Mappings</title>
 				<para>
-					When default mapping rules are not sufficient, explicit mapping rules can be registered by calling one of the <literal>mapper.addMapping(...)</literal> method variants.
+					When default mapping rules are not sufficient, explicit mapping rules can be registered by obtaining a <classname>MapperBuilder</classname> and using it to construct a <classname>Mapper</classname>.
 					Explicit mapping rules always override the default.
-					For example, suppose you need to map <literal>AccountDto.name</literal> to <literal>Account.fullName</literal>.
-					Since the two property names are not the same, default auto-mapping would never be performed.
-					Handle a situation like this by explicitly registering a mapping rule:
 				</para>
-				<programlisting language="java">mapper.addMapping("name", "fullName");</programlisting>
-				<para>
-					In this example, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
-					No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
-				</para>
+				<programlisting language="java"><![CDATA[
+MappingBuilder<PersonDto, Person> builder = MappingFactory.mappingBuilder(PersonDto.class, Person.class)]]>
+				</programlisting>			
+				<section id="mapping.SpelMapper-Explicit-differentFieldNames">
+					<title>Mapping between two fields with different names</title>
+					<para>
+						Suppose you need to map <literal>AccountDto.name</literal> to <literal>Account.fullName</literal>.
+						Since the two property names are not the same, default auto-mapping would never be performed.
+						Handle a situation like this by explicitly registering a mapping rule:
+					</para>
+					<programlisting language="java">builder.addMapping("name", "fullName")</programlisting>
+					<para>
+						In this example, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
+						No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
+					</para>
+				</section>
 				<section id="mapping.SpelMapper-Explicit-forcing">
 					<title>Forcing Explicit Mappings</title>
 					<para>
 						You can require that all mapping rules must be defined explicitly by disabling the "auto mapping" feature:
 					</para>
-					<programlisting language="java">mapper.setAutoMappingEnabled(false);</programlisting>
+					<programlisting language="java"><![CDATA[
+builder.setAutoMappingEnabled(false);]]>
+					</programlisting>
 				</section>		
 			</section>
 			<section id="mapping.SpelMapper-CustomConverter">
@@ -1623,12 +1634,13 @@ public void testDefaultSpelMappingBehavior() {
 					Do this by registering a converter with a Mapping:
 				</para>
 				<programlisting language="java"><![CDATA[
-mapper.addMapping("name", "fullName").setConverter() { new Converter<String, String>() {
+builder.addMapping("name", "fullName").setConverter() { new Converter<String, String>() {
     public String convert(String value) {
         // do transformation
         // return transformed value
     }
-});]]></programlisting>
+});]]>
+				</programlisting>
 			</section>
 			<section id="mapper.SpelMapper-IgnoringFields">
 				<title>Ignoring Fields</title>
@@ -1636,21 +1648,21 @@ mapper.addMapping("name", "fullName").setConverter() { new Converter<String, Str
 					Sometimes you need to exclude a specific field on a source object from being mapped.
 					Do this by marking a mapping as excluded:
 				</para>
-				<programlisting language="java">mapper.addMapping("name").setExclude();</programlisting>
+				<programlisting language="java">builder.setExcludedFields("name");</programlisting>
 			</section>
 			<section id="mapper.SpelMapper-CustomTypeConverters">
 				<title>Registering Custom Type Converters</title>
 				<para>
-					You can also install Converters to convert values of different types in a custom way.
-					Do this by obtaining the mapper's ConverterRegistry:
+					You can also install Converters to convert values of different types in a custom way:
 				</para>
 				<programlisting language="java"><![CDATA[
-mapper.getConverterRegistry().addConverter(new Converter<String, Date>() {
+builder.addConverter(new Converter<String, Date>() {
     public Date convert(String value) {
         // do conversion
         // return transformed value    
     }
-});]]></programlisting>
+});]]>
+				</programlisting>
 				<para>
 					The example Converter above will be invoked anytime a String field is mapped to a Date field.
 				</para>			
@@ -1662,54 +1674,17 @@ mapper.getConverterRegistry().addConverter(new Converter<String, Date>() {
 					Do this by adding a nested Mapper:
 				</para>
 				<programlisting language="java"><![CDATA[
-mapper.addNestedMapper(new Mapper<AddressDto, Address>() {
+builder.addNestedMapper(new Mapper<AddressDto, Address>() {
     public Address map(AddressDto source, Address target) {
         // do target bean mapping here
         return target; 
     }
-});]]></programlisting>
+});]]>
+				</programlisting>
 				<para>
 					The example above registers a nested Mapper that will map nested AddressDto properties to nested Address properties.
-					This particular nested Mapper is "hand-coded", but it could have easily been another generic SpelMapper instance.
-					<methodname>addNestedMapper</methodname> is a convenience method for registering a Converter that delegates to a Mapper.
+					This particular nested Mapper is "hand-coded", but it could have easily been another Mapper instance built by a MapperBuilder.
 				</para>
-			</section>
-			<section>
-				<title>Registering Custom Mappable Types</title>
-				<para>
-					By default, <classname>SpelMapper</classname> can map between JavaBean (Object), Collection, Array, and Map object structures.
-					The supported set of <emphasis>MappableTypes</emphasis> is extensible.
-					For example, you may wish to implement custom support for mapping XML element structures.
-				</para>
-				<para>
-					To implement your own custom MappableType, implement the <classname>MappableType</classname> interface:
-				</para>
-				<programlisting language="java"><![CDATA[
-public interface MappableType<T> {
-
-	boolean isInstance(Object object);
-
-	Set<String> getFields(T object);
-
-	EvaluationContext getEvaluationContext(T object, ConversionService conversionService);
-
-}]]>	</programlisting>
-				<para>
-					To plug in your custom MappableType, inject a custom MappableTypeFactory into your SpelMapper:
-				</para>		
-				<programlisting language="java"><![CDATA[
-SpelMapper mapper = new SpelMapper();
-MappableTypeFactory factory = new MappableTypeFactory();
-factory.add(new MyCustomMappableType());
-factory.add(new MapMappableType());
-factory.add(new BeanMappableType());
-mapper.setMappableTypeFactory(factory);]]></programlisting>
-				<note>
-					<para>
-						The Spring team encourages you to contribute any generally useful MappableType extensions back to the community.
-						Do this by filing a JIRA issue at <ulink url="http://jira.springframework.org">jira.springframework.org</ulink>.
-					</para>
-				</note>
 			</section>
 		</section>
 		<section id="org.springframework.mapping-FurtherReading">
