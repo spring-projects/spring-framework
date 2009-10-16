@@ -25,7 +25,7 @@ import org.springframework.mapping.Mapper;
  * @see MappingConverter
  * @see Mapper#map(Object, Object)
  */
-public interface MappingTargetFactory {
+interface MappingTargetFactory {
 
 	/**
 	 * Does this factory support creating mapping targets of the specified type

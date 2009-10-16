@@ -23,7 +23,7 @@ import java.util.Set;
  * Call {@link #add(MappableType)} to register.
  * @author Keith Donald
  */
-public class MappableTypeFactory {
+class MappableTypeFactory {
 
 	private Set<MappableType<?>> mappableTypes = new LinkedHashSet<MappableType<?>>();
 

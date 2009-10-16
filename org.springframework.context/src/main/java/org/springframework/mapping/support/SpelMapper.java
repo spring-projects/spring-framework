@@ -17,8 +17,6 @@ package org.springframework.mapping.support;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -33,28 +31,19 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 import org.springframework.mapping.Mapper;
-import org.springframework.mapping.MappingException;
-import org.springframework.mapping.MappingFailure;
 import org.springframework.util.Assert;
 
 /**
  * A general-purpose object mapper implementation based on the Spring Expression Language (SpEL).
  * @author Keith Donald 
- * @see #setAutoMappingEnabled(boolean)
- * @see #setMappableTypeFactory(MappableTypeFactory)
- * @see #addMapping(String)
- * @see #addMapping(String, String)
- * @see #addNestedMapper(Mapper)
- * @see #addNestedMapper(Mapper, MappingTargetFactory)
- * @see #getConverterRegistry()
  */
-public class SpelMapper implements Mapper<Object, Object> {
+final class SpelMapper implements Mapper<Object, Object> {
 
 	private static final Log logger = LogFactory.getLog(SpelMapper.class);
 
-	private static final SpelExpressionParser sourceExpressionParser = new SpelExpressionParser();
+	private final SpelExpressionParser sourceExpressionParser = new SpelExpressionParser();
 
-	private static final SpelExpressionParser targetExpressionParser = new SpelExpressionParser(
+	private final SpelExpressionParser targetExpressionParser = new SpelExpressionParser(
 			SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull
 					| SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
 
@@ -66,63 +55,35 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	private MappingConversionService conversionService = new MappingConversionService();
 
-	/**
-	 * Sets whether "auto mapping" is enabled.
-	 * When enabled, source and target fields with the same name will automatically be mapped unless an explicit mapping override has been registered.
-	 * Set to false to require explicit registration of all source-to-target mapping rules.
-	 * Default is enabled (true).
-	 * @param autoMappingEnabled auto mapping status
-	 */
+	public SpelMapper() {
+
+	}
+
+	public SpelMapper(Class sourceType, Class targetType) {
+		// TODO - addMapping assertions based on specified sourceType and targetType
+	}
+
 	public void setAutoMappingEnabled(boolean autoMappingEnabled) {
 		this.autoMappingEnabled = autoMappingEnabled;
 	}
 
-	/**
-	 * Sets the factory for {@link MappableType mappable types} supported by this mapper.
-	 * Default is {@link DefaultMappableTypeFactory}.
-	 * @param mappableTypeFactory the mappableTypeFactory
-	 */
 	public void setMappableTypeFactory(MappableTypeFactory mappableTypeFactory) {
 		this.mappableTypeFactory = mappableTypeFactory;
 	}
 
-	/**
-	 * Register a field mapping.
-	 * The source and target field expressions will be the same value.
-	 * For example, calling <code>addMapping("order")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>order</code> field on the target.
-	 * This is a convenience method for calling {@link #addMapping(String, String)} with the same source and target value..
-	 * @param fieldExpression the field mapping expression
-	 * @return this, for configuring additional field mapping options fluently
-	 */
-	public MappingConfiguration addMapping(String fieldExpression) {
-		return addMapping(fieldExpression, fieldExpression);
+	public void addMapping(String sourceFieldExpression, String targetFieldExpression, Converter<?, ?> converter) {
+		Expression sourceField = parseSourceField(sourceFieldExpression);
+		Expression targetField = parseTargetField(targetFieldExpression);
+		FieldToFieldMapping mapping = new FieldToFieldMapping(sourceField, targetField, converter);
+		this.mappings.add(mapping);
 	}
 
-	/**
-	 * Register a mapping between a source and target field.
-	 * For example, calling <code>addMapping("order", "primaryOrder")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>primaryOrder</code> field on the target.
-	 * @param sourceFieldExpression the source field mapping expression
-	 * @param targetFieldExpression the target field mapping expression 
-	 * @return this, for configuring additional field mapping options fluently
-	 */
-	public MappingConfiguration addMapping(String sourceFieldExpression, String targetFieldExpression) {
-		Expression sourceExp;
-		try {
-			sourceExp = sourceExpressionParser.parseExpression(sourceFieldExpression);
-		} catch (ParseException e) {
-			throw new IllegalArgumentException("The mapping source '" + sourceFieldExpression
-					+ "' is not a parseable value expression", e);
-		}
-		Expression targetExp;
-		try {
-			targetExp = targetExpressionParser.parseExpression(targetFieldExpression);
-		} catch (ParseException e) {
-			throw new IllegalArgumentException("The mapping target '" + targetFieldExpression
-					+ "' is not a parseable property expression", e);
-		}
-		SpelMapping mapping = new SpelMapping(sourceExp, targetExp);
-		this.mappings.add(mapping);
-		return mapping;
+	public void addMapping(String field, Mapper mapper) {
+		this.mappings.add(new FieldToMultiFieldMapping(parseSourceField(field), mapper));
+	}
+
+	public void addMapping(Mapper mapper) {
+		this.mappings.add(new MultiFieldToFieldMapping(mapper));
 	}
 
 	/**
@@ -174,13 +135,6 @@ public class SpelMapper implements Mapper<Object, Object> {
 				targetFactory));
 	}
 
-	/**
-	 * Return this mapper's internal converter registry.
-	 * Allows for registration of simple type Converters in addition to MapperConverters that map entire nested object structures using a Mapper.
-	 * To register the latter, consider using one of the {@link #addNestedMapper(Mapper) addNestedMapper} variants.
-	 * @see Converter
-	 * @see MappingConverter
-	 */
 	public ConverterRegistry getConverterRegistry() {
 		return conversionService;
 	}
@@ -192,17 +146,21 @@ public class SpelMapper implements Mapper<Object, Object> {
 			MappingContextHolder.push(source);
 			EvaluationContext sourceContext = getEvaluationContext(source);
 			EvaluationContext targetContext = getEvaluationContext(target);
-			List<MappingFailure> failures = new LinkedList<MappingFailure>();
+			SpelMappingContext context = new SpelMappingContext(sourceContext, targetContext);
 			for (SpelMapping mapping : this.mappings) {
-				doMap(mapping, sourceContext, targetContext, failures);
+				if (logger.isDebugEnabled()) {
+					logger.debug(MappingContextHolder.getLevel() + mapping);
+				}
+				mapping.map(context);
 			}
-			Set<SpelMapping> autoMappings = getAutoMappings(sourceContext, targetContext);
+			Set<FieldToFieldMapping> autoMappings = getAutoMappings(sourceContext, targetContext);
 			for (SpelMapping mapping : autoMappings) {
-				doMap(mapping, sourceContext, targetContext, failures);
+				if (logger.isDebugEnabled()) {
+					logger.debug(MappingContextHolder.getLevel() + mapping + " (auto)");
+				}
+				mapping.map(context);
 			}
-			if (!failures.isEmpty()) {
-				throw new MappingException(failures);
-			}
+			context.handleFailures();
 			return target;
 		} finally {
 			MappingContextHolder.pop();
@@ -210,6 +168,28 @@ public class SpelMapper implements Mapper<Object, Object> {
 	}
 
 	// internal helpers
+
+	private Expression parseSourceField(String sourceFieldExpression) {
+		Expression sourceExp;
+		try {
+			sourceExp = sourceExpressionParser.parseExpression(sourceFieldExpression);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("The mapping source '" + sourceFieldExpression
+					+ "' is not a parseable value expression", e);
+		}
+		return sourceExp;
+	}
+
+	private Expression parseTargetField(String targetFieldExpression) {
+		Expression targetExp;
+		try {
+			targetExp = targetExpressionParser.parseExpression(targetFieldExpression);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("The mapping target '" + targetFieldExpression
+					+ "' is not a parseable property expression", e);
+		}
+		return targetExp;
+	}
 
 	private Class<?>[] getRequiredTypeInfo(Mapper<?, ?> mapper) {
 		return GenericTypeResolver.resolveTypeArguments(mapper.getClass(), Mapper.class);
@@ -219,17 +199,9 @@ public class SpelMapper implements Mapper<Object, Object> {
 		return mappableTypeFactory.getMappableType(object).getEvaluationContext(object, this.conversionService);
 	}
 
-	private void doMap(SpelMapping mapping, EvaluationContext sourceContext, EvaluationContext targetContext,
-			List<MappingFailure> failures) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(MappingContextHolder.getLevel() + mapping);
-		}
-		mapping.map(sourceContext, targetContext, failures);
-	}
-
-	private Set<SpelMapping> getAutoMappings(EvaluationContext sourceContext, EvaluationContext targetContext) {
+	private Set<FieldToFieldMapping> getAutoMappings(EvaluationContext sourceContext, EvaluationContext targetContext) {
 		if (this.autoMappingEnabled) {
-			Set<SpelMapping> autoMappings = new LinkedHashSet<SpelMapping>();
+			Set<FieldToFieldMapping> autoMappings = new LinkedHashSet<FieldToFieldMapping>();
 			Set<String> sourceFields = getMappableFields(sourceContext.getRootObject().getValue());
 			for (String field : sourceFields) {
 				if (!explicitlyMapped(field)) {
@@ -249,7 +221,7 @@ public class SpelMapper implements Mapper<Object, Object> {
 					}
 					try {
 						if (targetExpression.isWritable(targetContext)) {
-							autoMappings.add(new SpelMapping(sourceExpression, targetExpression));
+							autoMappings.add(new FieldToFieldMapping(sourceExpression, targetExpression, null));
 						}
 					} catch (EvaluationException e) {
 
@@ -268,11 +240,11 @@ public class SpelMapper implements Mapper<Object, Object> {
 
 	private boolean explicitlyMapped(String field) {
 		for (SpelMapping mapping : this.mappings) {
-			if (mapping.getSourceExpressionString().startsWith(field)) {
+			if (mapping instanceof FieldToFieldMapping
+					&& ((FieldToFieldMapping) mapping).getSourceField().startsWith(field)) {
 				return true;
 			}
 		}
 		return false;
 	}
-
 }
