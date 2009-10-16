@@ -1599,10 +1599,14 @@ public void testDefaultSpelMappingBehavior() {
 				<title>Registering Explicit Mappings</title>
 				<para>
 					When default mapping rules are not sufficient, explicit mapping rules can be registered by obtaining a <classname>MapperBuilder</classname> and using it to construct a <classname>Mapper</classname>.
-					Explicit mapping rules always override the default.
+					Explicit mapping rules always override the default:
 				</para>
 				<programlisting language="java"><![CDATA[
-MappingBuilder<PersonDto, Person> builder = MappingFactory.mappingBuilder(PersonDto.class, Person.class)]]>
+MappperBuilder<PersonDto, Person> builder = MappingFactory.mappingBuilder(PersonDto.class, Person.class)
+builder.addMapping(...);
+builder.addMapping(...);
+Mapper<PersonDto, Person> mapper = builder.getMapper();
+]]>
 				</programlisting>			
 				<section id="mapping.SpelMapper-Explicit-differentFieldNames">
 					<title>Mapping between two fields with different names</title>
