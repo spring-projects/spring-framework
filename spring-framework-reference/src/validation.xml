@@ -1602,10 +1602,11 @@ public void testDefaultSpelMappingBehavior() {
 					Explicit mapping rules always override the default:
 				</para>
 				<programlisting language="java"><![CDATA[
-MappperBuilder<PersonDto, Person> builder = MappingFactory.mappingBuilder(PersonDto.class, Person.class)
-builder.addMapping(...);
-builder.addMapping(...);
-Mapper<PersonDto, Person> mapper = builder.getMapper();
+Mapper<PersonDto, Person> mapper =
+    MappingFactory.mappingBuilder(PersonDto.class, Person.class)
+        .addMapping(...)
+        .addMapping(...)
+        .getMapper();
 ]]>
 				</programlisting>			
 				<section id="mapping.SpelMapper-Explicit-differentFieldNames">
