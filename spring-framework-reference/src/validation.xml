@@ -1510,7 +1510,7 @@ public class PersonDtoPersonMapper implements Mapper&lt;PersonDto, Person&gt; {
 			</para>
 		</section>
 		<section id="mapping.SpelMapper">
-			<title>General-purpose Object Mapper Implementation</title>
+			<title>General Purpose Object Mapper Implementation</title>
 			<para>
 				A general purpose object-to-object mapping system exists in the <classname>org.springframework.mapping.support</classname> package.
 				Built on the Spring Expression Language (SpEL), this system is capable of mapping between a variety of object types, including JavaBeans, Arrays, Collections, and Maps.
@@ -1686,7 +1686,7 @@ builder.addConditionalMapping("countryCode", "international == 'true'");]]>
 			<section id="mapping.SpelMapper-Explicit-forcing">
 				<title>Forcing Explicit Mappings</title>
 				<para>
-					You can require that all mapping rules be defined explicitly by disabling the "auto mapping" feature:
+					You can force that <emphasis>all</emphasis> mapping rules be explicitly defined by disabling the "auto mapping" feature:
 				</para>
 				<programlisting language="java"><![CDATA[
 builder.setAutoMappingEnabled(false);]]>
@@ -1720,7 +1720,7 @@ builder.setExcludedFields("name");]]>
 			<section id="mapper.SpelMapper-CustomTypeConverters">
 				<title>Registering Custom Type Converters</title>
 				<para>
-					You may also register custom Converters to convert values between mapped field of different types:
+					You may also register custom Converters to convert values between mapped fields of different types:
 				</para>
 				<programlisting language="java"><![CDATA[
 builder.addConverter(new Converter<String, Date>() {
