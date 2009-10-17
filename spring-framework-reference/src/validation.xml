@@ -1757,7 +1757,7 @@ builder.addNestedMapper(new Mapper<AddressDto, Address>() {
 		<section id="org.springframework.mapping-FurtherReading">
 			<title>Further Reading</title>
 			<para>
-				Consult the JavaDocs of <classname>MapperFactory</classname> <classname>MapperBuilder</classname> in the <filename>org.springframework.mapping.support</filename> package for more information on the configuration options.
+				Consult the JavaDocs of <classname>MapperFactory</classname> and <classname>MapperBuilder</classname> in the <filename>org.springframework.mapping.support</filename> package for more information on the available configuration options.
 			</para>
 			<para>
 				Dozer is another general-purpose object mapper available in the open source Java community.
