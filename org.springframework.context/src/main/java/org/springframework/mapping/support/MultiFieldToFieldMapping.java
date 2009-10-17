@@ -15,6 +15,7 @@
  */
 package org.springframework.mapping.support;
 
+import org.springframework.core.style.StylerUtils;
 import org.springframework.mapping.Mapper;
 
 /**
@@ -23,11 +24,27 @@ import org.springframework.mapping.Mapper;
  */
 final class MultiFieldToFieldMapping implements SpelMapping {
 
+	private String[] fields;
+
 	@SuppressWarnings("unchecked")
 	private final Mapper multiFieldMapper;
 
-	public MultiFieldToFieldMapping(Mapper<?, ?> multiFieldMapper) {
+	public MultiFieldToFieldMapping(String[] fields, Mapper<?, ?> multiFieldMapper) {
+		this.fields = fields;
 		this.multiFieldMapper = multiFieldMapper;
+	}
+
+	public String[] getSourceFields() {
+		return fields;
+	}
+
+	public boolean mapsField(String field) {
+		for (String f : this.fields) {
+			if (f.equals(field)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -52,7 +69,7 @@ final class MultiFieldToFieldMapping implements SpelMapping {
 	}
 
 	public String toString() {
-		return "[MultiFieldToFieldMapping<" + this.multiFieldMapper + ">]";
+		return "[MultiFieldToFieldMapping<" + StylerUtils.style(this.fields) + " -> " + this.multiFieldMapper + ">]";
 	}
 
 }

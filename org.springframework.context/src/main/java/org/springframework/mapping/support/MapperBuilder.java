@@ -101,10 +101,11 @@ public interface MapperBuilder<S, T> {
 	 * Register a mapping between multiple source fields and a single target field.
 	 * For example, calling <code>addMapping(dateAndTimeFieldsToDateTimeFieldMapper)</code> might register a mapping that maps the <code>date</code> and <code>time</code> fields on the source to the <code>dateTime</code> field on the target.
 	 * The provided {@link Mapper} will be passed the source object S for its source and the target object T for its target.
+	 * @param fields the source field mapping expressions
 	 * @param mapper the fields to field mapper
 	 * @return this, for configuring additional field mapping options fluently
 	 */
-	MapperBuilder<S, T> addMapping(Mapper<S, T> mapper);
+	MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper);
 
 	/**
 	 * Register a Mapper that will be used to map between nested source and target fields of a specific sourceType/targetType pair.

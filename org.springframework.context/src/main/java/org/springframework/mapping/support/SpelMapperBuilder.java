@@ -64,8 +64,8 @@ final class SpelMapperBuilder<S, T> implements MapperBuilder<S, T> {
 		return this;
 	}
 
-	public MapperBuilder<S, T> addMapping(Mapper<S, T> mapper) {
-		this.mapper.addMapping(mapper);
+	public MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper) {
+		this.mapper.addMapping(fields, mapper);
 		return this;
 	}
 

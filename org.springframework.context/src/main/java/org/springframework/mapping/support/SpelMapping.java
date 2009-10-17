@@ -22,6 +22,11 @@ package org.springframework.mapping.support;
 interface SpelMapping {
 
 	/**
+	 * Return true if this maps the source field.
+	 */
+	boolean mapsField(String field);
+	
+	/**
 	 * Execute this mapping.
 	 * @param context the mapping context
 	 */
