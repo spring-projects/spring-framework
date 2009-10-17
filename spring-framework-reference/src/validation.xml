@@ -1599,7 +1599,8 @@ public void testDefaultSpelMappingBehavior() {
 				<title>Registering Explicit Mappings</title>
 				<para>
 					When default mapping rules are not sufficient, explicit mapping rules can be registered by obtaining a <classname>MapperBuilder</classname> and using it to construct a <classname>Mapper</classname>.
-					Explicit mapping rules always override the default:
+					Explicit mapping rules always override the default.
+					The MapperBuilder provides a fluent API for registering object-to-object Mapping rules:
 				</para>
 				<programlisting language="java"><![CDATA[
 Mapper<PersonDto, Person> mapper =
@@ -1616,16 +1617,60 @@ Mapper<PersonDto, Person> mapper =
 						Since the two property names are not the same, default auto-mapping would never be performed.
 						Handle a situation like this by explicitly registering a mapping rule:
 					</para>
-					<programlisting language="java">builder.addMapping("name", "fullName")</programlisting>
+					<programlisting language="java"><![CDATA[
+builder.addMapping("name", "fullName")]]>
+					</programlisting>			
 					<para>
-						In this example, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
+						In the example above, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
 						No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
+					</para>
+				</section>
+				<section id="mapping.SpelMapper-Explicit-singleFieldToMultipleField">
+					<title>Mapping a single field value to multiple fields</title>
+					<para>
+						Suppose you need to map <literal>PersonDto.name</literal> to <literal>Person.firstName</literal> and <literal>Person.lastName</literal>.
+						Handle a field-to-multi-field requirement like this by explicitly registering a mapping rule:
+					</para>
+					<programlisting language="java"><![CDATA[
+builder.addMapping("name", new Mapper<String, Person>() {
+    public Person map(String name, Person person) {
+        String[] names = name.split(" ");
+        person.setFirstName(names[0]);
+        person.setLastName(names[1]);
+        return person;        
+    }
+});]]>
+					</programlisting>			
+					<para>
+						In the example above, the first part of the <literal>name</literal> field will be mapped to the <literal>firstName</literal> field and the second part will be mapped to the <literal>lastName</literal> field.
+						No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
+					</para>
+				</section>
+				<section id="mapping.SpelMapper-Explicit-multipleFieldsToField">
+					<title>Mapping a single field value to multiple fields</title>
+					<para>
+						Suppose you need to map <literal>CreateAccountDto.activationDay</literal> and <literal>CreateAccountDto.activationTime</literal> to <literal>Account.activationDateTime</literal>.
+						Handle a multi-field-to-field requirement like this by explicitly registering a mapping rule:
+					</para>
+					<programlisting language="java"><![CDATA[
+builder.addMapping(new String[] { "activationDay", "activationTime" }, new Mapper<CreateAccountDto, AccountDto>() {
+    public Account map(CreateAccountDto dto, Account account) {
+        DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(
+            dto.getActivationDay() + "T" + dto.getActivationTime());
+        account.setActivationDateTime(dateTime);
+        return account;
+    }
+});]]>
+					</programlisting>			
+					<para>
+						In the example above, the <literal>activationDay</literal> and <literal>activationTime</literal> fields are mapped to the single <literal>activationDateTime</literal> field.
+						No default mapping is performed for <literal>activationDay</literal> and <literal>activationTime</literal> since an explicit mapping rule has been configured for these fields.
 					</para>
 				</section>
 				<section id="mapping.SpelMapper-Explicit-forcing">
 					<title>Forcing Explicit Mappings</title>
 					<para>
-						You can require that all mapping rules must be defined explicitly by disabling the "auto mapping" feature:
+						You can require that all mapping rules be defined explicitly by disabling the "auto mapping" feature:
 					</para>
 					<programlisting language="java"><![CDATA[
 builder.setAutoMappingEnabled(false);]]>
@@ -1651,14 +1696,14 @@ builder.addMapping("name", "fullName").setConverter() { new Converter<String, St
 				<title>Ignoring Fields</title>
 				<para>
 					Sometimes you need to exclude a specific field on a source object from being mapped.
-					Do this by marking a mapping as excluded:
+					Do this by marking one or more source fields as excluded:
 				</para>
 				<programlisting language="java">builder.setExcludedFields("name");</programlisting>
 			</section>
 			<section id="mapper.SpelMapper-CustomTypeConverters">
 				<title>Registering Custom Type Converters</title>
 				<para>
-					You can also install Converters to convert values of different types in a custom way:
+					You may also install Converters to convert values of different types in a custom way:
 				</para>
 				<programlisting language="java"><![CDATA[
 builder.addConverter(new Converter<String, Date>() {
@@ -1675,7 +1720,7 @@ builder.addConverter(new Converter<String, Date>() {
 			<section id="mapper.SpelMapper-CustomNestedMappers">
 				<title>Registering Custom Nested Mappers</title>
 				<para>
-					When mapping between two large object graphs, you may need to register explicit mapping rules for nested bean properties.
+					When mapping between two object graphs, you may find you need to register explicit mapping rules for nested bean properties.
 					Do this by adding a nested Mapper:
 				</para>
 				<programlisting language="java"><![CDATA[
@@ -1687,7 +1732,7 @@ builder.addNestedMapper(new Mapper<AddressDto, Address>() {
 });]]>
 				</programlisting>
 				<para>
-					The example above registers a nested Mapper that will map nested AddressDto properties to nested Address properties.
+					The example Mapper above will map nested AddressDto properties to nested Address properties.
 					This particular nested Mapper is "hand-coded", but it could have easily been another Mapper instance built by a MapperBuilder.
 				</para>
 			</section>

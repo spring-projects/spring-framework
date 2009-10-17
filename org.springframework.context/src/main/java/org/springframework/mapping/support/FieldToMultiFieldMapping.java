@@ -38,6 +38,10 @@ final class FieldToMultiFieldMapping implements SpelMapping {
 		return this.sourceField.getExpressionString();
 	}
 
+	public boolean mapsField(String field) {
+		return getSourceField().equals(field);
+	}
+
 	@SuppressWarnings("unchecked")
 	public void map(SpelMappingContext context) {
 		try {

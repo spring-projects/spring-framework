@@ -291,18 +291,19 @@ public class MappingTests {
 					}
 				})
 				// multiple fields to field
-				.addMapping(new Mapper<CreateAccountDto, Account>() {
-					public Account map(CreateAccountDto source, Account target) {
-						DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(
-								source.getActivationDate() + "T" + source.getActivationTime());
-						target.setActivationDateTime(dateTime);
-						return target;
-					}
-				}).getMapper();
+				.addMapping(new String[] { "activationDay", "activationTime " },
+						new Mapper<CreateAccountDto, Account>() {
+							public Account map(CreateAccountDto source, Account target) {
+								DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(
+										source.getActivationDay() + "T" + source.getActivationTime());
+								target.setActivationDateTime(dateTime);
+								return target;
+							}
+						}).getMapper();
 		CreateAccountDto dto = new CreateAccountDto();
 		dto.setAccountNumber("123456789");
 		dto.setName("Keith Donald");
-		dto.setActivationDate("2009-10-12");
+		dto.setActivationDay("2009-10-12");
 		dto.setActivationTime("12:00:00.000Z");
 		dto.setAddress("2009BelAireEstates PalmBay FL 35452");
 		Account account = mapper.map(dto, new Account());
@@ -500,7 +501,7 @@ public class MappingTests {
 
 		private String address;
 
-		private String activationDate;
+		private String activationDay;
 
 		private String activationTime;
 
@@ -528,12 +529,12 @@ public class MappingTests {
 			this.address = address;
 		}
 
-		public String getActivationDate() {
-			return activationDate;
+		public String getActivationDay() {
+			return activationDay;
 		}
 
-		public void setActivationDate(String activationDate) {
-			this.activationDate = activationDate;
+		public void setActivationDay(String activationDay) {
+			this.activationDay = activationDay;
 		}
 
 		public String getActivationTime() {

@@ -78,12 +78,12 @@ final class SpelMapper implements Mapper<Object, Object> {
 		this.mappings.add(mapping);
 	}
 
-	public void addMapping(String field, Mapper mapper) {
+	public void addMapping(String field, Mapper<?, ?> mapper) {
 		this.mappings.add(new FieldToMultiFieldMapping(parseSourceField(field), mapper));
 	}
 
-	public void addMapping(Mapper mapper) {
-		this.mappings.add(new MultiFieldToFieldMapping(mapper));
+	public void addMapping(String[] fields, Mapper<?, ?> mapper) {
+		this.mappings.add(new MultiFieldToFieldMapping(fields, mapper));
 	}
 
 	/**
@@ -240,8 +240,7 @@ final class SpelMapper implements Mapper<Object, Object> {
 
 	private boolean explicitlyMapped(String field) {
 		for (SpelMapping mapping : this.mappings) {
-			if (mapping instanceof FieldToFieldMapping
-					&& ((FieldToFieldMapping) mapping).getSourceField().startsWith(field)) {
+			if (mapping.mapsField(field)) {
 				return true;
 			}
 		}
