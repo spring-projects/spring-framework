@@ -1564,30 +1564,14 @@ public class Account {
     }
 }]]></programlisting>
 				<para>
-					Now mapped between in the following test case:
+					Now mapped in the following service method:
 				</para>
 				<programlisting language="java"><![CDATA[
-@Test
-public void testDefaultSpelMappingBehavior() {
-    CreateAccountDto source = new CreateAccountDto();
-    source.setNumber("123456789");
-    source.setName("Bob Sanders");
-    AddressDto nested = new AddressDto();
-    nested.setStreet("123 Maple Lane");
-    nested.setZip("35452");
-    source.setAddress(nested);
-    
-    Account target = new Account();
-    
-    MapperFactory.getDefaultMapper().map(source, target);
-    
-    assertEquals(new Long(123456789), target.getNumber();
-    assertEquals("Bob Sanders", target.getName());
-    assertEquals("123 Maple Lane", target.getAddress().getStreet());
-    assertEquals("35452", target.getAddress().getZip());
-    assertNull(target.getAddress().getCity());
-    assertNull(target.getAddress().getState());
-}]]></programlisting>
+public void createAccount(CreateAccountDto dto) {
+    Account account = (Account) MapperFactory.getDefaultMapper().map(dto, new Account());
+    // work with the mapped account instance
+}]]>
+				</programlisting>
 				<para>
 					In this example, the <literal>number</literal>, <literal>name</literal>, and <literal>address</literal> properties are automatically mapped since they are present on both the source and target objects.
 					The AccountDto's <literal>address</literal> property is a JavaBean, so its nested properties are also recursively mapped.
