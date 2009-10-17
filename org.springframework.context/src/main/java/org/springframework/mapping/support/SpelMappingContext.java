@@ -43,7 +43,14 @@ final class SpelMappingContext {
 	public Object getTarget() {
 		return this.targetEvaluationContext.getRootObject().getValue();
 	}
-	
+
+	public boolean conditionHolds(Expression condition) {
+		if (condition == null) {
+			return true;
+		}
+		return Boolean.TRUE.equals(condition.getValue(this.sourceEvaluationContext));
+	}
+
 	public Object getSourceFieldValue(Expression sourceField) {
 		return sourceField.getValue(this.sourceEvaluationContext);
 	}
@@ -61,4 +68,5 @@ final class SpelMappingContext {
 			throw new MappingException(this.failures);
 		}
 	}
+
 }

@@ -28,10 +28,13 @@ final class FieldToMultiFieldMapping implements SpelMapping {
 
 	@SuppressWarnings("unchecked")
 	private final Mapper targetFieldMapper;
-	
-	public FieldToMultiFieldMapping(Expression sourceField, Mapper<?, ?> targetFieldMapper) {
+
+	private final Expression condition;
+
+	public FieldToMultiFieldMapping(Expression sourceField, Mapper<?, ?> targetFieldMapper, Expression condition) {
 		this.sourceField = sourceField;
 		this.targetFieldMapper = targetFieldMapper;
+		this.condition = condition;
 	}
 
 	public String getSourceField() {
@@ -44,6 +47,9 @@ final class FieldToMultiFieldMapping implements SpelMapping {
 
 	@SuppressWarnings("unchecked")
 	public void map(SpelMappingContext context) {
+		if (!context.conditionHolds(this.condition)) {
+			return;
+		}		
 		try {
 			Object value = context.getSourceFieldValue(this.sourceField);
 			this.targetFieldMapper.map(value, context.getTarget());

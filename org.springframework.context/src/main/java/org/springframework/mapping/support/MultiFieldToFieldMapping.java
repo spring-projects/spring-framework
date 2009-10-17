@@ -16,6 +16,7 @@
 package org.springframework.mapping.support;
 
 import org.springframework.core.style.StylerUtils;
+import org.springframework.expression.Expression;
 import org.springframework.mapping.Mapper;
 
 /**
@@ -29,9 +30,12 @@ final class MultiFieldToFieldMapping implements SpelMapping {
 	@SuppressWarnings("unchecked")
 	private final Mapper multiFieldMapper;
 
-	public MultiFieldToFieldMapping(String[] fields, Mapper<?, ?> multiFieldMapper) {
+	private Expression condition;
+	
+	public MultiFieldToFieldMapping(String[] fields, Mapper<?, ?> multiFieldMapper, Expression condition) {
 		this.fields = fields;
 		this.multiFieldMapper = multiFieldMapper;
+		this.condition = condition;
 	}
 
 	public String[] getSourceFields() {
@@ -49,6 +53,9 @@ final class MultiFieldToFieldMapping implements SpelMapping {
 
 	@SuppressWarnings("unchecked")
 	public void map(SpelMappingContext context) {
+		if (!context.conditionHolds(this.condition)) {
+			return;
+		}		
 		try {
 			this.multiFieldMapper.map(context.getSource(), context.getTarget());
 		} catch (Exception e) {
