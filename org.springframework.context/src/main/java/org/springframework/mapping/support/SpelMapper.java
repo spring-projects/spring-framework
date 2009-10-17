@@ -71,64 +71,32 @@ final class SpelMapper implements Mapper<Object, Object> {
 		this.mappableTypeFactory = mappableTypeFactory;
 	}
 
-	public void addMapping(String sourceFieldExpression, String targetFieldExpression, Converter<?, ?> converter) {
+	public void setExcludedFields(String[] fields) {
+		// TODO
+	}
+	
+	public void addMapping(String sourceFieldExpression, String targetFieldExpression, Converter<?, ?> converter,
+			String condition) {
 		Expression sourceField = parseSourceField(sourceFieldExpression);
 		Expression targetField = parseTargetField(targetFieldExpression);
-		FieldToFieldMapping mapping = new FieldToFieldMapping(sourceField, targetField, converter);
+		FieldToFieldMapping mapping = new FieldToFieldMapping(sourceField, targetField, converter,
+				parseCondition(condition));
 		this.mappings.add(mapping);
 	}
 
-	public void addMapping(String field, Mapper<?, ?> mapper) {
-		this.mappings.add(new FieldToMultiFieldMapping(parseSourceField(field), mapper));
+	public void addMapping(String field, Mapper<?, ?> mapper, String condition) {
+		this.mappings.add(new FieldToMultiFieldMapping(parseSourceField(field), mapper, parseCondition(condition)));
 	}
 
-	public void addMapping(String[] fields, Mapper<?, ?> mapper) {
-		this.mappings.add(new MultiFieldToFieldMapping(fields, mapper));
+	public void addMapping(String[] fields, Mapper<?, ?> mapper, String condition) {
+		this.mappings.add(new MultiFieldToFieldMapping(fields, mapper, parseCondition(condition)));
 	}
 
-	/**
-	 * Adds a Mapper that will map the fields of a nested sourceType/targetType pair.
-	 * The source and target field types are determined by introspecting the parameterized types on the implementation's Mapper generic interface.
-	 * The target instance that is mapped is constructed by a {@link DefaultMappingTargetFactory}.
-	 * This method is a convenience method for {@link #addNestedMapper(Class, Class, Mapper)}.
-	 * @param nestedMapper the nested mapper
-	 */
-	public void addNestedMapper(Mapper<?, ?> nestedMapper) {
-		Class<?>[] typeInfo = getRequiredTypeInfo(nestedMapper);
-		addNestedMapper(typeInfo[0], typeInfo[1], nestedMapper);
-	}
-
-	/**
-	 * Adds a Mapper that will map the fields of a nested sourceType/targetType pair.
-	 * The source and target field types are determined by introspecting the parameterized types on the implementation's Mapper generic interface.
-	 * The target instance that is mapped is constructed by the provided {@link MappingTargetFactory}.
-	 * This method is a convenience method for {@link #addNestedMapper(Class, Class, Mapper, MappingTargetFactory)}.
-	 * @param nestedMapper the nested mapper
-	 * @param targetFactory the nested mapper's target factory
-	 */
 	public void addNestedMapper(Mapper<?, ?> nestedMapper, MappingTargetFactory targetFactory) {
 		Class<?>[] typeInfo = getRequiredTypeInfo(nestedMapper);
 		addNestedMapper(typeInfo[0], typeInfo[1], nestedMapper, targetFactory);
 	}
 
-	/**
-	 * Adds a Mapper that will map the fields of a nested sourceType/targetType pair.
-	 * The target instance that is mapped is constructed by a {@link DefaultMappingTargetFactory}.
-	 * @param sourceType the source nested object property type
-	 * @param targetType the target nested object property type
-	 * @param nestedMapper the nested mapper
-	 */
-	public void addNestedMapper(Class<?> sourceType, Class<?> targetType, Mapper<?, ?> nestedMapper) {
-		this.conversionService.addGenericConverter(sourceType, targetType, new MappingConverter(nestedMapper));
-	}
-
-	/**
-	 * Adds a Mapper that will map the fields of a nested sourceType/targetType pair.
-	 * @param sourceType the source nested object property type
-	 * @param targetType the target nested object property type
-	 * @param nestedMapper the nested mapper
-	 * @param targetFactory the nested mapper's target factory
-	 */
 	public void addNestedMapper(Class<?> sourceType, Class<?> targetType, Mapper<?, ?> nestedMapper,
 			MappingTargetFactory targetFactory) {
 		this.conversionService.addGenericConverter(sourceType, targetType, new MappingConverter(nestedMapper,
@@ -170,25 +138,33 @@ final class SpelMapper implements Mapper<Object, Object> {
 	// internal helpers
 
 	private Expression parseSourceField(String sourceFieldExpression) {
-		Expression sourceExp;
 		try {
-			sourceExp = sourceExpressionParser.parseExpression(sourceFieldExpression);
+			return sourceExpressionParser.parseExpression(sourceFieldExpression);
 		} catch (ParseException e) {
 			throw new IllegalArgumentException("The mapping source '" + sourceFieldExpression
 					+ "' is not a parseable value expression", e);
 		}
-		return sourceExp;
+	}
+
+	private Expression parseCondition(String condition) {
+		if (condition == null) {
+			return null;
+		}
+		try {
+			return sourceExpressionParser.parseExpression(condition);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("The mapping condition '" + condition
+					+ "' is not a parseable value expression", e);
+		}
 	}
 
 	private Expression parseTargetField(String targetFieldExpression) {
-		Expression targetExp;
 		try {
-			targetExp = targetExpressionParser.parseExpression(targetFieldExpression);
+			return targetExpressionParser.parseExpression(targetFieldExpression);
 		} catch (ParseException e) {
 			throw new IllegalArgumentException("The mapping target '" + targetFieldExpression
 					+ "' is not a parseable property expression", e);
 		}
-		return targetExp;
 	}
 
 	private Class<?>[] getRequiredTypeInfo(Mapper<?, ?> mapper) {
@@ -221,7 +197,7 @@ final class SpelMapper implements Mapper<Object, Object> {
 					}
 					try {
 						if (targetExpression.isWritable(targetContext)) {
-							autoMappings.add(new FieldToFieldMapping(sourceExpression, targetExpression, null));
+							autoMappings.add(new FieldToFieldMapping(sourceExpression, targetExpression, null, null));
 						}
 					} catch (EvaluationException e) {
 
@@ -246,4 +222,5 @@ final class SpelMapper implements Mapper<Object, Object> {
 		}
 		return false;
 	}
+
 }

@@ -35,21 +35,16 @@ final class MappingConverter implements GenericConverter {
 
 	/**
 	 * Creates a new Converter that delegates to the mapper to complete the type conversion process.
-	 * Uses a {@link DefaultMappingTargetFactory} to create the target object to map and return.
-	 * @param mapper the mapper
-	 */
-	public MappingConverter(Mapper mapper) {
-		this(mapper, new DefaultMappingTargetFactory());
-	}
-
-	/**
-	 * Creates a new Converter that delegates to the mapper to complete the type conversion process.
 	 * Uses the specified MappingTargetFactory to create the target object to map and return.
 	 * @param mapper the mapper
 	 */
 	public MappingConverter(Mapper mapper, MappingTargetFactory mappingTargetFactory) {
 		this.mapper = mapper;
-		this.mappingTargetFactory = mappingTargetFactory;
+		if (mappingTargetFactory != null) {
+			this.mappingTargetFactory = mappingTargetFactory;
+		} else {
+			this.mappingTargetFactory = DefaultMappingTargetFactory.getInstance();
+		}
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

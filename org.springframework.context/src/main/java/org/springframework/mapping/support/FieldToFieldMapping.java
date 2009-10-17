@@ -31,10 +31,13 @@ final class FieldToFieldMapping implements SpelMapping {
 	@SuppressWarnings("unchecked")
 	private final Converter converter;
 
-	public FieldToFieldMapping(Expression sourceField, Expression targetField, Converter<?, ?> converter) {
+	private final Expression condition;
+	
+	public FieldToFieldMapping(Expression sourceField, Expression targetField, Converter<?, ?> converter, Expression condition) {
 		this.sourceField = sourceField;
 		this.targetField = targetField;
 		this.converter = converter;
+		this.condition = condition;
 	}
 
 	public String getSourceField() {
@@ -51,6 +54,9 @@ final class FieldToFieldMapping implements SpelMapping {
 	
 	@SuppressWarnings("unchecked")
 	public void map(SpelMappingContext context) {
+		if (!context.conditionHolds(this.condition)) {
+			return;
+		}
 		try {
 			Object value = context.getSourceFieldValue(this.sourceField);
 			if (this.converter != null) {

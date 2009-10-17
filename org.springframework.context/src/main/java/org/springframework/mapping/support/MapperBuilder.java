@@ -50,7 +50,7 @@ public interface MapperBuilder<S, T> {
 	 * The source and target field names will be the same value.
 	 * For example, calling <code>addMapping("order")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>order</code> field on the target.
 	 * This is a convenience method for calling {@link #addMapping(String, String)} with the same source and target value..
-	 * @param fieldExpression the field mapping expression
+	 * @param field the field mapping expression
 	 * @return this, for configuring additional field mapping options fluently
 	 */
 	MapperBuilder<S, T> addMapping(String field);
@@ -60,7 +60,7 @@ public interface MapperBuilder<S, T> {
 	 * The source and target field expressions will be the same value.
 	 * For example, calling <code>addMapping("order")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>order</code> field on the target.
 	 * This is a convenience method for calling {@link #addMapping(String, String, Converter)} with the same source and target value..
-	 * @param fieldExpression the field mapping expression
+	 * @param field the field mapping expression
 	 * @param converter the converter that will convert the source field value before mapping the value to the target field
 	 * @return this, for configuring additional field mapping options fluently
 	 */
@@ -81,8 +81,8 @@ public interface MapperBuilder<S, T> {
 	 * Register a mapping between a source field and a target field.
 	 * Use this method when the name of the source field and the name of the target field are different.
 	 * For example, calling <code>addMapping("order", "primaryOrder")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>primaryOrder</code> field on the target.
-	 * @param sourceFieldExpression the source field mapping expression
-	 * @param targetFieldExpression the target field mapping expression 
+	 * @param sourceField the source field mapping expression
+	 * @param targetField the target field mapping expression 
 	 * @return this, for configuring additional field mapping options fluently
 	 */
 	MapperBuilder<S, T> addMapping(String sourceField, String targetField);
@@ -91,8 +91,8 @@ public interface MapperBuilder<S, T> {
 	 * Register a mapping between a source field and a target field that first converts the source field value using the provided Converter.
 	 * Use this method when the name of the source field and the name of the target field are different.
 	 * For example, calling <code>addMapping("order", "primaryOrder")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>primaryOrder</code> field on the target.
-	 * @param sourceFieldExpression the source field mapping expression
-	 * @param targetFieldExpression the target field mapping expression 
+	 * @param sourceField the source field mapping expression
+	 * @param targetField the target field mapping expression 
 	 * @return this, for configuring additional field mapping options fluently
 	 */
 	MapperBuilder<S, T> addMapping(String sourceField, String targetField, Converter<?, ?> converter);
@@ -107,6 +107,71 @@ public interface MapperBuilder<S, T> {
 	 */
 	MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper);
 
+	/**
+	 * Register a conditional mapping between a source field and a target field.
+	 * The source and target field names will be the same value.
+	 * @param field the field mapping expression
+	 * @param condition the boolean expression that determines if this mapping executes
+	 * @return this, for configuring additional field mapping options fluently
+	 */
+	MapperBuilder<S, T> addConditionalMapping(String field, String condition);
+
+	/**
+	 * Register a condition mapping between a source field and a target field that first converts the source field value using the provided Converter.
+	 * The source and target field expressions will be the same value.
+	 * @param field the field mapping expression
+	 * @param converter the converter that converts the source field value before mapping
+	 * @param condition the boolean expression that determines if this mapping executes
+	 * @return this, for configuring additional field mapping options fluently
+	 */
+	MapperBuilder<S, T> addConditionalMapping(String field, Converter<?, ?> converter, String condition);
+
+	/**
+	 * Register a conditional mapping between a source field and multiple target fields.
+	 * Use this method when you need to map a single source field value to multiple fields on the target.
+	 * For example, calling <code>addMapping("name", firstAndLastNameMapper)</code> might register a mapping that maps the <code>name</code> field on the source to the <code>firstName</code> and <code>lastName</code> fields on the target.
+	 * The target field {@link Mapper} will be passed the value of the source field for its source and the target object T for its target.
+	 * @param field the source field expression
+	 * @param mapper the mapper of the target fields
+	 * @param condition the boolean expression that determines if this mapping executes
+	 * @return this, for configuring additional field mapping options fluently
+	 */
+	MapperBuilder<S, T> addConditionalMapping(String field, Mapper<?, T> mapper, String condition);
+
+	/**
+	 * Register a conditional mapping between a source field and a target field.
+	 * Use this method when the name of the source field and the name of the target field are different.
+	 * For example, calling <code>addMapping("order", "primaryOrder")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>primaryOrder</code> field on the target.
+	 * @param sourceField the source field mapping expression
+	 * @param targetField the target field mapping expression 
+	 * @param condition the boolean expression that determines if this mapping executes
+	 * @return this, for configuring additional field mapping options fluently
+	 */
+	MapperBuilder<S, T> addConditionalMapping(String sourceField, String targetField, String condition);
+
+	/**
+	 * Register a conditional mapping between a source field and a target field that first converts the source field value using the provided Converter.
+	 * Use this method when the name of the source field and the name of the target field are different.
+	 * For example, calling <code>addMapping("order", "primaryOrder")</code> will register a mapping that maps between the <code>order</code> field on the source and the <code>primaryOrder</code> field on the target.
+	 * @param sourceField the source field mapping expression
+	 * @param targetField the target field mapping expression
+	 * @param converter the converter that converts the source field value before mapping
+	 * @param condition the boolean expression that determines if this mapping executes
+	 * @return this, for configuring additional field mapping options fluently
+	 */
+	MapperBuilder<S, T> addConditionalMapping(String sourceField, String targetField, Converter<?, ?> converter, String condition);
+
+	/**
+	 * Register a conditional mapping between multiple source fields and a single target field.
+	 * For example, calling <code>addMapping(dateAndTimeFieldsToDateTimeFieldMapper)</code> might register a mapping that maps the <code>date</code> and <code>time</code> fields on the source to the <code>dateTime</code> field on the target.
+	 * The provided {@link Mapper} will be passed the source object S for its source and the target object T for its target.
+	 * @param fields the source field mapping expressions
+	 * @param mapper the fields to field mapper
+	 * @param condition the boolean expression that determines if this mapping executes
+	 * @return this, for configuring additional field mapping options fluently
+	 */
+	MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper, String condition);
+	
 	/**
 	 * Register a Mapper that will be used to map between nested source and target fields of a specific sourceType/targetType pair.
 	 * The source and target field types are determined by introspecting the parameterized types on the Mapper generic interface.
@@ -130,10 +195,17 @@ public interface MapperBuilder<S, T> {
 	 * Register a custom type converter to use to convert between two mapped types.
 	 * The Converter may convert between simple types, such as Strings to Dates.
 	 * Alternatively, it may convert between complex types and initiate a recursive mapping operation between two object fields.
+	 * @return this, for configuring additional field mapping options fluently
 	 * @see Converter
 	 * @see MappingConverter
 	 */
 	MapperBuilder<S, T> addConverter(Converter<?, ?> converter);
+
+	/**
+	 * Set the source fields to exclude from mapping.
+	 * @param fields the source fields as var args
+	 */
+	MapperBuilder<S, T>  setExcludedFields(String... fields);
 
 	/**
 	 * Get the Mapper produced by this builder.

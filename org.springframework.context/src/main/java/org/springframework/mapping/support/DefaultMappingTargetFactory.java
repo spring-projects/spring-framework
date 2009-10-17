@@ -26,12 +26,22 @@ import org.springframework.util.ClassUtils;
  */
 final class DefaultMappingTargetFactory implements MappingTargetFactory {
 
+	private static final DefaultMappingTargetFactory INSTANCE = new DefaultMappingTargetFactory();
+
+	private DefaultMappingTargetFactory() {
+
+	}
+
 	public boolean supports(TypeDescriptor targetType) {
 		return ClassUtils.hasConstructor(targetType.getType(), null);
 	}
 
 	public Object createTarget(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return BeanUtils.instantiate(targetType.getType());
+	}
+
+	public static MappingTargetFactory getInstance() {
+		return INSTANCE;
 	}
 
 }

@@ -23,7 +23,7 @@ final class MappingConversionService extends DefaultConversionService {
 
 	@Override
 	protected GenericConverter getDefaultConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return new MappingConverter(new SpelMapper());
+		return new MappingConverter(new SpelMapper(), null);
 	}
 
 }

@@ -318,6 +318,45 @@ public class MappingTests {
 	}
 
 	@Test
+	public void conditionalMapping() {
+		Map<String, String> domestic = new HashMap<String, String>();
+		domestic.put("international", "false");
+		domestic.put("areaCode", "205");
+		domestic.put("prefix", "339");
+		domestic.put("line", "1234");
+		domestic.put("countryCode", "whatever");
+		domestic.put("cityCode", "whatever");
+
+		Mapper<Map, PhoneNumber> mapper = MapperFactory.mapperBuilder(Map.class, PhoneNumber.class)
+			.addConditionalMapping("countryCode", "international == 'true'")
+			.addConditionalMapping("cityCode", "international == 'true'")
+			.getMapper();
+		
+		PhoneNumber number = mapper.map(domestic, new PhoneNumber());
+		assertEquals("205", number.getAreaCode());
+		assertEquals("339", number.getPrefix());
+		assertEquals("1234", number.getLine());
+		assertNull(number.getCountryCode());
+		assertNull(number.getCityCode());
+		
+		Map<String, String> international = new HashMap<String, String>();
+		international.put("international", "true");
+		international.put("areaCode", "205");
+		international.put("prefix", "339");
+		international.put("line", "1234");
+		international.put("countryCode", "1");
+		international.put("cityCode", "2");
+		
+		PhoneNumber number2 = mapper.map(international, new PhoneNumber());
+
+		assertEquals("205", number2.getAreaCode());
+		assertEquals("339", number2.getPrefix());
+		assertEquals("1234", number2.getLine());
+		assertEquals("1", number2.getCountryCode());
+		assertEquals("2", number2.getCityCode());
+	}
+
+	@Test
 	public void mapList() {
 		PersonDto source = new PersonDto();
 		List<String> sports = new ArrayList<String>();
@@ -876,4 +915,59 @@ public class MappingTests {
 		}
 
 	}
+
+	public static class PhoneNumber {
+
+		private String areaCode;
+
+		private String prefix;
+
+		private String line;
+
+		private String countryCode;
+
+		private String cityCode;
+
+		public String getAreaCode() {
+			return areaCode;
+		}
+
+		public void setAreaCode(String areaCode) {
+			this.areaCode = areaCode;
+		}
+
+		public String getPrefix() {
+			return prefix;
+		}
+
+		public void setPrefix(String prefix) {
+			this.prefix = prefix;
+		}
+
+		public String getLine() {
+			return line;
+		}
+
+		public void setLine(String line) {
+			this.line = line;
+		}
+
+		public String getCountryCode() {
+			return countryCode;
+		}
+
+		public void setCountryCode(String countryCode) {
+			this.countryCode = countryCode;
+		}
+
+		public String getCityCode() {
+			return cityCode;
+		}
+
+		public void setCityCode(String cityCode) {
+			this.cityCode = cityCode;
+		}
+
+	}
+
 }

@@ -40,37 +40,68 @@ final class SpelMapperBuilder<S, T> implements MapperBuilder<S, T> {
 	}
 
 	public MapperBuilder<S, T> addMapping(String field) {
-		this.mapper.addMapping(field, field, null);
+		this.mapper.addMapping(field, field, null, null);
 		return this;
 	}
 
 	public MapperBuilder<S, T> addMapping(String field, Converter<?, ?> converter) {
-		this.mapper.addMapping(field, field, converter);
+		this.mapper.addMapping(field, field, converter, null);
 		return this;
 	}
 
 	public MapperBuilder<S, T> addMapping(String field, Mapper<?, T> mapper) {
-		this.mapper.addMapping(field, mapper);
+		this.mapper.addMapping(field, mapper, null);
 		return this;
 	}
 
 	public MapperBuilder<S, T> addMapping(String sourceField, String targetField) {
-		this.mapper.addMapping(sourceField, targetField, null);
+		this.mapper.addMapping(sourceField, targetField, null, null);
 		return this;
 	}
 
 	public MapperBuilder<S, T> addMapping(String sourceField, String targetField, Converter<?, ?> converter) {
-		this.mapper.addMapping(sourceField, targetField, converter);
+		this.mapper.addMapping(sourceField, targetField, converter, null);
 		return this;
 	}
 
 	public MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper) {
-		this.mapper.addMapping(fields, mapper);
+		this.mapper.addMapping(fields, mapper, null);
+		return this;
+	}
+
+	public MapperBuilder<S, T> addConditionalMapping(String field, String condition) {
+		this.mapper.addMapping(field, field, null, condition);
+		return this;
+	}
+	
+	public MapperBuilder<S, T> addConditionalMapping(String field, Converter<?, ?> converter, String condition) {
+		this.mapper.addMapping(field, field, converter, condition);
+		return this;
+	}
+
+	public MapperBuilder<S, T> addConditionalMapping(String field, Mapper<?, T> mapper, String condition) {
+		this.mapper.addMapping(field, mapper, condition);
+		return this;
+	}
+
+	public MapperBuilder<S, T> addConditionalMapping(String sourceField, String targetField, String condition) {
+		this.mapper.addMapping(sourceField, targetField, null, condition);
+		return this;
+	}
+
+	public MapperBuilder<S, T> addConditionalMapping(String sourceField, String targetField, Converter<?, ?> converter,
+			String condition) {
+		this.mapper.addMapping(sourceField, targetField, converter, condition);
+		return this;
+	}
+
+	public MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper, String condition) {
+		this.mapper.addMapping(fields, mapper, condition);
 		return this;
 	}
 
 	public MapperBuilder<S, T> addNestedMapper(Mapper<?, ?> nestedMapper) {
-		this.mapper.addNestedMapper(nestedMapper);
+		this.mapper.addNestedMapper(nestedMapper, null);
 		return this;
 	}
 
@@ -81,6 +112,11 @@ final class SpelMapperBuilder<S, T> implements MapperBuilder<S, T> {
 
 	public MapperBuilder<S, T> addConverter(Converter<?, ?> converter) {
 		this.mapper.getConverterRegistry().addConverter(converter);
+		return this;
+	}
+	
+	public MapperBuilder<S, T> setExcludedFields(String... fields) {
+		this.mapper.setExcludedFields(fields);
 		return this;
 	}
 
