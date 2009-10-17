@@ -1510,11 +1510,11 @@ public class PersonDtoPersonMapper implements Mapper&lt;PersonDto, Person&gt; {
 			</para>
 		</section>
 		<section id="mapping.SpelMapper">
-			<title>General-purpose SpelMapper Implementation</title>
+			<title>General-purpose Object Mapper Implementation</title>
 			<para>
 				A general purpose object-to-object mapping system exists in the <classname>org.springframework.mapping.support</classname> package.
 				Built on the Spring Expression Language (SpEL), this system is capable of mapping between a variety of object types, including JavaBeans, Arrays, Collections, and Maps.
-				It can perform field-to-field, field-to-multi-field, multi-field to field, and conditional mappings.
+				It can perform field-to-field, field-to-multi-field, multi-field-to-field, and conditional mappings.
 				It also can carry out type conversion and recursive mapping, which are often required with rich object models.
 			</para>
 			<section id="mapping.SpelMapper-usage">
@@ -1609,29 +1609,30 @@ Mapper<PersonDto, Person> mapper =
         .addMapping(...)
         .getMapper();
 ]]>
-				</programlisting>			
-				<section id="mapping.SpelMapper-Explicit-differentFieldNames">
-					<title>Mapping between two fields with different names</title>
-					<para>
-						Suppose you need to map <literal>AccountDto.name</literal> to <literal>Account.fullName</literal>.
-						Since these two field names are not the same, the default auto-mapping rule would not apply.
-						Handle a requirement like this by explicitly registering a mapping rule:
-					</para>
-					<programlisting language="java"><![CDATA[
+				</programlisting>
+			</section>	
+			<section id="mapping.SpelMapper-Explicit-differentFieldNames">
+				<title>Mapping between two fields with different names</title>
+				<para>
+					Suppose you need to map <literal>AccountDto.name</literal> to <literal>Account.fullName</literal>.
+					Since these two field names are not the same, the default auto-mapping rule would not apply.
+					Handle a requirement like this by explicitly registering a mapping rule:
+				</para>
+				<programlisting language="java"><![CDATA[
 builder.addMapping("name", "fullName")]]>
-					</programlisting>			
-					<para>
-						In the example above, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
-						No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
-					</para>
-				</section>
-				<section id="mapping.SpelMapper-Explicit-singleFieldToMultipleField">
-					<title>Mapping a single field to multiple fields</title>
-					<para>
-						Suppose you need to map <literal>PersonDto.name</literal> to <literal>Person.firstName</literal> and <literal>Person.lastName</literal>.
-						Handle a field-to-multi-field requirement like this by explicitly registering a mapping rule:
-					</para>
-					<programlisting language="java"><![CDATA[
+				</programlisting>			
+				<para>
+					In the example above, the <literal>name</literal> field will be mapped to the <literal>fullName</literal> field when the mapper is executed.
+					No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
+				</para>
+			</section>
+			<section id="mapping.SpelMapper-Explicit-singleFieldToMultipleField">
+				<title>Mapping a single field to multiple fields</title>
+				<para>
+					Suppose you need to map <literal>PersonDto.name</literal> to <literal>Person.firstName</literal> and <literal>Person.lastName</literal>.
+					Handle a field-to-multi-field requirement like this by explicitly registering a mapping rule:
+				</para>
+				<programlisting language="java"><![CDATA[
 builder.addMapping("name", new Mapper<String, Person>() {
     public Person map(String name, Person person) {
         String[] names = name.split(" ");
@@ -1640,19 +1641,19 @@ builder.addMapping("name", new Mapper<String, Person>() {
         return person;        
     }
 });]]>
-					</programlisting>			
-					<para>
-						In the example above, the first part of the <literal>name</literal> field will be mapped to the <literal>firstName</literal> field and the second part will be mapped to the <literal>lastName</literal> field.
-						No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
-					</para>
-				</section>
-				<section id="mapping.SpelMapper-Explicit-multipleFieldsToField">
-					<title>Mapping multiple fields to a single field</title>
-					<para>
-						Suppose you need to map <literal>CreateAccountDto.activationDay</literal> and <literal>CreateAccountDto.activationTime</literal> to <literal>Account.activationDateTime</literal>.
-						Handle a multi-field-to-field requirement like this by explicitly registering a mapping rule:
-					</para>
-					<programlisting language="java"><![CDATA[
+				</programlisting>			
+				<para>
+					In the example above, the first part of the <literal>name</literal> field will be mapped to the <literal>firstName</literal> field and the second part will be mapped to the <literal>lastName</literal> field.
+					No default mapping will be performed for <literal>name</literal> since an explicit mapping rule has been configured for this field.
+				</para>
+			</section>
+			<section id="mapping.SpelMapper-Explicit-multipleFieldsToField">
+				<title>Mapping multiple fields to a single field</title>
+				<para>
+					Suppose you need to map <literal>CreateAccountDto.activationDay</literal> and <literal>CreateAccountDto.activationTime</literal> to <literal>Account.activationDateTime</literal>.
+					Handle a multi-field-to-field requirement like this by explicitly registering a mapping rule:
+				</para>
+				<programlisting language="java"><![CDATA[
 builder.addMapping(new String[] { "activationDay", "activationTime" }, new Mapper<CreateAccountDto, AccountDto>() {
     public Account map(CreateAccountDto dto, Account account) {
         DateTime dateTime = ISODateTimeFormat.dateTime().parseDateTime(
@@ -1661,36 +1662,35 @@ builder.addMapping(new String[] { "activationDay", "activationTime" }, new Mappe
         return account;
     }
 });]]>
-					</programlisting>			
-					<para>
-						In the example above, the <literal>activationDay</literal> and <literal>activationTime</literal> fields are mapped to the single <literal>activationDateTime</literal> field.
-						No default mapping is performed for <literal>activationDay</literal> or <literal>activationTime</literal> since an explicit mapping rule has been configured for these fields.
-					</para>
-				</section>
-				<section id="mapping.SpelMapper-Explicit-conditionalMappings">
-					<title>Mapping conditionally</title>
-					<para>
-						Suppose you need to map <literal>Map.countryCode</literal> to <literal>PhoneNumber.countryCode</literal> only if the source Map contains a international phone number.
-						Handle conditional mapping requirements like this by explicitly registering a mapping rule:
-					</para>
-					<programlisting language="java"><![CDATA[
+				</programlisting>			
+				<para>
+					In the example above, the <literal>activationDay</literal> and <literal>activationTime</literal> fields are mapped to the single <literal>activationDateTime</literal> field.
+					No default mapping is performed for <literal>activationDay</literal> or <literal>activationTime</literal> since an explicit mapping rule has been configured for these fields.
+				</para>
+			</section>
+			<section id="mapping.SpelMapper-Explicit-conditionalMappings">
+				<title>Mapping conditionally</title>
+				<para>
+					Suppose you need to map <literal>Map.countryCode</literal> to <literal>PhoneNumber.countryCode</literal> only if the source Map contains a international phone number.
+					Handle conditional mapping requirements like this by explicitly registering a mapping rule:
+				</para>
+				<programlisting language="java"><![CDATA[
 builder.addConditionalMapping("countryCode", "international == 'true'");]]>
-					</programlisting>			
-					<para>
-						In the example above, the <literal>countryCode</literal> field will only be mapped if the international field is 'true'.
-						<literal>international == 'true'</literal> is a boolean expression that must evaluate to true for the mapping to be executed.
-						No default mapping is performed for <literal>countryCode</literal> since an explicit mapping rule has been configured for this field.
-					</para>
-				</section>
-				<section id="mapping.SpelMapper-Explicit-forcing">
-					<title>Forcing Explicit Mappings</title>
-					<para>
-						You can require that all mapping rules be defined explicitly by disabling the "auto mapping" feature:
-					</para>
-					<programlisting language="java"><![CDATA[
+				</programlisting>			
+				<para>
+					In the example above, the <literal>countryCode</literal> field will only be mapped if the international field is 'true'.
+					<literal>international == 'true'</literal> is a boolean expression that must evaluate to true for the mapping to be executed.
+					No default mapping is performed for <literal>countryCode</literal> since an explicit mapping rule has been configured for this field.
+				</para>
+			</section>
+			<section id="mapping.SpelMapper-Explicit-forcing">
+				<title>Forcing Explicit Mappings</title>
+				<para>
+					You can require that all mapping rules be defined explicitly by disabling the "auto mapping" feature:
+				</para>
+				<programlisting language="java"><![CDATA[
 builder.setAutoMappingEnabled(false);]]>
-					</programlisting>
-				</section>		
+				</programlisting>
 			</section>
 			<section id="mapping.SpelMapper-CustomConverter">
 				<title>Registering Custom Mapping Converters</title>
