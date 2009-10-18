@@ -46,7 +46,7 @@
 
       <para><quote><emphasis>The question is, what aspect of control are
       [they] inverting?</emphasis></quote> Martin Fowler posed this question
-      about Inversion of Control on his site in 2004. Fowler suggested
+      about Inversion of Control (IoC) on his site in 2004. Fowler suggested
       renaming the principle to make it more self-explanatory and came up with
       <firstterm>Dependency Injection</firstterm>.</para>
 
@@ -73,7 +73,8 @@
     Patterns are formalized best practices that <emphasis>you must implement
     yourself</emphasis> in your application.</para>
 
-    <para>The Spring Framework IoC component addresses this concern by
+    <para>The Spring Framework <emphasis>Inversion of Control</emphasis> (IoC)
+    component addresses this concern by
     providing a formalized means of composing disparate components into a
     fully working application ready for use. <!--Preceding sentence sounds like a description of what patterns do (and Spring uses patterns). Distinguish from patterns.-->The
     Spring Framework codifies formalized design patterns as first-class
@@ -140,11 +141,11 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       a powerful expression language for querying and manipulating an object
       graph at runtime. It is an extension of the unified expression language
       (unified EL) as specified in the JSP 2.1 specification. The language
-      supports setting and getting of property values, property assignment,
+      supports setting and getting property values, property assignment,
       method invocation, accessing the context of arrays, collections and
       indexers, logical and arithmetic operators, named variables, and
       retrieval of objects by name from Spring's IoC container. It also
-      supports list projection and selection, as well as common list
+      supports list projection and selection as well as common list
       aggregations.</para>
     </section>
 
@@ -165,15 +166,15 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       linkend="orm-jdo">JDO</link>, <link
       linkend="orm-hibernate">Hibernate</link>, and <link
       linkend="orm-ibatis">iBatis</link>. Using the ORM package you can use
-      all those O/R-mappers in combination with all the other features Spring
-      offers, such as the simple declarative transaction management feature
-      mentioned previously.</para>
+      all of these O/R-mapping frameworks in combination with all of the other
+      features Spring offers, such as the simple declarative transaction
+      management feature mentioned previously.</para>
 
       <para>The <link linkend="oxm">OXM</link> module provides an abstraction
       layer that supports Object/XML mapping implementations for JAXB, Castor,
       XMLBeans, JiBX and XStream.</para>
 
-      <para>The Java Messaging Service (<link linkend="jms">JMS</link> )module
+      <para>The Java Messaging Service (<link linkend="jms">JMS</link>) module
       contains features for producing and consuming messages.</para>
 
       <para>The <link linkend="transaction">Transaction</link> module supports
@@ -198,7 +199,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       model-view-controller (<link
       linkend="mvc-introduction"><emphasis>MVC</emphasis></link>)
       implementation for web applications. Spring's MVC framework provides a
-      <emphasis>clean</emphasis> separation between domain model code and web
+      clean separation between domain model code and web
       forms, and integrates with all the other features of the Spring
       Framework.<!--MVC allows you to use *all other features*? (Or just all other features in Web layer?) How do you mean? Does this need elaboration? 
 It sounds important.--><!--TR: REVISED, PLS REVIEW.--></para>
@@ -266,7 +267,7 @@ TR: OK. Added to diagram.--></para>
 
     <para>Spring's <link linkend="transaction-declarative">declarative
     transaction management features</link> make the web application fully
-    transactional, just as it would be if you use EJB container-managed
+    transactional, just as it would be if you used EJB container-managed
     transactions. All your custom business logic can be implemented with
     simple POJOs and managed by Spring's IoC container. Additional services
     include support for sending email and validation that is independent of
@@ -339,9 +340,9 @@ TR: OK. Added to diagram.--></para>
         <caption><para>EJBs - Wrapping existing POJOs</para></caption>
       </mediaobject></para>
 
-    <para>The Spring Framework also provides an <link linkend="ejb">access-
-    and abstraction- layer</link> for Enterprise JavaBeans, enabling you to
-    reuse your existing POJOs and wrap them in stateless session beans, for
+    <para>The Spring Framework also provides an <link linkend="ejb">access
+    and abstraction layer</link> for Enterprise JavaBeans, enabling you to
+    reuse your existing POJOs and wrap them in stateless session beans for
     use in scalable, fail-safe web applications that might need declarative
     security.</para>
   </section>

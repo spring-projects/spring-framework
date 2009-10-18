@@ -390,7 +390,7 @@ public class AppConfig {
 
       <para>A general purpose <link linkend="core.convert">type conversion
       system</link> has been introduced. The system is currently used by SpEL
-      for type coersion, and may also be used by a Spring Container when
+      for type conversion, and may also be used by a Spring Container when
       binding bean property values.</para>
 
       <para>In addition, a <link linkend="ui.format">ui.format</link> system
@@ -428,14 +428,14 @@ public class AppConfig {
         <classname>JmsTemplate</classname>. Both server and client side REST
         functionality make use of
         <interfacename>HttpConverter</interfacename>s to facilitate the
-        conversion between objects and their representation in HTTP request
-        and replies.</para>
+        conversion between objects and their representation in HTTP requests
+        and responses.</para>
 
         <para>The <classname>MarshallingHttpMessageConverter</classname> uses
         the <emphasis>Object to XML mapping</emphasis> functionality mentioned
         earlier.</para>
 
-        <para>Refer to the section on <link linkend="mvc">MVC</link> and <link
+        <para>Refer to the sections on <link linkend="mvc">MVC</link> and <link
         linkend="rest-resttemplate">the RestTemplate</link> for more
         information.</para>
       </section>
