@@ -40,6 +40,9 @@ final class ArrayToCollectionConverter implements GenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}		
 		int length = Array.getLength(source);
 		Collection collection = CollectionFactory.createCollection(targetType.getType(), length);
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();

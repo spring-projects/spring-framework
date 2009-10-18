@@ -131,7 +131,8 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertArrayToArray() {
-		conversionService.addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(conversionService));
+		conversionService.addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(
+				conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		Integer[] result = conversionService.convert(new String[] { "1", "2", "3" }, Integer[].class);
 		assertEquals(new Integer(1), result[0]);
@@ -255,11 +256,32 @@ public class GenericConversionServiceTests {
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
-		List<Integer> bar = (List<Integer>) conversionService.convert(foo, TypeDescriptor.valueOf(List.class),
+		List<Integer> bar = (List<Integer>) conversionService.convert(foo, TypeDescriptor.valueOf(LinkedHashSet.class),
 				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(new Integer(1), bar.get(0));
 		assertEquals(new Integer(2), bar.get(1));
 		assertEquals(new Integer(3), bar.get(2));
+	}
+	
+	@Test
+	public void convertCollectionToCollectionNull() throws Exception {
+		List<Integer> bar = (List<Integer>) conversionService.convert(null, TypeDescriptor.valueOf(LinkedHashSet.class),
+				new TypeDescriptor(getClass().getField("genericList")));
+		assertNull(bar);
+	}
+
+	@Test
+	public void convertCollectionToCollectionNotGeneric() throws Exception {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		Set<String> foo = new LinkedHashSet<String>();
+		foo.add("1");
+		foo.add("2");
+		foo.add("3");
+		List bar = (List) conversionService.convert(foo, TypeDescriptor.valueOf(LinkedHashSet.class), TypeDescriptor
+				.valueOf(List.class));
+		assertEquals("1", bar.get(0));
+		assertEquals("2", bar.get(1));
+		assertEquals("3", bar.get(2));
 	}
 
 	@Test

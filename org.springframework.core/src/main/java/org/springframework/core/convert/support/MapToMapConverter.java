@@ -37,6 +37,9 @@ final class MapToMapConverter implements GenericConverter {
 
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}
 		Map sourceMap = (Map) source;
 		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
 		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
@@ -98,8 +101,7 @@ final class MapToMapConverter implements GenericConverter {
 	private Map compatibleMapWithoutEntryConversion(Map source, TypeDescriptor targetType) {
 		if (targetType.getType().isAssignableFrom(source.getClass())) {
 			return source;
-		}
-		else {
+		} else {
 			Map target = CollectionFactory.createMap(targetType.getType(), source.size());
 			target.putAll(source);
 			return target;

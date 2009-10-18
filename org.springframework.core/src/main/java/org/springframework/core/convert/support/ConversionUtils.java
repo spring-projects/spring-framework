@@ -46,7 +46,7 @@ final class ConversionUtils {
 	
 
 	public static List asList(Object array) {
-		return new ArrayList(array);
+		return array != null ? new ArrayList(array) : null;
 	}
 	
 	private static class ArrayList extends AbstractList implements RandomAccess, java.io.Serializable {

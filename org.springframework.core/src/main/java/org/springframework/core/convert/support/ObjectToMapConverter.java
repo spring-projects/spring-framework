@@ -30,7 +30,7 @@ import org.springframework.core.convert.TypeDescriptor;
 final class ObjectToMapConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
-	
+
 	private final ArrayToMapConverter helperConverter;
 
 	public ObjectToMapConverter(GenericConversionService conversionService) {
@@ -40,12 +40,14 @@ final class ObjectToMapConverter implements GenericConverter {
 
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}
 		if (sourceType.typeEquals(String.class)) {
 			String string = (String) source;
 			String[] properties = string.split(" ");
 			return this.helperConverter.convert(properties, TypeDescriptor.valueOf(String[].class), targetType);
-		}
-		else {
+		} else {
 			Map target = CollectionFactory.createMap(targetType.getType(), 1);
 			TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
 			TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
@@ -59,10 +61,9 @@ final class ObjectToMapConverter implements GenericConverter {
 			}
 			if (keysCompatible && valuesCompatible) {
 				target.put(source, source);
-			}
-			else {
+			} else {
 				MapEntryConverter converter = new MapEntryConverter(sourceType, sourceType, targetKeyType,
-						targetValueType, keysCompatible, valuesCompatible, conversionService);
+						targetValueType, keysCompatible, valuesCompatible, this.conversionService);
 				Object key = converter.convertKey(source);
 				Object value = converter.convertValue(source);
 				target.put(key, value);

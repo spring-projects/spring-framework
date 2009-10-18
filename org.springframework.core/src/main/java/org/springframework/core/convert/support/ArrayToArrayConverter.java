@@ -34,7 +34,7 @@ final class ArrayToArrayConverter implements GenericConverter {
 		this.helperConverter = new CollectionToArrayConverter(conversionService);
 	}
 
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
 		return this.helperConverter.convert(asList(source), sourceType, targetType);
 	}
 
