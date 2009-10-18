@@ -197,7 +197,7 @@
 			    use of IoC certainly does make both unit and integration
 			    testing easier (in that the presence of setter methods and
 			    appropriate constructors on classes makes them
-			    easier to wire together on a test without having to set up
+			    easier to wire together in a test without having to set up
 			    service locator registries and suchlike)... the chapter
 			    dedicated solely to testing will hopefully convince you of
 			    this as well.
