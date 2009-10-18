@@ -38,6 +38,9 @@ final class MapToCollectionConverter implements GenericConverter {
 
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}
 		Map sourceMap = (Map) source;
 		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
 		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
@@ -52,7 +55,7 @@ final class MapToCollectionConverter implements GenericConverter {
 		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceMap.size());
 		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetElementType,
-				targetElementType, keysCompatible, valuesCompatible, conversionService);
+				targetElementType, keysCompatible, valuesCompatible, this.conversionService);
 		if (targetElementType.getType().equals(String.class)) {
 			for (Object entry : sourceMap.entrySet()) {
 				Map.Entry mapEntry = (Map.Entry) entry;

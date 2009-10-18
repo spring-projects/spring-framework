@@ -41,16 +41,17 @@ final class CollectionToObjectConverter implements GenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}
 		Collection sourceCollection = (Collection) source;
 		if (sourceCollection.size() == 0) {
 			if (targetType.typeEquals(String.class)) {
 				return "";
-			}
-			else {
+			} else {
 				return null;
 			}
-		}
-		else {
+		} else {
 			if (targetType.typeEquals(String.class)) {
 				TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 				if (sourceElementType == TypeDescriptor.NULL) {
@@ -67,8 +68,7 @@ final class CollectionToObjectConverter implements GenericConverter {
 						i++;
 					}
 					return string.toString();
-				}
-				else {
+				} else {
 					GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 					if (converter == null) {
 						throw new ConverterNotFoundException(sourceElementType, targetType);
@@ -85,8 +85,7 @@ final class CollectionToObjectConverter implements GenericConverter {
 					}
 					return string.toString();
 				}
-			}
-			else {
+			} else {
 				Object firstElement = sourceCollection.iterator().next();
 				TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 				if (sourceElementType == TypeDescriptor.NULL && firstElement != null) {
@@ -94,8 +93,7 @@ final class CollectionToObjectConverter implements GenericConverter {
 				}
 				if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
 					return firstElement;
-				}
-				else {
+				} else {
 					GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 					if (converter == null) {
 						throw new ConverterNotFoundException(sourceElementType, targetType);

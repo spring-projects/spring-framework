@@ -39,7 +39,10 @@ final class ObjectToCollectionConverter implements GenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		if (sourceType.typeEquals(String.class)) {
 			String string = (String) source;

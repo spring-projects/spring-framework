@@ -37,16 +37,17 @@ final class MapToObjectConverter implements GenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}		
 		Map sourceMap = (Map) source;
 		if (sourceMap.size() == 0) {
 			if (targetType.typeEquals(String.class)) {
 				return "";
-			}
-			else {
+			} else {
 				return null;
 			}
-		}
-		else {
+		} else {
 			if (targetType.typeEquals(String.class)) {
 				TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
 				TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
@@ -71,10 +72,9 @@ final class MapToObjectConverter implements GenericConverter {
 						i++;
 					}
 					return string.toString();
-				}
-				else {
-					MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetType, targetType,
-							keysCompatible, valuesCompatible, conversionService);
+				} else {
+					MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetType,
+							targetType, keysCompatible, valuesCompatible, this.conversionService);
 					StringBuilder string = new StringBuilder();
 					int i = 0;
 					for (Object entry : sourceMap.entrySet()) {
@@ -90,8 +90,7 @@ final class MapToObjectConverter implements GenericConverter {
 					}
 					return string.toString();
 				}
-			}
-			else {
+			} else {
 				TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
 				boolean valuesCompatible = false;
 				if (sourceValueType == TypeDescriptor.NULL || sourceValueType.isAssignableTo(targetType)) {
@@ -99,10 +98,9 @@ final class MapToObjectConverter implements GenericConverter {
 				}
 				if (valuesCompatible) {
 					return sourceMap.values().iterator().next();
-				}
-				else {
-					MapEntryConverter converter = new MapEntryConverter(sourceValueType, sourceValueType, targetType, targetType,
-							true, valuesCompatible, conversionService);
+				} else {
+					MapEntryConverter converter = new MapEntryConverter(sourceValueType, sourceValueType, targetType,
+							targetType, true, valuesCompatible, this.conversionService);
 					Object value = sourceMap.values().iterator().next();
 					return converter.convertValue(value);
 				}

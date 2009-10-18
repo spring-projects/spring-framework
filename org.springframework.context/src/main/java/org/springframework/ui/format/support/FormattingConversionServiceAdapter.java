@@ -81,6 +81,9 @@ public class FormattingConversionServiceAdapter extends GenericConversionService
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			if (source == null) {
+				return null;
+			}
 			try {
 				return this.formatter.parse((String) source, LocaleContextHolder.getLocale());
 			}

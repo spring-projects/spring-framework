@@ -90,7 +90,11 @@ public class TypeDescriptor {
 	private TypeDescriptor() {
 	}
 
-	private TypeDescriptor(Class collectionType, TypeDescriptor elementType) {
+	/**
+	 * Internal constructor for a Collection TypeDescriptor.
+	 * @see #collection(Class, TypeDescriptor)
+	 */
+	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementType) {
 		this.type = collectionType;
 		this.elementType = elementType;
 	}
@@ -381,16 +385,22 @@ public class TypeDescriptor {
 		return (object == null ? NULL : valueOf(object.getClass()));
 	}
 
+	/**
+	 * Create a TypeDescriptor for a Collection type.
+	 * @param type the collection type
+	 * @param elementType the collection's element type
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor collection(Class<?> type, TypeDescriptor elementType) {
+		return new TypeDescriptor(type, elementType);
+	}
+	
 	public String toString() {
 		if (this == TypeDescriptor.NULL) {
 			return "[TypeDescriptor.NULL]";
 		} else {
 			return "[TypeDescriptor type=" + getType().getName() + "]";
 		}
-	}
-
-	public static TypeDescriptor collection(Class<?> type, TypeDescriptor elementType) {
-		return new TypeDescriptor(type, elementType);
 	}
 
 }

@@ -16,12 +16,14 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getElementType;
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.util.Collection;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import static org.springframework.core.convert.support.ConversionUtils.*;
 
 /**
  * Converts from a source Collection to target Collection type.
@@ -39,17 +41,20 @@ final class CollectionToCollectionConverter implements GenericConverter {
 
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}
 		Collection sourceCollection = (Collection) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 		if (sourceElementType == TypeDescriptor.NULL) {
 			sourceElementType = getElementType(sourceCollection);
 		}
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
+		if (sourceElementType == TypeDescriptor.NULL || targetElementType == TypeDescriptor.NULL
+				|| sourceElementType.isAssignableTo(targetElementType)) {
 			if (sourceType.isAssignableTo(targetType)) {
 				return sourceCollection;
-			}
-			else {
+			} else {
 				Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 				target.addAll(sourceCollection);
 				return target;
