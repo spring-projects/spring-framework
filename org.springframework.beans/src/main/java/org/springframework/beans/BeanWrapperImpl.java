@@ -37,7 +37,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -179,6 +178,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
 		setExtractOldValueForEditor(superBw.isExtractOldValueForEditor());
+		setAutoGrowNestedPaths(superBw.isAutoGrowNestedPaths());
+		setConversionService(superBw.getConversionService());
+		setSecurityContext(superBw.acc);
 	}
 
 
@@ -253,10 +255,19 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return (this.rootObject != null ? this.rootObject.getClass() : null);
 	}
 
+	/**
+	 * If this BeanWrapper should "auto grow" nested paths.
+	 * When true, auto growth is triggered on nested paths when null values are encountered.
+	 * When true, auto growth is triggered on collection properties when out of bounds indexes are accessed.
+	 * Default is false.
+	 */
 	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
 
+	/**
+	 * If this BeanWrapper should "auto grow" nested paths.
+	 */
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
 	}
