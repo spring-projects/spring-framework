@@ -41,7 +41,7 @@ public class ParseException extends ExpressionException {
 	 * @param cause the underlying cause of this exception
 	 */ 
 	public ParseException(int position, String message, Throwable cause) {
-		super(message);
+		super(position, message, cause);
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class ParseException extends ExpressionException {
 	 * @param message description of the problem that occurred
 	 */ 
 	public ParseException(int position, String message) {
-		super(message);
+		super(position, message);
 	}
 
 }
