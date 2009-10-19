@@ -273,10 +273,10 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 		if (factory != null) {
 			return factory.getFormatterHolder(annotation);
 		} else {
-			Formatted formattedAnnotation = annotationType.getAnnotation(Formatted.class);
-			if (formattedAnnotation != null) {
+			Formatted formatted = annotationType.getAnnotation(Formatted.class);
+			if (formatted != null) {
 				// property annotation has @Formatted meta-annotation
-				Formatter<?> formatter = createFormatter(formattedAnnotation.value());
+				Formatter<?> formatter = createFormatter(formatted.value());
 				addFormatterByAnnotation(annotationType, formatter);
 				return findFormatterHolderForAnnotation(annotation);
 			} else {
