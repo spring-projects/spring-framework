@@ -23,9 +23,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation which indicates that a method parameter should be bound to a web request parameter.
- * Supported for annotated handler methods in Servlet and Portlet environments.
- *
+ * Annotation which indicates that a method parameter should be bound to a web
+ * request parameter. Supported for annotated handler methods in Servlet and
+ * Portlet environments.
+ * 
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 2.5
@@ -51,12 +52,12 @@ public @interface RequestParam {
 	 * of the parameter missing in the request. Switch this to <code>false</code>
 	 * if you prefer a <code>null</value> in case of the parameter missing.
 	 * <p>Alternatively, provide a {@link #defaultValue() defaultValue},
-	 * which implicitely sets this flag to <code>false</code>.
+	 * which implicitly sets this flag to <code>false</code>.
 	 */
 	boolean required() default true;
 
 	/**
-	 * The default value to use as a fallback. Supplying a default value implicitely
+	 * The default value to use as a fallback. Supplying a default value implicitly
 	 * sets {@link #required()} to false.
 	 */
 	String defaultValue() default "";
