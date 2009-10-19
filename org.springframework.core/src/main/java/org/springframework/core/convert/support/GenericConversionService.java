@@ -317,13 +317,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
 					}
 				} else {
+					Class[] interfaces = currentClass.getInterfaces();
+					for (Class ifc : interfaces) {
+						classQueue.addFirst(ifc);
+					}
 					if (currentClass.getSuperclass() != null) {
 						classQueue.addFirst(currentClass.getSuperclass());
 					}
-				}
-				Class[] interfaces = currentClass.getInterfaces();
-				for (Class ifc : interfaces) {
-					classQueue.addFirst(ifc);
 				}
 			}
 			return null;
@@ -378,13 +378,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
 					}
 				} else {
+					Class[] interfaces = currentClass.getInterfaces();
+					for (Class ifc : interfaces) {
+						classQueue.addFirst(ifc);
+					}
 					if (currentClass.getSuperclass() != null) {
 						classQueue.addFirst(currentClass.getSuperclass());
 					}
-				}
-				Class[] interfaces = currentClass.getInterfaces();
-				for (Class ifc : interfaces) {
-					classQueue.addFirst(ifc);
 				}
 			}
 			return null;

@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -124,6 +125,20 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertObjectToPrimitive() {
+		assertFalse(conversionService.canConvert(String.class, boolean.class));
+		conversionService.addConverter(new StringToBooleanConverter());
+		assertTrue(conversionService.canConvert(String.class, boolean.class));
+		Boolean b = conversionService.convert("true", boolean.class);
+		assertEquals(Boolean.TRUE, b);
+		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), TypeDescriptor
+				.valueOf(boolean.class)));
+		b = (Boolean) conversionService.convert("true", TypeDescriptor.valueOf(String.class), TypeDescriptor
+				.valueOf(boolean.class));
+		assertEquals(Boolean.TRUE, b);
+	}
+
+	@Test
+	public void convertObjectToPrimitiveViaConverterFactory() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		Integer three = conversionService.convert("3", int.class);
 		assertEquals(3, three.intValue());
@@ -262,11 +277,11 @@ public class GenericConversionServiceTests {
 		assertEquals(new Integer(2), bar.get(1));
 		assertEquals(new Integer(3), bar.get(2));
 	}
-	
+
 	@Test
 	public void convertCollectionToCollectionNull() throws Exception {
-		List<Integer> bar = (List<Integer>) conversionService.convert(null, TypeDescriptor.valueOf(LinkedHashSet.class),
-				new TypeDescriptor(getClass().getField("genericList")));
+		List<Integer> bar = (List<Integer>) conversionService.convert(null,
+				TypeDescriptor.valueOf(LinkedHashSet.class), new TypeDescriptor(getClass().getField("genericList")));
 		assertNull(bar);
 	}
 
@@ -282,6 +297,22 @@ public class GenericConversionServiceTests {
 		assertEquals("1", bar.get(0));
 		assertEquals("2", bar.get(1));
 		assertEquals("3", bar.get(2));
+	}
+
+	@Test
+	public void convertCollectionToCollectionSpecialCaseSourceImpl() throws Exception {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		Map map = new LinkedHashMap();
+		map.put("1", "1");
+		map.put("2", "2");
+		map.put("3", "3");
+		Collection values = map.values();
+		List<Integer> bar = (List<Integer>) conversionService.convert(values,
+				TypeDescriptor.valueOf(values.getClass()), new TypeDescriptor(getClass().getField("genericList")));
+		assertEquals(3, bar.size());
+		assertEquals(new Integer(1), bar.get(0));
+		assertEquals(new Integer(2), bar.get(1));
+		assertEquals(new Integer(3), bar.get(2));
 	}
 
 	@Test
