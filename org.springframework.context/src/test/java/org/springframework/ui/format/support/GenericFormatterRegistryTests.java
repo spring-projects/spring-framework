@@ -63,6 +63,16 @@ public class GenericFormatterRegistryTests {
 		Integer i = (Integer) formatter.parse("3", Locale.US);
 		assertEquals(new Integer(3), i);
 	}
+	
+	@Test
+	public void testAddLookupByPrimitive() throws ParseException {
+		registry.addFormatterByType(new IntegerFormatter());
+		Formatter formatter = registry.getFormatter(TypeDescriptor.valueOf(int.class));
+		String formatted = formatter.format(3, Locale.US);
+		assertEquals("3", formatted);
+		int integer = (Integer) formatter.parse("3", Locale.US);
+		assertEquals(3, integer);
+	}
 
 	@Test
 	public void testAddByObjectType() {

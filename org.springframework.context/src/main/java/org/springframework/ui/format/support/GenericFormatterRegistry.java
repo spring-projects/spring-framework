@@ -17,8 +17,6 @@
 package org.springframework.ui.format.support;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -40,7 +38,6 @@ import org.springframework.ui.format.Formatted;
 import org.springframework.ui.format.Formatter;
 import org.springframework.ui.format.FormatterRegistry;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * A generic implementation of {@link org.springframework.ui.format.FormatterRegistry}
@@ -61,9 +58,9 @@ import org.springframework.util.ReflectionUtils;
  */
 public class GenericFormatterRegistry implements FormatterRegistry, ApplicationContextAware, Cloneable {
 
-	private final Map<Class, FormatterHolder> typeFormatters = new ConcurrentHashMap<Class, FormatterHolder>();
+	private final Map<Class<?>, FormatterHolder> typeFormatters = new ConcurrentHashMap<Class<?>, FormatterHolder>();
 
-	private final Map<Class, AnnotationFormatterFactoryHolder> annotationFormatters = new ConcurrentHashMap<Class, AnnotationFormatterFactoryHolder>();
+	private final Map<Class<?>, AnnotationFormatterFactoryHolder> annotationFormatters = new ConcurrentHashMap<Class<?>, AnnotationFormatterFactoryHolder>();
 
 	private ConversionService conversionService;
 
@@ -182,47 +179,47 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 
 	// implementing FormatterRegistry
 
-	public void addFormatterByType(Class<?> type, Formatter<?> formatter) {
-		Class<?> formattedObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
-		if (formattedObjectType != null && !type.isAssignableFrom(formattedObjectType)) {
-			if (this.conversionService == null) {
-				throw new IllegalStateException("Unable to index Formatter " + formatter + " under type ["
-						+ type.getName() + "]; not able to convert from a [" + formattedObjectType.getName()
-						+ "] parsed by the Formatter to [" + type.getName()
-						+ "] because this.conversionService is null");
-			}
-			if (!this.conversionService.canConvert(formattedObjectType, type)) {
-				throw new IllegalArgumentException("Unable to index Formatter " + formatter + " under type ["
-						+ type.getName() + "]; not able to convert from a [" + formattedObjectType.getName()
-						+ "] parsed by the Formatter to [" + type.getName() + "]");
-			}
-			if (!this.conversionService.canConvert(type, formattedObjectType)) {
-				throw new IllegalArgumentException("Unable to index Formatter " + formatter + " under type ["
-						+ type.getName() + "]; not able to convert to [" + formattedObjectType.getName()
-						+ "] to format a [" + type.getName() + "]");
-			}
-		}
-		this.typeFormatters.put(type, new FormatterHolder(formattedObjectType, formatter));
-	}
-
 	public void addFormatterByType(Formatter<?> formatter) {
-		Class<?> formattedObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
-		if (formattedObjectType == null) {
+		Class<?> formatterObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		if (formatterObjectType == null) {
 			throw new IllegalArgumentException("Unable to register Formatter " + formatter
 					+ "; cannot determine parameterized object type <T>");
 		}
-		this.typeFormatters.put(formattedObjectType, new FormatterHolder(formattedObjectType, formatter));
+		this.typeFormatters.put(formatterObjectType, new FormatterHolder(formatterObjectType, formatter));
+	}
+
+	public void addFormatterByType(Class<?> type, Formatter<?> formatter) {
+		Class<?> formatterObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		if (formatterObjectType != null && !type.isAssignableFrom(formatterObjectType)) {
+			if (this.conversionService == null) {
+				throw new IllegalStateException("Unable to index Formatter " + formatter + " under type ["
+						+ type.getName() + "]; not able to convert from a [" + formatterObjectType.getName()
+						+ "] parsed by the Formatter to [" + type.getName()
+						+ "] because this.conversionService is null");
+			}
+			if (!this.conversionService.canConvert(formatterObjectType, type)) {
+				throw new IllegalArgumentException("Unable to index Formatter " + formatter + " under type ["
+						+ type.getName() + "]; not able to convert from a [" + formatterObjectType.getName()
+						+ "] parsed by the Formatter to [" + type.getName() + "]");
+			}
+			if (!this.conversionService.canConvert(type, formatterObjectType)) {
+				throw new IllegalArgumentException("Unable to index Formatter " + formatter + " under type ["
+						+ type.getName() + "]; not able to convert to [" + formatterObjectType.getName()
+						+ "] to format a [" + type.getName() + "]");
+			}
+		}
+		this.typeFormatters.put(type, new FormatterHolder(formatterObjectType, formatter));
 	}
 
 	public void addFormatterByAnnotation(Class<? extends Annotation> annotationType, Formatter<?> formatter) {
-		Class<?> formattedObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		Class<?> formatterObjectType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
 		SimpleAnnotationFormatterFactory factory = new SimpleAnnotationFormatterFactory(formatter);
 		this.annotationFormatters.put(annotationType,
-				new AnnotationFormatterFactoryHolder(formattedObjectType, factory));
+				new AnnotationFormatterFactoryHolder(formatterObjectType, factory));
 	}
 
 	public void addFormatterByAnnotation(AnnotationFormatterFactory<?, ?> factory) {
-		Class[] typeArgs = GenericTypeResolver.resolveTypeArguments(factory.getClass(),
+		Class<?>[] typeArgs = GenericTypeResolver.resolveTypeArguments(factory.getClass(),
 				AnnotationFormatterFactory.class);
 		if (typeArgs == null || typeArgs.length != 2) {
 			throw new IllegalArgumentException(
@@ -236,17 +233,18 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 	public Formatter<Object> getFormatter(TypeDescriptor type) {
 		Assert.notNull(type, "TypeDescriptor is required");
 		FormatterHolder holder = findFormatterHolderForAnnotatedProperty(type.getAnnotations());
+		Class<?> objectType = type.getObjectType();
 		if (holder == null) {
-			holder = findFormatterHolderForType(type.getType());
+			holder = findFormatterHolderForType(objectType);
 		}
 		if (holder == null) {
-			holder = getDefaultFormatterHolder(type);
+			holder = getDefaultFormatterHolder(objectType);
 		}
 		if (holder == null) {
 			return null;
 		}
-		Class formattedObjectType = holder.getFormattedObjectType();
-		if (formattedObjectType != null && !type.getType().isAssignableFrom(formattedObjectType)) {
+		Class<?> formatterObjectType = holder.getFormatterObjectType();
+		if (formatterObjectType != null && !objectType.isAssignableFrom(formatterObjectType)) {
 			if (this.conversionService != null) {
 				return new ConvertingFormatter(type, holder);
 			} else {
@@ -278,7 +276,7 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 			Formatted formattedAnnotation = annotationType.getAnnotation(Formatted.class);
 			if (formattedAnnotation != null) {
 				// property annotation has @Formatted meta-annotation
-				Formatter formatter = createFormatter(formattedAnnotation.value());
+				Formatter<?> formatter = createFormatter(formattedAnnotation.value());
 				addFormatterByAnnotation(annotationType, formatter);
 				return findFormatterHolderForAnnotation(annotation);
 			} else {
@@ -287,11 +285,11 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 		}
 	}
 
-	private FormatterHolder findFormatterHolderForType(Class type) {
-		LinkedList<Class> classQueue = new LinkedList<Class>();
+	private FormatterHolder findFormatterHolderForType(Class<?> type) {
+		LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 		classQueue.addFirst(type);
 		while (!classQueue.isEmpty()) {
-			Class currentClass = classQueue.removeLast();
+			Class<?> currentClass = classQueue.removeLast();
 			FormatterHolder holder = this.typeFormatters.get(currentClass);
 			if (holder != null) {
 				return holder;
@@ -299,19 +297,18 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 			if (currentClass.getSuperclass() != null) {
 				classQueue.addFirst(currentClass.getSuperclass());
 			}
-			Class[] interfaces = currentClass.getInterfaces();
-			for (Class ifc : interfaces) {
+			Class<?>[] interfaces = currentClass.getInterfaces();
+			for (Class<?> ifc : interfaces) {
 				classQueue.addFirst(ifc);
 			}
 		}
 		return null;
 	}
 
-	private FormatterHolder getDefaultFormatterHolder(TypeDescriptor typeDescriptor) {
-		Class type = typeDescriptor.getType();
+	private FormatterHolder getDefaultFormatterHolder(Class<?> type) {
 		Formatted formatted = AnnotationUtils.findAnnotation(type, Formatted.class);
 		if (formatted != null) {
-			Formatter formatter = createFormatter(formatted.value());
+			Formatter<?> formatter = createFormatter(formatted.value());
 			addFormatterByType(type, formatter);
 			return findFormatterHolderForType(type);
 		} else {
@@ -319,21 +316,21 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 		}
 	}
 
-	private Formatter createFormatter(Class<? extends Formatter> formatterClass) {
+	private Formatter<?> createFormatter(Class<? extends Formatter> formatterClass) {
 		return (this.applicationContext != null ? this.applicationContext.getAutowireCapableBeanFactory().createBean(
 				formatterClass) : BeanUtils.instantiate(formatterClass));
 	}
 
 	private abstract static class AbstractFormatterHolder {
 
-		private Class formattedObjectType;
+		private Class<?> formatterObjectType;
 
-		public AbstractFormatterHolder(Class formattedObjectType) {
-			this.formattedObjectType = formattedObjectType;
+		public AbstractFormatterHolder(Class<?> formatterObjectType) {
+			this.formatterObjectType = formatterObjectType;
 		}
 
-		public Class<?> getFormattedObjectType() {
-			return formattedObjectType;
+		public Class<?> getFormatterObjectType() {
+			return formatterObjectType;
 		}
 
 	}
@@ -342,8 +339,8 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 
 		private Formatter formatter;
 
-		public FormatterHolder(Class formattedObjectType, Formatter formatter) {
-			super(formattedObjectType);
+		public FormatterHolder(Class<?> formatterObjectType, Formatter<?> formatter) {
+			super(formatterObjectType);
 			this.formatter = formatter;
 		}
 
@@ -357,13 +354,13 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 
 		private AnnotationFormatterFactory factory;
 
-		public AnnotationFormatterFactoryHolder(Class formattedObjectType, AnnotationFormatterFactory factory) {
-			super(formattedObjectType);
+		public AnnotationFormatterFactoryHolder(Class<?> formatterObjectType, AnnotationFormatterFactory<?, ?> factory) {
+			super(formatterObjectType);
 			this.factory = factory;
 		}
 
 		public FormatterHolder getFormatterHolder(Annotation annotation) {
-			return new FormatterHolder(getFormattedObjectType(), this.factory.getFormatter(annotation));
+			return new FormatterHolder(getFormatterObjectType(), this.factory.getFormatter(annotation));
 		}
 
 	}
@@ -372,35 +369,13 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 
 		private final Formatter instance;
 
-		public SimpleAnnotationFormatterFactory(Formatter instance) {
+		public SimpleAnnotationFormatterFactory(Formatter<?> instance) {
 			this.instance = instance;
 		}
 
 		public Formatter getFormatter(Annotation annotation) {
 			return this.instance;
 		}
-	}
-
-	private static class ValueOfMethodFormatter implements Formatter {
-
-		private Method valueOfMethod;
-
-		public ValueOfMethodFormatter(Method valueOfMethod) {
-			this.valueOfMethod = valueOfMethod;
-		}
-
-		public String format(Object object, Locale locale) {
-			if (object == null) {
-				return "";
-			} else {
-				return object.toString();
-			}
-		}
-
-		public Object parse(String formatted, Locale locale) throws ParseException {
-			return ReflectionUtils.invokeMethod(valueOfMethod, null, formatted);
-		}
-
 	}
 
 	private class ConvertingFormatter implements Formatter {
@@ -416,14 +391,14 @@ public class GenericFormatterRegistry implements FormatterRegistry, ApplicationC
 
 		public String format(Object object, Locale locale) {
 			object = GenericFormatterRegistry.this.conversionService.convert(object, this.formatterHolder
-					.getFormattedObjectType());
+					.getFormatterObjectType());
 			return this.formatterHolder.getFormatter().format(object, locale);
 		}
 
 		public Object parse(String formatted, Locale locale) throws ParseException {
 			Object parsed = this.formatterHolder.getFormatter().parse(formatted, locale);
 			parsed = GenericFormatterRegistry.this.conversionService.convert(parsed, TypeDescriptor
-					.valueOf(this.formatterHolder.getFormattedObjectType()), this.type);
+					.valueOf(this.formatterHolder.getFormatterObjectType()), this.type);
 			return parsed;
 		}
 	}
