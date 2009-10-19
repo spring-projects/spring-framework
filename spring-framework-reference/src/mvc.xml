@@ -1399,8 +1399,8 @@ public class EditPetForm {
 
         <programlisting>JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84</programlisting>
 
-        <para>The following code sample allows you to easily get the value of
-        the "JSESSIONID"cookie:</para>
+        <para>The following code sample demonstrates how to get the value of
+        the <literal>JSESSIONID</literal> cookie:</para>
 
         <programlisting language="java">@RequestMapping("/displayHeaderInfo.do")
 public void displayHeaderInfo(<emphasis role="bold">@CookieValue("JSESSIONID")</emphasis> String cookie)  {
@@ -1420,7 +1420,7 @@ public void displayHeaderInfo(<emphasis role="bold">@CookieValue("JSESSIONID")</
         <para>The <interfacename>@RequestHeader</interfacename> annotation
         allows a method parameter to be bound to a request header.</para>
 
-        <para>Here is a request header sample:</para>
+        <para>Here is a sample request header:</para>
 
         <programlisting>
 Host                    localhost:8080
@@ -1431,12 +1431,12 @@ Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
 Keep-Alive              300
 </programlisting>
 
-        <para>The following code sample allows you to easily get the value of
-        the "Accept-Encoding" and "Keep-Alive" headers:</para>
+        <para>The following code sample demonstrates how to get the value of
+        the <literal>Accept-Encoding</literal> and <literal>Keep-Alive</literal> headers:</para>
 
         <programlisting language="java">@RequestMapping("/displayHeaderInfo.do")
-  public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encoding")</emphasis> String encoding,
-                                <emphasis role="bold">@RequestHeader("Keep-Alive")</emphasis> long keepAlive)  {
+public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encoding")</emphasis> String encoding,
+                              <emphasis role="bold">@RequestHeader("Keep-Alive")</emphasis> long keepAlive)  {
 
   //...
 
@@ -1464,7 +1464,7 @@ Keep-Alive              300
           <interfacename>@InitBinder</interfacename> allows you to configure
           web data binding directly within your controller class.
           <interfacename>@InitBinder</interfacename> identifies methods that
-          initialize the <classname>WebDataBinder</classname>, which will be
+          initialize the <classname>WebDataBinder</classname> that will be
           used to populate command and form object arguments of annotated
           handler methods.</para>
 
@@ -1538,66 +1538,88 @@ public class MyFormController {
     <classname>DefaultAnnotationHandlerMapping</classname>, which looks for
     <interfacename>@RequestMapping</interfacename> annotations on
     <interfacename>@Controllers</interfacename>. Typically, you do not need to
-    override this default mapping, except when overriding the properties.
+    override this default mapping, unless you need to override the default property values.
     These properties are:</para>
 
-    <itemizedlist spacing="compact">
-      <listitem>
-        <para><literal>interceptors</literal>: List of interceptors to use.
-        <interfacename>HandlerInterceptor</interfacename>s are discussed in
-        <xref linkend="mvc-handlermapping-interceptor" />.</para>
-      </listitem>
+	<variablelist>
+		<varlistentry>
+			<term><literal>interceptors</literal></term>
+			<listitem>
+				<para>
+					List of interceptors to use.
+					<interfacename>HandlerInterceptor</interfacename>s are discussed in
+					<xref linkend="mvc-handlermapping-interceptor" />.
+				</para>
+			</listitem>
+		</varlistentry>
 
-      <listitem>
-        <para><literal>defaultHandler</literal>: Default handler to use, when
-        this handler mapping does not result in a matching handler.</para>
-      </listitem>
+		<varlistentry>
+			<term><literal>defaultHandler</literal></term>
+			<listitem>
+				<para>Default handler to use, when this handler mapping does not result
+				in a matching handler.</para>
+			</listitem>
+		</varlistentry>
 
-      <listitem>
-        <para><literal>order</literal>: Based on the value of the order
-        property (see the <literal>org.springframework.core.Ordered</literal>
-        interface), Spring sorts all handler mappings available in the context
-        and applies the first matching handler.</para>
-      </listitem>
+		<varlistentry>
+			<term><literal>order</literal></term>
+			<listitem>
+				<para>
+					Based on the value of the order property (see the
+					<literal>org.springframework.core.Ordered</literal>
+					interface), Spring sorts all handler mappings available in the context
+					and applies the first matching handler.
+				</para>
+			</listitem>
+		</varlistentry>
 
-      <listitem>
-        <para><literal>alwaysUseFullPath</literal>: If
-        <literal>true</literal>, Spring uses the full path within the current
-        servlet context to find an appropriate handler. If
-        <literal>false</literal> (the default), the path within the current
-        servlet mapping is used. For example, if a servlet is mapped using
-        <literal>/testing/*</literal> and the
-        <literal>alwaysUseFullPath</literal> property is set to true,
-        <literal>/testing/viewPage.html</literal> is used, whereas if the
-        property is set to false, <literal>/viewPage.html</literal> is
-        used.</para>
-      </listitem>
+		<varlistentry>
+			<term><literal>alwaysUseFullPath</literal></term>
+			<listitem>
+				<para>
+					If <literal>true</literal> , Spring uses the full path within the current
+					servlet context to find an appropriate handler. If <literal>false</literal>
+					(the default), the path within the current servlet mapping is used. For
+					example, if a servlet is mapped using <literal>/testing/*</literal>
+					and the <literal>alwaysUseFullPath</literal> property is set to true,
+					<literal>/testing/viewPage.html</literal> is used, whereas if the
+					property is set to false, <literal>/viewPage.html</literal> is used.
+				</para>
+			</listitem>
+		</varlistentry>
 
-      <listitem>
-        <para><literal>urlDecode</literal>: Defaults to
-        <literal>true</literal>, as of Spring 2.5. <!--OK, or do you mean 3.0?-->If
-        you prefer to compare encoded paths, switch this flag to
-        <literal>false</literal>. However, the
-        <interfacename>HttpServletRequest</interfacename> always exposes the
-        servlet path in decoded form. Be aware that the servlet path will not
-        match when compared with encoded paths.</para>
-      </listitem>
+		<varlistentry>
+			<term><literal>urlDecode</literal></term>
+			<listitem>
+				<para>
+					Defaults to <literal>true</literal>, as of Spring 2.5. <!--OK, or do you mean 3.0?-->
+					If you prefer to compare encoded paths, set this flag to <literal>false</literal>.
+					However, the <interfacename>HttpServletRequest</interfacename> always exposes the
+					servlet path in decoded form. Be aware that the servlet path will not match when
+					compared with encoded paths.
+				</para>
+			</listitem>
+		</varlistentry>
 
-      <listitem>
-        <para><literal>lazyInitHandlers</literal>: Allows lazy initialization
-        of <emphasis>singleton</emphasis> handlers (prototype handlers are
-        always lazy-initialized). The default value is
-        <literal>false</literal>.</para>
-      </listitem>
-    </itemizedlist>
+		<varlistentry>
+			<term><literal>lazyInitHandlers</literal></term>
+			<listitem>
+				<para>
+					Allows lazy initialization of <emphasis>singleton</emphasis>
+					handlers (prototype handlers are always lazy-initialized).
+					The default value is <literal>false</literal>.
+				</para>
+			</listitem>
+		</varlistentry>
+	</variablelist>
 
-    <para><note>
-        <para>The
-        <literal>alwaysUseFullPath<literal>,</literal>urlDecode</literal>, and
-        <literal>lazyInitHandlers</literal> properties are only available to
-    subclasses of
-        <interfacename>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</interfacename>.</para>
-      </note></para>
+	<note>
+		<para>
+			The <literal>alwaysUseFullPath</literal>, <literal>urlDecode</literal>, and
+			<literal>lazyInitHandlers</literal> properties are only available to subclasses of
+			<interfacename>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</interfacename>.
+		</para>
+	</note>
 
     <para>The following example shows how to override the default mapping and
     add an interceptor:</para>
@@ -1633,7 +1655,7 @@ public class MyFormController {
       <para>The <literal>preHandle(..)</literal> method returns a boolean
       value. You can use this method to break or continue the processing of
       the execution chain. When this method returns <literal>true</literal>,
-      the handler execution chain will continue, when it returns false, the
+      the handler execution chain will continue; when it returns false, the
       <classname>DispatcherServlet</classname> assumes the interceptor itself
       has taken care of requests (and, for example, rendered an appropriate
       view) and does not continue executing the other interceptors and the
@@ -1732,10 +1754,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <title>Resolving views with the
       <interfacename>ViewResolver</interfacename> interface</title>
 
-      <para>As discussed in <xref linkend="mvc-controller" />, all controllers
-      in the Spring Web MVC framework return a
-      <classname>ModelAndView</classname> instance. Views in Spring are
-      addressed by a view name and are resolved by a view resolver. Spring
+      <para>As discussed in <xref linkend="mvc-controller" />, all handler
+      methods in the Spring Web MVC controllers must resolve to a logical
+      view name, either explicitly (e.g., by returning a <literal>String</literal>,
+      <literal>View</literal>, or <literal>ModelAndView</literal>) or implicitly
+      (i.e., based on conventions). Views in Spring are
+      addressed by a logical view name and are resolved by a view resolver. Spring
       comes with quite a few view resolvers. This table lists most of them; a
       couple of examples follow.</para>
 
@@ -1791,9 +1815,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
               <entry>Simple implementation of the
               <interfacename>ViewResolver</interfacename> interface that
-              effects the direct resolution of symbolic view names to URLs,
+              effects the direct resolution of logical view names to URLs,
               without an explicit mapping definition. This is appropriate if
-              your symbolic names match the names of your view resources in a
+              your logical names match the names of your view resources in a
               straightforward manner, without the need for arbitrary
               mappings.</entry>
             </row>
@@ -1801,10 +1825,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
             <row>
               <entry><classname>InternalResourceViewResolver</classname></entry>
 
-              <entry>Convenience subclass of
+              <entry>Convenient subclass of
               <classname>UrlBasedViewResolver</classname> that supports
               <classname>InternalResourceView</classname> (in effect, Servlets
-              and JSPs), and subclasses such as
+              and JSPs) and subclasses such as
               <classname>JstlView</classname> and
               <classname>TilesView</classname>. You can specify the view class
               for all views generated by this resolver by using
@@ -1817,7 +1841,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
               <entry><classname>VelocityViewResolver</classname> /
               <classname>FreeMarkerViewResolver</classname></entry>
 
-              <entry>Convenience subclass of
+              <entry>Convenient subclass of
               <classname>UrlBasedViewResolver</classname> that supports
               <classname>VelocityView</classname> (in effect, Velocity
               templates) or <classname>FreeMarkerView</classname>
@@ -1849,7 +1873,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     &lt;property name="suffix" value=".jsp"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>When returning <literal>test</literal> as a viewname, this view
+      <para>When returning <literal>test</literal> as a logical view name, this view
       resolver forwards the request to the
       <classname>RequestDispatcher</classname> that will send the request to
       <literal>/WEB-INF/jsp/test.jsp</literal>.</para>
@@ -1876,7 +1900,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <note>
         <para>Subclasses of <classname>AbstractCachingViewResolver</classname>
         cache view instances that they resolve. Caching improves performance
-        of certain view technologies. It's possible to turn off the cache, by
+        of certain view technologies. It's possible to turn off the cache by
         setting the <literal>cache</literal> property to
         <literal>false</literal>. Furthermore, if you must refresh a certain
         view at runtime (for example when a Velocity template is modified),
@@ -1892,12 +1916,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       resolvers and, for example, override specific views in certain
       circumstances. You chain view resolvers by adding more than one resolver
       to your application context and, if necessary, by setting the
-      <literal>order</literal> property to specify an order. Remember, the
+      <literal>order</literal> property to specify ordering. Remember, the
       higher the order property, the later the view resolver is positioned in
       the chain.</para>
 
       <para>In the following example, the chain of view resolvers consists of
-      two resolvers, a <classname>InternalResourceViewResolver</classname>,
+      two resolvers, an <classname>InternalResourceViewResolver</classname>,
       which is always automatically positioned as the last resolver in the
       chain, and an <classname>XmlViewResolver</classname> for specifying
       Excel views. Excel views are not supported by the
@@ -1923,7 +1947,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>If a specific view resolver does not result in a view, Spring
       examines the context for other view resolvers. If additional view
       resolvers exist, Spring continues to inspect them. <!--So what happens after Spring inspects them?-->If
-      they do not, it throws an <classname>Exception</classname>.</para>
+      they do not exist, Spring throws an <classname>Exception</classname>.</para>
 
       <para>The contract of a view resolver specifies that a view resolver
       <emphasis>can</emphasis> return null to indicate the view could not be
@@ -1950,30 +1974,32 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       view name, which a view resolver resolves to a particular view
       technology. For view technologies such as JSPs that are processed
       through the Servlet or JSP engine, this resolution is usually handled
-      through <classname>InternalResourceViewResolver</classname> /
+      through the combination of <classname>InternalResourceViewResolver</classname> and
       <classname>InternalResourceView</classname>, which
-      issues an internal forward or include, through the Servlet API's
-      <literal>RequestDispatcher.forward(..)</literal> or
-      <literal>RequestDispatcher.include()</literal>. For other view
+      issues an internal forward or include via the Servlet API's
+      <literal>RequestDispatcher.forward(..)</literal> method or
+      <literal>RequestDispatcher.include()</literal> method. For other view
       technologies, such as Velocity, XSLT, and so on, the view itself
-      produces the content on the response stream.</para>
+      writes the content directly to the response stream.</para>
 
       <para>It is sometimes desirable to issue an HTTP redirect back to the
-      client, before the view is rendered. This is desirable for example when
+      client, before the view is rendered. This is desirable, for example, when
       one controller has been called with <literal>POST</literal>ed data, and
       the response is actually a delegation to another controller (for example
       on a successful form submission). In this case, a normal internal
-      forward will mean the other controller will also see the same
+      forward will mean that the other controller will also see the same
       <literal>POST</literal> data, which is potentially problematic if it can
-      confuse it with other expected data. Another reason to do a redirect
-      before displaying the result is that this will eliminate the possibility
-      of the user doing a double submission of form data. The browser will
-      have sent the initial <literal>POST</literal>, will have seen a redirect
-      back and done a subsequent <literal>GET</literal> because of that, and
-      thus as far as it is concerned, the current page does not reflect the
-      result of a <literal>POST</literal>, but rather of a
-      <literal>GET</literal>, so there is no way the user can accidentally
-      re-<literal>POST</literal> the same data by doing a refresh. The refresh
+      confuse it with other expected data. Another reason to perform a redirect
+      before displaying the result is to eliminate the possibility
+      of the user submitting the form data multiple times. In this scenario,
+      the browser will first send an initial <literal>POST</literal>; it will
+      then receive a response to redirect to a different URL; and finally
+      the browser will perform a subsequent <literal>GET</literal> for the
+      URL named in the redirect response. Thus, from the perspective of the
+      browser, the current page does not reflect the result of a
+      <literal>POST</literal> but rather of a <literal>GET</literal>. The
+      end effect is that there is no way the user can accidentally
+      re-<literal>POST</literal> the same data by performing a refresh. The refresh
       forces a <literal>GET</literal> of the result page, not a resend of the
       initial <literal>POST</literal> data.</para>
 
@@ -1989,12 +2015,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         instructs the view to do its work.</para>
 
         <para>The <classname>RedirectView</classname> issues an
-        <literal>HttpServletResponse.sendRedirect()</literal> call, which
-        comes back to the client browser as an HTTP redirect. <!--Does preceding happen after what happens in first paragraph? Clarify sequence of events.-->All
-        model attributes are exposed as HTTP query parameters. This does mean
+        <literal>HttpServletResponse.sendRedirect()</literal> call that
+        returns to the client browser as an HTTP redirect. <!--Does preceding happen after what happens in first paragraph? Clarify sequence of events.-->All
+        model attributes are exposed as HTTP query parameters. This means
         that the model must contain only objects (generally Strings or
-        convertible to Strings), which can be readily converted to a
-        string-form HTTP query parameter.</para>
+        objects converted to a String representation), which can be readily converted to a
+        textual HTTP query parameter.</para>
 
         <para>If you use <classname>RedirectView</classname> and the view is
         created by the controller itself, it is recommended that you configure
@@ -2008,18 +2034,18 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         <title>The <literal>redirect:</literal> prefix</title>
 
         <para>While the use of <classname>RedirectView</classname> works fine,
-        if the controller itself is creating the
-        <classname>RedirectView</classname>, there is no getting around the
+        if the controller itself creates the
+        <classname>RedirectView</classname>, there is no avoiding the
         fact that the controller is aware that a redirection is happening.
         This is really suboptimal and couples things too tightly. The
         controller should not really care about how the response gets
-        handled.  In general it should operate only in terms of view names that
+        handled. In general it should operate only in terms of view names that
         have been injected into it.</para>
 
         <para>The special <literal>redirect:</literal> prefix allows you to
         accomplish this. If a view name is returned that has the prefix
-        redirect:, then <classname>UrlBasedViewResolver</classname> (and all
-        subclasses) recognize this as a special indication that a redirect is
+        <literal>redirect:</literal>, the <classname>UrlBasedViewResolver</classname> (and all
+        subclasses) will recognize this as a special indication that a redirect is
         needed. The rest of the view name will be treated as the redirect
         URL.</para>
 
@@ -2029,7 +2055,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         such as <literal>redirect:/my/response/controller.html</literal> will
         redirect relative to the current servlet context, while a name such as
         <literal>redirect:http://myhost.com/some/arbitrary/path.html</literal>
-        will redirect to an absolute URL. The important thing is that as long
+        will redirect to an absolute URL. The important thing is that, as long
         as this redirect view name is injected into the controller like any
         other logical view name, the controller is not even aware that
         redirection is happening.</para>
@@ -2040,12 +2066,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         <para>It is also possible to use a special <literal>forward:</literal>
         prefix for view names that are ultimately resolved by
-        <classname>UrlBasedViewResolver</classname> and subclasses. All this
-        does is create an <classname>InternalResourceView</classname> (which
+        <classname>UrlBasedViewResolver</classname> and subclasses. This
+        creates an <classname>InternalResourceView</classname> (which
         ultimately does a <literal>RequestDispatcher.forward()</literal>)
         around the rest of the view name, which is considered a URL.
         Therefore, this prefix is not useful with
-        <classname>InternalResourceViewResolver</classname> /
+        <classname>InternalResourceViewResolver</classname> and
         <classname>InternalResourceView</classname> (for JSPs for example).
         But the prefix can be helpful when you are primarily using another
         view technology, but still want to force a forward of a resource to be
@@ -2053,7 +2079,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         multiple view resolvers, instead.)<!--I think the preceding sentences were a bit garbled. I tried to reword a bit. And is this paragraph logical?--></para>
 
         <para>As with the <literal>redirect:</literal> prefix, if the view
-        name with the prefix is just injected into the controller, the
+        name with the <literal>forward:</literal> prefix is injected into the controller, the
         controller does not detect that anything special is happening in terms
         of handling the response.<!--Can you reword to clarify the point? The controller does not detect what?--></para>
       </section>
@@ -2063,7 +2089,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <title><classname>ContentNegotiatingViewResolver</classname></title>
 
       <para>The <classname>ContentNegotiatingViewResolver</classname> does not
-      resolve views itself, but rather delegates to other view resolvers,
+      resolve views itself but rather delegates to other view resolvers,
       selecting the view that resembles the representation requested by the
       client. Two strategies exist for a client to request a representation
       from the server:</para>
@@ -2088,7 +2114,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
           types</ulink> that it understands. For example, an HTTP request for
       <literal>http://www.example.com/users/fred</literal> with an
       <literal>Accept</literal> header set to <literal>application/pdf
-      </literal>requests a PDF representation of the user fred while
+      </literal>requests a PDF representation of the user fred, while
       <literal>http://www.example.com/users/fred</literal> with an
       <literal>Accept</literal> header set to <literal>text/xml</literal>
       requests an XML representation. This strategy is known as <ulink
@@ -2098,22 +2124,22 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       </itemizedlist>
 
       <note>
-        <para>One issue with the Accept header is that is impossible to change
-        it in a web browser, in HTML. For example, in Firefox, it is fixed
-        to<!--So how would you set the Accept header as in second bullet, if you can't do it in html? Indicate?--></para>
+        <para>One issue with the <literal>Accept</literal> header is that it is
+        impossible to set it in a web browser within HTML. For example, in Firefox, it is fixed
+        to:
+        <!--So how would you set the Accept header as in second bullet, if you can't do it in html? Indicate?--></para>
 
-        <programlisting>Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-  </programlisting>
+        <programlisting>Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</programlisting>
 
         <para>For this reason it is common to see the use of a distinct URI
-        for each representation.</para>
+        for each representation when developing browser based web applications.</para>
       </note>
 
       <para>To support multiple representations of a resource, Spring provides
       the <classname>ContentNegotiatingViewResolver</classname> to resolve a
       view based on the file extension or <literal>Accept</literal> header of
       the HTTP request. <classname>ContentNegotiatingViewResolver</classname>
-      does not perform the view resolution itself, but instead delegates to a
+      does not perform the view resolution itself but instead delegates to a
       list of view resolvers that you specify through the bean property
       <literal>ViewResolvers</literal>.<!--A human has to specify this list of resolvers, right? See example below.--></para>
 
@@ -2129,10 +2155,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       example text/*, in which case a <classname>View</classname> whose
       Context-Type was text/xml is a compatible match.</para>
 
-      <para>To support the resolution of a view based on a file extension, you
+      <para>To support the resolution of a view based on a file extension,
       use the <classname>ContentNegotiatingViewResolver </classname>bean
-      property <literal>MediaTypes</literal> to specify a mapping of file
-      extensions to media types. For more information on the algorithm to
+      property <literal>mediaTypes</literal> to specify a mapping of file
+      extensions to media types. For more information on the algorithm used to
       determine the request media type, refer to the API documentation for
       <classname>ContentNegotiatingViewResolver</classname>.</para>
 
@@ -2161,7 +2187,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 &lt;bean id="content" class="com.springsource.samples.rest.SampleContentAtomView"/&gt;</programlisting>
 
       <para>The <classname>InternalResourceViewResolver</classname> handles
-      the translation of view names and JSP pages while the
+      the translation of view names and JSP pages, while the
       <classname>BeanNameViewResolver</classname> returns a view based on the
       name of a bean. (See "<link
       linkend="mvc-viewresolver-resolver">Resolving views with the
@@ -2172,22 +2198,22 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       feed. For more information on creating an Atom Feed representation, see
       the section Atom Views.<!--Need a correct link or x-ref re the preceding sentence.I couldn't find an "Atom Views" section.--></para>
 
-      <para>In this configuration, if a request is made with an .html
-      extension, the view resolver looks for a view that matches the text/html
+      <para>In the above configuration, if a request is made with an <literal>.html</literal>
+      extension, the view resolver looks for a view that matches the <literal>text/html</literal>
       media type. The <classname>InternalResourceViewResolver</classname>
-      provides the matching view for text/html. If the request is made with
-      the file extension .atom, the view resolver looks for a view that
-      matches the application/atom+xml media type. This view is provided by
+      provides the matching view for <literal>text/html</literal>. If the request is made with
+      the file extension <literal>.atom</literal>, the view resolver looks for a view that
+      matches the <literal>application/atom+xml</literal> media type. This view is provided by
       the <classname>BeanNameViewResolver</classname> that maps to the
       <classname>SampleContentAtomView</classname> if the view name returned
       is <classname>content</classname>. Alternatively, client requests can be
-      made without a file extension and setting the Accept header to the
-      preferred media-type and the same resolution of request to views would
+      made without a file extension but with the <literal>Accept</literal> header set to the
+      preferred media-type, and the same resolution of request to views would
       occur.<!--Can you reword preceding sentence? I don't follow it.--></para>
 
       <note>
         <para>If <classname>ContentNegotiatingViewResolver</classname>'s list
-        of ViewResolvers is not configured explicitly, then it automatically
+        of ViewResolvers is not configured explicitly, it automatically
         uses any ViewResolvers defined in the application context.</para>
       </note>
 
@@ -2195,22 +2221,22 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       for a URI of the form <literal>http://localhost/content.atom</literal>
       or <literal>http://localhost/content</literal> with an
       <literal>Accept</literal> header of application/atom+xml is shown
-      below</para>
+      below.</para>
 
       <programlisting language="java">@Controller
-  public class ContentController {
+public class ContentController {
 
-      private List&lt;SampleContent&gt; contentList = new ArrayList&lt;SampleContent&gt;();
+    private List&lt;SampleContent&gt; contentList = new ArrayList&lt;SampleContent&gt;();
 
-      @RequestMapping(value="/content", method=RequestMethod.GET)
-      public ModelAndView getContent() {
-          ModelAndView mav = new ModelAndView();
-          mav.setViewName("content");
-          mav.addObject("sampleContentList", contentList);
-          return mav;
-      }
+    @RequestMapping(value="/content", method=RequestMethod.GET)
+    public ModelAndView getContent() {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("content");
+        mav.addObject("sampleContentList", contentList);
+        return mav;
+    }
 
-  }</programlisting>
+}</programlisting>
     </section>
   </section>
 
@@ -2224,19 +2250,19 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <interfacename>LocaleResolver</interfacename> objects.</para>
 
     <para>When a request comes in, the
-    <classname>DispatcherServlet</classname> looks for a locale resolver and
+    <classname>DispatcherServlet</classname> looks for a locale resolver, and
     if it finds one it tries to use it to set the locale. Using the
     <literal>RequestContext.getLocale()</literal> method, you can always
     retrieve the locale that was resolved by the locale resolver.</para>
 
-    <para>Besides the automatic locale resolution, you can also attach an
+    <para>In addition to automatic locale resolution, you can also attach an
     interceptor to the handler mapping (see <xref
     linkend="mvc-handlermapping-interceptor" /> for more information on
-    handler mapping interceptors), to change the locale under specific
-    circumstances, based on a parameter in the request, for example.</para>
+    handler mapping interceptors) to change the locale under specific
+    circumstances, for example, based on a parameter in the request.</para>
 
-    <para>Locale resolvers and interceptors are all defined in the
-    <literal>org.springframework.web.servlet.i18n</literal> package, and are
+    <para>Locale resolvers and interceptors are defined in the
+    <literal>org.springframework.web.servlet.i18n</literal> package and are
     configured in your application context in the normal way. Here is a
     selection of the locale resolvers included in Spring.</para>
 
@@ -2245,7 +2271,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
       <para>This locale resolver inspects the
       <literal>accept-language</literal> header in the request that was sent
-      by the browser of the client. Usually this header field contains the
+      by the client (e.g., a web browser). Usually this header field contains the
       locale of the client's operating system.</para>
     </section>
 
@@ -2253,11 +2279,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <title><classname>CookieLocaleResolver</classname></title>
 
       <para>This locale resolver inspects a <classname>Cookie</classname> that
-      might exist on the client, to see if a locale is specified. If so, it
-      uses that specific locale. Using the properties of this locale resolver,
-      you can specify the name of the cookie, as well as the maximum age. Find
-      below an example of defining a
-      <classname>CookieLocaleResolver</classname>.</para>
+      might exist on the client to see if a locale is specified. If so, it
+      uses the specified locale. Using the properties of this locale resolver,
+      you can specify the name of the cookie as well as the maximum age. Find
+      below an example of defining a <classname>CookieLocaleResolver</classname>.</para>
 
       <programlisting language="xml">&lt;bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"&gt;
 
@@ -2303,7 +2328,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
               <entry>Integer.MAX_INT</entry>
 
               <entry>The maximum time a cookie will stay persistent on the
-              client. If -1 is specified, the cookie will not be persisted. It
+              client. If -1 is specified, the cookie will not be persisted; it
               will only be available until the client shuts down his or her
               browser.</entry>
             </row>
@@ -2314,9 +2339,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
               <entry>/</entry>
 
               <entry>Limits the visibility of the cookie to a certain part of
-              your site.. When cookiePath is
-              specified, the cookie will only be visible to that path, and the
-              paths below it.</entry>
+              your site. When cookiePath is specified, the cookie will only
+              be visible to that path and the paths below it.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -2334,7 +2358,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <section id="mvc-localeresolver-interceptor">
       <title><classname>LocaleChangeInterceptor</classname></title>
 
-      <para>You can build in changing of locales by adding the
+      <para>You can enable changing of locales by adding the
       <classname>LocaleChangeInterceptor</classname> to one of the handler
       mappings (see <xref linkend="mvc-handlermapping" />). It will detect a
       parameter in the request and change the locale. It calls
@@ -2397,7 +2421,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <classname>ResourceBundleThemeSource</classname>, you can register a
       bean in the application context with the reserved name
       <classname>themeSource</classname>. The web application context
-      automatically detects that bean and starts using it.</para>
+      automatically detects a bean with that name and uses it.</para>
 
       <para>When using the <classname>ResourceBundleThemeSource</classname>, a
       theme is defined in a simple properties file. <!--Revise preceding sentence to clarify: To use ResourceBundleThemeSource, you define a theme in a properties file? OR do you mean a theme--><!--is already defined in a simple properties file for use with ResourceBundleThemeSource?-->The
@@ -2419,14 +2443,14 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
    &lt;head&gt;
       &lt;link rel="stylesheet" href="&lt;spring:theme code="styleSheet"/&gt;" type="text/css"/&gt;
    &lt;/head&gt;
-   &lt;body background="&lt;spring:theme code="background"/&gt;"&gt;
+   &lt;body style="background=&lt;spring:theme code="background"/&gt;"&gt;
       ...
    &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
       <para>By default, the <classname>ResourceBundleThemeSource</classname>
       uses an empty base name prefix. As a result, the properties files are
-      loaded from the root of the classpath, so you would put the
+      loaded from the root of the classpath. Thus you would put the
       <literal>cool.properties</literal> theme definition in a directory at
       the root of the classpath, for example, in
       <literal>/WEB-INF/classes</literal>. The
@@ -2485,15 +2509,14 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
             <row>
               <entry><classname>CookieThemeResolver</classname></entry>
 
-              <entry>The selected theme is stored in a cookie on the
-              user-agent's machine.</entry>
+              <entry>The selected theme is stored in a cookie on the client.</entry>
             </row>
           </tbody>
         </tgroup>
       </table>
 
       <para>Spring also provides a
-      <classname>ThemeChangeInterceptor</classname>, which allows theme
+      <classname>ThemeChangeInterceptor</classname> that allows theme
       changes on every request with a simple request parameter.<!--Do you need more info or an example re preceding sentence?--></para>
     </section>
   </section>
