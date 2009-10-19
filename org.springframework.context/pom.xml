@@ -116,6 +116,12 @@
       <optional>true</optional>
     </dependency> 
     <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>1.6</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-asm</artifactId>
       <version>${project.version}</version>
