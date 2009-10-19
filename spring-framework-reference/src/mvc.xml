@@ -29,7 +29,7 @@
       <para>Some methods in the core classes of Spring Web MVC are marked
       <literal>final</literal>. As a developer you cannot override these
       methods to supply your own behavior. This has not been done arbitrarily, but
-	  specifically with this principal in mind.</para>
+      specifically with this principal in mind.</para>
 
       <para>For an explanation of this principle, refer to <emphasis>Expert
       Spring Web MVC and Web Flow</emphasis> by Seth Ladd and others;
@@ -326,8 +326,8 @@
 &lt;/web-app&gt;</programlisting>
 
     <para>With the above servlet configuration in place, <!--Is this something you need to do (in above example)? -->you
-    will need to have a file called <literal>/WEB-INF/<emphasis
-    role="bold">golfing</emphasis>-servlet.xml</literal> in your application;
+    will need to have a file called <literal>/WEB-INF/</literal><emphasis
+    role="bold">golfing</emphasis><literal>-servlet.xml</literal> in your application;
     this file will contain all of your Spring Web MVC-specific components
     (beans). You can change the exact location of this configuration file
     through a servlet initialization parameter (see below for details).
@@ -451,14 +451,14 @@
         in the process to resolve the locale to use when processing the
         request (rendering the view, preparing data, and so on). If you do not
         need locale resolving, you do not need it.</para>
-	  <!--Reword 'if you don't need local resolving, you dont need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
+      <!--Reword 'if you don't need local resolving, you dont need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
       </listitem>
 
       <listitem>
         <para>The theme resolver is bound to the request to let elements such
         as views determine which theme to use. If you do not use themes, you
         can ignore it.</para>
-	  <!-- MLP perhaps say that there are not side effect to this binding.etc... Clarify *ignore it*. Does this step still occur if you don't use themes? --><!--And what if you DO use themes, what do you do and when? Same question re locale resolving.-->
+      <!-- MLP perhaps say that there are not side effect to this binding.etc... Clarify *ignore it*. Does this step still occur if you don't use themes? --><!--And what if you DO use themes, what do you do and when? Same question re locale resolving.-->
       </listitem>
 
       <listitem>
@@ -482,7 +482,7 @@
         returned, (may be due to a preprocessor or postprocessor
         intercepting the request, perhaps for security reasons), no view is
         rendered, because the request could already have been fulfilled.</para>
-	<!--fulfilled how and by what?-->
+    <!--fulfilled how and by what?-->
       </listitem>
     </orderedlist>
 
@@ -546,7 +546,7 @@
             (using a comma as a delimiter) to support multiple contexts. In
             case of multiple context locations with beans that are defined
             twice, the latest location takes precedence.</entry>
-			<!-- MLP review -->
+            <!-- MLP review -->
           </row>
 
           <row>
@@ -586,7 +586,7 @@
       <emphasis>PetClinic</emphasis> sample, a web application that leverages
       the annotation support described in this section, in the context of
       simple form processing. The <emphasis>PetClinic</emphasis> application
-      resides in the <literal>samples/petclinic</literal> directory.</para>
+      resides in the <literal>org.springframework.samples.petclinic</literal> module.</para>
 
       <!-- MLP Note removed reference to imagedb -->
     </tip>
@@ -598,7 +598,7 @@ public class HelloWorldController {
 
     @RequestMapping("/helloWorld")
     public ModelAndView helloWorld() {
-        ModelAndView mac = new ModelAndView();
+        ModelAndView mav = new ModelAndView();
         mav.setViewName("helloWorld");
         mav.addObject("message", "Hello World!");
         return mav;
@@ -624,7 +624,7 @@ public class HelloWorldController {
       indicates that a particular class serves the role of a
       <emphasis>controller</emphasis>. Spring does not require you to extend
       any controller base class or reference the Servlet API. However, you can
-      still reference Servlet-specific features if you need to do so.</para>
+      still reference Servlet-specific features if you need to.</para>
 
       <para>The <interfacename>@Controller</interfacename> annotation acts as
       a stereotype for the annotated class, indicating its role. The
@@ -638,7 +638,7 @@ public class HelloWorldController {
       for autodetection, aligned with Spring general support for detecting
       component classes in the classpath and auto-registering bean definitions
       for them.</para>
-	 <!-- MLP Bev.changed to 'also supports autodetection -->
+     <!-- MLP Bev.changed to 'also supports autodetection -->
       <para>To enable autodetection of such annotated controllers, you add
       component scanning to your configuration. Use the
       <emphasis>spring-context</emphasis> schema as shown in the following XML
@@ -668,21 +668,20 @@ public class HelloWorldController {
 
       <para>You use the <interfacename>@RequestMapping</interfacename>
       annotation to map URLs such as <filename>/appointments</filename> onto
-      an entire class or a particular handler method. You can use it to
-      annotate both a class and a method. Typically the class-level annotation
+      an entire class or a particular handler method. Typically the class-level annotation
       maps a specific request path (or path pattern) onto a form controller,
       with additional method-level annotations narrowing the primary mapping
       for a specific HTTP method request method ("GET"/"POST") or specific
       HTTP request parameters.</para>
 
-      <para>The following example shows a controller from the PetClinic sample
-      application that uses this annotation:</para>
+      <para>The following example shows a controller in a JSF application
+      that uses this annotation:</para>
 
       <programlisting language="java">@Controller
 <emphasis role="bold">@RequestMapping("/appointments")</emphasis>
 public class AppointmentsController {
 
-    private AppointmentBook appointmentBook;
+    private final AppointmentBook appointmentBook;
     
     @Autowired
     public AppointmentsController(AppointmentBook appointmentBook) {
@@ -791,11 +790,11 @@ public class ClinicController {
           variables.</para>
         </sidebar>
 
-        <para>You use the <interfacename>@PathVariable</interfacename> method
+        <para>Use the <interfacename>@PathVariable</interfacename> method
         parameter annotation to indicate that a method parameter should be
         bound to the value of a URI template variable.</para>
 
-        <para>The following code snippet shows the use of a single
+        <para>The following code snippet shows the usage of a single
         <interfacename>@PathVariable</interfacename> in a controller
         method:</para>
 
@@ -815,21 +814,20 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ow
         is bound to the method parameter <literal>String
         ownerId</literal>.</para>
 
-		<!-- MLP: Bev Review -->
+        <!-- MLP: Bev Review -->
         <para>The matching of method parameter names to URI Template variable
         names can only be done if your code is compiled with debugging
         enabled. If you do have not debugging enabled, you must specify the
         name of the URI Template variable name in the @PathVariable annotation
-	    in order to bind the resovled value of the variable name to a 
-		method parameter. For example:</para>
+        in order to bind the resolved value of the variable name to a 
+        method parameter. For example:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String ownerId, Model model) {
   // implementation omitted
-}
-</programlisting>
-	<para>
-        so you can also use a controller method with the following
+}</programlisting>
+    <para>
+        You can also use a controller method with the following
         signature:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
@@ -850,7 +848,7 @@ public String findPet(<emphasis role="bold">@PathVariable</emphasis> String owne
 }
 </programlisting>
 
-        <para>The following code snippet shows the use of path variables on a
+        <para>The following code snippet shows the usage of path variables on a
         relative path, so that the <methodname>findPet()</methodname> method
         will be invoked for <filename>/owners/42/pets/21</filename>, for
         instance.</para>
@@ -870,7 +868,7 @@ public class RelativePathUriTemplateController {
           <para>Method parameters that are decorated with the
           <interfacename>@PathVariable</interfacename> annotation can be of
           <emphasis role="bold">any simple type </emphasis>such as int, long,
-          Date... Spring automatically converts to the appropriate type and
+          Date, etc. Spring automatically converts to the appropriate type and
           throws a <classname>TypeMismatchException</classname> if the type is
           not correct. You can further customize this conversion process by
           customizing the data binder. See <xref
@@ -924,7 +922,9 @@ public class RelativePathUriTemplateController {
         <emphasis>not</emphasis> supposed to be present in the request.</para>
 
         <para>Similarly, path mappings can be narrowed down through header
-        conditions: <programlisting language="java">@Controller
+        conditions:</para>
+        
+        <programlisting language="java">@Controller
 @RequestMapping("/owners/{ownerId}")
 public class RelativePathUriTemplateController {
 
@@ -933,10 +933,11 @@ public class RelativePathUriTemplateController {
   public void addPet(Pet pet, @PathVariable String ownerId) {    
     // implementation omitted
   }
-}
-</programlisting> In the above example, the <methodname>addPet</methodname> is
-        only invoked when the content-type is in the <literal>text/*</literal>
-        range, for example, <literal>text/xml</literal>.</para>
+}</programlisting>
+
+        <para>In the above example, the <methodname>addPet()</methodname> method is
+        only invoked when the <literal>content-type</literal> matches the <literal>text/*</literal>
+        pattern, for example, <literal>text/xml</literal>.</para>
       </section>
 
       <section id="mvc-ann-requestmapping-arguments">
@@ -945,13 +946,14 @@ public class RelativePathUriTemplateController {
         <para>Handler methods that are annotated with
         <classname>@RequestMapping</classname> can have very flexible
         signatures. They may have arguments of the following types, in
-        arbitrary order. (except for validation results, which need to follow
-        right after the corresponding command object, if desired<!--Reword preceding sentence to clarify, make it a complete sentence and no parentheses: first it says validation results *must*--><!--immediately follow command object, but then it says *if desired*. Clarify what must happen if what is desired. And are validation --><!-- results a type of argument? Relate to the sentence that precedes it.-->):
+        arbitrary order (except for validation results, which need to follow
+        right after the corresponding command object, if desired):
+        <!--Reword preceding sentence to clarify, make it a complete sentence and no parentheses: first it says validation results *must*--><!--immediately follow command object, but then it says *if desired*. Clarify what must happen if what is desired. And are validation --><!-- results a type of argument? Relate to the sentence that precedes it.-->
         <itemizedlist>
             <listitem>
-              <para>Request and/or response objects (Servlet API). Choose any
-              specific request/response type, for example,
-              <interfacename>ServletRequest</interfacename> /
+              <para>Request or response objects (Servlet API). Choose any
+              specific request or response type, for example
+              <interfacename>ServletRequest</interfacename> or
               <interfacename>HttpServletRequest</interfacename>.</para>
             </listitem>
 
@@ -964,7 +966,7 @@ public class RelativePathUriTemplateController {
 
               <note>
                 <para>Session access may not be thread-safe, in particular in
-                a Servlet environment: Consider switching the
+                a Servlet environment. Consider setting the
                 <classname>AnnotationMethodHandlerAdapter</classname>'s
                 "synchronizeOnSession" flag to "true" if multiple requests are
                 allowed to access a session concurrently.</para>
@@ -1024,7 +1026,7 @@ public class RelativePathUriTemplateController {
 
             <listitem>
               <para><classname>@RequestBody</classname> annotated parameters
-              for access to the request HTTP body. Parameter values are
+              for access to the HTTP request body. Parameter values are
               converted to the declared method argument type using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
               linkend="mvc-ann-requestbody" />.</para>
@@ -1047,7 +1049,7 @@ public class RelativePathUriTemplateController {
               <literal>webBindingInitializer</literal> property on
               <classname>AnnotationMethodHandlerAdapter</classname>. Such
               command objects along with their validation results will be
-              exposed as model attributes by default., using the non-qualified
+              exposed as model attributes by default, using the non-qualified
               command class name in property notation. <!--Who or what uses the non-qualified class name in property notation? Is this something you have to set up?-->For
               example, "orderAddress" for type "mypackage.OrderAddress".
               Specify a parameter-level <classname>ModelAttribute</classname>
@@ -1059,7 +1061,7 @@ public class RelativePathUriTemplateController {
               /
               <classname>org.springframework.validation.BindingResult</classname>
               validation results for a preceding command or form object (the
-              immediately preceding argument).</para>
+              immediately preceding method argument).</para>
             </listitem>
 
             <listitem>
@@ -1109,7 +1111,7 @@ public class RelativePathUriTemplateController {
 
             <listitem>
               <para>A <classname>String</classname> value that is interpreted
-              as the view name, with the model implicitly determined through
+              as the logical view name, with the model implicitly determined through
               command objects and <literal>@ModelAttribute</literal> annotated
               reference data accessor methods. The handler method may also
               programmatically enrich the model by declaring a
@@ -1139,7 +1141,7 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
-              <para>Any other return type is considered as single model
+              <para>Any other return type is considered to be a single model
               attribute to be exposed to the view, using the attribute name
               specified through <literal>@ModelAttribute</literal> at the
               method level (or the default attribute name based on the return
@@ -1181,7 +1183,7 @@ public class EditPetForm {
         <interfacename>@RequestParam</interfacename>'s
         <literal>required</literal> attribute to <literal>false</literal>
         (e.g., <literal>@RequestParam(value="id",
-        required="false")</literal>).</para>
+        required=false)</literal>).</para>
       </section>
 
       <section id="mvc-ann-requestbody">
@@ -1197,7 +1199,7 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
   writer.write(body);
 }</programlisting>
 
-        <para>You convert the request body to the method argument by using a
+        <para>You convert the request body to the method argument by using an
         <interfacename>HttpMessageConverter</interfacename>.
         <interfacename>HttpMessageConverter</interfacename> is responsible for
         converting from the HTTP request message to an object and converting
@@ -1289,11 +1291,11 @@ public String helloWorld()  {
   return "Hello World";
 }</programlisting>
 
-        <para>The example will result in the text <literal>Hello
+        <para>The above example will result in the text <literal>Hello
         World</literal> being written to the HTTP response stream.</para>
 
         <para>As with <interfacename>@RequestBody</interfacename>, Spring converts
-        the returned object to a response body by using a
+        the returned object to a response body by using an
         <interfacename>HttpMessageConverter</interfacename>. For more
         information on these converters, see the previous section and <link
         linkend="rest-message-conversion">Message Converters</link>.</para>
@@ -1311,10 +1313,10 @@ public String helloWorld()  {
         controller gets a reference to the object holding the data entered in
         the form.</para>
 
-        <para>You can also use the <classname>@ModelAttribute </classname>at
+        <para>You can also use <classname>@ModelAttribute</classname> at
         the method level to provide <emphasis>reference data</emphasis> for
-        the model (see the <literal>populatePetTypes()</literal> method, as in
-        the following example. For this usage the method signature can contain
+        the model (see the <literal>populatePetTypes()</literal> method in
+        the following example). For this usage the method signature can contain
         the same types as documented previously for the
         <classname>@RequestMapping</classname> annotation.</para>
 
@@ -1337,27 +1339,28 @@ public String helloWorld()  {
 @SessionAttributes("pet")
 public class EditPetForm {
 
-	<lineannotation>// ...</lineannotation>
+    <lineannotation>// ...</lineannotation>
 
-	<emphasis role="bold">@ModelAttribute("types")</emphasis>
-	public Collection&lt;PetType&gt; populatePetTypes() {
-		return this.clinic.getPetTypes();
-	}
+    <emphasis role="bold">@ModelAttribute("types")</emphasis>
+    public Collection&lt;PetType&gt; populatePetTypes() {
+        return this.clinic.getPetTypes();
+    }
 
-	@RequestMapping(method = RequestMethod.POST)
-	public String processSubmit(
-			<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>, BindingResult result, SessionStatus status) {
+    @RequestMapping(method = RequestMethod.POST)
+    public String processSubmit(
+            <emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>,
+            BindingResult result, SessionStatus status) {
 
-		new PetValidator().validate(pet, result);
-		if (result.hasErrors()) {
-			return "petForm";
-		}
-		else {
-			this.clinic.storePet(pet);
-			status.setComplete();
-			return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
-		}
-	}
+        new PetValidator().validate(pet, result);
+        if (result.hasErrors()) {
+            return "petForm";
+        }
+        else {
+            this.clinic.storePet(pet);
+            status.setComplete();
+            return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
+        }
+    }
 
 }</programlisting>
       </section>
@@ -1368,20 +1371,20 @@ public class EditPetForm {
 
         <para>The type-level <classname>@SessionAttributes</classname>
         annotation declares session attributes used by a specific handler.
-        This will typically list the names of model attributes which should be
+        This will typically list the names of model attributes or types of
+        model attributes which should be
         transparently stored in the session or some conversational storage,
         serving as form-backing beans between subsequent requests.</para>
 
         <para>The following code snippet shows the usage of this
-        annotation:</para>
+        annotation, specifying the model attribute name:</para>
 
         <programlisting language="java">@Controller
 @RequestMapping("/editPet.do")
 <emphasis role="bold">@SessionAttributes("pet")</emphasis>
 public class EditPetForm {
     <lineannotation>// ...</lineannotation>
-}
-</programlisting>
+}</programlisting>
       </section>
 
       <section id="mvc-ann-cookievalue">
@@ -2197,15 +2200,15 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <programlisting language="java">@Controller
   public class ContentController {
 
-	  private List&lt;SampleContent&gt; contentList = new ArrayList&lt;SampleContent&gt;();
+      private List&lt;SampleContent&gt; contentList = new ArrayList&lt;SampleContent&gt;();
 
-	  @RequestMapping(value="/content", method=RequestMethod.GET)
-	  public ModelAndView getContent() {
-		  ModelAndView mav = new ModelAndView();
-		  mav.setViewName("content");
-		  mav.addObject("sampleContentList", contentList);
-		  return mav;
-	  }
+      @RequestMapping(value="/content", method=RequestMethod.GET)
+      public ModelAndView getContent() {
+          ModelAndView mav = new ModelAndView();
+          mav.setViewName("content");
+          mav.addObject("sampleContentList", contentList);
+          return mav;
+      }
 
   }</programlisting>
     </section>
@@ -2934,20 +2937,20 @@ public class SimpleController {
       <itemizedlist>
         <listitem>
           <para><classname>AdminController</classname> maps to the
-          <literal>/admin<emphasis role="bold">/*</emphasis></literal> request
+          <literal>/admin</literal><emphasis role="bold">/*</emphasis> request
           URL</para>
         </listitem>
 
         <listitem>
           <para><classname>CatalogController</classname> maps to the
-          <literal>/catalog<emphasis role="bold">/*</emphasis></literal>
+          <literal>/catalog</literal><emphasis role="bold">/*</emphasis>
           request URL</para>
         </listitem>
       </itemizedlist>
 
       <para>If you follow the convention of naming your
       <interfacename>Controller</interfacename> implementations as
-      <literal>xxx<emphasis role="bold">Controller</emphasis></literal>, the
+      <literal>xxx</literal><emphasis role="bold">Controller</emphasis>, the
       <classname>ControllerClassNameHandlerMapping</classname> saves you the
       tedium of defining and maintaining a potentially
       <emphasis>looooong</emphasis>
