@@ -150,6 +150,15 @@ public interface BeanFactory {
 	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
 
 	/**
+	 * Return the bean instance that uniquely matches the given object type, if any.
+	 * @param requiredType type the bean must match; can be an interface or superclass.
+	 * {@literal null} is disallowed.
+	 * @return bean matching required type
+	 * @throws NoSuchBeanDefinitionException if there is not exactly one matching bean found
+	 */
+	<T> T getBean(Class<T> requiredType) throws BeansException;
+
+	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * <p>Allows for specifying explicit constructor arguments / factory method arguments,
 	 * overriding the specified default arguments (if any) in the bean definition.

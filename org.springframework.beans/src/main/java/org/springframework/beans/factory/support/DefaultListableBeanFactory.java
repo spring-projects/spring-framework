@@ -242,6 +242,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		String[] beanNames = getBeanNamesForType(requiredType);
+		if (beanNames.length == 1) {
+			return getBean(beanNames[0], requiredType);
+		}
+		else if (beanNames.length == 0 && getParentBeanFactory() != null) {
+			return getParentBeanFactory().getBean(requiredType);
+		}
+		else {
+			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " + beanNames.length);
+		}
+	}
+
 	@Override
 	public boolean containsBeanDefinition(String beanName) {
 		return this.beanDefinitionMap.containsKey(beanName);

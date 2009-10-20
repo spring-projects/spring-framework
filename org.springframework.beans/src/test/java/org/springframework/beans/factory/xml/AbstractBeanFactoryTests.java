@@ -64,7 +64,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void testGetBeanWithNullArg() {
 		try {
-			getBeanFactory().getBean(null);
+			getBeanFactory().getBean((String) null);
 			fail("Can't get null bean");
 		}
 		catch (IllegalArgumentException ex) {
