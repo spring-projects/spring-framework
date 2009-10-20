@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.remoting.jaxrpc;
 
 import java.io.File;
-
 import javax.servlet.ServletContext;
 import javax.xml.rpc.ServiceException;
 import javax.xml.rpc.server.ServiceLifecycle;
@@ -57,7 +56,9 @@ import org.springframework.web.util.WebUtils;
  * @since 16.12.2003
  * @see #init
  * @see #getWebApplicationContext
+ * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
  */
+@Deprecated
 public abstract class ServletEndpointSupport implements ServiceLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());

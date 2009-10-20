@@ -43,7 +43,9 @@ import org.springframework.util.ClassUtils;
  * @see #setServiceInterface
  * @see #setPortInterface
  * @see LocalJaxRpcServiceFactoryBean
+ * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
  */
+@Deprecated
 public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware {
 
