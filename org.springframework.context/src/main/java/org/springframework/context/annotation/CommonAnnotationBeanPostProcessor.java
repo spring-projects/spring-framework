@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,7 +63,6 @@ import org.springframework.core.Ordered;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -283,13 +283,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		InjectionMetadata metadata = findResourceMetadata(bean.getClass());
-		try {
-			metadata.injectFields(bean, beanName);
-		}
-		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Injection of resource fields failed", ex);
-		}
 		return true;
 	}
 
@@ -298,10 +291,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		InjectionMetadata metadata = findResourceMetadata(bean.getClass());
 		try {
-			metadata.injectMethods(bean, beanName, pvs);
+			metadata.inject(bean, beanName, pvs);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Injection of resource methods failed", ex);
+			throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
 		}
 		return pvs;
 	}
@@ -314,33 +307,34 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(clazz);
 				if (metadata == null) {
-					final InjectionMetadata newMetadata = new InjectionMetadata(clazz);
-					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-						public void doWith(Field field) {
+					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+					Class<?> targetClass = clazz;
+
+					do {
+						LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
+						for (Field field : targetClass.getDeclaredFields()) {
 							if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
 								}
-								newMetadata.addInjectedField(new WebServiceRefElement(field, null));
+								currElements.add(new WebServiceRefElement(field, null));
 							}
 							else if (ejbRefClass != null && field.isAnnotationPresent(ejbRefClass)) {
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("@EJB annotation is not supported on static fields");
 								}
-								newMetadata.addInjectedField(new EjbRefElement(field, null));
+								currElements.add(new EjbRefElement(field, null));
 							}
 							else if (field.isAnnotationPresent(Resource.class)) {
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("@Resource annotation is not supported on static fields");
 								}
 								if (!ignoredResourceTypes.contains(field.getType().getName())) {
-									newMetadata.addInjectedField(new ResourceElement(field, null));
+									currElements.add(new ResourceElement(field, null));
 								}
 							}
 						}
-					});
-					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
-						public void doWith(Method method) {
+						for (Method method : targetClass.getDeclaredMethods()) {
 							if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass) &&
 									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
@@ -350,7 +344,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 									throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
 								}
 								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								newMetadata.addInjectedMethod(new WebServiceRefElement(method, pd));
+								currElements.add(new WebServiceRefElement(method, pd));
 							}
 							else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass) &&
 									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
@@ -361,7 +355,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 									throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
 								}
 								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								newMetadata.addInjectedMethod(new EjbRefElement(method, pd));
+								currElements.add(new EjbRefElement(method, pd));
 							}
 							else if (method.isAnnotationPresent(Resource.class) &&
 									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
@@ -374,12 +368,16 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 								}
 								if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
 									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-									newMetadata.addInjectedMethod(new ResourceElement(method, pd));
+									currElements.add(new ResourceElement(method, pd));
 								}
 							}
 						}
-					});
-					metadata = newMetadata;
+						elements.addAll(0, currElements);
+						targetClass = targetClass.getSuperclass();
+					}
+					while (targetClass != null && targetClass != Object.class);
+
+					metadata = new InjectionMetadata(clazz, elements);
 					this.injectionMetadataCache.put(clazz, metadata);
 				}
 			}

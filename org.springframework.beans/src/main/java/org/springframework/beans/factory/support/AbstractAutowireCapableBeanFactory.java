@@ -780,11 +780,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class beanType, String beanName)
 			throws BeansException {
 
-		for (BeanPostProcessor bp : getBeanPostProcessors()) {
-			if (bp instanceof MergedBeanDefinitionPostProcessor) {
-				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
-				bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+		try {
+			for (BeanPostProcessor bp : getBeanPostProcessors()) {
+				if (bp instanceof MergedBeanDefinitionPostProcessor) {
+					MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
+					bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+				}
 			}
+		}
+		catch (Exception ex) {
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+					"Post-processing failed of bean type [" + beanType + "] failed", ex);
 		}
 	}
 

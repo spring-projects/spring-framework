@@ -433,12 +433,12 @@ public abstract class ReflectionUtils {
 	 * class and superclasses.
 	 * <p>The same named method occurring on subclass and superclass will appear
 	 * twice, unless excluded by a {@link MethodFilter}.
-	 * @param targetClass class to start looking at
+	 * @param clazz class to start looking at
 	 * @param mc the callback to invoke for each method
 	 * @see #doWithMethods(Class, MethodCallback, MethodFilter)
 	 */
-	public static void doWithMethods(Class<?> targetClass, MethodCallback mc) throws IllegalArgumentException {
-		doWithMethods(targetClass, mc, null);
+	public static void doWithMethods(Class<?> clazz, MethodCallback mc) throws IllegalArgumentException {
+		doWithMethods(clazz, mc, null);
 	}
 
 	/**
@@ -446,14 +446,15 @@ public abstract class ReflectionUtils {
 	 * class and superclasses.
 	 * <p>The same named method occurring on subclass and superclass will appear
 	 * twice, unless excluded by the specified {@link MethodFilter}.
-	 * @param targetClass class to start looking at
+	 * @param clazz class to start looking at
 	 * @param mc the callback to invoke for each method
 	 * @param mf the filter that determines the methods to apply the callback to
 	 */
-	public static void doWithMethods(Class<?> targetClass, MethodCallback mc, MethodFilter mf)
+	public static void doWithMethods(Class<?> clazz, MethodCallback mc, MethodFilter mf)
 			throws IllegalArgumentException {
 
 		// Keep backing up the inheritance hierarchy.
+		Class<?> targetClass = clazz;
 		do {
 			Method[] methods = targetClass.getDeclaredMethods();
 			for (Method method : methods) {
@@ -469,7 +470,8 @@ public abstract class ReflectionUtils {
 				}
 			}
 			targetClass = targetClass.getSuperclass();
-		} while (targetClass != null);
+		}
+		while (targetClass != null);
 	}
 
 	/**
@@ -489,26 +491,26 @@ public abstract class ReflectionUtils {
 	/**
 	 * Invoke the given callback on all fields in the target class, going up the
 	 * class hierarchy to get all declared fields.
-	 * @param targetClass the target class to analyze
+	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
 	 */
-	public static void doWithFields(Class<?> targetClass, FieldCallback fc) throws IllegalArgumentException {
-		doWithFields(targetClass, fc, null);
+	public static void doWithFields(Class<?> clazz, FieldCallback fc) throws IllegalArgumentException {
+		doWithFields(clazz, fc, null);
 	}
 
 	/**
 	 * Invoke the given callback on all fields in the target class, going up the
 	 * class hierarchy to get all declared fields.
-	 * @param targetClass the target class to analyze
+	 * @param clazz the target class to analyze
 	 * @param fc the callback to invoke for each field
 	 * @param ff the filter that determines the fields to apply the callback to
 	 */
-	public static void doWithFields(Class<?> targetClass, FieldCallback fc, FieldFilter ff)
+	public static void doWithFields(Class<?> clazz, FieldCallback fc, FieldFilter ff)
 			throws IllegalArgumentException {
 
 		// Keep backing up the inheritance hierarchy.
+		Class<?> targetClass = clazz;
 		do {
-			// Copy each field declared on this class unless it's static or file.
 			Field[] fields = targetClass.getDeclaredFields();
 			for (Field field : fields) {
 				// Skip static and final fields.
@@ -519,12 +521,13 @@ public abstract class ReflectionUtils {
 					fc.doWith(field);
 				}
 				catch (IllegalAccessException ex) {
-					throw new IllegalStateException("Shouldn't be illegal to access field '" + field.getName() + "': "
-							+ ex);
+					throw new IllegalStateException(
+							"Shouldn't be illegal to access field '" + field.getName() + "': " + ex);
 				}
 			}
 			targetClass = targetClass.getSuperclass();
-		} while (targetClass != null && targetClass != Object.class);
+		}
+		while (targetClass != null && targetClass != Object.class);
 	}
 
 	/**
