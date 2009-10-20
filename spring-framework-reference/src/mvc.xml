@@ -2563,21 +2563,10 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
     &lt;property name="maxUploadSize" value="100000"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>This example uses the
-      <classname>CosMultipartResolver</classname>:</para>
-
-      <programlisting language="xml">&lt;bean id="multipartResolver" class="org.springframework.web.multipart.cos.CosMultipartResolver"&gt;
-
-    <lineannotation>&lt;!-- one of the properties available; the maximum file size in bytes --&gt;</lineannotation>
-    &lt;property name="maxUploadSize" value="100000"/&gt;
-&lt;/bean&gt;</programlisting>
-
       <para>Of course you also need to put the appropriate jars in your
       classpath for the multipart resolver to work. In the case of the
       <classname>CommonsMultipartResolver</classname>, you need to use
-      <literal>commons-fileupload.jar</literal>; in the case of the
-      <classname>CosMultipartResolver</classname>, use
-      <literal>cos.jar</literal>.</para>
+      <literal>commons-fileupload.jar</literal>.</para>
 
       <para>When the Spring <classname>DispatcherServlet</classname> detects a
       multi-part request, it activates the resolver that has been declared in
@@ -2596,7 +2585,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <para>After the <classname>MultipartResolver</classname> completes its
       job, the request is processed like any other. To use it<!--to use what?-->,
       you create a form with an upload field (see immediately below) that will
-      allow the user to upload a form, then let Spring bind the file onto your
+      allow the user to upload a form. Then let Spring bind the file onto your
       form (backing object). <!--I reworded because it sounded like you refer twice to creating a form. Where in example do you *let* Spring bind the file? Clarify.--><!--Does reader know what a backing object refers to?--></para>
 
       <programlisting language="xml">&lt;html&gt;
@@ -2660,25 +2649,25 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
     protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
             Object command, BindException errors) throws ServletException, IOException {
 
-        <lineannotation> // cast the bean</lineannotation>
+        <lineannotation>// cast the bean</lineannotation>
         FileUploadBean bean = (FileUploadBean) command;
 
-        <lineannotation> let's see if there's content there</lineannotation>
+        <lineannotation>// let's see if there's content there</lineannotation>
         byte[] file = bean.getFile();
         if (file == null) {
-            <lineannotation> // hmm, that's strange, the user did not upload anything</lineannotation>
+            <lineannotation>// hmm, that's strange, the user did not upload anything</lineannotation>
         }
 
-        <lineannotation> // well, let's do nothing with the bean for now and return</lineannotation>
+        <lineannotation>// well, let's do nothing with the bean for now and return</lineannotation>
         return super.onSubmit(request, response, command, errors);
     }
 
     protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
         throws ServletException {
-        // to actually be able to convert Multipart instance to byte[]
-        // we have to register a custom editor
+        <lineannotation>// to actually be able to convert Multipart instance to byte[]</lineannotation>
+        <lineannotation>// we have to register a custom editor</lineannotation>
         binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
-        // now Spring knows how to handle multipart object and convert them
+        <lineannotation>// now Spring knows how to handle multipart objects and convert them</lineannotation>
     }
 }
 
@@ -2711,16 +2700,16 @@ public class FileUploadBean {
     protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
             Object command, BindException errors) throws ServletException, IOException {
 
-        <lineannotation> // cast the bean</lineannotation>
+        <lineannotation>// cast the bean</lineannotation>
         FileUploadBean bean = (FileUploadBean) command;
 
-        <lineannotation> let's see if there's content there</lineannotation>
+        <lineannotation>// let's see if there's content there</lineannotation>
         String file = bean.getFile();
         if (file == null) {
-            <lineannotation> // hmm, that's strange, the user did not upload anything</lineannotation>
+            <lineannotation>// hmm, that's strange, the user did not upload anything</lineannotation>
         }
 
-        <lineannotation> // well, let's do nothing with the bean for now and return</lineannotation>
+        <lineannotation>// well, let's do nothing with the bean for now and return</lineannotation>
         return super.onSubmit(request, response, command, errors);
     }
 
@@ -2762,16 +2751,16 @@ public class FileUploadBean {
     protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
             Object command, BindException errors) throws ServletException, IOException {
 
-        <lineannotation> // cast the bean</lineannotation>
+        <lineannotation>// cast the bean</lineannotation>
         FileUploadBean bean = (FileUploadBean) command;
 
         <lineannotation> let's see if there's content there</lineannotation>
         MultipartFile file = bean.getFile();
         if (file == null) {
-            <lineannotation> // hmm, that's strange, the user did not upload anything</lineannotation>
+            <lineannotation>// hmm, that's strange, the user did not upload anything</lineannotation>
         }
 
-        <lineannotation> // well, let's do nothing with the bean for now and return</lineannotation>
+        <lineannotation>// well, let's do nothing with the bean for now and return</lineannotation>
         return super.onSubmit(request, response, command, errors);
     }
 }

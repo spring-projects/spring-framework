@@ -72,7 +72,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
       <para>When using the Java Standard Tag Library you must use a special
       view class, the <classname>JstlView</classname>, as JSTL needs some
-      preparation before things such as the i18N features will work.</para>
+      preparation before things such as the I18N features will work.</para>
     </section>
 
     <section id="view-jsp-tags">
@@ -86,8 +86,8 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       escaping of characters.</para>
 
       <para>The tag library descriptor (TLD) is included in the <filename
-      class="libraryfile">spring.jar</filename> as well in the distribution
-      itself. Further information about the individual tags can be found in
+      class="libraryfile">org.springframework.web.servlet-3.0.0.RELEASE.jar</filename>.
+      Further information about the individual tags can be found in
       the appendix entitled <xref linkend="spring.tld" />.</para>
     </section>
 
@@ -115,7 +115,8 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         <title>Configuration</title>
 
         <para>The form tag library comes bundled in
-        <literal>spring.jar</literal>. The library descriptor is called
+        <literal>org.springframework.web.servlet-3.0.0.RC1.jar</literal>.
+        The library descriptor is called
         <literal>spring-form.tld</literal>.</para>
 
         <para>To use the tags from this library, add the following directive
@@ -813,7 +814,7 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
       dependencies included in your project. The following is the list of
       dependencies you need.</para>
 
-      <para><itemizedlist spacing="compact">
+      <itemizedlist spacing="compact">
           <listitem>
             <para><literal>Tiles version 2.0.4 or higher</literal></para>
           </listitem>
@@ -829,10 +830,8 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
           <listitem>
             <para><literal>Commons Logging</literal></para>
           </listitem>
-        </itemizedlist></para>
+        </itemizedlist>
 
-      <para>These dependencies are all available in the Spring
-      distribution.</para>
     </section>
 
     <section id="view-tiles-integrate">
@@ -910,12 +909,12 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <para>As you can see, when using the
         <classname>ResourceBundleViewResolver</classname>, you can easily mix
         different view technologies.</para>
-      </section>
 
-      <para>Note that the <classname>TilesView</classname> class for Tiles 2
-      supports JSTL (the JSP Standard Tag Library) out of the box, whereas
-      there is a separate <classname>TilesJstlView</classname> subclass in the
-      Tiles 1.x support.</para>
+	      <para>Note that the <classname>TilesView</classname> class for Tiles 2
+	      supports JSTL (the JSP Standard Tag Library) out of the box, whereas
+	      there is a separate <classname>TilesJstlView</classname> subclass in the
+	      Tiles 1.x support.</para>
+      </section>
 
       <section id="view-tiles-preparer">
         <title><classname>SimpleSpringPreparerFactory</classname> and
@@ -990,10 +989,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       found by a Java EE server and added to the classpath for your application.
       It is of course assumed that you already have the <filename
       class="libraryfile">spring.jar</filename> in your <filename
-      class="directory">'WEB-INF/lib'</filename> directory too! The latest
-      stable Velocity, FreeMarker and Commons Collections jars are supplied
-      with the Spring framework and can be copied from the relevant <filename
-      class="libraryfile">/lib/</filename> sub-directories. If you make use of
+      class="directory">'WEB-INF/lib'</filename> directory too! If you make use of
       Spring's 'dateToolAttribute' or 'numberToolAttribute' in your Velocity
       views, you will also need to include the <filename
       class="libraryfile">velocity-tools-generic-1.x.jar</filename></para>
