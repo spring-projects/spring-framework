@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationListener;
@@ -297,7 +296,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * have been set. Creates this servlet's WebApplicationContext.
 	 */
 	@Override
-	protected final void initServletBean() throws ServletException, BeansException {
+	protected final void initServletBean() throws ServletException {
 		getServletContext().log("Initializing Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
@@ -312,7 +311,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 			this.logger.error("Context initialization failed", ex);
 			throw ex;
 		}
-		catch (BeansException ex) {
+		catch (RuntimeException ex) {
 			this.logger.error("Context initialization failed", ex);
 			throw ex;
 		}
@@ -329,11 +328,10 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation
 	 * of the context. Can be overridden in subclasses.
 	 * @return the WebApplicationContext instance
-	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
 	 * @see #setContextConfigLocation
 	 */
-	protected WebApplicationContext initWebApplicationContext() throws BeansException {
+	protected WebApplicationContext initWebApplicationContext() {
 		WebApplicationContext wac = findWebApplicationContext();
 		if (wac == null) {
 			// No fixed context defined for this servlet - create a local one.
@@ -397,12 +395,9 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * before returning the context instance.
 	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the WebApplicationContext for this servlet
-	 * @throws BeansException if the context couldn't be initialized
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
-	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
-			throws BeansException {
-
+	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 		Class<?> contextClass = getContextClass();
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Servlet with name '" + getServletName() +
@@ -415,25 +410,26 @@ public abstract class FrameworkServlet extends HttpServletBean
 					"': custom WebApplicationContext class [" + contextClass.getName() +
 					"] is not of type ConfigurableWebApplicationContext");
 		}
-
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
 		// Assign the best possible id value.
-		ServletContext servletContext = getServletContext();
-		if (servletContext.getMajorVersion() > 2 || servletContext.getMinorVersion() >= 5) {
-			// Servlet 2.5's getContextPath available!
-			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContext.getContextPath() + "/" + getServletName());
-		}
-		else {
+		ServletContext sc = getServletContext();
+		if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
 			// Servlet <= 2.4: resort to name specified in web.xml, if any.
-			String servletContextName = servletContext.getServletContextName();
+			String servletContextName = sc.getServletContextName();
 			if (servletContextName != null) {
-				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName + "." + getServletName());
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName +
+						"." + getServletName());
 			}
 			else {
 				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
 			}
+		}
+		else {
+			// Servlet 2.5's getContextPath available!
+			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + sc.getContextPath() +
+					"/" + getServletName());
 		}
 
 		wac.setParent(parent);
@@ -485,19 +481,17 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * the WebApplicationContext has been loaded. The default implementation is empty;
 	 * subclasses may override this method to perform any initialization they require.
 	 * @throws ServletException in case of an initialization exception
-	 * @throws BeansException if thrown by ApplicationContext methods
 	 */
-	protected void initFrameworkServlet() throws ServletException, BeansException {
+	protected void initFrameworkServlet() throws ServletException {
 	}
 
 	/**
 	 * Refresh this servlet's application context, as well as the
 	 * dependent state of the servlet.
-	 * @throws BeansException in case of errors
 	 * @see #getWebApplicationContext()
 	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
 	 */
-	public void refresh() throws BeansException {
+	public void refresh() {
 		WebApplicationContext wac = getWebApplicationContext();
 		if (!(wac instanceof ConfigurableApplicationContext)) {
 			throw new IllegalStateException("WebApplicationContext does not support refresh: " + wac);
@@ -523,10 +517,9 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * Called after successful context refresh.
 	 * <p>This implementation is empty.
 	 * @param context the current WebApplicationContext
-	 * @throws BeansException in case of errors
 	 * @see #refresh()
 	 */
-	protected void onRefresh(ApplicationContext context) throws BeansException {
+	protected void onRefresh(ApplicationContext context) {
 		// For subclasses: do nothing by default.
 	}
 
@@ -540,7 +533,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 */
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+			throws ServletException, IOException {
 
 		processRequest(request, response);
 	}
@@ -551,7 +544,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 */
 	@Override
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+			throws ServletException, IOException {
 
 		processRequest(request, response);
 	}
@@ -562,7 +555,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 */
 	@Override
 	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+			throws ServletException, IOException {
 
 		processRequest(request, response);
 	}
@@ -573,7 +566,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 */
 	@Override
 	protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+			throws ServletException, IOException {
 
 		processRequest(request, response);
 	}
@@ -584,7 +577,9 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * @see #doService
 	 */
 	@Override
-	protected void doOptions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
 		super.doOptions(request, response);
 		if (this.dispatchOptionsRequest) {
 			processRequest(request, response);
@@ -597,7 +592,9 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * @see #doService
 	 */
 	@Override
-	protected void doTrace(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doTrace(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
 		super.doTrace(request, response);
 		if (this.dispatchTraceRequest) {
 			processRequest(request, response);
@@ -715,7 +712,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * @see javax.servlet.http.HttpServlet#doPost
 	 */
 	protected abstract void doService(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception;
+			throws Exception;
 
 
 	/**

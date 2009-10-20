@@ -42,7 +42,6 @@ import javax.portlet.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -583,10 +582,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param context the current Portlet ApplicationContext
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
-	 * @throws BeansException if initialization failed
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 */
-	protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) throws BeansException {
+	protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) {
 		return context.getAutowireCapableBeanFactory().createBean(clazz);
 	}
 
