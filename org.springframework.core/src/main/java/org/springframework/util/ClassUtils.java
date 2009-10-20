@@ -694,11 +694,26 @@ public abstract class ClassUtils {
 	 */
 	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
 		Method specificMethod = null;
-		if (method != null && !Modifier.isPrivate(method.getModifiers()) &&
+		if (method != null && isOverridable(method, targetClass) &&
 				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
 			specificMethod = ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
 		}
 		return (specificMethod != null ? specificMethod : method);
+	}
+
+	/**
+	 * Determine whether the given method is overridable in the given target class.
+	 * @param method the method to check
+	 * @param targetClass the target class to check against
+	 */
+	private static boolean isOverridable(Method method, Class targetClass) {
+		if (Modifier.isPrivate(method.getModifiers())) {
+			return false;
+		}
+		if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())) {
+			return true;
+		}
+		return getPackageName(method.getDeclaringClass()).equals(getPackageName(targetClass));
 	}
 
 	/**

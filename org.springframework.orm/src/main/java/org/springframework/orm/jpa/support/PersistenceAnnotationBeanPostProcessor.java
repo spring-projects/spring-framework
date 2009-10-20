@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +60,6 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
@@ -302,13 +302,6 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		InjectionMetadata metadata = findPersistenceMetadata(bean.getClass());
-		try {
-			metadata.injectFields(bean, beanName);
-		}
-		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Injection of persistence fields failed", ex);
-		}
 		return true;
 	}
 
@@ -317,10 +310,10 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 		InjectionMetadata metadata = findPersistenceMetadata(bean.getClass());
 		try {
-			metadata.injectMethods(bean, beanName, pvs);
+			metadata.inject(bean, beanName, pvs);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Injection of persistence methods failed", ex);
+			throw new BeanCreationException(beanName, "Injection of persistence dependencies failed", ex);
 		}
 		return pvs;
 	}
@@ -346,21 +339,22 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(clazz);
 				if (metadata == null) {
-					final InjectionMetadata newMetadata = new InjectionMetadata(clazz);
-					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-						public void doWith(Field field) {
+					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+					Class<?> targetClass = clazz;
+
+					do {
+						LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
+						for (Field field : targetClass.getDeclaredFields()) {
 							PersistenceContext pc = field.getAnnotation(PersistenceContext.class);
 							PersistenceUnit pu = field.getAnnotation(PersistenceUnit.class);
 							if (pc != null || pu != null) {
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("Persistence annotations are not supported on static fields");
 								}
-								newMetadata.addInjectedField(new PersistenceElement(field, null));
+								currElements.add(new PersistenceElement(field, null));
 							}
 						}
-					});
-					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
-						public void doWith(Method method) {
+						for (Method method : targetClass.getDeclaredMethods()) {
 							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
 							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
 							if (pc != null || pu != null &&
@@ -372,11 +366,15 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 									throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
 								}
 								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								newMetadata.addInjectedMethod(new PersistenceElement(method, pd));
+								currElements.add(new PersistenceElement(method, pd));
 							}
 						}
-					});
-					metadata = newMetadata;
+						elements.addAll(0, currElements);
+						targetClass = targetClass.getSuperclass();
+					}
+					while (targetClass != null && targetClass != Object.class);
+
+					metadata = new InjectionMetadata(clazz, elements);
 					this.injectionMetadataCache.put(clazz, metadata);
 				}
 			}

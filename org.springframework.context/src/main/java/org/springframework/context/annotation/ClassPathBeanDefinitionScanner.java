@@ -315,5 +315,4 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		return ScopedProxyCreator.createScopedProxy(definition, this.registry, proxyTargetClass);
 	}
 
-
 }

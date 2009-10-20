@@ -49,42 +49,21 @@ public class InjectionMetadata {
 
 	private final Log logger = LogFactory.getLog(InjectionMetadata.class);
 
-	private String targetClassName;
-
-	private final Set<InjectedElement> injectedFields = new LinkedHashSet<InjectedElement>();
-
-	private final Set<InjectedElement> injectedMethods = new LinkedHashSet<InjectedElement>();
+	private final Set<InjectedElement> injectedElements;
 
 
-	public InjectionMetadata() {
-	}
-
-	public InjectionMetadata(Class targetClass) {
-		this.targetClassName = targetClass.getName();
-	}
-
-
-	public void addInjectedField(InjectedElement element) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Found injected field on class [" + this.targetClassName + "]: " + element);
+	public InjectionMetadata(Class targetClass, Collection<InjectedElement> elements) {
+		this.injectedElements = new LinkedHashSet<InjectedElement>();
+		for (InjectedElement element : elements) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
+			}
+			this.injectedElements.add(element);
 		}
-		this.injectedFields.add(element);
-	}
-
-	public void addInjectedMethod(InjectedElement element) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Found injected method on class [" + this.targetClassName + "]: " + element);
-		}
-		this.injectedMethods.add(element);
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		doRegisterConfigMembers(beanDefinition, this.injectedFields);
-		doRegisterConfigMembers(beanDefinition, this.injectedMethods);
-	}
-
-	private void doRegisterConfigMembers(RootBeanDefinition beanDefinition, Collection<InjectedElement> members) {
-		for (Iterator<InjectedElement> it = members.iterator(); it.hasNext();) {
+		for (Iterator<InjectedElement> it = this.injectedElements.iterator(); it.hasNext();) {
 			Member member = it.next().getMember();
 			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
 				beanDefinition.registerExternallyManagedConfigMember(member);
@@ -95,22 +74,10 @@ public class InjectionMetadata {
 		}
 	}
 
-	public void injectFields(Object target, String beanName) throws Throwable {
-		if (!this.injectedFields.isEmpty()) {
+	public void inject(Object target, String beanName, PropertyValues pvs) throws Throwable {
+		if (!this.injectedElements.isEmpty()) {
 			boolean debug = logger.isDebugEnabled();
-			for (InjectedElement element : this.injectedFields) {
-				if (debug) {
-					logger.debug("Processing injected field of bean '" + beanName + "': " + element);
-				}
-				element.inject(target, beanName, null);
-			}
-		}
-	}
-
-	public void injectMethods(Object target, String beanName, PropertyValues pvs) throws Throwable {
-		if (!this.injectedMethods.isEmpty()) {
-			boolean debug = logger.isDebugEnabled();
-			for (InjectedElement element : this.injectedMethods) {
+			for (InjectedElement element : this.injectedElements) {
 				if (debug) {
 					logger.debug("Processing injected method of bean '" + beanName + "': " + element);
 				}

@@ -16,19 +16,16 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.AbstractRefreshableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -108,8 +105,7 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 	 * @see Configuration#value()
 	 */
 	@Override
-	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
-			throws IOException, BeansException {
+	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) {
 		this.delegate.loadBeanDefinitions(beanFactory);
 	}
 
@@ -162,34 +158,27 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
 
 			for (Class<?> configClass : this.configClasses) {
-				AbstractBeanDefinition def = BeanDefinitionBuilder.rootBeanDefinition(configClass).getBeanDefinition();
-
+				RootBeanDefinition def = new RootBeanDefinition(configClass);
 				String name = AnnotationUtils.findAnnotation(configClass, Configuration.class).value();
 				if (!StringUtils.hasLength(name)) {
 					name = new DefaultBeanNameGenerator().generateBeanName(def, beanFactory);
 				}
-
 				beanFactory.registerBeanDefinition(name, def);
 			}
-
-			new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		}
 
 		/**
 		 * @see ConfigurationClassApplicationContext#getBean(Class)
 		 */
-		@SuppressWarnings("unchecked")
-		public <T> T getBean(Class<T> requiredType, AbstractApplicationContext context) {
+		public <T> T getBean(Class<T> requiredType, ListableBeanFactory context) {
 			Assert.notNull(requiredType, "requiredType may not be null");
 			Assert.notNull(context, "context may not be null");
-
-			Map<String, ?> beansOfType = context.getBeansOfType(requiredType);
-
+			Map<String, T> beansOfType = context.getBeansOfType(requiredType);
 			switch (beansOfType.size()) {
 				case 0:
 					throw new NoSuchBeanDefinitionException(requiredType);
 				case 1:
-					return (T) beansOfType.values().iterator().next();
+					return beansOfType.values().iterator().next();
 				default:
 					throw new NoSuchBeanDefinitionException(requiredType,
 							beansOfType.size() + " matching bean definitions found " +
@@ -199,4 +188,5 @@ public class ConfigurationClassApplicationContext extends AbstractRefreshableApp
 			}
 		}
 	}
+
 }
