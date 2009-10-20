@@ -118,6 +118,10 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		}
 	}
 
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		return getBean(requiredType.getSimpleName(), requiredType);
+	}
+
 	public Object getBean(String name, Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(

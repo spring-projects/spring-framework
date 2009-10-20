@@ -31,10 +31,7 @@ import org.atinject.tck.auto.accessories.SpareTire;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AutowireCandidateQualifier;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.ScopeMetadata;
 import org.springframework.context.annotation.ScopeMetadataResolver;
@@ -71,58 +68,8 @@ public class SpringAtInjectTck {
 		bdr.registerBean(FuelTank.class);
 
 		ac.refresh();
-		Car car = ac.getBean("convertible", Car.class);
+		Car car = ac.getBean(Car.class);
 
-		return Tck.testsFor(car, false, true);
-	}
-
-	public static Test suiteX() {
-		GenericApplicationContext ac = new GenericApplicationContext();
-
-		GenericBeanDefinition carDef = new GenericBeanDefinition();
-		carDef.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
-		carDef.setBeanClass(Convertible.class);
-		ac.registerBeanDefinition("car", carDef);
-
-		GenericBeanDefinition driversSeatDef = new GenericBeanDefinition();
-		driversSeatDef.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
-		driversSeatDef.setBeanClass(DriversSeat.class);
-		driversSeatDef.addQualifier(new AutowireCandidateQualifier(Drivers.class));
-		ac.registerBeanDefinition("driversSeat", driversSeatDef);
-
-		GenericBeanDefinition seatDef = new GenericBeanDefinition();
-		seatDef.setBeanClass(Seat.class);
-		seatDef.setPrimary(true);
-		ac.registerBeanDefinition("seat", seatDef);
-
-		GenericBeanDefinition engineDef = new GenericBeanDefinition();
-		engineDef.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
-		engineDef.setBeanClass(V8Engine.class);
-		ac.registerBeanDefinition("engine", engineDef);
-
-		GenericBeanDefinition spareDef = new GenericBeanDefinition();
-		spareDef.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
-		spareDef.setBeanClass(SpareTire.class);
-		spareDef.addQualifier(new AutowireCandidateQualifier(Drivers.class));
-		ac.registerBeanDefinition("spare", spareDef);
-
-		GenericBeanDefinition cupholderDef = new GenericBeanDefinition();
-		cupholderDef.setBeanClass(Cupholder.class);
-		ac.registerBeanDefinition("cupholder", cupholderDef);
-
-		GenericBeanDefinition tireDef = new GenericBeanDefinition();
-		tireDef.setScope(GenericBeanDefinition.SCOPE_PROTOTYPE);
-		tireDef.setBeanClass(Tire.class);
-		tireDef.setPrimary(true);
-		ac.registerBeanDefinition("tire", tireDef);
-
-		GenericBeanDefinition fuelTankDef = new GenericBeanDefinition();
-		fuelTankDef.setBeanClass(FuelTank.class);
-		ac.registerBeanDefinition("fuelTank", fuelTankDef);
-
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
-		ac.refresh();
-		Car car = ac.getBean("car", Car.class);
 		return Tck.testsFor(car, false, true);
 	}
 
