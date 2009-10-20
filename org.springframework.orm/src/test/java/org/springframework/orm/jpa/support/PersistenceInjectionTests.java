@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -506,8 +505,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public void testFieldOfWrongTypeAnnotatedWithPersistenceUnit() {
 		PersistenceAnnotationBeanPostProcessor babpp = new PersistenceAnnotationBeanPostProcessor();
 		try {
-			babpp.postProcessAfterInstantiation(new FieldOfWrongTypeAnnotatedWithPersistenceUnit(),
-					"bean name does not matter");
+			babpp.postProcessPropertyValues(null, null, new FieldOfWrongTypeAnnotatedWithPersistenceUnit(), null);
 			fail("Can't inject this field");
 		}
 		catch (IllegalStateException ex) {
@@ -518,8 +516,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public void testSetterOfWrongTypeAnnotatedWithPersistenceUnit() {
 		PersistenceAnnotationBeanPostProcessor babpp = new PersistenceAnnotationBeanPostProcessor();
 		try {
-			babpp.postProcessAfterInstantiation(new SetterOfWrongTypeAnnotatedWithPersistenceUnit(),
-					"bean name does not matter");
+			babpp.postProcessPropertyValues(null, null, new SetterOfWrongTypeAnnotatedWithPersistenceUnit(), null);
 			fail("Can't inject this setter");
 		}
 		catch (IllegalStateException ex) {
@@ -530,7 +527,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public void testSetterWithNoArgs() {
 		PersistenceAnnotationBeanPostProcessor babpp = new PersistenceAnnotationBeanPostProcessor();
 		try {
-			babpp.postProcessAfterInstantiation(new SetterWithNoArgs(), "bean name does not matter");
+			babpp.postProcessPropertyValues(null, null, new SetterWithNoArgs(), null);
 			fail("Can't inject this setter");
 		}
 		catch (IllegalStateException ex) {
@@ -582,7 +579,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		PersistenceAnnotationBeanPostProcessor babpp = new MockPersistenceAnnotationBeanPostProcessor();
 		DefaultPrivatePersistenceContextFieldWithProperties transactionalField =
 				new DefaultPrivatePersistenceContextFieldWithProperties();
-		babpp.postProcessAfterInstantiation(transactionalField, "bean name does not matter");
+		babpp.postProcessPropertyValues(null, null, transactionalField, null);
 
 		assertNotNull(transactionalField.em);
 		assertNotNull(transactionalField.em.getDelegate());
@@ -613,8 +610,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				new DefaultPrivatePersistenceContextFieldWithProperties();
 		DefaultPrivatePersistenceContextField transactionalField = new DefaultPrivatePersistenceContextField();
 
-		babpp.postProcessAfterInstantiation(transactionalFieldWithProperties, "bean name does not matter");
-		babpp.postProcessAfterInstantiation(transactionalField, "bean name does not matter");
+		babpp.postProcessPropertyValues(null, null, transactionalFieldWithProperties, null);
+		babpp.postProcessPropertyValues(null, null, transactionalField, null);
 
 		assertNotNull(transactionalFieldWithProperties.em);
 		assertNotNull(transactionalField.em);
@@ -650,8 +647,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				new DefaultPrivatePersistenceContextFieldWithProperties();
 		DefaultPrivatePersistenceContextField transactionalField = new DefaultPrivatePersistenceContextField();
 
-		babpp.postProcessAfterInstantiation(transactionalFieldWithProperties, "bean name does not matter");
-		babpp.postProcessAfterInstantiation(transactionalField, "bean name does not matter");
+		babpp.postProcessPropertyValues(null, null, transactionalFieldWithProperties, null);
+		babpp.postProcessPropertyValues(null, null, transactionalField, null);
 
 		assertNotNull(transactionalFieldWithProperties.em);
 		assertNotNull(transactionalField.em);
