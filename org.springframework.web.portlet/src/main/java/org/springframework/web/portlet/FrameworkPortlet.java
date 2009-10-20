@@ -32,7 +32,6 @@ import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationListener;
@@ -258,7 +257,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * have been set. Creates this portlet's ApplicationContext.
 	 */
 	@Override
-	protected final void initPortletBean() throws PortletException, BeansException {
+	protected final void initPortletBean() throws PortletException {
 		getPortletContext().log("Initializing Spring FrameworkPortlet '" + getPortletName() + "'");
 		if (logger.isInfoEnabled()) {
 			logger.info("FrameworkPortlet '" + getPortletName() + "': initialization started");
@@ -273,7 +272,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 			logger.error("Context initialization failed", ex);
 			throw ex;
 		}
-		catch (BeansException ex) {
+		catch (RuntimeException ex) {
 			logger.error("Context initialization failed", ex);
 			throw ex;
 		}
@@ -289,9 +288,8 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * <p>Delegates to {@link #createPortletApplicationContext} for actual creation.
 	 * Can be overridden in subclasses.
 	 * @return the ApplicationContext for this portlet
-	 * @throws BeansException if the context couldn't be initialized
 	 */
-	protected ApplicationContext initPortletApplicationContext() throws BeansException {
+	protected ApplicationContext initPortletApplicationContext() {
 		ApplicationContext parent = PortletApplicationContextUtils.getWebApplicationContext(getPortletContext());
 		ApplicationContext pac = createPortletApplicationContext(parent);
 
@@ -320,13 +318,10 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * ConfigurablePortletApplicationContext. Can be overridden in subclasses.
 	 * @param parent the parent ApplicationContext to use, or null if none
 	 * @return the Portlet ApplicationContext for this portlet
-	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
 	 * @see org.springframework.web.portlet.context.XmlPortletApplicationContext
 	 */
-	protected ApplicationContext createPortletApplicationContext(ApplicationContext parent)
-			throws BeansException {
-
+	protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) {
 		Class<?> contextClass = getContextClass();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Portlet with name '" + getPortletName() +
@@ -338,7 +333,6 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 					"': custom ApplicationContext class [" + contextClass.getName() +
 					"] is not of type ConfigurablePortletApplicationContext");
 		}
-
 		ConfigurablePortletApplicationContext pac =
 				(ConfigurablePortletApplicationContext) BeanUtils.instantiateClass(contextClass);
 
@@ -400,19 +394,17 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * <p>The default implementation is empty; subclasses may override this method
 	 * to perform any initialization they require.
 	 * @throws PortletException in case of an initialization exception
-	 * @throws BeansException if thrown by ApplicationContext methods
 	 */
-	protected void initFrameworkPortlet() throws PortletException, BeansException {
+	protected void initFrameworkPortlet() throws PortletException {
 	}
 
 	/**
 	 * Refresh this portlet's application context, as well as the
 	 * dependent state of the portlet.
-	 * @throws BeansException in case of errors
 	 * @see #getPortletApplicationContext()
 	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
 	 */
-	public void refresh() throws BeansException {
+	public void refresh() {
 		ApplicationContext pac = getPortletApplicationContext();
 		if (!(pac instanceof ConfigurableApplicationContext)) {
 			throw new IllegalStateException("Portlet ApplicationContext does not support refresh: " + pac);
@@ -438,10 +430,9 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * Called after successful context refresh.
 	 * <p>This implementation is empty.
 	 * @param context the current Portlet ApplicationContext
-	 * @throws BeansException in case of errors
 	 * @see #refresh()
 	 */
-	protected void onRefresh(ApplicationContext context) throws BeansException {
+	protected void onRefresh(ApplicationContext context) {
 		// For subclasses: do nothing by default.
 	}
 

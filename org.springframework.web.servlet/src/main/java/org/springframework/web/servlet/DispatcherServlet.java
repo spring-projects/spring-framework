@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -322,7 +321,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * This implementation calls {@link #initStrategies}.
 	 */
 	@Override
-	protected void onRefresh(ApplicationContext context) throws BeansException {
+	protected void onRefresh(ApplicationContext context) {
 		initStrategies(context);
 	}
 
@@ -673,11 +672,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param context the current WebApplicationContext
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
-	 * @throws BeansException if initialization failed
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean
 	 */
-	protected Object createDefaultStrategy(ApplicationContext context, Class clazz) throws BeansException {
+	protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) {
 		return context.getAutowireCapableBeanFactory().createBean(clazz);
 	}
 
@@ -742,7 +740,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		int interceptorIndex = -1;
 
 		try {
-			ModelAndView mv = null;
+			ModelAndView mv;
 			boolean errorView = false;
 
 			try {
@@ -1032,13 +1030,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws Exception if there's a problem rendering the view
 	 */
 	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 		// Determine locale for request and apply it to the response.
 		Locale locale = this.localeResolver.resolveLocale(request);
 		response.setLocale(locale);
 
-		View view = null;
-
+		View view;
 		if (mv.isReference()) {
 			// We need to resolve the view name.
 			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
@@ -1076,7 +1072,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Resolve the given view name into a View object (to be rendered).
-	 * <p>Default implementations asks all ViewResolvers of this dispatcher.
+	 * <p>The default implementations asks all ViewResolvers of this dispatcher.
 	 * Can be overridden for custom resolution strategies, potentially based on
 	 * specific model attributes or request parameters.
 	 * @param viewName the name of the view to resolve
@@ -1088,9 +1084,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
 	 */
-	protected View resolveViewName(String viewName,
-			Map<String, Object> model,
-			Locale locale,
+	protected View resolveViewName(String viewName, Map<String, Object> model, Locale locale,
 			HttpServletRequest request) throws Exception {
 
 		for (ViewResolver viewResolver : this.viewResolvers) {
