@@ -36,7 +36,7 @@
 
     <para>Having dispensed with the woolly sales patter (c.f. the previous
     paragraph), the remainder of this chapter will concentrate upon the meaty
-    details of integrating your favourite web framework with Spring. One thing
+    details of integrating your favorite web framework with Spring. One thing
     that is often commented upon by developers coming to Java from other
     languages is the seeming super-abundance of web frameworks available in
     Java... there are indeed a great number of web frameworks in the Java
@@ -45,15 +45,18 @@
     popular web frameworks in Java, starting with the Spring configuration
     that is common to all of the supported web frameworks, and then detailing
     the specific integration options for each supported web framework.</para>
+    
+    <note>
+        <para>Please note that this chapter does not attempt to explain
+        how to use any of the supported web frameworks. For example, if you want
+        to use Struts for the presentation layer of your web application, the
+        assumption is that you are already familiar with Struts. If you need
+        further details about any of the supported web frameworks themselves,
+        please do consult <xref linkend="web-integration-resources" /> at the end
+        of this chapter.
+        </para>
+    </note>
 
-    <para><emphasis> Please note that this chapter does not attempt to explain
-    how to use any of the supported web frameworks. For example, if you want
-    to use Struts for the presentation layer of your web application, the
-    assumption is that you are already familiar with Struts. If you need
-    further details about any of the supported web frameworks themselves,
-    please do consult <xref linkend="web-integration-resources" /> at the end
-    of this chapter.
-    </emphasis></para>
   </section>
 
   <section id="web-integration-common">
@@ -84,7 +87,7 @@
     in the standard Java EE servlet <literal>web.xml</literal> file of one's web
     application, and add a <literal>contextConfigLocation</literal>
     &lt;context-param/&gt; section (in the same file) that defines which set
-    of Spring XML cpnfiguration files to load.</para>
+    of Spring XML configuration files to load.</para>
 
     <para>Find below the &lt;listener/&gt; configuration:</para>
 
@@ -549,16 +552,18 @@
     <title>WebWork 2.x</title>
 
     <para>From the <ulink url="http://www.opensymphony.com/webwork/">WebWork
-    homepage</ulink>...</para>
-
-    <quote>
-      <emphasis>WebWork is a Java web-application development framework. It is
-      built specifically with developer productivity and code simplicity in
-      mind, providing robust support for building reusable UI templates, such
-      as form controls, UI themes, internationalization, dynamic form
-      parameter mapping to JavaBeans, robust client and server side
-      validation, and much more.</emphasis>
-    </quote>
+    homepage</ulink>:</para>
+    
+    <para>
+        <quote>
+          <emphasis>WebWork is a Java web-application development framework. It is
+          built specifically with developer productivity and code simplicity in
+          mind, providing robust support for building reusable UI templates, such
+          as form controls, UI themes, internationalization, dynamic form
+          parameter mapping to JavaBeans, robust client and server side
+          validation, and much more.</emphasis>
+        </quote>
+    </para>
 
     <para>WebWork is (in the opinion of this author) a very clean, elegant web
     framework. Its architecture and key concepts are not only very easy to
@@ -601,14 +606,16 @@
     <title>Tapestry 3.x and 4.x</title>
 
     <para>From the <ulink url="http://tapestry.apache.org/">Tapestry
-    homepage</ulink>...</para>
-
-    <quote>
-      <emphasis>Tapestry is an open-source framework for creating dynamic,
-      robust, highly scalable web applications in Java. Tapestry complements
-      and builds upon the standard Java Servlet API, and so it works in any
-      servlet container or application server.</emphasis>
-    </quote>
+    homepage</ulink>:</para>
+    
+    <para>
+        <quote>
+          <emphasis>Tapestry is an open-source framework for creating dynamic,
+          robust, highly scalable web applications in Java. Tapestry complements
+          and builds upon the standard Java Servlet API, and so it works in any
+          servlet container or application server.</emphasis>
+        </quote>
+    </para>
 
     <para>While Spring has its own <link linkend="mvc">powerful web
     layer</link>, there are a number of unique advantages to building a Java EE
@@ -624,21 +631,23 @@
     the following snippet of best practice advice. (Text that the author of
     this Spring section has added is contained within <literal>[]</literal>
     brackets.)</para>
-
-    <quote>
-      <emphasis>A very succesful design pattern in Tapestry is to keep pages
-      and components very simple, and <emphasis
-      role="bold">delegate</emphasis> as much logic as possible out to
-      HiveMind [or Spring, or whatever] services. Listener methods should
-      ideally do little more than marshall together the correct information
-      and pass it over to a service.</emphasis>
-    </quote>
+    
+    <para>
+        <quote>
+          <emphasis>A very succesful design pattern in Tapestry is to keep pages
+          and components very simple, and <emphasis
+          role="bold">delegate</emphasis> as much logic as possible out to
+          HiveMind [or Spring, or whatever] services. Listener methods should
+          ideally do little more than marshall together the correct information
+          and pass it over to a service.</emphasis>
+        </quote>
+    </para>
 
     <para>The key question then is... how does one supply Tapestry pages with
     collaborating services? The answer, ideally, is that one would want to
     dependency inject those services directly into one's Tapestry pages. In
     Tapestry, one can effect this dependency injection by a variety of
-    means... This section is only going to enumerate the dependency injection
+    means. This section is only going to enumerate the dependency injection
     means afforded by Spring. The real beauty of the rest of this
     Spring-Tapestry integration is that the elegant and flexible design of
     Tapestry itself makes doing this dependency injection of Spring-managed
@@ -1087,16 +1096,17 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 
         <programlisting language="xml">&lt;inject property="userService" object="spring:userService"/&gt;
 &lt;inject property="authenticationService" object="spring:authenticationService"/&gt;</programlisting>
+
+        <para>In this example, we've managed to allow service beans defined in a
+        Spring container to be provided to the Tapestry page in a declarative
+        fashion. The page class does not know where the service implementations
+        are coming from, and in fact it is easy to slip in another implementation,
+        for example, during testing. This inversion of control is one of the prime
+        goals and benefits of the Spring Framework, and we have managed to extend
+        it all the way up the Java EE stack in this Tapestry application.</para>
       </section>
     </section>
 
-    <para>In this example, we've managed to allow service beans defined in a
-    Spring container to be provided to the Tapestry page in a declarative
-    fashion. The page class does not know where the service implementations
-    are coming from, and in fact it is easy to slip in another implementation,
-    for example, during testing. This inversion of control is one of the prime
-    goals and benefits of the Spring Framework, and we have managed to extend
-    it all the way up the Java EE stack in this Tapestry application.</para>
   </section>
 
   <section id="web-integration-resources">
