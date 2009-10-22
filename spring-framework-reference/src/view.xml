@@ -2562,13 +2562,13 @@ simpleReport.reportDataKey=myBeanData</programlisting>
   <section id="view-xml-marshalling">
     <title>XML Marshalling View</title>
 
-    <para>The <classname>MarhsallingView</classname> uses a XML
+    <para>The <classname>MarhsallingView</classname> uses an XML
     <interfacename>Marshaller</interfacename> defined in the
     <classname>org.springframework.oxm</classname> package to render the
     response content as XML. The object to be marshalled can be set explicitly
     using <classname>MarhsallingView</classname>'s
     <property>modelKey</property> bean property. Alternatively, the view will
-    iterate over all model properties marhsall only those types that are
+    iterate over all model properties and marhsall only those types that are
     supported by the <interfacename>Marshaller</interfacename>. For more
     information on the functionality in the
     <classname>org.springframework.oxm</classname> package refer to the
