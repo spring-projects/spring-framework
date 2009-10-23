@@ -27,10 +27,12 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 
 /**
  * Convenient adapter for programmatic registration of annotated bean classes.
- * 
+ * This is an alternative to {@link ClassPathBeanDefinitionScanner}, applying
+ * the same resolution of annotations but for explicitly registered classes only.
  *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see AnnotationConfigApplicationContext#register
  */
 public class AnnotatedBeanDefinitionReader {
 
@@ -40,11 +42,15 @@ public class AnnotatedBeanDefinitionReader {
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
-	private boolean includeAnnotationConfig = true;
 
-
+	/**
+	 * Create a new AnnotatedBeanDefinitionReader for the given bean factory.
+	 * @param registry the BeanFactory to load bean definitions into,
+	 * in the form of a BeanDefinitionRegistry
+	 */
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		this.registry = registry;
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
 
@@ -65,35 +71,14 @@ public class AnnotatedBeanDefinitionReader {
 
 	/**
 	 * Set the ScopeMetadataResolver to use for detected bean classes.
-	 * Note that this will override any custom "scopedProxyMode" setting.
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
-	 * @see #setScopedProxyMode
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
-		this.scopeMetadataResolver = scopeMetadataResolver;
-	}
-
-	/**
-	 * Specify the proxy behavior for non-singleton scoped beans.
-	 * Note that this will override any custom "scopeMetadataResolver" setting.
-	 * <p>The default is {@link ScopedProxyMode#NO}.
-	 * @see #setScopeMetadataResolver
-	 */
-	public void setScopedProxyMode(ScopedProxyMode scopedProxyMode) {
-		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver(scopedProxyMode);
-	}
-
-	/**
-	 * Specify whether to register annotation config post-processors.
-	 * <p>The default is to register the post-processors. Turn this off
-	 * to be able to ignore the annotations or to process them differently.
-	 */
-	public void setIncludeAnnotationConfig(boolean includeAnnotationConfig) {
-		this.includeAnnotationConfig = includeAnnotationConfig;
+		this.scopeMetadataResolver = (scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
 
 
-	public void registerBeans(Class<?>... annotatedClasses) {
+	public void register(Class<?>... annotatedClasses) {
 		for (Class<?> annotatedClass : annotatedClasses) {
 			registerBean(annotatedClass);
 		}
@@ -112,17 +97,7 @@ public class AnnotatedBeanDefinitionReader {
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
-		if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
-			abd.setPrimary(true);
-		}
-		if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
-			Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
-			abd.setLazyInit(value);
-		}
-		if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
-			String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
-			abd.setDependsOn(value);
-		}
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class.equals(qualifier)) {
@@ -137,28 +112,8 @@ public class AnnotatedBeanDefinitionReader {
 			}
 		}
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
-		definitionHolder = applyScopedProxyMode(definitionHolder, scopeMetadata);
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
-
-		// Register annotation config processors, if necessary.
-		if (this.includeAnnotationConfig) {
-			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
-		}
-	}
-
-	/**
-	 * Apply the specified scope to the given bean definition.
-	 * @param definition the bean definition to configure
-	 * @param metadata the corresponding scope metadata
-	 * @return the final bean definition to use (potentially a proxy)
-	 */
-	private BeanDefinitionHolder applyScopedProxyMode(BeanDefinitionHolder definition, ScopeMetadata metadata) {
-		ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
-		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
-			return definition;
-		}
-		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
-		return ScopedProxyCreator.createScopedProxy(definition, this.registry, proxyTargetClass);
 	}
 
 }

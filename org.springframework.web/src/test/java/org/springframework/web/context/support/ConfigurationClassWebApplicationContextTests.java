@@ -16,25 +16,20 @@
 
 package org.springframework.web.context.support;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
-import java.io.IOException;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
-import org.springframework.context.ApplicationContextException;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
+/**
+ * @author Chris Beams
+ */
 public class ConfigurationClassWebApplicationContextTests {
 
 	@Test
 	public void testSingleWellFormedConfigLocation() {
-		ConfigurationClassWebApplicationContext ctx = new ConfigurationClassWebApplicationContext();
+		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
 		ctx.setConfigLocation(Config.class.getName());
 		ctx.refresh();
 
@@ -42,45 +37,6 @@ public class ConfigurationClassWebApplicationContextTests {
 		assertNotNull(bean);
 	}
 
-	@Test
-	public void testWithoutExplicitlySettingConfigLocations() {
-		ConfigurationClassWebApplicationContext ctx = new ConfigurationClassWebApplicationContext();
-		try {
-			ctx.refresh();
-			fail("expected exception");
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString(
-					"Is the 'contextConfigLocations' context-param " +
-					"and/or init-param set properly in web.xml?"));
-		}
-	}
-
-	@Test
-	public void testMalformedConfigLocation() {
-		ConfigurationClassWebApplicationContext ctx = new ConfigurationClassWebApplicationContext();
-		ctx.setConfigLocation("garbage");
-		try {
-			ctx.refresh();
-			fail("expected exception");
-		} catch (ApplicationContextException ex) {
-			assertThat(ex.getCause(), is(IOException.class));
-			assertThat(ex.getCause().getMessage(),
-					containsString("Could not load @Configuration class"));
-		}
-	}
-
-	@Test
-	public void testNonConfigurationClass() {
-		ConfigurationClassWebApplicationContext ctx = new ConfigurationClassWebApplicationContext();
-		ctx.setConfigLocation(NotConfigurationAnnotated.class.getName());
-		try {
-			ctx.refresh();
-			fail("expected exception");
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(),
-					containsString("is not annotated with @Configuration"));
-		}
-	}
 
 	@Configuration
 	static class Config {
@@ -92,7 +48,6 @@ public class ConfigurationClassWebApplicationContextTests {
 
 	static class NotConfigurationAnnotated { }
 
-	static class TestBean {
+	static class TestBean { }
 
-	}
 }

@@ -9,6 +9,8 @@ Changes in version 3.0.0.RC2 (2009-10-30)
 * updated to final versions of JSR-330 "javax.inject" and JSR-303 "javax.validation" APIs
 * full compliance with the JSR-330 TCK (i.e. full compliance with the final specification)
 * support for Hibernate Validator 4.0 GA (as the JSR-303 reference implementation)
+* added AnnotatedBeanDefinitionReader helper for programmatic registration of annotated classes
+* added AnnotationConfig(Web)ApplicationContext for convenient registration/scanning of classes
 * revised MethodParameter's annotation accessor methods
 * PathMatchingResourcePatternResolver leniently ignores non-existing root directories
 * DefaultConversionService understands "on"/"off", "yes"/"no", "1"/"0" as boolean values
@@ -21,6 +23,7 @@ Changes in version 3.0.0.RC2 (2009-10-30)
 * ContentNegotiatingViewResolver works with ignoreAcceptHeader and defaultContentType as well
 * re-introduced Struts 1.x support ("org.springframework.web.struts") in deprecated form
 * deprecated scheduling support for JDK 1.3 Timer ("org.springframework.scheduling.timer")
+* deprecated remoting support for JAX-RPC (in favor of JAX-WS)
 
 
 Changes in version 3.0.0.RC1 (2009-09-25)
