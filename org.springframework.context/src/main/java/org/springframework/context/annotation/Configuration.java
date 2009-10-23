@@ -56,7 +56,7 @@ import org.springframework.stereotype.Component;
  * @see Lazy
  * @see Bean
  * @see ConfigurationClassPostProcessor;
- * @see ConfigurationClassApplicationContext;
+ * @see AnnotationConfigApplicationContext ;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -70,7 +70,7 @@ public @interface Configuration {
 	 * a bean name will be automatically generated.
 	 * 
 	 * <p>The custom name applies only if the Configuration class is picked up via
-	 * component scanning or supplied directly to a {@link ConfigurationClassApplicationContext}.
+	 * component scanning or supplied directly to a {@link AnnotationConfigApplicationContext}.
 	 * If the Configuration class is registered as a traditional XML bean definition,
 	 * the name/id of the bean element will take precedence.
 	 * 

@@ -243,6 +243,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	//---------------------------------------------------------------------
 
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		Assert.notNull(requiredType, "Required type must not be null");
 		String[] beanNames = getBeanNamesForType(requiredType);
 		if (beanNames.length == 1) {
 			return getBean(beanNames[0], requiredType);
@@ -251,7 +252,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return getParentBeanFactory().getBean(requiredType);
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " + beanNames.length);
+			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " +
+					beanNames.length + ": " + StringUtils.arrayToCommaDelimitedString(beanNames));
 		}
 	}
 

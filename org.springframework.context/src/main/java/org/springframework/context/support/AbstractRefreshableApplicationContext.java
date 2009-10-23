@@ -49,7 +49,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * specific bean definition format, are {@link ClassPathXmlApplicationContext}
  * and {@link FileSystemXmlApplicationContext}, which both derive from the
  * common {@link AbstractXmlApplicationContext} base class;
- * {@link org.springframework.context.annotation.ConfigurationClassApplicationContext}
+ * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext}
  * supports {@literal @Configuration}-annotated classes as a source of bean definitions.
  *
  * @author Juergen Hoeller
@@ -60,7 +60,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * @see AbstractXmlApplicationContext
  * @see ClassPathXmlApplicationContext
  * @see FileSystemXmlApplicationContext
- * @see org.springframework.context.annotation.ConfigurationClassApplicationContext
+ * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
@@ -223,12 +223,12 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * Load bean definitions into the given bean factory, typically through
 	 * delegating to one or more bean definition readers.
 	 * @param beanFactory the bean factory to load bean definitions into
-	 * @throws IOException if loading of bean definition files failed
 	 * @throws BeansException if parsing of the bean definitions failed
+	 * @throws IOException if loading of bean definition files failed
 	 * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 */
 	protected abstract void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
-			throws IOException, BeansException;
+			throws BeansException, IOException;
 
 }

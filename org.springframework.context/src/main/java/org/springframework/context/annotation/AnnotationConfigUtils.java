@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -158,6 +159,31 @@ public class AnnotationConfigUtils {
 		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(beanName, definition);
 		return new BeanDefinitionHolder(definition, beanName);
+	}
+
+	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
+		if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
+			abd.setPrimary(true);
+		}
+		if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
+			Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
+			abd.setLazyInit(value);
+		}
+		if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
+			String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
+			abd.setDependsOn(value);
+		}
+	}
+
+	static BeanDefinitionHolder applyScopedProxyMode(
+			ScopeMetadata metadata, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+
+		ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
+		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
+			return definition;
+		}
+		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
+		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
 
 }
