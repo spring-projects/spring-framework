@@ -36,7 +36,7 @@
 		pool; an executor may be single-threaded or even synchronous.
 		Spring's abstraction hides implementation details between
 		Java SE 1.4, Java SE 5 and Java EE environments.</para>
-		<title>The <interfacename>TaskExecutor</interfacename> interface</title>
+
 		<para>Spring's <interfacename>TaskExecutor</interfacename> interface is
 		identical to the <classname>java.util.concurrent.Executor</classname>
 		interface. In fact, its primary reason for existence is to abstract away
@@ -85,7 +85,7 @@
 						invocations asynchronously. Instead, each
 						invocation takes place in the calling thread. It
 						is primarily used in situations where
-						mutlithreading isn't necessary such as simple
+						multithreading isn't necessary such as simple
 						test cases.
 					</para>
 				</listitem>
@@ -121,7 +121,7 @@
 						Quartz's <classname>SimpleThreadPool</classname>
 						which listens to Spring's lifecycle callbacks.
 						This is typically used when you have a
-						threadpool that may need to be shared by both
+						thread pool that may need to be shared by both
 						Quartz and non-Quartz components.
 					</para>
 				</listitem>
@@ -203,6 +203,7 @@
 
 			</itemizedlist>
 		</section>
+
 		<section id="scheduling-task-executor-usage">
 			<title>Using a <interfacename>TaskExecutor</interfacename></title>
 			<para>Spring's <interfacename>TaskExecutor</interfacename> implementations
@@ -760,6 +761,7 @@ public class ExampleJob extends QuartzJobBean {
 			</para>
 		</section>
 	</section>
+
 	<section id="scheduling-jdk-timer">
 		<title>Using JDK Timer support</title>
 		<para>
