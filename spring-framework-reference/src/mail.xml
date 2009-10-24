@@ -19,9 +19,7 @@
 				<para>The <ulink url="http://java.sun.com/products/javabeans/jaf/downloads/index.html">JAF</ulink> <filename class="libraryfile">activation.jar</filename> library</para>
 			</listitem>
 		</itemizedlist>
-		<para>All of these libraries are available in the Spring-with-dependencies
-		distribution of the Spring Framework (in addition to also being freely
-		available on the web).</para>
+		<para>All of these libraries are freely available on the web.</para>
 	</sidebar>
 
     <para>The Spring Framework provides a helpful utility library for sending
@@ -37,7 +35,7 @@
     This package also contains a hierarchy of checked exceptions which provide
     a higher level of abstraction over the lower level mail system exceptions
     with the root exception being <exceptionname>MailException</exceptionname>. Please
-    refer to the Javadocs for more information on the rich mail exception hierarchy.</para>
+    refer to the JavaDocs for more information on the rich mail exception hierarchy.</para>
 
     <para>The <interfacename>org.springframework.mail.javamail.JavaMailSender</interfacename>
 	interface adds specialized <emphasis>JavaMail</emphasis> features such as MIME
@@ -184,12 +182,8 @@ public class SimpleOrderManager implements OrderManager {
 				<interfacename>OrderManager</interfacename> target.</para>
 			</note>
 			
-			<para>The Spring Framework's mail support ships with two
-			<interfacename>MailSender</interfacename> implementations. The standard JavaMail
-			implementation and the implementation on top of Jason Hunter's
-			<classname>MailMessage</classname> class that is included in
-			<ulink url="http://servlets.com/cos">the <literal>com.oreilly.servlet</literal>
-			package</ulink>. Please refer to the relevant Javadocs for more information.</para>
+			<para>The Spring Framework's mail support ships with the standard JavaMail
+			implementation. Please refer to the relevant JavaDocs for more information.</para>
 		</section>
 		
 	</section>
