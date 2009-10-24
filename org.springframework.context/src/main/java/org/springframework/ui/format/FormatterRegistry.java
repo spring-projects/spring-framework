@@ -31,9 +31,9 @@ public interface FormatterRegistry {
 	/**
 	 * Adds a Formatter to this registry indexed by type.
 	 * <p>Use this add method when type differs from &lt;T&gt;.
-	 * Calling  <code>getFormatter(type)</code> returns a decorator that wraps
+	 * Calling <code>getFormatter(type)</code> returns a decorator that wraps
 	 * the <code>targetFormatter</code> instance.
-	 * <p>On format, the decorator first coerses the instance of type to &lt;T&gt;,
+	 * <p>On format, the decorator first coerces the instance of type to &lt;T&gt;,
 	 * then delegates to <code>targetFormatter</code> to format the value.
 	 * <p>On parse, the decorator first delegates to the formatter to parse a &lt;T&gt;,
 	 * then coerces the parsed value to type.
@@ -44,14 +44,14 @@ public interface FormatterRegistry {
 
 	/**
 	 * Adds a Formatter to this registry indexed by &lt;T&gt;.
-	 * <o>Calling <code>getFormatter(&lt;T&gt;.class)</code> returns <code>formatter</code>.
+	 * <p>Calling <code>getFormatter(&lt;T&gt;.class)</code> returns <code>formatter</code>.
 	 * @param formatter the formatter
 	 */
 	void addFormatterByType(Formatter<?> formatter);
 
 	/**
 	 * Adds a Formatter to this registry indexed by the given annotation type.
-	 * <o>Calling <code>getFormatter(...)</code> on a field or accessor method
+	 * <p>Calling <code>getFormatter(...)</code> on a field or accessor method
 	 * with the given annotation returns <code>formatter</code>.
 	 * @param formatter the formatter
 	 */
@@ -59,7 +59,7 @@ public interface FormatterRegistry {
 
 	/**
 	 * Adds a AnnotationFormatterFactory that returns the Formatter for properties annotated with a specific annotation.
-	 * <o>Calling <code>getFormatter(...)</code> on a field or accessor method
+	 * <p>Calling <code>getFormatter(...)</code> on a field or accessor method
 	 * with the given annotation returns <code>formatter</code>.
 	 * @param factory the annotation formatter factory
 	 */
