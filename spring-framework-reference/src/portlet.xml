@@ -1020,7 +1020,7 @@ public class SampleController extends AbstractController {
       <classname>DispatcherPortlet</classname> detects a multipart
       request, it activates the resolver that has been declared in your
       context and hands over the request. What the resolver then does is
-      wrap the current <interfacename>ActionRequest</interfacename> into a
+      wrap the current <interfacename>ActionRequest</interfacename> in a
       <interfacename>MultipartActionRequest</interfacename> that has
       support for multipart file uploads. Using the
       <interfacename>MultipartActionRequest</interfacename> you can get
@@ -1039,7 +1039,8 @@ public class SampleController extends AbstractController {
       <para>After the
       <interfacename>PortletMultipartResolver</interfacename> has finished
       doing its job, the request will be processed like any other. To use
-      it, you create a form with an upload field (see immediately below),
+      the <interfacename>PortletMultipartResolver</interfacename>, create
+      a form with an upload field (see example below),
       then let Spring bind the file onto your form (backing object). To
       actually let the user upload a file, we have to create a (JSP/HTML)
       form:</para>
@@ -1050,8 +1051,8 @@ public class SampleController extends AbstractController {
     <input type="submit"/>
 </form>]]></programlisting>
 
-      <para>As you can see, we've created a field named “file” after the
-      property of the bean that holds the <literal>byte[]</literal>.
+      <para>As you can see, we've created a field named “file” that matches the
+      property of the bean that holds the <literal>byte[]</literal> array.
       Furthermore we've added the encoding attribute
       (<literal>enctype="multipart/form-data"</literal>), which is
       necessary to let the browser know how to encode the multipart fields
@@ -1064,10 +1065,10 @@ public class SampleController extends AbstractController {
       of editors available for handling files and setting the results on
       an object. There's a
       <classname>StringMultipartFileEditor</classname> capable of
-      converting files to Strings (using a user-defined character set) and
+      converting files to Strings (using a user-defined character set), and
       there is a <classname>ByteArrayMultipartFileEditor</classname> which
-      converts files to byte arrays. They function just as the
-      <classname>CustomDateEditor</classname> does.</para>
+      converts files to byte arrays. They function analogous to the
+      <classname>CustomDateEditor</classname>.</para>
 
       <para>So, to be able to upload files using a form, declare the
       resolver, a mapping to a controller that will process the bean, and
@@ -1133,7 +1134,7 @@ public class FileUploadBean {
 }]]></programlisting>
 
       <para>As you can see, the <classname>FileUploadBean</classname> has
-      a property typed <literal>byte[]</literal> that holds the file. The
+      a property of type <literal>byte[]</literal> that holds the file. The
       controller registers a custom editor to let Spring know how to
       actually convert the multipart objects the resolver has found to
       properties specified by the bean. In this example, nothing is done
@@ -1142,7 +1143,7 @@ public class FileUploadBean {
       mail it to somebody, etc).</para>
 
       <para>An equivalent example in which a file is bound straight to a
-      String-typed property on a (form backing) object might look like
+      String-typed property on a form backing object might look like
       this:</para>
 
       <programlisting language="java"><![CDATA[public class FileUploadController extends SimpleFormController {
@@ -1232,11 +1233,11 @@ public class FileUploadBean {
   <section id="portlet-exceptionresolver">
     <title>Handling exceptions</title>
 
-    <para>Just like Web MVC, Portlet MVC provides
+    <para>Just like Servlet MVC, Portlet MVC provides
     <interfacename>HandlerExceptionResolver</interfacename>s to ease the
-    pain of unexpected exceptions occurring while your request is being
+    pain of unexpected exceptions that occur while your request is being
     processed by a handler that matched the request. Portlet MVC also
-    provides the same concrete
+    provides a portlet-specific, concrete
     <classname>SimpleMappingExceptionResolver</classname> that enables you
     to take the class name of any exception that might be thrown and map it
     to a view name.</para>
@@ -1245,7 +1246,7 @@ public class FileUploadBean {
   <section id="portlet-annotation">
     <title>Annotation-based controller configuration</title>
 
-    <para>Spring 2.5 introduces an annotation-based programming model for MVC
+    <para>Spring 2.5 introduced an annotation-based programming model for MVC
     controllers, using annotations such as
     <interfacename>@RequestMapping</interfacename>,
     <interfacename>@RequestParam</interfacename>,
@@ -1256,6 +1257,12 @@ public class FileUploadBean {
     direct dependencies on Servlet or Portlet API's, although they can easily
     get access to Servlet or Portlet facilities if desired.</para>
 
+	<!--
+		PetPortal is no longer included with the Spring distribution as of
+		Spring 3.0.0.RC1. Thus, the following is commented out until further
+		notice.
+	-->
+	<!--
     <tip>
       <para>The Spring distribution ships with the
       <emphasis>PetPortal</emphasis> sample, which is a portal application that takes
@@ -1263,6 +1270,7 @@ public class FileUploadBean {
       of simple form processing. You can find the <emphasis>PetPortal</emphasis>
       application in the <literal>'samples/petportal'</literal> directory.</para>
     </tip>
+	-->
 
     <para>The following sections document these annotations and how they are
     most commonly used in a Portlet environment.</para>
