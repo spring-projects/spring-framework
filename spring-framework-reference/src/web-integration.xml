@@ -39,7 +39,7 @@
     details of integrating your favorite web framework with Spring. One thing
     that is often commented upon by developers coming to Java from other
     languages is the seeming super-abundance of web frameworks available in
-    Java... there are indeed a great number of web frameworks in the Java
+    Java. There are indeed a great number of web frameworks in the Java
     space; in fact there are far too many to cover with any semblance of
     detail in a single chapter. This chapter thus picks four of the more
     popular web frameworks in Java, starting with the Spring configuration
@@ -63,15 +63,15 @@
     <title>Common configuration</title>
 
     <para>Before diving into the integration specifics of each supported web
-    framework, let us first take a look at the Spring configuration that
+    framework, let us first take a look at the Spring configuration that is
     <emphasis>not</emphasis> specific to any one web framework. (This section
     is equally applicable to Spring's own web framework, Spring MVC.)</para>
 
     <para>One of the concepts (for want of a better word) espoused by
     (Spring's) lightweight application model is that of a layered
     architecture. Remember that in a 'classic' layered architecture, the web
-    layer is but one of many layers... it serves as one of the entry points
-    into a server side application, and it delegates to service objects
+    layer is but one of many layers; it serves as one of the entry points
+    into a server side application and it delegates to service objects
     (facades) defined in a service layer to satisfy business specific (and
     presentation-technology agnostic) use cases. In Spring, these service
     objects, any other business-specific objects, data access objects, etc.
@@ -82,7 +82,7 @@
     a Spring container (a <classname>WebApplicationContext</classname>) that
     contains all of the 'business beans' in one's application.</para>
 
-    <para>Onto specifics... all that one need do is to declare a <ulink
+    <para>On to specifics: all that one need do is to declare a <ulink
     url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></ulink>
     in the standard Java EE servlet <literal>web.xml</literal> file of one's web
     application, and add a <literal>contextConfigLocation</literal>
@@ -117,7 +117,7 @@
     to load. Once the context files are loaded, Spring creates a <ulink
     url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></ulink>
     object based on the bean definitions and stores it in the
-    <interface>ServletContext</interface> of one's web application.</para>
+    <interface>ServletContext</interface> of the web application.</para>
 
     <para>All Java web frameworks are built on top of the Servlet API, and so
     one can use the following code snippet to get access to this 'business
@@ -141,7 +141,7 @@
 
     <para>Once you have a reference to the
     <classname>WebApplicationContext</classname>, you can retrieve beans by
-    their name or type. Most developers retrieve beans by name, then cast them
+    their name or type. Most developers retrieve beans by name and then cast them
     to one of their implemented interfaces.</para>
 
     <para>Fortunately, most of the frameworks in this section have simpler
@@ -209,7 +209,7 @@
 
       <para>The <classname>DelegatingVariableResolver</classname> will first
       delegate value lookups to the default resolver of the underlying JSF
-      implementation, and then to Spring's 'business context'
+      implementation and then to Spring's 'business context'
       <classname>WebApplicationContext</classname>. This allows one to easily
       inject dependencies into one's JSF-managed beans.</para>
 
@@ -235,7 +235,7 @@
       <para><classname>SpringBeanVariableResolver</classname> is a variant of
       <classname>DelegatingVariableResolver</classname>. It delegates to the
       Spring's 'business context' <classname>WebApplicationContext</classname>
-      <emphasis>first</emphasis>, then to the default resolver of the
+      <emphasis>first</emphasis> and then to the default resolver of the
       underlying JSF implementation. This is useful in particular when using
       request/session-scoped beans with special Spring resolution rules, e.g.
       Spring <interfacename>FactoryBean</interfacename>
@@ -541,10 +541,10 @@
 
       <para>The recommended strategy is to use the approach that best suits
       your project. Subclassing makes your code more readable, and you know
-      exactly how your dependencies are resolved. However, using the
-      <classname>ContextLoaderPlugin</classname> allow you to easily add new
+      exactly how your dependencies are resolved. In contrast, using the
+      <classname>ContextLoaderPlugin</classname> allows you to easily add new
       dependencies in your context XML file. Either way, Spring provides some
-      nice options for integrating the two frameworks.</para>
+      nice options for integrating with Struts.</para>
     </section>
   </section>
 
@@ -566,8 +566,9 @@
     </para>
 
     <para>WebWork is (in the opinion of this author) a very clean, elegant web
-    framework. Its architecture and key concepts are not only very easy to
-    understand, it has a rich tag library, nicely decoupled validation, and it
+    framework. Its architecture and key concepts are very easy to
+    understand, and the framework also has a rich tag library as well as
+    nicely decoupled validation. It
     is (again, in the opinion of this author) quite easy to be productive in
     next to no time at all (the documentation and tutorials are pretty good
     too).</para>
@@ -577,17 +578,17 @@
     IoC container</ulink> to manage Webwork Actions, handle the "wiring" of
     business objects, etc. Prior to WebWork version 2.2, WebWork used its own
     proprietary IoC container (and provided integration points so that one
-    could integrate an IoC container such as Springs into the mix). However,
+    could integrate an IoC container such as Spring's into the mix). However,
     as of WebWork version 2.2, the default IoC container that is used within
     WebWork <emphasis>is</emphasis> Spring. This is obviously great news if
     one is a Spring developer, because it means that one is immediately
-    familiar with the basics of IoC configuration, idioms and suchlike within
+    familiar with the basics of IoC configuration, idioms, and suchlike within
     WebWork.</para>
 
-    <para>Now in the interests of adhering to the DRY (Dont Repeat Yourself)
-    principle, it would be foolish to writeup the Spring-WebWork integration
+    <para>Now in the interests of adhering to the DRY (Don't Repeat Yourself)
+    principle, it would be foolish to document the Spring-WebWork integration
     in light of the fact that the WebWork team have already written such a
-    writeup. Please do consult the <ulink
+    writeup. Please consult the <ulink
     url="http://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork
     integration page</ulink> on the <ulink
     url="http://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</ulink>
@@ -595,11 +596,11 @@
 
     <para>Note that the Spring-WebWork integration code was developed (and
     continues to be maintained and improved) by the WebWork developers
-    themselves, so in the first instance please do refer to the WebWork site
-    and forums if you are having issues with the integration. Do feel free to
+    themselves. So please refer first to the WebWork site and forums if you are
+    having issues with the integration. But feel free to
     post comments and queries regarding the Spring-WebWork integration on the
     <ulink url="http://forum.springframework.org/forumdisplay.php?f=25">Spring
-    support forums</ulink> too.</para>
+    support forums</ulink>, too.</para>
   </section>
 
   <section id="tapestry">
@@ -643,7 +644,7 @@
         </quote>
     </para>
 
-    <para>The key question then is... how does one supply Tapestry pages with
+    <para>The key question then is: how does one supply Tapestry pages with
     collaborating services? The answer, ideally, is that one would want to
     dependency inject those services directly into one's Tapestry pages. In
     Tapestry, one can effect this dependency injection by a variety of
@@ -745,9 +746,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       <programlisting language="java">WebApplicationContext appContext = WebApplicationContextUtils.getApplicationContext(
     getRequestCycle().getRequestContext().getServlet().getServletContext());
 UserService userService = (UserService) appContext.getBean("userService");
-<lineannotation>... some code which uses UserService</lineannotation></programlisting>
+<lineannotation>// ... some code which uses UserService</lineannotation></programlisting>
 
-      <para>This mechanism does work... having said that, it can be made a lot
+      <para>This mechanism does work. Having said that, it can be made a lot
       less verbose by encapsulating most of the functionality in a method in
       the base class for the page or component. However, in some respects it
       goes against the IoC principle; ideally you would like the page to not
@@ -785,7 +786,7 @@ UserService userService = (UserService) appContext.getBean("userService");
 
         <programlisting language="java">package com.whatever.web.xportal;
 
-import ...
+// import ...
 
 public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
  
@@ -1042,7 +1043,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         annotate the appropriate getter methods in order to dependency inject
         the Spring-managed <literal>userService</literal> and
         <literal>authenticationService</literal> objects (lots of the class
-        definition has been elided for clarity)...</para>
+        definition has been elided for clarity).</para>
 
         <programlisting language="java">package com.whatever.web.xportal.pages;
 
@@ -1056,7 +1057,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 
 }</programlisting>
 
-        <para>We are almost done... all that remains is the HiveMind
+        <para>We are almost done. All that remains is the HiveMind
         configuration that exposes the Spring container stored in the
         <interfacename>ServletContext</interfacename> as a HiveMind service;
         for example:</para>
