@@ -118,7 +118,13 @@
       container(s) that Spring Portlet MVC uses. These bean scopes are described
       in detail in <xref linkend="beans-factory-scopes-other"/></para>
     </section>
-
+    
+    <!--
+        As of Spring 3.0.0.RC1, the PetPortal sample application is not
+        included in the Spring distribution. Thus the following note is
+        commented out until further notice.
+    -->
+    <!--
     <note>
       <para>The Spring distribution ships with a complete Spring Portlet MVC
       sample application that demonstrates all of the features and functionality
@@ -126,6 +132,7 @@
       in the <filename class="directory">'samples/petportal'</filename> directory of
       the full Spring distribution.</para>
     </note>
+    -->
   </section>
 
   <section id="portlet-dispatcher">
@@ -141,7 +148,7 @@
 
     <para>Like ordinary portlets, the
     <classname>DispatcherPortlet</classname> is declared in the
-    <literal>portlet.xml</literal> of your web application:</para>
+    <literal>portlet.xml</literal> file of your web application:</para>
 
     <programlisting language="xml"><![CDATA[<portlet>
     <portlet-name>sample</portlet-name>
@@ -163,8 +170,8 @@
     <interfacename>WebApplicationContext</interfacename>, which inherits all
     the beans already defined in the Root
     <interfacename>WebApplicationContext</interfacename>. These inherited
-    beans can be overridden in the portlet-specific scope, and new scope-
-    specific beans can be defined local to a given portlet instance.</para>
+    beans can be overridden in the portlet-specific scope, and new
+    scope-specific beans can be defined local to a given portlet instance.</para>
 
     <para>The framework will, on initialization of a
     <classname>DispatcherPortlet</classname>, look for a file named
@@ -260,8 +267,8 @@
       multipart handling).</para></listitem>
 
       <listitem><para>An appropriate handler is searched for. If a handler
-      is found, the execution chain associated with the handler (pre-
-      processors, post-processors, controllers) will be executed in order
+      is found, the execution chain associated with the handler
+      (pre-processors, post-processors, controllers) will be executed in order
       to prepare a model.</para></listitem>
 
       <listitem><para>If a model is returned, the view is rendered, using
@@ -274,7 +281,7 @@
 
     </orderedlist>
 
-    <para>Exceptions that might be thrown during processing of the request
+    <para>Exceptions that are thrown during processing of the request
     get picked up by any of the handler exception resolvers that are
     declared in the <interfacename>WebApplicationContext</interfacename>.
     Using these exception resolvers you can define custom behavior in case
@@ -312,15 +319,14 @@
             indicate where context(s) can be found. The String is
             potentially split up into multiple Strings (using a
             comma as a delimiter) to support multiple contexts (in
-            case of multiple context locations, of beans that are
+            case of multiple context locations, for beans that are
             defined twice, the latest takes precedence).</entry>
           </row>
           <row>
             <entry><literal>namespace</literal></entry>
             <entry>The namespace of the
             <interfacename>WebApplicationContext</interfacename>.
-            Defaults to <literal>[portlet-name]-
-            portlet</literal>.</entry>
+            Defaults to <literal>[portlet-name]-portlet</literal>.</entry>
           </row>
           <row>
             <entry><literal>viewRendererUrl</literal></entry>
@@ -339,7 +345,7 @@
 
     <para>The rendering process in Portlet MVC is a bit more complex than in
     Web MVC. In order to reuse all the <link linkend="view">view technologies</link>
-    from Spring Web MVC), we must convert the
+    from Spring Web MVC, we must convert the
     <interfacename>PortletRequest</interfacename> /
     <interfacename>PortletResponse</interfacename> to
     <interfacename>HttpServletRequest</interfacename> /
@@ -403,7 +409,7 @@
     <title>Controllers</title>
 
     <para>The controllers in Portlet MVC are very similar to the Web MVC
-    Controllers and porting code from one to the other should be
+    Controllers, and porting code from one to the other should be
     simple.</para>
 
     <para>The basis for the Portlet MVC controller architecture is the
@@ -430,14 +436,14 @@
     <interfacename>Controller</interfacename> interface requires two methods
     that handle the two phases of a portlet request: the action request and
     the render request. The action phase should be capable of handling an
-    action request and the render phase should be capable of handling a
+    action request, and the render phase should be capable of handling a
     render request and returning an appropriate model and view. While the
     <interfacename>Controller</interfacename> interface is quite abstract,
-    Spring Portlet MVC offers a lot of controllers that already contain a
-    lot of the functionality you might need – most of these are very similar
+    Spring Portlet MVC offers several controllers that already contain a
+    lot of the functionality you might need; most of these are very similar
     to controllers from Spring Web MVC. The
     <interfacename>Controller</interfacename> interface just defines the
-    most common functionality required of every controller - handling an
+    most common functionality required of every controller: handling an
     action request, handling a render request, and returning a model and a
     view.</para>
 
