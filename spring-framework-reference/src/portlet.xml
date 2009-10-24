@@ -1577,7 +1577,7 @@ public class PetSitesEditController {
         </listitem>
 
         <listitem>
-          <para>Any other return type will be considered as single model attribute
+          <para>Any other return type will be considered a single model attribute
           to be exposed to the view, using the attribute name specified through
           <literal>@ModelAttribute</literal> at the method level (or the default
           attribute name based on the return type's class name otherwise). The model
@@ -1617,7 +1617,7 @@ public class PetSitesEditController {
       can specify that a parameter is optional by setting
       <interfacename>@RequestParam</interfacename>'s
       <literal>required</literal> attribute to <literal>false</literal> (e.g.,
-      <literal>@RequestParam(value="id", required="false")</literal>).</para>
+      <literal>@RequestParam(value="id", required=false)</literal>).</para>
     </section>
 
     <section id="portlet-ann-modelattrib">
@@ -1628,7 +1628,7 @@ public class PetSitesEditController {
       controllers. When placed on a method parameter,
       <classname>@ModelAttribute</classname> is used to map a model attribute
       to the specific, annotated method parameter (see the
-      <literal>processSubmit()</literal> method below). This is how the
+      <literal>populateSite()</literal> method below). This is how the
       controller gets a reference to the object holding the data entered in
       the form. In addition, the parameter can be declared as the specific
       type of the form backing object rather than as a generic
@@ -1637,7 +1637,7 @@ public class PetSitesEditController {
 
       <para><classname>@ModelAttribute</classname> is also used at the method
       level to provide <emphasis>reference data</emphasis> for the model (see
-      the <literal>populatePetTypes()</literal> method below). For this usage
+      the <literal>getPetSites()</literal> method below). For this usage
       the method signature can contain the same types as documented above for
       the <classname>@RequestMapping</classname> annotation.</para>
 
@@ -1685,8 +1685,9 @@ public class PetSitesEditController {
       <classname>@SessionAttributes</classname></title>
 
       <para>The type-level <classname>@SessionAttributes</classname>
-      annotation declares session attributes used by a specific handler. This
-      will typically list the names of model attributes which should be
+      annotation declares session attributes used by a specific handler.
+      This will typically list the names of model attributes or types of
+      model attributes which should be
       transparently stored in the session or some conversational storage,
       serving as form-backing beans between subsequent requests.</para>
 
