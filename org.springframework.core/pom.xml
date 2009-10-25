@@ -42,6 +42,12 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>1.6</version>
+      <optional>true</optional>
+    </dependency>    
+    <dependency>
       <groupId>org.jboss.vfs</groupId>
       <artifactId>com.springsource.org.jboss.virtual</artifactId>
       <version>2.1.0.GA</version>
