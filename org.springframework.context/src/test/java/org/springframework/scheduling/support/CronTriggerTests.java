@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.scheduling.TriggerContext;
 
@@ -316,16 +315,32 @@ public class CronTriggerTests {
 	}
 
 	@Test
-	@Ignore
 	public void testSpecificMinuteSecond() throws Exception {
-		CronTrigger trigger = new CronTrigger("2 5 * * * *");
+		CronTrigger trigger = new CronTrigger("55 5 * * * *");
 		calendar.set(Calendar.MINUTE, 4);
+		calendar.set(Calendar.SECOND, 54);
 		Date date = calendar.getTime();
-		calendar.add(Calendar.MINUTE, 1);
-		calendar.set(Calendar.SECOND, 2);
 		TriggerContext context1 = getTriggerContext(date);
+		calendar.add(Calendar.MINUTE, 1);
+		calendar.set(Calendar.SECOND, 55);
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
 		calendar.add(Calendar.HOUR, 1);
+		TriggerContext context2 = getTriggerContext(date);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+	}
+
+	@Test
+	public void testSpecificHourSecond() throws Exception {
+		CronTrigger trigger = new CronTrigger("55 * 2 * * *");
+		calendar.set(Calendar.HOUR_OF_DAY, 1);
+		calendar.set(Calendar.SECOND, 54);
+		Date date = calendar.getTime();
+		TriggerContext context1 = getTriggerContext(date);
+		calendar.add(Calendar.HOUR_OF_DAY, 1);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 55);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		calendar.add(Calendar.MINUTE, 1);
 		TriggerContext context2 = getTriggerContext(date);
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
 	}
@@ -342,6 +357,40 @@ public class CronTriggerTests {
 		TriggerContext context1 = getTriggerContext(date);
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
 		// next trigger is in one second because second is wildcard
+		calendar.add(Calendar.SECOND, 1);
+		TriggerContext context2 = getTriggerContext(date);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+	}
+
+	@Test
+	public void testSpecificDayOfMonthSecond() throws Exception {
+		CronTrigger trigger = new CronTrigger("55 * * 3 * *");
+		calendar.set(Calendar.DAY_OF_MONTH, 2);
+		calendar.set(Calendar.SECOND, 54);
+		Date date = calendar.getTime();
+		TriggerContext context1 = getTriggerContext(date);
+		calendar.add(Calendar.DAY_OF_MONTH, 1);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 55);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		calendar.add(Calendar.MINUTE, 1);
+		TriggerContext context2 = getTriggerContext(date);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+	}
+
+	@Test
+	public void testSpecificDate() throws Exception {
+		CronTrigger trigger = new CronTrigger("* * * 3 10 *");
+		calendar.set(Calendar.DAY_OF_MONTH, 2);
+		calendar.set(Calendar.MONTH, 10);
+		Date date = calendar.getTime();
+		TriggerContext context1 = getTriggerContext(date);
+		calendar.add(Calendar.DAY_OF_MONTH, 1);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
 		calendar.add(Calendar.SECOND, 1);
 		TriggerContext context2 = getTriggerContext(date);
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));

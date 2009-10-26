@@ -66,7 +66,6 @@ class CronSequenceGenerator {
 
 	private final String expression;
 
-
 	/**
 	 * Construct a {@link CronSequenceGenerator} from the pattern provided.
 	 * @param expression a space-separated list of time fields
@@ -77,7 +76,6 @@ class CronSequenceGenerator {
 		parse(expression);
 	}
 
-
 	/**
 	 * Get the next {@link Date} in the sequence matching the Cron pattern and
 	 * after the value provided. The return value will have a whole number of
@@ -86,6 +84,27 @@ class CronSequenceGenerator {
 	 * @return the next value matching the pattern
 	 */
 	public Date next(Date date) {
+
+		/*
+		The plan:
+
+		1 Round up to the next whole second
+
+		2 If seconds match move on, otherwise find the next match:
+		2.1 If next match is in the next minute then roll forwards
+
+		3 If minute matches move on, otherwise find the next match
+		3.1 If next match is in the next hour then roll forwards
+		3.2 Reset the seconds and go to 2
+
+		4 If hour matches move on, otherwise find the next match
+		4.1 If next match is in the next day then roll forwards,
+		4.2 Reset the minutes and seconds and go to 2
+		
+		...
+
+		 */
+
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
 
@@ -93,10 +112,17 @@ class CronSequenceGenerator {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
 
+		doNext(calendar);
+
+		return calendar.getTime();
+	}
+
+	private void doNext(Calendar calendar) {
 		List<Integer> resets = new ArrayList<Integer>();
 
 		int second = calendar.get(Calendar.SECOND);
-		int updateSecond = findNext(this.seconds, second, 60, calendar, Calendar.SECOND, Collections.<Integer> emptyList());
+		List<Integer> emptyList = Collections.<Integer> emptyList();
+		int updateSecond = findNext(this.seconds, second, 60, calendar, Calendar.SECOND, emptyList);
 		if (second == updateSecond) {
 			resets.add(Calendar.SECOND);
 		}
@@ -105,12 +131,16 @@ class CronSequenceGenerator {
 		int updateMinute = findNext(this.minutes, minute, 60, calendar, Calendar.MINUTE, resets);
 		if (minute == updateMinute) {
 			resets.add(Calendar.MINUTE);
+		} else {
+			doNext(calendar);
 		}
 
 		int hour = calendar.get(Calendar.HOUR_OF_DAY);
 		int updateHour = findNext(this.hours, hour, 24, calendar, Calendar.HOUR_OF_DAY, resets);
 		if (hour == updateHour) {
 			resets.add(Calendar.HOUR_OF_DAY);
+		} else {
+			doNext(calendar);
 		}
 
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
@@ -118,16 +148,20 @@ class CronSequenceGenerator {
 		int updateDayOfMonth = findNextDay(calendar, this.daysOfMonth, dayOfMonth, daysOfWeek, dayOfWeek, 366, resets);
 		if (dayOfMonth == updateDayOfMonth) {
 			resets.add(Calendar.DAY_OF_MONTH);
+		} else {
+			doNext(calendar);			
 		}
 
 		int month = calendar.get(Calendar.MONTH);
-		month = findNext(this.months, month, 12, calendar, Calendar.MONTH, resets);
+		int updateMonth = findNext(this.months, month, 12, calendar, Calendar.MONTH, resets);
+		if (month != updateMonth) {
+			doNext(calendar);			
+		}
 
-		return calendar.getTime();
 	}
 
-	private int findNextDay(Calendar calendar, BitSet daysOfMonth, int dayOfMonth, BitSet daysOfWeek,
-			int dayOfWeek, int max, List<Integer> resets) {
+	private int findNextDay(Calendar calendar, BitSet daysOfMonth, int dayOfMonth, BitSet daysOfWeek, int dayOfWeek,
+			int max, List<Integer> resets) {
 
 		int count = 0;
 		// the DAY_OF_WEEK values in java.util.Calendar start with 1 (Sunday),
@@ -179,7 +213,6 @@ class CronSequenceGenerator {
 			calendar.set(field, 0);
 		}
 	}
-
 
 	// Parsing logic invoked by the constructor.
 
@@ -240,8 +273,7 @@ class CronSequenceGenerator {
 				// Not an incrementer so it must be a range (possibly empty)
 				int[] range = getRange(field, max);
 				bits.set(range[0], range[1] + 1);
-			}
-			else {
+			} else {
 				String[] split = StringUtils.delimitedListToStringArray(field, "/");
 				if (split.length > 2) {
 					throw new IllegalArgumentException("Incrementer has more than two fields: " + field);
@@ -267,8 +299,7 @@ class CronSequenceGenerator {
 		}
 		if (!field.contains("-")) {
 			result[0] = result[1] = Integer.valueOf(field);
-		}
-		else {
+		} else {
 			String[] split = StringUtils.delimitedListToStringArray(field, "-");
 			if (split.length > 2) {
 				throw new IllegalArgumentException("Range has more than two fields: " + field);
@@ -278,7 +309,6 @@ class CronSequenceGenerator {
 		}
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
