@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation4.DependencyBean;
 import org.springframework.context.annotation4.FactoryMethodComponent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.ClassUtils;
@@ -36,8 +37,8 @@ import org.springframework.util.ClassUtils;
 public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 
 	private static final String BASE_PACKAGE = FactoryMethodComponent.class.getPackage().getName();
-	
-		
+
+
 	public void testSingletonScopedFactoryMethod() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
@@ -61,14 +62,14 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 		assertEquals("protectedInstance", tb.getName());
 		assertSame(tb, context.getBean("protectedInstance"));
 		assertEquals("0", tb.getCountry());
-		tb2 = (TestBean)context.getBean("protectedInstance"); //3
+		tb2 = context.getBean("protectedInstance", TestBean.class); //3
 		assertEquals("protectedInstance", tb2.getName());
 		assertSame(tb2, tb);
 
-		tb = (TestBean)context.getBean("privateInstance"); //4
+		tb = context.getBean("privateInstance", TestBean.class); //4
 		assertEquals("privateInstance", tb.getName());
 		assertEquals(1, tb.getAge());
-		tb2 = (TestBean)context.getBean("privateInstance"); //4
+		tb2 = context.getBean("privateInstance", TestBean.class); //4
 		assertEquals(2, tb2.getAge());
 		assertNotSame(tb2, tb);
 		
@@ -78,6 +79,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 
 		QualifiedClientBean clientBean = context.getBean("clientBean", QualifiedClientBean.class);
 		assertSame(clientBean.testBean, context.getBean("publicInstance"));
+		assertSame(clientBean.dependencyBean, context.getBean("dependencyBean"));
 	}
 
 
@@ -85,6 +87,9 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 
 		@Autowired @Qualifier("public")
 		public TestBean testBean;
+
+		@Autowired
+		public DependencyBean dependencyBean;
 	}
 
 }

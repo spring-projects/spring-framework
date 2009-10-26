@@ -69,4 +69,9 @@ public final class FactoryMethodComponent {
 		return new TestBean("requestScopedInstance", 3);
 	}
 
+	@Bean
+	public DependencyBean secondInstance() {
+		return new DependencyBean();
+	}
+
 }
