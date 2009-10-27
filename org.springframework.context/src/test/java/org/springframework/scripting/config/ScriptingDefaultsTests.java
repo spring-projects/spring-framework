@@ -27,6 +27,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Mark Fisher
+ * @author Dave Syer
  */
 public class ScriptingDefaultsTests extends TestCase {
 
@@ -48,6 +49,12 @@ public class ScriptingDefaultsTests extends TestCase {
 	public void testDefaultInitMethod() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
 		ITestBean testBean = (ITestBean) context.getBean("testBean");
+		assertTrue(testBean.isInitialized());
+	}
+
+	public void testNameAsAlias() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
+		ITestBean testBean = (ITestBean) context.getBean("/url");
 		assertTrue(testBean.isInitialized());
 	}
 
