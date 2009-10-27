@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.Charset;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -36,6 +37,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
+import org.springframework.http.MediaType;
 
 /**
  * Base class for multipart resolvers that use Jakarta Commons FileUpload
@@ -221,14 +223,15 @@ public abstract class CommonsFileUploadSupport {
 		for (FileItem fileItem : fileItems) {
 			if (fileItem.isFormField()) {
 				String value;
-				if (encoding != null) {
+				String partEncoding = determineEncoding(fileItem.getContentType(), encoding);
+				if (partEncoding != null) {
 					try {
-						value = fileItem.getString(encoding);
+						value = fileItem.getString(partEncoding);
 					}
 					catch (UnsupportedEncodingException ex) {
 						if (logger.isWarnEnabled()) {
 							logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
-									"' with encoding '" + encoding + "': using platform default");
+									"' with encoding '" + partEncoding + "': using platform default");
 						}
 						value = fileItem.getString();
 					}
@@ -279,6 +282,15 @@ public abstract class CommonsFileUploadSupport {
 				}
 			}
 		}
+	}
+
+	private String determineEncoding(String contentTypeHeader, String defaultEncoding) {
+		if (!StringUtils.hasText(contentTypeHeader)) {
+			return defaultEncoding;
+		}
+		MediaType contentType = MediaType.parseMediaType(contentTypeHeader);
+		Charset charset = contentType.getCharSet();
+		return charset != null ? charset.name() : defaultEncoding;
 	}
 
 
