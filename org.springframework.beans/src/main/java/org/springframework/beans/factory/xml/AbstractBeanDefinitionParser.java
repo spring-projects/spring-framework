@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Dave Syer
  * @since 2.0
  */
 public abstract class AbstractBeanDefinitionParser implements BeanDefinitionParser {
@@ -51,6 +52,8 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	/** Constant for the id attribute */
 	public static final String ID_ATTRIBUTE = "id";
 
+	/** Constant for the name attribute */
+	public static final String NAME_ATTRIBUTE = "name";
 
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
@@ -62,7 +65,12 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 							"Id is required for element '" + parserContext.getDelegate().getLocalName(element)
 									+ "' when used as a top-level tag", element);
 				}
-				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
+				String[] aliases = new String[0];
+				String name = element.getAttribute(NAME_ATTRIBUTE);
+				if (StringUtils.hasLength(name)) {
+					aliases = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
+				}
+				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id, aliases);
 				registerBeanDefinition(holder, parserContext.getRegistry());
 				if (shouldFireEvents()) {
 					BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
