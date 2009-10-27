@@ -16,6 +16,7 @@
 
 package org.springframework.context.config;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -31,30 +32,76 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Arjen Poutsma
+ * @author Dave Syer
  * @since 2.5.6
  */
 public class ContextNamespaceHandlerTests {
 
-	private ApplicationContext applicationContext;
-
-	@Before
-	public void createAppContext() {
-		applicationContext = new ClassPathXmlApplicationContext("contextNamespaceHandlerTests.xml", getClass());
-	}
-
 	@Test
 	public void propertyPlaceholder() throws Exception {
-		Map beans = applicationContext.getBeansOfType(PropertyPlaceholderConfigurer.class);
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+				"contextNamespaceHandlerTests-replace.xml", getClass());
+		Map<String, PropertyPlaceholderConfigurer> beans = applicationContext
+				.getBeansOfType(PropertyPlaceholderConfigurer.class);
 		assertFalse("No PropertyPlaceHolderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("string");
 		assertEquals("No properties replaced", "bar", s);
 	}
 
 	@Test
+	public void propertyPlaceholderSystemProperties() throws Exception {
+		String value = System.setProperty("foo", "spam");
+		try {
+			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+					"contextNamespaceHandlerTests-system.xml", getClass());
+			Map<String, PropertyPlaceholderConfigurer> beans = applicationContext
+					.getBeansOfType(PropertyPlaceholderConfigurer.class);
+			assertFalse("No PropertyPlaceHolderConfigurer found", beans.isEmpty());
+			String s = (String) applicationContext.getBean("string");
+			assertEquals("No properties replaced", "spam", s);
+		} finally {
+			if (value!=null) {
+				System.setProperty("foo", value);
+			}
+		}
+	}
+
+	@Test
+	public void propertyPlaceholderLocation() throws Exception {
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+				"contextNamespaceHandlerTests-location.xml", getClass());
+		Map<String, PropertyPlaceholderConfigurer> beans = applicationContext
+				.getBeansOfType(PropertyPlaceholderConfigurer.class);
+		assertFalse("No PropertyPlaceHolderConfigurer found", beans.isEmpty());
+		String s = (String) applicationContext.getBean("foo");
+		assertEquals("No properties replaced", "bar", s);
+		s = (String) applicationContext.getBean("bar");
+		assertEquals("No properties replaced", "foo", s);
+		s = (String) applicationContext.getBean("spam");
+		assertEquals("No properties replaced", "maps", s);
+	}
+
+	@Test
+	public void propertyPlaceholderIgnored() throws Exception {
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+				"contextNamespaceHandlerTests-replace-ignore.xml", getClass());
+		Map<String, PropertyPlaceholderConfigurer> beans = applicationContext
+				.getBeansOfType(PropertyPlaceholderConfigurer.class);
+		assertFalse("No PropertyPlaceHolderConfigurer found", beans.isEmpty());
+		String s = (String) applicationContext.getBean("string");
+		assertEquals("Properties replaced", "${bar}", s);
+	}
+
+	@Test
 	public void propertyOverride() throws Exception {
-		Map beans = applicationContext.getBeansOfType(PropertyOverrideConfigurer.class);
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+				"contextNamespaceHandlerTests-override.xml", getClass());
+		Map<String, PropertyOverrideConfigurer> beans = applicationContext
+				.getBeansOfType(PropertyOverrideConfigurer.class);
 		assertFalse("No PropertyOverrideConfigurer found", beans.isEmpty());
 		Date date = (Date) applicationContext.getBean("date");
-		assertEquals("No properties overriden", 42, date.getMinutes());
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		assertEquals("No properties overriden", 42, calendar.get(Calendar.MINUTE));
 	}
 }
