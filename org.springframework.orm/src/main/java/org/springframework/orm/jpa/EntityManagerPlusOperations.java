@@ -23,7 +23,7 @@ package org.springframework.orm.jpa;
  *
  * <p>As of Spring 2.0, this interface does not define any operations yet.
  * The pass-through mechanism to the underlying JpaDialect is already in
- * place. Concrete operations will be added in the Spring 2.5 timeframe.
+ * place. Concrete operations may be added in future releases.
  *
  * @author Rod Johnson
  * @since 2.0
