@@ -19,11 +19,13 @@ package org.springframework.context.config;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
 /**
  * Parser for the &lt;context:property-override/&gt; element.
  *
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 2.5.2
  */
 class PropertyOverrideBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
@@ -31,6 +33,15 @@ class PropertyOverrideBeanDefinitionParser extends AbstractPropertyLoadingBeanDe
 	@Override
 	protected Class getBeanClass(Element element) {
 		return PropertyOverrideConfigurer.class;
+	}
+	
+	@Override
+	protected void doParse(Element element, BeanDefinitionBuilder builder) {
+
+		super.doParse(element, builder);
+		builder.addPropertyValue("ignoreInvalidKeys",
+				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));
+
 	}
 
 }

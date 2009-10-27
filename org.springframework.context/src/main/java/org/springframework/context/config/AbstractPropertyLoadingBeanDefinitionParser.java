@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Dave Syer
  * @since 2.5.2
  */
 abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
@@ -44,10 +45,28 @@ abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingl
 			String[] locations = StringUtils.commaDelimitedListToStringArray(location);
 			builder.addPropertyValue("locations", locations);
 		}
+
 		String propertiesRef = element.getAttribute("properties-ref");
 		if (StringUtils.hasLength(propertiesRef)) {
 			builder.addPropertyReference("properties", propertiesRef);
 		}
+
+		String fileEncoding = element.getAttribute("file-encoding");
+		if (StringUtils.hasLength(fileEncoding)) {
+			builder.addPropertyReference("fileEncoding", fileEncoding);
+		}
+
+		String order = element.getAttribute("order");
+		if (StringUtils.hasLength(order)) {
+			builder.addPropertyValue("order", Integer.valueOf(order));
+		}
+
+		builder.addPropertyValue("ignoreResourceNotFound",
+				Boolean.valueOf(element.getAttribute("ignore-resource-not-found")));
+
+		builder.addPropertyValue("localOverride",
+				Boolean.valueOf(element.getAttribute("local-override")));
+
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 	}
 

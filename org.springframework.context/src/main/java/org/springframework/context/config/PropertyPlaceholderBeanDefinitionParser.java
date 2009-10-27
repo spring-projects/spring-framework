@@ -19,11 +19,14 @@ package org.springframework.context.config;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.util.StringUtils;
 
 /**
  * Parser for the &lt;context:property-placeholder/&gt; element.
  *
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 2.5
  */
 class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
@@ -31,6 +34,21 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 	@Override
 	protected Class getBeanClass(Element element) {
 		return PropertyPlaceholderConfigurer.class;
+	}
+	
+	@Override
+	protected void doParse(Element element, BeanDefinitionBuilder builder) {
+	
+		super.doParse(element, builder);
+
+		builder.addPropertyValue("ignoreUnresolvablePlaceholders",
+				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));
+
+		String systemPropertiesModeName = element.getAttribute("system-properties-mode");
+		if (StringUtils.hasLength(systemPropertiesModeName)) {
+			builder.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_"+systemPropertiesModeName);
+		}
+
 	}
 
 }
