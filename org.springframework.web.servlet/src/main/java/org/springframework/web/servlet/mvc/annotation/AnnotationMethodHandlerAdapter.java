@@ -56,8 +56,8 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -779,6 +779,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest) throws ServletException, IOException {
 			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
 			List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
+			if (acceptedMediaTypes.isEmpty()) {
+				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
+			}
 			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
 			Class<?> returnValueType = returnValue.getClass();
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();

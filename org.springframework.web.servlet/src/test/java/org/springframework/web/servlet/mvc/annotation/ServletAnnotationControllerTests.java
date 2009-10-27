@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licensesch/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -970,6 +970,7 @@ public class ServletAnnotationControllerTests {
 		request.addHeader("Accept", "text/*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
+		assertEquals(200, response.getStatus());
 		assertEquals(requestBody, response.getContentAsString());
 	}
 
@@ -1014,6 +1015,20 @@ public class ServletAnnotationControllerTests {
 		assertEquals("Invalid response status code", HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE,
 				response.getStatus());
 		assertNotNull("No Accept response header set", response.getHeader("Accept"));
+	}
+
+	@Test
+	public void responseBodyNoAcceptHeader() throws ServletException, IOException {
+		initServlet(RequestBodyController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
+		String requestBody = "Hello World";
+		request.setContent(requestBody.getBytes("UTF-8"));
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals(requestBody, response.getContentAsString());
 	}
 
 	@Test
