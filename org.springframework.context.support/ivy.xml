@@ -45,6 +45,7 @@
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="optional, jdbc->compile"/>
 		<!-- test dependencies -->
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->runtime"/>
+		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->runtime"/>
 		<dependency org="org.apache.poi" name="com.springsource.org.apache.poi" rev="3.0.2.FINAL" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
