@@ -72,7 +72,7 @@ public class TypedValue {
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		str.append("TypedValue: ").append(this.value).append(" of type ").append(this.typeDescriptor.asString());
+		str.append("TypedValue: ").append(this.value).append(" of type ").append(this.getTypeDescriptor().asString());
 		return str.toString();
 	}
 
