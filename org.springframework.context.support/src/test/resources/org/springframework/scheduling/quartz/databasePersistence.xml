@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="scheduler"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers" ref="trigger" />
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="trigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="repeatInterval" value="1000" />
+		<property name="repeatCount" value="1" />
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobDataAsMap">
+					<map>
+						<entry key="param" value="10" />
+					</map>
+				</property>
+				<property name="jobClass"
+					value="org.springframework.scheduling.quartz.QuartzSupportTests$DummyJob" />
+			</bean>
+		</property>
+	</bean>
+
+	<jdbc:embedded-database id="dataSource" type="HSQL">
+		<jdbc:script location="org/springframework/scheduling/quartz/quartz-hsql.sql" />
+	</jdbc:embedded-database>
+
+</beans>

@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.junit.Test;
@@ -54,6 +56,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.scheduling.TestMethodInvokingTask;
 
 /**
@@ -976,6 +979,25 @@ public class QuartzSupportTests {
 		ctx.close();
 	}
 
+	// SPR-6038: detect HSQL and stop illegal locks being taken
+	@Test
+	public void testSchedulerWithHsqlDataSource() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/scheduling/quartz/databasePersistence.xml");
+		SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(ctx.getBean(DataSource.class));
+		assertTrue("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size()>0);
+		Thread.sleep(3000);
+		try {
+			// assertEquals(10, DummyJob.param);
+			assertTrue(DummyJob.count > 0);
+		} finally {
+			ctx.close();
+		}
+
+	}
 
 	private static class TestSchedulerListener implements SchedulerListener {
 
