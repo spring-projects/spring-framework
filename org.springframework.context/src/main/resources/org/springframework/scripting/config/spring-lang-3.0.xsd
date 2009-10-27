@@ -87,6 +87,13 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
+				<xsd:attribute name="name" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The name of this scripted bean as an alias or replacement for the id.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
 				<xsd:attribute name="scope" type="xsd:string">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
