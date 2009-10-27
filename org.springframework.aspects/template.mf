@@ -6,7 +6,9 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.aspectj.*;version="[1.5.4, 2.0.0)";resolution:=optional,
  org.springframework.beans.*;version="[3.0.0, 3.0.1)",
- org.springframework.transaction.*;version="[3.0.0, 3.0.1)";resolution:=optional
+ org.springframework.transaction.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.orm.jpa.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.dao.*;version="[3.0.0, 3.0.1)";resolution:=optional
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,

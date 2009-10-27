@@ -13,6 +13,7 @@
 		<include file="${spring.build.dir}/common/default-ivy-configurations.xml"/>
 		<conf name="aspectj" extends="runtime" description="JARs needed to run with AspectJ"/>
 		<conf name="tx" extends="runtime" description="JARs needed to run transactional aspects"/>
+		<conf name="orm" extends="runtime" description="JARs needed to compile JPA aspects"/>
 	</configurations>
 
 	<publications>
@@ -25,6 +26,7 @@
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="optional, aspectj->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="optional, tx->compile"/>
+		<dependency org="org.springframework" name="org.springframework.orm" rev="latest.integration" conf="optional,orm->compile"/>
 		<dependency org="org.springframework" name="org.springframework.test" rev="latest.integration" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.context.support" rev="latest.integration" conf="test->runtime"/>
