@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.nio.charset.Charset;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -53,6 +54,15 @@ public class MediaTypeTests {
 		assertEquals("Invalid type", "audio", mediaType.getType());
 		assertEquals("Invalid subtype", "*", mediaType.getSubtype());
 		assertEquals("Invalid quality factor", 0.2D, mediaType.getQualityValue(), 0D);
+	}
+
+	@Test
+	public void parseCharset() throws Exception {
+		String s = "text/html; charset=iso-8859-1";
+		MediaType mediaType = MediaType.parseMediaType(s);
+		assertEquals("Invalid type", "text", mediaType.getType());
+		assertEquals("Invalid subtype", "html", mediaType.getSubtype());
+		assertEquals("Invalid charset", Charset.forName("ISO-8859-1"), mediaType.getCharSet());
 	}
 
 	@Test
