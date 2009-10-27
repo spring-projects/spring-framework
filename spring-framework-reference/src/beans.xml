@@ -3965,7 +3965,6 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
 
         <programlisting language="xml">&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
     &lt;property name="locations" value="classpath:com/foo/jdbc.properties"/&gt;
-    &lt;/property&gt;
 &lt;/bean&gt;
 
 &lt;bean id="dataSource" destroy-method="close"
@@ -4217,9 +4216,9 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"><classname>RequiredAnnotationBeanPostProcessor</classname></ulink>.)</para>
 
     <note>
-      <para><literal>&lt;context:annotation-config/&gt;</literal>
-      only looks for annotations on beans in the same application context in
-      which it is defined. This means that, if you put
+      <para><literal>&lt;context:annotation-config/&gt;</literal> only looks
+      for annotations on beans in the same application context in which it is
+      defined. This means that, if you put
       <literal>&lt;context:annotation-config/&gt;</literal> in a
       <interfacename>WebApplicationContext</interfacename> for a
       <classname>DispatcherServlet</classname>, it only checks for
@@ -4270,9 +4269,10 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         <interfacename>@Autowired</interfacename> in the examples below.
         <interfacename>@Inject</interfacename> does not have a required
         property unlike Spring's <interfacename>@Autowire</interfacename>
-        annotation which has a <literal>required</literal> property to indicate if the value being
-        injected is optional. This behavior is enabled automatically if you
-        have the JSR 330 JAR on the classpath.</para>
+        annotation which has a <literal>required</literal> property to
+        indicate if the value being injected is optional. This behavior is
+        enabled automatically if you have the JSR 330 JAR on the
+        classpath.</para>
       </note>
 
       <programlisting language="java">public class SimpleMovieLister {
@@ -4443,11 +4443,11 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       simplest case, this can be a plain descriptive value:</para>
 
       <note>
-        <para>JSR 330's <interfacename>@Qualifier</interfacename>
-        annotation can only be applied as a meta-annotation unlike Spring's
-        @Qualifier which takes a string property to discriminate among
-        multiple injection candidates and can be placed on annotations as well
-        as types, fields, methods, constructors, and parameters.</para>
+        <para>JSR 330's <interfacename>@Qualifier</interfacename> annotation
+        can only be applied as a meta-annotation unlike Spring's @Qualifier
+        which takes a string property to discriminate among multiple injection
+        candidates and can be placed on annotations as well as types, fields,
+        methods, constructors, and parameters.</para>
       </note>
 
       <programlisting language="java">public class MovieRecommender {
@@ -4968,9 +4968,10 @@ public @interface MovieQualifier {
       project</ulink> are part of the core Spring Framework. This allows you
       to define beans using Java rather than using the traditional XML files.
       Take a look at the <interfacename>@Configuration</interfacename>,
-      <interfacename>@Bean</interfacename>, <interfacename>@Import</interfacename>, and
-      <interfacename>@DependsOn</interfacename> annotations for examples of how to use
-      these new features.</para>
+      <interfacename>@Bean</interfacename>,
+      <interfacename>@Import</interfacename>, and
+      <interfacename>@DependsOn</interfacename> annotations for examples of
+      how to use these new features.</para>
     </note>
 
     <section id="beans-stereotype-annotations">
@@ -5089,9 +5090,9 @@ public class JpaMovieFinder implements MovieFinder {
         component-scanning. The value of the
         <interfacename>@Named</interfacename> property will be used as the
         Bean Name. At this time Spring defaults for bean scope will be applied
-        when using @Named. This behavior as well as mapping of JSR 330 and
-        JSR 299 scopes is planned for Spring 3.0 GA assuming the JSRs are
-        stable at that time.</para>
+        when using @Named. This behavior as well as mapping of JSR 330 and JSR
+        299 scopes is planned for Spring 3.0 GA assuming the JSRs are stable
+        at that time.</para>
       </note>
     </section>
 
@@ -5315,9 +5316,10 @@ public class FactoryMethodComponent {
       corresponding bean definition.</para>
 
       <note>
-        <para>JSR 330's @Named annotation can be used as a means to both detect
-        components and to provide them with a name. This behavior is enabled
-        automatically if you have the JSR 330 JAR on the classpath.</para>
+        <para>JSR 330's @Named annotation can be used as a means to both
+        detect components and to provide them with a name. This behavior is
+        enabled automatically if you have the JSR 330 JAR on the
+        classpath.</para>
       </note>
 
       <para>If such an annotation contains no <literal>name</literal> value or
@@ -6046,19 +6048,20 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       injected with the application context's
       <classname>MessageSource</classname> when the bean is created and
       configured.</para>
+
       <note>
-          <para><emphasis>As an alternative to
-          <classname>ResourceBundleMessageSource</classname>, Spring provides
-          a <classname>ReloadableResourceBundleMessageSource</classname>
-          class. This variant supports the same bundle file format but is more
-          flexible than the standard JDK based
-          <classname>ResourceBundleMessageSource</classname>
-          implementation.</emphasis> In particular, it allows for reading
-          files from any Spring resource location (not just from the
-          classpath) and supports hot reloading of bundle property files
-          (while efficiently caching them in between). Check out the
-          <classname>ReloadableResourceBundleMessageSource</classname> javadoc
-          for details.</para>
+        <para><emphasis>As an alternative to
+        <classname>ResourceBundleMessageSource</classname>, Spring provides a
+        <classname>ReloadableResourceBundleMessageSource</classname> class.
+        This variant supports the same bundle file format but is more flexible
+        than the standard JDK based
+        <classname>ResourceBundleMessageSource</classname>
+        implementation.</emphasis> In particular, it allows for reading files
+        from any Spring resource location (not just from the classpath) and
+        supports hot reloading of bundle property files (while efficiently
+        caching them in between). Check out the
+        <classname>ReloadableResourceBundleMessageSource</classname> javadoc
+        for details.</para>
       </note>
     </section>
 
@@ -6405,17 +6408,16 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       your application server's deployment directory.</para>
 
       <note>
-          <para>Such RAR deployment units are usually self-contained; they do
-          not expose components to the outside world, not even to other
-          modules of the same application. Interaction with a RAR-based
-          ApplicationContext usually occurs through JMS destinations that it
-          shares with other modules. A RAR-based ApplicationContext may also,
-          for example, schedule some jobs, reacting to new files in the file
-          system (or the like). If it needs to allow synchronous access from
-          the outside, it could for example export RMI endpoints, which of
-          course may be used by other application modules on the same
-          machine.</para>
-        </note>
+        <para>Such RAR deployment units are usually self-contained; they do
+        not expose components to the outside world, not even to other modules
+        of the same application. Interaction with a RAR-based
+        ApplicationContext usually occurs through JMS destinations that it
+        shares with other modules. A RAR-based ApplicationContext may also,
+        for example, schedule some jobs, reacting to new files in the file
+        system (or the like). If it needs to allow synchronous access from the
+        outside, it could for example export RMI endpoints, which of course
+        may be used by other application modules on the same machine.</para>
+      </note>
     </section>
   </section>
 
