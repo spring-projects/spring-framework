@@ -28,7 +28,7 @@
 		<dependency org="org.springframework" name="org.springframework.test" rev="latest.integration" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.context.support" rev="latest.integration" conf="test->runtime"/>
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->compile"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="compile->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="provided, compile->compile"/>
 	
 	</dependencies>
