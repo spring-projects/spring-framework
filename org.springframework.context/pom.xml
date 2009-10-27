@@ -235,5 +235,24 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/src/test/java
+				</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>${project.basedir}/src/test/resources
+				</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</testResource>
+		</testResources>
 	</build>
 </project>
