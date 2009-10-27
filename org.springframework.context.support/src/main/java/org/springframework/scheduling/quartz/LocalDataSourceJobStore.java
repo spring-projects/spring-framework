@@ -23,12 +23,15 @@ import javax.sql.DataSource;
 
 import org.quartz.SchedulerConfigException;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
+import org.quartz.impl.jdbcjobstore.SimpleSemaphore;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.SchedulerSignaler;
 import org.quartz.utils.ConnectionProvider;
 import org.quartz.utils.DBConnectionManager;
 
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 
 /**
  * Subclass of Quartz's JobStoreCMT class that delegates to a Spring-managed
@@ -131,7 +134,22 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 				}
 		);
 
+		// No, if HSQL is the platform, we really don't want to use locks
+		try {
+			String productName = JdbcUtils.extractDatabaseMetaData(dataSource,
+					"getDatabaseProductName").toString();
+			productName = JdbcUtils.commonDatabaseName(productName);
+			if (productName != null
+					&& productName.toLowerCase().contains("hsql")) {
+				setUseDBLocks(false);
+				setLockHandler(new SimpleSemaphore());
+			}
+		} catch (MetaDataAccessException e) {
+			logWarnIfNonZero(1, "Could not detect database type.  Assuming locks can be taken.");
+		}
+
 		super.initialize(loadHelper, signaler);
+
 	}
 
 	@Override
