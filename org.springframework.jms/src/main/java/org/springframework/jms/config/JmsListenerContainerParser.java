@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String CONNECTION_FACTORY_ATTRIBUTE = "connection-factory";
 
 	private static final String TASK_EXECUTOR_ATTRIBUTE = "task-executor";
+
+	private static final String ERROR_HANDLER_ATTRIBUTE = "error-handler";
 
 	private static final String CACHE_ATTRIBUTE = "cache";
 
@@ -91,6 +93,12 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		if (StringUtils.hasText(taskExecutorBeanName)) {
 			containerDef.getPropertyValues().addPropertyValue("taskExecutor",
 					new RuntimeBeanReference(taskExecutorBeanName));
+		}
+
+		String errorHandlerBeanName = containerEle.getAttribute(ERROR_HANDLER_ATTRIBUTE);
+		if (StringUtils.hasText(errorHandlerBeanName)) {
+			containerDef.getPropertyValues().addPropertyValue("errorHandler",
+					new RuntimeBeanReference(errorHandlerBeanName));
 		}
 
 		String destinationResolverBeanName = containerEle.getAttribute(DESTINATION_RESOLVER_ATTRIBUTE);

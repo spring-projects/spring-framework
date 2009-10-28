@@ -125,6 +125,19 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="error-handler" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to an ErrorHandler strategy for handling any uncaught Exceptions
+	that may occur during the execution of the MessageListener.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.util.ErrorHandler"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="destination-type" default="queue">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
