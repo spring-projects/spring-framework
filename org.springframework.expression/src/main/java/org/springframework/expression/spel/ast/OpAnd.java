@@ -20,12 +20,14 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Represents the boolean AND operation.
  *
  * @author Andy Clement
+ * @author Mark Fisher
  * @since 3.0
  */
 public class OpAnd extends Operator {
@@ -40,7 +42,9 @@ public class OpAnd extends Operator {
 		boolean rightValue;
 
 		try {
-			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			TypedValue typedValue = getLeftOperand().getValueInternal(state);
+			this.assertTypedValueNotNull(typedValue);
+			leftValue = (Boolean)state.convertValue(typedValue, BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelEvaluationException ee) {
 			ee.setPosition(getLeftOperand().getStartPosition());
@@ -52,7 +56,9 @@ public class OpAnd extends Operator {
 		}
 
 		try {
-			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			TypedValue typedValue = getRightOperand().getValueInternal(state);
+			this.assertTypedValueNotNull(typedValue);
+			rightValue = (Boolean)state.convertValue(typedValue, BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelEvaluationException ee) {
 			ee.setPosition(getRightOperand().getStartPosition());
@@ -60,6 +66,12 @@ public class OpAnd extends Operator {
 		}
 
 		return /* leftValue && */BooleanTypedValue.forValue(rightValue);
+	}
+
+	private void assertTypedValueNotNull(TypedValue typedValue) {
+		if (TypedValue.NULL_TYPED_VALUE.equals(typedValue)) {
+			throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
+		}
 	}
 
 }
