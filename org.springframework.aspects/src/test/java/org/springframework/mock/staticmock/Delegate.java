@@ -1,4 +1,4 @@
-package org.springframework.mock.static_mock;
+package org.springframework.mock.staticmock;
 
 import java.rmi.RemoteException;
 
@@ -8,6 +8,8 @@ import junit.framework.Assert;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.mock.staticmock.JUnitStaticEntityMockingControl;
+import org.springframework.mock.staticmock.MockStaticEntityMethods;
 
 //Used because verification failures occur after method returns,
 //so we can't test for them in the test case itself
