@@ -63,8 +63,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/** indicates whether the use of a String[] for generated keys is supported */
 	private boolean generatedKeysColumnNameArraySupported = true;
 
-	/** database product we know that don't support the use of a String[] for generated keys */
-	private List productsNotSupportingGeneratedKeysColumnNameArray = Arrays.asList(new String[] {"Apache Derby"});
+	/** database products we know not supporting the use of a String[] for generated keys */
+	private List productsNotSupportingGeneratedKeysColumnNameArray =
+			Arrays.asList(new String[] {"Apache Derby", "HSQL Database Engine"});
 
 	/** Collection of TableParameterMetaData objects */
 	private List<TableParameterMetaData> insertParameterMetaData = new ArrayList<TableParameterMetaData>();
