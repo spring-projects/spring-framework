@@ -70,7 +70,7 @@ public class NestedServletException extends ServletException {
 		super(msg, cause);
 		// Set JDK 1.4 exception chain cause if not done by ServletException class already
 		// (this differs between Servlet API versions).
-		if (getCause() == null) {
+		if (getCause() == null && cause!=null) {
 			initCause(cause);
 		}
 	}

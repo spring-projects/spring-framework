@@ -44,7 +44,7 @@ public class TestVelocityEngine extends VelocityEngine {
 	}
 
 
-	public Template getTemplate(String name) {
+	public Template getTemplate(String name) throws ResourceNotFoundException {
 		Template template = (Template) this.templates.get(name);
 		if (template == null) {
 			throw new ResourceNotFoundException("No template registered for name [" + name + "]");

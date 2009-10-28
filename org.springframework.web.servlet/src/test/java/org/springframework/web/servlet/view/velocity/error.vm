@@ -1,0 +1,4 @@
+##
+## test template for Velocity view with missing method
+##
+$command.nonexistent()

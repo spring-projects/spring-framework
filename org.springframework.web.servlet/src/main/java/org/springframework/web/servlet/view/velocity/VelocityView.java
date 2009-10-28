@@ -73,6 +73,7 @@ import org.springframework.web.util.NestedServletException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @see VelocityConfig
  * @see VelocityConfigurer
  * @see #setUrl
@@ -516,11 +517,12 @@ public class VelocityView extends AbstractTemplateView {
 			template.merge(context, response.getWriter());
 		}
 		catch (MethodInvocationException ex) {
+			Throwable cause = ex.getWrappedThrowable();
 			throw new NestedServletException(
 					"Method invocation failed during rendering of Velocity view with name '" +
 					getBeanName() + "': " + ex.getMessage() + "; reference [" + ex.getReferenceName() +
 					"], method '" + ex.getMethodName() + "'",
-					ex.getWrappedThrowable());
+					cause==null ? ex : cause);
 		}
 	}
 
