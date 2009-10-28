@@ -50,6 +50,7 @@ import org.springframework.web.servlet.tags.TransformTag;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Jeremy Grelle
+ * @author Dave Syer
  */
 public class SelectTagTests extends AbstractFormTagTests {
 
@@ -172,7 +173,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), "testBean");
 		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
 			public void setAsText(String text) throws IllegalArgumentException {
-				setValue(new Country(text, ""));
+				setValue(Country.getCountryWithIsoCode(text));
 			}
 			public String getAsText() {
 				return ((Country) getValue()).getName();
@@ -187,7 +188,120 @@ public class SelectTagTests extends AbstractFormTagTests {
 		transformTag.setParent(this.tag);
 		transformTag.setPageContext(getPageContext());
 		transformTag.doStartTag();
+		String output = getOutput();
+		System.err.println(output);
 		assertEquals("Austria", getPageContext().findAttribute("key"));
+	}
+
+	public void testWithListAndEditor() throws Exception {
+		this.tag.setPath("realCountry");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), "testBean");
+		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(Country.getCountryWithIsoCode(text));
+			}
+			public String getAsText() {
+				return ((Country) getValue()).getName();
+			}
+		});
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
+		this.tag.doStartTag();
+		String output = getOutput();
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+		assertTrue(output.contains("option value=\"AT\" selected=\"selected\">Austria"));
+	}
+
+	public void testNestedPathWithListAndEditorAndNullValue() throws Exception {
+		this.tag.setPath("bean.realCountry");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
+		this.tag.setMultiple("false");
+		TestBeanWrapper testBean = new TestBeanWrapper();
+		TestBeanWithRealCountry withCountry = (TestBeanWithRealCountry) getTestBean();
+		withCountry.setRealCountry(null);
+		testBean.setBean(withCountry);
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(testBean , "testBean");
+		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				if (text==null || text.length()==0) {
+					setValue(null);
+					return;
+				}
+				setValue(Country.getCountryWithIsoCode(text));
+			}
+			public String getAsText() {
+				Country value = (Country) getValue();
+				if (value==null) {
+					return null;
+				}
+				return ((Country) value).getName();
+			}
+		});
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
+		this.tag.doStartTag();
+		String output = getOutput();
+		System.err.println(output);
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+		assertFalse(output.contains("selected=\"selected\""));
+	}
+
+	public void testNestedPathWithListAndEditor() throws Exception {
+		this.tag.setPath("bean.realCountry");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
+		TestBeanWrapper testBean = new TestBeanWrapper();
+		testBean.setBean(getTestBean());
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(testBean , "testBean");
+		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(Country.getCountryWithIsoCode(text));
+			}
+			public String getAsText() {
+				return ((Country) getValue()).getName();
+			}
+		});
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
+		this.tag.doStartTag();
+		String output = getOutput();
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+		assertTrue(output.contains("option value=\"AT\" selected=\"selected\">Austria"));
+	}
+
+	public void testWithListAndEditorAndNullValue() throws Exception {
+		this.tag.setPath("realCountry");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
+		TestBeanWithRealCountry testBean = (TestBeanWithRealCountry) getTestBean();
+		testBean.setRealCountry(null);
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(testBean, "testBean");
+		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(Country.getCountryWithIsoCode(text));
+			}
+			public String getAsText() {
+				Country value = (Country) getValue();
+				if (value==null) {
+					return "";
+				}
+				return ((Country) value).getName();
+			}
+		});
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
+		this.tag.doStartTag();
+		String output = getOutput();
+		System.err.println(output);
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+		assertFalse(output.contains("selected=\"selected\""));
 	}
 
 	public void testWithMap() throws Exception {
@@ -636,6 +750,19 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	private TestBean getTestBean() {
 		return (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
+	}
+	
+	public static class TestBeanWrapper {
+		private TestBean bean;
+
+		public TestBean getBean() {
+			return bean;
+		}
+
+		public void setBean(TestBean bean) {
+			this.bean = bean;
+		}
+		
 	}
 
 }

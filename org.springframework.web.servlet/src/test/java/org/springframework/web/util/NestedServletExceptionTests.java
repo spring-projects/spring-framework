@@ -21,4 +21,11 @@ public class NestedServletExceptionTests {
 		assertEquals(cause, exception.getCause());
 	}
 
+	@Test
+	public void testNestedServletExceptionStringNullThrowable() {
+		// This can happen if someone is sloppy with Throwable causes...
+		NestedServletException exception = new NestedServletException("foo", null);
+		assertEquals("foo", exception.getMessage());
+	}
+
 }
