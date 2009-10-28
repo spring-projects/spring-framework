@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.mock.static_mock;
+package org.springframework.mock.staticmock;
 
 import java.rmi.RemoteException;
 
@@ -25,6 +25,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.springframework.mock.staticmock.JUnitStaticEntityMockingControl;
+import org.springframework.mock.staticmock.MockStaticEntityMethods;
 import org.springframework.remoting.RemoteAccessException;
 
 

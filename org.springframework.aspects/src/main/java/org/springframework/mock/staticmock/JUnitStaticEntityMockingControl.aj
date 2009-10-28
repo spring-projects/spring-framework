@@ -1,4 +1,4 @@
-package org.springframework.mock.static_mock;
+package org.springframework.mock.staticmock;
 
 import javax.persistence.Entity;
 import org.junit.Test;

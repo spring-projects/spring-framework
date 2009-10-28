@@ -1,4 +1,4 @@
-package org.springframework.mock.static_mock;
+package org.springframework.mock.staticmock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

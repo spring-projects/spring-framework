@@ -1,4 +1,4 @@
-package org.springframework.mock.static_mock;
+package org.springframework.mock.staticmock;
 
 privileged aspect Person_Roo_Entity {
     
