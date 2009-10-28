@@ -238,7 +238,7 @@ public abstract class StatementCreatorUtils {
 				else if (databaseProductName.startsWith("DB2") ||
 						jdbcDriverName.startsWith("jConnect") ||
 						jdbcDriverName.startsWith("SQLServer")||
-						jdbcDriverName.startsWith("Apache Derby Embedded")) {
+						jdbcDriverName.startsWith("Apache Derby")) {
 					sqlType = Types.VARCHAR;
 				}
 			}
