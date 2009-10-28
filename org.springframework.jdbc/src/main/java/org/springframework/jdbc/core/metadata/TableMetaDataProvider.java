@@ -39,7 +39,7 @@ public interface TableMetaDataProvider {
 	/**
 	 * Initialize using provided database metadata, table and column information. This initalization can be
 	 * turned off by specifying that column meta data should not be used.
-	 * @param databaseMetaData used to retreive database specific information
+	 * @param databaseMetaData used to retrieve database specific information
 	 * @param catalogName name of catalog to use or null
 	 * @param schemaName name of schema name to use or null
 	 * @param tableName name of the table
@@ -104,14 +104,14 @@ public interface TableMetaDataProvider {
  	boolean isGetGeneratedKeysSupported();
 
 	/**
-	 * Does this database support a simple quey to retreive the generated key whe the JDBC 3.0 feature
+	 * Does this database support a simple quey to retrieve the generated key whe the JDBC 3.0 feature
 	 * of retreiving generated keys is not supported
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
 	 */
  	boolean isGetGeneratedKeysSimulated();
 
 	/**
-	 * Get the simple query to retreive a generated key
+	 * Get the simple query to retrieve a generated key
 	 */
 	String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName);
 

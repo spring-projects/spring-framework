@@ -43,7 +43,7 @@ public interface CallMetaDataProvider {
 	 * Initialize the database specific management of procedure column meta data.
 	 * This is only called for databases that are supported. This initalization
 	 * can be turned off by specifying that column meta data should not be used.
-	 * @param databaseMetaData used to retreive database specific information
+	 * @param databaseMetaData used to retrieve database specific information
 	 * @param catalogName name of catalog to use or null
 	 * @param schemaName name of schema name to use or null
 	 * @param procedureName name of the stored procedure
@@ -127,13 +127,13 @@ public interface CallMetaDataProvider {
 	String getUserName();
 
 	/**
-	 * Does this database support returning resultsets that should be retreived with the JDBC call
+	 * Does this database support returning resultsets that should be retrieved with the JDBC call
 	 * {@link java.sql.Statement#getResultSet()}
 	 */
 	boolean isReturnResultSetSupported();
 
 	/**
-	 * Does this database support returning resultsets as ref cursors to be retreived with
+	 * Does this database support returning resultsets as ref cursors to be retrieved with
 	 * {@link java.sql.CallableStatement#getObject(int)} for the specified column.
 	 */
 	boolean isRefCursorSupported();
