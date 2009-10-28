@@ -19,6 +19,8 @@ package org.springframework.expression.spel.ast;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
@@ -43,6 +45,10 @@ public class Ternary extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Boolean value = children[0].getValue(state, Boolean.class);
+		if (value == null) {
+			throw new SpelEvaluationException(getChild(0).getStartPosition(),
+					SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
+		}
 		if (value.booleanValue()) {
 			return children[1].getValueInternal(state);
 		} else {

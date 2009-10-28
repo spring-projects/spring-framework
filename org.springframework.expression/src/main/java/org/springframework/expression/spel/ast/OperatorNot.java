@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -36,7 +37,7 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
-			boolean value = (Boolean)state.convertValue(children[0].getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			boolean value = (Boolean) state.convertValue(children[0].getValueInternal(state), TypeDescriptor.valueOf(boolean.class));
 			return BooleanTypedValue.forValue(!value);
 		}
 		catch (SpelEvaluationException see) {

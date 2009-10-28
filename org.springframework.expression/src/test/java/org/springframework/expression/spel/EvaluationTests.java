@@ -36,6 +36,8 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
  * Tests the evaluation of real expressions in a real context.
  * 
  * @author Andy Clement
+ * @author Mark Fisher
+ * @since 3.0
  */
 public class EvaluationTests extends ExpressionTestCase {
 
@@ -296,6 +298,16 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("!true", "false", Boolean.class);
 	}
 
+	@Test
+	public void testUnaryNot02() {
+		evaluate("!false", "true", Boolean.class);
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testUnaryNotWithNullValue() {
+		parser.parseExpression("!null").getValue();
+	}
+
 	// assignment
 	@Test
 	public void testAssignmentToVariables01() {
@@ -307,7 +319,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("2>4?1:2",2,Integer.class);
 	}
 
-	
 	@Test
 	public void testTernaryOperator02() {
 		evaluate("'abc'=='abc'?1:2",1,Integer.class);
@@ -330,6 +341,11 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("3?:#var=5",3,Integer.class);
 		evaluate("null?:#var=5",5,Integer.class);
 		evaluate("2>4?(3>2?true:false):(5<3?true:false)",false,Boolean.class);
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testTernaryOperatorWithNullValue() {
+		parser.parseExpression("null ? 0 : 1").getValue();
 	}
 
 	@Test
