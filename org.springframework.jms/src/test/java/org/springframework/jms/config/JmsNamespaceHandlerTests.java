@@ -28,7 +28,7 @@ import javax.jms.TextMessage;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -41,6 +41,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
+import org.springframework.util.ErrorHandler;
 
 /**
  * @author Mark Fisher
@@ -133,9 +134,24 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		control3.verify();
 	}
 
+	public void testErrorHandlers() {
+		ErrorHandler expected = this.context.getBean("testErrorHandler", ErrorHandler.class);
+		ErrorHandler errorHandler1 = getErrorHandler("listener1");
+		ErrorHandler errorHandler2 = getErrorHandler("listener2");
+		ErrorHandler defaultErrorHandler = getErrorHandler(DefaultMessageListenerContainer.class.getName() + "#0");
+		assertSame(expected, errorHandler1);
+		assertSame(expected, errorHandler2);
+		assertNull(defaultErrorHandler);
+	}
+
 	private MessageListener getListener(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
 		return (MessageListener) container.getMessageListener();
+	}
+
+	private ErrorHandler getErrorHandler(String containerBeanName) {
+		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
+		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
 	}
 
 	public void testComponentRegistration() {
@@ -228,6 +244,14 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			this.registeredComponents.add(componentDefinition);
+		}
+	}
+
+
+	static class TestErrorHandler implements ErrorHandler {
+
+		@Override
+		public void handleError(Throwable t) {
 		}
 	}
 
