@@ -418,7 +418,7 @@ public abstract class AbstractJdbcInsert {
 			return kh.getKey();
 		}
 		else {
-			throw new DataIntegrityViolationException("Unable to retreive the generated key for the insert: " +
+			throw new DataIntegrityViolationException("Unable to retrieve the generated key for the insert: " +
 					getInsertString());
 		}
 	}
