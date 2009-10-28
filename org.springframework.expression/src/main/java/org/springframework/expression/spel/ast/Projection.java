@@ -16,7 +16,9 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents projection, where a given operation is performed on all elements in some input sequence, returning 
@@ -34,7 +38,8 @@ import org.springframework.expression.spel.SpelMessage;
  * "{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}" returns "[n, y, n, y, n, y, n, y, n, y]"
  * 
  * @author Andy Clement
- * 
+ * @author Mark Fisher
+ * @since 3.0
  */
 public class Projection extends SpelNodeImpl {
 
@@ -50,6 +55,7 @@ public class Projection extends SpelNodeImpl {
 		TypedValue op = state.getActiveContextObject();
 
 		Object operand = op.getValue();
+		boolean operandIsArray = ObjectUtils.isArray(operand);
 		// TypeDescriptor operandTypeDescriptor = op.getTypeDescriptor();
 		
 		// When the input is a map, we push a special context object on the stack
@@ -69,21 +75,35 @@ public class Projection extends SpelNodeImpl {
 				}
 			}
 			return new TypedValue(result,TypeDescriptor.valueOf(List.class)); // TODO unable to build correct type descriptor
-		} else if (operand instanceof List) {
+		} else if (operand instanceof List || operandIsArray) {
 			List<Object> data = new ArrayList<Object>();
-			data.addAll((Collection<?>) operand);
+			Collection<?> c = (operand instanceof List) ? (Collection<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
+			data.addAll(c);
 			List<Object> result = new ArrayList<Object>();
 			int idx = 0;
+			Class<?> arrayElementType = null;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
 					state.enterScope("index", idx);
-					result.add(children[0].getValueInternal(state).getValue());
+					Object value = children[0].getValueInternal(state).getValue();
+					if (value != null && operandIsArray) {
+						arrayElementType = this.determineCommonType(arrayElementType, value.getClass());
+					}
+					result.add(value);
 				} finally {
 					state.exitScope();
 					state.popActiveContextObject();
 				}
 				idx++;
+			}
+			if (operandIsArray) {
+				if (arrayElementType == null) {
+					arrayElementType = Object.class;
+				}
+				Object resultArray = Array.newInstance(arrayElementType, result.size());
+				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
+				return new TypedValue(resultArray, op.getTypeDescriptor());
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
 		} else {
@@ -104,5 +124,28 @@ public class Projection extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder();
 		return sb.append("![").append(getChild(0).toStringAST()).append("]").toString();
 	}
-	
+
+	private Class<?> determineCommonType(Class<?> oldType, Class<?> newType) {
+		if (oldType == null) {
+			return newType;
+		}
+		if (oldType.isAssignableFrom(newType)) {
+			return oldType;
+		}
+		Class<?> nextType = newType;
+		while (nextType != Object.class) {
+			if (nextType.isAssignableFrom(oldType)) {
+				return nextType;
+			}
+			nextType = nextType.getSuperclass();
+		}
+		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(newType);
+		for (Class<?> nextInterface : interfaces) {
+			if (nextInterface.isAssignableFrom(oldType)) {
+				return nextInterface;
+			}
+		}
+		return Object.class;
+	}
+
 }

@@ -16,7 +16,9 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +30,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents selection over a map or collection. For example: {1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'} returns
@@ -37,6 +41,8 @@ import org.springframework.expression.spel.SpelMessage;
  * criteria.
  * 
  * @author Andy Clement
+ * @author Mark Fisher
+ * @since 3.0
  */
 public class Selection extends SpelNodeImpl {
 
@@ -97,9 +103,11 @@ public class Selection extends SpelNodeImpl {
 				return new TypedValue(resultMap,TypeDescriptor.valueOf(Map.class));
 			}
 			return new TypedValue(result,op.getTypeDescriptor());
-		} else if (operand instanceof Collection) {
+		} else if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
 			List<Object> data = new ArrayList<Object>();
-			data.addAll((Collection<?>) operand);
+			Collection<?> c = (operand instanceof Collection) ?
+					(Collection<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
+			data.addAll(c);
 			List<Object> result = new ArrayList<Object>();
 			int idx = 0;
 			for (Object element : data) {
@@ -130,7 +138,15 @@ public class Selection extends SpelNodeImpl {
 			if (variant == LAST) {
 				return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
 			}
-			return new TypedValue(result,op.getTypeDescriptor());
+			if (operand instanceof Collection) {
+				return new TypedValue(result,op.getTypeDescriptor());
+			}
+			else {
+				Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementType());
+				Object resultArray = Array.newInstance(elementType, result.size());
+				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
+				return new TypedValue(resultArray, op.getTypeDescriptor());
+			}
 		} else {
 			if (operand==null) {
 				if (nullSafe) { 
