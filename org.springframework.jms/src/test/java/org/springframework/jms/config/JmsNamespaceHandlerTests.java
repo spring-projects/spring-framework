@@ -250,7 +250,6 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 	static class TestErrorHandler implements ErrorHandler {
 
-		@Override
 		public void handleError(Throwable t) {
 		}
 	}
