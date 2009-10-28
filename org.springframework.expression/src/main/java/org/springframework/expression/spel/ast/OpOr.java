@@ -17,14 +17,17 @@
 package org.springframework.expression.spel.ast;
 
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Represents the boolean OR operation.
  *
  * @author Andy Clement
+ * @author Mark Fisher
  * @since 3.0
  */
 public class OpOr extends Operator {
@@ -37,8 +40,10 @@ public class OpOr extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		boolean leftValue;
 		boolean rightValue;
-		try { 
-			leftValue = (Boolean)state.convertValue(getLeftOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+		try {
+			TypedValue typedValue = getLeftOperand().getValueInternal(state);
+			this.assertTypedValueNotNull(typedValue);
+			leftValue = (Boolean)state.convertValue(typedValue, BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelEvaluationException see) {
 			see.setPosition(getLeftOperand().getStartPosition());
@@ -50,7 +55,9 @@ public class OpOr extends Operator {
 		}
 
 		try {
-			rightValue = (Boolean)state.convertValue(getRightOperand().getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			TypedValue typedValue = getRightOperand().getValueInternal(state);
+			this.assertTypedValueNotNull(typedValue);
+			rightValue = (Boolean)state.convertValue(typedValue, BOOLEAN_TYPE_DESCRIPTOR);
 		}
 		catch (SpelEvaluationException see) {
 			see.setPosition(getRightOperand().getStartPosition()); // TODO end positions here and in similar situations
@@ -58,6 +65,12 @@ public class OpOr extends Operator {
 		}
 
 		return BooleanTypedValue.forValue(leftValue || rightValue);
+	}
+
+	private void assertTypedValueNotNull(TypedValue typedValue) {
+		if (TypedValue.NULL_TYPED_VALUE.equals(typedValue)) {
+			throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
+		}
 	}
 
 }

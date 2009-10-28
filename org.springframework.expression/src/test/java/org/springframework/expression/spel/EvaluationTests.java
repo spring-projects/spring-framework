@@ -308,6 +308,26 @@ public class EvaluationTests extends ExpressionTestCase {
 		parser.parseExpression("!null").getValue();
 	}
 
+	@Test(expected = EvaluationException.class)
+	public void testAndWithNullValueOnLeft() {
+		parser.parseExpression("null and true").getValue();
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testAndWithNullValueOnRight() {
+		parser.parseExpression("true and null").getValue();
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testOrWithNullValueOnLeft() {
+		parser.parseExpression("null or false").getValue();
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testOrWithNullValueOnRight() {
+		parser.parseExpression("false or null").getValue();
+	}
+
 	// assignment
 	@Test
 	public void testAssignmentToVariables01() {
