@@ -55,8 +55,9 @@ import org.springframework.web.util.UriTemplate;
  * <tr><td>PUT</td><td>{@link #put}</td></tr> <tr><td>any</td><td>{@link #execute}</td></tr> </table>
  *
  * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}.
- * Two variant take a {@code String} URI as first argument, and are capable of substituting any
- * {@linkplain UriTemplate uri templates} in that URL using either a
+ * Two variant take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, String[])},
+ * {@link #getForObject(String, Class, Map)}), and are capable of substituting any
+ * {@linkplain UriTemplate URI templates} in that URL using either a
  * {@code String} variable arguments array, or a {@code Map<String, String>}. The string varargs variant expands the
  * given template variables in order, so that
  * <pre>
@@ -71,8 +72,16 @@ import org.springframework.web.util.UriTemplate;
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
  * </pre>
  * will perform a GET on {@code http://example.com/hotels/42/rooms/42}.
- * Alternatively, there are {@link URI} variant methods, which do not allow for URI templates, but allow you to reuse a
- * single, expanded URI multiple times.
+ * Alternatively, there are {@link URI} variant methods ({@link #getForObject(URI, Class)}), which do not allow for
+ * URI templates, but allow you to reuse a single, expanded URI multiple times.
+ *
+ * <p>Furthermore, the {@code String}-argument methods assume that the URL String is unencoded. This means that
+ * <pre>
+ * restTemplate.getForObject("http://example.com/hotel list");
+ * </pre>
+ * will perform a GET on {@code http://example.com/hotel%20list}. As a result, any URL passed that is already encoded
+ * will be encoded twice (i.e. {@code http://example.com/hotel%20list} will become {@code http://example.com/hotel%2520list}).
+ * If this behavior is undesirable, use the {@code URI}-argument methods, which will not perform any URL encoding.
  *
  * <p>Objects passed to and returned from these methods are converted to and from HTTP messages by {@link
  * HttpMessageConverter} instances. Converters for the main mime types are registered by default, but you can also write
