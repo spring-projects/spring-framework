@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -80,6 +81,7 @@ import org.springframework.ui.format.date.DateFormatter;
 import org.springframework.ui.format.support.GenericFormatterRegistry;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -1146,6 +1148,25 @@ public class ServletAnnotationControllerTests {
 	}
 
 
+	@Test
+	public void requestParamMap() throws Exception {
+		initServlet(RequestParamMapController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/map");
+		request.addParameter("key1", "value1");
+		request.addParameter("key2", new String[]{"value21", "value22"});
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+		assertEquals("key1=value1,key2=value21", response.getContentAsString());
+
+		request.setRequestURI("/multiValueMap");
+		response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+		assertEquals("key1=[value1],key2=[value21,value22]", response.getContentAsString());
+	}
+
 
 	/*
 	 * Controllers
@@ -1940,6 +1961,41 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping("/method")
 		public ModelAndView method(MyEntity object) {
 			return new ModelAndView("/something");
+		}
+	}
+
+	@Controller
+	public static class RequestParamMapController {
+
+		@RequestMapping("/map")
+		public void map(@RequestParam Map<String, String> params, Writer writer) throws IOException {
+			for (Iterator<Map.Entry<String, String>> it = params.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<String, String> entry = it.next();
+				writer.write(entry.getKey() + "=" + entry.getValue());
+				if (it.hasNext()) {
+					writer.write(',');
+				}
+
+			}
+		}
+
+		@RequestMapping("/multiValueMap")
+		public void multiValueMap(@RequestParam MultiValueMap<String, String> params, Writer writer) throws IOException {
+			for (Iterator<Map.Entry<String, List<String>>> it1 = params.entrySet().iterator(); it1.hasNext();) {
+				Map.Entry<String, List<String>> entry = it1.next();
+				writer.write(entry.getKey() + "=[");
+				for (Iterator<String> it2 = entry.getValue().iterator(); it2.hasNext();) {
+					String value = it2.next();
+					writer.write(value);
+					if (it2.hasNext()) {
+						writer.write(',');
+					}
+				}
+				writer.write(']');
+				if (it1.hasNext()) {
+					writer.write(',');
+				}
+			}
 		}
 	}
 	

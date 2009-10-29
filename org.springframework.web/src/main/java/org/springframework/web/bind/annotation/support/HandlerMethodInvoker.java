@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +47,8 @@ import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -396,11 +399,15 @@ public class HandlerMethodInvoker {
 		return initBinderArgs;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Object resolveRequestParam(String paramName, boolean required, String defaultValue,
 			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
 			throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
+		if (Map.class.isAssignableFrom(paramType)) {
+			return resolveRequestParamMap((Class<? extends Map>) paramType, webRequest);
+		}
 		if (paramName.length() == 0) {
 			paramName = getRequiredParameterName(methodParam);
 		}
@@ -426,6 +433,28 @@ public class HandlerMethodInvoker {
 		WebRequestDataBinder binder = new WebRequestDataBinder(null, paramName);
 		initBinder(handlerForInitBinderCall, paramName, binder, webRequest);
 		return binder.convertIfNecessary(paramValue, paramType, methodParam);
+	}
+
+	private Map resolveRequestParamMap(Class<? extends Map> mapType, NativeWebRequest webRequest) {
+		Map<String, String[]> parameterMap = webRequest.getParameterMap();
+		if (MultiValueMap.class.isAssignableFrom(mapType)) {
+			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(parameterMap.size());
+			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+				for (String value : entry.getValue()) {
+					result.add(entry.getKey(), value);
+				}
+			}
+			return result;
+		}
+		else {
+			Map<String, String> result = new LinkedHashMap<String, String>(parameterMap.size());
+			for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+				if (entry.getValue().length > 0) {
+					result.put(entry.getKey(), entry.getValue()[0]);
+				}
+			}
+			return result;
+		}
 	}
 
 	private Object resolveRequestHeader(String headerName, boolean required, String defaultValue,
