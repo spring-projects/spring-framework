@@ -20,7 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Strategy used to populate an embedded database during initialization.
+ * Strategy used to populate a database during initialization.
  *
  * @author Keith Donald
  * @since 3.0
@@ -29,7 +29,7 @@ import java.sql.SQLException;
 public interface DatabasePopulator {
 	
 	/**
-	 * Populate the database using the JDBC-based data access template provided.
+	 * Populate the database using the JDBC connection provided.
 	 * @param connection the JDBC connection to use to populate the db; already configured and ready to use
 	 * @throws SQLException if an unrecoverable data access exception occurs during database population
 	 */

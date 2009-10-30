@@ -17,10 +17,10 @@
 package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Driver;
+
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.util.Assert;
 
 /**
  * Creates a {@link SimpleDriverDataSource}.
@@ -35,17 +35,18 @@ final class SimpleDriverDataSourceFactory implements DataSourceFactory {
 	
 	public ConnectionProperties getConnectionProperties() {
 		return new ConnectionProperties() {
-			@SuppressWarnings("unchecked")
-			public void setDriverClass(Class driverClass) {
-				Assert.isAssignable(Driver.class, driverClass);
-				dataSource.setDriverClass((Class<? extends Driver>) driverClass);
+			public void setDriverClass(Class<? extends Driver> driverClass) {
+				dataSource.setDriverClass(driverClass);
 			}
+			
 			public void setUrl(String url) {
 				dataSource.setUrl(url);
 			}
+			
 			public void setUsername(String username) {
 				dataSource.setUsername(username);
 			}
+			
 			public void setPassword(String password) {
 				dataSource.setPassword(password);
 			}

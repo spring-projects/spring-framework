@@ -120,7 +120,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @param clazz the class to load relative to
 	 * @return the embedded database builder
 	 */
-	public static EmbeddedDatabaseBuilder relativeTo(Class clazz) {
+	public static EmbeddedDatabaseBuilder relativeTo(Class<?> clazz) {
 		return new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(clazz));
 	}
 
