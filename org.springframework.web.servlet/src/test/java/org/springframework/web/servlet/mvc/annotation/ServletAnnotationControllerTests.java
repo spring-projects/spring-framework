@@ -77,8 +77,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.ui.format.date.DateFormatter;
-import org.springframework.ui.format.support.GenericFormatterRegistry;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.MultiValueMap;
@@ -471,37 +469,6 @@ public class ServletAnnotationControllerTests {
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
-				wac.registerBeanDefinition("handlerAdapter", adapterDef);
-				wac.refresh();
-				return wac;
-			}
-		};
-		servlet.init(new MockServletConfig());
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
-		request.addParameter("defaultName", "myDefaultName");
-		request.addParameter("age", "value2");
-		request.addParameter("date", "2007-10-02");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
-		assertEquals("myView-String:myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
-	}
-
-	@Test
-	public void commandProvidingFormControllerWithFormatter() throws Exception {
-		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyCommandProvidingFormController.class));
-				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
-				RootBeanDefinition registryDef = new RootBeanDefinition(GenericFormatterRegistry.class);
-				registryDef.getPropertyValues().addPropertyValue("formatters", new DateFormatter("yyyy-MM-dd"));
-				RootBeanDefinition initializerDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
-				initializerDef.getPropertyValues().addPropertyValue("formatterRegistry", registryDef);
-				initializerDef.getPropertyValues().addPropertyValue("validator", new RootBeanDefinition(LocalValidatorFactoryBean.class));
-				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", initializerDef);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;

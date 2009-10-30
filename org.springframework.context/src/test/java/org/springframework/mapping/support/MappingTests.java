@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.joda.time.MutableDateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
@@ -318,6 +319,35 @@ public class MappingTests {
 	}
 
 	@Test
+	public void testMultiFieldToFieldMappingWithAssembler() {
+		Mapper<Map, Account> mapper = MapperFactory.mapperBuilder(Map.class, Account.class)
+				.setAutoMappingEnabled(false)
+				// field to multiple fields
+				.addAssemblerMapping("activationDateTime", new Converter<Map<String, String>, DateTime>() {
+					public DateTime convert(Map<String, String> source) {
+						MutableDateTime dateTime = new MutableDateTime();
+						dateTime.setYear(Integer.parseInt(source.get("year")));
+						dateTime.setMonthOfYear(Integer.parseInt(source.get("month")));
+						dateTime.setDayOfMonth(Integer.parseInt(source.get("day")));
+						dateTime.setHourOfDay(Integer.parseInt(source.get("hour")));
+						dateTime.setMinuteOfHour(Integer.parseInt(source.get("minute")));
+						dateTime.setSecondOfMinute(0);
+						dateTime.setMillisOfSecond(0);
+						return dateTime.toDateTime();
+					}
+				}).getMapper();
+		Map<String, Object> source = new HashMap<String, Object>();
+		source.put("activationDateTime.year", "2009");
+		source.put("activationDateTime.month", "10");
+		source.put("activationDateTime.day", "12");
+		source.put("activationDateTime.hour", "12");
+		source.put("activationDateTime.minute", "0");
+		Account account = mapper.map(source, new Account());	
+		assertEquals(ISODateTimeFormat.dateTime().parseDateTime("2009-10-12T12:00:00.000-04:00"), account
+				.getActivationDateTime());		
+	}
+
+	@Test
 	public void conditionalMapping() {
 		Map<String, String> domestic = new HashMap<String, String>();
 		domestic.put("international", "false");
@@ -328,17 +358,16 @@ public class MappingTests {
 		domestic.put("cityCode", "whatever");
 
 		Mapper<Map, PhoneNumber> mapper = MapperFactory.mapperBuilder(Map.class, PhoneNumber.class)
-			.addConditionalMapping("countryCode", "international == 'true'")
-			.addConditionalMapping("cityCode", "international == 'true'")
-			.getMapper();
-		
+				.addConditionalMapping("countryCode", "international == 'true'").addConditionalMapping("cityCode",
+						"international == 'true'").getMapper();
+
 		PhoneNumber number = mapper.map(domestic, new PhoneNumber());
 		assertEquals("205", number.getAreaCode());
 		assertEquals("339", number.getPrefix());
 		assertEquals("1234", number.getLine());
 		assertNull(number.getCountryCode());
 		assertNull(number.getCityCode());
-		
+
 		Map<String, String> international = new HashMap<String, String>();
 		international.put("international", "true");
 		international.put("areaCode", "205");
@@ -346,7 +375,7 @@ public class MappingTests {
 		international.put("line", "1234");
 		international.put("countryCode", "1");
 		international.put("cityCode", "2");
-		
+
 		PhoneNumber number2 = mapper.map(international, new PhoneNumber());
 
 		assertEquals("205", number2.getAreaCode());
@@ -479,7 +508,7 @@ public class MappingTests {
 
 		MapperFactory.defaultMapper().map(source, target);
 		assertEquals(1, target.getNumber());
-		assertTrue(item != target.getLineItem());
+		assertTrue(item == target.getLineItem());
 		assertEquals(new BigDecimal("30.00"), target.getLineItem().getAmount());
 		assertEquals(source, target.getLineItem().getOrder());
 	}

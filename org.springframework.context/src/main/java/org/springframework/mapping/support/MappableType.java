@@ -15,6 +15,7 @@
  */
 package org.springframework.mapping.support;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
@@ -28,9 +29,10 @@ import org.springframework.expression.EvaluationContext;
 interface MappableType<T> {
 
 	/**
-	 * The fields of the object that are eligible for mapping, including any nested fields.
+	 * Is this object to map an instanceof this mappable type?
+	 * @param object the object to test
 	 */
-	Set<String> getFields(T object);
+	boolean isInstance(Object object);
 
 	/**
 	 * A evaluation context for accessing the object.
@@ -38,9 +40,13 @@ interface MappableType<T> {
 	EvaluationContext getEvaluationContext(T object, ConversionService conversionService);
 
 	/**
-	 * Is this object to map an instanceof this mappable type?
-	 * @param object the object to test
+	 * The names of the fields on the object that are eligible for mapping, including any nested fields.
 	 */
-	boolean isInstance(Object object);
+	Set<String> getFieldNames(T object);
+
+	/**
+	 * A map of the nested fields on the object that are nested relative to <code>fieldName</code>.
+	 */
+	Map<String, Object> getNestedFields(String fieldName, T object);
 
 }

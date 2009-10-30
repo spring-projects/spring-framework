@@ -17,7 +17,7 @@
 package org.springframework.web.bind.support;
 
 import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.ui.format.FormatterRegistry;
+import org.springframework.ui.format.FormattingService;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -46,7 +46,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	private Validator validator;
 
-	private FormatterRegistry formatterRegistry;
+	private FormattingService formattingService;
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
@@ -111,17 +111,17 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	}
 
 	/**
-	 * Specify a FormatterRegistry which will apply to every DataBinder.
+	 * Specify a FormattingService which will apply to every DataBinder.
 	 */
-	public final void setFormatterRegistry(FormatterRegistry formatterRegistry) {
-		this.formatterRegistry = formatterRegistry;
+	public final void setFormattingService(FormattingService formattingService) {
+		this.formattingService = formattingService;
 	}
 
 	/**
-	 * Return a FormatterRegistry which will apply to every DataBinder.
+	 * Return the FormattingService which will apply to every DataBinder.
 	 */
-	public final FormatterRegistry getFormatterRegistry() {
-		return this.formatterRegistry;
+	public final FormattingService getFormattingService() {
+		return this.formattingService;
 	}
 
 	/**
@@ -160,8 +160,8 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 				this.validator.supports(binder.getTarget().getClass())) {
 			binder.setValidator(this.validator);
 		}
-		if (this.formatterRegistry != null) {
-			binder.setFormatterRegistry(this.formatterRegistry);
+		if (this.formattingService != null) {
+			binder.setFormattingService(this.formattingService);
 		}
 		if (this.propertyEditorRegistrars != null) {
 			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {

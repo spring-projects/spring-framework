@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.ui.format.jodatime;
 
-package org.springframework.ui.format;
-
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A type that can be formatted as a String for display in a user interface.
- *
+ * Indicates a property should be formatted as a ISO date time.
  * @author Keith Donald
- * @since 3.0
  */
-@Target({ElementType.TYPE})
+@Target( { ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Formatted {
+public @interface ISODateTimeFormat {
 
-	/**
-	 * The Formatter that handles the formatting for the annotated element.
-	 */
-	Class<? extends Formatter> value();
+	FormatStyle value();
 
+	public enum FormatStyle {
+		DATE, TIME, DATE_TIME
+	}
+	
 }

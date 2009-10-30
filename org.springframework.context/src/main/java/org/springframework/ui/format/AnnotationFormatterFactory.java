@@ -13,31 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.ui.format;
 
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
- * A factory that creates {@link Formatter formatters} to format property values on properties
- * annotated with a particular format {@link Annotation}.
+ * A factory that creates formatters to format values of fields annotated with a particular format {@link Annotation}.
  *
- * <p>For example, a <code>CurrencyAnnotationFormatterFactory</code> might create a <code>Formatter</code>
- * that formats a <code>BigDecimal</code> value set on a property annotated with <code>@CurrencyFormat</code>.
+ * <p>For example, a <code>DateTimeFormatAnnotationFormatterFactory</code> might create a formatter
+ * that formats a <code>Date</code> objects set on properties annotated with <code>@DateFormat</code>.
  *
  * @author Keith Donald
  * @since 3.0 
- * @param <A> the type of Annotation this factory uses to create Formatter instances
- * @param <T> the type of object that the factory's Formatters are dealing with
+ * @param <A> the type of Annotation that should trigger property formatting
  */
-public interface AnnotationFormatterFactory<A extends Annotation, T> {
-	
-	/**
-	 * Get the Formatter that will format the value of the property annotated with the provided annotation.
-	 * The annotation instance can contain properties that may be used to configure the Formatter that is returned.
-	 * @param annotation the annotation instance
-	 * @return the Formatter to use to format values of properties annotated with the annotation.
-	 */
-	Formatter<T> getFormatter(A annotation);	
+public interface AnnotationFormatterFactory<A extends Annotation> {
 
+	/**
+	 * The types of fields that may be annotated with the &lt;A&gt; annotation.
+	 */
+	Set<Class<?>> getFieldTypes();
+
+	/**
+	 * Get the Printer to print the value of a property of <code>fieldType</code> annotated with <code>annotation</code>.
+	 * @param annotation the annotation instance
+	 * @param fieldType the type of property being annotated
+	 * @return the printer
+	 */
+	Printer<?> getPrinter(A annotation, Class<?> fieldType);
+
+	/**
+	 * Get the Parser to parse the printed value of a property of <code>fieldType</code> annotated with <code>annotation</code>.
+	 * @param annotation the annotation instance
+	 * @param fieldType the type of field being annotated
+	 * @return the parser
+	 */
+	Parser<?> getParser(A annotation, Class<?> fieldType);
+	
 }

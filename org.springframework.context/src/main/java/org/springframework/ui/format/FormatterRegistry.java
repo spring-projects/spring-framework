@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.ui.format;
 
-import java.lang.annotation.Annotation;
-
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
- * A shared registry of Formatters.
+ * A registry of field formatting logic.
  *
  * @author Keith Donald
  * @since 3.0
@@ -29,46 +26,43 @@ import org.springframework.core.convert.TypeDescriptor;
 public interface FormatterRegistry {
 
 	/**
-	 * Adds a Formatter to this registry indexed by type.
-	 * <p>Use this add method when type differs from &lt;T&gt;.
-	 * Calling <code>getFormatter(type)</code> returns a decorator that wraps
-	 * the <code>targetFormatter</code> instance.
-	 * <p>On format, the decorator first coerces the instance of type to &lt;T&gt;,
-	 * then delegates to <code>targetFormatter</code> to format the value.
-	 * <p>On parse, the decorator first delegates to the formatter to parse a &lt;T&gt;,
-	 * then coerces the parsed value to type.
-	 * @param type the object type
-	 * @param targetFormatter the target formatter
+	 * Adds a Formatter to format fields of a specific type.
+	 * The Formatter will delegate to the specified <code>printer</code> for printing and <code>parser</code> for parsing.
+	 * <p>
+	 * On print, if the Printer's type T is declared and <code>fieldType</code> is not assignable to T,
+	 * a coersion to T will be attempted before delegating to <code>printer</code> to print a field value.
+	 * On parse, if the object returned by the Parser is not assignable to the runtime field type,
+	 * a coersion to the field type will be attempted before returning the parsed field value.
+	 * @param fieldType the field type to format
+	 * @param formatter the formatter to add
 	 */
-	void addFormatterByType(Class<?> type, Formatter<?> targetFormatter);
+	void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
 
 	/**
-	 * Adds a Formatter to this registry indexed by &lt;T&gt;.
-	 * <p>Calling <code>getFormatter(&lt;T&gt;.class)</code> returns <code>formatter</code>.
-	 * @param formatter the formatter
+	 * Adds a Formatter to format fields of a specific type.
+	 * <p>
+	 * On print, if the Formatter's type T is declared and <code>fieldType</code> is not assignable to T,
+	 * a coersion to T will be attempted before delegating to <code>formatter</code> to print a field value.
+	 * On parse, if the parsed object returned by <code>formatter</code> is not assignable to the runtime field type,
+	 * a coersion to the field type will be attempted before returning the parsed field value.
+	 * @param fieldType the field type to format
+	 * @param formatter the formatter to add
 	 */
-	void addFormatterByType(Formatter<?> formatter);
+	void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter);
 
 	/**
-	 * Adds a Formatter to this registry indexed by the given annotation type.
-	 * <p>Calling <code>getFormatter(...)</code> on a field or accessor method
-	 * with the given annotation returns <code>formatter</code>.
-	 * @param formatter the formatter
+	 * Adds a Formatter to format fields annotated with a specific format annotation.
+	 * @param annotationFormatterFactory the annotation formatter factory to add
 	 */
-	void addFormatterByAnnotation(Class<? extends Annotation> annotationType, Formatter<?> formatter);
-
+	void addFormatterForFieldAnnotation(AnnotationFormatterFactory<?> annotationFormatterFactory);
+	
 	/**
-	 * Adds a AnnotationFormatterFactory that returns the Formatter for properties annotated with a specific annotation.
-	 * <p>Calling <code>getFormatter(...)</code> on a field or accessor method
-	 * with the given annotation returns <code>formatter</code>.
-	 * @param factory the annotation formatter factory
+	 * Returns the registry of Converters that coerse field values to types required by Formatters.
+	 * Allows clients to register their own custom converters.
+	 * For example, a date/time formatting configuration might expect a java.util.Date field value to be converted to a Long for formatting.
+	 * Registering a simpler DateToLongConverter allievates the need to register multiple formatters for closely related types.
+	 * @return the converter registry, allowing new Converters to be registered
 	 */
-	void addFormatterByAnnotation(AnnotationFormatterFactory<?, ?> factory);
-
-	/**
-	 * Get the Formatter for the type descriptor.
-	 * @return the Formatter, or <code>null</code> if no suitable one is registered
-	 */
-	Formatter<Object> getFormatter(TypeDescriptor type);
+	ConverterRegistry getConverterRegistry();
 
 }

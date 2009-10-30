@@ -33,17 +33,12 @@ public class IntegerFormatterTests {
 
 	@Test
 	public void formatValue() {
-		assertEquals("23", formatter.format(23L, Locale.US));
+		assertEquals("23", formatter.print(23L, Locale.US));
 	}
 
 	@Test
 	public void parseValue() throws ParseException {
 		assertEquals((Long) 2356L, formatter.parse("2356", Locale.US));
-	}
-
-	@Test
-	public void parseEmptyValue() throws ParseException {
-		assertEquals(null, formatter.parse("", Locale.US));
 	}
 
 	@Test(expected = ParseException.class)

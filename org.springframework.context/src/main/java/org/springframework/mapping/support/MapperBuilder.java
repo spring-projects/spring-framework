@@ -15,6 +15,9 @@
  */
 package org.springframework.mapping.support;
 
+import java.util.Map;
+
+import org.joda.time.DateTime;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.mapping.Mapper;
 
@@ -108,6 +111,17 @@ public interface MapperBuilder<S, T> {
 	MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper);
 
 	/**
+	 * Register a mapping that delegates to an assembler to convert multiple source field values to a single target field value.
+	 * The source field names mapped begin with <code>field.</code>.
+	 * For example, adding an assembler mapping for a field named <code>dateTime</code> would pass all nested <code>dateTime.*</code> fields to the assembler.
+	 * Such fields might be <code>year</code>, <code>month</code>, <code>day</code>, etc.
+	 * @param fields the name of the source field whose value will be assembled from multiple nested fields that begin with the same name
+	 * @param converter the assembler that will perform value assembly from the field values
+	 * @return this, for configuring additional field mapping options fluently
+	 */
+	MapperBuilder<S, T> addAssemblerMapping(String field, Converter<? extends Map<?, ?>, ?> converter);
+	
+	/**
 	 * Register a conditional mapping between a source field and a target field.
 	 * The source and target field names will be the same value.
 	 * @param field the field mapping expression
@@ -170,7 +184,7 @@ public interface MapperBuilder<S, T> {
 	 * @param condition the boolean expression that determines if this mapping executes
 	 * @return this, for configuring additional field mapping options fluently
 	 */
-	MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper, String condition);
+	MapperBuilder<S, T> addConditionalMapping(String[] fields, Mapper<S, T> mapper, String condition);
 	
 	/**
 	 * Register a Mapper that will be used to map between nested source and target fields of a specific sourceType/targetType pair.

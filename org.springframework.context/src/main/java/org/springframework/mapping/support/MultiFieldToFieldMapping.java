@@ -15,9 +15,11 @@
  */
 package org.springframework.mapping.support;
 
+import java.util.Map;
+
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.style.StylerUtils;
 import org.springframework.expression.Expression;
-import org.springframework.mapping.Mapper;
 
 /**
  * A mapping between several source fields and a target field.
@@ -25,46 +27,51 @@ import org.springframework.mapping.Mapper;
  */
 final class MultiFieldToFieldMapping implements SpelMapping {
 
-	private String[] fields;
+	private final String sourceField;
+
+	private final Expression targetField;
 
 	@SuppressWarnings("unchecked")
-	private final Mapper multiFieldMapper;
+	private final Converter targetFieldValueAssembler;
 
-	private Expression condition;
-	
-	public MultiFieldToFieldMapping(String[] fields, Mapper<?, ?> multiFieldMapper, Expression condition) {
-		this.fields = fields;
-		this.multiFieldMapper = multiFieldMapper;
+	private final Expression condition;
+
+	public MultiFieldToFieldMapping(String sourceField, Expression targetField, Converter<? extends Map<?,?>, ?> assembler,
+			Expression condition) {
+		this.sourceField = sourceField;
+		this.targetField = targetField;
+		this.targetFieldValueAssembler = assembler;
 		this.condition = condition;
 	}
 
-	public String[] getSourceFields() {
-		return fields;
+	public String getSourceField() {
+		return this.sourceField + ".*";
+	}
+
+	public String getTargetField() {
+		return this.targetField.getExpressionString();
 	}
 
 	public boolean mapsField(String field) {
-		for (String f : this.fields) {
-			if (f.equals(field)) {
-				return true;
-			}
-		}
-		return false;
+		return field.startsWith(this.sourceField + ".");
 	}
 
 	@SuppressWarnings("unchecked")
 	public void map(SpelMappingContext context) {
 		if (!context.conditionHolds(this.condition)) {
 			return;
-		}		
+		}
 		try {
-			this.multiFieldMapper.map(context.getSource(), context.getTarget());
+			Map<String, Object> nestedFields = context.getSourceNestedFields(this.sourceField);
+			Object value = this.targetFieldValueAssembler.convert(nestedFields);
+			context.setTargetFieldValue(this.targetField, value);
 		} catch (Exception e) {
 			context.addMappingFailure(e);
 		}
 	}
 
 	public int hashCode() {
-		return this.multiFieldMapper.hashCode();
+		return getSourceField().hashCode() + getTargetField().hashCode();
 	}
 
 	public boolean equals(Object o) {
@@ -72,11 +79,11 @@ final class MultiFieldToFieldMapping implements SpelMapping {
 			return false;
 		}
 		MultiFieldToFieldMapping m = (MultiFieldToFieldMapping) o;
-		return this.multiFieldMapper.equals(m.multiFieldMapper);
+		return getSourceField().equals(m.getSourceField()) && getTargetField().equals(m.getTargetField());
 	}
 
 	public String toString() {
-		return "[MultiFieldToFieldMapping<" + StylerUtils.style(this.fields) + " -> " + this.multiFieldMapper + ">]";
+		return "[MultiFieldToFieldMapping<" + StylerUtils.style(getSourceField()) + " -> " + getTargetField() + ">]";
 	}
 
 }

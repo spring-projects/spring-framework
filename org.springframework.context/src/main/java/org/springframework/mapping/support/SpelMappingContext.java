@@ -17,7 +17,10 @@ package org.springframework.mapping.support;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.mapping.MappingException;
@@ -25,21 +28,25 @@ import org.springframework.mapping.MappingFailure;
 
 final class SpelMappingContext {
 
+	private final MappableType sourceType;
+	
 	private final EvaluationContext sourceEvaluationContext;
 
 	private final EvaluationContext targetEvaluationContext;
 
 	private final List<MappingFailure> failures = new LinkedList<MappingFailure>();
 
-	public SpelMappingContext(EvaluationContext sourceEvaluationContext, EvaluationContext targetEvaluationContext) {
-		this.sourceEvaluationContext = sourceEvaluationContext;
-		this.targetEvaluationContext = targetEvaluationContext;
+	public SpelMappingContext(Object source, MappableType sourceType, Object target, MappableType targetType,
+			ConversionService conversionService) {
+		this.sourceType = sourceType;
+		this.sourceEvaluationContext = sourceType.getEvaluationContext(source, conversionService);
+		this.targetEvaluationContext = targetType.getEvaluationContext(target, conversionService);
 	}
 
 	public Object getSource() {
 		return this.sourceEvaluationContext.getRootObject().getValue();
 	}
-	
+
 	public Object getTarget() {
 		return this.targetEvaluationContext.getRootObject().getValue();
 	}
@@ -55,6 +62,14 @@ final class SpelMappingContext {
 		return sourceField.getValue(this.sourceEvaluationContext);
 	}
 
+	public Set<String> getSourceFieldNames() {
+		return this.sourceType.getFieldNames(getSource());
+	}
+	
+	public Map<String, Object> getSourceNestedFields(String sourceFieldName) {
+		return this.sourceType.getNestedFields(sourceFieldName, getSource());
+	}
+
 	public void setTargetFieldValue(Expression targetField, Object value) {
 		targetField.setValue(this.targetEvaluationContext, value);
 	}
@@ -67,6 +82,10 @@ final class SpelMappingContext {
 		if (!this.failures.isEmpty()) {
 			throw new MappingException(this.failures);
 		}
+	}
+
+	public boolean isTargetFieldWriteable(Expression targetField) {
+		return targetField.isWritable(this.targetEvaluationContext);
 	}
 
 }

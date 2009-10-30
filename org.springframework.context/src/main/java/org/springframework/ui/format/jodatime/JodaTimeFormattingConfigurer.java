@@ -1,0 +1,154 @@
+/*
+ * Copyright 2002-2009 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.ui.format.jodatime;
+
+import java.util.Calendar;
+import java.util.Date;
+
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.ReadableInstant;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import org.springframework.ui.format.FormatterRegistry;
+import org.springframework.ui.format.Parser;
+import org.springframework.ui.format.Printer;
+
+/**
+ * Configures Joda Time's Formatting system for use with Spring.
+ * @author Keith Donald
+ */
+public class JodaTimeFormattingConfigurer {
+
+	private FormatterRegistry formatterRegistry;
+
+	private String dateStyle;
+
+	private String timeStyle;
+
+	private String dateTimeStyle;
+
+	private boolean useISOFormat;
+
+	/**
+	 * Creates a new JodaTimeFormattingConfigurer that installs into the provided FormatterRegistry.
+	 * Call {@link #registerJodaTimeFormatting()} to install.
+	 * @param formatterRegistry the registry to register Joda Time formatters with
+	 */
+	public JodaTimeFormattingConfigurer(FormatterRegistry formatterRegistry) {
+		this.formatterRegistry = formatterRegistry;
+	}
+
+	/**
+	 * Set the default format style of Joda {@link LocalDate} objects.
+	 * Default is {@link DateTimeFormat#shortDate()}.
+	 * @param dateStyle the date format style
+	 */
+	public void setDateStyle(String dateStyle) {
+		this.dateStyle = dateStyle;
+	}
+
+	/**
+	 * Set the default format style of Joda {@link LocalTime} objects.
+	 * Default is {@link DateTimeFormat#shortTime()}.
+	 * @param timeStyle the time format style
+	 */
+	public void setTimeStyle(String timeStyle) {
+		this.timeStyle = timeStyle;
+	}
+
+	/**
+	 * Set the default format style of Joda {@link LocalDateTime} and {@link DateTime} objects, as well as JDK {@link Date} and {@link Calendar} objects.
+	 * Default is {@link DateTimeFormat#shortDateTime()}.
+	 * @param dateTimeStyle the date time format style
+	 */
+	public void setDateTimeStyle(String dateTimeStyle) {
+		this.dateTimeStyle = dateTimeStyle;
+	}
+
+	/**
+	 * Set whether standard ISO formatting should be applied to all Date/Time types.
+	 * Default is false (no).
+	 * If set to true, the dateStyle, timeStyle, and dateTimeStyle properties are ignored.
+	 * @param useISOFormat true to enable ISO formatting
+	 */
+	public void setUseISOFormat(boolean useISOFormat) {
+		this.useISOFormat = useISOFormat;
+	}
+
+	/**
+	 * Install Joda Time formatters given the current configuration of this {@link JodaTimeFormattingConfigurer}.
+	 */
+	public void registerJodaTimeFormatting() {
+		JodaTimeConverters.registerConverters(this.formatterRegistry.getConverterRegistry());
+
+		DateTimeFormatter jodaDateFormatter = getJodaDateFormatter();
+		this.formatterRegistry.addFormatterForFieldType(LocalDate.class, new ReadablePartialPrinter(jodaDateFormatter), new DateTimeParser(jodaDateFormatter));
+
+		DateTimeFormatter jodaTimeFormatter = getJodaTimeFormatter();
+		this.formatterRegistry.addFormatterForFieldType(LocalTime.class, new ReadablePartialPrinter(jodaTimeFormatter), new DateTimeParser(jodaTimeFormatter));
+
+		DateTimeFormatter jodaDateTimeFormatter = getJodaDateTimeFormatter();
+		Parser<DateTime> dateTimeParser = new DateTimeParser(jodaDateTimeFormatter);
+		this.formatterRegistry.addFormatterForFieldType(LocalDateTime.class, new ReadablePartialPrinter(jodaDateTimeFormatter), dateTimeParser);
+
+		Printer<ReadableInstant> readableInstantPrinter = new ReadableInstantPrinter(jodaDateTimeFormatter);
+		this.formatterRegistry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
+		this.formatterRegistry.addFormatterForFieldType(Calendar.class, readableInstantPrinter, dateTimeParser);
+		this.formatterRegistry.addFormatterForFieldType(Calendar.class, new MillisecondInstantPrinter(jodaDateTimeFormatter), dateTimeParser);
+		
+		this.formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+	}
+
+	// internal helpers
+	
+	private DateTimeFormatter getJodaDateFormatter() {
+		if (this.useISOFormat) {
+			return ISODateTimeFormat.date();
+		}
+		if (this.dateStyle != null) {
+			return DateTimeFormat.forStyle(this.dateStyle + "-");
+		} else {
+			return DateTimeFormat.shortDate();
+		}
+	}
+
+	private DateTimeFormatter getJodaTimeFormatter() {
+		if (this.useISOFormat) {
+			return ISODateTimeFormat.time();
+		}
+		if (this.timeStyle != null) {
+			return DateTimeFormat.forStyle("-" + this.timeStyle);
+		} else {
+			return DateTimeFormat.shortTime();
+		}
+	}
+
+	private DateTimeFormatter getJodaDateTimeFormatter() {
+		if (this.useISOFormat) {
+			return ISODateTimeFormat.dateTime();
+		}
+		if (this.dateTimeStyle != null) {
+			return DateTimeFormat.forStyle(this.dateTimeStyle);
+		} else {
+			return DateTimeFormat.shortDateTime();
+		}
+	}
+
+}

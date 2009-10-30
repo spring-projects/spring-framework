@@ -24,8 +24,7 @@ import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.ui.format.Formatter;
-import org.springframework.ui.format.FormatterRegistry;
+import org.springframework.ui.format.FormattingService;
 import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
 import org.springframework.ui.format.support.FormattingPropertyEditorAdapter;
 import org.springframework.util.Assert;
@@ -44,7 +43,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractPropertyBindingResult extends AbstractBindingResult {
 
-	private FormatterRegistry formatterRegistry;
+	private FormattingService formattingService;
 
 
 	/**
@@ -57,10 +56,10 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	}
 
 
-	public void initFormatterLookup(FormatterRegistry formatterRegistry) {
-		Assert.notNull(formatterRegistry, "FormatterRegistry must not be null");
-		this.formatterRegistry = formatterRegistry;
-		getPropertyAccessor().setConversionService(new FormattingConversionServiceAdapter(formatterRegistry));
+	public void initFormatting(FormattingService formattingService) {
+		Assert.notNull(formattingService, "FormattingService must not be null");
+		this.formattingService = formattingService;
+		getPropertyAccessor().setConversionService(new FormattingConversionServiceAdapter(formattingService));
 	}
 
 	/**
@@ -117,14 +116,13 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 				return textValue;
 			}
 		}
-		// Try custom formatter...
-		TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
-		Formatter<Object> formatter = (this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-		if (formatter != null) {
-			return formatter.format(value, LocaleContextHolder.getLocale());
+		if (this.formattingService != null) {
+			// Try custom formatter...
+			TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
+			return this.formattingService.print(value, td, LocaleContextHolder.getLocale());
+		} else {
+			return value;
 		}
-		// Nothing found: return value as-is.
-		return value;
 	}
 
 	/**
@@ -147,16 +145,15 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	public PropertyEditor findEditor(String field, Class valueType) {
+		if (valueType == null) {
+			valueType = getFieldType(field);
+		}
 		PropertyEditor editor = super.findEditor(field, valueType);
 		if (editor == null) {
 			TypeDescriptor td = (field != null ?
 					getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) :
 					TypeDescriptor.valueOf(valueType));
-			Formatter<Object> formatter =
-					(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-			if (formatter != null) {
-				editor = new FormattingPropertyEditorAdapter(formatter);
-			}
+			editor = new FormattingPropertyEditorAdapter(this.formattingService, valueType);
 		}
 		return editor;
 	}
