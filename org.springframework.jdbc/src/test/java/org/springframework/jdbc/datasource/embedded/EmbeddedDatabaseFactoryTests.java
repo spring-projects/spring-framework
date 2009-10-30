@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 
 import org.junit.Test;
+import org.springframework.jdbc.datasource.init.DatabasePopulator;
 
 public class EmbeddedDatabaseFactoryTests {
 	

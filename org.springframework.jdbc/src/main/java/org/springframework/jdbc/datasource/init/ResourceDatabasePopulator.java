@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.datasource.embedded;
+package org.springframework.jdbc.datasource.init;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.StringUtils;
@@ -40,6 +39,7 @@ import org.springframework.util.StringUtils;
  * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.<br>
  *
  * @author Keith Donald
+ * @author Dave Syer
  * @since 3.0
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
@@ -50,6 +50,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private String sqlScriptEncoding;
 
+	private boolean ignoreFailedDrops = false;
+
+	private boolean continueOnError = false;
 
 	/**
 	 * Add a script to execute to populate the database.
@@ -66,6 +69,29 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	public void setScripts(Resource[] scripts) {
 		this.scripts = Arrays.asList(scripts);
 	}
+	
+	/**
+	 * Flag to indicate that all failures in SQL should be logged but not cause a 
+	 * failure.  Defaults to false.
+	 * 
+	 * @param continueOnError the flag value to set
+	 */
+	public void setContinueOnError(boolean continueOnError) {
+		this.continueOnError = continueOnError;
+	}
+
+	/**
+	 * Flag to indicate that a failed SQL <code>DROP</code> statement can be ignored.  
+	 * This is useful for non-embedded databases whose SQL dialect does not support 
+	 * an <code>IF EXISTS</code> clause in a <code>DROP</code>.  The default is false
+	 * so that if it the populator runs accidentally against an existing database it 
+	 * will fail fast when the script starts with a <code>DROP</code>.
+	 * 
+	 * @param ignoreFailedDrops the flag value to set
+	 */
+	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
+		this.ignoreFailedDrops = ignoreFailedDrops;
+	}
 
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
@@ -77,30 +103,29 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.sqlScriptEncoding = sqlScriptEncoding;
 	}
 
-
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
-			executeSqlScript(connection, applyEncodingIfNecessary(script), false);
+			executeSqlScript(connection, applyEncodingIfNecessary(script), continueOnError, ignoreFailedDrops);
 		}
 	}
 
 	private EncodedResource applyEncodingIfNecessary(Resource script) {
 		if (script instanceof EncodedResource) {
 			return (EncodedResource) script;
-		}
-		else {
+		} else {
 			return new EncodedResource(script, this.sqlScriptEncoding);
 		}
 	}
-	
+
 	/**
 	 * Execute the given SQL script. <p>The script will normally be loaded by classpath. There should be one statement
 	 * per line. Any semicolons will be removed. <b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param template the SimpleJdbcTemplate with which to perform JDBC operations
 	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from.
 	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error.
+	 * @param ignoreFailedDrops whether of not to continue in thw event of specifically an error on a <code>DROP</code>.
 	 */
-	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError)
+	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError, boolean ignoreFailedDrops)
 			throws SQLException {
 
 		if (logger.isInfoEnabled()) {
@@ -129,24 +154,21 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					if (logger.isDebugEnabled()) {
 						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
-				}
-				catch (SQLException ex) {
-					if (continueOnError) {
+				} catch (SQLException ex) {
+					boolean dropStatement = statement.trim().toLowerCase().startsWith("drop");
+					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 						if (logger.isWarnEnabled()) {
 							logger.warn("Line " + lineNumber + " statement failed: " + statement, ex);
 						}
-					}
-					else {
+					} else {
 						throw ex;
 					}
 				}
 			}
-		}
-		finally {
+		} finally {
 			try {
 				stmt.close();
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				logger.debug("Could not close JDBC Statement", ex);
 			}
 		}
