@@ -27,6 +27,7 @@ import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
+import org.springframework.instrument.classloading.jboss.JBoss5LoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
 import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
@@ -104,6 +105,9 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			}
 			else if (classLoader.getClass().getName().startsWith("com.sun.enterprise")) {
 				return new GlassFishLoadTimeWeaver(classLoader);
+			}
+			else if (classLoader.getClass().getName().startsWith("org.jboss")) {
+				return new JBoss5LoadTimeWeaver(classLoader);
 			}
 		}
 		catch (IllegalStateException ex) {
