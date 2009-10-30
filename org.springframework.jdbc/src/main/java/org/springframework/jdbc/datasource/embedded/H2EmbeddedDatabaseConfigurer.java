@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
+import java.sql.Driver;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -30,22 +32,23 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 
 	private static H2EmbeddedDatabaseConfigurer INSTANCE;
 
-	private final Class<?> driverClass;
+	private final Class<? extends Driver> driverClass;
 
 	/**
 	 * Get the singleton {@link H2EmbeddedDatabaseConfigurer} instance.
 	 * @return the configurer
 	 * @throws ClassNotFoundException if H2 is not on the classpath
 	 */
+	@SuppressWarnings("unchecked")
 	public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
 			INSTANCE = new H2EmbeddedDatabaseConfigurer(
-					ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
+					(Class<? extends Driver>) ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
 		}
 		return INSTANCE;
 	}
 
-	private H2EmbeddedDatabaseConfigurer(Class<?> driverClass) {
+	private H2EmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
 		this.driverClass = driverClass;
 	}
 

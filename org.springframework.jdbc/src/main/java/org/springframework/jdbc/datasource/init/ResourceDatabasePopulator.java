@@ -49,10 +49,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private List<Resource> scripts = new ArrayList<Resource>();
 
 	private String sqlScriptEncoding;
+	
+	private boolean continueOnError = false;
 
 	private boolean ignoreFailedDrops = false;
-
-	private boolean continueOnError = false;
 
 	/**
 	 * Add a script to execute to populate the database.
@@ -69,29 +69,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	public void setScripts(Resource[] scripts) {
 		this.scripts = Arrays.asList(scripts);
 	}
-	
-	/**
-	 * Flag to indicate that all failures in SQL should be logged but not cause a 
-	 * failure.  Defaults to false.
-	 * 
-	 * @param continueOnError the flag value to set
-	 */
-	public void setContinueOnError(boolean continueOnError) {
-		this.continueOnError = continueOnError;
-	}
-
-	/**
-	 * Flag to indicate that a failed SQL <code>DROP</code> statement can be ignored.  
-	 * This is useful for non-embedded databases whose SQL dialect does not support 
-	 * an <code>IF EXISTS</code> clause in a <code>DROP</code>.  The default is false
-	 * so that if it the populator runs accidentally against an existing database it 
-	 * will fail fast when the script starts with a <code>DROP</code>.
-	 * 
-	 * @param ignoreFailedDrops the flag value to set
-	 */
-	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
-		this.ignoreFailedDrops = ignoreFailedDrops;
-	}
 
 	/**
 	 * Specify the encoding for SQL scripts, if different from the platform encoding.
@@ -103,9 +80,28 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.sqlScriptEncoding = sqlScriptEncoding;
 	}
 
+	/**
+	 * Flag to indicate that all failures in SQL should be logged but not cause a failure.
+	 * Defaults to false.
+	 * @param continueOnError the flag value to set
+	 */
+	public void setContinueOnError(boolean continueOnError) {
+		this.continueOnError = continueOnError;
+	}
+
+	/**
+	 * Flag to indicate that a failed SQL <code>DROP</code> statement can be ignored.  
+	 * This is useful for non-embedded databases whose SQL dialect does not support an <code>IF EXISTS</code> clause in a <code>DROP</code>.
+	 * The default is false so that if it the populator runs accidentally, it will failfast when the script starts with a <code>DROP</code>.
+	 * @param ignoreFailedDrops the flag value to set
+	 */
+	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
+		this.ignoreFailedDrops = ignoreFailedDrops;
+	}
+	
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
-			executeSqlScript(connection, applyEncodingIfNecessary(script), continueOnError, ignoreFailedDrops);
+			executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops);
 		}
 	}
 
