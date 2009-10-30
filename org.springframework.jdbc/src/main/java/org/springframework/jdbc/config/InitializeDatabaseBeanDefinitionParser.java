@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -99,6 +101,8 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 
 	public static class SortedResourcesFactoryBean implements FactoryBean<Resource[]> {
 
+		private static final Log logger = LogFactory.getLog(SortedResourcesFactoryBean.class);
+		
 		private ResourceLoader resourceLoader;
 		private List<String> locations;
 
@@ -111,6 +115,11 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 		public Resource[] getObject() throws Exception {
 			List<Resource> scripts = new ArrayList<Resource>();
 			for (String location : locations) {
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("Adding resources from pattern: "+location);
+				}
+
 				if (resourceLoader instanceof ResourcePatternResolver) {
 					List<Resource> resources = new ArrayList<Resource>(Arrays
 							.asList(((ResourcePatternResolver) resourceLoader).getResources(location)));
@@ -126,9 +135,11 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 					for (Resource resource : resources) {
 						scripts.add(resource);
 					}
+
 				} else {
 					scripts.add(resourceLoader.getResource(location));
 				}
+
 			}
 			return scripts.toArray(new Resource[scripts.size()]);
 		}
