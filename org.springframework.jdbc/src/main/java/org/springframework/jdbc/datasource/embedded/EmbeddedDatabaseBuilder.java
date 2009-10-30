@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource.embedded;
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 /**
  * A builder that provides a fluent API for constructing an embedded database.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.datasource.embedded;
+package org.springframework.jdbc.datasource.init;
 
 import org.springframework.core.io.support.EncodedResource;
 

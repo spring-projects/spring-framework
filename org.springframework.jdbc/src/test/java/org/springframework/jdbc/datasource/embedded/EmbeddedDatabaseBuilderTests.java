@@ -7,6 +7,7 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
 
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 
 public class EmbeddedDatabaseBuilderTests {
 
