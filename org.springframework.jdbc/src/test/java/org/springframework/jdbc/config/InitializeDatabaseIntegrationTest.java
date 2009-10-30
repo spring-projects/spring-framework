@@ -66,6 +66,13 @@ public class InitializeDatabaseIntegrationTest {
 	}
 
 	@Test
+	public void testScriptNameWithPlaceholder() throws Exception {
+		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-placeholder-config.xml");
+		DataSource dataSource = context.getBean("dataSource", DataSource.class);
+		assertCorrectSetup(dataSource);
+	}
+
+	@Test
 	public void testCacheInitialization() throws Exception {
 		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-cache-config.xml");
 		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
