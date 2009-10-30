@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
@@ -325,7 +327,7 @@ public class MappingTests {
 				// field to multiple fields
 				.addAssemblerMapping("activationDateTime", new Converter<Map<String, String>, DateTime>() {
 					public DateTime convert(Map<String, String> source) {
-						MutableDateTime dateTime = new MutableDateTime();
+						MutableDateTime dateTime = new MutableDateTime(DateTimeZone.UTC);
 						dateTime.setYear(Integer.parseInt(source.get("year")));
 						dateTime.setMonthOfYear(Integer.parseInt(source.get("month")));
 						dateTime.setDayOfMonth(Integer.parseInt(source.get("day")));
@@ -343,7 +345,7 @@ public class MappingTests {
 		source.put("activationDateTime.hour", "12");
 		source.put("activationDateTime.minute", "0");
 		Account account = mapper.map(source, new Account());	
-		assertEquals(ISODateTimeFormat.dateTime().parseDateTime("2009-10-12T12:00:00.000-04:00"), account
+		assertEquals(ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC).parseDateTime("2009-10-12T12:00:00.000-04:00"), account
 				.getActivationDateTime());		
 	}
 
