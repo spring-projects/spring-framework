@@ -20,7 +20,8 @@ import java.beans.PropertyEditorSupport;
 import java.text.ParseException;
 
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.format.Formatter;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.ui.format.FormattingService;
 import org.springframework.util.Assert;
 
 /**
@@ -33,23 +34,26 @@ import org.springframework.util.Assert;
  */
 public class FormattingPropertyEditorAdapter extends PropertyEditorSupport {
 
-	private final Formatter<Object> formatter;
+	private final FormattingService formattingService;
 
-
+	private final TypeDescriptor fieldType;
+	
 	/**
 	 * Create a new FormattingPropertyEditorAdapter for the given Formatter.
 	 * @param formatter the Formatter to wrap
 	 */
-	public FormattingPropertyEditorAdapter(Formatter<Object> formatter) {
-		Assert.notNull(formatter, "Formatter must not be null");
-		this.formatter = formatter;
+	public FormattingPropertyEditorAdapter(FormattingService formattingService, Class<?> fieldType) {
+		Assert.notNull(formattingService, "FormattingService must not be null");
+		Assert.notNull(formattingService, "FieldType must not be null");
+		this.formattingService = formattingService;
+		this.fieldType = TypeDescriptor.valueOf(fieldType);
 	}
 
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		try {
-			setValue(this.formatter.parse(text, LocaleContextHolder.getLocale()));
+			setValue(this.formattingService.parse(text, this.fieldType, LocaleContextHolder.getLocale()));
 		}
 		catch (ParseException ex) {
 			throw new IllegalArgumentException("Failed to parse formatted value", ex);
@@ -58,7 +62,7 @@ public class FormattingPropertyEditorAdapter extends PropertyEditorSupport {
 
 	@Override
 	public String getAsText() {
-		return this.formatter.format(getValue(), LocaleContextHolder.getLocale());
+		return this.formattingService.print(getValue(), this.fieldType, LocaleContextHolder.getLocale());
 	}
 
 }

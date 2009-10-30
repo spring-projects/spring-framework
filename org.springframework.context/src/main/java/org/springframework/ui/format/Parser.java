@@ -13,21 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.support;
 
-import java.util.Calendar;
-import java.util.Date;
+package org.springframework.ui.format;
 
-import org.springframework.core.convert.converter.Converter;
+import java.text.ParseException;
+import java.util.Locale;
 
 /**
- * Converts from a java.util.Calendar to a java.util.Date.
+ * Parses objects of type T from their printed representations.
+ *
  * @author Keith Donald
+ * @since 3.0 
+ * @param <T> the type of object this Parser parses
  */
-final class CalendarToDateConverter implements Converter<Calendar, Date> {
-	
-	public Date convert(Calendar source) {
-		return source.getTime();
-	}
-	
+public interface Parser<T> {
+
+	/**
+	 * Parse an object from its printed representation.
+	 * @param printed a printed representation
+	 * @param locale the current user locale
+	 * @return the parsed object
+	 * @throws ParseException when a parse exception occurs in a java.text parsing library
+	 * @throws RuntimeException when a parse exception occurs
+	 */
+	T parse(String printed, Locale locale) throws ParseException;
+
 }

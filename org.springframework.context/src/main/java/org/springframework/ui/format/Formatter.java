@@ -16,35 +16,14 @@
 
 package org.springframework.ui.format;
 
-import java.text.ParseException;
-import java.util.Locale;
-
 /**
- * Formats objects of type T for display.
+ * Formats objects of type T.
+ * A Formatter is both a Printer <i>and</i> a Parser for an object type.
  *
  * @author Keith Donald
  * @since 3.0 
- * @param <T> the type of object this formatter can format
+ * @param <T> the type of object this Formatter formats
  */
-public interface Formatter<T> {
-
-	/**
-	 * Format the object of type T for display.
-	 * @param object the object to format
-	 * @param locale the user's locale
-	 * @return the formatted display string
-	 */
-	String format(T object, Locale locale);
-
-	/**
-	 * Parse an object from its formatted representation.
-	 * @param formatted a formatted representation
-	 * @param locale the user's locale
-	 * @return the parsed object
-	 * @throws ParseException when a parse exception occurs
-	 * @throws RuntimeException when thrown by coercion methods that are
-	 *
-	 */
-	T parse(String formatted, Locale locale) throws ParseException;
+public interface Formatter<T> extends Printer<T>, Parser<T> {
 
 }

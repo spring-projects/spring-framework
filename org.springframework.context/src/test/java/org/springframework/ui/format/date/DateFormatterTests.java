@@ -37,7 +37,7 @@ public class DateFormatterTests {
 		cal.set(Calendar.YEAR, 2009);
 		cal.set(Calendar.MONTH, Calendar.JUNE);
 		cal.set(Calendar.DAY_OF_MONTH, 1);
-		assertEquals("2009-06-01", formatter.format(cal.getTime(), Locale.US));
+		assertEquals("2009-06-01", formatter.print(cal.getTime(), Locale.US));
 	}
 	
 	@Test

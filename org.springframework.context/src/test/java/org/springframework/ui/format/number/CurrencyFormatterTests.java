@@ -16,12 +16,13 @@
 
 package org.springframework.ui.format.number;
 
+import static org.junit.Assert.assertEquals;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.util.Locale;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -33,17 +34,12 @@ public class CurrencyFormatterTests {
 	
 	@Test
 	public void formatValue() {
-		assertEquals("$23.00", formatter.format(new BigDecimal("23"), Locale.US));
+		assertEquals("$23.00", formatter.print(new BigDecimal("23"), Locale.US));
 	}
 
 	@Test
 	public void parseValue() throws ParseException {
 		assertEquals(new BigDecimal("23.56"), formatter.parse("$23.56", Locale.US));
-	}
-
-	@Test
-	public void parseEmptyValue() throws ParseException {
-		assertEquals(null, formatter.parse("", Locale.US));
 	}
 
 	@Test(expected = ParseException.class)

@@ -13,35 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.ui.format.jodatime;
 
-import static org.junit.Assert.assertEquals;
-
-import java.text.ParseException;
 import java.util.Locale;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.junit.Test;
+import org.joda.time.ReadableInstant;
+import org.joda.time.format.DateTimeFormatter;
+import org.springframework.ui.format.Printer;
 
 /**
+ * Prints Joda Time {@link ReadableInstant} instances using a {@link DateTimeFormatter}.
  * @author Keith Donald
  */
-public class DateTimeFormatterTests {
+public final class ReadableInstantPrinter implements Printer<ReadableInstant> {
 
-	private DateTimeFormatter formatter = new DateTimeFormatter("yyyy-MM-dd");
-	
-	@Test
-	public void formatValue() {
-		DateTime dateTime = DateTimeFormat.forPattern("yyyy-MM-dd").parseDateTime("2009-06-01");
-		assertEquals("2009-06-01", formatter.format(dateTime, Locale.US));
-	}
-	
-	@Test
-	public void parseValue() throws ParseException {
-		DateTime dateTime = DateTimeFormat.forPattern("yyyy-MM-dd").parseDateTime("2009-06-01");
-		assertEquals(dateTime, formatter.parse("2009-06-01", Locale.US));
+	private final DateTimeFormatter formatter;
+
+	/**
+	 * Creates a new ReadableInstantPrinter.
+	 * @param formatter the Joda DateTimeFormatter instance
+	 */
+	public ReadableInstantPrinter(DateTimeFormatter formatter) {
+		this.formatter = formatter;
 	}
 
+	public String print(ReadableInstant instant, Locale locale) {
+		return JodaTimeContextHolder.getFormatter(this.formatter, locale).print(instant);
+	}
 }

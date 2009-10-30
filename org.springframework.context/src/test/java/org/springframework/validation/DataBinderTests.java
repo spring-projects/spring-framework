@@ -16,21 +16,20 @@
 
 package org.springframework.validation;
 
-import java.beans.PropertyEditorSupport;
 import java.beans.PropertyEditor;
+import java.beans.PropertyEditorSupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Retention;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.math.BigDecimal;
 
 import junit.framework.TestCase;
 
@@ -45,12 +44,12 @@ import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.ui.format.number.DecimalFormatter;
-import org.springframework.ui.format.Formatted;
-import org.springframework.ui.format.support.GenericFormatterRegistry;
+import org.springframework.ui.format.support.GenericFormattingService;
 import org.springframework.util.StringUtils;
 
 /**
@@ -304,7 +303,10 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithFormatter() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
-		binder.getFormatterRegistry().addFormatterByType(Float.class, new DecimalFormatter());
+		GenericFormattingService formattingService = new GenericFormattingService();
+		formattingService.setParentConversionService(new DefaultConversionService());
+		formattingService.addFormatterForFieldType(Float.class, new DecimalFormatter());
+		binder.setFormattingService(formattingService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("myFloat", "1,2");
 
@@ -323,46 +325,6 @@ public class DataBinderTests extends TestCase {
 			assertNotNull(editor);
 			editor.setAsText("1,6");
 			assertEquals(new Float(1.6), editor.getValue());
-		}
-		finally {
-			LocaleContextHolder.resetLocaleContext();
-		}
-	}
-
-	public void testBindingWithDefaultFormatterFromField() {
-		doTestBindingWithDefaultFormatter(new FormattedFieldTestBean());
-	}
-
-	public void testBindingWithDefaultFormatterFromGetter() {
-		doTestBindingWithDefaultFormatter(new FormattedGetterTestBean());
-	}
-
-	public void testBindingWithDefaultFormatterFromSetter() {
-		doTestBindingWithDefaultFormatter(new FormattedSetterTestBean());
-	}
-
-	private void doTestBindingWithDefaultFormatter(Object tb) {
-		DataBinder binder = new DataBinder(tb);
-		// force formatter registry to be created
-		binder.getFormatterRegistry();
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("number", "1,2");
-
-		LocaleContextHolder.setLocale(Locale.GERMAN);
-		try {
-			binder.bind(pvs);
-			assertEquals(new Float("1.2"), binder.getBindingResult().getRawFieldValue("number"));
-			assertEquals("1,2", binder.getBindingResult().getFieldValue("number"));
-
-			PropertyEditor editor = binder.getBindingResult().findEditor("number", Float.class);
-			assertNotNull(editor);
-			editor.setValue(new Float("1.4"));
-			assertEquals("1,4", editor.getAsText());
-
-			editor = binder.getBindingResult().findEditor("number", null);
-			assertNotNull(editor);
-			editor.setAsText("1,6");
-			assertEquals(new Float("1.6"), editor.getValue());
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -1420,58 +1382,6 @@ public class DataBinderTests extends TestCase {
 			if (tb.getAge() < 32) {
 				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
 			}
-		}
-	}
-
-
-	@Target({ElementType.METHOD, ElementType.FIELD})
-	@Retention(RetentionPolicy.RUNTIME)
-	@Formatted(DecimalFormatter.class)
-	public @interface Decimal {
-	}
-
-
-	private static class FormattedFieldTestBean {
-
-		@Decimal
-		private Float number;
-
-		public Float getNumber() {
-			return number;
-		}
-
-		public void setNumber(Float number) {
-			this.number = number;
-		}
-	}
-
-
-	private static class FormattedGetterTestBean {
-
-		private Float number;
-
-		@Decimal
-		public Float getNumber() {
-			return number;
-		}
-
-		public void setNumber(Float number) {
-			this.number = number;
-		}
-	}
-
-
-	private static class FormattedSetterTestBean {
-
-		private Float number;
-
-		public Float getNumber() {
-			return number;
-		}
-
-		@Decimal
-		public void setNumber(Float number) {
-			this.number = number;
 		}
 	}
 

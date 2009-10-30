@@ -61,11 +61,7 @@ final class MappingConverter implements GenericConverter {
 	}
 
 	private boolean isCopyByReference(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (BeanUtils.isSimpleValueType(targetType.getType())) {
-			return true;
-		} else {
-			return false;
-		}
+		return true;
 	}
 
 	private Object createTargetAndMap(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

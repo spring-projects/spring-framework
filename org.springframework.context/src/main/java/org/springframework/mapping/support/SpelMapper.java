@@ -17,6 +17,7 @@ package org.springframework.mapping.support;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -24,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
@@ -74,22 +74,25 @@ final class SpelMapper implements Mapper<Object, Object> {
 	public void setExcludedFields(String[] fields) {
 		// TODO
 	}
-	
-	public void addMapping(String sourceFieldExpression, String targetFieldExpression, Converter<?, ?> converter,
+
+	public void addFieldToFieldMapping(String sourceField, String targetField, Converter<?, ?> converter,
 			String condition) {
-		Expression sourceField = parseSourceField(sourceFieldExpression);
-		Expression targetField = parseTargetField(targetFieldExpression);
-		FieldToFieldMapping mapping = new FieldToFieldMapping(sourceField, targetField, converter,
-				parseCondition(condition));
-		this.mappings.add(mapping);
+		this.mappings.add(new FieldToFieldMapping(parseSourceField(sourceField), parseTargetField(targetField),
+				converter, parseCondition(condition)));
 	}
 
-	public void addMapping(String field, Mapper<?, ?> mapper, String condition) {
+	public void addFieldToMultiFieldMapping(String field, Mapper<?, ?> mapper, String condition) {
 		this.mappings.add(new FieldToMultiFieldMapping(parseSourceField(field), mapper, parseCondition(condition)));
 	}
 
-	public void addMapping(String[] fields, Mapper<?, ?> mapper, String condition) {
-		this.mappings.add(new MultiFieldToFieldMapping(fields, mapper, parseCondition(condition)));
+	public void addMultiFieldToFieldMapping(String[] fields, Mapper<?, ?> mapper, String condition) {
+		this.mappings.add(new FlexibleFieldMapping(fields, mapper, parseCondition(condition)));
+	}
+
+	public void addMultiFieldToFieldMapping(String sourceField, String targetField,
+			Converter<? extends Map<?, ?>, ?> assembler, String condition) {
+		this.mappings.add(new MultiFieldToFieldMapping(sourceField, parseTargetField(targetField), assembler,
+				parseCondition(condition)));
 	}
 
 	public void addNestedMapper(Mapper<?, ?> nestedMapper, MappingTargetFactory targetFactory) {
@@ -112,16 +115,17 @@ final class SpelMapper implements Mapper<Object, Object> {
 		Assert.notNull(target, "The target to map to cannot be null");
 		try {
 			MappingContextHolder.push(source);
-			EvaluationContext sourceContext = getEvaluationContext(source);
-			EvaluationContext targetContext = getEvaluationContext(target);
-			SpelMappingContext context = new SpelMappingContext(sourceContext, targetContext);
+			MappableType<?> sourceType = this.mappableTypeFactory.getMappableType(source);
+			MappableType<?> targetType = this.mappableTypeFactory.getMappableType(target);
+			SpelMappingContext context = new SpelMappingContext(source, sourceType, target, targetType,
+					this.conversionService);
 			for (SpelMapping mapping : this.mappings) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(MappingContextHolder.getLevel() + mapping);
 				}
 				mapping.map(context);
 			}
-			Set<FieldToFieldMapping> autoMappings = getAutoMappings(sourceContext, targetContext);
+			Set<FieldToFieldMapping> autoMappings = getAutoMappings(context);
 			for (SpelMapping mapping : autoMappings) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(MappingContextHolder.getLevel() + mapping + " (auto)");
@@ -171,33 +175,29 @@ final class SpelMapper implements Mapper<Object, Object> {
 		return GenericTypeResolver.resolveTypeArguments(mapper.getClass(), Mapper.class);
 	}
 
-	private EvaluationContext getEvaluationContext(Object object) {
-		return mappableTypeFactory.getMappableType(object).getEvaluationContext(object, this.conversionService);
-	}
-
-	private Set<FieldToFieldMapping> getAutoMappings(EvaluationContext sourceContext, EvaluationContext targetContext) {
+	private Set<FieldToFieldMapping> getAutoMappings(SpelMappingContext context) {
 		if (this.autoMappingEnabled) {
 			Set<FieldToFieldMapping> autoMappings = new LinkedHashSet<FieldToFieldMapping>();
-			Set<String> sourceFields = getMappableFields(sourceContext.getRootObject().getValue());
+			Set<String> sourceFields = context.getSourceFieldNames();
 			for (String field : sourceFields) {
 				if (!explicitlyMapped(field)) {
-					Expression sourceExpression;
-					Expression targetExpression;
+					Expression sourceField;
 					try {
-						sourceExpression = sourceExpressionParser.parseExpression(field);
+						sourceField = sourceExpressionParser.parseExpression(field);
 					} catch (ParseException e) {
-						throw new IllegalArgumentException("The mapping source '" + field
+						throw new IllegalArgumentException("The source field '" + field
+								+ "' is not a parseable value expression", e);
+					}
+					Expression targetField;
+					try {
+						targetField = targetExpressionParser.parseExpression(field);
+					} catch (ParseException e) {
+						throw new IllegalArgumentException("The target field '" + field
 								+ "' is not a parseable value expression", e);
 					}
 					try {
-						targetExpression = targetExpressionParser.parseExpression(field);
-					} catch (ParseException e) {
-						throw new IllegalArgumentException("The mapping target '" + field
-								+ "' is not a parseable value expression", e);
-					}
-					try {
-						if (targetExpression.isWritable(targetContext)) {
-							autoMappings.add(new FieldToFieldMapping(sourceExpression, targetExpression, null, null));
+						if (context.isTargetFieldWriteable(targetField)) {
+							autoMappings.add(new FieldToFieldMapping(sourceField, targetField, null, null));
 						}
 					} catch (EvaluationException e) {
 
@@ -209,11 +209,7 @@ final class SpelMapper implements Mapper<Object, Object> {
 			return Collections.emptySet();
 		}
 	}
-
-	private Set<String> getMappableFields(Object object) {
-		return mappableTypeFactory.getMappableType(object).getFields(object);
-	}
-
+	
 	private boolean explicitlyMapped(String field) {
 		for (SpelMapping mapping : this.mappings) {
 			if (mapping.mapsField(field)) {

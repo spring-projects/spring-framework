@@ -15,6 +15,7 @@
  */
 package org.springframework.mapping.support;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -31,22 +32,36 @@ final class MapMappableType implements MappableType<Map<? extends Object, ? exte
 		return object instanceof Map<?, ?>;
 	}
 
-	public Set<String> getFields(Map<? extends Object, ? extends Object> object) {
-		LinkedHashSet<String> fields = new LinkedHashSet<String>(object.size(), 1);
-		for (Object key : object.keySet()) {
-			if (key != null && key instanceof String) {
-				fields.add((String) key);
-			}
-		}
-		return fields;
-	}
-
 	public EvaluationContext getEvaluationContext(Map<? extends Object, ? extends Object> object,
 			ConversionService conversionService) {
 		StandardEvaluationContext context = new StandardEvaluationContext(object);
 		context.setTypeConverter(new StandardTypeConverter(conversionService));
 		context.addPropertyAccessor(new MapAccessor());
 		return context;
+	}
+
+	public Set<String> getFieldNames(Map<? extends Object, ? extends Object> object) {
+		Set<String> fieldNames = new LinkedHashSet<String>(object.size(), 1);
+		for (Object key : object.keySet()) {
+			if (key != null && key instanceof String) {
+				fieldNames.add((String) key);
+			}
+		}
+		return fieldNames;
+	}
+
+	public Map<String, Object> getNestedFields(String fieldName, Map<? extends Object, ? extends Object> object) {
+		Map<String, Object> fields = new LinkedHashMap<String, Object>(object.size(), 1);
+		for (Map.Entry<? extends Object, ? extends Object> entry : object.entrySet()) {
+			Object key = entry.getKey();
+			if (key != null && key instanceof String) {
+				String name = (String) key;
+				if (name.startsWith(fieldName + ".")) {
+					fields.put(name.substring(fieldName.length() + 1), entry.getValue());					
+				}
+			}
+		}
+		return fields;
 	}
 
 }

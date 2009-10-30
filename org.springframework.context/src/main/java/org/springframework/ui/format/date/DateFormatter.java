@@ -97,17 +97,11 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 
-	public String format(Date date, Locale locale) {
-		if (date == null) {
-			return "";
-		}
+	public String print(Date date, Locale locale) {
 		return getDateFormat(locale).format(date);
 	}
 
 	public Date parse(String formatted, Locale locale) throws ParseException {
-		if (formatted.length() == 0) {
-			return null;
-		}
 		return getDateFormat(locale).parse(formatted);
 	}
 

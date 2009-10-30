@@ -17,6 +17,7 @@ package org.springframework.mapping.support;
 
 import java.beans.PropertyDescriptor;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
@@ -31,7 +32,13 @@ final class BeanMappableType implements MappableType<Object> {
 		return true;
 	}
 
-	public Set<String> getFields(Object object) {
+	public EvaluationContext getEvaluationContext(Object object, ConversionService conversionService) {
+		StandardEvaluationContext context = new StandardEvaluationContext(object);
+		context.setTypeConverter(new StandardTypeConverter(conversionService));
+		return context;
+	}
+
+	public Set<String> getFieldNames(Object object) {
 		Set<String> fields = new LinkedHashSet<String>();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(object.getClass());
 		for (PropertyDescriptor descriptor : descriptors) {
@@ -44,10 +51,9 @@ final class BeanMappableType implements MappableType<Object> {
 		return fields;
 	}
 
-	public EvaluationContext getEvaluationContext(Object object, ConversionService conversionService) {
-		StandardEvaluationContext context = new StandardEvaluationContext(object);
-		context.setTypeConverter(new StandardTypeConverter(conversionService));
-		return context;
+	public Map<String, Object> getNestedFields(String fieldName, Object object) {
+		return null;
 	}
 
+	
 }

@@ -34,18 +34,13 @@ public class PercentFormatterTests {
 
 	@Test
 	public void formatValue() {
-		assertEquals("23%", formatter.format(new BigDecimal(".23"), Locale.US));
+		assertEquals("23%", formatter.print(new BigDecimal(".23"), Locale.US));
 	}
 
 	@Test
 	public void parseValue() throws ParseException {
 		assertEquals(new BigDecimal(".2356"), formatter.parse("23.56%",
 				Locale.US));
-	}
-
-	@Test
-	public void parseEmptyValue() throws ParseException {
-		assertEquals(null, formatter.parse("", Locale.US));
 	}
 
 	@Test(expected = ParseException.class)

@@ -34,17 +34,12 @@ public class DecimalFormatterTests {
 
 	@Test
 	public void formatValue() {
-		assertEquals("23.56", formatter.format(new BigDecimal("23.56"), Locale.US));
+		assertEquals("23.56", formatter.print(new BigDecimal("23.56"), Locale.US));
 	}
 
 	@Test
 	public void parseValue() throws ParseException {
 		assertEquals(new BigDecimal("23.56"), formatter.parse("23.56", Locale.US));
-	}
-
-	@Test
-	public void parseEmptyValue() throws ParseException {
-		assertEquals(null, formatter.parse("", Locale.US));
 	}
 
 	@Test(expected = ParseException.class)

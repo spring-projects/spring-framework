@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.support;
 
-import java.util.Calendar;
-import java.util.Date;
+package org.springframework.ui.format;
 
-import org.springframework.core.convert.converter.Converter;
+import java.util.Locale;
 
 /**
- * Converts from a java.util.Date to a java.util.Calendar.
+ * Prints objects of type T for display.
+ *
  * @author Keith Donald
+ * @since 3.0 
+ * @param <T> the type of object this Printer prints
  */
-final class DateToCalendarConverter implements Converter<Date, Calendar> {
+public interface Printer<T> {
 
-	public Calendar convert(Date source) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(source);
-		return cal;
-	}
+	/**
+	 * Print the object of type T for display.
+	 * @param object the object to print
+	 * @param locale the current user locale
+	 * @return the printed string
+	 */
+	String print(T object, Locale locale);
 
 }

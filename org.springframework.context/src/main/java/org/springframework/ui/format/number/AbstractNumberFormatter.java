@@ -46,18 +46,11 @@ public abstract class AbstractNumberFormatter implements Formatter<Number> {
 	}
 
 
-	public String format(Number integer, Locale locale) {
-		if (integer == null) {
-			return "";
-		}
-		NumberFormat format = getNumberFormat(locale);
-		return format.format(integer);
+	public String print(Number integer, Locale locale) {
+		return getNumberFormat(locale).format(integer);
 	}
 
 	public Number parse(String formatted, Locale locale) throws ParseException {
-		if (formatted.length() == 0) {
-			return null;
-		}
 		NumberFormat format = getNumberFormat(locale);
 		ParsePosition position = new ParsePosition(0);
 		Number number = format.parse(formatted, position);
