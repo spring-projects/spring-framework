@@ -77,7 +77,7 @@ abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> 
 	// internal helpers
 	
 	private Set<Class<?>> createPropertyTypes() {
-		Set<Class<?>> propertyTypes = new HashSet<Class<?>>();
+		Set<Class<?>> propertyTypes = new HashSet<Class<?>>(5);
 		propertyTypes.add(ReadableInstant.class);
 		propertyTypes.add(ReadablePartial.class);
 		propertyTypes.add(Date.class);
