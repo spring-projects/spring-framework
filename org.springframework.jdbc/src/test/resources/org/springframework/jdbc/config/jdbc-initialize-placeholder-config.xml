@@ -16,7 +16,7 @@
 		<property name="properties">
 			<value>
 				schema.scripts=classpath:org/springframework/jdbc/config/db-schema.sql
-				insert.scripts=classpath:org/springframework/jdbc/config/*-data.sql
+				insert.scripts=classpath*:org/springframework/jdbc/config/*-data.sql
 				data.source.init=true
 			</value>
 		</property>
