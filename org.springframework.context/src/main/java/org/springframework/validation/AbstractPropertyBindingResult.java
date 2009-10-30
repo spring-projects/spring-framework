@@ -149,7 +149,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 			valueType = getFieldType(field);
 		}
 		PropertyEditor editor = super.findEditor(field, valueType);
-		if (editor == null) {
+		if (editor == null && this.formattingService != null) {
 			TypeDescriptor td = (field != null ?
 					getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) :
 					TypeDescriptor.valueOf(valueType));
