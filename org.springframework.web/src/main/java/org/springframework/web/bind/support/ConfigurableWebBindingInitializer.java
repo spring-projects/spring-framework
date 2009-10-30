@@ -34,6 +34,8 @@ import org.springframework.web.context.request.WebRequest;
  * @see #setDirectFieldAccess
  * @see #setMessageCodesResolver
  * @see #setBindingErrorProcessor
+ * @see #setValidator(Validator)
+ * @see #setFormattingService(FormattingService)
  * @see #setPropertyEditorRegistrar
  */
 public class ConfigurableWebBindingInitializer implements WebBindingInitializer {

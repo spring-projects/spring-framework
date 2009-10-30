@@ -101,7 +101,7 @@ public interface MapperBuilder<S, T> {
 	MapperBuilder<S, T> addMapping(String sourceField, String targetField, Converter<?, ?> converter);
 
 	/**
-	 * Register a mapping between multiple source fields and a single target field.
+	 * Register a flexible mapping between multiple source fields and one or more target fields.
 	 * For example, calling <code>addMapping(dateAndTimeFieldsToDateTimeFieldMapper)</code> might register a mapping that maps the <code>date</code> and <code>time</code> fields on the source to the <code>dateTime</code> field on the target.
 	 * The provided {@link Mapper} will be passed the source object S for its source and the target object T for its target.
 	 * @param fields the source field mapping expressions
@@ -111,15 +111,15 @@ public interface MapperBuilder<S, T> {
 	MapperBuilder<S, T> addMapping(String[] fields, Mapper<S, T> mapper);
 
 	/**
-	 * Register a mapping that delegates to an assembler to convert multiple source field values to a single target field value.
-	 * The source field names mapped begin with <code>field.</code>.
+	 * Register a mapping that delegates to an assembler to convert multiple nested source field values to a single target field value.
+	 * The source field names that will be mapped all begin with the prefix <code>field.</code>.
 	 * For example, adding an assembler mapping for a field named <code>dateTime</code> would pass all nested <code>dateTime.*</code> fields to the assembler.
 	 * Such fields might be <code>year</code>, <code>month</code>, <code>day</code>, etc.
 	 * @param fields the name of the source field whose value will be assembled from multiple nested fields that begin with the same name
-	 * @param converter the assembler that will perform value assembly from the field values
+	 * @param assembler the assembler that will perform value assembly from the field values
 	 * @return this, for configuring additional field mapping options fluently
 	 */
-	MapperBuilder<S, T> addAssemblerMapping(String field, Converter<? extends Map<?, ?>, ?> converter);
+	MapperBuilder<S, T> addAssemblerMapping(String field, Converter<? extends Map<?, ?>, ?> assembler);
 	
 	/**
 	 * Register a conditional mapping between a source field and a target field.
@@ -176,7 +176,7 @@ public interface MapperBuilder<S, T> {
 	MapperBuilder<S, T> addConditionalMapping(String sourceField, String targetField, Converter<?, ?> converter, String condition);
 
 	/**
-	 * Register a conditional mapping between multiple source fields and a single target field.
+	 * Register a flexible conditional mapping between multiple source fields and one ore more target fields.
 	 * For example, calling <code>addMapping(dateAndTimeFieldsToDateTimeFieldMapper)</code> might register a mapping that maps the <code>date</code> and <code>time</code> fields on the source to the <code>dateTime</code> field on the target.
 	 * The provided {@link Mapper} will be passed the source object S for its source and the target object T for its target.
 	 * @param fields the source field mapping expressions
