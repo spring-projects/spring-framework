@@ -16,8 +16,6 @@
 
 package org.springframework.mock.staticmock;
 
-import java.rmi.RemoteException;
-
 import javax.persistence.PersistenceException;
 
 import junit.framework.Assert;
@@ -25,9 +23,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.springframework.mock.staticmock.JUnitStaticEntityMockingControl;
-import org.springframework.mock.staticmock.MockStaticEntityMethods;
-import org.springframework.remoting.RemoteAccessException;
+
+import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.*;
 
 
 /**
@@ -38,22 +35,22 @@ import org.springframework.remoting.RemoteAccessException;
  */
 @MockStaticEntityMethods
 @RunWith(JUnit4.class)
-public class JUnitStaticEntityMockingControlTest {
+public class AnnotationDrivenStaticEntityMockingControlTest {
 
 	@Test
 	public void testNoArgIntReturn() {
 		int expectedCount = 13;
 		Person.countPeople();
-		JUnitStaticEntityMockingControl.expectReturn(expectedCount);
-		JUnitStaticEntityMockingControl.playback();
+		expectReturn(expectedCount);
+		playback();
 		Assert.assertEquals(expectedCount, Person.countPeople());
 	}
 	
 	@Test(expected=PersistenceException.class)
 	public void testNoArgThrows() {
 		Person.countPeople();
-		JUnitStaticEntityMockingControl.expectThrow(new PersistenceException());
-		JUnitStaticEntityMockingControl.playback();
+		expectThrow(new PersistenceException());
+		playback();
 		Person.countPeople();
 	}
 
@@ -62,8 +59,8 @@ public class JUnitStaticEntityMockingControlTest {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		JUnitStaticEntityMockingControl.expectReturn(found);
-		JUnitStaticEntityMockingControl.playback();
+		expectReturn(found);
+		playback();
 		Assert.assertEquals(found, Person.findPerson(id));
 	}
 
@@ -74,15 +71,15 @@ public class JUnitStaticEntityMockingControlTest {
 		long id2 = 24;
 		Person found1 = new Person();
 		Person.findPerson(id1);
-		JUnitStaticEntityMockingControl.expectReturn(found1);
+		expectReturn(found1);
 		Person found2 = new Person();
 		Person.findPerson(id2);
-		JUnitStaticEntityMockingControl.expectReturn(found2);
+		expectReturn(found2);
 		Person.findPerson(id1);
-		JUnitStaticEntityMockingControl.expectReturn(found1);
+		expectReturn(found1);
 		Person.countPeople();
-		JUnitStaticEntityMockingControl.expectReturn(0);
-		JUnitStaticEntityMockingControl.playback();
+		expectReturn(0);
+		playback();
 		
 		Assert.assertEquals(found1, Person.findPerson(id1));
 		Assert.assertEquals(found2, Person.findPerson(id2));
@@ -116,8 +113,8 @@ public class JUnitStaticEntityMockingControlTest {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		JUnitStaticEntityMockingControl.expectReturn(found);
-		JUnitStaticEntityMockingControl.playback();
+		expectReturn(found);
+		playback();
 		called(found, id);
 	}
 

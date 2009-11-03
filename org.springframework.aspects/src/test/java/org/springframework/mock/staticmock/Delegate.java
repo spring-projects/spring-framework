@@ -8,13 +8,13 @@ import junit.framework.Assert;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.mock.staticmock.JUnitStaticEntityMockingControl;
+import org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl;
 import org.springframework.mock.staticmock.MockStaticEntityMethods;
 
 //Used because verification failures occur after method returns,
 //so we can't test for them in the test case itself
 @MockStaticEntityMethods
-@Ignore // This isn't meant for direct testing; rather it is driven from JUnintStaticEntityMockingControlTest
+@Ignore // This isn't meant for direct testing; rather it is driven from AnnotationDrivenStaticEntityMockingControl
 public class Delegate {
 
 	@Test
@@ -22,8 +22,8 @@ public class Delegate {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		JUnitStaticEntityMockingControl.expectReturn(found);
-		JUnitStaticEntityMockingControl.playback();
+		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
+		AnnotationDrivenStaticEntityMockingControl.playback();
 		Assert.assertEquals(found, Person.findPerson(id + 1));
 	}
 
@@ -32,8 +32,8 @@ public class Delegate {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		JUnitStaticEntityMockingControl.expectThrow(new PersistenceException());
-		JUnitStaticEntityMockingControl.playback();
+		AnnotationDrivenStaticEntityMockingControl.expectThrow(new PersistenceException());
+		AnnotationDrivenStaticEntityMockingControl.playback();
 		Assert.assertEquals(found, Person.findPerson(id + 1));
 	}
 	
@@ -42,10 +42,10 @@ public class Delegate {
 		long id = 13;
 		Person found = new Person();
 		Person.findPerson(id);
-		JUnitStaticEntityMockingControl.expectReturn(found);
+		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
 		Person.countPeople();
-		JUnitStaticEntityMockingControl.expectReturn(25);
-		JUnitStaticEntityMockingControl.playback();
+		AnnotationDrivenStaticEntityMockingControl.expectReturn(25);
+		AnnotationDrivenStaticEntityMockingControl.playback();
 		Assert.assertEquals(found, Person.findPerson(id));
 	}
 
@@ -57,19 +57,19 @@ public class Delegate {
 	@Test
 	public void doesntEverSetReturn() {
 		Person.countPeople();
-		JUnitStaticEntityMockingControl.playback();
+		AnnotationDrivenStaticEntityMockingControl.playback();
 	}
 
 	@Test
 	public void rejectUnexpectedCall() {
-		JUnitStaticEntityMockingControl.playback();
+		AnnotationDrivenStaticEntityMockingControl.playback();
 		Person.countPeople();
 	}
 	
 	@Test(expected=RemoteException.class)
 	public void testVerificationFailsEvenWhenTestFailsInExpectedManner() throws RemoteException {
 		Person.countPeople();
-		JUnitStaticEntityMockingControl.playback();
+		AnnotationDrivenStaticEntityMockingControl.playback();
 		// No calls to allow verification failure
 		throw new RemoteException();
 	}
