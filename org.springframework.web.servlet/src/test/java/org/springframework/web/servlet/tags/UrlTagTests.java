@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.tags;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,7 +110,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		tag.doEndTag();
 
-		assertEquals("url/path?n+me=v%26l%3De&name=value2", context
+		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context
 				.getAttribute("var"));
 	}
 
@@ -131,7 +133,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		tag.doEndTag();
 
-		assertEquals("url/path?n+me=v%26l%3De&name=value2", context
+		assertEquals("url/path?n%20me=v%26l%3De&name=value2", context
 				.getAttribute("var"));
 	}
 
@@ -154,7 +156,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		tag.doEndTag();
 
-		assertEquals("url/path?n+me=v%26l%3De&amp;name=value2", context
+		assertEquals("url/path?n%20me=v%26l%3De&amp;name=value2", context
 				.getAttribute("var"));
 	}
 
@@ -177,7 +179,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		tag.doEndTag();
 
-		assertEquals("url\\/path?n+me=v%26l%3De&name=value2", context
+		assertEquals("url\\/path?n%20me=v%26l%3De&name=value2", context
 				.getAttribute("var"));
 	}
 
@@ -201,7 +203,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		tag.doEndTag();
 
-		assertEquals("url\\/path?n+me=v%26l%3De&amp;name=value2", context
+		assertEquals("url\\/path?n%20me=v%26l%3De&amp;name=value2", context
 				.getAttribute("var"));
 	}
 
@@ -322,7 +324,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String queryString = tag.createQueryString(params, usedParams, true);
 
-		assertEquals("?n+me=v%26l%3De&name=value2", queryString);
+		assertEquals("?n%20me=v%26l%3De&name=value2", queryString);
 	}
 
 	public void testCreateQueryStringParamNullName() throws JspException {
@@ -425,7 +427,7 @@ public class UrlTagTests extends AbstractTagTests {
 		String uri = tag.replaceUriTemplateParams("url/{name}", params,
 				usedParams);
 
-		assertEquals("url/v+lue", uri);
+		assertEquals("url/v%20lue", uri);
 		assertEquals(1, usedParams.size());
 		assertTrue(usedParams.contains("name"));
 	}
@@ -509,7 +511,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = invokeCreateUrl(tag);
 
-		assertEquals("url/path?name=value&n+me=v+lue", uri);
+		assertEquals("url/path?name=value&n%20me=v%20lue", uri);
 	}
 
 	public void testCreateUrlWithTemplateParams() throws JspException {
@@ -529,7 +531,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = invokeCreateUrl(tag);
 
-		assertEquals("url/value?n+me=v+lue", uri);
+		assertEquals("url/value?n%20me=v%20lue", uri);
 	}
 
 	public void testCreateUrlWithParamAndExsistingQueryString()
@@ -549,7 +551,14 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	public void testUrlEncode() throws JspException {
-		assertEquals("my+name", tag.urlEncode("my name"));
+		assertEquals("my%20name%2Bis", tag.urlEncode("my name+is"));
+	}
+	
+	public void testUrlEncode_character() throws UnsupportedEncodingException {
+		assertEquals("%20", tag.urlEncode(' ', "UTF-8"));
+		assertEquals(" ", URLDecoder.decode("%20", "UTF-8"));
+		assertEquals("%FE%FF%00%20", tag.urlEncode(' ', "UTF-16"));
+		assertEquals("%40", tag.urlEncode(' ', "IBM-Thai"));
 	}
 
 	public void testUrlEncodeNull() throws JspException {

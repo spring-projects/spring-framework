@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.tags;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
@@ -65,7 +67,7 @@ import org.springframework.web.util.TagUtils;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
  * Results in:
- * <code>/currentApplicationContext/url/path/more+than+JSTL+c%3Aurl</code>
+ * <code>/currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl</code>
  * 
  * @author Scott Andrews
  * @since 3.0
@@ -269,7 +271,6 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 */
 	protected String replaceUriTemplateParams(String uri, List<Param> params, Set<String> usedParams)
 			throws JspException {
-
 		for (Param param : params) {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {
@@ -281,7 +282,11 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	}
 
 	/**
-	 * URL-encode the providedSstring using the character encoding for the response.
+	 * URL-encode the provided String using the character encoding for the response.
+	 * <p>This method will <strong>not</strong> URL-encode according to the 
+	 * <code>application/x-www-form-urlencoded</code> MIME format. Spaces will 
+	 * encoded as regular character instead of <code>+</code>. In <code>UTF-8</code>
+	 * a space encodes to <code>%20</code>.
 	 * @param value the value to encode
 	 * @return the URL encoded value
 	 * @throws JspException if the character encoding is invalid
@@ -291,13 +296,41 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			return null;
 		}
 		try {
-			return URLEncoder.encode(value, pageContext.getResponse().getCharacterEncoding());
+			String encoding = pageContext.getResponse().getCharacterEncoding();
+			String formUrlEncodedValue = URLEncoder.encode(value, encoding);
+			if (!formUrlEncodedValue.contains("+")) {
+				return formUrlEncodedValue;
+			}
+			String spaceEncoding = this.urlEncode(' ', encoding);
+			return formUrlEncodedValue.replace("+", spaceEncoding);
 		}
 		catch (UnsupportedEncodingException ex) {
 			throw new JspException(ex);
 		}
 	}
 
+	/*
+	 * based on URLCodec from Apache Commons Codec
+	 */
+	protected String urlEncode(Character c, String enc) throws UnsupportedEncodingException {
+		if (c == null) {
+			return null;
+		}
+		byte[] bytes = c.toString().getBytes(enc);
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < bytes.length; i++) {
+			int b = bytes[i];
+			if (b < 0) {
+				b = 256 + b;
+			}
+			char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
+			char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+			builder.append('%');
+			builder.append(hex1);
+			builder.append(hex2);
+		}
+		return builder.toString();
+	}
 
 	/**
 	 * Internal enum that classifies URLs by type.
