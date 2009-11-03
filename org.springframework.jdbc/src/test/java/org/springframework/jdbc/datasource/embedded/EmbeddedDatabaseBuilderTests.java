@@ -6,42 +6,37 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
 import org.junit.Test;
+import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 
 public class EmbeddedDatabaseBuilderTests {
 
 	@Test
-	public void testBuildDefaults() {
-		EmbeddedDatabase db = EmbeddedDatabaseBuilder.buildDefault();
-		assertDatabaseCreatedAndShutdown(db);
-	}
-
-	@Test
 	public void testBuild() {
-		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
-		EmbeddedDatabase db = builder.script("db-schema.sql").script("db-test-data.sql").build();
+		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
+		EmbeddedDatabase db = builder.addScript("db-schema.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
 	@Test
 	public void testBuildH2() {
-		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
-		EmbeddedDatabase db = builder.type(H2).script("db-schema.sql").script("db-test-data.sql").build();
+		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
+		EmbeddedDatabase db = builder.setType(H2).addScript("db-schema.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
 
 	public void testBuildDerby() {
-		EmbeddedDatabaseBuilder builder = EmbeddedDatabaseBuilder.relativeTo(getClass());
-		EmbeddedDatabase db = builder.type(DERBY).script("db-schema-derby.sql").script("db-test-data.sql").build();
+		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
+		EmbeddedDatabase db = builder.setType(DERBY).addScript("db-schema-derby.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
 	@Test
 	public void testBuildNoSuchScript() {
 		try {
-			new EmbeddedDatabaseBuilder().script("bogus.sql").build();
+			new EmbeddedDatabaseBuilder().addScript("bogus.sql").build();
 			fail("Should have failed");
 		} catch (CannotReadScriptException e) {
 		}
