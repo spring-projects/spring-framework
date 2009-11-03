@@ -13,6 +13,13 @@ import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 public class EmbeddedDatabaseBuilderTests {
 
 	@Test
+	public void testBuildDefaultScripts() {
+		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+		EmbeddedDatabase db = builder.addDefaultScripts().build();
+		assertDatabaseCreatedAndShutdown(db);
+	}
+
+	@Test
 	public void testBuild() {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 		EmbeddedDatabase db = builder.addScript("db-schema.sql").addScript("db-test-data.sql").build();
