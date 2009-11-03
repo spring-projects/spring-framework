@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
