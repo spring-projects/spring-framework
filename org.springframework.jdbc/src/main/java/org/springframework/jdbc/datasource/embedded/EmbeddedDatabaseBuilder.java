@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
@@ -27,7 +26,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * <p>Usage example:
  * <pre>
  * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
- * EmbeddedDatabase db = builder.script("schema.sql").script("data.sql").build();
+ * EmbeddedDatabase db = builder.setType(H2).addScript("schema.sql").addScript("data.sql").build();
  * db.shutdown();
  * </pre>
  *
@@ -69,7 +68,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @param databaseName the database name
 	 * @return this, for fluent call chaining
 	 */
-	public EmbeddedDatabaseBuilder name(String databaseName) {
+	public EmbeddedDatabaseBuilder setName(String databaseName) {
 		this.databaseFactory.setDatabaseName(databaseName);
 		return this;
 	}
@@ -80,7 +79,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @param databaseType the database type
 	 * @return this, for fluent call chaining
 	 */
-	public EmbeddedDatabaseBuilder type(EmbeddedDatabaseType databaseType) {
+	public EmbeddedDatabaseBuilder setType(EmbeddedDatabaseType databaseType) {
 		this.databaseFactory.setDatabaseType(databaseType);
 		return this;
 	}
@@ -90,7 +89,7 @@ public class EmbeddedDatabaseBuilder {
 	 * @param sqlResource the sql resource location
 	 * @return this, for fluent call chaining
 	 */
-	public EmbeddedDatabaseBuilder script(String sqlResource) {
+	public EmbeddedDatabaseBuilder addScript(String sqlResource) {
 		this.databasePopulator.addScript(this.resourceLoader.getResource(sqlResource));
 		return this;
 	}
@@ -102,26 +101,5 @@ public class EmbeddedDatabaseBuilder {
 	public EmbeddedDatabase build() {
 		return this.databaseFactory.getDatabase();
 	}
-
-
-	/**
-	 * Factory method that builds a default EmbeddedDatabase instance.
-	 * <p>The default instance is HSQL with a schema created from "classpath:schema.sql"
-	 * and data loaded from "classpath:data.sql".
-	 * @return an embedded database
-	 */
-	public static EmbeddedDatabase buildDefault() {
-		return new EmbeddedDatabaseBuilder().script("schema.sql").script("data.sql").build();
-	}
-
-	/**
-	 * Factory method that creates a EmbeddedDatabaseBuilder that loads SQL resources
-	 * relative to the provided class.
-	 * @param clazz the class to load relative to
-	 * @return the embedded database builder
-	 */
-	public static EmbeddedDatabaseBuilder relativeTo(Class<?> clazz) {
-		return new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(clazz));
-	}
-
+	
 }
