@@ -461,6 +461,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set the ConversionService to use for field value formatting in preference to JavaBeans PropertyEditors.
+	 * @since 3.0
 	 */
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
