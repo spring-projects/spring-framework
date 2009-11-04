@@ -34,8 +34,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.format.FormattingService;
-import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -135,7 +134,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private Validator validator;
 
-	private FormattingService formattingService;
+	private ConversionService conversionService;
 
 
 	/**
@@ -183,8 +182,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.isNull(this.bindingResult,
 				"DataBinder is already initialized - call initBeanPropertyAccess before any other configuration methods");
 		this.bindingResult = new BeanPropertyBindingResult(getTarget(), getObjectName());
-		if (this.formattingService != null) {
-			this.bindingResult.initFormatting(this.formattingService);
+		if (this.conversionService != null) {
+			this.bindingResult.initConversion(this.conversionService);
 		}
 	}
 
@@ -197,8 +196,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.isNull(this.bindingResult,
 				"DataBinder is already initialized - call initDirectFieldAccess before any other configuration methods");
 		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName());
-		if (this.formattingService != null) {
-			this.bindingResult.initFormatting(this.formattingService);
+		if (this.conversionService != null) {
+			this.bindingResult.initConversion(this.conversionService);
 		}
 	}
 
@@ -226,8 +225,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected SimpleTypeConverter getSimpleTypeConverter() {
 		if (this.typeConverter == null) {
 			this.typeConverter = new SimpleTypeConverter();
-			if (this.formattingService != null) {
-				this.typeConverter.setConversionService(new FormattingConversionServiceAdapter(this.formattingService));
+			if (this.conversionService != null) {
+				this.typeConverter.setConversionService(this.conversionService);
 			}
 		}
 		return this.typeConverter;
@@ -461,10 +460,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Set the FormattingService to use for field value formatting in preference to JavaBeans PropertyEditors.
+	 * Set the ConversionService to use for field value formatting in preference to JavaBeans PropertyEditors.
 	 */
-	public void setFormattingService(FormattingService formattingService) {
-		this.formattingService = formattingService;
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
 	}
 
 	//---------------------------------------------------------------------
@@ -492,7 +491,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	public <T> T convertIfNecessary(
 			Object value, Class<T> requiredType, MethodParameter methodParam) throws TypeMismatchException {
-
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
 	}
 

@@ -25,11 +25,12 @@ import java.util.Locale;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.ui.format.jodatime.DateTimeFormatAnnotationFormatterFactory;
 import org.springframework.ui.format.jodatime.DateTimeParser;
 import org.springframework.ui.format.jodatime.ReadablePartialPrinter;
@@ -42,20 +43,25 @@ import org.springframework.ui.format.number.IntegerFormatter;
  */
 public class GenericFormattingServiceTests {
 
-	private GenericFormattingService formattingService;
+	private FormattingConversionService formattingService;
 
 	@Before
 	public void setUp() {
-		formattingService = new GenericFormattingService();
-		formattingService.setParentConversionService(new DefaultConversionService());
+		formattingService = new FormattingConversionService();
+		LocaleContextHolder.setLocale(Locale.US);
+	}
+
+	@After
+	public void tearDown() {
+		LocaleContextHolder.setLocale(null);
 	}
 
 	@Test
 	public void testFormatFieldForTypeWithFormatter() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new IntegerFormatter());
-		String formatted = formattingService.print(new Integer(3), TypeDescriptor.valueOf(Integer.class), Locale.US);
+		String formatted = formattingService.convert(new Integer(3), String.class);
 		assertEquals("3", formatted);
-		Integer i = (Integer) formattingService.parse("3", TypeDescriptor.valueOf(Integer.class), Locale.US);
+		Integer i = (Integer) formattingService.convert("3", Integer.class);
 		assertEquals(new Integer(3), i);
 	}
 
@@ -68,9 +74,9 @@ public class GenericFormattingServiceTests {
 		});
 		formattingService.addFormatterForFieldType(LocalDate.class, new ReadablePartialPrinter(DateTimeFormat
 				.shortDate()), new DateTimeParser(DateTimeFormat.shortDate()));
-		String formatted = formattingService.print(new LocalDate(2009, 10, 31), TypeDescriptor.valueOf(LocalDate.class), Locale.US);
+		String formatted = formattingService.convert(new LocalDate(2009, 10, 31), String.class);
 		assertEquals("10/31/09", formatted);
-		LocalDate date = (LocalDate) formattingService.parse("10/31/09", TypeDescriptor.valueOf(LocalDate.class), Locale.US);
+		LocalDate date = (LocalDate) formattingService.convert("10/31/09", LocalDate.class);
 		assertEquals(new LocalDate(2009, 10, 31), date);
 	}
 
@@ -85,21 +91,22 @@ public class GenericFormattingServiceTests {
 			public Date convert(DateTime source) {
 				return source.toDate();
 			}
-		});		
+		});
 		formattingService.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
-		String formatted = formattingService.print(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime().toDate(), new TypeDescriptor(Model.class.getField("date")), Locale.US);
+		String formatted = (String) formattingService.convert(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime()
+				.toDate(), new TypeDescriptor(Model.class.getField("date")), TypeDescriptor.valueOf(String.class));
 		assertEquals("10/31/09", formatted);
-		LocalDate date = new LocalDate(formattingService.parse("10/31/09", new TypeDescriptor(Model.class.getField("date")), Locale.US));
+		LocalDate date = new LocalDate(formattingService.convert("10/31/09", TypeDescriptor.valueOf(String.class),
+				new TypeDescriptor(Model.class.getField("date"))));
 		assertEquals(new LocalDate(2009, 10, 31), date);
 	}
-	
-	private static class Model {
-		
-		@SuppressWarnings("unused")
-		@org.springframework.ui.format.jodatime.DateTimeFormat(dateStyle=FormatStyle.SHORT)
-		public Date date;
-		
-	}
 
+	private static class Model {
+
+		@SuppressWarnings("unused")
+		@org.springframework.ui.format.jodatime.DateTimeFormat(dateStyle = FormatStyle.SHORT)
+		public Date date;
+
+	}
 
 }

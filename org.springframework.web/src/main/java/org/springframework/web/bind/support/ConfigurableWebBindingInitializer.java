@@ -17,7 +17,7 @@
 package org.springframework.web.bind.support;
 
 import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.ui.format.FormattingService;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -35,7 +35,7 @@ import org.springframework.web.context.request.WebRequest;
  * @see #setMessageCodesResolver
  * @see #setBindingErrorProcessor
  * @see #setValidator(Validator)
- * @see #setFormattingService(FormattingService)
+ * @see #setConversionService(ConversionService)
  * @see #setPropertyEditorRegistrar
  */
 public class ConfigurableWebBindingInitializer implements WebBindingInitializer {
@@ -48,7 +48,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	private Validator validator;
 
-	private FormattingService formattingService;
+	private ConversionService conversionService;
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
@@ -113,17 +113,17 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	}
 
 	/**
-	 * Specify a FormattingService which will apply to every DataBinder.
+	 * Specify a ConversionService which will apply to every DataBinder.
 	 */
-	public final void setFormattingService(FormattingService formattingService) {
-		this.formattingService = formattingService;
+	public final void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
 	}
 
 	/**
-	 * Return the FormattingService which will apply to every DataBinder.
+	 * Return the ConversionService which will apply to every DataBinder.
 	 */
-	public final FormattingService getFormattingService() {
-		return this.formattingService;
+	public final ConversionService getConversionService() {
+		return this.conversionService;
 	}
 
 	/**
@@ -162,8 +162,8 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 				this.validator.supports(binder.getTarget().getClass())) {
 			binder.setValidator(this.validator);
 		}
-		if (this.formattingService != null) {
-			binder.setFormattingService(this.formattingService);
+		if (this.conversionService != null) {
+			binder.setConversionService(this.conversionService);
 		}
 		if (this.propertyEditorRegistrars != null) {
 			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {

@@ -15,6 +15,8 @@
  */
 package org.springframework.ui.format;
 
+import java.lang.annotation.Annotation;
+
 import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
@@ -54,12 +56,12 @@ public interface FormatterRegistry {
 	 * Adds a Formatter to format fields annotated with a specific format annotation.
 	 * @param annotationFormatterFactory the annotation formatter factory to add
 	 */
-	void addFormatterForFieldAnnotation(AnnotationFormatterFactory<?> annotationFormatterFactory);
+	void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory);
 	
 	/**
 	 * Returns the registry of Converters that coerse field values to types required by Formatters.
-	 * Allows clients to register their own custom converters.
-	 * For example, a date/time formatting configuration might expect a java.util.Date field value to be converted to a Long for formatting.
+	 * Allows clients to register their own custom converters directly.
+	 * For example, a date/time formatting configuration might expect a java.util.Date field value to be coersed to a Long for formatting.
 	 * Registering a simpler DateToLongConverter allievates the need to register multiple formatters for closely related types.
 	 * @return the converter registry, allowing new Converters to be registered
 	 */

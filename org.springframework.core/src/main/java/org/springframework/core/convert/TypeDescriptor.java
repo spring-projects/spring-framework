@@ -284,6 +284,18 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Obtain the annotation associated with the wrapped parameter/field, if any.
+	 */
+	public Annotation getAnnotation(Class<? extends Annotation> annotationType) {
+		for (Annotation annotation : getAnnotations()) {
+			if (annotation.annotationType().equals(annotationType)) {
+				return annotation;
+			}
+		}
+		return null;		
+	}
+
+	/**
 	 * Returns true if this type is an abstract class.
 	 */
 	public boolean isAbstractClass() {
@@ -402,5 +414,5 @@ public class TypeDescriptor {
 			return "[TypeDescriptor type=" + getType().getName() + "]";
 		}
 	}
-
+	
 }

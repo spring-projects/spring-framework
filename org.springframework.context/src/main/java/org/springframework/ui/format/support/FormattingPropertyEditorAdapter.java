@@ -17,11 +17,8 @@
 package org.springframework.ui.format.support;
 
 import java.beans.PropertyEditorSupport;
-import java.text.ParseException;
 
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.ui.format.FormattingService;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
 /**
@@ -34,35 +31,29 @@ import org.springframework.util.Assert;
  */
 public class FormattingPropertyEditorAdapter extends PropertyEditorSupport {
 
-	private final FormattingService formattingService;
+	private final ConversionService conversionService;
 
-	private final TypeDescriptor fieldType;
-	
+	private final Class<?> fieldType;
+
 	/**
 	 * Create a new FormattingPropertyEditorAdapter for the given Formatter.
 	 * @param formatter the Formatter to wrap
 	 */
-	public FormattingPropertyEditorAdapter(FormattingService formattingService, Class<?> fieldType) {
-		Assert.notNull(formattingService, "FormattingService must not be null");
+	public FormattingPropertyEditorAdapter(ConversionService formattingService, Class<?> fieldType) {
+		Assert.notNull(formattingService, "ConversionService must not be null");
 		Assert.notNull(formattingService, "FieldType must not be null");
-		this.formattingService = formattingService;
-		this.fieldType = TypeDescriptor.valueOf(fieldType);
+		this.conversionService = formattingService;
+		this.fieldType = fieldType;
 	}
-
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		try {
-			setValue(this.formattingService.parse(text, this.fieldType, LocaleContextHolder.getLocale()));
-		}
-		catch (ParseException ex) {
-			throw new IllegalArgumentException("Failed to parse formatted value", ex);
-		}
+		setValue(this.conversionService.convert(text, this.fieldType));
 	}
 
 	@Override
 	public String getAsText() {
-		return this.formattingService.print(getValue(), this.fieldType, LocaleContextHolder.getLocale());
+		return this.conversionService.convert(getValue(), String.class);
 	}
 
 }
