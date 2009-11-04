@@ -174,8 +174,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 
 	private static class ParserConverter implements GenericConverter {
 
-		@SuppressWarnings("unchecked")
-		private Parser parser;
+		private Parser<?> parser;
 
 		private ConversionService conversionService;
 
