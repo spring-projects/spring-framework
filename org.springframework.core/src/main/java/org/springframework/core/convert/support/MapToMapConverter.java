@@ -40,7 +40,7 @@ final class MapToMapConverter implements GenericConverter {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}
-		Map sourceMap = (Map) source;
+		Map<?, ?> sourceMap = (Map<?, ?>) source;
 		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
 		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
 		if (targetKeyType == TypeDescriptor.NULL && targetValueType == TypeDescriptor.NULL) {
@@ -77,11 +77,11 @@ final class MapToMapConverter implements GenericConverter {
 		return targetMap;
 	}
 
-	private TypeDescriptor[] getMapEntryTypes(Map sourceMap) {
-		Class keyType = null;
-		Class valueType = null;
+	private TypeDescriptor[] getMapEntryTypes(Map<?, ?> sourceMap) {
+		Class<?> keyType = null;
+		Class<?> valueType = null;
 		for (Object entry : sourceMap.entrySet()) {
-			Map.Entry mapEntry = (Map.Entry) entry;
+			Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
 			Object key = mapEntry.getKey();
 			if (keyType == null && key != null) {
 				keyType = key.getClass();
@@ -98,7 +98,7 @@ final class MapToMapConverter implements GenericConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map compatibleMapWithoutEntryConversion(Map source, TypeDescriptor targetType) {
+	private Map<?, ?> compatibleMapWithoutEntryConversion(Map<?, ?> source, TypeDescriptor targetType) {
 		if (targetType.getType().isAssignableFrom(source.getClass())) {
 			return source;
 		} else {

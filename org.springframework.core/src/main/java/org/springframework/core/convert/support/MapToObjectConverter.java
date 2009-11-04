@@ -40,7 +40,7 @@ final class MapToObjectConverter implements GenericConverter {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}		
-		Map sourceMap = (Map) source;
+		Map<?, ?> sourceMap = (Map<?, ?>) source;
 		if (sourceMap.size() == 0) {
 			if (targetType.typeEquals(String.class)) {
 				return "";
@@ -63,7 +63,7 @@ final class MapToObjectConverter implements GenericConverter {
 					StringBuilder string = new StringBuilder();
 					int i = 0;
 					for (Object entry : sourceMap.entrySet()) {
-						Map.Entry mapEntry = (Map.Entry) entry;
+						Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
 						if (i > 0) {
 							string.append(DELIMITER);
 						}
@@ -78,7 +78,7 @@ final class MapToObjectConverter implements GenericConverter {
 					StringBuilder string = new StringBuilder();
 					int i = 0;
 					for (Object entry : sourceMap.entrySet()) {
-						Map.Entry mapEntry = (Map.Entry) entry;
+						Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
 						if (i > 0) {
 							string.append(DELIMITER);
 						}

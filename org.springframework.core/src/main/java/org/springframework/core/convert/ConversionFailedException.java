@@ -22,6 +22,7 @@ package org.springframework.core.convert;
  * @author Keith Donald
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public final class ConversionFailedException extends ConversionException {
 
 	private final TypeDescriptor sourceType;
