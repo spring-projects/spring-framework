@@ -34,7 +34,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.ui.format.jodatime.DateTimeFormatAnnotationFormatterFactory;
 import org.springframework.ui.format.jodatime.DateTimeParser;
 import org.springframework.ui.format.jodatime.ReadablePartialPrinter;
-import org.springframework.ui.format.jodatime.DateTimeFormat.FormatStyle;
+import org.springframework.ui.format.jodatime.DateTimeFormat.Style;
 import org.springframework.ui.format.number.IntegerFormatter;
 
 /**
@@ -105,7 +105,7 @@ public class FormattingConversionServiceTests {
 	private static class Model {
 
 		@SuppressWarnings("unused")
-		@org.springframework.ui.format.jodatime.DateTimeFormat(dateStyle = FormatStyle.SHORT)
+		@org.springframework.ui.format.jodatime.DateTimeFormat(dateStyle = Style.SHORT)
 		public Date date;
 
 	}

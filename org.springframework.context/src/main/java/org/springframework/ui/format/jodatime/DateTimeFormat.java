@@ -30,15 +30,15 @@ public @interface DateTimeFormat {
 
 	/**
 	 * The style to use for formatting the date portion of the property.
-	 * Defaults to {@link FormatStyle#NONE}.
+	 * Defaults to {@link Style#NONE}.
 	 */
-	FormatStyle dateStyle() default FormatStyle.NONE;
+	Style dateStyle() default Style.NONE;
 
 	/**
 	 * The style to use for formatting the time portion of the property.
-	 * Defaults to {@link FormatStyle#NONE}.
+	 * Defaults to {@link Style#NONE}.
 	 */
-	FormatStyle timeStyle() default FormatStyle.NONE;
+	Style timeStyle() default Style.NONE;
 
 	/**
 	 * A pattern String that defines a custom format for the property.
@@ -49,7 +49,7 @@ public @interface DateTimeFormat {
 	/**
 	 * Supported DateTimeFormat styles.
 	 */
-	public enum FormatStyle {
+	public enum Style {
 		SHORT {
 			public String toString() {
 				return "S";
