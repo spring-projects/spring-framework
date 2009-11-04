@@ -28,9 +28,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ISODateTimeFormat {
 
-	FormatStyle value();
+	Style value();
 
-	public enum FormatStyle {
+	public enum Style {
 		DATE, TIME, DATE_TIME
 	}
 	
