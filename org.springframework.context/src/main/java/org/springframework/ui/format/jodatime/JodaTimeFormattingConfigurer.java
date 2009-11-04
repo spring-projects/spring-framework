@@ -111,7 +111,7 @@ public class JodaTimeFormattingConfigurer {
 		Printer<ReadableInstant> readableInstantPrinter = new ReadableInstantPrinter(jodaDateTimeFormatter);
 		this.formatterRegistry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
 		this.formatterRegistry.addFormatterForFieldType(Calendar.class, readableInstantPrinter, dateTimeParser);
-		this.formatterRegistry.addFormatterForFieldType(Calendar.class, new MillisecondInstantPrinter(jodaDateTimeFormatter), dateTimeParser);
+		this.formatterRegistry.addFormatterForFieldType(Date.class, new MillisecondInstantPrinter(jodaDateTimeFormatter), dateTimeParser);
 		
 		this.formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
 	}

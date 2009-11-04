@@ -41,7 +41,7 @@ abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> 
 	private final Set<Class<?>> propertyTypes;
 	
 	public AbstractDateTimeAnnotationFormatterFactory() {
-		this.propertyTypes = Collections.unmodifiableSet(createPropertyTypes());
+		this.propertyTypes = Collections.unmodifiableSet(createFieldTypes());
 	}
 
 	public Set<Class<?>> getFieldTypes() {
@@ -76,7 +76,7 @@ abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> 
 
 	// internal helpers
 	
-	private Set<Class<?>> createPropertyTypes() {
+	private Set<Class<?>> createFieldTypes() {
 		Set<Class<?>> propertyTypes = new HashSet<Class<?>>(5);
 		propertyTypes.add(ReadableInstant.class);
 		propertyTypes.add(ReadablePartial.class);

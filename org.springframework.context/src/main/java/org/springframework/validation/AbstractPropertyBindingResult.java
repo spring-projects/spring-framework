@@ -22,10 +22,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.ui.format.FormattingService;
-import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
 import org.springframework.ui.format.support.FormattingPropertyEditorAdapter;
 import org.springframework.util.Assert;
 
@@ -43,7 +41,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractPropertyBindingResult extends AbstractBindingResult {
 
-	private FormattingService formattingService;
+	private ConversionService conversionService;
 
 
 	/**
@@ -56,10 +54,10 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	}
 
 
-	public void initFormatting(FormattingService formattingService) {
-		Assert.notNull(formattingService, "FormattingService must not be null");
-		this.formattingService = formattingService;
-		getPropertyAccessor().setConversionService(new FormattingConversionServiceAdapter(formattingService));
+	public void initConversion(ConversionService conversionService) {
+		Assert.notNull(conversionService, "ConversionService must not be null");
+		this.conversionService = conversionService;
+		getPropertyAccessor().setConversionService(conversionService);
 	}
 
 	/**
@@ -116,10 +114,10 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 				return textValue;
 			}
 		}
-		if (this.formattingService != null) {
+		if (this.conversionService != null) {
 			// Try custom formatter...
 			TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
-			return this.formattingService.print(value, td, LocaleContextHolder.getLocale());
+			return this.conversionService.convert(value, td, TypeDescriptor.valueOf(String.class));
 		} else {
 			return value;
 		}
@@ -149,11 +147,11 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 			valueType = getFieldType(field);
 		}
 		PropertyEditor editor = super.findEditor(field, valueType);
-		if (editor == null && this.formattingService != null) {
+		if (editor == null && this.conversionService != null) {
 			TypeDescriptor td = (field != null ?
 					getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) :
 					TypeDescriptor.valueOf(valueType));
-			editor = new FormattingPropertyEditorAdapter(this.formattingService, valueType);
+			editor = new FormattingPropertyEditorAdapter(this.conversionService, valueType);
 		}
 		return editor;
 	}

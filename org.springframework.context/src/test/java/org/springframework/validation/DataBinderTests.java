@@ -22,10 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +45,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.ui.format.number.DecimalFormatter;
-import org.springframework.ui.format.support.GenericFormattingService;
+import org.springframework.ui.format.support.FormattingConversionService;
 import org.springframework.util.StringUtils;
 
 /**
@@ -303,10 +299,9 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithFormatter() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
-		GenericFormattingService formattingService = new GenericFormattingService();
-		formattingService.setParentConversionService(new DefaultConversionService());
-		formattingService.addFormatterForFieldType(Float.class, new DecimalFormatter());
-		binder.setFormattingService(formattingService);
+		FormattingConversionService conversionService = new FormattingConversionService();
+		conversionService.addFormatterForFieldType(Float.class, new DecimalFormatter());
+		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("myFloat", "1,2");
 
