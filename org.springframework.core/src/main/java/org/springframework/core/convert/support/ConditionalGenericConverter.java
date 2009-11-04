@@ -15,23 +15,13 @@
  */
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.TypeDescriptor;
-
 /**
- * A generic converter that conditionally executes.
+ * A generic converter that, as a ConverterMatcher, conditionally executes.
  * Often used when selectively matching custom conversion logic based on the presence of a field or class-level annotation.
  * For example, when converting from a String to a Date field, an implementation might return true if the target field has also been annotated with <code>@DateTimeFormat</code>.
  * @author Keith Donald
  * @since 3.0
  */
-public interface ConditionalGenericConverter extends GenericConverter {
-
-	/**
-	 * Should the conversion between <code>sourceFieldType</code> and <code>targetFieldType</code> be performed?
-	 * @param sourceFieldType the type descriptor of the field we are converting from
-	 * @param targetFieldType the type descriptor of the field we are converting to
-	 * @return true if conversion should be performed, false otherwise
-	 */
-	boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
+public interface ConditionalGenericConverter extends GenericConverter, ConverterMatcher {
 	
 }
