@@ -26,7 +26,6 @@ package org.springframework.core.convert;
 public interface ConversionService {
 
 	/**
-	 * TODO - do we really need to support this?
 	 * Returns true if objects of sourceType can be converted to targetType.
 	 * @param sourceType the source type to convert from (required)
 	 * @param targetType the target type to convert to (required)
@@ -35,7 +34,6 @@ public interface ConversionService {
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 
 	/**
-	 * TODO - do we really need to support this?
 	 * Convert the source to targetType.
 	 * @param source the source object to convert (may be null)
 	 * @param targetType the target type to convert to (required)
@@ -46,7 +44,7 @@ public interface ConversionService {
 
 	/**
 	 * Returns true if objects of sourceType can be converted to the targetType.
-	 * The TypeDescriptors provide additional context about the variable locations where conversion would occur, often object property locations.
+	 * The TypeDescriptors provide additional context about the field locations where conversion would occur, often object property locations.
 	 * This flavor of the canConvert operation exists mainly for use by a general purpose data mapping framework, and not for use by user code.
 	 * @param sourceType context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
@@ -56,7 +54,7 @@ public interface ConversionService {
 
 	/**
 	 * Convert the source to targetType.
-	 * The TypeDescriptors provide additional context about the variable locations where conversion will occur, often object property locations.
+	 * The TypeDescriptors provide additional context about the field locations where conversion will occur, often object property locations.
 	 * This flavor of the convert operation exists mainly for use by a general purpose data mapping framework, and not for use by user code.
 	 * @param source the source object to convert (may be null)
 	 * @param sourceType context about the source type converting from (required)
