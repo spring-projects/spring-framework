@@ -82,7 +82,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 							+ "]; does the factory parameterize the <A extends Annotation> generic type?");
 		}		
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
-		for (Class<?> fieldType : fieldTypes) {
+		for (final Class<?> fieldType : fieldTypes) {
 			this.conversionService.addGenericConverter(fieldType, String.class, new ConditionalGenericConverter() {
 				public boolean matches(TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
 					return sourceFieldType.getAnnotation(annotationType) != null;
@@ -90,7 +90,10 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 					Printer<?> printer = annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType), targetType.getType());
 					return new PrinterConverter(printer, conversionService).convert(source, sourceType, targetType);
-				}				
+				}
+				public String toString() {
+					return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " + String.class.getName();
+				}
 			});
 			this.conversionService.addGenericConverter(String.class, fieldType, new ConditionalGenericConverter() {
 				public boolean matches(TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
@@ -99,6 +102,9 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 					Parser<?> parser = annotationFormatterFactory.getParser(targetType.getAnnotation(annotationType), targetType.getType());
 					return new ParserConverter(parser, conversionService).convert(source, sourceType, targetType);		
+				}
+				public String toString() {
+					return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName();
 				}				
 			});
 		}
@@ -127,6 +133,10 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 		return this.conversionService.convert(source, sourceType, targetType);
 	}
 
+	public String toString() {
+		return this.conversionService.toString();
+	}
+	
 	// internal helpers
 
 	@SuppressWarnings("unchecked")

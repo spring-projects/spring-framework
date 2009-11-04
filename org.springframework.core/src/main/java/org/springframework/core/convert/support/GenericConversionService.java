@@ -62,28 +62,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	};
 
 	/**
-	 * Create a new GenericConversionService.
-	 * Generic converters for Collection types are registered.
-	 */
-	public GenericConversionService() {
-		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(this));
-		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionConverter(this));
-		addGenericConverter(Object[].class, Map.class, new ArrayToMapConverter(this));
-		addGenericConverter(Object[].class, Object.class, new ArrayToObjectConverter(this));
-		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionConverter(this));
-		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayConverter(this));
-		addGenericConverter(Collection.class, Map.class, new CollectionToMapConverter(this));
-		addGenericConverter(Collection.class, Object.class, new CollectionToObjectConverter(this));
-		addGenericConverter(Map.class, Map.class, new MapToMapConverter(this));
-		addGenericConverter(Map.class, Object[].class, new MapToArrayConverter(this));
-		addGenericConverter(Map.class, Collection.class, new MapToCollectionConverter(this));
-		addGenericConverter(Map.class, Object.class, new MapToObjectConverter(this));
-		addGenericConverter(Object.class, Object[].class, new ObjectToArrayConverter(this));
-		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionConverter(this));
-		addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(this));
-	}
-
-	/**
 	 * Registers the converters in the set provided.
 	 * JavaBean-friendly alternative to calling {@link #addConverter(Converter)}.
 	 * @see #addConverter(Converter)
@@ -191,7 +169,18 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
 		getMatchableConvertersList(sourceType, targetType).add(converter);
 	}
-
+	
+	/**
+	 * Registers a GenericConverter for the source/target type pair that will only be matched if the provided matcher returns true.
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
+	 * @param matcher a matcher can restrict a match of the converter based on source and target runtime field types
+	 * @param converter the generic converter.
+	 */
+	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter, ConverterMatcher matcher) {
+		getMatchableConvertersList(sourceType, targetType).add(matcher, converter);
+	}
+	
 	/**
 	 * Registers a Converter with the sourceType and targetType to index on specified explicitly.
 	 * This method performs better than {@link #addConverter(Converter)} because there parameterized types S and T don't have to be discovered.
@@ -214,6 +203,22 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		addGenericConverter(sourceType, targetType, new ConverterFactoryAdapter(converterFactory));
 	}
 
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("ConversionService converters = ").append("\n");
+		for (Map<Class<?>, MatchableConverters> targetConverters : this.converters.values()) {
+			for (MatchableConverters matchable : targetConverters.values()) {
+				builder.append("\t");
+				builder.append(matchable);
+				builder.append("\n");
+			}
+		}
+		if (this.parent != null) {
+			builder.append("parent = ").append(this.parent);
+		}
+		return builder.toString();
+	}
+	
 	// subclassing hooks
 
 	/**
@@ -402,7 +407,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-	private GenericConverter matchConverter(MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
+	private GenericConverter matchConverter(MatchableConverters matchable, TypeDescriptor sourceFieldType,
+			TypeDescriptor targetFieldType) {
 		return matchable != null ? matchable.matchConverter(sourceFieldType, targetFieldType) : null;
 	}
 
@@ -421,6 +427,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			}
 			return this.converter.convert(source);
 		}
+		
+		public String toString() {
+			return this.converter.toString();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -438,29 +448,97 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			}
 			return this.converterFactory.getConverter(targetType.getObjectType()).convert(source);
 		}
+
+		public String toString() {
+			return this.converterFactory.toString();
+		}
+
 	}
 
 	private static class MatchableConverters {
 
-		private LinkedList<GenericConverter> matchableConverters = new LinkedList<GenericConverter>();
+		private static final ConverterMatcher ALWAYS_MATCHES = new ConverterMatcher() {
+			public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+				return true;
+			}
+		};
+
+		private LinkedList<MatchableConverter> matchableConverters = new LinkedList<MatchableConverter>();
 
 		public void add(GenericConverter converter) {
-			this.matchableConverters.addFirst(converter);
+			if (converter instanceof ConverterMatcher) {
+				add((ConverterMatcher) converter, converter);				
+			} else {
+				add(ALWAYS_MATCHES, converter);				
+			}
+		}
+
+		public void add(ConverterMatcher matcher, GenericConverter converter) {
+			MatchableConverter matchable = new MatchableConverter(matcher, converter);
+			int index = this.matchableConverters.indexOf(matchable);
+			if (index == -1) {
+				this.matchableConverters.addFirst(new MatchableConverter(matcher, converter));
+			} else {
+				this.matchableConverters.set(index, matchable);
+			}
 		}
 
 		public GenericConverter matchConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			for (GenericConverter matchable : this.matchableConverters) {
-				if (!(matchable instanceof ConditionalGenericConverter)) {
-					return matchable;
-				}
-				ConditionalGenericConverter conditional = (ConditionalGenericConverter) matchable;
-				if (conditional.matches(sourceType, targetType)) {
-					return matchable;
+			for (MatchableConverter matchable : this.matchableConverters) {
+				if (matchable.matches(sourceType, targetType)) {
+					return matchable.getConverter();
 				}
 			}
 			return null;
 		}
+		
+		public String toString() {
+			if (this.matchableConverters.size() == 1) {
+				return this.matchableConverters.get(0).toString();
+			} else {
+				return "[MatchableConverters = " + this.matchableConverters + "]";
+			}
+		}
 
+		private static class MatchableConverter {
+
+			private ConverterMatcher matcher;
+
+			private GenericConverter converter;
+
+			public MatchableConverter(ConverterMatcher matcher, GenericConverter converter) {
+				this.matcher = matcher;
+				this.converter = converter;
+			}
+
+			public GenericConverter getConverter() {
+				return this.converter;
+			}
+			
+			public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+				return this.matcher.matches(sourceType, targetType);
+			}
+	
+			public int hashCode() {
+				return this.matcher.hashCode();
+			}
+
+			public boolean equals(Object o) {
+				if (!(o instanceof MatchableConverter)) {
+					return false;
+				}
+				MatchableConverter matchable = (MatchableConverter) o;
+				return this.matcher.equals(matchable.matcher);
+			}
+			
+			public String toString() {
+				if (matcher == ALWAYS_MATCHES || matcher == converter) {
+					return this.converter.toString();
+				} else {
+					return "if (" + this.matcher + ") " + this.converter;					
+				}
+			}
+		}
 	}
 
 }

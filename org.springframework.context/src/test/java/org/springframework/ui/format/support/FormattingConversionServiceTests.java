@@ -41,7 +41,7 @@ import org.springframework.ui.format.number.IntegerFormatter;
  * @author Keith Donald
  * @author Juergen Hoeller
  */
-public class GenericFormattingServiceTests {
+public class FormattingConversionServiceTests {
 
 	private FormattingConversionService formattingService;
 
@@ -93,6 +93,7 @@ public class GenericFormattingServiceTests {
 			}
 		});
 		formattingService.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+		System.out.println(this.formattingService);
 		String formatted = (String) formattingService.convert(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime()
 				.toDate(), new TypeDescriptor(Model.class.getField("date")), TypeDescriptor.valueOf(String.class));
 		assertEquals("10/31/09", formatted);
