@@ -35,7 +35,7 @@ final class ConversionUtils {
 		}
 	}
 
-	public static TypeDescriptor getElementType(Collection collection) {
+	public static TypeDescriptor getElementType(Collection<?> collection) {
 		for (Object element : collection) {
 			if (element != null) {
 				return TypeDescriptor.valueOf(element.getClass());
@@ -45,11 +45,12 @@ final class ConversionUtils {
 	}
 	
 
-	public static List asList(Object array) {
+	public static List<?> asList(Object array) {
 		return array != null ? new ArrayList(array) : null;
 	}
 	
-	private static class ArrayList extends AbstractList implements RandomAccess, java.io.Serializable {
+	@SuppressWarnings("serial")
+	private static class ArrayList extends AbstractList<Object> implements RandomAccess, java.io.Serializable {
 
 		private Object array;
 

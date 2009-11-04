@@ -44,7 +44,7 @@ final class CollectionToObjectConverter implements GenericConverter {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}
-		Collection sourceCollection = (Collection) source;
+		Collection<?> sourceCollection = (Collection<?>) source;
 		if (sourceCollection.size() == 0) {
 			if (targetType.typeEquals(String.class)) {
 				return "";

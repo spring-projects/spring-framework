@@ -42,7 +42,7 @@ final class CollectionToMapConverter implements GenericConverter {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}		
-		Collection sourceCollection = (Collection) source;
+		Collection<?> sourceCollection = (Collection<?>) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 		if (sourceElementType == TypeDescriptor.NULL) {
 			sourceElementType = getElementType(sourceCollection);

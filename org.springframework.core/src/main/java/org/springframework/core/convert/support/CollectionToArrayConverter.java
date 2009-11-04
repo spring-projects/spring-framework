@@ -44,7 +44,7 @@ final class CollectionToArrayConverter implements GenericConverter {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}		
-		Collection sourceCollection = (Collection) source;
+		Collection<?> sourceCollection = (Collection<?>) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 		if (sourceElementType == TypeDescriptor.NULL) {
 			sourceElementType = getElementType(sourceCollection);
@@ -53,7 +53,7 @@ final class CollectionToArrayConverter implements GenericConverter {
 		Object array = Array.newInstance(targetElementType.getType(), sourceCollection.size());
 		int i = 0;
 		if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
-			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
+			for (Iterator<?> it = sourceCollection.iterator(); it.hasNext(); i++) {
 				Array.set(array, i, it.next());
 			}
 		}
@@ -62,7 +62,7 @@ final class CollectionToArrayConverter implements GenericConverter {
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceElementType, targetElementType);
 			}
-			for (Iterator it = sourceCollection.iterator(); it.hasNext(); i++) {
+			for (Iterator<?> it = sourceCollection.iterator(); it.hasNext(); i++) {
 				Object sourceElement = it.next();
 				Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetElementType);
 				Array.set(array, i, targetElement);
