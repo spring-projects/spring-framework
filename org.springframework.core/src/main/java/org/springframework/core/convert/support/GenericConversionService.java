@@ -19,6 +19,7 @@ package org.springframework.core.convert.support;
 import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -61,6 +62,24 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	};
 
+	public GenericConversionService() {
+		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(this));
+		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionConverter(this));
+		addGenericConverter(Object[].class, Map.class, new ArrayToMapConverter(this));
+		addGenericConverter(Object[].class, Object.class, new ArrayToObjectConverter(this));
+		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionConverter(this));
+		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayConverter(this));
+		addGenericConverter(Collection.class, Map.class, new CollectionToMapConverter(this));
+		addGenericConverter(Collection.class, Object.class, new CollectionToObjectConverter(this));
+		addGenericConverter(Map.class, Map.class, new MapToMapConverter(this));
+		addGenericConverter(Map.class, Object[].class, new MapToArrayConverter(this));
+		addGenericConverter(Map.class, Collection.class, new MapToCollectionConverter(this));
+		addGenericConverter(Map.class, Object.class, new MapToObjectConverter(this));
+		addGenericConverter(Object.class, Object[].class, new ObjectToArrayConverter(this));
+		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionConverter(this));
+		addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(this));		
+	}
+	
 	/**
 	 * Registers the converters in the set provided.
 	 * JavaBean-friendly alternative to calling {@link #addConverter(Converter)}.
