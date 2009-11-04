@@ -114,6 +114,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	/**
 	 * Specify a ConversionService which will apply to every DataBinder.
+	 * @since 3.0
 	 */
 	public final void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
