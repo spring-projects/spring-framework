@@ -88,7 +88,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 					return sourceFieldType.getAnnotation(annotationType) != null;
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-					Printer<?> printer = annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType), targetType.getType());
+					Printer<?> printer = annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType), sourceType.getType());
 					return new PrinterConverter(printer, conversionService).convert(source, sourceType, targetType);
 				}
 				public String toString() {
