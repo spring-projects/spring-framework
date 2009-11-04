@@ -19,7 +19,6 @@ package org.springframework.core.convert.support;
 import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
 
 import java.lang.reflect.Array;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -51,7 +50,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	};
 
-	private final Map<Class<?>, Map<Class<?>, MatchableConverters>> converters = new HashMap<Class<?>, Map<Class<?>, MatchableConverters>>(36);
+	private final Map<Class<?>, Map<Class<?>, MatchableConverters>> converters = new HashMap<Class<?>, Map<Class<?>, MatchableConverters>>(
+			36);
 
 	private ConversionService parent;
 
@@ -169,7 +169,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
 		getMatchableConvertersList(sourceType, targetType).add(converter);
 	}
-	
+
 	/**
 	 * Registers a GenericConverter for the source/target type pair that will only be matched if the provided matcher returns true.
 	 * @param sourceType the source type to convert from
@@ -177,10 +177,11 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * @param matcher a matcher can restrict a match of the converter based on source and target runtime field types
 	 * @param converter the generic converter.
 	 */
-	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter, ConverterMatcher matcher) {
+	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter,
+			ConverterMatcher matcher) {
 		getMatchableConvertersList(sourceType, targetType).add(matcher, converter);
 	}
-	
+
 	/**
 	 * Registers a Converter with the sourceType and targetType to index on specified explicitly.
 	 * This method performs better than {@link #addConverter(Converter)} because there parameterized types S and T don't have to be discovered.
@@ -218,7 +219,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		return builder.toString();
 	}
-	
+
 	// subclassing hooks
 
 	/**
@@ -249,7 +250,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 * @return the generic converter that will perform the conversion, or <code>null</code> if no suitable converter was found
 	 */
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		MatchableConverters matchable = findMatchableConvertersForClassPair(sourceType.getObjectType(), targetType.getObjectType());
+		MatchableConverters matchable = findMatchableConvertersForClassPair(sourceType.getObjectType(), targetType
+				.getObjectType());
 		GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 		if (converter != null) {
 			return converter;
@@ -427,7 +429,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			}
 			return this.converter.convert(source);
 		}
-		
+
 		public String toString() {
 			return this.converter.toString();
 		}
@@ -467,9 +469,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 		public void add(GenericConverter converter) {
 			if (converter instanceof ConverterMatcher) {
-				add((ConverterMatcher) converter, converter);				
+				add((ConverterMatcher) converter, converter);
 			} else {
-				add(ALWAYS_MATCHES, converter);				
+				add(ALWAYS_MATCHES, converter);
 			}
 		}
 
@@ -491,7 +493,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			}
 			return null;
 		}
-		
+
 		public String toString() {
 			if (this.matchableConverters.size() == 1) {
 				return this.matchableConverters.get(0).toString();
@@ -514,11 +516,11 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			public GenericConverter getConverter() {
 				return this.converter;
 			}
-			
+
 			public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 				return this.matcher.matches(sourceType, targetType);
 			}
-	
+
 			public int hashCode() {
 				return this.matcher.hashCode();
 			}
@@ -530,12 +532,12 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				MatchableConverter matchable = (MatchableConverter) o;
 				return this.matcher.equals(matchable.matcher);
 			}
-			
+
 			public String toString() {
 				if (matcher == ALWAYS_MATCHES || matcher == converter) {
 					return this.converter.toString();
 				} else {
-					return "if (" + this.matcher + ") " + this.converter;					
+					return "if (" + this.matcher + ") " + this.converter;
 				}
 			}
 		}
