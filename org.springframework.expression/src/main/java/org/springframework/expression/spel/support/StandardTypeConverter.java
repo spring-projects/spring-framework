@@ -43,9 +43,9 @@ public class StandardTypeConverter implements TypeConverter {
 		this.conversionService = new DefaultConversionService();
 	}
 
-	public StandardTypeConverter(ConversionService typeConverter) {
-		Assert.notNull(typeConverter, "ConversionService must not be null");
-		this.conversionService = typeConverter;
+	public StandardTypeConverter(ConversionService conversionService) {
+		Assert.notNull(conversionService, "ConversionService must not be null");
+		this.conversionService = conversionService;
 	}
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
