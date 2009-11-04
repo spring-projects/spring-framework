@@ -36,8 +36,6 @@ import org.springframework.ui.format.Printer;
  */
 public class JodaTimeFormattingConfigurer {
 
-	private FormatterRegistry formatterRegistry;
-
 	private String dateStyle;
 
 	private String timeStyle;
@@ -45,15 +43,6 @@ public class JodaTimeFormattingConfigurer {
 	private String dateTimeStyle;
 
 	private boolean useISOFormat;
-
-	/**
-	 * Creates a new JodaTimeFormattingConfigurer that installs into the provided FormatterRegistry.
-	 * Call {@link #registerJodaTimeFormatting()} to install.
-	 * @param formatterRegistry the registry to register Joda Time formatters with
-	 */
-	public JodaTimeFormattingConfigurer(FormatterRegistry formatterRegistry) {
-		this.formatterRegistry = formatterRegistry;
-	}
 
 	/**
 	 * Set the default format style of Joda {@link LocalDate} objects.
@@ -95,25 +84,25 @@ public class JodaTimeFormattingConfigurer {
 	/**
 	 * Install Joda Time formatters given the current configuration of this {@link JodaTimeFormattingConfigurer}.
 	 */
-	public void registerJodaTimeFormatting() {
-		JodaTimeConverters.registerConverters(this.formatterRegistry.getConverterRegistry());
+	public void installJodaTimeFormatting(FormatterRegistry formatterRegistry) {
+		JodaTimeConverters.registerConverters(formatterRegistry.getConverterRegistry());
 
 		DateTimeFormatter jodaDateFormatter = getJodaDateFormatter();
-		this.formatterRegistry.addFormatterForFieldType(LocalDate.class, new ReadablePartialPrinter(jodaDateFormatter), new DateTimeParser(jodaDateFormatter));
+		formatterRegistry.addFormatterForFieldType(LocalDate.class, new ReadablePartialPrinter(jodaDateFormatter), new DateTimeParser(jodaDateFormatter));
 
 		DateTimeFormatter jodaTimeFormatter = getJodaTimeFormatter();
-		this.formatterRegistry.addFormatterForFieldType(LocalTime.class, new ReadablePartialPrinter(jodaTimeFormatter), new DateTimeParser(jodaTimeFormatter));
+		formatterRegistry.addFormatterForFieldType(LocalTime.class, new ReadablePartialPrinter(jodaTimeFormatter), new DateTimeParser(jodaTimeFormatter));
 
 		DateTimeFormatter jodaDateTimeFormatter = getJodaDateTimeFormatter();
 		Parser<DateTime> dateTimeParser = new DateTimeParser(jodaDateTimeFormatter);
-		this.formatterRegistry.addFormatterForFieldType(LocalDateTime.class, new ReadablePartialPrinter(jodaDateTimeFormatter), dateTimeParser);
+		formatterRegistry.addFormatterForFieldType(LocalDateTime.class, new ReadablePartialPrinter(jodaDateTimeFormatter), dateTimeParser);
 
 		Printer<ReadableInstant> readableInstantPrinter = new ReadableInstantPrinter(jodaDateTimeFormatter);
-		this.formatterRegistry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
-		this.formatterRegistry.addFormatterForFieldType(Calendar.class, readableInstantPrinter, dateTimeParser);
-		this.formatterRegistry.addFormatterForFieldType(Date.class, new MillisecondInstantPrinter(jodaDateTimeFormatter), dateTimeParser);
+		formatterRegistry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
+		formatterRegistry.addFormatterForFieldType(Calendar.class, readableInstantPrinter, dateTimeParser);
+		formatterRegistry.addFormatterForFieldType(Date.class, new MillisecondInstantPrinter(jodaDateTimeFormatter), dateTimeParser);
 		
-		this.formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+		formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
 	}
 
 	// internal helpers
