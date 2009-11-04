@@ -23,6 +23,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
 import org.joda.time.format.DateTimeFormatter;
@@ -52,7 +55,7 @@ abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> 
 		DateTimeFormatter formatter = configureDateTimeFormatterFrom(annotation);		
 		if (ReadableInstant.class.isAssignableFrom(propertyType)) {
 			return new ReadableInstantPrinter(formatter);
-		} else if (ReadablePartial.class.equals(propertyType)) {
+		} else if (ReadablePartial.class.isAssignableFrom(propertyType)) {
 			return new ReadablePartialPrinter(formatter);
 		} else if (Calendar.class.isAssignableFrom(propertyType)) {
 			// assumes Calendar->ReadableInstant converter is registered
@@ -78,8 +81,10 @@ abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> 
 	
 	private Set<Class<?>> createFieldTypes() {
 		Set<Class<?>> propertyTypes = new HashSet<Class<?>>(5);
-		propertyTypes.add(ReadableInstant.class);
-		propertyTypes.add(ReadablePartial.class);
+		propertyTypes.add(LocalDate.class);
+		propertyTypes.add(LocalTime.class);
+		propertyTypes.add(LocalDateTime.class);
+		propertyTypes.add(DateTime.class);
 		propertyTypes.add(Date.class);
 		propertyTypes.add(Calendar.class);
 		propertyTypes.add(Long.class);
