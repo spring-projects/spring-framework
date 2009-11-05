@@ -34,6 +34,9 @@ import org.easymock.MockControl;
 import org.easymock.internal.AlwaysMatcher;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
 import org.springframework.util.ErrorHandler;
@@ -87,7 +90,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 	}
 
 	@Test
-	public void testInitDoesNotStartTheConnectionIfAutoStartIsSetToFalse() throws Exception {
+	public void testContextRefreshedEventDoesNotStartTheConnectionIfAutoStartIsSetToFalse() throws Exception {
 		MockControl mockMessageConsumer = MockControl.createControl(MessageConsumer.class);
 		MessageConsumer messageConsumer = (MessageConsumer) mockMessageConsumer.getMock();
 		messageConsumer.setMessageListener(null);
@@ -127,6 +130,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setMessageListener(new TestMessageListener());
 		this.container.setAutoStartup(false);
 		this.container.afterPropertiesSet();
+		this.container.onApplicationEvent(new ContextRefreshedEvent(new StaticApplicationContext()));
 
 		mockMessageConsumer.verify();
 		mockSession.verify();
@@ -135,7 +139,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 	}
 
 	@Test
-	public void testInitStartsTheConnectionByDefault() throws Exception {
+	public void testContextRefreshedEventStartsTheConnectionByDefault() throws Exception {
 		MockControl mockMessageConsumer = MockControl.createControl(MessageConsumer.class);
 		MessageConsumer messageConsumer = (MessageConsumer) mockMessageConsumer.getMock();
 		messageConsumer.setMessageListener(null);
@@ -177,6 +181,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 
 		this.container.setMessageListener(new TestMessageListener());
 		this.container.afterPropertiesSet();
+		this.container.onApplicationEvent(new ContextRefreshedEvent(new StaticApplicationContext()));
 
 		mockMessageConsumer.verify();
 		mockSession.verify();
@@ -238,6 +243,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		});
 
 		this.container.afterPropertiesSet();
+		this.container.start();
 
 		MockControl mockMessage = MockControl.createControl(Message.class);
 		final Message message = (Message) mockMessage.getMock();
@@ -300,6 +306,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 			}
 		});
 		this.container.afterPropertiesSet();
+		this.container.start();
 
 		MockControl mockMessage = MockControl.createControl(Message.class);
 		final Message message = (Message) mockMessage.getMock();
@@ -367,6 +374,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 
 		this.container.setExceptionListener(exceptionListener);
 		this.container.afterPropertiesSet();
+		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
 		MockControl mockMessage = MockControl.createControl(Message.class);
@@ -430,6 +438,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		EasyMock.replay(errorHandler);
 		this.container.setErrorHandler(errorHandler);
 		this.container.afterPropertiesSet();
+		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
 		Message message = EasyMock.createMock(Message.class);
@@ -484,6 +493,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 			}
 		});
 		this.container.afterPropertiesSet();
+		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
 		MockControl mockMessage = MockControl.createControl(Message.class);
@@ -547,6 +557,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 			}
 		});
 		this.container.afterPropertiesSet();
+		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
 		MockControl mockMessage = MockControl.createControl(Message.class);
@@ -614,6 +625,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 
 		this.container.setMessageListener(new TestMessageListener());
 		this.container.afterPropertiesSet();
+		this.container.start();
 		this.container.destroy();
 
 		mockMessageConsumer.verify();

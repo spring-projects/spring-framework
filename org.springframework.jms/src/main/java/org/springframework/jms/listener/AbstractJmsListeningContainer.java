@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@ import javax.jms.JMSException;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
@@ -59,7 +62,7 @@ import org.springframework.util.ClassUtils;
  * @see #doShutdown()
  */
 public abstract class AbstractJmsListeningContainer extends JmsDestinationAccessor
-		implements Lifecycle, BeanNameAware, DisposableBean {
+		implements Lifecycle, ApplicationListener<ApplicationEvent>, BeanNameAware, DisposableBean {
 
 	private String clientId;
 
@@ -134,6 +137,12 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		initialize();
 	}
 
+	public void onApplicationEvent(ApplicationEvent event) {
+		if (event instanceof ContextRefreshedEvent && this.autoStartup) {
+			this.start();
+		}
+	}
+
 	/**
 	 * Validate the configuration of this container.
 	 * <p>The default implementation is empty. To be overridden in subclasses.
@@ -166,9 +175,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			synchronized (this.lifecycleMonitor) {
 				this.active = true;
 				this.lifecycleMonitor.notifyAll();
-			}
-			if (this.autoStartup) {
-				doStart();
 			}
 			doInitialize();
 		}
