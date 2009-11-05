@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.ISODateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.Style;
 import org.springframework.format.datetime.joda.JodaTimeFormattingConfigurer;
 import org.springframework.format.support.FormattingConversionService;
@@ -36,11 +38,15 @@ public class JodaTimeFormattingTests {
 		binder.setConversionService(conversionService);
 
 		LocaleContextHolder.setLocale(Locale.US);
+		JodaTimeContext context = new JodaTimeContext();
+		context.setTimeZone(DateTimeZone.forID("-05:00"));
+		JodaTimeContextHolder.setJodaTimeContext(context);
 	}
 
 	@After
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
+		JodaTimeContextHolder.setJodaTimeContext(null);
 	}
 
 	@Test
@@ -120,7 +126,6 @@ public class JodaTimeFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.addPropertyValue("dateTimeAnnotated", "Oct 31, 2009 12:00 PM");
 		binder.bind(propertyValues);
-		System.out.println(binder.getBindingResult());
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("Oct 31, 2009 12:00 PM", binder.getBindingResult().getFieldValue("dateTimeAnnotated"));
 	}
@@ -179,6 +184,33 @@ public class JodaTimeFormattingTests {
 		assertEquals("10/31/09", binder.getBindingResult().getFieldValue("millisAnnotated"));
 	}
 
+	@Test
+	public void testBindISODate() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.addPropertyValue("isoDate", "2009-10-31");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2009-10-31", binder.getBindingResult().getFieldValue("isoDate"));
+	}
+
+	@Test
+	public void testBindISOTime() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.addPropertyValue("isoTime", "12:00:00.000-05:00");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("12:00:00.000", binder.getBindingResult().getFieldValue("isoTime"));
+	}
+
+	@Test
+	public void testBindISODateTime() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.addPropertyValue("isoDateTime", "2009-10-31T12:00:00.000Z");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("isoDateTime"));
+	}
+
 	public static class JodaTimeBean {
 
 		private LocalDate localDate;
@@ -215,6 +247,15 @@ public class JodaTimeFormattingTests {
 
 		@DateTimeFormat(dateStyle = Style.SHORT)
 		private Long millisAnnotated;
+
+		@ISODateTimeFormat(org.springframework.format.annotation.ISODateTimeFormat.Style.DATE)
+		private LocalDate isoDate;
+
+		@ISODateTimeFormat(org.springframework.format.annotation.ISODateTimeFormat.Style.TIME)
+		private LocalTime isoTime;
+
+		@ISODateTimeFormat(org.springframework.format.annotation.ISODateTimeFormat.Style.DATE_TIME)
+		private DateTime isoDateTime;
 
 		public LocalDate getLocalDate() {
 			return localDate;
@@ -326,6 +367,30 @@ public class JodaTimeFormattingTests {
 
 		public void setMillisAnnotated(Long millisAnnotated) {
 			this.millisAnnotated = millisAnnotated;
+		}
+
+		public LocalDate getIsoDate() {
+			return isoDate;
+		}
+
+		public void setIsoDate(LocalDate isoDate) {
+			this.isoDate = isoDate;
+		}
+
+		public LocalTime getIsoTime() {
+			return isoTime;
+		}
+
+		public void setIsoTime(LocalTime isoTime) {
+			this.isoTime = isoTime;
+		}
+
+		public DateTime getIsoDateTime() {
+			return isoDateTime;
+		}
+
+		public void setIsoDateTime(DateTime isoDateTime) {
+			this.isoDateTime = isoDateTime;
 		}
 
 	}
