@@ -66,6 +66,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -1134,6 +1135,31 @@ public class ServletAnnotationControllerTests {
 		assertEquals("key1=[value1],key2=[value21,value22]", response.getContentAsString());
 	}
 
+	@Test
+	public void requestHeaderMap() throws Exception {
+		initServlet(RequestHeaderMapController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/map");
+		request.addHeader("Content-Type", "text/html");
+		request.addHeader("Custom-Header", new String[]{"value21", "value22"});
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+		assertEquals("Content-Type=text/html,Custom-Header=value21", response.getContentAsString());
+
+		request.setRequestURI("/multiValueMap");
+		response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+		assertEquals("Content-Type=[text/html],Custom-Header=[value21,value22]", response.getContentAsString());
+
+		request.setRequestURI("/httpHeaders");
+		response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+		assertEquals("Content-Type=[text/html],Custom-Header=[value21,value22]", response.getContentAsString());
+	}
+
 
 	/*
 	 * Controllers
@@ -1965,6 +1991,48 @@ public class ServletAnnotationControllerTests {
 			}
 		}
 	}
-	
+
+	@Controller
+	public static class RequestHeaderMapController {
+
+		@RequestMapping("/map")
+		public void map(@RequestHeader Map<String, String> headers, Writer writer) throws IOException {
+			for (Iterator<Map.Entry<String, String>> it = headers.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<String, String> entry = it.next();
+				writer.write(entry.getKey() + "=" + entry.getValue());
+				if (it.hasNext()) {
+					writer.write(',');
+				}
+
+			}
+		}
+
+		@RequestMapping("/multiValueMap")
+		public void multiValueMap(@RequestHeader MultiValueMap<String, String> headers, Writer writer) throws IOException {
+			for (Iterator<Map.Entry<String, List<String>>> it1 = headers.entrySet().iterator(); it1.hasNext();) {
+				Map.Entry<String, List<String>> entry = it1.next();
+				writer.write(entry.getKey() + "=[");
+				for (Iterator<String> it2 = entry.getValue().iterator(); it2.hasNext();) {
+					String value = it2.next();
+					writer.write(value);
+					if (it2.hasNext()) {
+						writer.write(',');
+					}
+				}
+				writer.write(']');
+				if (it1.hasNext()) {
+					writer.write(',');
+				}
+			}
+		}
+
+		@RequestMapping("/httpHeaders")
+		public void httpHeaders(@RequestHeader HttpHeaders headers, Writer writer) throws IOException {
+			assertEquals("Invalid Content-Type", new MediaType("text", "html"), headers.getContentType());
+			multiValueMap(headers, writer);
+		}
+
+	}
+
 
 }

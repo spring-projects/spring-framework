@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.LinkedHashMap;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +42,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -457,11 +459,15 @@ public class HandlerMethodInvoker {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private Object resolveRequestHeader(String headerName, boolean required, String defaultValue,
 			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
 			throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
+		if (Map.class.isAssignableFrom(paramType)) {
+			return resolveRequestHeaderMap((Class<? extends Map>) paramType, webRequest);
+		}
 		if (headerName.length() == 0) {
 			headerName = getRequiredParameterName(methodParam);
 		}
@@ -483,6 +489,34 @@ public class HandlerMethodInvoker {
 		initBinder(handlerForInitBinderCall, headerName, binder, webRequest);
 		return binder.convertIfNecessary(headerValue, paramType, methodParam);
 	}
+
+	private Map resolveRequestHeaderMap(Class<? extends Map> mapType, NativeWebRequest webRequest) {
+		if (MultiValueMap.class.isAssignableFrom(mapType)) {
+			MultiValueMap<String, String> result;
+			if (HttpHeaders.class.isAssignableFrom(mapType)) {
+				result = new HttpHeaders();
+			} else {
+				result = new LinkedMultiValueMap<String, String>();
+			}
+			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
+				String headerName = iterator.next();
+				for (String headerValue : webRequest.getHeaderValues(headerName)) {
+					result.add(headerName, headerValue);
+				}
+			}
+			return result;
+		}
+		else {
+			Map<String, String> result = new LinkedHashMap<String, String>();
+			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
+				String headerName = iterator.next();
+				String headerValue = webRequest.getHeader(headerName);
+				result.put(headerName, headerValue);
+			}
+			return result;
+		}
+	}
+
 
 	/**
 	 * Resolves the given {@link RequestBody @RequestBody} annotation.

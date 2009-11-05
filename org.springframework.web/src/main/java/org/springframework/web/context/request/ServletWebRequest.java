@@ -102,6 +102,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
 	}
 
+	@SuppressWarnings("unchecked")
+	public Iterator<String> getHeaderNames() {
+		return CollectionUtils.toIterator(getRequest().getHeaderNames());
+	}
+
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}

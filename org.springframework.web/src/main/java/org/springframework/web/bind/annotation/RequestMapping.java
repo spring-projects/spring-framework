@@ -77,12 +77,16 @@ import java.lang.annotation.Target;
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
  * specific Servlet/Portlet request parameters. Parameter values will be
  * converted to the declared method argument type. Additionally,
- * {@code RequestParam @RequestParam} can be used on a {@link java.util.Map Map} or
- * {@link org.springframework.util.MultiValueMap MultiValueMap} to gain access
- * to all request parameters. 
+ * {@code @RequestParam} can be used on a {@link java.util.Map Map&lt;String, String&gt;} or
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}
+ * method parameter to gain access to all request parameters.
  * <li>{@link RequestHeader @RequestHeader} annotated parameters for access to
  * specific Servlet/Portlet request HTTP headers. Parameter values will be
- * converted to the declared method argument type.
+ * converted to the declared method argument type. Additionally,
+ * {@code @RequestHeader} can be used on a {@link java.util.Map Map&lt;String, String&gt;},
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}, or
+ * {@link org.springframework.http.HttpHeaders HttpHeaders} method parameter to
+ * gain access to all request headers.
  * <li>{@link RequestBody @RequestBody} annotated parameters for access to
  * the Servlet request HTTP contents. Parameter values will be
  * converted to the declared method argument type using 
