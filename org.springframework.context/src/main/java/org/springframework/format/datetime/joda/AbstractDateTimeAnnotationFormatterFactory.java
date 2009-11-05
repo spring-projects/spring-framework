@@ -38,6 +38,7 @@ import org.springframework.format.Printer;
  * Base class for annotation-based Joda DateTime formatters.
  * Can format any Joda {@link ReadableInstant} or {@link ReadablePartial} property, as well as standard {@link Date}, {@link Calendar}, and Long properties.
  * @author Keith Donald
+ * @since 3.0
  * @param <A> the format annotation parameter type to be declared by subclasses
  */
 abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> implements AnnotationFormatterFactory<A> {

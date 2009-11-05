@@ -20,8 +20,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.Style;
 
 /**
- * Formats properties annotated with the {@link DateTimeFormat} annotation.
- * 
+ * Formats fields annotated with the {@link DateTimeFormat} annotation.
  * @author Keith Donald
  * @since 3.0
  * @see DateTimeFormat

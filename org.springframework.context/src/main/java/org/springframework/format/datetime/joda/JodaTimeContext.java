@@ -23,6 +23,7 @@ import org.joda.time.format.DateTimeFormatter;
  * A context that holds user-specific Joda Time settings such as the user's Chronology (calendar system) and time zone.
  * A <code>null</code> property value indicate the user has not specified a setting.
  * @author Keith Donald
+ * @since 3.0
  * @see JodaTimeContextHolder
  */
 public class JodaTimeContext {

@@ -23,6 +23,7 @@ import org.springframework.format.Printer;
 /**
  * Prints Long instances using a {@link DateTimeFormatter}.
  * @author Keith Donald
+ * @since 3.0
  */
 public final class MillisecondInstantPrinter implements Printer<Long> {
 

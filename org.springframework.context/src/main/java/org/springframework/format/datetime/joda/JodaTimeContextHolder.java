@@ -22,6 +22,7 @@ import org.springframework.core.NamedInheritableThreadLocal;
 
 /**
  * A holder for a thread-local user {@link JodaTimeContext}.
+ * @since 3.0
  * @author Keith Donald
  */
 public final class JodaTimeContextHolder {
