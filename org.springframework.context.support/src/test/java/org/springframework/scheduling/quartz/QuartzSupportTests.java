@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scheduling.quartz;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -29,7 +30,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.junit.Test;
 import org.quartz.CronTrigger;
@@ -51,6 +51,9 @@ import org.quartz.impl.SchedulerRepository;
 import org.quartz.spi.JobFactory;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
@@ -64,6 +67,7 @@ import org.springframework.scheduling.TestMethodInvokingTask;
  * @author Alef Arendsen
  * @author Rob Harrop
  * @author Dave Syer
+ * @author Mark Fisher
  * @since 20.02.2004
  */
 public class QuartzSupportTests {
@@ -164,6 +168,7 @@ public class QuartzSupportTests {
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -257,6 +262,7 @@ public class QuartzSupportTests {
 		}
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -354,6 +360,7 @@ public class QuartzSupportTests {
 		}
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -406,6 +413,7 @@ public class QuartzSupportTests {
 		schedulerFactoryBean.setTriggerListeners(new TriggerListener[] {triggerListener});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -571,6 +579,7 @@ public class QuartzSupportTests {
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -608,6 +617,7 @@ public class QuartzSupportTests {
 		schedulerFactoryBean.setApplicationContextSchedulerContextKey("appCtx");
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 			Scheduler returnedScheduler = (Scheduler) schedulerFactoryBean.getObject();
 			assertEquals(tb, returnedScheduler.getContext().get("testBean"));
 			assertEquals(ac, returnedScheduler.getContext().get("appCtx"));
@@ -703,6 +713,7 @@ public class QuartzSupportTests {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertTrue(DummyJob.count > 0);
@@ -731,6 +742,7 @@ public class QuartzSupportTests {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertTrue(DummyRunnable.count > 0);
@@ -760,6 +772,7 @@ public class QuartzSupportTests {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJobBean.param);
@@ -792,6 +805,7 @@ public class QuartzSupportTests {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJob.param);
@@ -857,6 +871,7 @@ public class QuartzSupportTests {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyRunnable.param);
@@ -888,6 +903,7 @@ public class QuartzSupportTests {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJobBean.param);
@@ -906,6 +922,7 @@ public class QuartzSupportTests {
 		bean.setJobSchedulingDataLocation("org/springframework/scheduling/quartz/job-scheduling-data.xml");
 		bean.setResourceLoader(new FileSystemResourceLoader());
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJob.param);
@@ -969,6 +986,28 @@ public class QuartzSupportTests {
 		finally {
 			ctx.close();
 		}
+	}
+
+	@Test
+	public void testSchedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBeanDefinition("scheduler", new RootBeanDefinition(SchedulerFactoryBean.class));
+		Scheduler bean = context.getBean("scheduler", Scheduler.class);
+		assertFalse(bean.isStarted());
+		context.refresh();
+		assertTrue(bean.isStarted());
+	}
+
+	@Test
+	public void testSchedulerAutoStartupFalse() throws Exception {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(
+				SchedulerFactoryBean.class).addPropertyValue("autoStartup", false).getBeanDefinition();
+		context.registerBeanDefinition("scheduler", beanDefinition);
+		Scheduler bean = context.getBean("scheduler", Scheduler.class);
+		assertFalse(bean.isStarted());
+		context.refresh();
+		assertFalse(bean.isStarted());
 	}
 
 	@Test
