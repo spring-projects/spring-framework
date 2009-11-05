@@ -48,6 +48,7 @@ final class JodaTimeConverters {
 		registry.addConverter(new DateTimeToDateMidnightConverter());
 		registry.addConverter(new DateTimeToDateConverter());
 		registry.addConverter(new DateTimeToCalendarConverter());
+		registry.addConverter(new DateTimeToLongConverter());
 		registry.addConverter(new DateToLongConverter());
 		registry.addConverter(new CalendarToReadableInstantConverter());
 	}
@@ -111,6 +112,16 @@ final class JodaTimeConverters {
 	private static class DateTimeToCalendarConverter implements Converter<DateTime, Calendar> {
 		public Calendar convert(DateTime source) {
 			return source.toGregorianCalendar();
+		}
+	}
+
+	/** 
+	 * Used when binding a parsed DateTime to a java.lang.Long field. 
+	 * @see DateTimeParser 
+	 */
+	private static class DateTimeToLongConverter implements Converter<DateTime, Long> {
+		public Long convert(DateTime source) {
+			return source.getMillis();
 		}
 	}
 

@@ -41,23 +41,23 @@ import org.springframework.ui.format.Printer;
  */
 abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> implements AnnotationFormatterFactory<A> {
 
-	private final Set<Class<?>> propertyTypes;
+	private final Set<Class<?>> fieldTypes;
 	
 	public AbstractDateTimeAnnotationFormatterFactory() {
-		this.propertyTypes = Collections.unmodifiableSet(createFieldTypes());
+		this.fieldTypes = Collections.unmodifiableSet(createFieldTypes());
 	}
 
 	public Set<Class<?>> getFieldTypes() {
-		return propertyTypes;
+		return this.fieldTypes;
 	}
 
-	public Printer<?> getPrinter(A annotation, Class<?> propertyType) {
+	public Printer<?> getPrinter(A annotation, Class<?> fieldType) {
 		DateTimeFormatter formatter = configureDateTimeFormatterFrom(annotation);		
-		if (ReadableInstant.class.isAssignableFrom(propertyType)) {
+		if (ReadableInstant.class.isAssignableFrom(fieldType)) {
 			return new ReadableInstantPrinter(formatter);
-		} else if (ReadablePartial.class.isAssignableFrom(propertyType)) {
+		} else if (ReadablePartial.class.isAssignableFrom(fieldType)) {
 			return new ReadablePartialPrinter(formatter);
-		} else if (Calendar.class.isAssignableFrom(propertyType)) {
+		} else if (Calendar.class.isAssignableFrom(fieldType)) {
 			// assumes Calendar->ReadableInstant converter is registered
 			return new ReadableInstantPrinter(formatter);			
 		} else {
@@ -80,15 +80,15 @@ abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> 
 	// internal helpers
 	
 	private Set<Class<?>> createFieldTypes() {
-		Set<Class<?>> propertyTypes = new HashSet<Class<?>>(5);
-		propertyTypes.add(LocalDate.class);
-		propertyTypes.add(LocalTime.class);
-		propertyTypes.add(LocalDateTime.class);
-		propertyTypes.add(DateTime.class);
-		propertyTypes.add(Date.class);
-		propertyTypes.add(Calendar.class);
-		propertyTypes.add(Long.class);
-		return propertyTypes;
+		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(7);
+		fieldTypes.add(LocalDate.class);
+		fieldTypes.add(LocalTime.class);
+		fieldTypes.add(LocalDateTime.class);
+		fieldTypes.add(DateTime.class);
+		fieldTypes.add(Date.class);
+		fieldTypes.add(Calendar.class);
+		fieldTypes.add(Long.class);
+		return fieldTypes;
 	}
 
 }
