@@ -382,8 +382,11 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 				requestCallback.doWithRequest(request);
 			}
 			response = request.execute();
-			if (getErrorHandler().hasError(response)) {
-				getErrorHandler().handleError(response);
+			if (!getErrorHandler().hasError(response)) {
+				logResponseStatus(method, url, response);
+			}
+			else {
+				handleResponseError(method, url, response);
 			}
 			if (responseExtractor != null) {
 				return responseExtractor.extractData(response);
@@ -417,6 +420,31 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 			}
 		}
 		throw new IllegalArgumentException("Could not resolve HttpMessageConverter for [" + type.getName() + "]");
+	}
+
+	private void logResponseStatus(HttpMethod method, URI url, ClientHttpResponse response) {
+		if (logger.isDebugEnabled()) {
+			try {
+				logger.debug(method.name() + " request for \"" + url + "\" resulted in " + response.getStatusCode() +
+						" (" + response.getStatusText() + ")");
+			}
+			catch (IOException e) {
+				// ignore
+			}
+		}
+	}
+
+	private void handleResponseError(HttpMethod method, URI url, ClientHttpResponse response) throws IOException {
+		if (logger.isWarnEnabled()) {
+			try {
+				logger.warn(method.name() + " request for \"" + url + "\" resulted in " + response.getStatusCode() +
+						" (" + response.getStatusText() + "); invoking error handler");
+			}
+			catch (IOException e) {
+				// ignore
+			}
+		}
+		getErrorHandler().handleError(response);
 	}
 
 	/** Request callback implementation that prepares the request's accept headers. */
