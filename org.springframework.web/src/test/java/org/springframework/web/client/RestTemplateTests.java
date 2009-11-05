@@ -116,6 +116,8 @@ public class RestTemplateTests {
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.GET)).andReturn(request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(true);
+		expect(response.getStatusCode()).andReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+		expect(response.getStatusText()).andReturn("Internal Server Error");
 		errorHandler.handleError(response);
 		expectLastCall().andThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 		response.close();
