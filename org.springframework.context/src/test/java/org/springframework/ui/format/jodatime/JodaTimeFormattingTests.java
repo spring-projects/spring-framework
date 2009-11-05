@@ -109,6 +109,7 @@ public class JodaTimeFormattingTests {
 	public void testBindDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.addPropertyValue("dateTime", "10/31/09 12:00 PM");
+		// this doesn't work because the String->ReadableInstant converter doesn't match due to String->@DateTimeFormat DateTime Matchable taking precedence
 		binder.bind(propertyValues);
 		System.out.println(binder.getBindingResult());
 		assertEquals(0, binder.getBindingResult().getErrorCount());
