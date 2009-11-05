@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -80,11 +81,12 @@ abstract class AbstractDateTimeAnnotationFormatterFactory<A extends Annotation> 
 	// internal helpers
 	
 	private Set<Class<?>> createFieldTypes() {
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(7);
+		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
 		fieldTypes.add(LocalDateTime.class);
 		fieldTypes.add(DateTime.class);
+		fieldTypes.add(DateMidnight.class);
 		fieldTypes.add(Date.class);
 		fieldTypes.add(Calendar.class);
 		fieldTypes.add(Long.class);
