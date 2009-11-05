@@ -42,7 +42,7 @@ public final class JodaTimeContextHolder {
 	 * @param context the current JodaTimeContext, or <code>null</code> to clear
 	 * the thread-bound context
 	 */
-	public static void setLocaleContext(JodaTimeContext context) {
+	public static void setJodaTimeContext(JodaTimeContext context) {
 		jodaTimeContextHolder.set(context);
 	}
 	
