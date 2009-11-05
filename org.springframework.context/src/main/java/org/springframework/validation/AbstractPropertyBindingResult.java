@@ -24,7 +24,7 @@ import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.ui.format.support.FormattingPropertyEditorAdapter;
+import org.springframework.format.support.FormattingPropertyEditorAdapter;
 import org.springframework.util.Assert;
 
 /**
