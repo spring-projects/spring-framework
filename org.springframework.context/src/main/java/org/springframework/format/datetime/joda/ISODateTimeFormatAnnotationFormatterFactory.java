@@ -20,8 +20,7 @@ import org.springframework.format.annotation.ISODateTimeFormat;
 import org.springframework.format.annotation.ISODateTimeFormat.Style;
 
 /**
- * Formats properties annotated with the {@link ISODateTimeFormat} annotation.
- * 
+ * Formats fields annotated with the {@link ISODateTimeFormat} annotation.
  * @author Keith Donald
  * @since 3.0
  * @see ISODateTimeFormat

@@ -21,8 +21,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates a property should be formatted as a ISO date time.
+ * Declares that a field should be formatted as a ISO date time.
  * @author Keith Donald
+ * @since 3.0
  */
 @Target( { ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)

@@ -54,7 +54,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 
 	/**
 	 * Creates a new FormattingConversionService, initially with no Formatters registered.
-	 * The conversion logic contained in the parent is merged with this service.
+	 * The conversion logic contained in the specified parent is merged with this service.
 	 */
 	public FormattingConversionService(ConversionService parent) {
 		this.conversionService.setParent(parent);

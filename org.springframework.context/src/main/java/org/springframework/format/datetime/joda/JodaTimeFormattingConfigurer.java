@@ -33,6 +33,12 @@ import org.springframework.format.Printer;
 /**
  * Configures Joda Time's Formatting system for use with Spring.
  * @author Keith Donald
+ * @since 3.0
+ * @see #setDateStyle(String)
+ * @see #setTimeStyle(String)
+ * @see #setTimeStyle(String)
+ * @see #setUseISOFormat(boolean)
+ * @see #installJodaTimeFormatting(FormatterRegistry)
  */
 public class JodaTimeFormattingConfigurer {
 

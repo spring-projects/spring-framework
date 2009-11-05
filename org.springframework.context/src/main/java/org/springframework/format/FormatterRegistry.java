@@ -29,7 +29,7 @@ public interface FormatterRegistry {
 
 	/**
 	 * Adds a Formatter to format fields of a specific type.
-	 * The Formatter will delegate to the specified <code>printer</code> for printing and <code>parser</code> for parsing.
+	 * The Formatter will delegate to the specified <code>printer</code> for printing and the specified <code>parser</code> for parsing.
 	 * <p>
 	 * On print, if the Printer's type T is declared and <code>fieldType</code> is not assignable to T,
 	 * a coersion to T will be attempted before delegating to <code>printer</code> to print a field value.

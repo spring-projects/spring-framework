@@ -24,6 +24,7 @@ import org.springframework.format.Printer;
 /**
  * Prints Joda Time {@link ReadableInstant} instances using a {@link DateTimeFormatter}.
  * @author Keith Donald
+ * @since 3.0
  */
 public final class ReadableInstantPrinter implements Printer<ReadableInstant> {
 

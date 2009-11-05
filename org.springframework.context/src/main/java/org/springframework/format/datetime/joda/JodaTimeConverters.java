@@ -28,8 +28,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
- * Installs lower-level type converters required to integrate Joda Time support into Spring's formatting and field binding systems.
- * @author Keith Donald 
+ * Installs lower-level type converters required to integrate Joda Time support into Spring's field formatting system.
+ * @author Keith Donald
+ * @since 3.0
  */
 final class JodaTimeConverters {
 
