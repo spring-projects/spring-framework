@@ -32,13 +32,17 @@ import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.JobFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -87,7 +91,8 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class SchedulerFactoryBean extends SchedulerAccessor
-		implements FactoryBean<Scheduler>, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
+		implements FactoryBean<Scheduler>, BeanNameAware, ApplicationContextAware,
+		ApplicationListener<ApplicationEvent>, InitializingBean, DisposableBean, Lifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
@@ -481,11 +486,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 
 		registerListeners();
 		registerJobsAndTriggers();
-
-		// Start Scheduler immediately, if demanded.
-		if (this.autoStartup) {
-			startScheduler(this.scheduler, this.startupDelay);
-		}
 	}
 
 
@@ -675,6 +675,23 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of ApplicationListener interface
+	//---------------------------------------------------------------------
+
+	public void onApplicationEvent(ApplicationEvent event) {
+		// auto-start Scheduler if demanded
+		if (event instanceof ContextRefreshedEvent && this.autoStartup) {
+			try {
+				startScheduler(this.scheduler, this.startupDelay);
+			}
+			catch (SchedulerException e) {
+				throw new BeanInitializationException("failed to auto-start scheduler", e);
+			}
+		}
 	}
 
 
