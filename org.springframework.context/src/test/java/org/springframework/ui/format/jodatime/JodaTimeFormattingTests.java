@@ -12,11 +12,11 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.ui.format.jodatime.DateTimeFormat.Style;
+import org.springframework.ui.format.annotation.DateTimeFormat;
+import org.springframework.ui.format.annotation.DateTimeFormat.Style;
 import org.springframework.ui.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
@@ -30,7 +30,7 @@ public class JodaTimeFormattingTests {
 	public void setUp() {
 		JodaTimeFormattingConfigurer configurer = new JodaTimeFormattingConfigurer();
 		configurer.installJodaTimeFormatting(conversionService);
-		
+
 		binder = new DataBinder(new JodaTimeBean());
 		binder.setConversionService(conversionService);
 
@@ -67,7 +67,7 @@ public class JodaTimeFormattingTests {
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("Oct 31, 2009", binder.getBindingResult().getFieldValue("localDateAnnotated"));
 	}
-	
+
 	@Test
 	public void testBindLocalTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -101,17 +101,15 @@ public class JodaTimeFormattingTests {
 		propertyValues.addPropertyValue("localDateTimeAnnotated", "Saturday, October 31, 2009 12:00:00 PM ");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("Saturday, October 31, 2009 12:00:00 PM ", binder.getBindingResult().getFieldValue("localDateTimeAnnotated"));
+		assertEquals("Saturday, October 31, 2009 12:00:00 PM ", binder.getBindingResult().getFieldValue(
+				"localDateTimeAnnotated"));
 	}
 
 	@Test
-	@Ignore
 	public void testBindDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.addPropertyValue("dateTime", "10/31/09 12:00 PM");
-		// this doesn't work because the String->ReadableInstant converter doesn't match due to String->@DateTimeFormat DateTime Matchable taking precedence
 		binder.bind(propertyValues);
-		System.out.println(binder.getBindingResult());
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("dateTime"));
 	}
@@ -125,7 +123,7 @@ public class JodaTimeFormattingTests {
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("Oct 31, 2009 12:00 PM", binder.getBindingResult().getFieldValue("dateTimeAnnotated"));
 	}
-	
+
 	@Test
 	public void testBindDate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();

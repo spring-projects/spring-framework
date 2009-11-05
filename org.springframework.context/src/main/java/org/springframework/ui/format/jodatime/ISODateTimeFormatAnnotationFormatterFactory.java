@@ -16,7 +16,8 @@
 package org.springframework.ui.format.jodatime;
 
 import org.joda.time.format.DateTimeFormatter;
-import org.springframework.ui.format.jodatime.ISODateTimeFormat.Style;
+import org.springframework.ui.format.annotation.ISODateTimeFormat;
+import org.springframework.ui.format.annotation.ISODateTimeFormat.Style;
 
 /**
  * Formats properties annotated with the {@link ISODateTimeFormat} annotation.
