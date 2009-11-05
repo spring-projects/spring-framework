@@ -48,6 +48,13 @@ public interface WebRequest extends RequestAttributes {
 	String[] getHeaderValues(String headerName);
 
 	/**
+	 * Return a Iterator over request header names.
+	 * @see javax.servlet.http.HttpServletRequest#getHeaderNames()
+	 * @since 3.0
+	 */
+	Iterator<String> getHeaderNames();
+
+	/**
 	 * Return the request parameter of the given name, or <code>null</code> if none.
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
 	 * @see javax.servlet.http.HttpServletRequest#getParameter(String)

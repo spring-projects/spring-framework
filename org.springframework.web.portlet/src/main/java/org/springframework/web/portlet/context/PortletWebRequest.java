@@ -96,6 +96,10 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
 	}
 
+	public Iterator<String> getHeaderNames() {
+		return CollectionUtils.toIterator(getRequest().getPropertyNames());
+	}
+
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}
