@@ -16,9 +16,15 @@
 
 package org.springframework.web.servlet.config;
 
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 import org.w3c.dom.Element;
 
 /**
@@ -27,11 +33,38 @@ import org.w3c.dom.Element;
  * 
  * @author Keith Donald
  */
-public class AnnotatedControllersBeanDefinitionParser extends AbstractBeanDefinitionParser {
+public class AnnotatedControllersBeanDefinitionParser implements BeanDefinitionParser {
 
-	@Override
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext context) {
-		throw new UnsupportedOperationException("Not yet implemented");
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		Object source = parserContext.extractSource(element);
+		BeanDefinitionHolder handlerMappingHolder = registerDefaultAnnotationHandlerMapping(element, source, parserContext);
+		BeanDefinitionHolder handlerAdapterHolder = registerAnnotationMethodHandlerAdapter(element, source, parserContext);
+
+		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
+		parserContext.pushContainingComponent(compDefinition);
+		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingHolder));
+		parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterHolder));
+		parserContext.popAndRegisterContainingComponent();
+		
+		return null;
+	}
+	
+	private BeanDefinitionHolder registerDefaultAnnotationHandlerMapping(Element element, Object source, ParserContext context) {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+		builder.addPropertyValue("order", 0);
+		builder.getRawBeanDefinition().setSource(source);
+		return registerBeanDefinition(new BeanDefinitionHolder(builder.getBeanDefinition(), "defaultAnnotationHandlerMapping"), context);
+	}
+
+	private BeanDefinitionHolder registerAnnotationMethodHandlerAdapter(Element element, Object source, ParserContext context) {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+		builder.getRawBeanDefinition().setSource(source);
+		return registerBeanDefinition(new BeanDefinitionHolder(builder.getBeanDefinition(), "annotationMethodHandlerAdapter"), context);	
+	}
+
+	private BeanDefinitionHolder registerBeanDefinition(BeanDefinitionHolder holder, ParserContext context) {
+		context.getRegistry().registerBeanDefinition(holder.getBeanName(), holder.getBeanDefinition());
+		return holder;
 	}
 
 }
