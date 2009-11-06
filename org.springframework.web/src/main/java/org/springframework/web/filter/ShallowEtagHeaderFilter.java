@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.Md5HashUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -83,11 +83,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 *
 	 * @param bytes the response bdoy as byte array
 	 * @return the ETag header value
-	 * @see Md5HashUtils
+	 * @see org.springframework.util.DigestUtils
 	 */
 	protected String generateETagHeaderValue(byte[] bytes) {
 		StringBuilder builder = new StringBuilder("\"0");
-		Md5HashUtils.appendHashString(bytes, builder);
+		DigestUtils.appendMd5DigestAsHex(bytes, builder);
 		builder.append('"');
 		return builder.toString();
 	}
