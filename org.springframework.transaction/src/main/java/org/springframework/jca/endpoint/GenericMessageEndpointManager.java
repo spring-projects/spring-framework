@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,10 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 /**
  * Generic bean that manages JCA 1.5 message endpoints within a Spring
@@ -144,7 +147,8 @@ import org.springframework.context.Lifecycle;
  * @see javax.resource.spi.endpoint.MessageEndpointFactory
  * @see javax.resource.spi.ActivationSpec
  */
-public class GenericMessageEndpointManager implements InitializingBean, Lifecycle, DisposableBean {
+public class GenericMessageEndpointManager
+		implements ApplicationListener<ApplicationEvent>, Lifecycle, InitializingBean, DisposableBean {
 
 	private ResourceAdapter resourceAdapter;
 
@@ -209,8 +213,8 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 	}
 
 	/**
-	 * Set whether to auto-start the endpoint activation along with
-	 * this endpoint manager's initialization.
+	 * Set whether to auto-start the endpoint activation after this endpoint
+	 * manager has been initialized and the context has been refreshed.
 	 * <p>Default is "true". Turn this flag off to defer the endpoint
 	 * activation until an explicit {#start()} call.
 	 */
@@ -242,8 +246,13 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 			throw new IllegalArgumentException("ActivationSpec [" + activationSpec +
 					"] is associated with a different ResourceAdapter: " + activationSpec.getResourceAdapter());
 		}
+	}
 
-		if (this.autoStartup) {
+	/**
+	 * Start upon a ContextRefreshedEvent if the 'autoStartup' property value is "true".
+	 */
+	public void onApplicationEvent(ApplicationEvent event) {
+		if (event instanceof ContextRefreshedEvent && this.autoStartup) {
 			start();
 		}
 	}
