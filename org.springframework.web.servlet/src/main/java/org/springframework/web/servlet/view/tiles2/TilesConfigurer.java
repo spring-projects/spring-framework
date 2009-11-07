@@ -28,6 +28,7 @@ import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
 import org.apache.tiles.definition.DefinitionsFactory;
 import org.apache.tiles.definition.digester.DigesterDefinitionsReader;
 import org.apache.tiles.evaluator.el.ELAttributeEvaluator;
+import org.apache.tiles.evaluator.impl.DirectAttributeEvaluator;
 import org.apache.tiles.factory.TilesContainerFactory;
 import org.apache.tiles.preparer.BasicPreparerFactory;
 import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
@@ -39,6 +40,7 @@ import org.apache.tiles.web.util.ServletContextAdapter;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
@@ -48,7 +50,9 @@ import org.springframework.web.context.ServletContextAware;
  * <a href="http://tiles.apache.org">http://tiles.apache.org</a>
  * for more information about Tiles, which basically is a templating
  * mechanism for JSP-based web applications.
+ *
  * <b>Note: Spring 3.0 requires Tiles 2.1.2 or above.</b>
+ * Tiles EL support will be activated by default when running on JSP 2.1 or above.
  *
  * <p>The TilesConfigurer simply configures a TilesContainer using a set of files
  * containing definitions, to be accessed by {@link TilesView} instances. This is a
@@ -82,6 +86,9 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
 
+	private static final boolean jsp21Present = ClassUtils.isPresent(
+			"javax.servlet.jsp.JspApplicationContext", TilesConfigurer.class.getClassLoader());
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Properties tilesPropertyMap = new Properties();
@@ -94,12 +101,12 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				WildcardServletTilesApplicationContextFactory.class.getName());
 		this.tilesPropertyMap.put(TilesContainerFactory.PREPARER_FACTORY_INIT_PARAM,
 				BasicPreparerFactory.class.getName());
+		this.tilesPropertyMap.put(TilesContainerFactory.CONTAINER_FACTORY_MUTABLE_INIT_PARAM,
+				Boolean.toString(false));
 		this.tilesPropertyMap.put(DefinitionsFactory.LOCALE_RESOLVER_IMPL_PROPERTY,
 				SpringLocaleResolver.class.getName());
 		this.tilesPropertyMap.put(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM,
-				ELAttributeEvaluator.class.getName());
-		this.tilesPropertyMap.put(TilesContainerFactory.CONTAINER_FACTORY_MUTABLE_INIT_PARAM,
-				Boolean.toString(false));
+				jsp21Present ? ELAttributeEvaluator.class.getName() : DirectAttributeEvaluator.class.getName());
 	}
 
 
