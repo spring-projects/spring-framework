@@ -22,6 +22,7 @@ import javax.validation.metadata.BeanDescriptor;
 
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
 /**
@@ -68,10 +69,14 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 	public void validate(Object target, Errors errors) {
 		Set<ConstraintViolation<Object>> result = this.targetValidator.validate(target);
 		for (ConstraintViolation<Object> violation : result) {
-			errors.rejectValue(violation.getPropertyPath().toString(),
-					violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
-					violation.getConstraintDescriptor().getAttributes().values().toArray(),
-					violation.getMessage());
+			String field = violation.getPropertyPath().toString();
+			FieldError fieldError = errors.getFieldError(field);
+			if (fieldError == null || !fieldError.isBindingFailure()) {
+				errors.rejectValue(field,
+						violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
+						violation.getConstraintDescriptor().getAttributes().values().toArray(),
+						violation.getMessage());
+			}
 		}
 	}
 
