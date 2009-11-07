@@ -18,13 +18,16 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -468,10 +471,30 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Register default environment beans.
 		if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
-			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, System.getProperties());
+			Properties systemProperties;
+			try {
+				systemProperties = System.getProperties();
+			}
+			catch (AccessControlException ex) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Not allowed to obtain system properties: " + ex.getMessage());
+				}
+				systemProperties = new Properties();
+			}
+			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, systemProperties);
 		}
 		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
-			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, System.getenv());
+			Map<String,String> systemEnvironment;
+			try {
+				systemEnvironment = System.getenv();
+			}
+			catch (AccessControlException ex) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Not allowed to obtain system environment: " + ex.getMessage());
+				}
+				systemEnvironment = Collections.emptyMap();
+			}
+			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, systemEnvironment);
 		}
 	}
 
