@@ -23,6 +23,8 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 import org.w3c.dom.Element;
@@ -39,7 +41,7 @@ public class AnnotatedControllersBeanDefinitionParser implements BeanDefinitionP
 		Object source = parserContext.extractSource(element);
 		BeanDefinitionHolder handlerMappingHolder = registerDefaultAnnotationHandlerMapping(element, source, parserContext);
 		BeanDefinitionHolder handlerAdapterHolder = registerAnnotationMethodHandlerAdapter(element, source, parserContext);
-
+		
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		parserContext.pushContainingComponent(compDefinition);
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingHolder));
@@ -50,21 +52,41 @@ public class AnnotatedControllersBeanDefinitionParser implements BeanDefinitionP
 	}
 	
 	private BeanDefinitionHolder registerDefaultAnnotationHandlerMapping(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+		BeanDefinitionBuilder builder = createBeanBuilder(DefaultAnnotationHandlerMapping.class, source);
 		builder.addPropertyValue("order", 0);
-		builder.getRawBeanDefinition().setSource(source);
 		return registerBeanDefinition(new BeanDefinitionHolder(builder.getBeanDefinition(), "defaultAnnotationHandlerMapping"), context);
 	}
 
 	private BeanDefinitionHolder registerAnnotationMethodHandlerAdapter(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-		builder.getRawBeanDefinition().setSource(source);
+		BeanDefinitionBuilder builder = createBeanBuilder(AnnotationMethodHandlerAdapter.class, source);
+		builder.addPropertyValue("webBindingInitializer", createWebBindingInitializer(element, source, context));
 		return registerBeanDefinition(new BeanDefinitionHolder(builder.getBeanDefinition(), "annotationMethodHandlerAdapter"), context);	
+	}
+
+	private BeanDefinition createWebBindingInitializer(Element element, Object source, ParserContext context) {
+		BeanDefinitionBuilder builder = createBeanBuilder(ConfigurableWebBindingInitializer.class, source);
+		if (context.getRegistry().containsBeanDefinition("conversionService")) {
+			builder.addPropertyReference("conversionService", "conversionService");
+		} else {
+			builder.addPropertyValue("conversionService", createFormattingConversionService(element, source, context));
+		}
+		return builder.getBeanDefinition();
+	}
+	
+	private BeanDefinition createFormattingConversionService(Element element, Object source, ParserContext context) {
+		BeanDefinitionBuilder builder = createBeanBuilder(FormattingConversionServiceFactoryBean.class, source);
+		return builder.getBeanDefinition();
 	}
 
 	private BeanDefinitionHolder registerBeanDefinition(BeanDefinitionHolder holder, ParserContext context) {
 		context.getRegistry().registerBeanDefinition(holder.getBeanName(), holder.getBeanDefinition());
 		return holder;
+	}
+	
+	private BeanDefinitionBuilder createBeanBuilder(Class<?> clazz, Object source) {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
+		builder.getRawBeanDefinition().setSource(source);
+		return builder;
 	}
 
 }

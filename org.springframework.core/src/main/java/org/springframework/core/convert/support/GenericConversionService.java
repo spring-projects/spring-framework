@@ -26,6 +26,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -45,6 +47,8 @@ import org.springframework.util.ClassUtils;
  */
 public class GenericConversionService implements ConversionService, ConverterRegistry {
 
+	private static final Log logger = LogFactory.getLog(GenericConversionService.class);
+	
 	private static final GenericConverter NO_OP_CONVERTER = new GenericConverter() {
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return source;
@@ -326,6 +330,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	private GenericConverter findConverterForClassPair(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for Converter to convert from " + sourceType + " to " + targetType);
+		}
 		Class<?> sourceObjectType = sourceType.getObjectType();
 		if (sourceObjectType.isInterface()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
@@ -507,7 +514,14 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		public GenericConverter matchConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			for (MatchableConverter matchable : this.matchableConverters) {
 				if (matchable.matches(sourceType, targetType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Converter Lookup [MATCHED] " + matchable);
+					}
 					return matchable.getConverter();
+				} else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Converter Lookup [DID NOT MATCH] " + matchable);
+					}					
 				}
 			}
 			return null;

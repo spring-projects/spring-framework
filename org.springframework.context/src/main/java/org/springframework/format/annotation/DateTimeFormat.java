@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  * @author Keith Donald
  * @since 3.0
  */
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DateTimeFormat {
 
