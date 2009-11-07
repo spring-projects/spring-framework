@@ -41,7 +41,7 @@ public class AddVisitForm {
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
-		dataBinder.setDisallowedFields("id");
+		dataBinder.setDisallowedFields(new String[] {"id"});
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
