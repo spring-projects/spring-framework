@@ -24,8 +24,11 @@ import java.util.Map;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import com.sun.xml.internal.rngom.ast.builder.Annotations;
 
 /**
  * Context about a type to convert to.
@@ -277,7 +280,7 @@ public class TypeDescriptor {
 			}
 			return this.cachedFieldAnnotations;
 		} else if (this.methodParameter != null) {
-			return this.methodParameter.getMethod().getAnnotations();
+			return this.methodParameter.getParameterAnnotations();
 		} else {
 			return new Annotation[0];
 		}
@@ -411,7 +414,15 @@ public class TypeDescriptor {
 		if (this == TypeDescriptor.NULL) {
 			return "[TypeDescriptor.NULL]";
 		} else {
-			return "[TypeDescriptor type=" + getType().getName() + "]";
+			StringBuilder builder = new StringBuilder();
+			builder.append("[TypeDescriptor ");
+			Annotation[] anns = getAnnotations();
+			for (Annotation ann : anns) {
+				builder.append("@" + ann.annotationType().getName()).append(' ');
+			}
+			builder.append(getType().getName());
+			builder.append("]");
+			return builder.toString();
 		}
 	}
 	

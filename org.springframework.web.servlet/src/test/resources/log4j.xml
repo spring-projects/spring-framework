@@ -15,7 +15,7 @@
 		<level value="warn" />
 	</logger>
 
-	<logger name="org.springframework.binding">
+	<logger name="org.springframework.core.convert">
 		<level value="debug" />
 	</logger>
 
