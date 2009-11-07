@@ -50,6 +50,8 @@ final class ConfigurationClass {
 
 	private String beanName;
 
+	private final Set<String> xmlFilesToImport = new LinkedHashSet<String>();
+
 	private final Set<ConfigurationClassMethod> methods = new LinkedHashSet<ConfigurationClassMethod>();
 
 	private final Map<String, Integer> overloadedMethodMap = new LinkedHashMap<String, Integer>();
@@ -61,7 +63,7 @@ final class ConfigurationClass {
 		this.beanName = beanName;
 	}
 
-	public ConfigurationClass(Class clazz, String beanName) {
+	public ConfigurationClass(Class<?> clazz, String beanName) {
 		this.metadata = new StandardAnnotationMetadata(clazz);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.beanName = beanName;
@@ -100,10 +102,19 @@ final class ConfigurationClass {
 		}
 		return this;
 	}
-
-	public Set<ConfigurationClassMethod> getConfigurationMethods() {
+	
+	public Set<ConfigurationClassMethod> getMethods() {
 		return this.methods;
 	}
+	
+	public void addXmlImport(String xmlImport) {
+		this.xmlFilesToImport.add(xmlImport);
+	}
+
+	public Set<String> getXmlImports() {
+		return this.xmlFilesToImport;
+	}
+
 
 	public void validate(ProblemReporter problemReporter) {
 		// No overloading of factory methods allowed

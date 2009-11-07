@@ -36,13 +36,17 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 /**
- * Parses a {@link Configuration} class definition, populating a configuration model.
- * This ASM-based implementation avoids reflection and eager class loading in order to
- * interoperate effectively with lazy class loading in a Spring ApplicationContext.
- *
+ * Parses a {@link Configuration} class definition, populating a model (collection) of
+ * {@link ConfigurationClass} objects (parsing a single Configuration class may result in
+ * any number of ConfigurationClass objects because one Configuration class may import
+ * another using the {@link Import} annotation).
+ * 
  * <p>This class helps separate the concern of parsing the structure of a Configuration
  * class from the concern of registering {@link BeanDefinition} objects based on the
  * content of that model.
+ *
+ * <p>This ASM-based implementation avoids reflection and eager class loading in order to
+ * interoperate effectively with lazy class loading in a Spring ApplicationContext.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -55,19 +59,19 @@ class ConfigurationClassParser {
 
 	private final ProblemReporter problemReporter;
 
-	private final Set<ConfigurationClass> model;
-
 	private final Stack<ConfigurationClass> importStack = new ImportStack();
+	
+	private final Set<ConfigurationClass> configurationClasses =
+		new LinkedHashSet<ConfigurationClass>();
 
 
 	/**
 	 * Create a new {@link ConfigurationClassParser} instance that will be used
-	 * to populate a configuration model.
+	 * to populate the set of configuration classes.
 	 */
 	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory, ProblemReporter problemReporter) {
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
-		this.model = new LinkedHashSet<ConfigurationClass>();
 	}
 
 
@@ -84,11 +88,11 @@ class ConfigurationClassParser {
 
 	/**
 	 * Parse the specified {@link Configuration @Configuration} class.
-	 * @param clazz the Clazz to parse
+	 * @param clazz the Class to parse
 	 * @param beanName may be null, but if populated represents the bean id
 	 * (assumes that this configuration class was configured via XML)
 	 */
-	public void parse(Class clazz, String beanName) throws IOException {
+	public void parse(Class<?> clazz, String beanName) throws IOException {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName));
 	}
 
@@ -100,7 +104,7 @@ class ConfigurationClassParser {
 			String superClassName = metadata.getSuperClassName();
 			if (superClassName != null && !Object.class.getName().equals(superClassName)) {
 				if (metadata instanceof StandardAnnotationMetadata) {
-					Class clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
+					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
 					metadata = new StandardAnnotationMetadata(clazz.getSuperclass());
 				}
 				else {
@@ -112,17 +116,22 @@ class ConfigurationClassParser {
 				metadata = null;
 			}
 		}
-		if (this.model.contains(configClass) && configClass.getBeanName() != null) {
+		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
 			// Explicit bean definition found, probably replacing an import.
 			// Let's remove the old one and go with the new one.
-			this.model.remove(configClass);
+			this.configurationClasses.remove(configClass);
 		}
-		this.model.add(configClass);
+		this.configurationClasses.add(configClass);
 	}
 
 	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
 		if (metadata.isAnnotated(Import.class.getName())) {
 			processImport(configClass, (String[]) metadata.getAnnotationAttributes(Import.class.getName()).get("value"));
+		}
+		if (metadata.isAnnotated(ImportXml.class.getName())) {
+			for (String xmlImport : (String[]) metadata.getAnnotationAttributes(ImportXml.class.getName()).get("value")) {
+				configClass.addXmlImport(xmlImport);
+			}
 		}
 		Set<MethodMetadata> methods = metadata.getAnnotatedMethods(Bean.class.getName());
 		for (MethodMetadata methodMetadata : methods) {
@@ -130,7 +139,7 @@ class ConfigurationClassParser {
 		}
 	}
 
-	public void processImport(ConfigurationClass configClass, String[] classesToImport) throws IOException {
+	private void processImport(ConfigurationClass configClass, String[] classesToImport) throws IOException {
 		if (this.importStack.contains(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack, configClass.getMetadata()));
 		}
@@ -156,17 +165,17 @@ class ConfigurationClassParser {
 	}
 
 	/**
-	 * Recurse through the model validating each {@link ConfigurationClass}.
+	 * Validate each {@link ConfigurationClass} object.
 	 * @see ConfigurationClass#validate
 	 */
 	public void validate() {
-		for (ConfigurationClass configClass : this.model) {
+		for (ConfigurationClass configClass : this.configurationClasses) {
 			configClass.validate(this.problemReporter);
 		}
 	}
 
-	public Set<ConfigurationClass> getModel() {
-		return this.model;
+	public Set<ConfigurationClass> getConfigurationClasses() {
+		return this.configurationClasses;
 	}
 
 

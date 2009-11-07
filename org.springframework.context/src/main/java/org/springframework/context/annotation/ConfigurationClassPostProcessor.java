@@ -184,7 +184,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		parser.validate();
 
 		// Read the model and create bean definitions based on its content
-		new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor).loadBeanDefinitions(parser.getModel());
+		new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor).loadBeanDefinitions(parser.getConfigurationClasses());
 	}
 
 	/**
