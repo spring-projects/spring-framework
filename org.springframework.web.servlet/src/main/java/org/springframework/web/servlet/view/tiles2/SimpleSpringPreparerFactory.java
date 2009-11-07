@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {
 				preparer = this.sharedPreparers.get(name);
 				if (preparer == null) {
 					try {
-						Class beanClass = context.getClassLoader().loadClass(name);
+						Class<?> beanClass = context.getClassLoader().loadClass(name);
 						if (!ViewPreparer.class.isAssignableFrom(beanClass)) {
 							throw new PreparerException(
 									"Invalid preparer class [" + name + "]: does not implement ViewPreparer interface");
