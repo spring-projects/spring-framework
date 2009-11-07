@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -36,6 +35,7 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Convenient superclass for Excel document views.
+ * Compatible with Apache POI 3.0 as well as 3.5, as of Spring 3.0.
  *
  * <p>Properties:
  * <ul>
@@ -217,7 +217,7 @@ public abstract class AbstractExcelView extends AbstractView {
 	 */
 	protected void setText(HSSFCell cell, String text) {
 		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
-		cell.setCellValue(new HSSFRichTextString(text));
+		cell.setCellValue(text);
 	}
 
 }
