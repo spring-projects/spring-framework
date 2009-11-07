@@ -39,7 +39,11 @@ import org.springframework.orm.jpa.JpaDialect;
  * EclipseLink is effectively the next generation of the TopLink product.
  * Thanks to Mike Keith for the original EclipseLink support prototype!
  *
+ * <p>NOTE: No need to filter out classes from the JPA providers package for
+ * EclipseLink (see SPR-6040) 
+ *
  * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @since 2.5.2
  * @see org.eclipse.persistence.jpa.PersistenceProvider
  * @see org.eclipse.persistence.jpa.JpaEntityManager
@@ -53,11 +57,6 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
-	}
-
-	@Override
-	public String getPersistenceProviderRootPackage() {
-		return "org.eclipse.persistence";
 	}
 
 	@Override
