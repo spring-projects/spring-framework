@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
@@ -39,7 +38,6 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
@@ -92,6 +90,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		doLoadBeanDefinitionForConfigurationClass(configClass);
+		
 		for (ConfigurationClassMethod method : configClass.getMethods()) {
 			loadBeanDefinitionsForModelMethod(method);
 		}
@@ -215,9 +214,10 @@ class ConfigurationClassBeanDefinitionReader {
 	
 	private void loadBeanDefinitionsFromXml(Set<String> xmlImports) {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.registry);
+		// TODO SPR-6310: qualify relatively pathed locations as done in AbstractContextLoader.modifyLocations
 		reader.loadBeanDefinitions(xmlImports.toArray(new String[]{}));
 	}
-
+	
 	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
 	 * created from a configuration class as opposed to any other configuration source.
