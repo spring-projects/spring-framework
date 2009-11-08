@@ -20,11 +20,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Miscellaneous method for calculating digests.
-
+ * Miscellaneous methods for calculating digests.
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://jakarta.apache.org/commons/codec/">Jakarta's Commons Codec</a>
- * for a more comprehensive suite of Digest utilities.
+ * <a href="http://commons.apache.org/codec/">Apache Commons Codec</a> for a
+ * more comprehensive suite of digest utilities.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -47,7 +46,8 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Return a hexadecimal string representation of the MD5 digest of the given bytes.
+	 * Return a hexadecimal string representation of the MD5 digest of the given
+	 * bytes.
 	 * @param bytes the bytes to calculate the digest over
 	 * @return a hexadecimal digest string
 	 */
@@ -56,7 +56,8 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Append a hexadecima string representation of the MD5 digest of the given bytes to the given {@link StringBuilder}.
+	 * Append a hexadecimal string representation of the MD5 digest of the given
+	 * bytes to the given {@link StringBuilder}.
 	 * @param bytes the bytes to calculate the digest over
 	 * @param builder the string builder to append the digest to
 	 * @return the given string builder
@@ -66,8 +67,8 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Creates a new {@link MessageDigest} with the given algorithm. Necessary because {@code MessageDigest} is not
-	 * thread-safe.
+	 * Creates a new {@link MessageDigest} with the given algorithm. Necessary 
+	 * because {@code MessageDigest} is not thread-safe.
 	 */
 	private static MessageDigest getDigest(String algorithm) {
 		try {
@@ -106,6 +107,5 @@ public abstract class DigestUtils {
 		}
 		return chars;
 	}
-
 
 }
