@@ -30,7 +30,8 @@ import org.junit.Test;
  */
 public class MockServletContextTests {
 
-	@Ignore // fails to work under ant after move from .testsuite -> .test
+	@Ignore
+	// fails to work under ant after move from .testsuite -> .test
 	@Test
 	public void testListFiles() {
 		MockServletContext sc = new MockServletContext("org/springframework/mock");
@@ -39,7 +40,8 @@ public class MockServletContextTests {
 		assertTrue(paths.contains("/web/MockServletContextTests.class"));
 	}
 
-	@Ignore // fails to work under ant after move from .testsuite -> .test
+	@Ignore
+	// fails to work under ant after move from .testsuite -> .test
 	@Test
 	public void testListSubdirectories() {
 		MockServletContext sc = new MockServletContext("org/springframework/mock");
@@ -79,4 +81,24 @@ public class MockServletContextTests {
 		assertEquals("image/gif", sc.getMimeType("test.gif"));
 	}
 
+	@Test
+	public void testMinorVersion() {
+		MockServletContext sc = new MockServletContext();
+		assertEquals(5, sc.getMinorVersion());
+		sc.setMinorVersion(4);
+		assertEquals(4, sc.getMinorVersion());
+	}
+
+	@Test
+	public void testIllegalMinorVersion() {
+		MockServletContext sc = new MockServletContext();
+		assertEquals(5, sc.getMinorVersion());
+		try {
+			sc.setMinorVersion(2);
+			fail("expected expection for illegal argument");
+		}
+		catch (IllegalArgumentException iae) {
+			// expected
+		}
+	}
 }
