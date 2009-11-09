@@ -19,7 +19,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.ISODateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.Style;
-import org.springframework.format.datetime.joda.JodaTimeFormattingConfigurer;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
@@ -49,6 +48,14 @@ public class JodaTimeFormattingTests {
 		JodaTimeContextHolder.setJodaTimeContext(null);
 	}
 
+	@Test
+	public void testJodaTimePatternsForStyle() {
+		System.out.println(org.joda.time.format.DateTimeFormat.patternForStyle("SS", LocaleContextHolder.getLocale()));
+		System.out.println(org.joda.time.format.DateTimeFormat.patternForStyle("MM", LocaleContextHolder.getLocale()));
+		System.out.println(org.joda.time.format.DateTimeFormat.patternForStyle("LL", LocaleContextHolder.getLocale()));
+		System.out.println(org.joda.time.format.DateTimeFormat.patternForStyle("FF", LocaleContextHolder.getLocale()));
+	}
+	
 	@Test
 	public void testBindLocalDate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
