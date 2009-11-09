@@ -34,6 +34,10 @@ import org.springframework.util.StringUtils;
  * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL,
  * which will be resolved to a corresponding URI.
  *
+ * <p>By default, this editor will encode Strings into URIs. For instance,
+ * a space will be encoded into {@code %20}. This behavior can be changed
+ * by setting calling the {@link #URIEditor(boolean)} constructor.
+ *
  * <p>Note: A URI is more relaxed than a URL in that it does not require
  * a valid protocol to be specified. Any scheme within a valid URI syntax
  * is allowed, even without a matching protocol handler being registered.
@@ -47,14 +51,30 @@ public class URIEditor extends PropertyEditorSupport {
 
 	private final ClassLoader classLoader;
 
+	private final boolean encode;
+
+
 
 	/**
-	 * Create a new URIEditor, converting "classpath:" locations into
+	 * Create a new, encoding URIEditor, converting "classpath:" locations into
 	 * standard URIs (not trying to resolve them into physical resources).
 	 */
 	public URIEditor() {
 		this.classLoader = null;
+		this.encode = true;
 	}
+
+	/**
+	 * Create a new URIEditor, converting "classpath:" locations into
+	 * standard URIs (not trying to resolve them into physical resources).
+	 *
+	 * @param encode indicates whether Strings will be encoded or not
+	 */
+	public URIEditor(boolean encode) {
+		this.classLoader = null;
+		this.encode = encode;
+	}
+
 
 	/**
 	 * Create a new URIEditor, using the given ClassLoader to resolve
@@ -64,6 +84,19 @@ public class URIEditor extends PropertyEditorSupport {
 	 */
 	public URIEditor(ClassLoader classLoader) {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		this.encode = true;
+	}
+
+	/**
+	 * Create a new URIEditor, using the given ClassLoader to resolve
+	 * "classpath:" locations into physical resource URLs.
+	 * @param classLoader the ClassLoader to use for resolving "classpath:" locations
+	 * (may be <code>null</code> to indicate the default ClassLoader)
+	 * @param encode indicates whether Strings will be encoded or not
+	 */
+	public URIEditor(ClassLoader classLoader, boolean encode) {
+		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		this.encode = encode;
 	}
 
 
@@ -109,13 +142,13 @@ public class URIEditor extends PropertyEditorSupport {
 	 */
 	protected URI createURI(String value) throws URISyntaxException {
 		int idx = value.indexOf(':');
-		if (idx != -1) {
+		if (encode && idx != -1) {
 			String scheme = value.substring(0, idx);
 			String ssp = value.substring(idx + 1);
 			return new URI(scheme, ssp, null);
 		}
 		else {
-			// value contains no scheme, fallback to default
+			// not encoding or the value contains no scheme , fallback to default
 			return new URI(value);
 		}
 	}
