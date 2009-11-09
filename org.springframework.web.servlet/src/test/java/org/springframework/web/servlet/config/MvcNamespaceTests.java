@@ -59,7 +59,7 @@ public class MvcNamespaceTests {
 	public static class TestController {
 		
 		@RequestMapping
-		public void testBind(@RequestParam @DateTimeFormat(dateStyle=Style.MEDIUM) Date date) {
+		public void testBind(@RequestParam @DateTimeFormat(dateStyle=ISO.MEDIUM) Date date) {
 			System.out.println(date);
 		}
 	}

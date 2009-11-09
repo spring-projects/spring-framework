@@ -31,11 +31,11 @@ public @interface ISODateTimeFormat {
 
 	/**
 	 * The ISO style to use to format the date time.
-	 * Defaults to {@link Style#DATE_TIME}.
+	 * Defaults to {@link ISO#DATE_TIME}.
 	 */
-	Style value() default Style.DATE_TIME;
+	ISO value() default ISO.DATE_TIME;
 
-	public enum Style {
+	public enum ISO {
 		
 		/** 
 		 * The most common ISO Date Format <code>yyyy-MM-dd</code> e.g. 2000-10-31.

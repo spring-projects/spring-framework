@@ -17,7 +17,6 @@ package org.springframework.format.datetime.joda;
 
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.Style;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation.
@@ -32,22 +31,16 @@ public final class DateTimeFormatAnnotationFormatterFactory extends AbstractDate
 		if (!pattern.isEmpty()) {
 			return forPattern(pattern);
 		} else {
-			Style dateStyle = annotation.dateStyle();
-			Style timeStyle = annotation.timeStyle();
-			if (Style.NONE == dateStyle && Style.NONE == timeStyle) {
-				return forDateTimeStyle(Style.SHORT, Style.SHORT);
-			} else {
-				return forDateTimeStyle(dateStyle, timeStyle);
-			}
+			return forStyle(annotation.style());
 		}
-	}
-
-	private DateTimeFormatter forDateTimeStyle(Style dateStyle, Style timeStyle) {
-		return org.joda.time.format.DateTimeFormat.forStyle(dateStyle.toString() + timeStyle.toString());
 	}
 
 	private DateTimeFormatter forPattern(String pattern) {
 		return org.joda.time.format.DateTimeFormat.forPattern(pattern);
+	}
+
+	private DateTimeFormatter forStyle(String style) {
+		return org.joda.time.format.DateTimeFormat.forStyle(style);
 	}
 
 }

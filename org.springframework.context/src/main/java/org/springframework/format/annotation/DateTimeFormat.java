@@ -22,104 +22,37 @@ import java.lang.annotation.Target;
 
 /**
  * Declares that a field should be formatted as a date time.
- * Supports formatting by {@link Style} or by pattern string.
+ * Supports formatting by style pattern or by format pattern string.
+ * Can be applied to <code>java.util.Date</code>, <code>java.util.Calendar</code>, <code>java.long.Long</code>, or Joda Time fields.
  * <p>
- * For style-based formatting:
- * <ul>
- * <li>Set <code>dateStyle</code> attribute to specify the style of the <i>date</i> portion of the DateTime.
- * <li>Set <code>timeStyle</code> attribute to specify the style of the <i>time</i> portion of the DateTime.
- * <li>The default for both dateStyle and timeStyle if not specified is {@link Style#NONE}.
- * </ul>
+ * For style-based formatting, set the <code>style</code> attribute to be the style pattern.  
+ * The first character is the date style, and the second character is the time style.
+ * Specify a character of 'S' for short style, 'M' for medium, 'L' for long, and 'F' for full.
+ * A date or time may be omitted by specifying the style character '-'.
+ * <p>
  * For pattern-based formatting, set the <code>pattern</code> attribute to be the DateTime pattern, such as <code>yyyy/mm/dd h:mm:ss a</code>.
+ * If the pattern attribute is specified, it takes precedence over the style attribute.
  * <p>
- * If no annotation attributes are specified, the default format applied is style-based with dateStyle={@link Style#SHORT} and timeStyle={@link Style#SHORT}.
+ * If no annotation attributes are specified, the default format applied is style-based with a style code of 'SS' (short date, short time).
  * 
  * @author Keith Donald
  * @since 3.0
+ * @see org.joda.time.format.DateTimeFormat
  */
 @Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DateTimeFormat {
 
 	/**
-	 * The style to use for formatting the date portion of the property.
-	 * Defaults to {@link Style#NONE}.
+	 * The style pattern to use to format the field.
+	 * Defaults to 'SS' for short date time.
 	 */
-	Style dateStyle() default Style.NONE;
+	String style() default "SS";
 
 	/**
-	 * The style to use for formatting the time portion of the property.
-	 * Defaults to {@link Style#NONE}.
-	 */
-	Style timeStyle() default Style.NONE;
-
-	/**
-	 * A pattern String that defines a custom format for the property.
-	 * Use this method or the <code>*Style</code> methods, not both.
+	 * A pattern String to apply to format the field.
+	 * Set this attribute or the style attribute, not both.
 	 */
 	String pattern() default "";
-	
-	/**
-	 * Supported DateTimeFormat styles.
-	 */
-	public enum Style {
 		
-		/**
-		 * The short format style.
-		 * <br>Example short dateStyle: Locale.US="M/d/yy" e.g. 10/31/2009
-		 * <br>Example short timeStyle: Locale.US="h:mm a" e.g. 1:30 PM
-		 */
-		SHORT {
-			public String toString() {
-				return "S";
-			}
-		},
-		
-		/**
-		 * The medium format style.
-		 * <br>Example medium dateStyle: Locale.US="MMM d, yyyy" e.g Oct 31, 2009
-		 * <br>Example medium timeStyle: Locale.US="h:mm:ss a" e.g. 1:30:00 PM
-		 */
-		MEDIUM {
-			public String toString() {
-				return "M";
-			}
-		},
-
-		/**
-		 * The long format style.
-		 * <br>Example long dateStyle: Locale.US="MMMM d, yyyy" e.g October 31, 2009
-		 * <br>Example long timeStyle: Locale.US="h:mm:ss a z" e.g. 1:30:00 PM Eastern Standard Time  
-		 */
-		LONG {
-			public String toString() {
-				return "L";
-			}
-		},
-
-		/**
-		 * The full format style.
-		 * <br>Example full dateStyle: Locale.US="EEEE, MMMM d, yyyy" e.g. Saturday, October 31, 2009
-		 * <br>Example full timeStyle: Locale.US="h:mm:ss a z" e.g 1:30:00 PM Eastern Standard Time
-		 */
-		FULL {
-			public String toString() {
-				return "F";
-			}
-		},
-
-		/**
-		 * The none format style.
-		 * A dateStyle specified with this value results in date fields such as mm, dd, and yyyy being ignored.
-		 * A timeStyle specified with this value results in time fields such as hh, mm being ignored.
-		 * If both dateStyle and timeStyle are set to this value and the pattern attribute is also not specified,
-		 * a default value for each is selected based on the type of field being annotated.
-		 */
-		NONE {
-			public String toString() {
-				return "-";
-			}
-		}		
-	}
-	
 }
