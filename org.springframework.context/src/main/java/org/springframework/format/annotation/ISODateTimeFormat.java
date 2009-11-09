@@ -29,10 +29,29 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ISODateTimeFormat {
 
-	Style value();
+	/**
+	 * The ISO style to use to format the date time.
+	 * Defaults to {@link Style#DATE_TIME}.
+	 */
+	Style value() default Style.DATE_TIME;
 
 	public enum Style {
-		DATE, TIME, DATE_TIME
+		
+		/** 
+		 * The most common ISO Date Format <code>yyyy-MM-dd</code> e.g. 2000-10-31.
+		 */
+		DATE,
+
+		/** 
+		 * The most common ISO Time Format <code>hh:mm:ss.SSSZ</code> e.g. 01:30:00.000-05:00.
+		 */
+		TIME,
+
+		/** 
+		 * The most common ISO DateTime Format <code>yyyy-MM-dd'T'hh:mm:ss.SSSZ</code> e.g. 2000-10-31 01:30:00.000-05:00.
+		 * The default if no annotation value is specified.
+		 */
+		DATE_TIME
 	}
-	
+
 }

@@ -34,7 +34,11 @@ public final class DateTimeFormatAnnotationFormatterFactory extends AbstractDate
 		} else {
 			Style dateStyle = annotation.dateStyle();
 			Style timeStyle = annotation.timeStyle();
-			return forDateTimeStyle(dateStyle, timeStyle);
+			if (Style.NONE == dateStyle && Style.NONE == timeStyle) {
+				return forDateTimeStyle(Style.SHORT, Style.SHORT);
+			} else {
+				return forDateTimeStyle(dateStyle, timeStyle);
+			}
 		}
 	}
 
