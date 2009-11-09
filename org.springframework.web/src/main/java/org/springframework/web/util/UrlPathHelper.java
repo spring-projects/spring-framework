@@ -304,7 +304,7 @@ public class UrlPathHelper {
 		if (this.urlDecode) {
 			String enc = determineEncoding(request);
 			try {
-				return URLDecoder.decode(source, enc);
+				return UriUtils.decode(source, enc);
 			}
 			catch (UnsupportedEncodingException ex) {
 				if (logger.isWarnEnabled()) {
