@@ -97,6 +97,8 @@ public class MockServletContext implements ServletContext {
 
 	private String servletContextName = "MockServletContext";
 
+	private int minorVersion = 5;
+
 
 	/**
 	 * Create a new MockServletContext, using no base path and a
@@ -181,7 +183,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public int getMinorVersion() {
-		return 5;
+		return minorVersion;
 	}
 
 	public String getMimeType(String filePath) {
@@ -340,6 +342,11 @@ public class MockServletContext implements ServletContext {
 		return this.servletContextName;
 	}
 
+	public void setMinorVersion(int minorVersion) {
+		if (minorVersion <3 || minorVersion > 5)
+			throw new IllegalArgumentException("Only Servlet minor versions between 3 and 5 are supported");
+		this.minorVersion = minorVersion;
+	}
 
 	/**
 	 * Inner factory class used to just introduce a Java Activation Framework
@@ -351,5 +358,4 @@ public class MockServletContext implements ServletContext {
 			return FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
 		}
 	}
-
 }
