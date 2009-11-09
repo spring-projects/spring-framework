@@ -23,7 +23,11 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.util.ClassUtils;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
@@ -32,8 +36,21 @@ import org.w3c.dom.Element;
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses the {@code annotated-controllers} element to setup
  * <code>@Controller</code> configuration in a Spring MVC web application.
- * 
+ * <p>
+ * Responsible for:
+ * <ol>
+ * <li>Registering a DefaultAnnotationHandlerMapping bean for mapping HTTP Servlet Requests to @Controller methods using @RequestMapping annotations.
+ * <li>Registering a AnnotationMethodHandlerAdapter bean for invoking annotated @Controller methods.
+ * Will configure the HandlerAdapter's <code>webBindingInitializer</code> property for centrally configuring @Controller DataBinder instances:
+ * <ul>
+ * <li>Configures the conversionService to be the bean named <code>conversionService</code> if such a bean exists,
+ * otherwise defaults to a fresh {@link ConversionService} instance created by the default {@link FormattingConversionServiceFactoryBean}.
+ * <li>Configures the validator to be the bean named <code>validator</code> if such a bean exists,
+ * otherwise defaults to a fresh {@link Validator} instance created by the default {@link LocalValidatorFactoryBean} <i>if the JSR-303 API is present in the classpath.
+ * </ul>
+ * </ol>
  * @author Keith Donald
+ * @since 3.0
  */
 public class AnnotatedControllersBeanDefinitionParser implements BeanDefinitionParser {
 
@@ -65,16 +82,36 @@ public class AnnotatedControllersBeanDefinitionParser implements BeanDefinitionP
 
 	private BeanDefinition createWebBindingInitializer(Element element, Object source, ParserContext context) {
 		BeanDefinitionBuilder builder = createBeanBuilder(ConfigurableWebBindingInitializer.class, source);
+		addConversionService(builder, element, source, context);
+		addValidator(builder, element, source, context);		
+		return builder.getBeanDefinition();
+	}
+
+	private void addConversionService(BeanDefinitionBuilder builder, Element element, Object source, ParserContext context) {
 		if (context.getRegistry().containsBeanDefinition("conversionService")) {
 			builder.addPropertyReference("conversionService", "conversionService");
 		} else {
-			builder.addPropertyValue("conversionService", createFormattingConversionService(element, source, context));
+			builder.addPropertyValue("conversionService", createConversionService(element, source, context));
 		}
+	}
+
+	private void addValidator(BeanDefinitionBuilder builder, Element element, Object source, ParserContext context) {
+		if (context.getRegistry().containsBeanDefinition("validator")) {
+			builder.addPropertyReference("validator", "validator");
+		} else {
+			if (ClassUtils.isPresent("javax.validation.Validator", AnnotatedControllersBeanDefinitionParser.class.getClassLoader())) {
+				builder.addPropertyValue("validator", createValidator(element, source, context));
+			}
+		}
+	}
+
+	private BeanDefinition createConversionService(Element element, Object source, ParserContext context) {
+		BeanDefinitionBuilder builder = createBeanBuilder(FormattingConversionServiceFactoryBean.class, source);
 		return builder.getBeanDefinition();
 	}
-	
-	private BeanDefinition createFormattingConversionService(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = createBeanBuilder(FormattingConversionServiceFactoryBean.class, source);
+
+	private BeanDefinition createValidator(Element element, Object source, ParserContext context) {
+		BeanDefinitionBuilder builder = createBeanBuilder(LocalValidatorFactoryBean.class, source);
 		return builder.getBeanDefinition();
 	}
 
