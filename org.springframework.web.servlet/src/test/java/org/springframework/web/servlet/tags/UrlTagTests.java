@@ -554,13 +554,6 @@ public class UrlTagTests extends AbstractTagTests {
 		assertEquals("my%20name%2Bis", tag.urlEncode("my name+is"));
 	}
 	
-	public void testUrlEncode_character() throws UnsupportedEncodingException {
-		assertEquals("%20", tag.urlEncode(' ', "UTF-8"));
-		assertEquals(" ", URLDecoder.decode("%20", "UTF-8"));
-		assertEquals("%FE%FF%00%20", tag.urlEncode(' ', "UTF-16"));
-		assertEquals("%40", tag.urlEncode(' ', "IBM-Thai"));
-	}
-
 	public void testUrlEncodeNull() throws JspException {
 		assertNull(tag.urlEncode(null));
 	}

@@ -33,6 +33,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
@@ -296,39 +297,11 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		}
 		try {
 			String encoding = pageContext.getResponse().getCharacterEncoding();
-			String formUrlEncodedValue = URLEncoder.encode(value, encoding);
-			if (!formUrlEncodedValue.contains("+")) {
-				return formUrlEncodedValue;
-			}
-			String spaceEncoding = this.urlEncode(' ', encoding);
-			return formUrlEncodedValue.replace("+", spaceEncoding);
+			return UriUtils.encode(value, encoding);
 		}
 		catch (UnsupportedEncodingException ex) {
 			throw new JspException(ex);
 		}
-	}
-
-	/*
-	 * based on URLCodec from Apache Commons Codec
-	 */
-	protected String urlEncode(Character c, String enc) throws UnsupportedEncodingException {
-		if (c == null) {
-			return null;
-		}
-		byte[] bytes = c.toString().getBytes(enc);
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < bytes.length; i++) {
-			int b = bytes[i];
-			if (b < 0) {
-				b = 256 + b;
-			}
-			char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
-			char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-			builder.append('%');
-			builder.append(hex1);
-			builder.append(hex2);
-		}
-		return builder.toString();
 	}
 
 	/**

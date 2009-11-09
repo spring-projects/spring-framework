@@ -26,11 +26,15 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 /**
  * @author Alef Arendsen
  * @author Juergen Hoeller
  */
-public class PathMatchingUrlHandlerMappingTests extends TestCase {
+public class PathMatchingUrlHandlerMappingTests {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map3.xml";
 
@@ -38,6 +42,7 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 
 	private ConfigurableWebApplicationContext wac;
 
+	@Before
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		wac = new XmlWebApplicationContext();
@@ -47,7 +52,8 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 		hm = (HandlerMapping) wac.getBean("urlMapping");
 	}
 
-	public void testRequestsWithHandlers() throws Exception {
+	@Test
+	public void requestsWithHandlers() throws Exception {
 		Object bean = wac.getBean("mainController");
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/welcome.html");
@@ -63,7 +69,8 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
 
-	public void testActualPathMatching() throws Exception {
+	@Test
+	public void actualPathMatching() throws Exception {
 		// there a couple of mappings defined with which we can test the
 		// path matching, let's do that...
 
@@ -222,14 +229,16 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
 	}
 
-	public void testDefaultMapping() throws Exception {
+	@Test
+	public void defaultMapping() throws Exception {
 		Object bean = wac.getBean("starController");
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/goggog.html");
 		HandlerExecutionChain hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
 
-	public void testMappingExposedInRequest() throws Exception {
+	@Test
+	public void mappingExposedInRequest() throws Exception {
 		Object bean = wac.getBean("mainController");
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/show.html");
 		HandlerExecutionChain hec = getHandler(req);
@@ -241,8 +250,8 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 		HandlerExecutionChain hec = hm.getHandler(req);
 		HandlerInterceptor[] interceptors = hec.getInterceptors();
 		if (interceptors != null) {
-			for (int i = 0; i < interceptors.length; i++) {
-				interceptors[i].preHandle(req, null, hec.getHandler());
+			for (HandlerInterceptor interceptor : interceptors) {
+				interceptor.preHandle(req, null, hec.getHandler());
 			}
 		}
 		return hec;

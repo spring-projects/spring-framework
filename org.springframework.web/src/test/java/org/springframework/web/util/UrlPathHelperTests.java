@@ -16,44 +16,68 @@
 
 package org.springframework.web.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import org.junit.Test;
+import org.junit.Before;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class UrlPathHelperTests extends TestCase {
+public class UrlPathHelperTests {
 
-	public void testGetPathWithinApplication() {
-		UrlPathHelper helper = new UrlPathHelper();
+	private UrlPathHelper helper;
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	private MockHttpServletRequest request;
+
+	@Before
+	public void setUp() {
+		helper = new UrlPathHelper();
+		request = new MockHttpServletRequest();
+	}
+
+	@Test
+	public void getPathWithinApplication() {
 		request.setContextPath("/petclinic");
 		request.setRequestURI("/petclinic/welcome.html");
 
 		assertEquals("Incorrect path returned", "/welcome.html", helper.getPathWithinApplication(request));
 	}
 
-	public void testGetPathWithinApplicationForRootWithNoLeadingSlash() {
-		UrlPathHelper helper = new UrlPathHelper();
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@Test
+	public void getPathWithinApplicationForRootWithNoLeadingSlash() {
 		request.setContextPath("/petclinic");
 		request.setRequestURI("/petclinic");
 
 		assertEquals("Incorrect root path returned", "/", helper.getPathWithinApplication(request));
 	}
 
-	public void testGetPathWithinApplicationForSlashContextPath() {
-		UrlPathHelper helper = new UrlPathHelper();
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@Test
+	public void getPathWithinApplicationForSlashContextPath() {
 		request.setContextPath("/");
 		request.setRequestURI("/welcome.html");
 
 		assertEquals("Incorrect path returned", "/welcome.html", helper.getPathWithinApplication(request));
+	}
+
+	@Test
+	public void getRequestUri() {
+		request.setRequestURI("/welcome.html");
+		assertEquals("Incorrect path returned", "/welcome.html", helper.getRequestUri(request));
+
+		request.setRequestURI("/foo%20bar");
+		assertEquals("Incorrect path returned", "/foo bar", helper.getRequestUri(request));
+
+		request.setRequestURI("/foo+bar");
+		assertEquals("Incorrect path returned", "/foo+bar", helper.getRequestUri(request));
+
 	}
 
 }
