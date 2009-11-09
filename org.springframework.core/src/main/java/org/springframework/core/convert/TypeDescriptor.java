@@ -24,11 +24,8 @@ import java.util.Map;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.style.StylerUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
-import com.sun.xml.internal.rngom.ast.builder.Annotations;
 
 /**
  * Context about a type to convert to.
