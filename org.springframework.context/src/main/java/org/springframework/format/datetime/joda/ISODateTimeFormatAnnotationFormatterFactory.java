@@ -28,10 +28,10 @@ import org.springframework.format.annotation.ISODateTimeFormat.ISO;
 public final class ISODateTimeFormatAnnotationFormatterFactory extends AbstractDateTimeAnnotationFormatterFactory<ISODateTimeFormat> {
 
 	protected DateTimeFormatter configureDateTimeFormatterFrom(ISODateTimeFormat annotation) {
-		ISO style = annotation.value();
-		if (style == ISO.DATE) {
+		ISO format = annotation.value();
+		if (format == ISO.DATE) {
 			return org.joda.time.format.ISODateTimeFormat.date();
-		} else if (style == ISO.TIME) {
+		} else if (format == ISO.TIME) {
 			return org.joda.time.format.ISODateTimeFormat.time();
 		} else {
 			return org.joda.time.format.ISODateTimeFormat.dateTime();

@@ -22,6 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * Declares that a field should be formatted as a ISO date time.
+ * Can be applied to <code>java.util.Date</code>, <code>java.util.Calendar</code>, <code>java.long.Long</code>, or Joda Time fields.
  * @author Keith Donald
  * @since 3.0
  */
