@@ -17,7 +17,7 @@ package org.springframework.format.datetime.joda;
 
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.format.annotation.ISODateTimeFormat;
-import org.springframework.format.annotation.ISODateTimeFormat.Style;
+import org.springframework.format.annotation.ISODateTimeFormat.ISO;
 
 /**
  * Formats fields annotated with the {@link ISODateTimeFormat} annotation.
@@ -28,10 +28,10 @@ import org.springframework.format.annotation.ISODateTimeFormat.Style;
 public final class ISODateTimeFormatAnnotationFormatterFactory extends AbstractDateTimeAnnotationFormatterFactory<ISODateTimeFormat> {
 
 	protected DateTimeFormatter configureDateTimeFormatterFrom(ISODateTimeFormat annotation) {
-		Style style = annotation.value();
-		if (style == Style.DATE) {
+		ISO style = annotation.value();
+		if (style == ISO.DATE) {
 			return org.joda.time.format.ISODateTimeFormat.date();
-		} else if (style == Style.TIME) {
+		} else if (style == ISO.TIME) {
 			return org.joda.time.format.ISODateTimeFormat.time();
 		} else {
 			return org.joda.time.format.ISODateTimeFormat.dateTime();

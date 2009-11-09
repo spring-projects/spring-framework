@@ -18,7 +18,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.ISODateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.Style;
+import org.springframework.format.annotation.ISODateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
@@ -138,6 +138,15 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindDateTimeAnnotatedDefault() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.addPropertyValue("dateTimeAnnotatedDefault", "10/31/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("dateTimeAnnotatedDefault"));
+	}
+
+	@Test
 	public void testBindDate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.addPropertyValue("date", "10/31/09 12:00 PM");
@@ -218,51 +227,66 @@ public class JodaTimeFormattingTests {
 		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("isoDateTime"));
 	}
 
+	@Test
+	public void testBindISODateTimeDefault() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.addPropertyValue("isoDateTimeDefault", "2009-10-31T12:00:00.000Z");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("isoDateTimeDefault"));
+	}
+
 	public static class JodaTimeBean {
 
 		private LocalDate localDate;
 
-		@DateTimeFormat(dateStyle = Style.MEDIUM)
+		@DateTimeFormat(style="M-")
 		private LocalDate localDateAnnotated;
 
 		private LocalTime localTime;
 
-		@DateTimeFormat(timeStyle = Style.MEDIUM)
+		@DateTimeFormat(style="-M")
 		private LocalTime localTimeAnnotated;
 
 		private LocalDateTime localDateTime;
 
-		@DateTimeFormat(dateStyle = Style.FULL, timeStyle = Style.FULL)
+		@DateTimeFormat(style="FF")
 		private LocalDateTime localDateTimeAnnotated;
 
 		private DateTime dateTime;
 
-		@DateTimeFormat(dateStyle = Style.MEDIUM, timeStyle = Style.SHORT)
+		@DateTimeFormat(style="MS")
 		private DateTime dateTimeAnnotated;
+
+		@DateTimeFormat
+		private DateTime dateTimeAnnotatedDefault;
 
 		private Date date;
 
-		@DateTimeFormat(dateStyle = Style.SHORT)
+		@DateTimeFormat(style="S-")
 		private Date dateAnnotated;
 
 		private Calendar calendar;
 
-		@DateTimeFormat(dateStyle = Style.SHORT)
+		@DateTimeFormat(style="S-")
 		private Calendar calendarAnnotated;
 
 		private Long millis;
 
-		@DateTimeFormat(dateStyle = Style.SHORT)
+		@DateTimeFormat(style="S-")
 		private Long millisAnnotated;
 
-		@ISODateTimeFormat(org.springframework.format.annotation.ISODateTimeFormat.Style.DATE)
+		@ISODateTimeFormat(ISO.DATE)
 		private LocalDate isoDate;
 
-		@ISODateTimeFormat(org.springframework.format.annotation.ISODateTimeFormat.Style.TIME)
+		@ISODateTimeFormat(ISO.TIME)
 		private LocalTime isoTime;
 
-		@ISODateTimeFormat(org.springframework.format.annotation.ISODateTimeFormat.Style.DATE_TIME)
+		@ISODateTimeFormat(ISO.DATE_TIME)
 		private DateTime isoDateTime;
+
+		@ISODateTimeFormat
+		private DateTime isoDateTimeDefault;
 
 		public LocalDate getLocalDate() {
 			return localDate;
@@ -326,6 +350,14 @@ public class JodaTimeFormattingTests {
 
 		public void setDateTimeAnnotated(DateTime dateTimeAnnotated) {
 			this.dateTimeAnnotated = dateTimeAnnotated;
+		}
+
+		public DateTime getDateTimeAnnotatedDefault() {
+			return dateTimeAnnotatedDefault;
+		}
+
+		public void setDateTimeAnnotatedDefault(DateTime dateTimeAnnotatedDefault) {
+			this.dateTimeAnnotatedDefault = dateTimeAnnotatedDefault;
 		}
 
 		public Date getDate() {
@@ -398,6 +430,14 @@ public class JodaTimeFormattingTests {
 
 		public void setIsoDateTime(DateTime isoDateTime) {
 			this.isoDateTime = isoDateTime;
+		}
+
+		public DateTime getIsoDateTimeDefault() {
+			return isoDateTimeDefault;
+		}
+
+		public void setIsoDateTimeDefault(DateTime isoDateTimeDefault) {
+			this.isoDateTimeDefault = isoDateTimeDefault;
 		}
 
 	}

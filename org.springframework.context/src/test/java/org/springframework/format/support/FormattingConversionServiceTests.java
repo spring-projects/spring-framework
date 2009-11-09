@@ -31,12 +31,10 @@ import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.format.annotation.DateTimeFormat.Style;
 import org.springframework.format.datetime.joda.DateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
 import org.springframework.format.number.IntegerFormatter;
-import org.springframework.format.support.FormattingConversionService;
 
 /**
  * @author Keith Donald
@@ -106,7 +104,7 @@ public class FormattingConversionServiceTests {
 	private static class Model {
 
 		@SuppressWarnings("unused")
-		@org.springframework.format.annotation.DateTimeFormat(dateStyle = Style.SHORT)
+		@org.springframework.format.annotation.DateTimeFormat(style="S-")
 		public Date date;
 
 	}
