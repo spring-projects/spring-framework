@@ -397,7 +397,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 	 * @return the WebApplicationContext for this servlet
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
-	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+	protected WebApplicationContext createWebApplicationContext(ApplicationContext parent) {
 		Class<?> contextClass = getContextClass();
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Servlet with name '" + getServletName() +
