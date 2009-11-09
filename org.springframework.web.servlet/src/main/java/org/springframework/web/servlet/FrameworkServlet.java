@@ -446,6 +446,20 @@ public abstract class FrameworkServlet extends HttpServletBean
 	}
 
 	/**
+	 * Instantiate the WebApplicationContext for this servlet, either a default
+	 * {@link org.springframework.web.context.support.XmlWebApplicationContext}
+	 * or a {@link #setContextClass custom context class}, if set.
+	 * Delegates to #createWebApplicationContext(ApplicationContext).
+	 * @param parent the parent WebApplicationContext to use, or <code>null</code> if none
+	 * @return the WebApplicationContext for this servlet
+	 * @see org.springframework.web.context.support.XmlWebApplicationContext
+	 * @see #createWebApplicationContext(ApplicationContext)
+	 */
+	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+		return createWebApplicationContext((ApplicationContext) parent);
+	}
+	
+	/**
 	 * Post-process the given WebApplicationContext before it is refreshed
 	 * and activated as context for this servlet.
 	 * <p>The default implementation is empty. <code>refresh()</code> will
