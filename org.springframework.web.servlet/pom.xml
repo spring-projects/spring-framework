@@ -301,6 +301,12 @@
       <artifactId>slf4j-jcl</artifactId>
       <version>1.5.3</version>
       <scope>test</scope>
-    </dependency> 
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>1.6</version>
+      <scope>test</scope>
+    </dependency>    
   </dependencies>
 </project>
