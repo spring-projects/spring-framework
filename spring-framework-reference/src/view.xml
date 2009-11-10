@@ -42,10 +42,10 @@
 &lt;/bean&gt;
 
 <lineannotation># And a sample properties file is uses (views.properties in WEB-INF/classes):</lineannotation>
-welcome.class=org.springframework.web.servlet.view.JstlView
+welcome.(class)=org.springframework.web.servlet.view.JstlView
 welcome.url=/WEB-INF/jsp/welcome.jsp
 
-productList.class=org.springframework.web.servlet.view.JstlView
+productList.(class)=org.springframework.web.servlet.view.JstlView
 productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
       <para>As you can see, the
@@ -898,13 +898,13 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
 &lt;/bean&gt;</programlisting>
 
         <programlisting language="java">...
-welcomeView.class=org.springframework.web.servlet.view.tiles2.TilesView
+welcomeView.(class)=org.springframework.web.servlet.view.tiles2.TilesView
 welcomeView.url=welcome <lineannotation>(this is the name of a Tiles definition)</lineannotation>
 
-vetsView.class=org.springframework.web.servlet.view.tiles2.TilesView
+vetsView.(class)=org.springframework.web.servlet.view.tiles2.TilesView
 vetsView.url=vetsView <lineannotation>(again, this is the name of a Tiles definition)</lineannotation>
 
-findOwnersForm.class=org.springframework.web.servlet.view.JstlView
+findOwnersForm.(class)=org.springframework.web.servlet.view.JstlView
 findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 ...</programlisting>
 
@@ -1781,13 +1781,13 @@ public class HomePage extends AbstractXsltView {
         examples above) looks like this for the one-view application that is
         'My First Words':</para>
 
-        <programlisting>home.class=xslt.HomePage
+        <programlisting>home.(class)=xslt.HomePage
 home.stylesheetLocation=/WEB-INF/xsl/home.xslt
 home.root=words</programlisting>
 
         <para>Here, you can see how the view is tied in with the
         <classname>HomePage</classname> class just written which handles the
-        model domification in the first property <literal>'.class'</literal>.
+        model domification in the first property <literal>'.(class)'</literal>.
         The <literal>'stylesheetLocation'</literal> property points to the
         XSLT file which will handle the XML transformation into HTML for us
         and the final property <literal>'.root'</literal> is the name that
@@ -1901,13 +1901,13 @@ home.root=words</programlisting>
         The entire file now looks like this with the XSLT view shown from
         earlier:</para>
         
-        <programlisting>home.class=xslt.HomePage
+        <programlisting>home.(class)=xslt.HomePage
 home.stylesheetLocation=/WEB-INF/xsl/home.xslt
 home.root=words
 
-xl.class=excel.HomePage
+xl.(class)=excel.HomePage
 
-pdf.class=pdf.HomePage</programlisting>
+pdf.(class)=pdf.HomePage</programlisting>
 
         <para><emphasis>If you want to start with a
         template spreadsheet or a fillable PDF form to add your model data to, specify the location
@@ -2198,7 +2198,7 @@ public class PDFPage extends AbstractPdfView {
         a matter of adding the appropriate entries in the resource bundle
         configured in the previous section as shown here:</para>
 
-        <programlisting>simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
+        <programlisting>simpleReport.(class)=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
 simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper</programlisting>
 
         <para>Here you can see that the view with name
@@ -2368,7 +2368,7 @@ HttpServletResponse response) throws Exception {
       are being added to the model. To ensure that the correct one is used, we
       simply modify our view configuration as appropriate:</para>
 
-      <programlisting>simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
+      <programlisting>simpleReport.(class)=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
 simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
 simpleReport.reportDataKey=myBeanData</programlisting>
 
