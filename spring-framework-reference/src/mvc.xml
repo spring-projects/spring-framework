@@ -1891,10 +1891,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>The <classname>ResourceBundleViewResolver</classname> inspects the
       <classname>ResourceBundle</classname> identified by the basename, and
       for each view it is supposed to resolve, it uses the value of the
-      property <literal>[viewname].class</literal> as the view class and the
-      value of the property <literal>[viewname].url</literal> as the view url.
+      property <literal>[viewname].(class)</literal> as the view class and the
+      value of the property <literal>[viewname].url</literal> as the view url. 
+      Examples can be found in the next chapter which covers view technologies.
       As you can see, you can identify a parent view, from which all views in
-      the properties file sort of extend. <!--Pls. revise last line. Can you say *extend* instead of *sort of extend*? -->This
+      the properties file <quote>extend</quote>. This
       way you can specify a default view class, for example.</para>
 
       <note>
