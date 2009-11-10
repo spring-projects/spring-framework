@@ -36,7 +36,7 @@ import org.springframework.format.Printer;
  * @since 3.0
  * @see #setDateStyle(String)
  * @see #setTimeStyle(String)
- * @see #setTimeStyle(String)
+ * @see #setDateTimeStyle(String)
  * @see #setUseISOFormat(boolean)
  * @see #installJodaTimeFormatting(FormatterRegistry)
  */
