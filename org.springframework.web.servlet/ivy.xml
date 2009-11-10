@@ -100,6 +100,7 @@
 		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.0.GA" conf="test->runtime"/>
 		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->runtime"/>
+		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="test->runtime"/>
 	</dependencies>
 
 </ivy-module>

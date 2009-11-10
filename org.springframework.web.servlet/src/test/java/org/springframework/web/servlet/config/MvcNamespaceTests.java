@@ -31,7 +31,6 @@ public class MvcNamespaceTests {
 	public void setUp() {
 		container = new GenericWebApplicationContext();
 		container.setServletContext(new MockServletContext());
-		
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 	
