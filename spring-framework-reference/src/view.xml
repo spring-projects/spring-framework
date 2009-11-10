@@ -818,7 +818,7 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
 
       <itemizedlist spacing="compact">
           <listitem>
-            <para><literal>Tiles version 2.0.4 or higher</literal></para>
+            <para><literal>Tiles version 2.1.2 or higher</literal></para>
           </listitem>
 
           <listitem>
