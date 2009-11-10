@@ -10,11 +10,11 @@
 	<xsd:import namespace="http://www.springframework.org/schema/tool"
 		schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd" />
 
-	<xsd:element name="annotated-controllers">
+	<xsd:element name="annotation-driven">
 		<xsd:annotation>
 			<xsd:documentation
 				source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
-	Configures the Spring MVC @Controller programming model.
+	Configures the Spring MVC Annotated Controller programming model.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>

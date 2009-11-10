@@ -26,6 +26,6 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 public class MvcNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
-		registerBeanDefinitionParser("annotated-controllers", new AnnotatedControllersBeanDefinitionParser());
+		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 	}
 }
