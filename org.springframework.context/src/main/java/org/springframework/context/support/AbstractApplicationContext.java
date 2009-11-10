@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,6 +49,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.Lifecycle;
+import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.MessageSourceResolvable;
@@ -127,6 +127,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
 
 	/**
+	 * Name of the LifecycleProcessor bean in the factory.
+	 * If none is supplied, a DefaultLifecycleProcessor is used.
+	 * @see org.springframework.context.LifecycleProcessor
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor
+	 */
+	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
+
+	/**
 	 * Name of the ApplicationEventMulticaster bean in the factory.
 	 * If none is supplied, a default SimpleApplicationEventMulticaster is used.
 	 * @see org.springframework.context.event.ApplicationEventMulticaster
@@ -178,6 +186,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/** MessageSource we delegate our implementation of this interface to */
 	private MessageSource messageSource;
+
+	/** LifecycleProcessor for managing the lifecycle of beans within this context */
+	private LifecycleProcessor lifecycleProcessor;
 
 	/** Helper class used in event publishing */
 	private ApplicationEventMulticaster applicationEventMulticaster;
@@ -287,8 +298,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return the internal MessageSource used by the context.
-	 * @return the internal MessageSource (never <code>null</code>)
+	 * Return the internal LifecycleProcessor used by the context.
+	 * @return the internal LifecycleProcessor (never <code>null</code>)
+	 * @throws IllegalStateException if the context has not been initialized yet
+	 */
+	private LifecycleProcessor getLifecycleProcessor() {
+		if (this.lifecycleProcessor == null) {
+			throw new IllegalStateException("LifecycleProcessor not initialized - " +
+					"call 'refresh' before invoking lifecycle methods via the context: " + this);
+		}
+		return this.lifecycleProcessor;
+	}
+
+	/**
+	 * Return the internal ApplicationEventMulticaster used by the context.
+	 * @return the internal ApplicationEventMulticaster (never <code>null</code>)
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
@@ -376,6 +400,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Initialize message source for this context.
 				initMessageSource();
+
+				// Initialize lifecycle processor for this context.
+				initLifecycleProcessor();
 
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
@@ -677,6 +704,33 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * Initialize the LifecycleProcessor.
+	 * Uses DefaultLifecycleProcessor if none defined in the context.
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor
+	 */
+	protected void initLifecycleProcessor() {
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
+			this.lifecycleProcessor =
+					beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using LifecycleProcessor [" + this.lifecycleProcessor + "]");
+			}
+		}
+		else {
+			DefaultLifecycleProcessor defaultProcessor = new DefaultLifecycleProcessor();
+			defaultProcessor.setBeanFactory(beanFactory);
+			this.lifecycleProcessor = defaultProcessor;
+			beanFactory.registerSingleton(LIFECYCLE_PROCESSOR_BEAN_NAME, this.lifecycleProcessor);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate LifecycleProcessor with name '" +
+						LIFECYCLE_PROCESSOR_BEAN_NAME +
+						"': using default [" + this.lifecycleProcessor + "]");
+			}
+		}
+	}
+
+	/**
 	 * Initialize the ApplicationEventMulticaster.
 	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
@@ -851,10 +905,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-			for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
-				doStop(lifecycleBeans, beanName);
-			}
+			this.getLifecycleProcessor().stop();
 
 			// Destroy all cached singletons in the context's BeanFactory.
 			destroyBeans();
@@ -1076,18 +1127,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	public void start() {
-		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
-			doStart(lifecycleBeans, beanName);
-		}
+		this.getLifecycleProcessor().start();
 		publishEvent(new ContextStartedEvent(this));
 	}
 
 	public void stop() {
-		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
-			doStop(lifecycleBeans, beanName);
-		}
+		this.getLifecycleProcessor().stop();
 		publishEvent(new ContextStoppedEvent(this));
 	}
 
@@ -1116,46 +1161,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		return beans;
-	}
-
-	/**
-	 * Start the specified bean as part of the given set of Lifecycle beans,
-	 * making sure that any beans that it depends on are started first.
-	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
-	 * @param beanName the name of the bean to start
-	 */
-	private void doStart(Map<String, Lifecycle> lifecycleBeans, String beanName) {
-		Lifecycle bean = lifecycleBeans.get(beanName);
-		if (bean != null) {
-			String[] dependenciesForBean = getBeanFactory().getDependenciesForBean(beanName);
-			for (String dependency : dependenciesForBean) {
-				doStart(lifecycleBeans, dependency);
-			}
-			if (!bean.isRunning()) {
-				bean.start();
-			}
-			lifecycleBeans.remove(beanName);
-		}
-	}
-
-	/**
-	 * Stop the specified bean as part of the given set of Lifecycle beans,
-	 * making sure that any beans that depends on it are stopped first.
-	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
-	 * @param beanName the name of the bean to stop
-	 */
-	private void doStop(Map lifecycleBeans, String beanName) {
-		Lifecycle bean = (Lifecycle) lifecycleBeans.get(beanName);
-		if (bean != null) {
-			String[] dependentBeans = getBeanFactory().getDependentBeans(beanName);
-			for (String dependentBean : dependentBeans) {
-				doStop(lifecycleBeans, dependentBean);
-			}
-			if (bean.isRunning()) {
-				bean.stop();
-			}
-			lifecycleBeans.remove(beanName);
-		}
 	}
 
 
