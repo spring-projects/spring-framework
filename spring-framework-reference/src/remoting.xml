@@ -366,8 +366,8 @@ public class AccountServiceImpl implements AccountService {
       <note>
         <para>Of course, this example doesn't show a flexible kind of security
         infrastructure. For more options as far as security is concerned, have
-        a look at the Acegi Security System for Spring, to be found at <ulink
-        url="http://acegisecurity.sourceforge.net"></ulink>.</para>
+        a look at the Spring Security project at <ulink
+          url="http://static.springsource.org/spring-security/site/"></ulink>.</para>
       </note>
     </section>
   </section>
