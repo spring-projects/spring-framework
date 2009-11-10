@@ -28,6 +28,7 @@ Changes in version 3.0.0.RC2 (2009-11-11)
 * re-introduced Struts 1.x support ("org.springframework.web.struts") in deprecated form
 * deprecated scheduling support for JDK 1.3 Timer ("org.springframework.scheduling.timer")
 * deprecated remoting support for JAX-RPC (in favor of JAX-WS)
+* added support for load-time weaving in JBoss 5.x
 
 
 Changes in version 3.0.0.RC1 (2009-09-25)
