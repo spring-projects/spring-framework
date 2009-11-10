@@ -164,7 +164,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param args Map containing the parameter values to be used in the call.
 	 * @return map of output params.
 	 */
-	Map<String, Object> execute(Map<String, Object> args);
+	Map<String, Object> execute(Map<String, ?> args);
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name as in parameter declarations..

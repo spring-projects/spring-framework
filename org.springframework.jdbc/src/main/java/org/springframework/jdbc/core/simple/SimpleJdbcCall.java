@@ -165,7 +165,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return doExecute(args);
 	}
 
-	public Map<String, Object> execute(Map<String, Object> args) {
+	public Map<String, Object> execute(Map<String, ?> args) {
 		return doExecute(args);
 	}
 
