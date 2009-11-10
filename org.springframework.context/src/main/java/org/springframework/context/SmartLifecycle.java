@@ -20,8 +20,8 @@ package org.springframework.context;
  * @author Mark Fisher
  * @since 3.0
  */
-public interface LifecycleProcessor extends Lifecycle {
+public interface SmartLifecycle extends Lifecycle {
 
-	void onRefresh();
+	boolean isAutoStartup();
 
 }

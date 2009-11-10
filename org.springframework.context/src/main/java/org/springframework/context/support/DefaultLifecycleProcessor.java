@@ -25,6 +25,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.util.Assert;
 
 /**
@@ -66,6 +67,23 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			doStop(lifecycleBeans, beanName);
 		}
 		this.running = false;
+	}
+
+	public void onRefresh() {
+		Map<String, SmartLifecycle> lifecycleBeans = getSmartLifecycleBeans();
+		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
+			SmartLifecycle bean = lifecycleBeans.get(beanName);
+			if (bean != null && bean.isAutoStartup()) {
+				String[] dependenciesForBean = this.beanFactory.getDependenciesForBean(beanName);
+				for (String dependency : dependenciesForBean) {
+					doStart(lifecycleBeans, dependency);
+				}
+				if (!bean.isRunning()) {
+					bean.start();
+				}
+				lifecycleBeans.remove(beanName);
+			}
+		}
 	}
 
 	/**
@@ -115,6 +133,18 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			Object bean = beanFactory.getSingleton(beanName);
 			if (bean instanceof Lifecycle) {
 				beans.put(beanName, (Lifecycle) bean);
+			}
+		}
+		return beans;
+	}
+
+	private Map<String, SmartLifecycle> getSmartLifecycleBeans() {
+		String[] beanNames = beanFactory.getSingletonNames();
+		Map<String, SmartLifecycle> beans = new LinkedHashMap<String, SmartLifecycle>();
+		for (String beanName : beanNames) {
+			Object bean = beanFactory.getSingleton(beanName);
+			if (bean instanceof SmartLifecycle) {
+				beans.put(beanName, (SmartLifecycle) bean);
 			}
 		}
 		return beans;
