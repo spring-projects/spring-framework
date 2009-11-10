@@ -25,10 +25,7 @@ import javax.jms.JMSException;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.Lifecycle;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
@@ -62,7 +59,7 @@ import org.springframework.util.ClassUtils;
  * @see #doShutdown()
  */
 public abstract class AbstractJmsListeningContainer extends JmsDestinationAccessor
-		implements Lifecycle, ApplicationListener<ApplicationEvent>, BeanNameAware, DisposableBean {
+		implements SmartLifecycle, BeanNameAware, DisposableBean {
 
 	private String clientId;
 
@@ -115,6 +112,10 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		this.autoStartup = autoStartup;
 	}
 
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -135,12 +136,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		super.afterPropertiesSet();
 		validateConfiguration();
 		initialize();
-	}
-
-	public void onApplicationEvent(ApplicationEvent event) {
-		if (event instanceof ContextRefreshedEvent && this.autoStartup) {
-			this.start();
-		}
 	}
 
 	/**

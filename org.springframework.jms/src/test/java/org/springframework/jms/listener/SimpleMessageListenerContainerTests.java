@@ -35,8 +35,7 @@ import org.easymock.internal.AlwaysMatcher;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
 import org.springframework.util.ErrorHandler;
@@ -130,7 +129,9 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setMessageListener(new TestMessageListener());
 		this.container.setAutoStartup(false);
 		this.container.afterPropertiesSet();
-		this.container.onApplicationEvent(new ContextRefreshedEvent(new StaticApplicationContext()));
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.getBeanFactory().registerSingleton("messageListenerContainer", this.container);
+		context.refresh();
 
 		mockMessageConsumer.verify();
 		mockSession.verify();
@@ -181,7 +182,9 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 
 		this.container.setMessageListener(new TestMessageListener());
 		this.container.afterPropertiesSet();
-		this.container.onApplicationEvent(new ContextRefreshedEvent(new StaticApplicationContext()));
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.getBeanFactory().registerSingleton("messageListenerContainer", this.container);
+		context.refresh();
 
 		mockMessageConsumer.verify();
 		mockSession.verify();
