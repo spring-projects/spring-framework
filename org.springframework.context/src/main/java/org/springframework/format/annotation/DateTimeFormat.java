@@ -22,18 +22,22 @@ import java.lang.annotation.Target;
 
 /**
  * Declares that a field should be formatted as a date time.
- * Supports formatting by style pattern or by format pattern string.
+ * Supports formatting by style pattern, custom format pattern string, or ISO date time pattern.
  * Can be applied to <code>java.util.Date</code>, <code>java.util.Calendar</code>, <code>java.long.Long</code>, or Joda Time fields.
  * <p>
- * For style-based formatting, set the <code>style</code> attribute to be the style pattern.  
- * The first character is the date style, and the second character is the time style.
+ * For style-based formatting, set the {@link #style()} attribute to be the style pattern code.  
+ * The first character of the code is the date style, and the second character is the time style.
  * Specify a character of 'S' for short style, 'M' for medium, 'L' for long, and 'F' for full.
  * A date or time may be omitted by specifying the style character '-'.
  * <p>
- * For pattern-based formatting, set the <code>pattern</code> attribute to be the DateTime pattern, such as <code>yyyy/mm/dd h:mm:ss a</code>.
- * If the pattern attribute is specified, it takes precedence over the style attribute.
+ * For pattern-based formatting, set the {@link #pattern()} attribute to be the DateTime pattern, such as <code>yyyy/mm/dd h:mm:ss a</code>.
  * <p>
- * If no annotation attributes are specified, the default format applied is style-based with a style code of 'SS' (short date, short time).
+ * For ISO-based formatting, set the {@link #iso()} attribute to be the desired {@link ISO} format, such as {@link ISO#DATE}.
+ * <p>
+ * Each attribute is mutually exclusive, so only set one attribute per annotation instance (the one most convenient one for your formatting needs).
+ * When the pattern attribute is specified, it takes precedence over both the style and ISO attribute.
+ * When the iso attribute is specified, if takes precedence over the style attribute.
+ * When no annotation attributes are specified, the default format applied is style-based with a style code of 'SS' (short date, short time).
  * 
  * @author Keith Donald
  * @since 3.0
@@ -50,9 +54,44 @@ public @interface DateTimeFormat {
 	String style() default "SS";
 
 	/**
-	 * A pattern String to apply to format the field.
 	 * Set this attribute or the style attribute, not both.
 	 */
 	String pattern() default "";
+
+	/**
+	 * A ISO pattern to apply to format the field.
+	 * The possible ISO patterns are defined in the {@link ISO} enum.
+	 * Defaults to ISO.NONE, indicating this attribute should be ignored.
+	 */
+	ISO iso() default ISO.NONE;
+
+	/**
+	 * Common ISO date time format patterns.
+	 * @author Keith Donald
+	 * @since 3.0
+	 */
+	public enum ISO {
 		
+		/** 
+		 * The most common ISO Date Format <code>yyyy-MM-dd</code> e.g. 2000-10-31.
+		 */
+		DATE,
+
+		/** 
+		 * The most common ISO Time Format <code>hh:mm:ss.SSSZ</code> e.g. 01:30:00.000-05:00.
+		 */
+		TIME,
+
+		/** 
+		 * The most common ISO DateTime Format <code>yyyy-MM-dd'T'hh:mm:ss.SSSZ</code> e.g. 2000-10-31 01:30:00.000-05:00.
+		 * The default if no annotation value is specified.
+		 */
+		DATE_TIME,
+		
+		/**
+		 * Indicates that no ISO-based format pattern should be applied.
+		 */
+		NONE
+		
+	}
 }

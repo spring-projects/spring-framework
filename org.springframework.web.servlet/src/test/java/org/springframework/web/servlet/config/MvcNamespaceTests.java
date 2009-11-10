@@ -11,8 +11,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.format.annotation.ISODateTimeFormat;
-import org.springframework.format.annotation.ISODateTimeFormat.ISO;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -58,7 +58,7 @@ public class MvcNamespaceTests {
 	public static class TestController {
 		
 		@RequestMapping
-		public void testBind(@RequestParam @ISODateTimeFormat(ISO.DATE) Date date) {
+		public void testBind(@RequestParam @DateTimeFormat(iso=ISO.DATE) Date date) {
 			
 		}
 	}
