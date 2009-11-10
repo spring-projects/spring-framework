@@ -23,10 +23,7 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.Lifecycle;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.SmartLifecycle;
 
 /**
  * Generic bean that manages JCA 1.5 message endpoints within a Spring
@@ -147,8 +144,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
  * @see javax.resource.spi.endpoint.MessageEndpointFactory
  * @see javax.resource.spi.ActivationSpec
  */
-public class GenericMessageEndpointManager
-		implements ApplicationListener<ApplicationEvent>, Lifecycle, InitializingBean, DisposableBean {
+public class GenericMessageEndpointManager implements SmartLifecycle, InitializingBean, DisposableBean {
 
 	private ResourceAdapter resourceAdapter;
 
@@ -222,6 +218,13 @@ public class GenericMessageEndpointManager
 		this.autoStartup = autoStartup;
 	}
 
+	/**
+	 * Return the value for the 'autoStartup' property.	If "true", this
+	 * endpoint manager will start upon a ContextRefreshedEvent.
+	 */
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
 
 	/**
 	 * Prepares the message endpoint, and automatically activates it
@@ -245,15 +248,6 @@ public class GenericMessageEndpointManager
 		else if (activationSpec.getResourceAdapter() != getResourceAdapter()) {
 			throw new IllegalArgumentException("ActivationSpec [" + activationSpec +
 					"] is associated with a different ResourceAdapter: " + activationSpec.getResourceAdapter());
-		}
-	}
-
-	/**
-	 * Start upon a ContextRefreshedEvent if the 'autoStartup' property value is "true".
-	 */
-	public void onApplicationEvent(ApplicationEvent event) {
-		if (event instanceof ContextRefreshedEvent && this.autoStartup) {
-			start();
 		}
 	}
 
