@@ -32,17 +32,13 @@ import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.JobFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.Lifecycle;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -90,9 +86,8 @@ import org.springframework.util.CollectionUtils;
  * @see org.quartz.impl.StdSchedulerFactory
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public class SchedulerFactoryBean extends SchedulerAccessor
-		implements FactoryBean<Scheduler>, BeanNameAware, ApplicationContextAware,
-		ApplicationListener<ApplicationEvent>, InitializingBean, DisposableBean, Lifecycle {
+public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBean<Scheduler>, BeanNameAware,
+		ApplicationContextAware, InitializingBean, DisposableBean, SmartLifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
@@ -367,6 +362,15 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
+	}
+
+	/**
+	 * Return whether this scheduler is configured for auto-startup. If "true",
+	 * the scheduler will start after the context is refreshed and after the
+	 * start delay, if any.
+	 */
+	public boolean isAutoStartup() {
+		return this.autoStartup;
 	}
 
 	/**
@@ -679,30 +683,13 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 
 
 	//---------------------------------------------------------------------
-	// Implementation of ApplicationListener interface
-	//---------------------------------------------------------------------
-
-	public void onApplicationEvent(ApplicationEvent event) {
-		// auto-start Scheduler if demanded
-		if (event instanceof ContextRefreshedEvent && this.autoStartup) {
-			try {
-				startScheduler(this.scheduler, this.startupDelay);
-			}
-			catch (SchedulerException e) {
-				throw new BeanInitializationException("failed to auto-start scheduler", e);
-			}
-		}
-	}
-
-
-	//---------------------------------------------------------------------
 	// Implementation of Lifecycle interface
 	//---------------------------------------------------------------------
 
 	public void start() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
-				this.scheduler.start();
+				startScheduler(this.scheduler, this.startupDelay);
 			}
 			catch (SchedulerException ex) {
 				throw new SchedulingException("Could not start Quartz Scheduler", ex);
