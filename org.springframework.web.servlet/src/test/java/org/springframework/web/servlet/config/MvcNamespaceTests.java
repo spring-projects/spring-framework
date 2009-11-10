@@ -39,10 +39,10 @@ public class MvcNamespaceTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml", getClass()));
 		assertEquals(2, container.getBeanDefinitionCount());
-		DefaultAnnotationHandlerMapping mapping = container.getBean("defaultAnnotationHandlerMapping", DefaultAnnotationHandlerMapping.class);
+		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
-		AnnotationMethodHandlerAdapter adapter = container.getBean("annotationMethodHandlerAdapter", AnnotationMethodHandlerAdapter.class);
+		AnnotationMethodHandlerAdapter adapter = container.getBean(AnnotationMethodHandlerAdapter.class);
 		assertNotNull(adapter);
 
 		TestController handler = new TestController();
