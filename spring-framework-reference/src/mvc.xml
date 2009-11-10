@@ -281,7 +281,7 @@
     <interfacename>WebApplicationContext</interfacename>, which inherits all
     the beans already defined in the root
     <interfacename>WebApplicationContext</interfacename>. These inherited
-    beans defined can be overridden in the servlet-specific scope, <!--Preceding line is garbled; how should it read?-->and
+    beans can be overridden in the servlet-specific scope, and
     you can define new scope-specific beans local to a given servlet
     instance.</para>
 
@@ -303,7 +303,7 @@
     the framework <!--Spring MVC or Spring Framework?--><emphasis><emphasis>looks
     for a file named</emphasis>
     <literal>[servlet-name]-servlet.xml</literal></emphasis> in the
-    <literal>WEB-INF</literal> directory of your web application and create
+    <literal>WEB-INF</literal> directory of your web application and creates
     the beans defined there, overriding the definitions of any beans defined
     with the same name in the global scope.</para>
 
@@ -505,10 +505,12 @@
     <interfacename>LastModified</interfacename> interface is returned to the
     client.</para>
 
-    <para>You can customize Spring's <classname>DispatcherServlet</classname>
-    by adding context parameters in the <literal>web.xml</literal> file or
-    servlet initialization parameters. See the following table.</para>
-    <!--Reword above sentence to specify whether configuring parameters in table configures last-modification-date, or are they further --><!--customization for some other purpose? If so, need to explain how you config last-modification-date-->
+    <para>You can customize individual <classname>DispatcherServlet</classname>
+      instances by adding servlet initialization parameters (<literal>init-param</literal> elements) 
+       to the servlet declaration in the <literal>web.xml</literal> file. See the following table for the list
+      of supported parameters.</para>
+    <!--Reword above sentence to specify whether configuring parameters in table configures last-modification-date, or are they further -->
+    <!--customization for some other purpose? If so, need to explain how you config last-modification-date-->
 
     <table id="mvc-disp-servlet-init-params-tbl">
       <title><classname>DispatcherServlet</classname> initialization
