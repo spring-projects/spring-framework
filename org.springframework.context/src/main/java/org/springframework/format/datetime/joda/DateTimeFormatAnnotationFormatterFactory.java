@@ -15,8 +15,25 @@
  */
 package org.springframework.format.datetime.joda;
 
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.joda.time.DateMidnight;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.ReadableInstant;
+import org.joda.time.ReadablePartial;
 import org.joda.time.format.DateTimeFormatter;
+import org.springframework.format.AnnotationFormatterFactory;
+import org.springframework.format.Parser;
+import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation.
@@ -24,12 +41,57 @@ import org.springframework.format.annotation.DateTimeFormat;
  * @since 3.0
  * @see DateTimeFormat
  */
-public final class DateTimeFormatAnnotationFormatterFactory extends AbstractDateTimeAnnotationFormatterFactory<DateTimeFormat> {
+public final class DateTimeFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<DateTimeFormat> {
 
-	protected DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
-		String pattern = annotation.pattern();
-		if (!pattern.isEmpty()) {
-			return forPattern(pattern);
+	private final Set<Class<?>> fieldTypes;
+	
+	public DateTimeFormatAnnotationFormatterFactory() {
+		this.fieldTypes = Collections.unmodifiableSet(createFieldTypes());
+	}
+
+	public Set<Class<?>> getFieldTypes() {
+		return this.fieldTypes;
+	}
+
+	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
+		DateTimeFormatter formatter = configureDateTimeFormatterFrom(annotation);		
+		if (ReadableInstant.class.isAssignableFrom(fieldType)) {
+			return new ReadableInstantPrinter(formatter);
+		} else if (ReadablePartial.class.isAssignableFrom(fieldType)) {
+			return new ReadablePartialPrinter(formatter);
+		} else if (Calendar.class.isAssignableFrom(fieldType)) {
+			// assumes Calendar->ReadableInstant converter is registered
+			return new ReadableInstantPrinter(formatter);			
+		} else {
+			// assumes Date->Long converter is registered
+			return new MillisecondInstantPrinter(formatter);
+		}		
+	}
+
+	public Parser<DateTime> getParser(DateTimeFormat annotation, Class<?> fieldType) {
+		return new DateTimeParser(configureDateTimeFormatterFrom(annotation));				
+	}
+
+	// internal helpers
+	
+	private Set<Class<?>> createFieldTypes() {
+		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
+		fieldTypes.add(LocalDate.class);
+		fieldTypes.add(LocalTime.class);
+		fieldTypes.add(LocalDateTime.class);
+		fieldTypes.add(DateTime.class);
+		fieldTypes.add(DateMidnight.class);
+		fieldTypes.add(Date.class);
+		fieldTypes.add(Calendar.class);
+		fieldTypes.add(Long.class);
+		return fieldTypes;
+	}
+
+	private DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
+		if (!annotation.pattern().isEmpty()) {
+			return forPattern(annotation.pattern());
+		} else if (annotation.iso() != ISO.NONE) {
+			return forISO(annotation.iso());
 		} else {
 			return forStyle(annotation.style());
 		}
@@ -37,6 +99,16 @@ public final class DateTimeFormatAnnotationFormatterFactory extends AbstractDate
 
 	private DateTimeFormatter forPattern(String pattern) {
 		return org.joda.time.format.DateTimeFormat.forPattern(pattern);
+	}
+	
+	private DateTimeFormatter forISO(ISO iso) {
+		if (iso == ISO.DATE) {
+			return org.joda.time.format.ISODateTimeFormat.date();
+		} else if (iso == ISO.TIME) {
+			return org.joda.time.format.ISODateTimeFormat.time();
+		} else {
+			return org.joda.time.format.ISODateTimeFormat.dateTime();
+		}		
 	}
 
 	private DateTimeFormatter forStyle(String style) {

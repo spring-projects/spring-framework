@@ -109,7 +109,6 @@ public class JodaTimeFormattingConfigurer {
 		formatterRegistry.addFormatterForFieldType(Date.class, new MillisecondInstantPrinter(jodaDateTimeFormatter), dateTimeParser);
 		
 		formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
-		formatterRegistry.addFormatterForFieldAnnotation(new ISODateTimeFormatAnnotationFormatterFactory());
 	}
 
 	// internal helpers
