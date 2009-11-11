@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public interface SqlParameterSource {
 	int getSqlType(String paramName);
 
 	/**
-	 * Determine the type ane for the specified named parameter.
+	 * Determine the type name for the specified named parameter.
 	 * @param paramName the name of the parameter
 	 * @return the type name of the specified parameter,
 	 * or <code>null</code> if not known
