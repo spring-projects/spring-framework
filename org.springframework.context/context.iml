@@ -130,6 +130,26 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.jboss.cl/com.springsource.org.jboss.classloader/2.0.5.GA/com.springsource.org.jboss.classloader-2.0.5.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.jboss.util/com.springsource.org.jboss.util/2.2.9.GA/com.springsource.org.jboss.util-2.2.9.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.jboss.util/com.springsource.org.jboss.util/2.2.9.GA/com.springsource.org.jboss.util-sources-2.2.9.GA.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.jruby/com.springsource.org.jruby/1.2.0/com.springsource.org.jruby-1.2.0.jar!/" />
         </CLASSES>
         <JAVADOC />
