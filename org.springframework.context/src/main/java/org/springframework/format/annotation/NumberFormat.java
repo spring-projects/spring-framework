@@ -62,17 +62,17 @@ public @interface NumberFormat {
 	public enum Style {
 
 		/**
-		 * General-purpose number format for the current locale.
+		 * The general-purpose number format for the current locale.
 		 */
 		NUMBER,
 		
 		/**
-		 * A currency format for the current locale.
+		 * The currency format for the current locale.
 		 */
 		CURRENCY,
 
 		/**
-		 * A percent format for the current locale.
+		 * The percent format for the current locale.
 		 */
 		PERCENT
 
