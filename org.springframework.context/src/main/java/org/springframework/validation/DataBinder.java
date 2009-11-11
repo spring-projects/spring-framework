@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
@@ -459,17 +460,25 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return this.validator;
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of PropertyEditorRegistry/TypeConverter interface
+	//---------------------------------------------------------------------
+
 	/**
-	 * Set the ConversionService to use for field value formatting in preference to JavaBeans PropertyEditors.
-	 * @since 3.0
+	 * Specify a Spring 3.0 ConversionService to use for converting
+	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 */
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
-	//---------------------------------------------------------------------
-	// Implementation of PropertyEditorRegistry/TypeConverter interface
-	//---------------------------------------------------------------------
+	/**
+	 * Return the associated ConversionService, if any.
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
+	}
 
 	@SuppressWarnings("unchecked")
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
@@ -492,6 +501,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	public <T> T convertIfNecessary(
 			Object value, Class<T> requiredType, MethodParameter methodParam) throws TypeMismatchException {
+
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
 	}
 
