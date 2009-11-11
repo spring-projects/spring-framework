@@ -19,7 +19,7 @@
 			<xsd:sequence minOccurs="0">
 				<xsd:element name="expected-type" type="typedParameterType" minOccurs="0" maxOccurs="1"/>
 				<xsd:element name="assignable-to" type="assignableToType" minOccurs="0" maxOccurs="1"/>
-				<xsd:element name="exports" type="exportsType" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="exports" type="exportsType" minOccurs="0" maxOccurs="unbounded"/>
 				<xsd:element name="registers-scope" type="registersScopeType" minOccurs="0" maxOccurs="unbounded"/>
 				<xsd:element name="expected-method" type="expectedMethodType" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:sequence>
