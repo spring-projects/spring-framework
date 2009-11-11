@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * 
  * @author Keith Donald
  * @since 3.0
- * @see org.joda.time.format.DateTimeFormat
+ * @see java.text.NumberFormat
  */
 @Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
