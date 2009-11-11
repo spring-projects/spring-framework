@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.InfrastructureProxy;
 import org.springframework.util.Assert;
+import org.springframework.aop.scope.ScopedObject;
 
 /**
  * Utility methods for triggering specific {@link TransactionSynchronization}
@@ -55,7 +56,13 @@ public abstract class TransactionSynchronizationUtils {
 	 */
 	static Object unwrapResourceIfNecessary(Object resource) {
 		Assert.notNull(resource, "Resource must not be null");
-		return (resource instanceof InfrastructureProxy ? ((InfrastructureProxy) resource).getWrappedObject() : resource);
+		Object resourceRef = resource;
+		if (resource instanceof ScopedObject) {
+			// First unwrap a scoped proxy.
+			resourceRef = ((ScopedObject) resource).getTargetObject();
+		}
+		// Now unwrap infrastructure proxy
+		return (resourceRef instanceof InfrastructureProxy ? ((InfrastructureProxy) resourceRef).getWrappedObject() : resourceRef);
 	}
 
 
