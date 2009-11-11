@@ -763,16 +763,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					throw new NoSuchBeanDefinitionException(type,
-							"Unsatisfied dependency of type [" + type + "]: expected at least 1 matching bean");
+					raiseNoSuchBeanDefinitionException(type, "", descriptor);
 				}
 				return null;
 			}
 			if (matchingBeans.size() > 1) {
 				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
-					throw new NoSuchBeanDefinitionException(type,
-							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
+					throw new NoSuchBeanDefinitionException(type, "expected single matching bean but found " +
+							matchingBeans.size() + ": " + matchingBeans.keySet());
 				}
 				if (autowiredBeanNames != null) {
 					autowiredBeanNames.add(primaryBeanName);
