@@ -912,26 +912,28 @@ public class MyService {
 	<section id="ui.format">
 		<title>Spring 3 Field Formatting</title>
 		<para>
-			<link linkend="core.convert"><filename>core.convert</filename></link> is a general-purpose type conversion system.
-			It provides a strongly-typed Converter SPI for implementing conversion logic from one type to another and is not limited to just converting Strings.
-			As discussed in the previous section, a Spring Container can be configured to use this system to bind bean property values.
-			In addition, both the Spring Expression Language (SpEL) and DataBinder can use this system to bind values.
+			As discussed in the previous section, <link linkend="core.convert"><filename>core.convert</filename></link> is a general-purpose type conversion system.
+			It provides a unified ConversionService API as well as a strongly-typed Converter SPI for implementing conversion logic from one type to another.
+			A Spring Container uses this system to bind bean property values.
+			In addition, both the Spring Expression Language (SpEL) and DataBinder use this system to bind field values.
 			For example, when SpEL needs to coerce a <classname>Short</classname> to a <classname>Long</classname> to complete an <function>expression.setValue(Object bean, Object value)</function> attempt, the core.convert system performs the coercion.
 		</para>
 		<para>
 			Now consider the type conversion requirements of a typical client environment such as a web or desktop application.
 			In such environments, you typically convert <emphasis>from String</emphasis> to support the client postback process, as well as back <emphasis>to String</emphasis> to support the view rendering process.
-			The more general <emphasis>core.convert</emphasis> Converter SPI does not address this scenario directly.
-			To directly address this, Spring 3 introduces a convenient <emphasis>format</emphasis> SPI that provides a simple and robust alternative to PropertyEditors for client environments.
+			In addition, you often need to localize String values.
+			The more general <emphasis>core.convert</emphasis> Converter SPI does not address such <emphasis>formatting</emphasis> requirements directly.
+			To directly address them, Spring 3 introduces a convenient Formatter SPI that provides a simple and robust alternative to PropertyEditors for client environments.
 		</para>
 		<para>
-			In general, use the Converter SPI when you need to implement general-purpose type conversion logic.
-			Use Formatters when you're working in a client environment, such as a web application, and need to parse and print localized field values.
+			In general, use the Converter SPI when you need to implement general-purpose type conversion logic; for example, for converting between a java.util.Date and and java.lang.Long.
+			Use the Formatter SPI when you're working in a client environment, such as a web application, and need to parse and print localized field values.
+			The ConversionService provides a unified type conversion API for both SPIs.
 		</para>
 		<section id="format-Formatter-SPI">
 			<title>Formatter SPI</title>
 			<para>
-				The <literal>org.springframework.format</literal> SPI to implement field formatting logic is simple and strongly typed:
+				The Formatter SPI to implement field formatting logic is simple and strongly typed:
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.format;
@@ -1010,8 +1012,8 @@ public final class DateFormatter implements Formatter<Date> {
 		<section id="format-CustomFormatAnnotations">
 			<title>Annotation-driven Formatting</title>
 			<para>
-				Field formatting can be triggered by field type or annotation.
-				To bind an annotation to a formatter, implement AnnotationFormatterFactory:
+				As you will see, field formatting can be configured by field type or annotation.
+				To bind an Annotation to a formatter, implement AnnotationFormatterFactory:
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.format;
@@ -1028,13 +1030,13 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 			</programlisting>
 			<para>
 				Parameterize A to be the field annotationType you wish to associate formatting logic with, for example <code>org.springframework.format.annotation.DateTimeFormat</code>.
-				Implement the <methodname>getFieldTypes</methodname> operation return the types of fields the annotation may be used on.
-				Implement the <methodname>getPrinter</methodname> operation to return the Printer to print the value of an annotated field.
-				Implement the <methodname>getParser</methodname> operation to return the Parser to parse the value of an annotated field.
+				Have <methodname>getFieldTypes</methodname> return the types of fields the annotation may be used on.
+				Have <methodname>getPrinter</methodname> return a Printer to print the value of an annotated field.
+				Have <methodname>getParser</methodname> return a Parser to parse a clientValue for an annotated field.
 			</para>
 			<para>
-				The example AnnotationFormatterFactory implementation below binds a @NumberFormat Annotation to a formatter.
-				This annotation allows a number style or pattern to be specified:
+				The example AnnotationFormatterFactory implementation below binds the @NumberFormat Annotation to a formatter.
+				This annotation allows either a number style or pattern to be specified:
 			</para>
 			<programlisting language="java"><![CDATA[
 public final class NumberFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<NumberFormat> {
@@ -1069,7 +1071,7 @@ public final class NumberFormatAnnotationFormatterFactory implements AnnotationF
 }]]>
 			</programlisting>
 			<para>
-				Then, to trigger formatting, annotate fields with @NumberFormat:
+				To trigger formatting, simply annotate fields with @NumberFormat:
 			</para>
 			<programlisting language="java"><![CDATA[
 public class MyModel {
@@ -1083,11 +1085,11 @@ public class MyModel {
 				<title>Format Annotation API</title>
 				<para>
 					A portable format annotation API exists in the <filename>org.springframework.format.annotation</filename> package.
-					Use the @NumberFormat to apply formatting to java.lang.Number fields.
-					Use the @DateTimeFormat to apply formatting to java.util.Date, java.util.Calendar, java.util.Long, or Joda Time fields. 
+					Use @NumberFormat to format java.lang.Number fields.
+					Use @DateTimeFormat to format java.util.Date, java.util.Calendar, java.util.Long, or Joda Time fields. 
 				</para>
 				<para>
-					The example below shows use of the DateTimeFormat annotation to format a java.util.Date as a ISO Date (yyyy-MM-dd):
+					The example below uses @DateTimeFormat to format a java.util.Date as a ISO Date (yyyy-MM-dd):
 				</para>
 				<programlisting language="java"><![CDATA[
 public class MyModel {
@@ -1103,7 +1105,7 @@ public class MyModel {
 			<title>FormatterRegistry SPI</title>
 			<para>
 				At runtime, Formatters are registered in a FormatterRegistry.
-				A FormatterRegistry allows you to configure Formatting rules centrally, instead of duplicating such configuration across your Controllers.
+				The FormatterRegistry SPI allows you to configure Formatting rules centrally, instead of duplicating such configuration across your Controllers.
 				For example, you might want to enforce that all Date fields are formatted a certain way, or fields with a specific annotation are formatted in a certain way.
 				With a shared FormatterRegistry, you define these rules once and they are applied whenever formatting is needed.
 			</para>
@@ -1125,16 +1127,16 @@ public interface FormatterRegistry {
 			<para>
 				As shown above, Formatters can be registered by fieldType or annotation.
 				<classname>FormattingConversionService</classname> is the implementation of <classname>FormatterRegistry</classname> suitable for most environments.
-				This implementation may be configured programatically or declaratively as a Spring bean with <classname>FormattingConversionServiceFactoryBean</classname>.
-				Because it also implements <classname>ConversionService</classname>, it can be configured for use with Spring's DataBinder as well as SpEL.
+				This implementation may be configured programatically, or declaratively as a Spring bean using <classname>FormattingConversionServiceFactoryBean</classname>.
+				Because this implemementation also implements <classname>ConversionService</classname>, it can be directly configured for use with Spring's DataBinder and the Spring Expression Language (SpEL).
 			</para>
 		</section>
 		<section id="format-configuring-FormatterRegistry">
 			<title>Configuring Formatting in Spring MVC</title>
 			<para>
-				In a Spring MVC application, you can configure a ConversionService instance explicity as an attribute of the <literal>annotation-driven</literal> element of the MVC namespace.
-				This ConversionService will then be used any time type conversion is needed during Controller model binding.
-				If not configured explicitly, Spring MVC will automatically register default formatters for common types such as numbers and dates.
+				In a Spring MVC application, you may configure a custom ConversionService instance explicity as an attribute of the <literal>annotation-driven</literal> element of the MVC namespace.
+				This ConversionService will then be used anytime a type conversion is required during Controller model binding.
+				If not configured explicitly, Spring MVC will automatically register default formatters and converters for common types such as numbers and dates.
 			</para>
 			<para>
 				To rely on default formatting rules, no custom configuration is required in your Spring MVC config XML:
@@ -1144,8 +1146,11 @@ public interface FormatterRegistry {
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
     <mvc:annotation-driven/>
 	
@@ -1157,15 +1162,18 @@ public interface FormatterRegistry {
 				Full support for the Joda Time formatting library is also installed if Joda Time is present on the classpath.
 			</para>
 			<para>
-				To inject a ConversionService instance with custom formatters/converters registered, set the conversion-service attribute:
+				To inject a ConversionService instance with custom formatters and converters registered, set the conversion-service attribute:
 			</para>
 			<programlisting language="xml"><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
     <mvc:annotation-driven conversion-service="conversionService" />
 	
@@ -1175,7 +1183,7 @@ public interface FormatterRegistry {
 ]]>
 			</programlisting>
 			<para>
-				A custom ConversionService instance is often constructed by a FactoryBean, which internally registers custom Formatters and Converters programatically before the ConversionService is returned.
+				A custom ConversionService instance is often constructed by a FactoryBean that internally registers custom Formatters and Converters programatically before the ConversionService is returned.
 				See FormatingConversionServiceFactoryBean for an example.		
 			</para>
 		</section>
