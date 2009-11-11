@@ -922,16 +922,25 @@ public class MyService {
 			Now consider the type conversion requirements of a typical client environment such as a web or desktop application.
 			In such environments, you typically convert <emphasis>from String</emphasis> to support the client postback process, as well as back <emphasis>to String</emphasis> to support the view rendering process.
 			The more general <emphasis>core.convert</emphasis> Converter SPI does not address this scenario directly.
-			To directly address this, Spring 3 introduces a conveient <emphasis>format</emphasis> SPI that provides a simple and robust alternative to PropertyEditors for client environments.
+			To directly address this, Spring 3 introduces a convenient <emphasis>format</emphasis> SPI that provides a simple and robust alternative to PropertyEditors for client environments.
 		</para>
 		<para>
 			In general, use the Converter SPI when you need to implement general-purpose type conversion logic.
-			Use Formatters when you're working in a client environment, such as a web application, and need to apply String parsing, printing, and localization logic to form field values.
+			Use Formatters when you're working in a client environment, such as a web application, and need to parse and print localized field values.
 		</para>
 		<section id="format-Formatter-SPI">
 			<title>Formatter SPI</title>
 			<para>
 				The <literal>org.springframework.format</literal> SPI to implement field formatting logic is simple and strongly typed:
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.format;
+
+public interface Formatter<T> extends Printer<T>, Parser<T> {
+}]]>
+			</programlisting>
+			<para>
+				Where Formatter extends from the Printer and Parser building-block interfaces:
 			</para>
 			<programlisting language="java"><![CDATA[
 public interface Printer<T> {
@@ -945,22 +954,18 @@ public interface Parser<T> {
     T parse(String clientValue, Locale locale) throws ParseException;
 }]]>
 			</programlisting>
-			<programlisting language="java"><![CDATA[
-public interface Formatter<T> extends Printer<T>, Parser<T> {
-}]]>
-			</programlisting>
 			<para>
 				To create your own Formatter, simply implement the Formatter interface above.
-				Parameterize T to be the type of object you are formatting, for example, <classname>java.util.Date</classname>.
+				Parameterize T to be the type of object you wish to format, for example, <classname>java.util.Date</classname>.
 				Implement the <methodname>print</methodname> operation to print an instance of T for display in the client locale.
 				Implement the <methodname>parse</methodname> operation to parse an instance of T from the formatted representation returned from the client locale.
 				Your Formatter should throw a ParseException or IllegalArgumentException if a parse attempt fails.
 				Take care to ensure your Formatter implementation is thread-safe.
 			</para>
 			<para>
-				Several Formatter implementations are provided in <filename>format</filename>subpackages as a convenience.
-				The <filename>datetime</filename> package provides a DateFormatter to format java.util.Date objects with a java.text.DateFormat.
+				Several Formatter implementations are provided in <filename>format</filename> subpackages as a convenience.
 				The <filename>number</filename> package provides a NumberFormatter, CurrencyFormatter, and PercentFormatter to format java.lang.Number objects using a java.text.NumberFormat.
+				The <filename>datetime</filename> package provides a DateFormatter to format java.util.Date objects with a java.text.DateFormat.
 				The <filename>datetime.joda</filename> package provides comprehensive datetime formatting support based on the <ulink url="http://joda-time.sourceforge.net">Joda Time library</ulink>.
 			</para>
 			<para>
@@ -1003,10 +1008,10 @@ public final class DateFormatter implements Formatter<Date> {
 			</para>
 		</section>
 		<section id="format-CustomFormatAnnotations">
-			<title>Custom Format Annotations</title>
+			<title>Annotation-driven Formatting</title>
 			<para>
-				Field formatting can be triggered by annotating model properties.
-				To bind a custom annotation to a Formatter instance, implement AnnotationFormatterFactory:
+				Field formatting can be triggered by field type or annotation.
+				To bind an annotation to a formatter, implement AnnotationFormatterFactory:
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.format;
@@ -1026,53 +1031,45 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 				Implement the <methodname>getFieldTypes</methodname> operation return the types of fields the annotation may be used on.
 				Implement the <methodname>getPrinter</methodname> operation to return the Printer to print the value of an annotated field.
 				Implement the <methodname>getParser</methodname> operation to return the Parser to parse the value of an annotated field.
-				Take care to ensure your AnnotationFormatterFactory implementation is thread-safe.				
 			</para>
 			<para>
-				The example implementation below binds a @NumberFormat instance to a Formatter instance.
-				This particular annotation allows the NumberFormat style or pattern to be specified:
+				The example AnnotationFormatterFactory implementation below binds a @NumberFormat Annotation to a formatter.
+				This annotation allows a number style or pattern to be specified:
 			</para>
 			<programlisting language="java"><![CDATA[
 public final class NumberFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<NumberFormat> {
 
-	public Set<Class<?>> getFieldTypes() {
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(7);
-		fieldTypes.add(Short.class);
-		fieldTypes.add(Integer.class);
-		fieldTypes.add(Long.class);
-		fieldTypes.add(Float.class);
-		fieldTypes.add(Double.class);
-		fieldTypes.add(BigDecimal.class);
-		fieldTypes.add(BigInteger.class);
-		return fieldTypes;
-	}
+    public Set<Class<?>> getFieldTypes() {
+        return new HashSet<Class<?>>(asList(new Class<?>[] { 
+            Short.class, Integer.class, Long.class, Float.class, Double.class, BigDecimal.class, BigInteger.class }));
+    }
+    
+    public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
+        return configureFormatterFrom(annotation, fieldType);
+    }
+    
+    public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
+        return configureFormatterFrom(annotation, fieldType);
+    }
 
-	public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
-		return configureFormatterFrom(annotation, fieldType);
-	}
-	
-	public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
-		return configureFormatterFrom(annotation, fieldType);
-	}
-
-	private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
-		if (!annotation.pattern().isEmpty()) {
-			return new NumberFormatter(annotation.pattern());
-		} else {
-			Style style = annotation.style();
-			if (style == Style.PERCENT) {
-				return new PercentFormatter();
-			} else if (style == Style.CURRENCY) {
-				return new CurrencyFormatter();
-			} else {
-				return new NumberFormatter();
-			}
-		}
-	}
+    private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
+        if (!annotation.pattern().isEmpty()) {
+            return new NumberFormatter(annotation.pattern());
+        } else {
+            Style style = annotation.style();
+            if (style == Style.PERCENT) {
+                return new PercentFormatter();
+            } else if (style == Style.CURRENCY) {
+                return new CurrencyFormatter();
+            } else {
+                return new NumberFormatter();
+            }
+        }
+    }
 }]]>
 			</programlisting>
 			<para>
-				Then, to trigger formatting, simply annotate a property with @NumberFormat in your model:
+				Then, to trigger formatting, annotate fields with @NumberFormat:
 			</para>
 			<programlisting language="java"><![CDATA[
 public class MyModel {
@@ -1082,27 +1079,30 @@ public class MyModel {
 	
 }]]>
 			</programlisting>
-			<para>
-				A format annotation API exists in the <filename>org.springframework.format.annotation</filename> package.
-				Use the NumberFormat annotation to apply formatting to java.lang.Number fields.
-				Use the DateTimeFormat annotation to apply formatting to java.util.Date, java.util.Calendar, java.util.Long, or Joda Time fields. 
-			</para>
-			<para>
-				The example below shows use of the DateTimeFormat annotation to format a java.util.Date as a ISO Date (yyyy-MM-dd):
-			</para>
-			<programlisting language="java"><![CDATA[
+			<section id="format.annotations.api">
+				<title>Format Annotation API</title>
+				<para>
+					A portable format annotation API exists in the <filename>org.springframework.format.annotation</filename> package.
+					Use the @NumberFormat to apply formatting to java.lang.Number fields.
+					Use the @DateTimeFormat to apply formatting to java.util.Date, java.util.Calendar, java.util.Long, or Joda Time fields. 
+				</para>
+				<para>
+					The example below shows use of the DateTimeFormat annotation to format a java.util.Date as a ISO Date (yyyy-MM-dd):
+				</para>
+				<programlisting language="java"><![CDATA[
 public class MyModel {
 
     @DateTimeFormat(iso=ISO.DATE)
     private Date date;
 	
 }]]>
-			</programlisting>
+				</programlisting>		
+			</section>
 		</section>
 		<section id="format-FormatterRegistry-SPI">
 			<title>FormatterRegistry SPI</title>
 			<para>
-				When installed, Formatters are registered in a FormatterRegistry.
+				At runtime, Formatters are registered in a FormatterRegistry.
 				A FormatterRegistry allows you to configure Formatting rules centrally, instead of duplicating such configuration across your Controllers.
 				For example, you might want to enforce that all Date fields are formatted a certain way, or fields with a specific annotation are formatted in a certain way.
 				With a shared FormatterRegistry, you define these rules once and they are applied whenever formatting is needed.
@@ -1134,10 +1134,10 @@ public interface FormatterRegistry {
 			<para>
 				In a Spring MVC application, you can configure a ConversionService instance explicity as an attribute of the <literal>annotation-driven</literal> element of the MVC namespace.
 				This ConversionService will then be used any time type conversion is needed during Controller model binding.
-				If not configured explicitly, Spring MVC will configure a FormattingConversionService instance that registers default formatters for number and date types.
+				If not configured explicitly, Spring MVC will automatically register default formatters for common types such as numbers and dates.
 			</para>
 			<para>
-				To rely on default formatting rules, no explicit configuration is required in your Spring MVC config XML:
+				To rely on default formatting rules, no custom configuration is required in your Spring MVC config XML:
 			</para>
 			<programlisting language="xml"><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1154,7 +1154,7 @@ public interface FormatterRegistry {
 			</programlisting>
 			<para>
 				With this one-line of configuation, default formatters for Numbers and Date types will be installed, including support for the @NumberFormat and @DateTimeFormat annotations.
-				This also includes full support for the Joda Time formatting library if Joda Time is present on the classpath.
+				Full support for the Joda Time formatting library is also installed if Joda Time is present on the classpath.
 			</para>
 			<para>
 				To inject a ConversionService instance with custom formatters/converters registered, set the conversion-service attribute:
