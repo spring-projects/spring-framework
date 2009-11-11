@@ -23,6 +23,34 @@
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="conversion-service" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.core.convert.ConversionService"><![CDATA[
+	The bean name of the ConversionService that is to be used for type conversion during field binding.
+	This attribute is not required, and only needs to be specified explicitly if custom converters need to be configured.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.core.convert.ConversionService" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="validator" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.validation.Validator"><![CDATA[
+	The bean name of the Validator that is to be used to validate Controller model objects.
+	This attribute is not required, and only needs to be specified explicitly if a custom Validator needs to be configured.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.validation.Validator" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>			
+		</xsd:complexType>
 	</xsd:element>
 
 </xsd:schema>
