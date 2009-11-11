@@ -235,9 +235,9 @@ public class BeanDefinitionParserDelegate {
 
 	private final XmlReaderContext readerContext;
 
-	private DocumentDefaultsDefinition defaults;
+	private final DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
 
-	private ParseState parseState = new ParseState();
+	private final ParseState parseState = new ParseState();
 
 	/**
 	 * Stores all used bean names so we can enforce uniqueness on a per file basis.
@@ -295,10 +295,19 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Initialize the default lazy-init, autowire, dependency check settings,
 	 * init-method, destroy-method and merge settings.
+	 * @see #populateDefaults(DocumentDefaultsDefinition, org.w3c.dom.Element)
 	 * @see #getDefaults()
 	 */
 	public void initDefaults(Element root) {
-		DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
+		populateDefaults(this.defaults, root);
+		this.readerContext.fireDefaultsRegistered(this.defaults);
+	}
+
+	/**
+	 * Populate the given DocumentDefaultsDefinition instance with the default lazy-init,
+	 * autowire, dependency check settings, init-method, destroy-method and merge settings.
+	 */
+	protected void populateDefaults(DocumentDefaultsDefinition defaults, Element root) {
 		defaults.setLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
 		defaults.setMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
 		defaults.setAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
@@ -313,9 +322,6 @@ public class BeanDefinitionParserDelegate {
 			defaults.setDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
 		}
 		defaults.setSource(this.readerContext.extractSource(root));
-
-		this.defaults = defaults;
-		this.readerContext.fireDefaultsRegistered(defaults);
 	}
 
 	/**
@@ -332,13 +338,11 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
 		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
-		if (this.defaults != null) {
-			bdd.setLazyInit("TRUE".equalsIgnoreCase(this.defaults.getLazyInit()));
-			bdd.setDependencyCheck(this.getDependencyCheck(DEFAULT_VALUE));
-			bdd.setAutowireMode(this.getAutowireMode(DEFAULT_VALUE));
-			bdd.setInitMethodName(this.defaults.getInitMethod());
-			bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
-		}
+		bdd.setLazyInit("TRUE".equalsIgnoreCase(this.defaults.getLazyInit()));
+		bdd.setDependencyCheck(this.getDependencyCheck(DEFAULT_VALUE));
+		bdd.setAutowireMode(this.getAutowireMode(DEFAULT_VALUE));
+		bdd.setInitMethodName(this.defaults.getInitMethod());
+		bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
 		return bdd;
 	}
 
@@ -348,7 +352,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public String[] getAutowireCandidatePatterns() {
 		String candidatePattern = this.defaults.getAutowireCandidates();
-		return candidatePattern == null ? null : StringUtils.commaDelimitedListToStringArray(candidatePattern);
+		return (candidatePattern != null ? StringUtils.commaDelimitedListToStringArray(candidatePattern) : null);
 	}
 
 
