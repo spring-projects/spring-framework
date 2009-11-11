@@ -63,11 +63,7 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 
 
 	public void visit(String name, Object value) {
-		Object valueToUse = value;
-		if (valueToUse instanceof Type) {
-			valueToUse = ((Type) value).getClassName();
-		}
-		this.localAttributes.put(name, valueToUse);
+		this.localAttributes.put(name, value);
 	}
 
 	public void visitEnum(String name, String desc, String value) {
@@ -93,9 +89,6 @@ final class AnnotationAttributesReadingVisitor implements AnnotationVisitor {
 		return new AnnotationVisitor() {
 			public void visit(String name, Object value) {
 				Object newValue = value;
-				if (newValue instanceof Type) {
-					newValue = ((Type) value).getClassName();
-				}
 				Object existingValue = localAttributes.get(attrName);
 				if (existingValue != null) {
 					newValue = ObjectUtils.addObjectToArray((Object[]) existingValue, newValue);

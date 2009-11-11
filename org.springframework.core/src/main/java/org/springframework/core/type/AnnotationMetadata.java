@@ -84,6 +84,20 @@ public interface AnnotationMetadata extends ClassMetadata {
 	Map<String, Object> getAnnotationAttributes(String annotationType);
 
 	/**
+	 * Retrieve the attributes of the annotation of the given type,
+	 * if any (i.e. if defined on the underlying class, as direct
+	 * annotation or as meta-annotation).
+	 * @param annotationType the annotation type to look for
+	 * @param classValuesAsString whether to convert class references to String
+	 * class names for exposure as values in the returned Map, instead of Class
+	 * references which might potentially have to be loaded first
+	 * @return a Map of attributes, with the attribute name as key (e.g. "value")
+	 * and the defined attribute value as Map value. This return value will be
+	 * <code>null</code> if no matching annotation is defined.
+	 */
+	Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString);
+
+	/**
 	 * Determine whether the underlying class has any methods that are
 	 * annotated (or meta-annotated) with the given annotation type.
 	 */
