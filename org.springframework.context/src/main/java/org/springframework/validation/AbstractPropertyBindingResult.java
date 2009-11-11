@@ -24,7 +24,7 @@ import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.format.support.FormattingPropertyEditorAdapter;
+import org.springframework.core.convert.support.ConvertingPropertyEditorAdapter;
 import org.springframework.util.Assert;
 
 /**
@@ -151,7 +151,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 			TypeDescriptor td = (field != null ?
 					getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) :
 					TypeDescriptor.valueOf(valueType));
-			editor = new FormattingPropertyEditorAdapter(this.conversionService, valueType);
+			editor = new ConvertingPropertyEditorAdapter(this.conversionService, td);
 		}
 		return editor;
 	}
