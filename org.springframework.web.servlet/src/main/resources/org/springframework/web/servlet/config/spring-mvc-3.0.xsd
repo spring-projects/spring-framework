@@ -14,14 +14,8 @@
 		<xsd:annotation>
 			<xsd:documentation
 				source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
-	Configures the Spring MVC Annotated Controller programming model.
+	Configures the annotation-driven Spring MVC Controller programming model.
 			]]></xsd:documentation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports type="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
-					<tool:exports type="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
-				</tool:annotation>
-			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="conversion-service" type="xsd:string">
