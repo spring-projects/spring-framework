@@ -23,6 +23,8 @@
 					<xsd:documentation source="java:org.springframework.core.convert.ConversionService"><![CDATA[
 	The bean name of the ConversionService that is to be used for type conversion during field binding.
 	This attribute is not required, and only needs to be specified explicitly if custom converters need to be configured.
+	If not specified, a DefaultConversionService is registered that contains converters to/from standard JDK types.
+	In addition, full support for date/time formatting will be installed if the Joda Time library is present on the classpath.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
@@ -36,6 +38,7 @@
 					<xsd:documentation source="java:org.springframework.validation.Validator"><![CDATA[
 	The bean name of the Validator that is to be used to validate Controller model objects.
 	This attribute is not required, and only needs to be specified explicitly if a custom Validator needs to be configured.
+	If not specified, JSR-303 validation will be installed if a JSR-303 provider is present on the classpath.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
