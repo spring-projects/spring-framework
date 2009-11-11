@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.util.StringUtils;
 
 /**
  * Exception thrown when a BeanFactory is asked for a bean
@@ -79,8 +80,9 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param message detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(Class type, String dependencyDescription, String message) {
-		super("No matching bean of type [" + type.getName() + "] found for dependency [" +
-				dependencyDescription + "]: " + message);
+		super("No matching bean of type [" + type.getName() + "] found for dependency" +
+				(StringUtils.hasLength(dependencyDescription) ? " [" + dependencyDescription + "]" : "") +
+				": " + message);
 		this.beanType = type;
 	}
 
