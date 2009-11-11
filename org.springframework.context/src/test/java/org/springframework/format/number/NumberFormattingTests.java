@@ -73,9 +73,15 @@ public class NumberFormattingTests {
 
 	@Test
 	public void testPatternFormatting() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.addPropertyValue("pattern", "1,25.00");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("1,25.00", binder.getBindingResult().getFieldValue("pattern"));
 	}
 
-	public static class TestBean {
+	@SuppressWarnings("unused")
+	private static class TestBean {
 		
 		private Integer numberDefault;
 		

@@ -235,7 +235,8 @@ public class JodaTimeFormattingTests {
 		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("isoDateTime"));
 	}
 
-	public static class JodaTimeBean {
+	@SuppressWarnings("unused")
+	private static class JodaTimeBean {
 
 		private LocalDate localDate;
 
