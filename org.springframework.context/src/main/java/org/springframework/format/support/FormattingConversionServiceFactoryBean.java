@@ -19,6 +19,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.datetime.joda.JodaTimeFormattingConfigurer;
+import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
+import org.springframework.format.number.NumberFormatter;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -40,6 +42,7 @@ public class FormattingConversionServiceFactoryBean implements FactoryBean<Conve
 	
 	public void afterPropertiesSet() {
 		initConversionService();
+		installNumberFormatting();
 		installJodaTimeFormattingIfPresent();
 	}
 	
@@ -65,6 +68,11 @@ public class FormattingConversionServiceFactoryBean implements FactoryBean<Conve
 		} else {
 			this.conversionService = new FormattingConversionService();
 		}
+	}
+	
+	private void installNumberFormatting() {
+		this.conversionService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		this.conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
 	}
 	
 	private void installJodaTimeFormattingIfPresent() {

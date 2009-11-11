@@ -35,7 +35,6 @@ public abstract class AbstractNumberFormatter implements Formatter<Number> {
 
 	private boolean lenient = false;
 
-
 	/**
 	 * Specify whether or not parsing is to be lenient. Default is false.
 	 * <p>With lenient parsing, the parser may allow inputs that do not precisely match the format.
@@ -44,7 +43,6 @@ public abstract class AbstractNumberFormatter implements Formatter<Number> {
 	public void setLenient(boolean lenient) {
 		this.lenient = lenient;
 	}
-
 
 	public String print(Number integer, Locale locale) {
 		return getNumberFormat(locale).format(integer);

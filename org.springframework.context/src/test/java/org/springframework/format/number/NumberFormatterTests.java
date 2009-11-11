@@ -18,27 +18,28 @@ package org.springframework.format.number;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Locale;
 
 import org.junit.Test;
-import org.springframework.format.number.IntegerFormatter;
+import org.springframework.format.number.NumberFormatter;
 
 /**
  * @author Keith Donald
  */
-public class IntegerFormatterTests {
+public class NumberFormatterTests {
 
-	private IntegerFormatter formatter = new IntegerFormatter();
+	private NumberFormatter formatter = new NumberFormatter();
 
 	@Test
 	public void formatValue() {
-		assertEquals("23", formatter.print(23L, Locale.US));
+		assertEquals("23.56", formatter.print(new BigDecimal("23.56"), Locale.US));
 	}
 
 	@Test
 	public void parseValue() throws ParseException {
-		assertEquals((Long) 2356L, formatter.parse("2356", Locale.US));
+		assertEquals(new BigDecimal("23.56"), formatter.parse("23.56", Locale.US));
 	}
 
 	@Test(expected = ParseException.class)
@@ -48,7 +49,7 @@ public class IntegerFormatterTests {
 
 	@Test(expected = ParseException.class)
 	public void parsePercentValueNotLenientFailure() throws ParseException {
-		formatter.parse("23.56", Locale.US);
+		formatter.parse("23.56bogus", Locale.US);
 	}
 
 }
