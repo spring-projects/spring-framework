@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,11 +37,12 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -95,7 +97,7 @@ class ConfigurationClassBeanDefinitionReader {
 			loadBeanDefinitionsForModelMethod(method);
 		}
 		
-		loadBeanDefinitionsFromXml(configClass.getXmlImports());
+		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 	}
 
 	/**
@@ -212,10 +214,29 @@ class ConfigurationClassBeanDefinitionReader {
 		registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 	
-	private void loadBeanDefinitionsFromXml(Set<String> xmlImports) {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.registry);
-		// TODO SPR-6310: qualify relatively pathed locations as done in AbstractContextLoader.modifyLocations
-		reader.loadBeanDefinitions(xmlImports.toArray(new String[]{}));
+	private void loadBeanDefinitionsFromImportedResources(Map<String, String> importedResources) {
+		
+		HashMap<String, BeanDefinitionReader> readerInstanceCache = new HashMap<String, BeanDefinitionReader>();
+		
+		for (String resource : importedResources.keySet()) {
+			String readerClassName = importedResources.get(resource);
+			
+			if (!readerInstanceCache.containsKey(readerClassName)) {
+				try {
+					@SuppressWarnings("unchecked")
+					Class<? extends BeanDefinitionReader> readerClass =
+						(Class<? extends BeanDefinitionReader>) ClassUtils.forName(readerClassName, ClassUtils.getDefaultClassLoader());
+					BeanDefinitionReader readerInstance = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+					readerInstanceCache.put(readerClassName, readerInstance);
+				} catch (Exception ex) {
+					ReflectionUtils.handleReflectionException(ex);
+				}
+			}
+			
+			BeanDefinitionReader reader = readerInstanceCache.get(readerClassName);
+			// TODO SPR-6310: qualify relatively pathed locations as done in AbstractContextLoader.modifyLocations
+			reader.loadBeanDefinitions(importedResources.keySet().toArray(new String[]{}));
+		}
 	}
 	
 	/**

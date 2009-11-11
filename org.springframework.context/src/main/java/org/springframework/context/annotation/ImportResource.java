@@ -23,12 +23,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Inherited
-public @interface ImportXml {
+public @interface ImportResource {
 
 	String[] value();
+	
+	Class<? extends BeanDefinitionReader> reader() default XmlBeanDefinitionReader.class;
 
 }
