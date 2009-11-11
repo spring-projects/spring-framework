@@ -795,7 +795,7 @@ public class StringToInteger implements Converter&lt;String, Integer&gt; {
 		<section id="core-convert-ConverterFactory-SPI">
 			<title>ConverterFactory</title>
 			<para>
-				When you need to centralize the conversion logic for an entire class hierarchy, for example, when converting from String to java.lang.Enum objects, implement a <interfacename>ConverterFactory</interfacename>ConverterFactory:
+				When you need to centralize the conversion logic for an entire class hierarchy, for example, when converting from String to java.lang.Enum objects, implement a <interfacename>ConverterFactory</interfacename>:
 			</para>
 			<programlisting language="java"><![CDATA[
 package org.springframework.core.converter;
