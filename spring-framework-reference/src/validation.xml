@@ -1176,9 +1176,9 @@ public interface FormatterRegistry {
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
     <mvc:annotation-driven conversion-service="conversionService" />
-	
-	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
-	
+    
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
+    
 </beans>
 ]]>
 			</programlisting>
