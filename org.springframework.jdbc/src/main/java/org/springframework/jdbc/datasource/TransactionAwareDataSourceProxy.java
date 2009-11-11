@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
 
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -195,6 +194,9 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				else {
 					sb.append(" from DataSource [").append(this.targetDataSource).append("]");
 				}
+			}
+			else if (method.getName().equals("isClosed")) {
+				return this.closed;
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.

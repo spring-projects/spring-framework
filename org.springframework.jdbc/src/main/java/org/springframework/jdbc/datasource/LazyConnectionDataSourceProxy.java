@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -346,7 +345,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 					return null;
 				}
 				else if (method.getName().equals("isClosed")) {
-					return (this.closed);
+					return this.closed;
 				}
 				else if (method.getName().equals("close")) {
 					// Ignore: no target connection yet.
