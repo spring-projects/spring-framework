@@ -34,7 +34,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.datetime.joda.DateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
-import org.springframework.format.number.IntegerFormatter;
+import org.springframework.format.number.NumberFormatter;
 
 /**
  * @author Keith Donald
@@ -57,7 +57,7 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void testFormatFieldForTypeWithFormatter() throws ParseException {
-		formattingService.addFormatterForFieldType(Number.class, new IntegerFormatter());
+		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
 		String formatted = formattingService.convert(new Integer(3), String.class);
 		assertEquals("3", formatted);
 		Integer i = (Integer) formattingService.convert("3", Integer.class);

@@ -44,7 +44,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.format.number.DecimalFormatter;
+import org.springframework.format.number.NumberFormatter;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.util.StringUtils;
 
@@ -300,7 +300,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
-		conversionService.addFormatterForFieldType(Float.class, new DecimalFormatter());
+		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("myFloat", "1,2");

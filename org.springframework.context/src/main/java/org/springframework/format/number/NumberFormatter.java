@@ -21,7 +21,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 /**
- * A Number formatter for decimal values.
+ * A general-purpose Number formatter.
  *
  * <p>Delegates to {@link NumberFormat#getInstance(Locale)}.
  * Configures BigDecimal parsing so there is no loss in precision.
@@ -34,10 +34,17 @@ import java.util.Locale;
  * @see #setPattern
  * @see #setLenient
  */
-public final class DecimalFormatter extends AbstractNumberFormatter {
+public final class NumberFormatter extends AbstractNumberFormatter {
 
 	private String pattern;
 
+	public NumberFormatter() {
+		
+	}
+
+	public NumberFormatter(String pattern) {
+		this.pattern = pattern;
+	}
 
 	/**
 	 * Sets the pattern to use to format number values.

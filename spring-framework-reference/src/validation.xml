@@ -3,7 +3,7 @@
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 
 <chapter id="validation">
-  <title>Validation, Data-binding, the <interfacename>BeanWrapper</interfacename>, and <literal>PropertyEditors</literal></title>
+  <title>Validation, Data Binding, and Type Conversion</title>
 
   <section id="validation-introduction">
     <title>Introduction</title>
@@ -345,7 +345,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
     <section id="beans-beans-conversion">
       <title>Built-in <interface>PropertyEditor</interface> implementations</title>
 
-		<para>Spring heavily uses the concept of <literal>PropertyEditors</literal> to effect the conversion
+		<para>Spring uses the concept of <literal>PropertyEditors</literal> to effect the conversion
 		between an <classname>Object</classname> and a <classname>String</classname>. If you think about it,
 		it sometimes might be handy to be able to represent properties in a different way than the object itself.
 		For example, a <classname>Date</classname> can be represented in a human readable way (as the
@@ -910,65 +910,64 @@ public class MyService {
 	</section>
 	
 	<section id="ui.format">
-		<title>Spring 3 UI Field Formatting</title>
+		<title>Spring 3 Field Formatting</title>
 		<para>
 			<link linkend="core.convert"><filename>core.convert</filename></link> is a simple, general-purpose type conversion system.
-			It addresses <emphasis>one-way</emphasis> conversion from one type to another and is not limited to just converting Strings.
+			It provides a strongly-typed Converter SPI for implementing <emphasis>one-way</emphasis> conversion logic from one type to another and is not limited to just converting Strings.
 			As discussed in the previous section, a Spring Container can be configured to use this system to bind bean property values.
-			In addition, the Spring Expression Language (SpEL) uses this system to coerce Expression values.
-			For example, when SpEL needs to coerce a <classname>Short</classname> to a <classname>Long</classname> to fulfill an
-			<function>expression.setValue()</function> attempt, the core.convert system performs the coercion.
+			In addition, both the Spring Expression Language (SpEL) and DataBinder can use this system to coerce values.
+			For example, when SpEL needs to coerce a <classname>Short</classname> to a <classname>Long</classname> to complete an <function>expression.setValue(Object bean, Object value)</function> attempt, the core.convert system performs the coercion.
 		</para>
 		<para>
-			Now consider the type conversion requirements of a typical UI environment such as a web or desktop application.
-			In such environments, you typically convert <emphasis>from String</emphasis> to support the form postback process, as well as back <emphasis>to String</emphasis> to support the rendering process.
-			The more general <emphasis>core.convert</emphasis> system does not address this specific scenario directly.
-			To directly address this, Spring 3 introduces a new <emphasis>ui.format</emphasis> system that provides a simple and robust alternative to PropertyEditors in a UI environment.
+			Now consider the type conversion requirements of a typical client environment such as a web or desktop application.
+			In such environments, you typically convert <emphasis>from String</emphasis> to support the client postback process, as well as back <emphasis>to String</emphasis> to support the rendering process.
+			The more general <emphasis>core.convert</emphasis> Converter SPI does not address this specific common scenario directly.
+			To directly address this, Spring 3 introduces a conveient <emphasis>format</emphasis> SPI that provides a simple and robust alternative to PropertyEditors in a client environment.
 		</para>
 		<para>
-			In general, use Converters when you need to implement general-purpose type
-			conversion logic, logic that may be invoked by the Spring Container, SpEL, 
-			or your own code as part of a <emphasis>one-way</emphasis> binding process.
-			Use Formatters when you're working in a UI environment, such as an HTML form
-			of a web application and need to apply <emphasis>two-way</emphasis> parsing, 
-			formatting, and localization logic to form field values.
+			In general, use the Converter SPI when you need to implement general-purpose type conversion logic.
+			Use Formatters when you're working in a client environment, such as an HTML form of a web application and need to apply String parsing, printing, and localization logic to form field values.
 		</para>
 		<section id="ui-format-Formatter-SPI">
 			<title>Formatter SPI</title>
 			<para>
-				The Formatter SPI to implement UI formatting logic is simple and strongly typed:
+				The <literal>org.springframework.format</literal> SPI to implement field formatting logic is simple and strongly typed:
 			</para>
 			<programlisting language="java"><![CDATA[
-package org.springframework.ui.format;
-
+public interface Printer<T> {
+    String print(T fieldValue, Locale locale);
+}]]>
+			</programlisting>
+			<programlisting language="java"><![CDATA[
 import java.text.ParseException;
 
-public interface Formatter<T> {
-
-    String format(T object, Locale locale);
-	
-    T parse(String formatted, Locale locale) throws ParseException;
-    
-}]]></programlisting>
+public interface Parser<T> {
+    T parse(String clientValue, Locale locale) throws ParseException;
+}]]>
+			</programlisting>
+			<programlisting language="java"><![CDATA[
+public interface Formatter<T> extends Printer<T>, Parser<T> {
+}]]>
+			</programlisting>
 			<para>
-				To create your own Formatter, simply implement the interface above.
+				To create your own Formatter, simply implement the Formatter interface above.
 				Parameterize T to be the type of object you are formatting, for example, <classname>java.lang.BigDecimal</classname>.
-				Implement the <methodname>format</methodname> operation to format an instance of T for display in the client locale.
+				Implement the <methodname>print</methodname> operation to print an instance of T for display in the client locale.
 				Implement the <methodname>parse</methodname> operation to parse an instance of T from the formatted representation returned from the client locale.
-				Your Formatter should throw a ParseException if a parse attempt fails.
+				Your Formatter should throw a ParseException or IllegalArgumentException if a parse attempt fails.
 				Take care to ensure your Formatter implementation is thread-safe.
 			</para>
 			<para>
-				Several Formatter implementations are provided in subpackages of <filename>ui.format</filename> as a convenience.
-				The <filename>date</filename> package provides a DateFormatter to format java.util.Date objects with a java.text.DateFormat.
+				Several Formatter implementations are provided in <filename>format</filename>subpackages as a convenience.
+				The <filename>datetime</filename> package provides a DateFormatter to format java.util.Date objects with a java.text.DateFormat.
 				The <filename>number</filename> package provides a DecimalFormatter, IntegerFormatter, CurrencyFormatter, and PercentFormatter to format java.lang.Number objects using a java.text.NumberFormat.
-				The <filename>jodatime</filename> package provides a DateTimeFormatter to format Joda DateTime objects, a popular alternative to java.util.Date/Calendar.
+				The <filename>datetime.joda</filename> package provides comprehensive datetime formatting support based on the <ulink url="http://joda-time.sourceforge.net">Joda Time library</ulink>.
 			</para>
 			<para>
 				Consider <classname>DateFormatter</classname> as an example <interfacename>Formatter</interfacename> implementation:				
 			</para>
 			<programlisting language="java"><![CDATA[
-package org.springframework.ui.format.date;
+package org.springframework.format.datetime;
 
 public final class DateFormatter implements Formatter<Date> {
 
@@ -978,7 +977,7 @@ public final class DateFormatter implements Formatter<Date> {
         this.pattern = pattern;
     }
     
-    public String format(Date date, Locale locale) {
+    public String print(Date date, Locale locale) {
         if (date == null) {
             return "";
         }
@@ -1003,72 +1002,31 @@ public final class DateFormatter implements Formatter<Date> {
 				The Spring team welcomes community-driven Formatter contributions; see <ulink url="http://jira.springframework.org">http://jira.springframework.org</ulink> to contribute.
 			</para>
 		</section>
-		<section id="ui-format-Formatted-Annotation">
-			<title>@Formatted</title>
-			<para>
-				The @Formatted annotation allows you to easily associate a Formatter implementation with one of your classes.
-				To use this feature, simply annotate your class as @Formatted and specify the Formatter implementation to use as the annotation value:
-			</para>
-			<programlisting language="java"><![CDATA[
-@Formatted(MoneyFormatter.class)
-public class Money {
-    ...
-}]]></programlisting>
-			<para>
-				The example above says <emphasis>"Money objects should be formatted by a MoneyFormatter"</emphasis>.
-				With this configuation, whenever a field is of type Money, MoneyFormatter will format the field value.
-			</para>
-		</section>
 		<section id="ui-format-CustomFormatAnnotations">
 			<title>Custom Format Annotations</title>
 			<para>
-				Field-specific formatting can be triggered by annotating model properties.
-				To bind a custom annotation to a Formatter instance, simply annotate the annotation as @Formatted:
+				Field formatting can be triggered by annotating model properties.
+				To bind a custom annotation to a Formatter instance, implement AnnotationFormatterFactory:
 			</para>
-			<programlisting language="java"><![CDATA[
-@Target({ElementType.METHOD, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-@Formatted(CurrencyFormatter.class)
-public @interface Currency {
-}]]></programlisting>
-			<para>
-				Then, to trigger formatting, simply annotate a model property with the annotation:
-			</para>
-			<programlisting language="java"><![CDATA[
-public class MyModel {
-
-    @Currency
-    private BigDecimal amount;
-	
-}]]></programlisting>
-			<para>
-				Custom annotations like @Currency can also be annotated with JSR-303 constraint annotations to specify declarative validation constraints.
-				For example:
-			</para>
-			<programlisting language="java"><![CDATA[
-@Target({ElementType.METHOD, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-@Formatted(CurrencyFormatter.class)
-@Constraint(validatedBy = CurrencyValidator.class)
-public @interface Currency {
-}]]></programlisting>
-			<para>
-				Given the example above, on form postback any @Currency properties will first be parsed by CurrencyFormatter, then validated by CurrencyValidator.
-			</para>
-			<section id="ui-format-AnnotationFormatterFactory">
-				<title>AnnotationFormatterFactory</title>
-				<para>
-					If your custom annotation has attributes that configure Formatter 
-					instance behavior by property, implement an AnnotationFormatterFactory:
-				</para>
 				<programlisting language="java"><![CDATA[
-package org.springframework.ui.format;
+package org.springframework.format;
 
-public interface AnnotationFormatterFactory<A extends Annotation, T> {
+public interface AnnotationFormatterFactory<A extends Annotation> {
 
-    Formatter<T> getFormatter(A annotation);
+    Set<Class<?>> getFieldTypes();    
+  
+    Printer<?> getPrinter(A annotation, Class<?> fieldType);
+    
+    Parser<?> getParser(A annotation, Class<?> fieldType);
 
 }]]></programlisting>
+				<para>
+					Parameterize A to be the field annotationType you wish to associate formatting logic with, for example <code>org.springframework.format.annotation.DateTimeFormat</code>.
+					Implement the <methodname>getFieldTypes</methodname> operation return the types of fields the annotation may be used on.
+					Implement the <methodname>getPrinter</methodname> operation to return the Printer to print the value of an annotated field.
+					Implement the <methodname>getParser</methodname> operation to return the Parser to parse the value of an annotated field.
+					Take care to ensure your AnnotationFormatterFactory implementation is thread-safe.				
+				</para>
 				<para>
 					The example implementation below binds a @DecimalFormat instance to a Formatter instance.
 					This particular annotation allows the NumberFormat pattern to be configured.
@@ -1107,7 +1065,7 @@ public class MyModel {
 				Review the FormatterRegistry SPI below:
 			</para>
 			<programlisting language="java"><![CDATA[
-package org.springframework.ui.format;
+package org.springframework.format;
 
 public interface FormatterRegistry {
 
@@ -1145,7 +1103,7 @@ public interface FormatterRegistry {
         <!-- Configures Spring MVC DataBinder instances -->
         <bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
             <property name="formatterRegistry">
-                <bean class="org.springframework.ui.format.support.GenericFormatterRegistry">
+                <bean class="org.springframework.format.support.GenericFormatterRegistry">
                     <property name="formatters">
                         <list>
 	                        <!-- Register Formatter beans here -->
@@ -1165,33 +1123,6 @@ public interface FormatterRegistry {
 			<para>
 				When using the @Formatted annotation, no explicit Formatter or AnnotationFormatterFactory registration is required.
 				See the JavaDocs for GenericFormatterRegistry for more configuration options.
-			</para>
-		</section>
-		<section id="ui-format-registering-field-specific-Formatters">
-			<title>Registering field-specific Formatters</title>
-			<para>
-				In most cases, configuring a shared FormatterRegistry that selects Formatters based on model property type or annotation is sufficient.
-				When sufficient, no special @Controller @InitBinder callbacks are needed to apply custom formatting logic.
-				However, there are cases where field-specific formatting should be configured on a Controller-by-Controller basis.
-				For example, you may need to format a specific Date field in a way that differs from all the other Date fields in your application.
-			</para>
-			<para>
-				To apply a Formatter to a single field, create an @InitBinder callback on your @Controller, then call binder.registerFormatter(String, Formatter):
-			</para>
-			<programlisting language="java"><![CDATA[
-    @Controller
-    public class MyController {
-    
-        @InitBinder
-        public void initBinder(WebDataBinder binder) {
-            binder.registerFormatter("myFieldName", new MyCustomFieldFormatter());
-        }
-        
-        ...
-    }]]></programlisting>
-			<para>
-				This applies the Formatter to the field and overrides any Formatter
-				that would have been applied by field type or annotation.
 			</para>
 		</section>
 	</section>
