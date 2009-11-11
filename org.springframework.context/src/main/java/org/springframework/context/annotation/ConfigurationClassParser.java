@@ -28,12 +28,14 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.util.ClassUtils;
 
 /**
  * Parses a {@link Configuration} class definition, populating a model (collection) of
@@ -128,9 +130,10 @@ class ConfigurationClassParser {
 		if (metadata.isAnnotated(Import.class.getName())) {
 			processImport(configClass, (String[]) metadata.getAnnotationAttributes(Import.class.getName()).get("value"));
 		}
-		if (metadata.isAnnotated(ImportXml.class.getName())) {
-			for (String xmlImport : (String[]) metadata.getAnnotationAttributes(ImportXml.class.getName()).get("value")) {
-				configClass.addXmlImport(xmlImport);
+		if (metadata.isAnnotated(ImportResource.class.getName())) {
+			String readerClassName = (String) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("reader");
+			for (String importedResource : (String[]) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("value")) {
+				configClass.addImportedResource(importedResource, readerClassName);
 			}
 		}
 		Set<MethodMetadata> methods = metadata.getAnnotatedMethods(Bean.class.getName());

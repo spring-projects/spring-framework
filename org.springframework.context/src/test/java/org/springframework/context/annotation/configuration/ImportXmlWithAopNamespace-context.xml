@@ -7,7 +7,7 @@
 
 	<bean id="proxiedXmlBean" class="test.beans.TestBean"/>
 	
-	<bean id="anAspect" class="org.springframework.context.annotation.configuration.ImportXmlTests$AnAspect"/>
+	<bean id="anAspect" class="org.springframework.context.annotation.configuration.ImportResourceTests$AnAspect"/>
 	
 	<aop:aspectj-autoproxy>
 		<aop:include name="anAspect"/>
