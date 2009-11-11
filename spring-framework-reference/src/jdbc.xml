@@ -9,7 +9,7 @@
 
     <para>The value-add provided by the Spring Framework JDBC abstraction is
     perhaps best shown by the sequence of actions outlined in the table
-    bellow. The table shows what actions Spring will take care of and which
+    below. The table shows what actions Spring will take care of and which
     actions are the responsibility of you, the application developer.<!--Is this sequence correct, as far as what developer does and doesn't do? Does it adhere to info in the rest of the chapter?
 --><!--How does JDBC know what connection parameters are if a human does not at some point define them?--><!--TR: OK. I have rewritten this as a table indicating who has what responsibility. --></para>
 
