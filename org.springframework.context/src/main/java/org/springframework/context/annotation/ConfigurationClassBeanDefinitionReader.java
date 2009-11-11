@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
@@ -41,8 +42,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -214,28 +213,24 @@ class ConfigurationClassBeanDefinitionReader {
 		registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 	
-	private void loadBeanDefinitionsFromImportedResources(Map<String, String> importedResources) {
-		
-		HashMap<String, BeanDefinitionReader> readerInstanceCache = new HashMap<String, BeanDefinitionReader>();
-		
-		for (String resource : importedResources.keySet()) {
-			String readerClassName = importedResources.get(resource);
-			
-			if (!readerInstanceCache.containsKey(readerClassName)) {
+	private void loadBeanDefinitionsFromImportedResources(Map<String, Class> importedResources) {
+		Map<Class, BeanDefinitionReader> readerInstanceCache = new HashMap<Class, BeanDefinitionReader>();
+		for (Map.Entry<String, Class> entry : importedResources.entrySet()) {
+			String resource = entry.getKey();
+			Class readerClass = entry.getValue();
+			if (!readerInstanceCache.containsKey(readerClass)) {
 				try {
-					@SuppressWarnings("unchecked")
-					Class<? extends BeanDefinitionReader> readerClass =
-						(Class<? extends BeanDefinitionReader>) ClassUtils.forName(readerClassName, ClassUtils.getDefaultClassLoader());
-					BeanDefinitionReader readerInstance = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
-					readerInstanceCache.put(readerClassName, readerInstance);
-				} catch (Exception ex) {
-					ReflectionUtils.handleReflectionException(ex);
+					BeanDefinitionReader readerInstance = (BeanDefinitionReader)
+							readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+					readerInstanceCache.put(readerClass, readerInstance);
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
 				}
 			}
-			
-			BeanDefinitionReader reader = readerInstanceCache.get(readerClassName);
+			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
 			// TODO SPR-6310: qualify relatively pathed locations as done in AbstractContextLoader.modifyLocations
-			reader.loadBeanDefinitions(importedResources.keySet().toArray(new String[]{}));
+			reader.loadBeanDefinitions(resource);
 		}
 	}
 	

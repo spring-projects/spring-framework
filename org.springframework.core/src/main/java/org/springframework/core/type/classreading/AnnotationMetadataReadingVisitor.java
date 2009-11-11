@@ -97,7 +97,38 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 	}
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return this.attributeMap.get(annotationType);
+		return getAnnotationAttributes(annotationType, false);
+	}
+
+	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+		Map<String, Object> raw = this.attributeMap.get(annotationType);
+		if (raw == null) {
+			return null;
+		}
+		Map<String, Object> result = new LinkedHashMap<String, Object>(raw.size());
+		for (Map.Entry<String, Object> entry : raw.entrySet()) {
+			try {
+				Object value = entry.getValue();
+				if (value instanceof Type) {
+					value = (classValuesAsString ? ((Type) value).getClassName() :
+							this.classLoader.loadClass(((Type) value).getClassName()));
+				}
+				else if (value instanceof Type[]) {
+					Type[] array = (Type[]) value;
+					Object[] convArray = (classValuesAsString ? new String[array.length] : new Class[array.length]);
+					for (int i = 0; i < array.length; i++) {
+						convArray[i] = (classValuesAsString ? array[i].getClassName() :
+								this.classLoader.loadClass(array[i].getClassName()));
+					}
+					value = convArray;
+				}
+				result.put(entry.getKey(), value);
+			}
+			catch (Exception ex) {
+				// Class not found - can't resolve class reference in annotation attribute.
+			}
+		}
+		return result;
 	}
 
 	public boolean hasAnnotatedMethods(String annotationType) {
