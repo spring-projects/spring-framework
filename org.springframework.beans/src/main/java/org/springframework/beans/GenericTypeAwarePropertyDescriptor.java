@@ -19,6 +19,10 @@ package org.springframework.beans;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
@@ -44,6 +48,8 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class propertyEditorClass;
 
+	private volatile Set<Method> ambiguousWriteMethods;
+
 	private Class propertyType;
 
 	private MethodParameter writeMethodParameter;
@@ -55,6 +61,8 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 		super(propertyName, null, null);
 		this.beanClass = beanClass;
+		this.propertyEditorClass = propertyEditorClass;
+
 		Method readMethodToUse = BridgeMethodResolver.findBridgedMethod(readMethod);
 		Method writeMethodToUse = BridgeMethodResolver.findBridgedMethod(writeMethod);
 		if (writeMethodToUse == null && readMethodToUse != null) {
@@ -66,7 +74,22 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		}
 		this.readMethod = readMethodToUse;
 		this.writeMethod = writeMethodToUse;
-		this.propertyEditorClass = propertyEditorClass;
+
+		if (this.writeMethod != null && this.readMethod == null) {
+			// Write method not matched against read method: potentially ambiguous through
+			// several overloaded variants, in which case an arbitrary winner has been chosen
+			// by the JDK's JavaBeans Introspector...
+			Set<Method> ambiguousCandidates = new HashSet<Method>();
+			for (Method method : beanClass.getMethods()) {
+				if (method.getName().equals(writeMethodToUse.getName()) &&
+						!method.equals(writeMethodToUse) && !method.isBridge()) {
+					ambiguousCandidates.add(method);
+				}
+			}
+			if (!ambiguousCandidates.isEmpty()) {
+				this.ambiguousWriteMethods = ambiguousCandidates;
+			}
+		}
 	}
 
 
@@ -77,6 +100,13 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	@Override
 	public Method getWriteMethod() {
+		Set<Method> ambiguousCandidates = this.ambiguousWriteMethods;
+		if (ambiguousCandidates != null) {
+			this.ambiguousWriteMethods = null;
+			LogFactory.getLog(GenericTypeAwarePropertyDescriptor.class).warn("Invalid JavaBean property '" +
+					getName() + "' being accessed! Ambiguous write methods found next to actually used [" +
+					this.writeMethod + "]: " + ambiguousCandidates);
+		}
 		return this.writeMethod;
 	}
 
