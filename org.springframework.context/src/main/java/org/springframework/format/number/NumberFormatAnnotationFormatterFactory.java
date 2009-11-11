@@ -54,7 +54,6 @@ public final class NumberFormatAnnotationFormatterFactory implements AnnotationF
 		return configureFormatterFrom(annotation, fieldType);
 	}
 
-	
 	// internal helpers
 	
 	private Set<Class<?>> createFieldTypes() {
