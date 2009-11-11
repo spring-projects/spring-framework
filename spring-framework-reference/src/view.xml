@@ -25,6 +25,20 @@
     in the <interfacename>WebApplicationContext</interfacename>. Furthermore,
     of course you need to write some JSPs that will actually render the
     view.</para>
+    
+    <note>
+      <para>
+        Setting up your application to use JSTL is a common source of error,
+        mainly cause by confusion over the different servlet spec., JSP and JSTL
+        version numbers, what they mean and how to declare the taglibs correctly. 
+        The article
+        <ulink url="http://www.mularien.com/blog/2008/04/24/how-to-reference-and-use-jstl-in-your-web-application/">
+        How to Reference and Use JSTL in your Web Application</ulink> provides a 
+        useful guide to the common pitfalls and how to avoid them. Note that as of
+        Spring 3.0, the minimum supported servlet version is 2.4 (JSP 2.0 and JSTL 1.1),
+        which reduces the scope for confusion somewhat.
+      </para>
+    </note>
 
     <section id="view-jsp-resolver">
       <title>View resolvers</title>
