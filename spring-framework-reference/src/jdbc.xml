@@ -2779,7 +2779,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       this when you need to create an embedded database instance in a
       standalone environment, such as a data access object unit test:
       <programlisting language="java">    EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-    EmbeddedDatabase db = builder.type(H2).script("schema.sql").script("test-data.sql").build();
+    EmbeddedDatabase db = builder.setType(H2).addScript("my-schema.sql").addScript("my-test-data.sql").build();
     // do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
     db.shutdown()
 </programlisting></para>
@@ -2812,12 +2812,11 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       <title>Using HSQL</title>
 
       <para>Spring supports HSQL 1.0.0 to 2.0.0. HSQL is the default embedded
-      database if no type is specified explicitly. To specify HSQL explicitly,
-      <!--Why would you need to specify HSQL explicitly if it's the default? TR: For clarity, maybe?-->set
-      the <literal>type</literal> attribute of the
+      database if no type is specified explicitly. To specify HSQL explicitly, 
+      set the <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>HSQL</literal>. If
       you are using the builder API, call the
-      <literal>type(EmbeddedDatabaseType)</literal> method with
+      <literal>setType(EmbeddedDatabaseType)</literal> method with
       <literal>EmbeddedDatabaseType.HSQL</literal>.</para>
     </section>
 
@@ -2828,7 +2827,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>H2</literal>. If
       you are using the builder API, call the
-      <literal>type(EmbeddedDatabaseType)</literal> method with
+      <literal>setType(EmbeddedDatabaseType)</literal> method with
       <literal>EmbeddedDatabaseType.H2</literal>.</para>
     </section>
 
@@ -2839,7 +2838,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       set the <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>Derby</literal>. If
       using the builder API, call the
-      <literal>type(EmbeddedDatabaseType)</literal> method with
+      <literal>setType(EmbeddedDatabaseType)</literal> method with
       <literal>EmbeddedDatabaseType.Derby</literal>.</para>
     </section>
 
@@ -2856,8 +2855,8 @@ public class DataAccessUnitTestTemplate {
     
     @Before
     public void setUp() {
-        // creates a HSQL in-memory db populated from classpath:schema.sql and classpath:test-data.sql
-        db = EmbeddedDatabaseBuilder.buildDefault();		
+        // creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:test-data.sql
+        db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();		
     }
 
     @Test
