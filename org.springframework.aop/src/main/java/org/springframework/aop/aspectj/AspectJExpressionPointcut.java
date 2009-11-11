@@ -462,7 +462,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 * <p>Dynamic match tests for this matcher always return true,
 	 * since the matching decision is made at the proxy creation time.
 	 * For static match tests, this matcher abstains to allow the overall
-	 * pointcut to match even when negation is used with the bean() poitncut.
+	 * pointcut to match even when negation is used with the bean() pointcut.
 	 */
 	private class BeanNameContextMatcher implements ContextBasedMatcher {
 
