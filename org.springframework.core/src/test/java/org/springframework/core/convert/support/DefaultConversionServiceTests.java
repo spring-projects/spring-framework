@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.converter.Converter;
 
 /**
@@ -196,7 +197,7 @@ public class DefaultConversionServiceTests {
 		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected=ConverterNotFoundException.class)
 	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
 		DefaultConversionService conversionService = new DefaultConversionService();
 		conversionService.convert(new Long(3), SSN.class);
