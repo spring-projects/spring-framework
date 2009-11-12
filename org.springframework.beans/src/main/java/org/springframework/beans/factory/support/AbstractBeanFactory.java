@@ -1113,6 +1113,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					mbd.overrideFrom(bd);
 				}
 
+				// Set default singleton scope, if not configured before.
+				if (mbd.getScope() == null) {
+					mbd.setScope(RootBeanDefinition.SCOPE_SINGLETON);
+				}
+
 				// A bean contained in a non-singleton bean cannot be a singleton itself.
 				// Let's correct this on the fly here, since this might be the result of
 				// parent-child merging for the outer bean, in which case the original inner bean

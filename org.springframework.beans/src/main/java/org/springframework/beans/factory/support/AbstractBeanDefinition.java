@@ -118,9 +118,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private volatile Object beanClass;
 
-	private String scope = SCOPE_SINGLETON;
+	private String scope;
 
-	private boolean singleton = true;
+	private boolean singleton = false;
 
 	private boolean prototype = false;
 
@@ -281,7 +281,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		if (other.getFactoryMethodName() != null) {
 			setFactoryMethodName(other.getFactoryMethodName());
 		}
-		setScope(other.getScope());
+		if (other.getScope() != null) {
+			setScope(other.getScope());
+		}
 		setAbstract(other.isAbstract());
 		setLazyInit(other.isLazyInit());
 		setRole(other.getRole());
@@ -408,7 +410,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #SCOPE_PROTOTYPE
 	 */
 	public void setScope(String scope) {
-		Assert.notNull(scope, "Scope must not be null");
 		this.scope = scope;
 		this.singleton = SCOPE_SINGLETON.equals(scope);
 		this.prototype = SCOPE_PROTOTYPE.equals(scope);

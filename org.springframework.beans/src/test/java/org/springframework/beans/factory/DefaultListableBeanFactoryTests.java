@@ -1972,7 +1972,7 @@ public final class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void testImplicitScopeInheritanceForChildBeanDefinitions() throws Exception {
+	public void testScopeInheritanceForChildBeanDefinitions() throws Exception {
 		RootBeanDefinition parent = new RootBeanDefinition();
 		parent.setScope("bonanza!");
 
@@ -1984,7 +1984,7 @@ public final class DefaultListableBeanFactoryTests {
 		factory.registerBeanDefinition("child", child);
 
 		BeanDefinition def = factory.getMergedBeanDefinition("child");
-		assertTrue("Child 'scope' not overriding parent scope (it must).", def.isSingleton());
+		assertEquals("Child 'scope' not inherited", "bonanza!", def.getScope());
 	}
 
 	@Test
