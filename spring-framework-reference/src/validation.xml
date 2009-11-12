@@ -909,7 +909,7 @@ public class MyService {
 		</section>
 	</section>
 	
-	<section id="ui.format">
+	<section id="format">
 		<title>Spring 3 Field Formatting</title>
 		<para>
 			As discussed in the previous section, <link linkend="core.convert"><filename>core.convert</filename></link> is a general-purpose type conversion system.
