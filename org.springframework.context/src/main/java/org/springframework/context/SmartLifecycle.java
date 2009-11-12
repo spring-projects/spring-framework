@@ -25,10 +25,30 @@ package org.springframework.context;
  */
 public interface SmartLifecycle extends Lifecycle {
 
+	/**
+	 * Return whether this Lifecycle component should be started automatically
+	 * by the container when the ApplicationContext is refreshed. A value of
+	 * "false" indicates that the component is intended to be started manually.
+	 */
 	boolean isAutoStartup();
 
+	/**
+	 * Return the order in which this Lifecycle component should be stopped.
+	 * The shutdown process begins with the component(s) having the <i>lowest</i>
+	 * value and ends with the highest value (Integer.MIN_VALUE is the lowest
+	 * possible, and Integer.MAX_VALUE is the highest possible). Any Lifecycle
+	 * components within the context that do not also implement SmartLifecycle
+	 * will be treated as if they have a value of Integer.MAX_VALUE.
+	 */
 	int getShutdownOrder();
 
+	/**
+	 * Indicates that a Lifecycle component must stop if it is currently running.
+	 * The provided callback is used by the LifecycleProcessor to support an
+	 * ordered, and potentially concurrent, shutdown of all components having a
+	 * common shutdown order value. The callback <b>must</b> be executed after
+	 * the SmartLifecycle component does indeed stop.
+	 */
 	void stop(Runnable callback);
 
 }
