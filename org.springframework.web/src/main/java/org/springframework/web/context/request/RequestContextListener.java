@@ -20,9 +20,6 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
@@ -51,9 +48,6 @@ public class RequestContextListener implements ServletRequestListener {
 	private static final String REQUEST_ATTRIBUTES_ATTRIBUTE =
 			RequestContextListener.class.getName() + ".REQUEST_ATTRIBUTES";
 
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	public void requestInitialized(ServletRequestEvent requestEvent) {
 		if (!(requestEvent.getServletRequest() instanceof HttpServletRequest)) {
@@ -65,9 +59,6 @@ public class RequestContextListener implements ServletRequestListener {
 		request.setAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE, attributes);
 		LocaleContextHolder.setLocale(request.getLocale());
 		RequestContextHolder.setRequestAttributes(attributes);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound request context to thread: " + request);
-		}
 	}
 
 	public void requestDestroyed(ServletRequestEvent requestEvent) {
@@ -85,9 +76,6 @@ public class RequestContextListener implements ServletRequestListener {
 		}
 		if (attributes != null) {
 			attributes.requestCompleted();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound request context: " + requestEvent.getServletRequest());
-			}
 		}
 	}
 
