@@ -34,14 +34,14 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  */
-class WebLogicClassLoader {
+class WebLogicClassLoaderAdapter {
 
 	private static final String GENERIC_CLASS_LOADER_NAME = "weblogic.utils.classloaders.GenericClassLoader";
 
 	private static final String CLASS_PRE_PROCESSOR_NAME = "weblogic.utils.classloaders.ClassPreProcessor";
 
 
-	private final ClassLoader internalClassLoader;
+	private final ClassLoader classLoader;
 
 	private final Class wlPreProcessorClass;
 
@@ -54,7 +54,7 @@ class WebLogicClassLoader {
 	private final Constructor wlGenericClassLoaderConstructor;
 
 
-	public WebLogicClassLoader(ClassLoader classLoader) {
+	public WebLogicClassLoaderAdapter(ClassLoader classLoader) {
 		Class wlGenericClassLoaderClass = null;
 		try {
 			wlGenericClassLoaderClass = classLoader.loadClass(GENERIC_CLASS_LOADER_NAME);
@@ -68,21 +68,21 @@ class WebLogicClassLoader {
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
-					"Could not initialize WebLogic ClassLoader because WebLogic 10 API classes are not available", ex);
+					"Could not initialize WebLogic LoadTimeWeaver because WebLogic 10 API classes are not available", ex);
 		}
 		Assert.isInstanceOf(wlGenericClassLoaderClass, classLoader,
 				"ClassLoader must be instance of [" + wlGenericClassLoaderClass.getName() + "]");
-		this.internalClassLoader = classLoader;
+		this.classLoader = classLoader;
 	}
 
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "ClassFileTransformer must not be null");
 		try {
-			InvocationHandler adapter = new WebLogicClassPreProcessorAdapter(transformer, this.internalClassLoader);
+			InvocationHandler adapter = new WebLogicClassPreProcessorAdapter(transformer, this.classLoader);
 			Object adapterInstance = Proxy.newProxyInstance(this.wlPreProcessorClass.getClassLoader(),
 					new Class[] {this.wlPreProcessorClass}, adapter);
-			this.addPreProcessorMethod.invoke(this.internalClassLoader, adapterInstance);
+			this.addPreProcessorMethod.invoke(this.classLoader, adapterInstance);
 		}
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("WebLogic addInstanceClassPreProcessor method threw exception", ex.getCause());
@@ -92,14 +92,14 @@ class WebLogicClassLoader {
 		}
 	}
 
-	public ClassLoader getInternalClassLoader() {
-		return this.internalClassLoader;
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
 		try {
-			Object classFinder = this.getClassFinderMethod.invoke(this.internalClassLoader);
-			Object parent = this.getParentMethod.invoke(this.internalClassLoader);
+			Object classFinder = this.getClassFinderMethod.invoke(this.classLoader);
+			Object parent = this.getParentMethod.invoke(this.classLoader);
 			// arguments for 'clone'-like method
 			return (ClassLoader) this.wlGenericClassLoaderConstructor.newInstance(classFinder, parent);
 		}
@@ -110,5 +110,4 @@ class WebLogicClassLoader {
 			throw new IllegalStateException("Could not construct WebLogic GenericClassLoader", ex);
 		}
 	}
-
 }

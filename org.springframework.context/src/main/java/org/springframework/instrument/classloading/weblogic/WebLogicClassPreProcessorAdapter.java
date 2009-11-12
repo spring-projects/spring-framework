@@ -92,5 +92,4 @@ class WebLogicClassPreProcessorAdapter implements InvocationHandler {
 		builder.append(this.transformer);
 		return builder.toString();
 	}
-
 }
