@@ -85,7 +85,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	private int indent = -1;
 
-	private String encoding;
+	private String encoding = "UTF-8";
 
 	private Boolean standalone;
 
