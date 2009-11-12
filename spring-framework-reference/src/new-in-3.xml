@@ -456,8 +456,8 @@ public class AppConfig {
     <section id="new-feature-validation">
       <title>Declarative model validation</title>
 
-      <para>JSR 303 support using Hibernate Validator as the
-      implementation.</para>
+      <para>Several <link linkend="validation.beanvalidation">validation enhancements</link>,
+      including JSR 303 support that uses Hibernate Validator as the default provider.</para>
     </section>
 
     <section id="new-feature-jee-6">
