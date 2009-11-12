@@ -17,6 +17,8 @@
 package org.springframework.context;
 
 /**
+ * Strategy interface for processing Lifecycle beans within the ApplicationContext.
+ * 
  * @author Mark Fisher
  * @since 3.0
  */

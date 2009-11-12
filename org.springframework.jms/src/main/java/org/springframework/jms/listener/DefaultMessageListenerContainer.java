@@ -514,6 +514,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @throws JmsException if stopping failed
 	 * @see #stop()
 	 */
+	@Override
 	public void stop(Runnable callback) throws JmsException {
 		synchronized (this.lifecycleMonitor) {
 			this.stopCallback = callback;

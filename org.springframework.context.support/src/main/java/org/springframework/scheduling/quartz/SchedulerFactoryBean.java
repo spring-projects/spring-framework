@@ -190,6 +190,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private int startupDelay = 0;
 
+	private int shutdownOrder = Integer.MAX_VALUE;
+
 	private boolean exposeSchedulerInRepository = false;
 
 	private boolean waitForJobsToCompleteOnShutdown = false;
@@ -371,6 +373,21 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 */
 	public boolean isAutoStartup() {
 		return this.autoStartup;
+	}
+
+	/**
+	 * Specify the order in which this scheduler should be stopped.
+	 * By default it will be stopped in the last group. 
+	 */
+	public void setShutdownOrder(int shutdownOrder) {
+		this.shutdownOrder = shutdownOrder;
+	}
+
+	/**
+	 * Return the order in which this scheduler will be stopped.
+	 */
+	public int getShutdownOrder() {
+		return this.shutdownOrder;
 	}
 
 	/**
@@ -706,6 +723,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				throw new SchedulingException("Could not stop Quartz Scheduler", ex);
 			}
 		}
+	}
+
+	public void stop(Runnable callback) throws SchedulingException {
+		this.stop();
+		callback.run();
 	}
 
 	public boolean isRunning() throws SchedulingException {

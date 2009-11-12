@@ -65,6 +65,8 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean autoStartup = true;
 
+	private int shutdownOrder = Integer.MAX_VALUE;
+
 	private String beanName;
 
 	private Connection sharedConnection;
@@ -114,6 +116,21 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	public boolean isAutoStartup() {
 		return this.autoStartup;
+	}
+
+	/**
+	 * Specify the order in which this container should be stopped.
+	 * By default it will be stopped in the last group. 
+	 */
+	public void setShutdownOrder(int shutdownOrder) {
+		this.shutdownOrder = shutdownOrder;
+	}
+
+	/**
+	 * Return the order in which this container will be stopped.
+	 */
+	public int getShutdownOrder() {
+		return this.shutdownOrder;
 	}
 
 	public void setBeanName(String beanName) {
@@ -284,6 +301,11 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
+	}
+
+	public void stop(Runnable callback) {
+		this.stop();
+		callback.run();
 	}
 
 	/**
