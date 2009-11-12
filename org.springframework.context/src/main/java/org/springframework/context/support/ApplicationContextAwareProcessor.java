@@ -19,11 +19,18 @@ package org.springframework.context.support;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
@@ -48,9 +55,13 @@ import org.springframework.context.ResourceLoaderAware;
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
-class ApplicationContextAwareProcessor implements BeanPostProcessor {
+class ApplicationContextAwareProcessor implements MergedBeanDefinitionPostProcessor {
+
+	private final Log logger = LogFactory.getLog(getClass());
 
 	private final ConfigurableApplicationContext applicationContext;
+
+	private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>();
 
 
 	/**
@@ -61,7 +72,13 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 
 
-	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+		if (!this.applicationContext.containsBean(beanName) && beanDefinition.isSingleton()) {
+			this.singletonNames.put(beanName, Boolean.TRUE);
+		}
+	}
+
+	public Object postProcessBeforeInitialization(final Object bean, final String beanName) throws BeansException {
 		AccessControlContext acc = null;
 
 		if (System.getSecurityManager() != null &&
@@ -73,19 +90,19 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		if (acc != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
-					doProcess(bean);
+					doProcess(bean, beanName);
 					return null;
 				}
 			}, acc);
 		}
 		else {
-			doProcess(bean);
+			doProcess(bean, beanName);
 		}
 		
 		return bean;
 	}
 	
-	private void doProcess(Object bean) {
+	private void doProcess(Object bean, String beanName) {
 		if (bean instanceof ResourceLoaderAware) {
 			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
 		}
@@ -97,6 +114,27 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		}
 		if (bean instanceof ApplicationContextAware) {
 			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
+		}
+
+		if (bean instanceof ApplicationListener) {
+			if (!this.applicationContext.containsBean(beanName)) {
+				// not a top-level bean - not detected as a listener by getBeanNamesForType retrieval
+				Boolean flag = this.singletonNames.get(beanName);
+				if (Boolean.TRUE.equals(flag)) {
+					// inner singleton bean: register on the fly
+					this.applicationContext.addApplicationListener((ApplicationListener) bean);
+				}
+				else if (flag == null) {
+					// inner bean with other scope - can't reliably process events
+					if (logger.isWarnEnabled()) {
+						logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface " +
+								"but is not reachable for event multicasting by its containing ApplicationContext " +
+								"because it does not have singleton scope. Only top-level listener beans are allowed " +
+								"to be of non-singleton scope.");
+					}
+					this.singletonNames.put(beanName, Boolean.FALSE);
+				}
+			}
 		}
 	}
 

@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -124,6 +125,19 @@ public class ApplicationContextEventTests {
 		BeanThatBroadcasts broadcaster = context.getBean("broadcaster", BeanThatBroadcasts.class);
 		context.publishEvent(new MyEvent(context));
 		assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
+	}
+
+	@Test
+	public void innerBeanAsListener() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		RootBeanDefinition listenerDef = new RootBeanDefinition(TestBean.class);
+		listenerDef.getPropertyValues().addPropertyValue("friends", new RootBeanDefinition(BeanThatListens.class));
+		context.registerBeanDefinition("listener", listenerDef);
+		context.refresh();
+		context.publishEvent(new MyEvent(this));
+		context.publishEvent(new MyEvent(this));
+		TestBean listener = context.getBean(TestBean.class);
+		assertEquals(3, ((BeanThatListens) listener.getFriends().iterator().next()).getEventCount());
 	}
 
 

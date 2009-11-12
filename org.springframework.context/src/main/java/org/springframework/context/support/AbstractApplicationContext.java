@@ -20,11 +20,14 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -193,7 +196,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
 	/** Statically specified listeners */
-	private List<ApplicationListener> applicationListeners = new ArrayList<ApplicationListener>();
+	private Set<ApplicationListener> applicationListeners = new LinkedHashSet<ApplicationListener>();
 
 
 	/**
@@ -362,13 +365,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	public void addApplicationListener(ApplicationListener listener) {
-		this.applicationListeners.add(listener);
+		if (isActive()) {
+			addListener(listener);
+		}
+		else {
+			this.applicationListeners.add(listener);
+		}
 	}
 
 	/**
 	 * Return the list of statically specified ApplicationListeners.
 	 */
-	public List<ApplicationListener> getApplicationListeners() {
+	public Collection<ApplicationListener> getApplicationListeners() {
 		return this.applicationListeners;
 	}
 
@@ -817,7 +825,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
-		for (final String lisName : listenerBeanNames) {
+		for (String lisName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(lisName);
 		}
 	}
