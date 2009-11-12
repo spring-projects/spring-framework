@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,9 @@ import org.springframework.core.io.Resource;
  */
 public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
 
+	private boolean validating = false;
+
+
 	/**
 	 * Create a new AbstractXmlApplicationContext with no parent.
 	 */
@@ -56,6 +59,14 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 */
 	public AbstractXmlApplicationContext(ApplicationContext parent) {
 		super(parent);
+	}
+
+
+	/**
+	 * Set whether to use XML validation. Default is <code>true</code>.
+	 */
+	public void setValidating(boolean validating) {
+		this.validating = validating;
 	}
 
 
@@ -90,6 +101,9 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setDocumentReaderClass
 	 */
 	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
+		beanDefinitionReader.setValidationMode(this.validating ?
+				XmlBeanDefinitionReader.VALIDATION_AUTO : XmlBeanDefinitionReader.VALIDATION_NONE);
+
 	}
 
 	/**
