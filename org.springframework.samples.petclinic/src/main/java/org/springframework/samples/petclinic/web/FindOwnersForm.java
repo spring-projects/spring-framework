@@ -35,7 +35,7 @@ public class FindOwnersForm {
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
-		dataBinder.setDisallowedFields(new String[] {"id"});
+		dataBinder.setDisallowedFields("id");
 	}
 
 	@RequestMapping(value = "/owners/search", method = RequestMethod.GET)

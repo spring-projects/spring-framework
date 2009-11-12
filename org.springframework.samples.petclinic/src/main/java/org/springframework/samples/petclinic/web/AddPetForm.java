@@ -49,7 +49,7 @@ public class AddPetForm {
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
-		dataBinder.setDisallowedFields(new String[] {"id"});
+		dataBinder.setDisallowedFields("id");
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
