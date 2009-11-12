@@ -157,6 +157,27 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	/**
+	 * Set whether it should be allowed to override bean definitions by registering
+	 * a different definition with the same name, automatically replacing the former.
+	 * If not, an exception will be thrown. Default is "true".
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 */
+	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
+		this.beanFactory.setAllowBeanDefinitionOverriding(allowBeanDefinitionOverriding);
+	}
+
+	/**
+	 * Set whether to allow circular references between beans - and automatically
+	 * try to resolve them.
+	 * <p>Default is "true". Turn this off to throw an exception when encountering
+	 * a circular reference, disallowing them completely.
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
+	 */
+	public void setAllowCircularReferences(boolean allowCircularReferences) {
+		this.beanFactory.setAllowCircularReferences(allowCircularReferences);
+	}
+
+	/**
 	 * Set a ResourceLoader to use for this context. If set, the context will
 	 * delegate all <code>getResource</code> calls to the given ResourceLoader.
 	 * If not set, default resource loading will apply.
