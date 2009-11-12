@@ -40,222 +40,222 @@ import org.springframework.core.io.Resource;
  * guaranteed that the database schema and data will have been loaded by that time.
  *
  * Is a FactoryBean, for exposing the fully-initialized DataSource as a Spring bean. See {@link #getObject()}.
- * 
+ *
  * @author Chris Beams
  * @author Scott Andrews
  */
 public class DbcpDataSourceFactory implements FactoryBean<DataSource>, DisposableBean {
 
-    // configurable properties
+	// configurable properties
 
-    private String driverClassName;
-    
-    private String url;
-    
-    private String username;
-    
-    private String password;
-    
-    private boolean populate;
+	private String driverClassName;
 
-    private Resource schemaLocation;
+	private String url;
 
-    private Resource dataLocation;
+	private String username;
 
-    private Resource dropLocation;
+	private String password;
 
-    /**
-     * The object created by this factory.
-     */
-    private BasicDataSource dataSource;
+	private boolean populate;
 
-    public void setDriverClassName(String driverClassName) {
-        this.driverClassName = driverClassName;
-    }
+	private Resource schemaLocation;
 
-    /**
-     * The data source connection URL
-     */
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	private Resource dataLocation;
 
-    /**
-     * The data source username
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	private Resource dropLocation;
 
-    /**
-     *The data source password
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	/**
+	 * The object created by this factory.
+	 */
+	private BasicDataSource dataSource;
 
-    /**
-     * Indicates that the data base should be populated from the schema and data locations
-     */
-    public void setPopulate(boolean populate) {
-        this.populate = populate;
-    }
+	public void setDriverClassName(String driverClassName) {
+		this.driverClassName = driverClassName;
+	}
 
-    /**
-     * Sets the location of the file containing the schema DDL to export to the database.
-     * @param schemaLocation the location of the database schema DDL
-     */
-    public void setSchemaLocation(Resource schemaLocation) {
-        this.schemaLocation = schemaLocation;
-    }
+	/**
+	 * The data source connection URL
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    /**
-     * Sets the location of the file containing the data to load into the database.
-     * @param testDataLocation the location of the data file
-     */
-    public void setDataLocation(Resource testDataLocation) {
-        this.dataLocation = testDataLocation;
-    }
+	/**
+	 * The data source username
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    /**
-     * Sets the location of the file containing the drop scripts for the database.
-     * @param testDataLocation the location of the data file
-     */
-    public void setDropLocation(Resource testDropLocation) {
-        this.dropLocation = testDropLocation;
-    }
+	/**
+	 *The data source password
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    // implementing FactoryBean
+	/**
+	 * Indicates that the data base should be populated from the schema and data locations
+	 */
+	public void setPopulate(boolean populate) {
+		this.populate = populate;
+	}
 
-    // this method is called by Spring to expose the DataSource as a bean
-    public DataSource getObject() throws Exception {
-        if (dataSource == null) {
-            initDataSource();
-        }
-        return dataSource;
-    }
+	/**
+	 * Sets the location of the file containing the schema DDL to export to the database.
+	 * @param schemaLocation the location of the database schema DDL
+	 */
+	public void setSchemaLocation(Resource schemaLocation) {
+		this.schemaLocation = schemaLocation;
+	}
 
-    public Class<DataSource> getObjectType() {
-        return DataSource.class;
-    }
+	/**
+	 * Sets the location of the file containing the data to load into the database.
+	 * @param testDataLocation the location of the data file
+	 */
+	public void setDataLocation(Resource testDataLocation) {
+		this.dataLocation = testDataLocation;
+	}
 
-    public boolean isSingleton() {
-        return true;
-    }
+	/**
+	 * Sets the location of the file containing the drop scripts for the database.
+	 * @param testDataLocation the location of the data file
+	 */
+	public void setDropLocation(Resource testDropLocation) {
+		this.dropLocation = testDropLocation;
+	}
 
-    // implementing DisposableBean
+	// implementing FactoryBean
 
-    public void destroy() throws Exception {
-    	dataSource.close();
-    }
+	// this method is called by Spring to expose the DataSource as a bean
+	public DataSource getObject() throws Exception {
+		if (dataSource == null) {
+			initDataSource();
+		}
+		return dataSource;
+	}
 
-    // internal helper methods
+	public Class<DataSource> getObjectType() {
+		return DataSource.class;
+	}
 
-    // encapsulates the steps involved in initializing the data source: creating it, and populating it
-    private void initDataSource() {
-        // create the database source first
-        this.dataSource = createDataSource();
+	public boolean isSingleton() {
+		return true;
+	}
 
-        if (this.populate) {
-        	// now populate the database by loading the schema and data
-        	populateDataSource();
-        }
-    }
+	// implementing DisposableBean
 
-    private BasicDataSource createDataSource() {
-    	BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName(this.driverClassName);
-        dataSource.setUrl(this.url);
-        dataSource.setUsername(this.username);
-        dataSource.setPassword(this.password);
-        return dataSource;
-    }
+	public void destroy() throws Exception {
+		dataSource.close();
+	}
 
-    private void populateDataSource() {
-        DatabasePopulator populator = new DatabasePopulator(dataSource);
-        if (dropLocation != null) {
-            try {
-        		populator.populate(this.dropLocation);
-            } 
-            catch (Exception e) {
-               	// ignore
-            }
-        }
-        populator.populate(this.schemaLocation);
-        populator.populate(this.dataLocation);
-    }
+	// internal helper methods
 
-    /**
-     * Populates a in memory data source with data.
-     */
-    private class DatabasePopulator {
+	// encapsulates the steps involved in initializing the data source: creating it, and populating it
+	private void initDataSource() {
+		// create the database source first
+		this.dataSource = createDataSource();
 
-        private DataSource dataSource;
+		if (this.populate) {
+			// now populate the database by loading the schema and data
+			populateDataSource();
+		}
+	}
 
-        /**
-         * Creates a new database populator.
-         * @param dataSource the data source that will be populated.
-         */
-        public DatabasePopulator(DataSource dataSource) {
-            this.dataSource = dataSource;
-        }
+	private BasicDataSource createDataSource() {
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName(this.driverClassName);
+		dataSource.setUrl(this.url);
+		dataSource.setUsername(this.username);
+		dataSource.setPassword(this.password);
+		return dataSource;
+	}
 
-        /**
-         * Populate the database executing the statements in the provided resource against the database
-         * @param sqlFile spring resource containing SQL to run against the db
-         */
-        public void populate(Resource sqlFile) {
-            Connection connection = null;
-            try {
-                connection = dataSource.getConnection();
-                try {
-                    String sql = parseSqlIn(sqlFile);
-                    executeSql(sql, connection);
-                } catch (IOException e) {
-                    throw new RuntimeException("I/O exception occurred accessing the database schema file", e);
-                } catch (SQLException e) {
-                    throw new RuntimeException("SQL exception occurred exporting database schema", e);
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException("SQL exception occurred acquiring connection", e);
-            } finally {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                    }
-                }
-            }
-        }
+	private void populateDataSource() {
+		DatabasePopulator populator = new DatabasePopulator(dataSource);
+		if (dropLocation != null) {
+			try {
+				populator.populate(this.dropLocation);
+			} 
+			catch (Exception e) {
+			   	// ignore
+			}
+		}
+		populator.populate(this.schemaLocation);
+		populator.populate(this.dataLocation);
+	}
 
-        // utility method to read a .sql txt input stream
-        private String parseSqlIn(Resource resource) throws IOException {
-            InputStream is = null;
-            try {
-                is = resource.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+	/**
+	 * Populates a in memory data source with data.
+	 */
+	private class DatabasePopulator {
 
-                StringWriter sw = new StringWriter();
-                BufferedWriter writer = new BufferedWriter(sw);
+		private DataSource dataSource;
 
-                for (int c=reader.read(); c != -1; c=reader.read()) {
-                    writer.write(c);
-                }
-                writer.flush();
-                return sw.toString();
+		/**
+		 * Creates a new database populator.
+		 * @param dataSource the data source that will be populated.
+		 */
+		public DatabasePopulator(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
 
-            } finally {
-                if (is != null) {
-                    is.close();
-                }
-            }
-        }
+		/**
+		 * Populate the database executing the statements in the provided resource against the database
+		 * @param sqlFile spring resource containing SQL to run against the db
+		 */
+		public void populate(Resource sqlFile) {
+			Connection connection = null;
+			try {
+				connection = dataSource.getConnection();
+				try {
+					String sql = parseSqlIn(sqlFile);
+					executeSql(sql, connection);
+				} catch (IOException e) {
+					throw new RuntimeException("I/O exception occurred accessing the database schema file", e);
+				} catch (SQLException e) {
+					throw new RuntimeException("SQL exception occurred exporting database schema", e);
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException("SQL exception occurred acquiring connection", e);
+			} finally {
+				if (connection != null) {
+					try {
+						connection.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+		}
 
-        // utility method to run the parsed sql
-        private void executeSql(String sql, Connection connection) throws SQLException {
-            Statement statement = connection.createStatement();
-            statement.execute(sql);
-        }
-    }
+		// utility method to read a .sql txt input stream
+		private String parseSqlIn(Resource resource) throws IOException {
+			InputStream is = null;
+			try {
+				is = resource.getInputStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+				StringWriter sw = new StringWriter();
+				BufferedWriter writer = new BufferedWriter(sw);
+
+				for (int c=reader.read(); c != -1; c=reader.read()) {
+					writer.write(c);
+				}
+				writer.flush();
+				return sw.toString();
+
+			} finally {
+				if (is != null) {
+					is.close();
+				}
+			}
+		}
+
+		// utility method to run the parsed sql
+		private void executeSql(String sql, Connection connection) throws SQLException {
+			Statement statement = connection.createStatement();
+			statement.execute(sql);
+		}
+	}
 
 }

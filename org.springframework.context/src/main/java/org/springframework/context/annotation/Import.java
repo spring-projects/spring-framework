@@ -18,25 +18,32 @@ package org.springframework.context.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that allows one {@link Configuration} class to import another Configuration,
- * and thereby all its {@link Bean} definitions.
- * 
+ * Indicates one or more {@link Configuration} classes to import.
+ *
  * <p>Provides functionality equivalent to the {@literal <import/>} element in Spring XML.
- * Only supported for actual {@link Configuration} classes.
+ * Only supported for actual {@literal @Configuration}-annotated classes.
+ *
+ * <p>{@literal @Bean} definitions declared in imported {@literal @Configuration} classes
+ * should be accessed by using {@link Autowired @Autowired} injection.  Either the bean
+ * itself can be autowired, or the configuration class instance declaring the bean can be
+ * autowired.  The latter approach allows for explicit, IDE-friendly navigation between
+ * {@literal @Configuration} class methods.
+ *
+ * <p>If XML or other non-{@literal @Configuration} bean definition resources need to be
+ * imported, use {@link ImportResource @ImportResource}
  *
  * @author Chris Beams
  * @since 3.0
  * @see Configuration
+ * @see ImportResource
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
 public @interface Import {
 
