@@ -666,11 +666,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public <T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException {
-		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rse);
+		return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
 	public <T> T query(String sql, Object[] args, ResultSetExtractor<T> rse) throws DataAccessException {
-		return query(sql, new ArgPreparedStatementSetter(args), rse);
+		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
 	public void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {
@@ -682,11 +682,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
+		query(sql, newArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
 	public void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, new ArgPreparedStatementSetter(args), rch);
+		query(sql, newArgPreparedStatementSetter(args), rch);
 	}
 
 	public <T> List<T> query(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
@@ -843,11 +843,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public int update(String sql, Object[] args, int[] argTypes) throws DataAccessException {
-		return update(sql, new ArgTypePreparedStatementSetter(args, argTypes));
+		return update(sql, newArgTypePreparedStatementSetter(args, argTypes));
 	}
 
 	public int update(String sql, Object... args) throws DataAccessException {
-		return update(sql, new ArgPreparedStatementSetter(args));
+		return update(sql, newArgPreparedStatementSetter(args));
 	}
 
 	public int[] batchUpdate(String sql, final BatchPreparedStatementSetter pss) throws DataAccessException {
@@ -1231,6 +1231,28 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throw new SQLWarningException("Warning not ignored", warning);
 		}
 	}
+
+	/**
+	 * Create a new ArgPreparedStatementSetter using the args passed in. This method allows the
+	 * creation to be overridden by sub-classes.
+	 * @param args object array woth arguments
+	 * @return the new ArgPreparedStatementSetter
+	 */
+	protected ArgPreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
+		return new ArgPreparedStatementSetter(args);
+	}
+
+	/**
+	 * Create a new ArgTypePreparedStatementSetter using the args and argTypes passed in.
+	 * This method allows the creation to be overridden by sub-classes.
+	 * @param args object array woth arguments
+	 * @param argTypes int array of SQLTypes for arguments
+	 * @return the new ArgTypePreparedStatementSetter
+	 */
+	protected ArgTypePreparedStatementSetter newArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
+		return new ArgTypePreparedStatementSetter(args, argTypes);
+	}
+
 
 	/**
 	 * Determine SQL from potential provider object.
