@@ -36,7 +36,6 @@ public class DefaultConversionService extends GenericConversionService {
 		addConverter(String.class, Character.class, new StringToCharacterConverter());
 		addConverter(String.class, Locale.class, new StringToLocaleConverter());
 		addConverter(Number.class, Character.class, new NumberToCharacterConverter());
-		addConverter(Object.class, String.class, new ObjectToStringConverter());
 		addConverterFactory(String.class, Number.class, new StringToNumberConverterFactory());
 		addConverterFactory(String.class, Enum.class, new StringToEnumConverterFactory());
 		addConverterFactory(Number.class, Number.class, new NumberToNumberConverterFactory());

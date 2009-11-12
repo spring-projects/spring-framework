@@ -80,7 +80,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		addGenericConverter(Map.class, Object.class, new MapToObjectConverter(this));
 		addGenericConverter(Object.class, Object[].class, new ObjectToArrayConverter(this));
 		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionConverter(this));
-		addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(this));		
+		addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(this));
+		addConverter(Object.class, String.class, new ObjectToStringConverter());		
+		addGenericConverter(Object.class, Object.class, new ObjectToObjectGenericConverter());
 	}
 	
 	/**
