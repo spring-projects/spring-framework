@@ -67,7 +67,6 @@ public class GenericConversionServiceTests {
 	@Test
 	public void converterNotFound() {
 		try {
-			conversionService.removeConvertible(Object.class, Object.class);
 			conversionService.convert("3", Integer.class);
 			fail("Should have thrown an exception");
 		} catch (ConverterNotFoundException e) {
@@ -126,7 +125,6 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertObjectToPrimitive() {
-		conversionService.removeConvertible(Object.class, Object.class);		
 		assertFalse(conversionService.canConvert(String.class, boolean.class));
 		conversionService.addConverter(new StringToBooleanConverter());
 		assertTrue(conversionService.canConvert(String.class, boolean.class));
@@ -663,46 +661,6 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	public void convertObjectToObjectValueOFMethod() {
-		assertEquals(new Integer(3), conversionService.convert("3", Integer.class));
-	}
-
-	@Test
-	public void convertObjectToObjectConstructor() {
-		assertEquals(new SSN("123456789"), conversionService.convert("123456789", SSN.class));
-		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
-	}
-
-	@Test(expected=ConversionFailedException.class)
-	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
-		conversionService.convert(new Long(3), Integer.class);
-	}
-	
-	private static class SSN {
-		private String value;
-		
-		public SSN(String value) {
-			this.value = value;
-		}
-		
-		public boolean equals(Object o) {
-			if (!(o instanceof SSN)) {
-				return false;
-			}
-			SSN ssn = (SSN) o;
-			return this.value.equals(ssn.value);
-		}
-		
-		public int hashCode() {
-			return value.hashCode();
-		}
-		
-		public String toString() {
-			return value;
-		}
-	}
-
-	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
 		conversionService.addGenericConverter(Object.class, Object[].class, new ObjectToArrayConverter(
 				conversionService));
@@ -717,8 +675,6 @@ public class GenericConversionServiceTests {
 	public void parent() {
 		GenericConversionService parent = new GenericConversionService();
 		conversionService.setParent(parent);
-		conversionService.removeConvertible(Object.class, Object.class);
-		parent.removeConvertible(Object.class, Object.class);		
 		assertFalse(conversionService.canConvert(String.class, Integer.class));
 		try {
 			conversionService.convert("3", Integer.class);

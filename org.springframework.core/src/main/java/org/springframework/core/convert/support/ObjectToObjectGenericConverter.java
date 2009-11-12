@@ -34,7 +34,13 @@ import org.springframework.util.ReflectionUtils;
  * @author Keith Donald
  * @since 3.0
  */
-final class ObjectToObjectGenericConverter implements GenericConverter {
+final class ObjectToObjectGenericConverter implements ConditionalGenericConverter {
+	
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		Class<?> sourceClass = sourceType.getObjectType();
+		Class<?> targetClass = targetType.getObjectType();		
+		return getValueOfMethodOn(targetClass, sourceClass) != null || getConstructor(targetClass, sourceClass) != null;
+	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.isAssignableTo(targetType)) {
@@ -43,11 +49,11 @@ final class ObjectToObjectGenericConverter implements GenericConverter {
 		Class<?> sourceClass = sourceType.getObjectType();
 		Class<?> targetClass = targetType.getObjectType();
 		Object target;
-		Method method = ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
+		Method method = getValueOfMethodOn(targetClass, sourceClass);
 		if (method != null) {
 			target = ReflectionUtils.invokeMethod(method, null, source);
 		} else {
-			Constructor<?> constructor = ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+			Constructor<?> constructor = getConstructor(targetClass, sourceClass);
 			if (constructor != null) {
 				try {
 					target = constructor.newInstance(source);
@@ -67,4 +73,13 @@ final class ObjectToObjectGenericConverter implements GenericConverter {
 		}
 		return target;
 	}
+
+	private Method getValueOfMethodOn(Class<?> targetClass, Class<?> argType) {
+		return ClassUtils.getStaticMethod(targetClass, "valueOf", argType);
+	}
+	
+	private Constructor<?> getConstructor(Class<?> targetClass, Class<?> sourceClass) {
+		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+	}
+
 }

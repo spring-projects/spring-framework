@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -64,7 +65,7 @@ public class MvcNamespaceTests {
 		assertTrue(handler.recordedValidationError);
 	}
 
-	@Test(expected=ConversionNotSupportedException.class)
+	@Test(expected=ConversionFailedException.class)
 	public void testCustomConversionService() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml", getClass()));

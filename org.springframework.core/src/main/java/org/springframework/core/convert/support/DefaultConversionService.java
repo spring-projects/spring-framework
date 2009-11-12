@@ -40,6 +40,8 @@ public class DefaultConversionService extends GenericConversionService {
 		addConverterFactory(String.class, Enum.class, new StringToEnumConverterFactory());
 		addConverterFactory(Number.class, Number.class, new NumberToNumberConverterFactory());
 		addConverterFactory(Character.class, Number.class, new CharacterToNumberFactory());
+		addConverter(Object.class, String.class, new ObjectToStringConverter());		
+		addGenericConverter(Object.class, Object.class, new ObjectToObjectGenericConverter());		
 	}
 
 }
