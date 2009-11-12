@@ -385,17 +385,17 @@ public class AppConfig {
     </section>
 
     <section id="new-feature-convert-and-format">
-      <title>General purpose type conversion system and UI field formatting
+      <title>General purpose type conversion system and field formatting
       system</title>
 
       <para>A general purpose <link linkend="core.convert">type conversion
       system</link> has been introduced. The system is currently used by SpEL
-      for type conversion, and may also be used by a Spring Container when
+      for type conversion, and may also be used by a Spring Container and DataBinder when
       binding bean property values.</para>
 
-      <para>In addition, a <link linkend="ui.format">ui.format</link> system
-      has been introduced for formatting UI field values. This system provides
-      a simpler and more robust alternative to JavaBean PropertyEditors in UI
+      <para>In addition, a <link linkend="format">formatter</link> system
+      has been introduced for formatting field values. This system provides
+      a simpler and more robust alternative to JavaBean PropertyEditors for use in client
       environments such as Spring MVC.</para>
     </section>
 
@@ -469,7 +469,6 @@ public class AppConfig {
 
       <para>JSR 303, JSF 2.0, JPA 2.0, etc</para>
 
-      <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>
 
     <section id="new-feature-embedded-databases">
