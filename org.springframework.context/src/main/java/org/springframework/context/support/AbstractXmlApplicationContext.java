@@ -97,14 +97,11 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * definitions of this context. Default implementation is empty.
 	 * <p>Can be overridden in subclasses, e.g. for turning off XML validation
 	 * or using a different XmlBeanDefinitionParser implementation.
-	 * @param beanDefinitionReader the bean definition reader used by this context
+	 * @param reader the bean definition reader used by this context
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setDocumentReaderClass
 	 */
-	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
-		if (!this.validating) {
-			beanDefinitionReader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
-			beanDefinitionReader.setNamespaceAware(true);
-		}
+	protected void initBeanDefinitionReader(XmlBeanDefinitionReader reader) {
+		reader.setValidating(this.validating);
 	}
 
 	/**

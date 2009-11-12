@@ -136,7 +136,20 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 
 	/**
+	 * Set whether to use XML validation. Default is <code>true</code>.
+	 * <p>This method switches namespace awareness on if validation is turned off,
+	 * in order to still process schema namespaces properly in such a scenario.
+	 * @see #setValidationMode
+	 * @see #setNamespaceAware
+	 */
+	public void setValidating(boolean validating) {
+		this.validationMode = (validating ? VALIDATION_AUTO : VALIDATION_NONE);
+		this.namespaceAware = !validating;
+	}
+
+	/**
 	 * Set the validation mode to use by name. Defaults to {@link #VALIDATION_AUTO}.
+	 * @see #setValidationMode
 	 */
 	public void setValidationModeName(String validationModeName) {
 		setValidationMode(constants.asNumber(validationModeName).intValue());
@@ -144,6 +157,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Set the validation mode to use. Defaults to {@link #VALIDATION_AUTO}.
+	 * <p>Note that this only activates or deactivates validation itself.
+	 * If you are switching validation off for schema files, you might need to
+	 * activate schema namespace support explicitly: see {@link #setNamespaceAware}.
 	 */
 	public void setValidationMode(int validationMode) {
 		this.validationMode = validationMode;
@@ -159,6 +175,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Set whether or not the XML parser should be XML namespace aware.
 	 * Default is "false".
+	 * <p>This is typically not needed when schema validation is active.
+	 * However, without validation, this has to be switched to "true"
+	 * in order to properly process schema namespaces.
 	 */
 	public void setNamespaceAware(boolean namespaceAware) {
 		this.namespaceAware = namespaceAware;
