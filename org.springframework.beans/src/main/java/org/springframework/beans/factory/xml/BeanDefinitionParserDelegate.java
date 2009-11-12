@@ -778,7 +778,12 @@ public class BeanDefinitionParserDelegate {
 							valueHolder.setName(nameAttr);
 						}
 						valueHolder.setSource(extractSource(ele));
-						bd.getConstructorArgumentValues().addIndexedArgumentValue(index, valueHolder);
+						if (bd.getConstructorArgumentValues().hasIndexedArgumentValue(index)) {
+							error("Ambiguous constructor-arg entries for index " + index, ele);
+						}
+						else {
+							bd.getConstructorArgumentValues().addIndexedArgumentValue(index, valueHolder);
+						}
 					}
 					finally {
 						this.parseState.pop();

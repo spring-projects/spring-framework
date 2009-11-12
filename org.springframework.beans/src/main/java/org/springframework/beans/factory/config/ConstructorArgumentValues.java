@@ -132,6 +132,14 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
+	 * Check whether an argument value has been registered for the given index.
+	 * @param index the index in the constructor argument list
+	 */
+	public boolean hasIndexedArgumentValue(int index) {
+		return this.indexedArgumentValues.containsKey(index);
+	}
+
+	/**
 	 * Get argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
 	 * @param requiredType the type to match (can be <code>null</code> to match
