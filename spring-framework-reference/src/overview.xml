@@ -187,7 +187,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       <title>Web</title>
 
       <para>The <emphasis>Web</emphasis> layer consists of the Web,
-      Web-Servlet, and Web-Portlet modules.</para>
+      Web-Servlet, Web-Struts, and Web-Portlet modules.</para>
 
       <para>Spring's <emphasis>Web</emphasis> module provides basic
       web-oriented integration features such as multipart file-upload
@@ -203,6 +203,12 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       forms, and integrates with all the other features of the Spring
       Framework.<!--MVC allows you to use *all other features*? (Or just all other features in Web layer?) How do you mean? Does this need elaboration? 
 It sounds important.--><!--TR: REVISED, PLS REVIEW.--></para>
+
+      <para>The <emphasis>Web-Struts</emphasis> module contains the support 
+      classes for integrating a classic Struts web tier within a Spring application.
+      Note that this support is now deprecated as of Spring 3.0. Consider
+      migrating your application to Struts 2.0 and its Spring integration or
+      to a Spring MVC solution.</para>
 
       <para>The <emphasis>Web-Portlet</emphasis> module provides the MVC
       implementation to be used in a portlet environment and mirrors the
