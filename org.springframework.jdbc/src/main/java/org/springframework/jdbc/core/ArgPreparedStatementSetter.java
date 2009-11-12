@@ -43,7 +43,7 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDi
 		if (this.args != null) {
 			for (int i = 0; i < this.args.length; i++) {
 				Object arg = this.args[i];
-				doSetValue(ps, i, arg);
+				doSetValue(ps, i + 1, arg);
 			}
 		}
 	}
@@ -59,10 +59,10 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDi
 	protected void doSetValue(PreparedStatement ps, int parameterPosition, Object argValue) throws SQLException {
 		if (argValue instanceof SqlParameterValue) {
 			SqlParameterValue paramValue = (SqlParameterValue) argValue;
-			StatementCreatorUtils.setParameterValue(ps, parameterPosition + 1, paramValue, paramValue.getValue());
+			StatementCreatorUtils.setParameterValue(ps, parameterPosition, paramValue, paramValue.getValue());
 		}
 		else {
-			StatementCreatorUtils.setParameterValue(ps, parameterPosition + 1, SqlTypeValue.TYPE_UNKNOWN, argValue);
+			StatementCreatorUtils.setParameterValue(ps, parameterPosition, SqlTypeValue.TYPE_UNKNOWN, argValue);
 		}
 	}
 
