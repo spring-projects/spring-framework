@@ -92,7 +92,6 @@ public class FormattingConversionServiceTests {
 			}
 		});
 		formattingService.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
-		System.out.println(this.formattingService);
 		String formatted = (String) formattingService.convert(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime()
 				.toDate(), new TypeDescriptor(Model.class.getField("date")), TypeDescriptor.valueOf(String.class));
 		assertEquals("10/31/09", formatted);

@@ -16,13 +16,15 @@
 
 package org.springframework.core.convert.support;
 
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Locale;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.converter.Converter;
 
 /**
@@ -179,6 +181,49 @@ public class DefaultConversionServiceTests {
 	public void testObjectToString() {
 		ObjectToStringConverter o = new ObjectToStringConverter();
 		assertEquals("3", o.convert(3));
+	}
+	
+	@Test
+	public void convertObjectToObjectValueOFMethod() {
+		DefaultConversionService conversionService = new DefaultConversionService();
+		assertEquals(new Integer(3), conversionService.convert("3", Integer.class));
+	}
+
+	@Test
+	public void convertObjectToObjectConstructor() {
+		DefaultConversionService conversionService = new DefaultConversionService();
+		assertEquals(new SSN("123456789"), conversionService.convert("123456789", SSN.class));
+		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
+	}
+
+	@Test(expected=ConversionFailedException.class)
+	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
+		DefaultConversionService conversionService = new DefaultConversionService();
+		conversionService.convert(new Long(3), SSN.class);
+	}
+
+	private static class SSN {
+		private String value;
+		
+		public SSN(String value) {
+			this.value = value;
+		}
+		
+		public boolean equals(Object o) {
+			if (!(o instanceof SSN)) {
+				return false;
+			}
+			SSN ssn = (SSN) o;
+			return this.value.equals(ssn.value);
+		}
+		
+		public int hashCode() {
+			return value.hashCode();
+		}
+		
+		public String toString() {
+			return value;
+		}
 	}
 	
 	public static class CustomNumber extends Number {
