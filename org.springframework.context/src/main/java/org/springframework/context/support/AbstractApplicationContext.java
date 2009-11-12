@@ -37,6 +37,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -502,14 +503,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 			catch (AccessControlException ex) {
 				systemProperties = new ReadOnlySystemAttributesMap() {
-
 					@Override
 					protected String getSystemAttribute(String propertyName) {
 						try {
 							return System.getProperty(propertyName);
-						} catch (AccessControlException ex) {
-							logger.info("Not allowed to obtain system property [" + propertyName + "]: "
-									+ ex.getMessage());
+						}
+						catch (AccessControlException ex) {
+							if (logger.isInfoEnabled()) {
+								logger.info("Not allowed to obtain system property [" + propertyName + "]: " +
+										ex.getMessage());
+							}
 							return null;
 						}
 					}
@@ -517,6 +520,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, systemProperties);
 		}
+
 		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
 			Map<String,String> systemEnvironment;
 			try {
@@ -528,9 +532,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					protected String getSystemAttribute(String variableName) {
 						try {
 							return System.getenv(variableName);
-						} catch (AccessControlException ex) {
-							logger.info("Not allowed to obtain system environment variable [" + variableName + "]: " +
-									ex.getMessage());
+						}
+						catch (AccessControlException ex) {
+							if (logger.isInfoEnabled()) {
+								logger.info("Not allowed to obtain system environment variable [" + variableName + "]: " +
+										ex.getMessage());
+							}
 							return null;
 						}
 					}
@@ -629,11 +636,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
+		List<BeanPostProcessor> internalPostProcessors = new ArrayList<BeanPostProcessor>();
 		List<String> orderedPostProcessorNames = new ArrayList<String>();
 		List<String> nonOrderedPostProcessorNames = new ArrayList<String>();
 		for (String ppName : postProcessorNames) {
 			if (isTypeMatch(ppName, PriorityOrdered.class)) {
-				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanPostProcessor.class));
+				BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+				priorityOrderedPostProcessors.add(pp);
+				if (pp instanceof MergedBeanDefinitionPostProcessor) {
+					internalPostProcessors.add(pp);
+				}
 			}
 			else if (isTypeMatch(ppName, Ordered.class)) {
 				orderedPostProcessorNames.add(ppName);
@@ -649,18 +661,30 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Next, register the BeanPostProcessors that implement Ordered.
 		List<BeanPostProcessor> orderedPostProcessors = new ArrayList<BeanPostProcessor>();
-		for (String postProcessorName : orderedPostProcessorNames) {
-			orderedPostProcessors.add(getBean(postProcessorName, BeanPostProcessor.class));
+		for (String ppName : orderedPostProcessorNames) {
+			BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+			orderedPostProcessors.add(pp);
+			if (pp instanceof MergedBeanDefinitionPostProcessor) {
+				internalPostProcessors.add(pp);
+			}
 		}
 		OrderComparator.sort(orderedPostProcessors);
 		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
-		// Finally, register all other BeanPostProcessors.
+		// Now, register all regular BeanPostProcessors.
 		List<BeanPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
-		for (String postProcessorName : nonOrderedPostProcessorNames) {
-			nonOrderedPostProcessors.add(getBean(postProcessorName, BeanPostProcessor.class));
+		for (String ppName : nonOrderedPostProcessorNames) {
+			BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+			nonOrderedPostProcessors.add(pp);
+			if (pp instanceof MergedBeanDefinitionPostProcessor) {
+				internalPostProcessors.add(pp);
+			}
 		}
 		registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
+
+		// Finally, re-register all internal BeanPostProcessors.
+		OrderComparator.sort(internalPostProcessors);
+		registerBeanPostProcessors(beanFactory, internalPostProcessors);
 	}
 
 	/**
