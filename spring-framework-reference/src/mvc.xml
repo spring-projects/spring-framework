@@ -676,7 +676,7 @@ public class HelloWorldController {
       for a specific HTTP method request method ("GET"/"POST") or specific
       HTTP request parameters.</para>
 
-      <para>The following example shows a controller in a JSF application
+      <para>The following example shows a controller in a Spring MVC application
       that uses this annotation:</para>
 
       <programlisting language="java">@Controller
@@ -691,19 +691,13 @@ public class AppointmentsController {
     }
 
     <emphasis role="bold">@RequestMapping(method = RequestMethod.GET)</emphasis>
-    public Appointments get() {
+    public Map&lt;String, Appointment&gt; get() {
         return appointmentBook.getAppointmentsForToday();
     }
 
     <emphasis role="bold">@RequestMapping(value="/{day}", method = RequestMethod.GET)</emphasis>
-    public void getForDay(@PathVariable Date day, ExternalContext context) {
-        Appointments appts = appointmentBook.getAppointmentsForDay(day);
-        context.getModel().addAttribute(appts);
-        context.selectView("appointments");
-        if (context.isAjaxRequest()) {
-            //could activate a ViewHelper for component associated with main
-            context.renderFragment("main");
-        }
+    public Map&lt;String, Appointment&gt; getForDay(@PathVariable @DateTimeFormat(iso=ISO.DATE) Date day, Model model) {
+        return appointmentBook.getAppointmentsForDay(day);
     }
 
     <emphasis role="bold">@RequestMapping(value="/new", method = RequestMethod.GET)</emphasis>
@@ -712,8 +706,11 @@ public class AppointmentsController {
     }
 
     <emphasis role="bold">@RequestMapping(method = RequestMethod.POST)</emphasis>
-    public String post(AppointmentForm form) {
-        appointmentBook.createAppointment(form);
+    public String add(@Valid AppointmentForm appointment, BindingResult result) {
+        if (result.hasErrors()) {
+            return "appointments/new";
+        }
+        appointmentBook.addAppointment(appointment);
         return "redirect:/appointments";
     }
 }</programlisting>
