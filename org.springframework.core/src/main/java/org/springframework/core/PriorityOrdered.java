@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ package org.springframework.core;
  * {@link org.springframework.context.ApplicationContext}.
  *
  * <p>Note: PriorityOrdered post-processor beans are initialized in
- * a special phase, ahead of other post-postprocessor beans. This
- * subtly affects their autowiring behavior: They will only be
- * autowired against beans which do not require eager initialization
- * for type matching.
+ * a special phase, ahead of other post-processor beans. This subtly
+ * affects their autowiring behavior: They will only be autowired against
+ * beans which do not require eager initialization for type matching.
  *
  * @author Juergen Hoeller
  * @since 2.5

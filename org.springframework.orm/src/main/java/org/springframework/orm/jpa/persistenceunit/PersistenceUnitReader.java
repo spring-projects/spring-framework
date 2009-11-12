@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -129,8 +128,8 @@ class PersistenceUnitReader {
 		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
 		String resourceLocation = null;
 		try {
-			for (int i = 0; i < persistenceXmlLocations.length; i++) {
-				Resource[] resources = this.resourcePatternResolver.getResources(persistenceXmlLocations[i]);
+			for (String location : persistenceXmlLocations) {
+				Resource[] resources = this.resourcePatternResolver.getResources(location);
 				for (Resource resource : resources) {
 					resourceLocation = resource.toString();
 					InputStream stream = resource.getInputStream();
@@ -192,8 +191,8 @@ class PersistenceUnitReader {
 	 * @return an existing resource, or <code>null</code> if none found
 	 */
 	protected Resource findSchemaResource() {
-		for (int i = 0; i < SCHEMA_RESOURCE_LOCATIONS.length; i++) {
-			Resource schemaLocation = this.resourcePatternResolver.getResource(SCHEMA_RESOURCE_LOCATIONS[i]);
+		for (String location : SCHEMA_RESOURCE_LOCATIONS) {
+			Resource schemaLocation = this.resourcePatternResolver.getResource(location);
 			if (schemaLocation.exists()) {
 				return schemaLocation;
 			}
@@ -210,7 +209,7 @@ class PersistenceUnitReader {
 
 		Element persistence = document.getDocumentElement();
 		URL unitRootURL = determinePersistenceUnitRootUrl(resource);
-		List<Element> units = (List<Element>) DomUtils.getChildElementsByTagName(persistence, PERSISTENCE_UNIT);
+		List<Element> units = DomUtils.getChildElementsByTagName(persistence, PERSISTENCE_UNIT);
 		for (Element unit : units) {
 			SpringPersistenceUnitInfo info = parsePersistenceUnitInfo(unit);
 			info.setPersistenceUnitRootUrl(unitRootURL);
@@ -346,8 +345,8 @@ class PersistenceUnitReader {
 			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
 				Resource[] resources = this.resourcePatternResolver.getResources(value);
-				for (int i = 0; i < resources.length; i++) {
-					unitInfo.addJarFileUrl(resources[i].getURL());
+				for (Resource resource : resources) {
+					unitInfo.addJarFileUrl(resource.getURL());
 				}
 			}
 		}
