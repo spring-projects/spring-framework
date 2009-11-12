@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,9 +99,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/** Constants instance for this class */
 	private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
-	private boolean namespaceAware;
-
 	private int validationMode = VALIDATION_AUTO;
+
+	private boolean namespaceAware = false;
 
 	private Class documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
 
@@ -136,21 +136,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 
 	/**
-	 * Set whether or not the XML parser should be XML namespace aware.
-	 * Default is "false".
-	 */
-	public void setNamespaceAware(boolean namespaceAware) {
-		this.namespaceAware = namespaceAware;
-	}
-
-	/**
-	 * Return whether or not the XML parser should be XML namespace aware.
-	 */
-	public boolean isNamespaceAware() {
-		return this.namespaceAware;
-	}
-
-	/**
 	 * Set the validation mode to use by name. Defaults to {@link #VALIDATION_AUTO}.
 	 */
 	public void setValidationModeName(String validationModeName) {
@@ -172,56 +157,72 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Specify which {@link org.springframework.beans.factory.parsing.ProblemReporter} to use. Default implementation is
-	 * {@link org.springframework.beans.factory.parsing.FailFastProblemReporter} which exhibits fail fast behaviour. External tools
-	 * can provide an alternative implementation that collates errors and warnings for
-	 * display in the tool UI.
+	 * Set whether or not the XML parser should be XML namespace aware.
+	 * Default is "false".
+	 */
+	public void setNamespaceAware(boolean namespaceAware) {
+		this.namespaceAware = namespaceAware;
+	}
+
+	/**
+	 * Return whether or not the XML parser should be XML namespace aware.
+	 */
+	public boolean isNamespaceAware() {
+		return this.namespaceAware;
+	}
+
+	/**
+	 * Specify which {@link org.springframework.beans.factory.parsing.ProblemReporter} to use.
+	 * <p>The default implementation is {@link org.springframework.beans.factory.parsing.FailFastProblemReporter}
+	 * which exhibits fail fast behaviour. External tools can provide an alternative implementation
+	 * that collates errors and warnings for display in the tool UI.
 	 */
 	public void setProblemReporter(ProblemReporter problemReporter) {
 		this.problemReporter = (problemReporter != null ? problemReporter : new FailFastProblemReporter());
 	}
 
 	/**
-	 * Specify which {@link ReaderEventListener} to use. Default implementation is
-	 * EmptyReaderEventListener which discards every event notification. External tools
-	 * can provide an alternative implementation to monitor the components being registered
-	 * in the BeanFactory.
+	 * Specify which {@link ReaderEventListener} to use.
+	 * <p>The default implementation is EmptyReaderEventListener which discards every event notification.
+	 * External tools can provide an alternative implementation to monitor the components being
+	 * registered in the BeanFactory.
 	 */
 	public void setEventListener(ReaderEventListener eventListener) {
 		this.eventListener = (eventListener != null ? eventListener : new EmptyReaderEventListener());
 	}
 
 	/**
-	 * Specify the {@link SourceExtractor} to use. The default implementation is
-	 * {@link NullSourceExtractor} which simply returns <code>null</code> as the source object.
-	 * This means that during normal runtime execution no additional source metadata is attached
-	 * to the bean configuration metadata.
+	 * Specify the {@link SourceExtractor} to use.
+	 * <p>The default implementation is {@link NullSourceExtractor} which simply returns <code>null</code>
+	 * as the source object. This means that - during normal runtime execution -
+	 * no additional source metadata is attached to the bean configuration metadata.
 	 */
 	public void setSourceExtractor(SourceExtractor sourceExtractor) {
 		this.sourceExtractor = (sourceExtractor != null ? sourceExtractor : new NullSourceExtractor());
 	}
 
 	/**
-	 * Specify the {@link NamespaceHandlerResolver} to use. If none is specified a default
-	 * instance will be created by {@link #createDefaultNamespaceHandlerResolver()}.
+	 * Specify the {@link NamespaceHandlerResolver} to use.
+	 * <p>If none is specified, a default instance will be created through
+	 * {@link #createDefaultNamespaceHandlerResolver()}.
 	 */
 	public void setNamespaceHandlerResolver(NamespaceHandlerResolver namespaceHandlerResolver) {
 		this.namespaceHandlerResolver = namespaceHandlerResolver;
 	}
 
 	/**
-	 * Specify the {@link DocumentLoader} to use. The default implementation is
-	 * {@link DefaultDocumentLoader} which loads {@link Document} instances using JAXP.
+	 * Specify the {@link DocumentLoader} to use.
+	 * <p>The default implementation is {@link DefaultDocumentLoader}
+	 * which loads {@link Document} instances using JAXP.
 	 */
 	public void setDocumentLoader(DocumentLoader documentLoader) {
 		this.documentLoader = (documentLoader != null ? documentLoader : new DefaultDocumentLoader());
 	}
 
 	/**
-	 * Set a SAX entity resolver to be used for parsing. By default,
-	 * BeansDtdResolver will be used. Can be overridden for custom entity
-	 * resolution, for example relative to some specific base path.
-	 * @see BeansDtdResolver
+	 * Set a SAX entity resolver to be used for parsing.
+	 * <p>By default, {@link ResourceEntityResolver} will be used. Can be overridden
+	 * for custom entity resolution, for example relative to some specific base path.
 	 */
 	public void setEntityResolver(EntityResolver entityResolver) {
 		this.entityResolver = entityResolver;
@@ -258,12 +259,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Specify the BeanDefinitionDocumentReader implementation to use,
+	 * Specify the {@link BeanDefinitionDocumentReader} implementation to use,
 	 * responsible for the actual reading of the XML bean definition document.
-	 * <p>Default is DefaultBeanDefinitionDocumentReader.
+	 * <p>The default is {@link DefaultBeanDefinitionDocumentReader}.
 	 * @param documentReaderClass the desired BeanDefinitionDocumentReader implementation class
-	 * @see BeanDefinitionDocumentReader
-	 * @see DefaultBeanDefinitionDocumentReader
 	 */
 	public void setDocumentReaderClass(Class documentReaderClass) {
 		if (documentReaderClass == null || !BeanDefinitionDocumentReader.class.isAssignableFrom(documentReaderClass)) {
