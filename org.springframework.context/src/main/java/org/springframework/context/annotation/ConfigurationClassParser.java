@@ -37,11 +37,11 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * Parses a {@link Configuration} class definition, populating a model (collection) of
+ * Parses a {@link Configuration} class definition, populating a collection of
  * {@link ConfigurationClass} objects (parsing a single Configuration class may result in
  * any number of ConfigurationClass objects because one Configuration class may import
  * another using the {@link Import} annotation).
- * 
+ *
  * <p>This class helps separate the concern of parsing the structure of a Configuration
  * class from the concern of registering {@link BeanDefinition} objects based on the
  * content of that model.
@@ -61,7 +61,7 @@ class ConfigurationClassParser {
 	private final ProblemReporter problemReporter;
 
 	private final Stack<ConfigurationClass> importStack = new ImportStack();
-	
+
 	private final Set<ConfigurationClass> configurationClasses =
 		new LinkedHashSet<ConfigurationClass>();
 

@@ -29,32 +29,32 @@ import org.springframework.beans.factory.annotation.Autowire;
  * names and semantics of the attributes to this annotation are intentionally similar
  * to those of the {@literal <bean/>} element in the Spring XML schema. Deviations are
  * as follows:
- * 
+ *
  * <p>The Bean annotation does not provide attributes for scope, primary or lazy. Rather,
  * it should be used in conjunction with {@link Scope &#064;Scope},
  * {@link Primary &#064;Primary}, and {@link Lazy &#064;Lazy} annotations to achieve the
  * same semantics.
- * 
+ *
  * <p>While a {@link #name()} attribute is available, the default strategy for determining
  * the name of a bean is to use the name of the Bean method. This is convenient and
  * intuitive, but if explicit naming is desired, the {@link #name()} attribute may be used.
  * Also note that {@link #name()} accepts an array of strings. This is in order to allow
  * for specifying multiple names (i.e., aliases) for a single bean.
- * 
+ *
  * <h3>Constraints</h3>
  * <ul>
  *     <li>Bean methods are valid only when declared within an {@link Configuration &#064;Configuration}-annotated class
- * 	   <li>Bean methods must be non-void, non-final, non-private
- * 	   <li>Bean methods may not accept any arguments
+ *     <li>Bean methods must be non-void, non-final, non-private
+ *     <li>Bean methods may not accept any arguments
  *     <li>Bean methods may throw any exception, which will be caught and handled
  *  by the Spring container on processing of the declaring {@link Configuration &#064;Configuration} class.
  * </ul>
- * 
+ *
  * <h3>Usage</h3>
  * <p>Bean methods may reference other Bean methods by calling them directly. This ensures
  * that references between beans are strongly typed and navigable. So called 'inter-bean
  * references' are guaranteed to respect scoping and AOP semantics.
- * 
+ *
  * @author Rod Johnson
  * @author Costin Leau
  * @author Chris Beams

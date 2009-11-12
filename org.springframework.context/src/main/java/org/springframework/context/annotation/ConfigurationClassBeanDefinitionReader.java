@@ -233,7 +233,7 @@ class ConfigurationClassBeanDefinitionReader {
 			reader.loadBeanDefinitions(resource);
 		}
 	}
-	
+
 	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
 	 * created from a configuration class as opposed to any other configuration source.
