@@ -30,8 +30,6 @@ Import-Template:
  org.aspectj.weaver.*;version="[1.5.4, 2.0.0)";resolution:=optional,
  org.codehaus.groovy.*;version="[1.5.0, 2.0.0)";resolution:=optional,
  org.joda.*;version="[1.6.0, 2.0.0)";resolution:=optional,
- org.jboss.classloader.*;version="[2.0.5, 3.0.0)";resolution:=optional,
- org.jboss.util.*;version="[2.2.13, 3.0.0)";resolution:=optional,
  org.jruby.*;version="[1.1.0, 2.0.0)";resolution:=optional,
  org.omg.CORBA.*;version="0";resolution:=optional,
  org.springframework.aop.*;version="[3.0.0, 3.0.1)";resolution:=optional,
