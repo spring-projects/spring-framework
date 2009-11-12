@@ -132,7 +132,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setFactoryMethodName(String factoryMethodName);
 
 	/**
-	 * Return the name of the current target scope for this bean.
+	 * Return the name of the current target scope for this bean,
+	 * or <code>null</code> if not known yet.
 	 */
 	String getScope();
 
