@@ -41,8 +41,7 @@ import org.springframework.core.io.Resource;
  * and cares for proper shutdown of the CacheManager. EhCacheManagerFactoryBean is
  * also necessary for loading EHCache configuration from a non-default config location.
  *
- * <p>Note: As of Spring 2.0, this FactoryBean will by default create an independent
- * CacheManager instance, which requires EHCache 1.2 or higher.
+ * <p>Note: As of Spring 3.0, Spring's EHCache support requires EHCache 1.3 or higher.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
