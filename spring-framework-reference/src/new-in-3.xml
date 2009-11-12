@@ -443,6 +443,8 @@ public class AppConfig {
       <section>
         <title>@MVC additions</title>
 
+		<para>A <literal>mvc</literal> namespace has been introduced that greatly simplifies Spring MVC configuration.</para>
+
         <para>Additional annotations such as
         <classname>@CookieValue</classname> and
         <classname>@RequestHeaders</classname> have been added. See <link
