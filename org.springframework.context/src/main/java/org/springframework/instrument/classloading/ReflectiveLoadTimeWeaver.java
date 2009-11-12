@@ -135,5 +135,4 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 			return new SimpleThrowawayClassLoader(this.classLoader);
 		}
 	}
-
 }

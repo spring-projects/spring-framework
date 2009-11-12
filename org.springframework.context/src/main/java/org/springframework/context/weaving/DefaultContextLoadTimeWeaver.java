@@ -27,7 +27,7 @@ import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
-import org.springframework.instrument.classloading.jboss.JBoss5LoadTimeWeaver;
+import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
 import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
@@ -96,18 +96,19 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	 * versions even though the ClassLoader name is the same.
 	 */
 	protected LoadTimeWeaver createServerSpecificLoadTimeWeaver(ClassLoader classLoader) {
+		String name = classLoader.getClass().getName();
 		try {
-			if (classLoader.getClass().getName().startsWith("weblogic")) {
+			if (name.startsWith("weblogic")) {
 				return new WebLogicLoadTimeWeaver(classLoader);
 			}
-			else if (classLoader.getClass().getName().startsWith("oracle")) {
+			else if (name.startsWith("oracle")) {
 				return new OC4JLoadTimeWeaver(classLoader);
 			}
-			else if (classLoader.getClass().getName().startsWith("com.sun.enterprise")) {
+			else if (name.startsWith("com.sun.enterprise")) {
 				return new GlassFishLoadTimeWeaver(classLoader);
 			}
-			else if (classLoader.getClass().getName().startsWith("org.jboss")) {
-				return new JBoss5LoadTimeWeaver(classLoader);
+			else if (name.startsWith("org.jboss")) {
+				return new JBossLoadTimeWeaver(classLoader);
 			}
 		}
 		catch (IllegalStateException ex) {
@@ -136,5 +137,4 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	public ClassLoader getThrowawayClassLoader() {
 		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}
-
 }

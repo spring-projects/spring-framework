@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
  */
 public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 
-	private final WebLogicClassLoader classLoader;
+	private final WebLogicClassLoaderAdapter classLoader;
 
 
 	/**
@@ -54,7 +54,7 @@ public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	public WebLogicLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
-		this.classLoader = new WebLogicClassLoader(classLoader);
+		this.classLoader = new WebLogicClassLoaderAdapter(classLoader);
 	}
 
 
@@ -63,11 +63,10 @@ public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return this.classLoader.getInternalClassLoader();
+		return this.classLoader.getClassLoader();
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
 		return this.classLoader.getThrowawayClassLoader();
 	}
-
 }
