@@ -7,7 +7,7 @@
 		<title>Reference Documentation</title>
 		<subtitle>(Work in progress)</subtitle>
 	    <productname>Spring Framework</productname>
-		<releaseinfo>3.0.0.RC1</releaseinfo>
+		<releaseinfo>3.0.0.RC2</releaseinfo>
 	    <mediaobject>
 	      <imageobject role="fo">
 	        <imagedata align="center" fileref="images/logo-pdf.png"
