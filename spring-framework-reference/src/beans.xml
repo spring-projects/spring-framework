@@ -610,7 +610,7 @@ List userList service.getUsernameList();
         configuration metadata for subsystem B may refer to a DataSource via
         the name 'subsystemB-dataSource'. When composing the main application
         that uses both these subsystems the main application refers to the
-        DattaSource via the name 'myApp-dataSource'. To have all three names
+        DataSource via the name 'myApp-dataSource'. To have all three names
         refer to the same object you add to the MyApp configuration metadata
         the following aliases definitions:</para>
 
