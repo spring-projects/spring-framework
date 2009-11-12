@@ -53,7 +53,7 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 
 
 	public void setValues(PreparedStatement ps) throws SQLException {
-		int argIndx = 1;
+		int parameterPosition = 1;
 		if (this.args != null) {
 			for (int i = 0; i < this.args.length; i++) {
 				Object arg = this.args[i];
@@ -65,19 +65,36 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 							Object[] valueArray = ((Object[])entry);
 							for (int k = 0; k < valueArray.length; k++) {
 								Object argValue = valueArray[k];
-								StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], argValue);
+								doSetValue(ps, parameterPosition, this.argTypes[i], argValue);
+								parameterPosition++;
 							}
 						}
 						else {
-							StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], entry);
+							doSetValue(ps, parameterPosition, this.argTypes[i], entry);
+							parameterPosition++;
 						}
 					}
 				}
 				else {
-					StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], arg);
+					doSetValue(ps, parameterPosition, this.argTypes[i], arg);
+					parameterPosition++;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Set the value for the prepared statement's specified parameter position using the passed in
+	 * value and type. This method can be overridden by sub-classes if needed.
+	 * @param ps the PreparedStatement
+	 * @param parameterPosition index of the parameter position
+	 * @param argType the argument type
+	 * @param argValue the argument value
+	 * @throws SQLException
+	 */
+	protected void doSetValue(PreparedStatement ps, int parameterPosition, int argType, Object argValue)
+			throws SQLException {
+		StatementCreatorUtils.setParameterValue(ps, parameterPosition, argType, argValue);
 	}
 
 	public void cleanupParameters() {
