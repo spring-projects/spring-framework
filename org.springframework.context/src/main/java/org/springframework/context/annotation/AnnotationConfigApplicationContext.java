@@ -27,9 +27,6 @@ import org.springframework.context.support.GenericApplicationContext;
  * registering classes one by one ({@link #register}) as well as for classpath scanning
  * ({@link #scan}).
  *
- * <p>Useful for test harnesses or any other scenario where XML-based configuration
- * is unnecessary or undesired.
- *
  * <p>In case of multiple Configuration classes, {@link Bean} methods defined in later
  * classes will override those defined in earlier classes. This can be leveraged to
  * deliberately override certain bean definitions via an extra Configuration class.
@@ -37,8 +34,11 @@ import org.springframework.context.support.GenericApplicationContext;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
+ * @see #register
+ * @see #scan
  * @see AnnotatedBeanDefinitionReader
  * @see ClassPathBeanDefinitionScanner
+ * @see org.springframework.context.support.GenericXmlApplicationContext
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext {
 
@@ -55,9 +55,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	}
 
 	/**
-	 * Create a new AnnotationConfigApplicationContext, deriving bean
-	 * definitions from the given annotated classes and automatically
-	 * refreshing the context.
+	 * Create a new AnnotationConfigApplicationContext, deriving bean definitions
+	 * from the given annotated classes and automatically refreshing the context.
 	 * @param annotatedClasses one or more annotated classes,
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
@@ -67,9 +66,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	}
 
 	/**
-	 * Create a new AnnotationConfigApplicationContext, scanning for bean
-	 * definitions in the given packages and automatically refreshing the
-	 * context.
+	 * Create a new AnnotationConfigApplicationContext, scanning for bean definitions
+	 * in the given packages and automatically refreshing the context.
 	 * @param basePackages the packages to check for annotated classes
 	 */
 	public AnnotationConfigApplicationContext(String... basePackages) {
