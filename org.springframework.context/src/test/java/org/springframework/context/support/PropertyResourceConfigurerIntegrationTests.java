@@ -16,22 +16,20 @@
 
 package org.springframework.context.support;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
@@ -46,13 +44,6 @@ import org.springframework.util.StringUtils;
  */
 public class PropertyResourceConfigurerIntegrationTests {
 	
-	private DefaultListableBeanFactory factory;
-	
-	@Before
-	public void setUp() {
-		factory = new DefaultListableBeanFactory();
-	}
-
 	@Test
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
@@ -118,9 +109,9 @@ public class PropertyResourceConfigurerIntegrationTests {
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
-			fail("Should have thrown BeanCreationException");
+			fail("Should have thrown BeanInitializationException");
 		}
-		catch (BeanCreationException ex) {
+		catch (BeanInitializationException ex) {
 			// expected
 			assertTrue(ex.getMessage().contains("myprop"));
 		}
