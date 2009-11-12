@@ -1424,13 +1424,12 @@ public class MyController {
 			<section id="validation.mvc.jsr303">
 				<title>Configuring a JSR-303 Validator for use by Spring MVC</title>
 				<para>
-					With JSR-303, the default <code>javax.validation.Validator</code> implementation is typically global.
-					A single instance typically validates <emphasis>all</emphasis> application objects that declare validation constraints.
-					To configure such a general purpose Validator for use by Spring MVC, simply add a JSR-303 Provider to your classpath.
-					Spring MVC will detect it and automatically configure JSR-303 for use across all Controllers.
+					With JSR-303, a single <code>javax.validation.Validator</code> instance typically validates <emphasis>all</emphasis> model objects that declare validation constraints.
+					To configure a JSR-303-backed Validator with Spring MVC, simply add a JSR-303 Provider, such as Hibernate Validator, to your classpath.
+					Spring MVC will detect it and automatically enable JSR-303 support across all Controllers.
 				</para>
 				<para>
-					The Spring MVC configuration required to configure JSR-303 support is shown below:
+					The Spring MVC configuration required to enable JSR-303 support is shown below:
 				</para>
 				<programlisting language="xml"><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1443,7 +1442,7 @@ public class MyController {
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
-	<!-- JSR-303 support detected on classpath and configured automatically -->
+    <!-- JSR-303 support will be detected on classpath and enabled automatically -->
     <mvc:annotation-driven/>
     
 </beans>
