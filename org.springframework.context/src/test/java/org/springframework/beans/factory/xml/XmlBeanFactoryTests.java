@@ -286,7 +286,7 @@ public final class XmlBeanFactoryTests {
 		}
 	}
 
-	public @Test void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
+	public @Test void testInheritanceFromParentFactoryPrototype() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(PARENT_CONTEXT);
 		XmlBeanFactory child = new XmlBeanFactory(CHILD_CONTEXT, parent);
 		assertEquals(TestBean.class, child.getType("inheritsFromParentFactory"));
@@ -296,7 +296,7 @@ public final class XmlBeanFactoryTests {
 		// Age property is inherited from bean in parent factory
 		assertTrue(inherits.getAge() == 1);
 		TestBean inherits2 = (TestBean) child.getBean("inheritsFromParentFactory");
-		assertTrue(inherits2 == inherits);
+		assertFalse(inherits2 == inherits);
 	}
 
 	public @Test void testInheritanceWithDifferentClass() throws Exception {
@@ -420,7 +420,7 @@ public final class XmlBeanFactoryTests {
 		// Age property is inherited from bean in parent factory
 		assertTrue(inherits.getAge() == 1);
 		TestBean inherits2 = (TestBean) child.getBean("inheritedTestBean");
-		assertTrue(inherits2 == inherits);
+		assertTrue(inherits2 != inherits);
 	}
 
 	/**

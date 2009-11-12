@@ -535,8 +535,7 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
-		if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
-			// Just apply default to singletons, as lazy-init has no meaning for prototypes.
+		if (DEFAULT_VALUE.equals(lazyInit)) {
 			lazyInit = this.defaults.getLazyInit();
 		}
 		bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
