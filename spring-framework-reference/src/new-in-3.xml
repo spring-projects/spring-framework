@@ -393,8 +393,8 @@ public class AppConfig {
       for type conversion, and may also be used by a Spring Container and DataBinder when
       binding bean property values.</para>
 
-      <para>In addition, a <link linkend="format">formatter</link> system
-      has been introduced for formatting field values. This system provides
+      <para>In addition, a <link linkend="format">formatter</link> SPI
+      has been introduced for formatting field values. This SPI provides
       a simpler and more robust alternative to JavaBean PropertyEditors for use in client
       environments such as Spring MVC.</para>
     </section>
