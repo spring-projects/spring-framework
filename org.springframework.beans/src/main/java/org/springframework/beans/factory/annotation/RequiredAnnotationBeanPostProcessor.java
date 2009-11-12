@@ -32,6 +32,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -70,7 +72,7 @@ import org.springframework.util.Assert;
  * @see Required
  */
 public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements PriorityOrdered, BeanFactoryAware {
+		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	/**
 	 * Bean definition attribute that may indicate whether a given bean is supposed
@@ -126,6 +128,9 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	  return this.order;
 	}
 
+
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+	}
 
 	@Override
 	public PropertyValues postProcessPropertyValues(
