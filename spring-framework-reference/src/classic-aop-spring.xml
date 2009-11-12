@@ -3,17 +3,14 @@
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <appendix id="classic-aop-spring">
   <title>Classic Spring AOP Usage</title>
-  <section id="classic-aop-classic-introduction">
-  <para>In this chapter we discuss 
+
+  <para>In this appendix we discuss 
 	the lower-level Spring AOP APIs and the AOP support used in Spring 1.2 applications.
 	For new applications, we recommend the use of the Spring 2.0 AOP support 
 	described in the <link linkend="aop">AOP</link> chapter, but when working with existing applications,
 	or when reading books and articles, you may come across Spring 1.2 style examples.
 	Spring 2.0 is fully backwards compatible with Spring 1.2 and everything described
-	in this chapter is fully supported in Spring 2.0.
-	</para>
-
-  </section>
+	in this appendix is fully supported in Spring 2.0.</para>
 
   <section id="classic-aop-api-pointcuts">
     <title>Pointcut API in Spring</title>
