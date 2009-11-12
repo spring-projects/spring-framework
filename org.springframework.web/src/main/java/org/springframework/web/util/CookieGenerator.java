@@ -44,6 +44,13 @@ public class CookieGenerator {
 	 */
 	public static final String DEFAULT_COOKIE_PATH = "/";
 
+	/**
+	 * Default maximum age of cookies: maximum integer value, i.e. forever.
+	 * @deprecated in favor of setting no max age value at all in such a case
+	 */
+	@Deprecated
+	public static final int DEFAULT_COOKIE_MAX_AGE = Integer.MAX_VALUE;
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
