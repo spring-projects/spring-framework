@@ -3,38 +3,43 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.RC2 (2009-11-12)
+Changes in version 3.0.0.RC2 (2009-11-13)
 -----------------------------------------
 
 * updated to final versions of JSR-330 "javax.inject" and JSR-303 "javax.validation" APIs
 * full compliance with the JSR-330 TCK (i.e. full compliance with the final specification)
 * support for Hibernate Validator 4.0 GA (as the JSR-303 reference implementation)
-* added Spring MVC namespace, with convenient <mvc:annotation-driven/> element for configuring support for annotated Controllers
-* default number and datetime formatters configured automatically when using the Spring MVC namespace
-* full support for datetime formatting using the Joda Time library, configured automatically if Joda Time is present in the classpath
-* added convenient @NumberFormat and @DateTimeFormat annotations for declaratively formatting number and datetime model fields, respectively
-* When converting from a source field of type S to a target field of type T, will fallback to T.valueOf(S) and T(S) if no explicit S->T converter matches
+* added support for load-time weaving in JBoss 5.x
+* added support for recent EHCache 1.6 configuration properties to EHCacheFactoryBean
 * added AnnotatedBeanDefinitionReader helper for programmatic registration of annotated classes
 * added AnnotationConfig(Web)ApplicationContext for convenient registration/scanning of classes
-* revised MethodParameter's annotation accessor methods
+* added GenericXmlApplicationContext with flexible configuration options for its XML support
 * PathMatchingResourcePatternResolver leniently ignores non-existing root directories
 * DefaultConversionService understands "on"/"off", "yes"/"no", "1"/"0" as boolean values
 * CustomEditorConfigurer supports PropertyEditor instances again (with deprecation warning)
 * AbstractApplicationContext can also start up in case of system properties access failure
+* internal MergedBeanDefinitionPostProcessors apply after all other post-processors
+* inner beans detected as ApplicationListeners as well (only supported for inner singletons)
+* child bean definition's scope attribute can be inherited from parent bean definition now
+* revised MethodParameter's annotation accessor methods
 * ClassUtils is now parametrized with Class<?> and Class<T> where appropriate
+* added initialize-database tag to jdbc namespace for populating external data sources with data
 * DataBinder now accepts var-args to set allowed, disallowed, and required fields
-* DataBinder auto-grows nested paths on traversal (avoiding NullValueInNestedPathException and IndexOutOfBoundException)
+* DataBinder auto-grows nested paths on traversal (avoiding NullValueInNestedPathException)
 * fixed enum binding regression with WebRequestDataBinder (as used by @MVC data binding now)
 * fixed FieldError to expose rejected input value as String value instead of as array
 * JSR-303 Validator will only register validation failures if no binding failure happened
 * ContentNegotiatingViewResolver works with ignoreAcceptHeader and defaultContentType as well
+* added Spring MVC namespace, with convenient mvc:annotation-driven configuration element
+* default number and datetime formatters configured when using the Spring MVC namespace
+* full support for datetime formatting using the Joda Time library (automatically enabled)
+* added convenient @NumberFormat and @DateTimeFormat annotations for declarative formatting
+* implicit T.valueOf(S) and constructor T(S) lookup if no explicit S->T converter matches
 * AbstractExcelView is compatible with Apache POI 3.0 as well as 3.5 now
 * TilesConfigurer only sets up EL support if JSP 2.1 is present (for JSP 2.0 compatibility)
 * re-introduced Struts 1.x support ("org.springframework.web.struts") in deprecated form
 * deprecated scheduling support for JDK 1.3 Timer ("org.springframework.scheduling.timer")
 * deprecated remoting support for JAX-RPC (in favor of JAX-WS)
-* added support for load-time weaving in JBoss 5.x
-* added initialize-database tag added to jdbc namespace for populating external data sources with data
 
 
 Changes in version 3.0.0.RC1 (2009-09-25)
