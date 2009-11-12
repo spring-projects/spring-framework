@@ -139,6 +139,10 @@
       <listitem>
         <para>org.springframework.web.servlet</para>
       </listitem>
+
+      <listitem>
+        <para>org.springframework.web.struts</para>
+      </listitem>
     </itemizedlist>
 
     <sidebar id="new-in-3-intro-spring-jar">
