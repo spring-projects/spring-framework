@@ -74,6 +74,7 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 	public void setValidating(boolean validating) {
 		this.reader.setValidationMode(validating ?
 				XmlBeanDefinitionReader.VALIDATION_AUTO : XmlBeanDefinitionReader.VALIDATION_NONE);
+		this.reader.setNamespaceAware(!validating);
 	}
 
 

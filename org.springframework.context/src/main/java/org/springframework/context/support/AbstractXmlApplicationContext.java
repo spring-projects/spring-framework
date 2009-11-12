@@ -44,7 +44,7 @@ import org.springframework.core.io.Resource;
  */
 public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
 
-	private boolean validating = false;
+	private boolean validating = true;
 
 
 	/**
@@ -101,9 +101,10 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setDocumentReaderClass
 	 */
 	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
-		beanDefinitionReader.setValidationMode(this.validating ?
-				XmlBeanDefinitionReader.VALIDATION_AUTO : XmlBeanDefinitionReader.VALIDATION_NONE);
-
+		if (!this.validating) {
+			beanDefinitionReader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+			beanDefinitionReader.setNamespaceAware(true);
+		}
 	}
 
 	/**
