@@ -16,9 +16,18 @@
 
 package org.springframework.context.support;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -29,15 +38,30 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.util.Assert;
 
 /**
+ * Default implementation of the {@link LifecycleProcessor} strategy.
+ * 
  * @author Mark Fisher
  * @since 3.0
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
 
+	private final Log logger = LogFactory.getLog(this.getClass());
+
+	private volatile long shutdownGroupTimeout = 30000;
+
 	private volatile boolean running;
 
 	private volatile ConfigurableListableBeanFactory beanFactory;
 
+
+	/**
+	 * Specify the maximum time allotted for the shutdown of any group of
+	 * SmartLifecycle beans (those with the same 'order' value). The default
+	 * value is 30 seconds.
+	 */
+	public void setShutdownGroupTimeout(long shutdownGroupTimeout) {
+		this.shutdownGroupTimeout = shutdownGroupTimeout;
+	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		Assert.isTrue(beanFactory instanceof ConfigurableListableBeanFactory,
@@ -63,8 +87,23 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	public void stop() {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
-			doStop(lifecycleBeans, beanName);
+		Map<Integer, ShutdownGroup> shutdownGroups = new HashMap<Integer, ShutdownGroup>();
+		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
+			Lifecycle lifecycle = entry.getValue();
+			int shutdownOrder = getShutdownOrder(lifecycle);
+			ShutdownGroup group = shutdownGroups.get(shutdownOrder);
+			if (group == null) {
+				group = new ShutdownGroup(shutdownOrder, this.shutdownGroupTimeout, lifecycleBeans);
+				shutdownGroups.put(shutdownOrder, group);
+			}
+			group.add(entry.getKey(), lifecycle);
+		}
+		if (shutdownGroups.size() > 0) {
+			List<Integer> keys = new ArrayList<Integer>(shutdownGroups.keySet());
+			Collections.sort(keys);
+			for (Integer key : keys) {
+				shutdownGroups.get(key).shutdown();
+			}
 		}
 		this.running = false;
 	}
@@ -112,15 +151,24 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to stop
 	 */
-	private void doStop(Map<String, Lifecycle> lifecycleBeans, String beanName) {
+	private void doStop(Map<String, Lifecycle> lifecycleBeans, String beanName, final CountDownLatch latch) {
 		Lifecycle bean = lifecycleBeans.get(beanName);
-		if (bean != null && !this.equals(bean)) {
+		if (bean != null) {
 			String[] dependentBeans = this.beanFactory.getDependentBeans(beanName);
 			for (String dependentBean : dependentBeans) {
-				doStop(lifecycleBeans, dependentBean);
+				doStop(lifecycleBeans, dependentBean, latch);
 			}
 			if (bean.isRunning()) {
-				bean.stop();
+				if (bean instanceof SmartLifecycle) {
+					((SmartLifecycle) bean).stop(new Runnable() {
+						public void run() {
+							latch.countDown();
+						}
+					});
+				}
+				else {
+					bean.stop();
+				}
 			}
 			lifecycleBeans.remove(beanName);
 		}
@@ -131,7 +179,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
 		for (String beanName : beanNames) {
 			Object bean = beanFactory.getSingleton(beanName);
-			if (bean instanceof Lifecycle) {
+			if (bean instanceof Lifecycle && !this.equals(bean)) {
 				beans.put(beanName, (Lifecycle) bean);
 			}
 		}
@@ -148,6 +196,92 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		}
 		return beans;
+	}
+
+
+	private static int getShutdownOrder(Lifecycle bean) {
+		return (bean instanceof SmartLifecycle) ?
+				((SmartLifecycle) bean).getShutdownOrder() : Integer.MAX_VALUE;
+	}
+
+
+	/**
+	 * Helper class for maintaining a group of Lifecycle beans that should be shutdown
+	 * together based on their 'shutdownOrder' value (or the default MAX_INTEGER value). 
+	 */
+	private class ShutdownGroup {
+
+		private final List<ShutdownGroupMember> members = new ArrayList<ShutdownGroupMember>();
+
+		private Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
+
+		private volatile int smartMemberCount;
+
+		private final int order;
+
+		private final long timeout;
+
+
+		ShutdownGroup(int order, long timeout, Map<String, Lifecycle> lifecycleBeans) {
+			this.order = order;
+			this.timeout = timeout;
+			this.lifecycleBeans = lifecycleBeans;
+		}
+
+		void add(String name, Lifecycle bean) {
+			if (bean instanceof SmartLifecycle) {
+				this.smartMemberCount++;
+			}
+			this.members.add(new ShutdownGroupMember(name, bean));
+		}
+
+		void shutdown() {
+			if (members.size() == 0) {
+				return;
+			}
+			Collections.sort(members);
+			final CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
+			for (ShutdownGroupMember member : members) {
+				if (lifecycleBeans.containsKey(member.name)) {
+					doStop(lifecycleBeans, member.name, latch);
+				}
+				else if (member.bean instanceof SmartLifecycle) {
+					// already removed, must have been a dependent
+					latch.countDown();
+				}
+			}
+			try {
+				latch.await(this.timeout, TimeUnit.MILLISECONDS);
+				if (latch.getCount() != 0) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("failed to shutdown beans with order " +
+							this.order + " within timeout of " + this.timeout);
+					}
+				}
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
+	}
+
+
+	private static class ShutdownGroupMember implements Comparable<ShutdownGroupMember> {
+
+		private String name;
+
+		private Lifecycle bean;
+
+		ShutdownGroupMember(String name, Lifecycle bean) {
+			this.name = name;
+			this.bean = bean;
+		}
+
+		public int compareTo(ShutdownGroupMember other) {
+			int thisOrder = getShutdownOrder(this.bean);
+			int otherOrder = getShutdownOrder(other.bean);
+			return (thisOrder == otherOrder) ? 0 : (thisOrder < otherOrder) ? -1 : 1;
+		}
 	}
 
 }

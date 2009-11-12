@@ -154,6 +154,8 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 
 	private boolean autoStartup = true;
 
+	private int shutdownOrder = Integer.MAX_VALUE;
+
 	private boolean running = false;
 
 	private final Object lifecycleMonitor = new Object();
@@ -227,6 +229,21 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	}
 
 	/**
+	 * Specify the order in which this endpoint manager should be stopped.
+	 * By default it will be stopped in the last group. 
+	 */
+	public void setShutdownOrder(int shutdownOrder) {
+		this.shutdownOrder = shutdownOrder;
+	}
+
+	/**
+	 * Return the order in which this endpoint manager will be stopped.
+	 */
+	public int getShutdownOrder() {
+		return this.shutdownOrder;
+	}
+
+	/**
 	 * Prepares the message endpoint, and automatically activates it
 	 * if the "autoStartup" flag is set to "true".
 	 */
@@ -277,6 +294,13 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 				getResourceAdapter().endpointDeactivation(getMessageEndpointFactory(), getActivationSpec());
 				this.running = false;
 			}
+		}
+	}
+
+	public void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			this.stop();
+			callback.run();
 		}
 	}
 

@@ -17,11 +17,18 @@
 package org.springframework.context;
 
 /**
+ * An extension of the Lifecycle interface for those beans that require to be
+ * started upon ApplicationContext refresh and/or shutdown in a particular order.
+ * 
  * @author Mark Fisher
  * @since 3.0
  */
 public interface SmartLifecycle extends Lifecycle {
 
 	boolean isAutoStartup();
+
+	int getShutdownOrder();
+
+	void stop(Runnable callback);
 
 }
