@@ -16,8 +16,9 @@
 package org.springframework.instrument.classloading.jboss;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -30,7 +31,6 @@ import org.springframework.util.ReflectionUtils;
  */
 class JBossClassLoaderAdapter {
 
-	private static final String TRANSLATOR_ADAPTER_NAME = "org.jboss.classloader.spi.translator.ClassFileTransformer2Translator";
 	private static final String TRANSLATOR_NAME = "org.jboss.util.loading.Translator";
 	private static final String POLICY_NAME = "org.jboss.classloader.spi.base.BaseClassLoaderPolicy";
 	private static final String DOMAIN_NAME = "org.jboss.classloader.spi.base.BaseClassLoaderDomain";
@@ -46,7 +46,8 @@ class JBossClassLoaderAdapter {
 	private static final String SET_TRANSLATOR_NAME = "setTranslator";
 
 	private final ClassLoader classLoader;
-	private final Constructor<?> constructor;
+	private final Class<?> translatorClass;
+
 	private final Method addTranslator;
 	private final Object target;
 
@@ -81,7 +82,7 @@ class JBossClassLoaderAdapter {
 
 			// try the 5.1.x hooks
 			// check existence of BaseClassLoaderPolicy#addTranslator(Translator)
-			Class<?> translatorClass = classLoader.loadClass(TRANSLATOR_NAME);
+			this.translatorClass = classLoader.loadClass(TRANSLATOR_NAME);
 			Class<?> clazz = classLoader.loadClass(POLICY_NAME);
 			try {
 				addMethod = clazz.getDeclaredMethod(ADD_TRANSLATOR_NAME, translatorClass);
@@ -102,24 +103,19 @@ class JBossClassLoaderAdapter {
 				method = clazz.getDeclaredMethod(GET_SYSTEM);
 				ReflectionUtils.makeAccessible(method);
 				Object system = method.invoke(domain);
-				addTarget = system;
 
 				// resolve ClassLoaderSystem
 				clazz = classLoader.loadClass(DEDICATED_SYSTEM);
-
 				Assert.isInstanceOf(clazz, system, "JBoss LoadTimeWeaver requires JBoss loader system of type "
 						+ clazz.getName() + " on JBoss 5.0.x");
 
 				// ClassLoaderSystem#setTranslator
 				addMethod = clazz.getDeclaredMethod(SET_TRANSLATOR_NAME, translatorClass);
+				addTarget = system;
 			}
 
 			this.addTranslator = addMethod;
 			this.target = addTarget;
-
-			// resolve Transformer2TranslatorUtil constructor
-			clazz = classLoader.loadClass(TRANSLATOR_ADAPTER_NAME);
-			this.constructor = clazz.getDeclaredConstructor(ClassFileTransformer.class);
 
 		} catch (Exception ex) {
 			throw new IllegalStateException(
@@ -128,15 +124,12 @@ class JBossClassLoaderAdapter {
 	}
 
 	public void addTransformer(ClassFileTransformer transformer) {
-		Object translator = null;
-		try {
-			translator = this.constructor.newInstance(transformer);
-		} catch (Exception ex) {
-			throw new IllegalStateException("Could not instantiate a JBoss class translator", ex);
-		}
+		InvocationHandler adapter = new JBossTranslatorAdapter(transformer);
+		Object adapterInstance = Proxy.newProxyInstance(this.translatorClass.getClassLoader(),
+				new Class[] { this.translatorClass }, adapter);
 
 		try {
-			addTranslator.invoke(target, translator);
+			addTranslator.invoke(target, adapterInstance);
 		} catch (Exception ex) {
 			throw new IllegalStateException("Could not add transformer on JBoss classloader " + classLoader, ex);
 		}
