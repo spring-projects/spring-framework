@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -180,8 +181,8 @@ public abstract class ModelAndViewAssert {
 	 */
 	public static void assertViewName(ModelAndView mav, String expectedName) {
 		assertCondition(mav != null, "ModelAndView is null");
-		assertCondition(expectedName.equals(mav.getViewName()), "View name is not equal to '" + expectedName +
-				"' but was '" + mav.getViewName() + "'");
+		assertCondition(ObjectUtils.nullSafeEquals(expectedName, mav.getViewName()),
+				"View name is not equal to '" + expectedName + "' but was '" + mav.getViewName() + "'");
 	}
 
 
