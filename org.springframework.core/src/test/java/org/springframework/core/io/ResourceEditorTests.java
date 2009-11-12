@@ -16,9 +16,12 @@
 
 package org.springframework.core.io;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.beans.PropertyEditor;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -55,6 +58,35 @@ public final class ResourceEditorTests {
 		PropertyEditor editor = new ResourceEditor();
 		editor.setAsText("  ");
 		assertEquals("", editor.getAsText());
+	}
+
+	@Test
+	public void testSystemPropertyReplacement() {
+		PropertyEditor editor = new ResourceEditor();
+		System.setProperty("test.prop", "foo");
+		try {
+			editor.setAsText("${test.prop}-${bar}");
+			Resource resolved = (Resource) editor.getValue();
+			assertEquals("foo-${bar}", resolved.getFilename());
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testStrictSystemPropertyReplacement() {
+		ResourceEditor editor = new ResourceEditor();
+		editor.setIgnoreUnresolvablePlaceholders(false);
+		System.setProperty("test.prop", "foo");
+		try {
+			editor.setAsText("${test.prop}-${bar}");
+			Resource resolved = (Resource) editor.getValue();
+			assertEquals("foo-${bar}", resolved.getFilename());
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
 	}
 
 }

@@ -31,12 +31,16 @@ import org.springframework.util.SystemPropertyUtils;
  * properties instead of using a <code>String</code> location property.
  *
  * <p>The path may contain <code>${...}</code> placeholders, to be resolved
- * as system properties: e.g. <code>${user.dir}</code>.
+ * as system properties: e.g. <code>${user.dir}</code>.  By default unresolvable
+ * placeholders are ignored, but if an exception is preferred set the 
+ * {@link #setIgnoreUnresolvablePlaceholders(boolean) ignoreUnresolvablePlaceholders} 
+ * flag to false.
  *
  * <p>Delegates to a {@link ResourceLoader} to do the heavy lifting,
  * by default using a {@link DefaultResourceLoader}.
  *
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 28.12.2003
  * @see Resource
  * @see ResourceLoader
@@ -47,7 +51,8 @@ import org.springframework.util.SystemPropertyUtils;
 public class ResourceEditor extends PropertyEditorSupport {
 
 	private final ResourceLoader resourceLoader;
-
+	
+	private boolean ignoreUnresolvablePlaceholders = true;
 
 	/**
 	 * Create a new instance of the {@link ResourceEditor} class
@@ -66,7 +71,14 @@ public class ResourceEditor extends PropertyEditorSupport {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 	}
-
+	
+	/**
+	 * Flag to determine if unresolvable placeholders in System properties
+	 * @param ignoreUnresolvablePlaceholders
+	 */
+	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
+		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
+	}
 
 	@Override
 	public void setAsText(String text) {
@@ -87,7 +99,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
 	 */
 	protected String resolvePath(String path) {
-		return SystemPropertyUtils.resolvePlaceholders(path);
+		return SystemPropertyUtils.resolvePlaceholders(path, ignoreUnresolvablePlaceholders);
 	}
 
 

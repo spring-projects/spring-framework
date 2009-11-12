@@ -45,6 +45,24 @@ public class SystemPropertyUtilsTests {
 		assertEquals("foo", resolved);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
+	public void testReplaceWithNoDefault() {
+		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
+		assertEquals("", resolved);
+	}
+
+	@Test
+	public void testReplaceWithNoDefaultIgnored() {
+		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}", true);
+		assertEquals("${test.prop}", resolved);
+	}
+
+	@Test
+	public void testReplaceWithEmptyDefault() {
+		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:}");
+		assertEquals("", resolved);
+	}
+
 	@Test
 	public void testRecursiveFromSystemProperty() {
 		System.setProperty("test.prop", "foo=${bar}");
