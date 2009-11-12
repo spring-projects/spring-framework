@@ -1650,6 +1650,17 @@ public class DefaultFooService implements FooService {
               <tbody>
                 <row>
                   <entry><literal><link
+                    linkend="tx-multiple-tx-mgrs-with-attransactional">value</link></literal></entry>
+                  
+                  <entry>String</entry>
+                  
+                  <entry>
+                    Optional qualifier specifying the transaction manager to be used.
+                  </entry>
+                </row>
+                
+                <row>
+                  <entry><literal><link
                   linkend="tx-propagation">propagation</link></literal></entry>
 
                   <entry>enum: <classname>Propagation</classname></entry>
@@ -1741,6 +1752,81 @@ public class DefaultFooService implements FooService {
         the name of the transaction would be:
         <literal>com.foo.BusinessService.handlePayment</literal>.</para>
       </section>
+    
+      <section id="tx-multiple-tx-mgrs-with-attransactional">
+        <title>Multiple Transaction Managers with <interfacename>@Transactional</interfacename></title>
+        <para>
+          Most Spring applications only need a single transaction manager, but there may be situations
+          where you want multiple independent transaction managers in a single application.
+          The value attribute of the <interfacename>@Transactional</interfacename> annotation can
+          be used to optionally specify the identity of the <classname>PlatformTransactionManager</classname>
+          to be used. This can either be the bean name or the qualifier value of the transaction manager bean.
+          For example, using the qualifier notation, the following Java code 
+<programlisting language="java">
+  public class TransactionalService {
+  
+    @Transactional("order")
+    public void setSomething(String name) { ... }
+  
+    @Transactional("account")
+    public void doSomething() { ... }
+  }
+</programlisting>          
+          could be combined with the following transaction manager bean declarations in the application context.
+<programlisting language="xml"><![CDATA[
+  <tx:annotation-driven/>
+
+  <bean id="transactionManager1" class="org.springframework.jdbc.DataSourceTransactionManager">
+    ...
+    <qualifier value="order"/>
+  </bean>
+
+  <bean id="transactionManager2" class="org.springframework.jdbc.DataSourceTransactionManager">
+    ...
+    <qualifier value="account"/>
+  </bean>  
+]]>
+</programlisting>  
+          In this case, the two methods on <literal>TransactionalService</literal> will run under separate 
+          transaction managers, differentiated by the "order" and "account" qualifiers.          
+          The default <literal>&lt;tx:annotation-driven&gt;</literal> target bean name <literal>transactionManager</literal> will 
+          still be used if no specifically qualified PlatformTransactionManager bean is found.          
+        </para>
+      </section>
+      <section id="tx-custom-attributes">
+        <title>Custom shortcut annotations</title>
+        <para>
+          If you find you are repeatedly using the same attributes with <interfacename>@Transactional</interfacename>
+          on many different methods, then Spring's meta-annotation support allows you to define custom shortcut
+          annotations for your specific use cases. For example, defining the following annotations
+<programlisting language="java">
+  @Target({ElementType.METHOD, ElementType.TYPE})
+  @Retention(RetentionPolicy.RUNTIME)
+  @Transactional("order")
+  public @interface OrderTx {
+  }
+  
+  @Target({ElementType.METHOD, ElementType.TYPE})
+  @Retention(RetentionPolicy.RUNTIME)
+  @Transactional("account")
+  public @interface AccountTx {
+  }  
+</programlisting>
+          allows us to write the example from the previous section as
+<programlisting language="java">
+  public class TransactionalService {
+  
+    @OrderTx
+    public void setSomething(String name) { ... }
+  
+    @AccountTx
+    public void doSomething() { ... }
+  }
+</programlisting>          
+          Here we have used the syntax to define the transaction manager qualifier, but could also have 
+          included propagation behavior, rollback rules, timeouts etc.
+        </para>
+      </section>  
     </section>
 
     <section id="tx-propagation">
