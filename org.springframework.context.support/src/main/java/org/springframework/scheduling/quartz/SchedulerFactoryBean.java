@@ -159,7 +159,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 
-	private Class schedulerFactoryClass = StdSchedulerFactory.class;
+	private Class<?> schedulerFactoryClass = StdSchedulerFactory.class;
 
 	private String schedulerName;
 
@@ -450,7 +450,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		}
 
 		// Create SchedulerFactory instance.
-		SchedulerFactory schedulerFactory = (SchedulerFactory) BeanUtils.instantiateClass(this.schedulerFactoryClass);
+		SchedulerFactory schedulerFactory = (SchedulerFactory)
+				BeanUtils.instantiateClass(this.schedulerFactoryClass);
 
 		initSchedulerFactory(schedulerFactory);
 
@@ -726,7 +727,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	public void stop(Runnable callback) throws SchedulingException {
-		this.stop();
+		stop();
 		callback.run();
 	}
 
