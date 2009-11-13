@@ -100,7 +100,7 @@ public class UriUtilsTest {
 		assertEquals("Invalid encoded URI", "http://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeUri("http://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded URI", "http://www.google.com/?q=z%FCrich",
-				UriUtils.encodeUri("http://www.google.com/?q=zürich", ENC));
+				UriUtils.encodeUri("http://www.google.com/?q=z\u00fcrich", ENC));
 		assertEquals("Invalid encoded URI",
 				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
 				UriUtils.encodeUri(
