@@ -1414,7 +1414,8 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       <classname>SourceHttpMessageConverter</classname>. You can override
       these defaults using the <methodname>messageConverters</methodname> bean
       property as would be required if using the
-      <classname>MarshallingHttpMessageConverter</classname>.</para>
+      <classname>MarshallingHttpMessageConverter</classname> or 
+      <classname>MappingJacksonHttpMessageConverter</classname>.</para>
 
       <para>Each method takes URI template arguments in two forms, either as a
       <literal>String</literal> variable length argument or a
@@ -1576,6 +1577,20 @@ URI location = template.postForLocation(uri, booking, "1");
         These can be injected via constructor or bean properties. By default
         this converter supports (<literal>text/xml</literal>) and
         (<literal>application/xml</literal>).</para>
+      </section>
+      
+      <section id="rest-mapping-json-converter">
+        <title>MappingJacksonHttpMessageConverter</title>
+        
+        <para>An <interfacename>HttpMessageConverter</interfacename> 
+        implementation that can read and write JSON using Jackson's 
+        <interfacename>ObjectMapper</interfacename>. JSON mapping can be 
+        customized as needed through the use of Jackson's provided annotations. When 
+        further control is needed, a custom 
+        <interfacename>ObjectMapper</interfacename> can be injected through 
+        the <literal>ObjectMapper</literal> property for cases where custom 
+        JSON serializers/deserializers need to be provided for specific types. 
+        By default this converter supports (<literal>application/json</literal>).</para>
       </section>
 
       <section id="rest-source-converter">

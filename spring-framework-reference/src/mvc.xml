@@ -2151,8 +2151,13 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <classname>ViewResolvers</classname>. The first
       <classname>View</classname> in the list that has a compatible
       <literal>Content-Type</literal> returns the representation to the
-      client. The <literal>Accept</literal> header may include wildcards, for
-      example text/*, in which case a <classname>View</classname> whose
+      client. If a compatible view cannot be supplied by the 
+      <classname>ViewResolver</classname> chain, then the list of views specified 
+      through the <literal>DefaultViews</literal> property will be consulted. This 
+      latter option is appropriate for singleton <classname>Views</classname> that 
+      can render an appropriate representation of the current resource regardless 
+      of the logical view name. The <literal>Accept</literal> header may include 
+      wildcards, for example text/*, in which case a <classname>View</classname> whose
       Context-Type was text/xml is a compatible match.</para>
 
       <para>To support the resolution of a view based on a file extension,
@@ -2170,6 +2175,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     &lt;map&gt;
       &lt;entry key="atom" value="application/atom+xml"/&gt;
       &lt;entry key="html" value="text/html"/&gt;
+      &lt;entry key="json" value="application/json"/&gt;
     &lt;/map&gt;
   &lt;/property&gt;
   &lt;property name="viewResolvers"&gt;
@@ -2180,6 +2186,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         &lt;property name="suffix" value=".jsp"/&gt;
       &lt;/bean&gt;
     &lt;/list&gt;
+  &lt;/property&gt;
+  &lt;property name="defaultViews">
+    &lt;list>
+      &lt;bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+    &lt;/list>
   &lt;/property&gt;
 &lt;/bean&gt;
 
@@ -2206,10 +2217,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       matches the <literal>application/atom+xml</literal> media type. This view is provided by
       the <classname>BeanNameViewResolver</classname> that maps to the
       <classname>SampleContentAtomView</classname> if the view name returned
-      is <classname>content</classname>. Alternatively, client requests can be
-      made without a file extension but with the <literal>Accept</literal> header set to the
-      preferred media-type, and the same resolution of request to views would
-      occur.<!--Can you reword preceding sentence? I don't follow it.--></para>
+      is <classname>content</classname>. If the request is made with the file extension 
+      <literal>.json</literal>, the <classname>MappingJacksonJsonView</classname> instance from 
+      the <literal>DefaultViews</literal> list will be selected regardless of the view name. 
+      Alternatively, client requests can be made without a file extension but with the 
+      <literal>Accept</literal> header set to the preferred media-type, and the same resolution 
+      of request to views would occur.<!--Can you reword preceding sentence? I don't follow it.--></para>
 
       <note>
         <para>If <classname>ContentNegotiatingViewResolver</classname>'s list

@@ -2589,5 +2589,24 @@ simpleReport.reportDataKey=myBeanData</programlisting>
     chapter <link linkend="oxm">Marshalling XML using O/X
     Mappers</link>.</para>
   </section>
+  
+  <section id="view-json-mapping">
+  	<title>JSON Mapping View</title>
+  	
+  	<para>The <classname>MappingJacksonJsonView</classname> uses the Jackson 
+  	library's <classname>ObjectMapper</classname> to render the response content 
+  	as JSON. By default, the entire contents of the model map (with the exception 
+  	of framework-specific classes) will be encoded as JSON. For cases where the 
+  	contents of the map need to be filtered, users may specify a specific set of 
+  	model attributes to encode via the <literal>RenderedAttributes</literal> 
+  	property.</para>
+
+	<para>JSON mapping can be customized as needed through the use of Jackson's provided 
+	annotations. When further control is needed, a custom 
+	<interfacename>ObjectMapper</interfacename> can be injected through the 
+	<literal>ObjectMapper</literal> property for cases where custom JSON 
+	serializers/deserializers need to be provided for specific types.</para>
+  	
+  </section>
 
 </chapter>
