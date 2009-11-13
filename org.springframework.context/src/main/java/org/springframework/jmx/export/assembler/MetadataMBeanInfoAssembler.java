@@ -45,26 +45,22 @@ import org.springframework.util.StringUtils;
  *
  * <p>Uses the {@link JmxAttributeSource} strategy interface, so that
  * metadata can be read using any supported implementation. Out of the box,
- * two strategies are included:
- * <ul>
- * <li><code>AttributesJmxAttributeSource</code>, for Commons Attributes
- * <li><code>AnnotationJmxAttributeSource</code>, for JDK 1.5+ annotations
- * </ul>
+ * Spring provides an implementation based on JDK 1.5+ annotations,
+ * <code>AnnotationJmxAttributeSource</code>.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Jennifer Hickey
  * @since 1.2
  * @see #setAttributeSource
- * @see org.springframework.jmx.export.metadata.AttributesJmxAttributeSource
  * @see org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource
  */
 public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssembler
 		implements AutodetectCapableMBeanInfoAssembler, InitializingBean {
 
 	private JmxAttributeSource attributeSource;
-	
-	
+
+
 	/**
 	 * Create a new <code>MetadataMBeanInfoAssembler<code> which needs to be
 	 * configured through the {@link #setAttributeSource} method.
@@ -86,7 +82,6 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	/**
 	 * Set the <code>JmxAttributeSource</code> implementation to use for
 	 * reading the metadata from the bean class.
-	 * @see org.springframework.jmx.export.metadata.AttributesJmxAttributeSource
 	 * @see org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource
 	 */
 	public void setAttributeSource(JmxAttributeSource attributeSource) {
@@ -169,7 +164,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	private boolean hasManagedAttribute(Method method) {
 		return (this.attributeSource.getManagedAttribute(method) != null);
 	}
-	
+
 	/**
 	 * Checks to see if the given Method has the <code>ManagedMetric</code> attribute.
 	 */
@@ -217,12 +212,12 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		else if (setter != null && StringUtils.hasText(setter.getDescription())) {
 			return setter.getDescription();
 		}
-		
+
 		ManagedMetric metric = (readMethod != null) ? this.attributeSource.getManagedMetric(readMethod) : null;
 		if(metric != null && StringUtils.hasText(metric.getDescription())) {
 			return metric.getDescription();
 		}
-		
+
 		return propertyDescriptor.getDisplayName();
 	}
 
@@ -350,7 +345,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			populateAttributeDescriptor(desc,gma,sma);
 		}
 	}
-	
+
 	private void populateAttributeDescriptor(Descriptor desc, ManagedAttribute gma, ManagedAttribute sma) {
 		applyCurrencyTimeLimit(desc, resolveIntDescriptor(gma.getCurrencyTimeLimit(), sma.getCurrencyTimeLimit()));
 
@@ -366,29 +361,29 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(persistPeriod));
 		}
 	}
-	
+
 	private void populateMetricDescriptor(Descriptor desc, ManagedMetric metric) {
 		applyCurrencyTimeLimit(desc, metric.getCurrencyTimeLimit());
-		
+
 		if (StringUtils.hasLength(metric.getPersistPolicy())) {
 			desc.setField(FIELD_PERSIST_POLICY, metric.getPersistPolicy());
 		}
 		if (metric.getPersistPeriod() >= 0) {
 			desc.setField(FIELD_PERSIST_PERIOD, Integer.toString(metric.getPersistPeriod()));
 		}
-		
+
 		if (StringUtils.hasLength(metric.getDisplayName())) {
 			desc.setField(FIELD_DISPLAY_NAME, metric.getDisplayName());
 		}
-		
+
 		if(StringUtils.hasLength(metric.getUnit())) {
 			desc.setField(FIELD_UNITS, metric.getUnit());
 		}
-		
+
 		if(StringUtils.hasLength(metric.getCategory())) {
 			desc.setField(FIELD_METRIC_CATEGORY, metric.getCategory());
 		}
-		
+
 		String metricType = (metric.getMetricType() == null) ? MetricType.GAUGE.toString() : metric.getMetricType().toString();
 		desc.setField(FIELD_METRIC_TYPE, metricType);
 	}
