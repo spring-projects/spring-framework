@@ -421,7 +421,7 @@ public class JmxTestBean implements IJmxTestBean {
     </section>
 
     <section id="jmx-interface-metadata">
-      <title>Using source-Level metadata (JDK 5.0 annotations)</title>
+      <title>Using Source-Level Metadata (JDK 5.0 annotations)</title>
 
       <para>Using the <classname>MetadataMBeanInfoAssembler</classname> you
       can define the management interfaces for your beans using source level
@@ -569,7 +569,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <para><table id="jmx-metadata-types">
           <title>Source-Level Metadata Types</title>
 
-          <tgroup cols="4">
+          <tgroup cols="3">
             <colspec align="left" />
 
             <colspec colname="spycolgen1" colnum="1" colwidth="*" />
