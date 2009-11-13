@@ -29,12 +29,9 @@ import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.Cupholder;
 import org.atinject.tck.auto.accessories.SpareTire;
 
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.annotation.Jsr330ScopeMetadataResolver;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.ScopeMetadata;
-import org.springframework.context.annotation.ScopeMetadataResolver;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -46,17 +43,7 @@ public class SpringAtInjectTck {
 	public static Test suite() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotatedBeanDefinitionReader bdr = new AnnotatedBeanDefinitionReader(ac);
-		bdr.setScopeMetadataResolver(new ScopeMetadataResolver() {
-			public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
-				ScopeMetadata metadata = new ScopeMetadata();
-				if (definition instanceof AnnotatedBeanDefinition) {
-					AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
-					metadata.setScopeName(annDef.getMetadata().hasAnnotation(javax.inject.Singleton.class.getName()) ?
-							BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
-				}
-				return metadata;
-			}
-		});
+		bdr.setScopeMetadataResolver(new Jsr330ScopeMetadataResolver());
 
 		bdr.registerBean(Convertible.class);
 		bdr.registerBean(DriversSeat.class, Drivers.class);
