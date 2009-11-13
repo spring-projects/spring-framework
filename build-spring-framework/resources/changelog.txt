@@ -14,16 +14,19 @@ Changes in version 3.0.0.RC2 (2009-11-13)
 * added AnnotatedBeanDefinitionReader helper for programmatic registration of annotated classes
 * added AnnotationConfig(Web)ApplicationContext for convenient registration/scanning of classes
 * added GenericXmlApplicationContext with flexible configuration options for its XML support
-* PathMatchingResourcePatternResolver leniently ignores non-existing root directories
-* DefaultConversionService understands "on"/"off", "yes"/"no", "1"/"0" as boolean values
-* CustomEditorConfigurer supports PropertyEditor instances again (with deprecation warning)
 * AbstractApplicationContext can also start up in case of system properties access failure
 * internal MergedBeanDefinitionPostProcessors apply after all other post-processors
 * inner beans detected as ApplicationListeners as well (only supported for inner singletons)
 * child bean definition's scope attribute can be inherited from parent bean definition now
-* revised MethodParameter's annotation accessor methods
-* ClassUtils is now parametrized with Class<?> and Class<T> where appropriate
+* introduced SmartLifecycle interface with auto-startup and shutdown order support
+* introduced LifecycleProcessor delegate, customizable through "lifecycleProcessor" bean
+* MessageListenerContainers and Quartz SchedulerFactoryBean start up on refresh instead of init
 * added initialize-database tag to jdbc namespace for populating external data sources with data
+* PathMatchingResourcePatternResolver leniently ignores non-existing root directories
+* DefaultConversionService understands "on"/"off", "yes"/"no", "1"/"0" as boolean values
+* CustomEditorConfigurer supports PropertyEditor instances again (with deprecation warning)
+* revised MethodParameter's annotation accessor methods
+* ClassUtils is now parameterized with Class<?> and Class<T> where appropriate
 * DataBinder now accepts var-args to set allowed, disallowed, and required fields
 * DataBinder auto-grows nested paths on traversal (avoiding NullValueInNestedPathException)
 * fixed enum binding regression with WebRequestDataBinder (as used by @MVC data binding now)
