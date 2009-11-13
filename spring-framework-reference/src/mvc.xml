@@ -1660,7 +1660,10 @@ public class MyFormController {
       view) and does not continue executing the other interceptors and the
       actual handler in the execution chain.</para>
 
-      <para>The following example provides an interceptor that intercepts all
+      <para>The following example defines a handler mapping which maps
+        all requests matching the URL patterns "/*.form" and "/*.view" to a particular
+        controller, <literal>editAccountFormController</literal>. 
+         An interceptor has been added that intercepts these
       requests and reroutes the user to a specific page if the time is not
       between 9 a.m. and 6 p.m.</para>
 
@@ -1718,7 +1721,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     }
 }</programlisting>
 
-      <para>Any request coming in is intercepted by the
+      <para>Any request handled by this mapping is intercepted by the
       <classname>TimeBasedAccessInterceptor</classname>. If the current time
       is outside office hours, the user is redirected to a static HTML file
       that says, for example, you can only access the website during office
