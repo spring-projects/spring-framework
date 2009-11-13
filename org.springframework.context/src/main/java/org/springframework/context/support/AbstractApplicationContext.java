@@ -22,7 +22,6 @@ import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -50,7 +49,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.HierarchicalMessageSource;
-import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
@@ -955,7 +953,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			this.getLifecycleProcessor().stop();
+			getLifecycleProcessor().onClose();
 
 			// Destroy all cached singletons in the context's BeanFactory.
 			destroyBeans();
@@ -1177,40 +1175,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	public void start() {
-		this.getLifecycleProcessor().start();
+		getLifecycleProcessor().start();
 		publishEvent(new ContextStartedEvent(this));
 	}
 
 	public void stop() {
-		this.getLifecycleProcessor().stop();
+		getLifecycleProcessor().stop();
 		publishEvent(new ContextStoppedEvent(this));
 	}
 
 	public boolean isRunning() {
-		for (Lifecycle lifecycle : getLifecycleBeans().values()) {
-			if (!lifecycle.isRunning()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Return a Map of all singleton beans that implement the
-	 * Lifecycle interface in this context.
-	 * @return Map of Lifecycle beans with bean name as key
-	 */
-	private Map<String, Lifecycle> getLifecycleBeans() {
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		String[] beanNames = beanFactory.getSingletonNames();
-		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
-		for (String beanName : beanNames) {
-			Object bean = beanFactory.getSingleton(beanName);
-			if (bean instanceof Lifecycle) {
-				beans.put(beanName, (Lifecycle) bean);
-			}
-		}
-		return beans;
+		return getLifecycleProcessor().isRunning();
 	}
 
 
