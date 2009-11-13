@@ -39,7 +39,7 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes) will be
  * encoded as JSON. For cases where the contents of the map need to be filtered, users may specify a specific set of
- * model attributes to encode via the {@link #setRenderedAttributes(Set) includeAttributes} property.
+ * model attributes to encode via the {@link #setRenderedAttributes(Set) renderedAttributes} property.
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
