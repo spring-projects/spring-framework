@@ -41,6 +41,7 @@
 				<exclude name="*/target/**"/>
 				<exclude name="integration-repo/**"/>
 				<exclude name="ivy-cache/**"/>
+				<exclude name="org.springframework.samples.petclinic/**"/>
 				<!--exclude name="ivy-cache/repository/org.apache.velocity/org.apache.velocity.docbookframework.dist/**"/-->
 				<exclude name="spring-build/lib/docbook/**" />
 				<exclude name="**/*OLD*/**"/>

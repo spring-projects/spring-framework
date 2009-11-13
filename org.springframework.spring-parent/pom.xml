@@ -14,7 +14,7 @@
   <artifactId>spring-parent</artifactId>
   <packaging>pom</packaging>
   <name>Spring Framework - Parent</name>
-  <version>3.0.0.BUILD-SNAPSHOT</version>
+  <version>3.0.0.RC2</version>
   <description>Spring Framework Parent</description>
   <scm>
     <url>https://fisheye.springframework.org/browse/spring-framework</url>
@@ -198,6 +198,13 @@
   </profiles>
 
   <build>
+    <extensions>
+		<extension>
+		                <groupId>org.springframework.build.aws</groupId>
+		                <artifactId>org.springframework.build.aws.maven</artifactId>
+		                <version>2.0.0.RELEASE</version>
+		            </extension>
+    </extensions>    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

@@ -1,11 +1,11 @@
-SPRING FRAMEWORK 3.0 M4 (August 2009)
+SPRING FRAMEWORK 3.0 RC2 (November 2009)
 -------------------------------------
 http://www.springframework.org
 
 1. INTRODUCTION
 
-This is the fourth milestone of Spring 3.0 which is scheduled for final release in Q3 2009.
-It is nearly feature complete, with only very specific areas still being worked on for RC1.
+This is the second release candidate of Spring 3.0, which is scheduled for final release in Q4 2009.
+It release is feature complete, but may still have some issues.
 
 2. RELEASE NOTES
 
