@@ -125,7 +125,7 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void uri() throws InterruptedException, URISyntaxException {
-		String result = template.getForObject(URI + "/uri/{query}", String.class, "ZŸrich");
+		String result = template.getForObject(URI + "/uri/{query}", String.class, "Z\u00fcrich");
 		assertEquals("Invalid request URI", "/uri/Z%FCrich", result);
 	}
 
