@@ -2624,7 +2624,7 @@ clobReader.close();</programlisting>
 
       <para>The SQL standard allows for selecting rows based on an expression
       that includes a variable list of values. A typical example would be
-      "select * from <code>T_ACTOR where id in (1, 2, 3)</code>. This variable
+      <code>select * from T_ACTOR where id in (1, 2, 3)</code>. This variable
       list is not directly supported for prepared statements by the JDBC
       standard; you cannot declare a variable number of placeholders. You need
       a number of variations with the desired number of placeholders prepared,
@@ -2648,8 +2648,8 @@ clobReader.close();</programlisting>
       <para>In addition to the primitive values in the value list, you can
       create a <classname>java.util.List</classname> of object arrays. This
       list would support multiple expressions defined for the <code>in</code>
-      clause such as "<symbol>select * from T_ACTOR where (id, last_name) in
-      ((1, 'Johnson'), (2, 'Harrop'))</symbol>". <!--Is the preceding punctuated correctly? I'm not sure what to put in code font. TR: OK.-->This
+      clause such as <code>select * from T_ACTOR where (id, last_name) in
+      ((1, 'Johnson'), (2, 'Harrop'))</code>. This
       of course requires that your database supports this syntax.</para>
     </section>
 
@@ -2975,9 +2975,23 @@ public class DataAccessUnitTestTemplate {
         <para>The first option might be easy if the application is in your
         control, and not otherwise. Some suggestions for how to implement this
         are<itemizedlist>
+
             <listitem>
               <para>Make the cache initialize lazily on first usage, which
               improves application startup time</para>
+            </listitem>
+
+            <listitem>
+              <para>Have your cache or a separate component that
+              initializes the cache implement <code>Lifecycle</code> or 
+              <code>SmartLifecycle</code>.  When the application context
+              starts up a <code>SmartLifecycle</code> can be automatically
+              started if its <code>autoStartup</code> flag is set, 
+              and a <code>Lifecycle</code> can be started
+              manually by calling 
+              <code>ConfigurableApplicationContext.start()</code> on the
+              enclosing context.
+              </para>
             </listitem>
 
             <listitem>
@@ -2985,8 +2999,10 @@ public class DataAccessUnitTestTemplate {
               custom observer mechanism to trigger the cache initialization.
               <code>ContextRefreshedEvent</code> is always published by the
               context when it is ready for use (after all beans have been
-              initialized), so that is often a useful hook.</para>
+              initialized), so that is often a useful hook (this is
+              how the <code>SmartLifecycle</code> works by default).</para>
             </listitem>
+
           </itemizedlist></para>
 
         <para>The second option can also be easy. Some suggestions on how to
