@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.UnsupportedEncodingException;
 
 import org.springframework.util.Assert;
 
@@ -175,48 +176,12 @@ public class UriTemplate {
 
 	private static URI encodeUri(String uri) {
 		try {
-			int schemeIdx = uri.indexOf(':');
-			if (schemeIdx == -1) {
-				int queryIdx = uri.indexOf('?');
-				if (queryIdx == -1) {
-					int fragmentIdx = uri.indexOf('#');
-					if (fragmentIdx == -1) {
-						return new URI(null, null, uri, null);
-					}
-					else {
-						String path = uri.substring(0, fragmentIdx);
-						String fragment = uri.substring(fragmentIdx + 1);
-						return new URI(null, null, path, fragment);
-					}
-				}
-				else {
-					int fragmentIdx = uri.indexOf('#', queryIdx + 1);
-					if (fragmentIdx == -1) {
-						String path = uri.substring(0, queryIdx);
-						String query = uri.substring(queryIdx + 1);
-						return new URI(null, null, path, query, null);
-					}
-					else {
-						String path = uri.substring(0, queryIdx);
-						String query = uri.substring(queryIdx + 1, fragmentIdx);
-						String fragment = uri.substring(fragmentIdx + 1);
-						return new URI(null, null, path, query, fragment);
-					}
-				}
-			}
-			else {
-				int fragmentIdx = uri.indexOf('#', schemeIdx + 1);
-				String scheme = uri.substring(0, schemeIdx);
-				if (fragmentIdx == -1) {
-					String ssp = uri.substring(schemeIdx + 1);
-					return new URI(scheme, ssp, null);
-				}
-				else {
-					String ssp = uri.substring(schemeIdx + 1, fragmentIdx);
-					String fragment = uri.substring(fragmentIdx + 1);
-					return new URI(scheme, ssp, fragment);
-				}
-			}
+			String encoded = UriUtils.encodeUri(uri, "UTF-8");
+			return new URI(encoded);
+		}
+		catch (UnsupportedEncodingException ex) {
+			// should not happen, UTF-8 is always supported
+			throw new IllegalStateException(ex);
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex);

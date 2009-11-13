@@ -34,6 +34,7 @@ import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 import org.springframework.web.util.UriUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
@@ -236,23 +237,29 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @return the query string
 	 * @throws JspException
 	 */
-	protected String createQueryString(
-			List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
+	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
 			throws JspException {
+
+		String encoding = pageContext.getResponse().getCharacterEncoding();
 
 		StringBuilder qs = new StringBuilder();
 		for (Param param : params) {
-			if (!usedParams.contains(param.getName()) && param.getName() != null && !"".equals(param.getName())) {
+			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
 				if (includeQueryStringDelimiter && qs.length() == 0) {
 					qs.append("?");
 				}
 				else {
 					qs.append("&");
 				}
-				qs.append(urlEncode(param.getName()));
-				if (param.getValue() != null) {
-					qs.append("=");
-					qs.append(urlEncode(param.getValue()));
+				try {
+					qs.append(UriUtils.encodeQueryParam(param.getName(), encoding));
+					if (param.getValue() != null) {
+						qs.append("=");
+						qs.append(UriUtils.encodeQueryParam(param.getValue(), encoding));
+					}
+				}
+				catch (UnsupportedEncodingException ex) {
+					throw new JspException(ex);
 				}
 			}
 		}
@@ -271,37 +278,21 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 */
 	protected String replaceUriTemplateParams(String uri, List<Param> params, Set<String> usedParams)
 			throws JspException {
+		String encoding = pageContext.getResponse().getCharacterEncoding();
+
 		for (Param param : params) {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {
 				usedParams.add(param.getName());
-				uri = uri.replace(template, urlEncode(param.getValue()));
+				try {
+					uri = uri.replace(template, UriUtils.encodePath(param.getValue(), encoding));
+				}
+				catch (UnsupportedEncodingException ex) {
+					throw new JspException(ex);
+				}
 			}
 		}
 		return uri;
-	}
-
-	/**
-	 * URL-encode the provided String using the character encoding for the response.
-	 * <p>This method will <strong>not</strong> URL-encode according to the 
-	 * <code>application/x-www-form-urlencoded</code> MIME format. Spaces will 
-	 * encoded as regular character instead of <code>+</code>. In <code>UTF-8</code>
-	 * a space encodes to <code>%20</code>.
-	 * @param value the value to encode
-	 * @return the URL encoded value
-	 * @throws JspException if the character encoding is invalid
-	 */
-	protected String urlEncode(String value) throws JspException {
-		if (value == null) {
-			return null;
-		}
-		try {
-			String encoding = pageContext.getResponse().getCharacterEncoding();
-			return UriUtils.encode(value, encoding);
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new JspException(ex);
-		}
 	}
 
 	/**

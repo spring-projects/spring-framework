@@ -550,26 +550,6 @@ public class UrlTagTests extends AbstractTagTests {
 		assertEquals("url/path?foo=bar&name=value", uri);
 	}
 
-	public void testUrlEncode() throws JspException {
-		assertEquals("my%20name%2Bis", tag.urlEncode("my name+is"));
-	}
-	
-	public void testUrlEncodeNull() throws JspException {
-		assertNull(tag.urlEncode(null));
-	}
-
-	public void testUrlEncodeBadEncoding() {
-		context.getResponse().setCharacterEncoding("bad encoding");
-
-		try {
-			tag.urlEncode("my name");
-			fail("expected JspException");
-		}
-		catch (JspException e) {
-			// we want this
-		}
-	}
-
 	public void testJspWriterOutput() {
 		// TODO assert that the output to the JspWriter is the expected output
 	}

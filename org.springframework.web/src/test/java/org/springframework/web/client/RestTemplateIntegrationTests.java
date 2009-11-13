@@ -51,6 +51,8 @@ public class RestTemplateIntegrationTests {
 
 	private static String helloWorld = "H\u00e9llo W\u00f6rld";
 
+	private static final String URI = "http://localhost:8889";
+
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
 		jettyServer = new Server(8889);
@@ -60,10 +62,11 @@ public class RestTemplateIntegrationTests {
 		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
 		jettyContext.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
 		jettyContext.addServlet(
-				new ServletHolder(new PostServlet(helloWorld, "http://localhost:8889/post/1", bytes, contentType)),
+				new ServletHolder(new PostServlet(helloWorld, URI + "/post/1", bytes, contentType)),
 				"/post");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/errors/notfound");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)), "/errors/server");
+		jettyContext.addServlet(new ServletHolder(new UriServlet()), "/uri/*");
 		jettyServer.start();
 	}
 
@@ -81,43 +84,49 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void getString() {
-		String s = template.getForObject("http://localhost:8889/{method}", String.class, "get");
+		String s = template.getForObject(URI + "/{method}", String.class, "get");
 		assertEquals("Invalid content", helloWorld, s);
 	}
 
 	@Test
 	public void getNoResponse() {
-		String s = template.getForObject("http://localhost:8889/get/nothing", String.class);
+		String s = template.getForObject(URI + "/get/nothing", String.class);
 		assertEquals("Invalid content", "", s);
 	}
 
 	@Test
 	public void postForLocation() throws URISyntaxException {
-		URI location = template.postForLocation("http://localhost:8889/{method}", helloWorld, "post");
-		assertEquals("Invalid location", new URI("http://localhost:8889/post/1"), location);
+		URI location = template.postForLocation(URI + "/{method}", helloWorld, "post");
+		assertEquals("Invalid location", new URI(URI + "/post/1"), location);
 	}
 
 	@Test
 	public void postForObject() throws URISyntaxException {
-		String s = template.postForObject("http://localhost:8889/{method}", helloWorld, String.class, "post");
+		String s = template.postForObject(URI + "/{method}", helloWorld, String.class, "post");
 		assertEquals("Invalid content", helloWorld, s);
 	}
 
 	@Test(expected = HttpClientErrorException.class)
 	public void notFound() {
-		template.execute("http://localhost:8889/errors/notfound", HttpMethod.GET, null, null);
+		template.execute(URI + "/errors/notfound", HttpMethod.GET, null, null);
 	}
 
 	@Test(expected = HttpServerErrorException.class)
 	public void serverError() {
-		template.execute("http://localhost:8889/errors/server", HttpMethod.GET, null, null);
+		template.execute(URI + "/errors/server", HttpMethod.GET, null, null);
 	}
 
 	@Test
 	public void optionsForAllow() throws URISyntaxException {
-		Set<HttpMethod> allowed = template.optionsForAllow(new URI("http://localhost:8889/get"));
+		Set<HttpMethod> allowed = template.optionsForAllow(new URI(URI + "/get"));
 		assertEquals("Invalid response",
 				EnumSet.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE), allowed);
+	}
+
+	@Test
+	public void uri() throws InterruptedException, URISyntaxException {
+		String result = template.getForObject(URI + "/uri/{query}", String.class, "ZŸrich");
+		assertEquals("Invalid request URI", "/uri/Z%FCrich", result);
 	}
 
 	/** Servlet that returns and error message for a given status code. */
@@ -184,6 +193,16 @@ public class RestTemplateIntegrationTests {
 			response.setContentLength(buf.length);
 			response.setContentType(contentType);
 			FileCopyUtils.copy(buf, response.getOutputStream());
+		}
+	}
+
+	private static class UriServlet extends HttpServlet {
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			resp.setContentType("text/plain");
+			resp.setCharacterEncoding("UTF-8");
+			resp.getWriter().write(req.getRequestURI());
 		}
 	}
 
