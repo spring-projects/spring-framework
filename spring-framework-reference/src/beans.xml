@@ -2486,7 +2486,7 @@ public class ReplacementComputeValue implements MethodReplacer {
     <para>You can control not only the various dependencies and configuration
     values that are to be plugged into an object that is created from a
     particular bean definition, but also the <firstterm>scope</firstterm> of
-    the objects created from a particular bean definition. This approach
+    the objects created from a particular bean definition. This approach is
     powerful and flexible in that you can <emphasis>choose</emphasis> the
     scope of the objects you create through configuration instead of having to
     bake in the scope of an object at the Java class level. Beans can be
