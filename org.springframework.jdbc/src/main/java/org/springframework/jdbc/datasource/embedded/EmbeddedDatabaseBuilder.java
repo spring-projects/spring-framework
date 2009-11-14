@@ -32,16 +32,16 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 3.0
  */
 public class EmbeddedDatabaseBuilder {
 
 	private final EmbeddedDatabaseFactory databaseFactory;
-	
+
 	private final ResourceDatabasePopulator databasePopulator;
 
 	private final ResourceLoader resourceLoader;
-
 
 	/**
 	 * Create a new embedded database builder.
@@ -51,7 +51,7 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Create a new embedded database builder withfor the given ResourceLoader.
+	 * Create a new embedded database builder with the given ResourceLoader.
 	 * @param resourceLoader the ResourceLoader to delegate to
 	 */
 	public EmbeddedDatabaseBuilder(ResourceLoader resourceLoader) {
@@ -60,7 +60,6 @@ public class EmbeddedDatabaseBuilder {
 		this.databaseFactory.setDatabasePopulator(this.databasePopulator);
 		this.resourceLoader = resourceLoader;
 	}
-
 
 	/**
 	 * Sets the name of the embedded database
@@ -74,6 +73,30 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
+	 * Sets a flag to say that the database populator should continue on 
+	 * errors in the scripts provided (if any).
+	 * 
+	 * @param continueOnError the flag value
+	 * @return this, for fluent call chaining
+	 */
+	public EmbeddedDatabaseBuilder continueOnError(boolean continueOnError) {
+		this.databasePopulator.setContinueOnError(continueOnError);
+		return this;
+	}
+
+	/**
+	 * Sets a flag to say that the database populator should continue on 
+	 * errors in DROP statements in the scripts provided (if any).
+	 * 
+	 * @param ignoreFailedDrops the flag value
+	 * @return this, for fluent call chaining
+	 */
+	public EmbeddedDatabaseBuilder ignoreFailedDrops(boolean ignoreFailedDrops) {
+		this.databasePopulator.setIgnoreFailedDrops(ignoreFailedDrops);
+		return this;
+	}
+
+	/**
 	 * Sets the type of embedded database.
 	 * Defaults to HSQL if not called.
 	 * @param databaseType the database type
@@ -83,7 +106,7 @@ public class EmbeddedDatabaseBuilder {
 		this.databaseFactory.setDatabaseType(databaseType);
 		return this;
 	}
-	
+
 	/**
 	 * Adds a SQL script to execute to populate the database.
 	 * @param sqlResource the sql resource location
@@ -112,5 +135,5 @@ public class EmbeddedDatabaseBuilder {
 	public EmbeddedDatabase build() {
 		return this.databaseFactory.getDatabase();
 	}
-	
+
 }

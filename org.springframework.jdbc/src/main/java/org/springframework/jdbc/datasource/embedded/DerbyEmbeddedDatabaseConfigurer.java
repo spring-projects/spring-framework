@@ -106,7 +106,7 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	 * Returns an {@link OutputStream} that ignores all data given to it.
 	 * Used by {@link #getInstance()} to prevent writing to Derby.log file.
 	 */
-	static OutputStream getNoopOutputStream() {
+	public static OutputStream getNoopOutputStream() {
 		return new OutputStream() {
 			public void write(int b) throws IOException {
 				// ignore the output
