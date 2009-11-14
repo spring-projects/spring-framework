@@ -155,8 +155,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 				} catch (SQLException ex) {
 					boolean dropStatement = statement.trim().toLowerCase().startsWith("drop");
 					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Line " + lineNumber + " statement failed: " + statement, ex);
+						if (logger.isDebugEnabled()) {
+							logger.debug("Line " + lineNumber + " statement failed: " + statement, ex);
 						}
 					} else {
 						throw ex;
