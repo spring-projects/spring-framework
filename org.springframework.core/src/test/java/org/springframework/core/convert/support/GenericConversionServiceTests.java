@@ -482,7 +482,9 @@ public class GenericConversionServiceTests {
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
 		String result = conversionService.convert(foo, String.class);
-		assertEquals("1=BAR 2=BAZ", result);
+		System.out.println(result);
+		assertTrue(result.contains("1=BAR"));
+		assertTrue(result.contains("2=BAZ"));
 	}
 
 	@Test
@@ -494,7 +496,8 @@ public class GenericConversionServiceTests {
 		conversionService.addConverter(new ObjectToStringConverter());
 		String result = (String) conversionService.convert(foo, new TypeDescriptor(getClass().getField("genericMap")),
 				TypeDescriptor.valueOf(String.class));
-		assertEquals("1=BAR 2=BAZ", result);
+		assertTrue(result.contains("1=BAR"));
+		assertTrue(result.contains("2=BAZ"));
 	}
 
 	@Test
@@ -626,7 +629,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertStringToMap() {
 		conversionService.addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(conversionService));
-		Map result = conversionService.convert("foo=bar bar=baz baz=boop", Map.class);
+		Map result = conversionService.convert("   foo=bar\n   bar=baz\n    baz=boop", Map.class);
 		assertEquals("bar", result.get("foo"));
 		assertEquals("baz", result.get("bar"));
 		assertEquals("boop", result.get("baz"));
@@ -637,7 +640,7 @@ public class GenericConversionServiceTests {
 		conversionService.addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		conversionService.addConverterFactory(new StringToEnumConverterFactory());
-		Map result = (Map) conversionService.convert("1=BAR 2=BAZ", TypeDescriptor.valueOf(String.class),
+		Map result = (Map) conversionService.convert("1=BAR\n 2=BAZ", TypeDescriptor.valueOf(String.class),
 				new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(FooEnum.BAR, result.get(1));
 		assertEquals(FooEnum.BAZ, result.get(2));
@@ -646,9 +649,8 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertObjectToMap() {
 		conversionService.addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(conversionService));
-		Map result = conversionService.convert("foo=bar bar=baz", Map.class);
-		assertEquals("bar", result.get("foo"));
-		assertEquals("baz", result.get("bar"));
+		Map result = conversionService.convert(new Integer(3), Map.class);
+		assertEquals(new Integer(3), result.get(new Integer(3)));
 	}
 
 	@Test

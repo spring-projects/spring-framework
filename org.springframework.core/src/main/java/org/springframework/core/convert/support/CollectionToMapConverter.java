@@ -16,12 +16,14 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getElementType;
+
 import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
-import static org.springframework.core.convert.support.ConversionUtils.*;
+import org.springframework.core.style.StylerUtils;
 
 /**
  * Converts from a Collection to a Map.
@@ -50,13 +52,11 @@ final class CollectionToMapConverter implements GenericConverter {
 		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
 		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
 		boolean keysCompatible = false;
-		if (sourceElementType == TypeDescriptor.NULL || targetKeyType == TypeDescriptor.NULL
-				|| sourceElementType.isAssignableTo(targetKeyType)) {
+		if (sourceElementType != TypeDescriptor.NULL && sourceElementType.isAssignableTo(targetKeyType)) {
 			keysCompatible = true;
 		}
 		boolean valuesCompatible = false;
-		if (sourceElementType == TypeDescriptor.NULL || targetValueType == TypeDescriptor.NULL
-				|| sourceElementType.isAssignableTo(targetValueType)) {
+		if (sourceElementType != TypeDescriptor.NULL && sourceElementType.isAssignableTo(targetValueType)) {
 			valuesCompatible = true;
 		}
 		if (keysCompatible && valuesCompatible) {

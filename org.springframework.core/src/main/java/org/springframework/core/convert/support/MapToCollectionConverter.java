@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -44,13 +46,18 @@ final class MapToCollectionConverter implements GenericConverter {
 		Map<?, ?> sourceMap = (Map<?, ?>) source;
 		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
 		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
+		if (sourceKeyType == TypeDescriptor.NULL || sourceValueType == TypeDescriptor.NULL) {
+			TypeDescriptor[] sourceEntryTypes = getMapEntryTypes(sourceMap);
+			sourceKeyType = sourceEntryTypes[0];
+			sourceValueType = sourceEntryTypes[1];
+		}
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		boolean keysCompatible = false;
-		if (targetElementType == TypeDescriptor.NULL || sourceKeyType.isAssignableTo(targetElementType)) {
+		if (sourceKeyType != TypeDescriptor.NULL && sourceKeyType.isAssignableTo(targetElementType)) {
 			keysCompatible = true;
 		}
 		boolean valuesCompatible = false;
-		if (targetElementType == TypeDescriptor.NULL || sourceValueType.isAssignableTo(targetElementType)) {
+		if (sourceValueType != TypeDescriptor.NULL || sourceValueType.isAssignableTo(targetElementType)) {
 			valuesCompatible = true;
 		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceMap.size());
@@ -63,11 +70,10 @@ final class MapToCollectionConverter implements GenericConverter {
 						+ converter.convertValue(mapEntry.getValue());
 				target.add(property);
 			}
-		}
-		else {
+		} else {
 			for (Object value : sourceMap.values()) {
-				target.add(value);
-			}			
+				target.add(converter.convertValue(value));
+			}
 		}
 		return target;
 	}

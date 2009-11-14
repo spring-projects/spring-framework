@@ -185,7 +185,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			String submittedValue = (String) source;
-			if (submittedValue.isEmpty()) {
+			if (submittedValue == null || submittedValue.length() == 0) {
 				return null;
 			}
 			Object parsedValue;

@@ -16,7 +16,9 @@
 
 package org.springframework.core.convert.support;
 
+import java.io.ByteArrayInputStream;
 import java.util.Map;
+import java.util.Properties;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
@@ -31,11 +33,8 @@ final class ObjectToMapConverter implements GenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	private final ArrayToMapConverter helperConverter;
-
 	public ObjectToMapConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
-		this.helperConverter = new ArrayToMapConverter(conversionService);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -45,18 +44,17 @@ final class ObjectToMapConverter implements GenericConverter {
 		}
 		if (sourceType.typeEquals(String.class)) {
 			String string = (String) source;
-			String[] properties = string.split(" ");
-			return this.helperConverter.convert(properties, TypeDescriptor.valueOf(String[].class), targetType);
+			return this.conversionService.convert(loadProperties(string), TypeDescriptor.valueOf(Properties.class), targetType);
 		} else {
 			Map target = CollectionFactory.createMap(targetType.getType(), 1);
 			TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
 			TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
 			boolean keysCompatible = false;
-			if (targetKeyType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetKeyType)) {
+			if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetKeyType)) {
 				keysCompatible = true;
 			}
 			boolean valuesCompatible = false;
-			if (targetValueType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetValueType)) {
+			if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetValueType)) {
 				valuesCompatible = true;
 			}
 			if (keysCompatible && valuesCompatible) {
@@ -69,6 +67,18 @@ final class ObjectToMapConverter implements GenericConverter {
 				target.put(key, value);
 			}
 			return target;
+		}
+	}
+
+	private Properties loadProperties(String string) {
+		try {
+			Properties props = new Properties();
+			// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
+			props.load(new ByteArrayInputStream(string.getBytes("ISO-8859-1")));
+			return props;
+		} catch (Exception e) {
+			// Should never happen.
+			throw new IllegalArgumentException("Failed to parse [" + string + "] into Properties", e);
 		}
 	}
 

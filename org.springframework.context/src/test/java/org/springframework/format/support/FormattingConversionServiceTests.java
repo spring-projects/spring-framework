@@ -17,6 +17,7 @@
 package org.springframework.format.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -98,6 +99,39 @@ public class FormattingConversionServiceTests {
 		LocalDate date = new LocalDate(formattingService.convert("10/31/09", TypeDescriptor.valueOf(String.class),
 				new TypeDescriptor(Model.class.getField("date"))));
 		assertEquals(new LocalDate(2009, 10, 31), date);
+	}
+	
+	@Test
+	public void testPrintNull() throws ParseException {
+		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		assertEquals("", formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
+	}
+
+	@Test
+	public void testParseNull() throws ParseException {
+		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+	}
+
+	@Test
+	public void testParseEmptyString() throws ParseException {
+		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+	}
+
+	@Test
+	public void testPrintNullDefault() throws ParseException {
+		assertEquals(null, formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
+	}
+
+	@Test
+	public void testParseNullDefault() throws ParseException {
+		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+	}
+
+	@Test
+	public void testParseEmptyStringDefault() throws ParseException {
+		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	private static class Model {
