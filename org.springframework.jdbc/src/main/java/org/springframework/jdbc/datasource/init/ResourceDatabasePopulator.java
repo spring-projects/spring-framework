@@ -54,6 +54,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private boolean ignoreFailedDrops = false;
 
+	private static String COMMENT_PREFIX = "--";
+
 	/**
 	 * Add a script to execute to populate the database.
 	 * @param script the path to a SQL script
@@ -185,7 +187,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		String currentStatement = lnr.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement)) {
+			if (StringUtils.hasText(currentStatement) && !currentStatement.startsWith(COMMENT_PREFIX)) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
