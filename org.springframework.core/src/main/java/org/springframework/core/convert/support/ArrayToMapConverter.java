@@ -16,8 +16,9 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.asList;
+
 import org.springframework.core.convert.TypeDescriptor;
-import static org.springframework.core.convert.support.ConversionUtils.*;
 
 /**
  * Converts from an array to a Map.
@@ -27,7 +28,7 @@ import static org.springframework.core.convert.support.ConversionUtils.*;
  */
 final class ArrayToMapConverter implements GenericConverter {
 
-	private final GenericConverter helperConverter;
+	private final CollectionToMapConverter helperConverter;
 
 	public ArrayToMapConverter(GenericConversionService conversionService) {
 		this.helperConverter = new CollectionToMapConverter(conversionService);

@@ -19,6 +19,7 @@ import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.RandomAccess;
 
 import org.springframework.core.convert.ConversionFailedException;
@@ -26,6 +27,9 @@ import org.springframework.core.convert.TypeDescriptor;
 
 final class ConversionUtils {
 
+	private ConversionUtils() {
+	}
+	
 	public static Object invokeConverter(GenericConverter converter, Object source, TypeDescriptor sourceType,
 			TypeDescriptor targetType) {
 		try {
@@ -44,6 +48,25 @@ final class ConversionUtils {
 		return TypeDescriptor.NULL;
 	}
 	
+	public static TypeDescriptor[] getMapEntryTypes(Map<?, ?> sourceMap) {
+		Class<?> keyType = null;
+		Class<?> valueType = null;
+		for (Object entry : sourceMap.entrySet()) {
+			Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
+			Object key = mapEntry.getKey();
+			if (keyType == null && key != null) {
+				keyType = key.getClass();
+			}
+			Object value = mapEntry.getValue();
+			if (valueType == null && value != null) {
+				valueType = value.getClass();
+			}
+			if (keyType!= null && valueType != null) {
+				break;
+			}
+		}
+		return new TypeDescriptor[] { TypeDescriptor.valueOf(keyType), TypeDescriptor.valueOf(valueType) };
+	}
 
 	public static List<?> asList(Object array) {
 		return array != null ? new ArrayList(array) : null;

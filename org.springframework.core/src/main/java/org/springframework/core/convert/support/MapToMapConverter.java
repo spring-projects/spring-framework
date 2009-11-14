@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
+
 import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
@@ -46,20 +48,22 @@ final class MapToMapConverter implements GenericConverter {
 		if (targetKeyType == TypeDescriptor.NULL && targetValueType == TypeDescriptor.NULL) {
 			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
 		}
-		TypeDescriptor[] sourceEntryTypes = getMapEntryTypes(sourceMap);
-		TypeDescriptor sourceKeyType = sourceEntryTypes[0];
-		TypeDescriptor sourceValueType = sourceEntryTypes[1];
+		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
+		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
+		if (sourceKeyType == TypeDescriptor.NULL || sourceValueType == TypeDescriptor.NULL) {
+			TypeDescriptor[] sourceEntryTypes = getMapEntryTypes(sourceMap);
+			sourceKeyType = sourceEntryTypes[0];
+			sourceValueType = sourceEntryTypes[1];
+		}
 		if (sourceKeyType == TypeDescriptor.NULL && sourceValueType == TypeDescriptor.NULL) {
 			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
 		}
 		boolean keysCompatible = false;
-		if (sourceKeyType != TypeDescriptor.NULL && targetKeyType != TypeDescriptor.NULL
-				&& sourceKeyType.isAssignableTo(targetKeyType)) {
+		if (sourceKeyType != TypeDescriptor.NULL && sourceKeyType.isAssignableTo(targetKeyType)) {
 			keysCompatible = true;
 		}
 		boolean valuesCompatible = false;
-		if (sourceValueType != TypeDescriptor.NULL && targetValueType != TypeDescriptor.NULL
-				&& sourceValueType.isAssignableTo(targetValueType)) {
+		if (sourceValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetValueType)) {
 			valuesCompatible = true;
 		}
 		if (keysCompatible && valuesCompatible) {
@@ -67,7 +71,7 @@ final class MapToMapConverter implements GenericConverter {
 		}
 		Map targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
 		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetKeyType,
-				targetValueType, keysCompatible, valuesCompatible, conversionService);
+				targetValueType, keysCompatible, valuesCompatible, this.conversionService);
 		for (Object entry : sourceMap.entrySet()) {
 			Map.Entry sourceMapEntry = (Map.Entry) entry;
 			Object targetKey = converter.convertKey(sourceMapEntry.getKey());
@@ -75,26 +79,6 @@ final class MapToMapConverter implements GenericConverter {
 			targetMap.put(targetKey, targetValue);
 		}
 		return targetMap;
-	}
-
-	private TypeDescriptor[] getMapEntryTypes(Map<?, ?> sourceMap) {
-		Class<?> keyType = null;
-		Class<?> valueType = null;
-		for (Object entry : sourceMap.entrySet()) {
-			Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-			Object key = mapEntry.getKey();
-			if (keyType == null && key != null) {
-				keyType = key.getClass();
-			}
-			Object value = mapEntry.getValue();
-			if (valueType == null && value != null) {
-				valueType = value.getClass();
-			}
-			if (mapEntry.getKey() != null && mapEntry.getValue() != null) {
-				break;
-			}
-		}
-		return new TypeDescriptor[] { TypeDescriptor.valueOf(keyType), TypeDescriptor.valueOf(valueType) };
 	}
 
 	@SuppressWarnings("unchecked")

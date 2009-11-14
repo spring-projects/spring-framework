@@ -54,7 +54,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 			catch (IOException ex) {
 				// Should never happen.
 				throw new IllegalArgumentException(
-						"Failed to parse [" + text + "] into Properties: " + ex.getMessage());
+						"Failed to parse [" + text + "] into Properties", ex);
 			}
 		}
 		setValue(props);
