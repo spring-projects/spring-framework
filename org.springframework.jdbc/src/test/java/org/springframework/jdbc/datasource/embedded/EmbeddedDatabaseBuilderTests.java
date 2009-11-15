@@ -48,6 +48,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 
+	@Test
 	public void testBuildDerby() {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 		EmbeddedDatabase db = builder.setType(DERBY).addScript("db-schema-derby.sql").addScript("db-test-data.sql").build();
