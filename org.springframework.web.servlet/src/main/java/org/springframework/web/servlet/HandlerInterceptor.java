@@ -107,6 +107,9 @@ public interface HandlerInterceptor {
 	 * for proper resource cleanup.
 	 * <p>Note: Will only be called if this interceptor's <code>preHandle</code>
 	 * method has successfully completed and returned <code>true</code>!
+	 * <p>As with the {@code postHandle} method, the method will be invoked on each
+	 * interceptor in the chain in reverse order, so the first interceptor will be
+	 * the last to be invoked.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance examination
