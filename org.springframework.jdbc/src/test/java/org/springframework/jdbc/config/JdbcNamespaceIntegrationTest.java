@@ -14,18 +14,24 @@ public class JdbcNamespaceIntegrationTest {
 	public void testCreateEmbeddedDatabase() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/jdbc/config/jdbc-config.xml");
-		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
-		assertCorrectSetup(context.getBean("h2DataSource", DataSource.class));
-		assertCorrectSetup(context.getBean("derbyDataSource", DataSource.class));
-		context.close();
+		try {
+			assertCorrectSetup(context.getBean("dataSource", DataSource.class));
+			assertCorrectSetup(context.getBean("h2DataSource", DataSource.class));
+			assertCorrectSetup(context.getBean("derbyDataSource", DataSource.class));
+		} finally {
+			context.close();
+		}
 	}
 
 	@Test
 	public void testCreateWithResourcePattern() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/jdbc/config/jdbc-config-pattern.xml");
-		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
-		context.close();
+		try {
+			assertCorrectSetup(context.getBean("dataSource", DataSource.class));
+		} finally {
+			context.close();
+		}
 	}
 
 	private void assertCorrectSetup(DataSource dataSource) {
