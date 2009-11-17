@@ -27,6 +27,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
@@ -172,9 +173,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		boolean absoluteLocation = false;
 		
 		try {
-			absoluteLocation = ResourceUtils.toURI(location).isAbsolute();
+			absoluteLocation = ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();
 		} catch (Exception ex) {
 			// cannot convert to an URI, considering the location relative
+			// unless it is the well-known Spring prefix classpath*: 
 		}
 		
 		// check the 

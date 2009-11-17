@@ -82,6 +82,20 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 		testBeanDefinitions(registry);
 	}
 
+	public void testWithImport() {
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		Resource resource = new ClassPathResource("import.xml", getClass());
+		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
+		testBeanDefinitions(registry);
+	}
+
+	public void testWithWildcardImport() {
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		Resource resource = new ClassPathResource("importPattern.xml", getClass());
+		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
+		testBeanDefinitions(registry);
+	}
+
 	public void testWithInputSource() {
 		try {
 			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
