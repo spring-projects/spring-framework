@@ -82,11 +82,8 @@
 				default="true">
 				<xsd:annotation>
 					<xsd:documentation>
-						Is this bean "enabled", that is, will the
-						scripts be executed?
-						Defaults to true, but can be used to switch on
-						and off the
-						initialization depending on the environment.
+						Is this bean "enabled", meaning the scripts will be executed?
+						Defaults to true, but can be used to switch on and off the initialization depending on the environment.
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -130,8 +127,7 @@
 		<xsd:attribute name="location" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The resource location of an SQL script to execute. Can be a single script location or 
-	a pattern (e.g. classpath:/com/foo/sql/*-data.sql).
+	The resource location of an SQL script to execute. Can be a single script location or a pattern (e.g. classpath:/com/foo/sql/*-data.sql).
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>

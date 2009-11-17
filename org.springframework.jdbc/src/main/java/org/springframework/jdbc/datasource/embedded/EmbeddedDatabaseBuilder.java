@@ -73,30 +73,6 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Sets a flag to say that the database populator should continue on 
-	 * errors in the scripts provided (if any).
-	 * 
-	 * @param continueOnError the flag value
-	 * @return this, for fluent call chaining
-	 */
-	public EmbeddedDatabaseBuilder continueOnError(boolean continueOnError) {
-		this.databasePopulator.setContinueOnError(continueOnError);
-		return this;
-	}
-
-	/**
-	 * Sets a flag to say that the database populator should continue on 
-	 * errors in DROP statements in the scripts provided (if any).
-	 * 
-	 * @param ignoreFailedDrops the flag value
-	 * @return this, for fluent call chaining
-	 */
-	public EmbeddedDatabaseBuilder ignoreFailedDrops(boolean ignoreFailedDrops) {
-		this.databasePopulator.setIgnoreFailedDrops(ignoreFailedDrops);
-		return this;
-	}
-
-	/**
 	 * Sets the type of embedded database.
 	 * Defaults to HSQL if not called.
 	 * @param databaseType the database type
@@ -127,7 +103,7 @@ public class EmbeddedDatabaseBuilder {
 		addScript("data.sql");
 		return this;
 	}
-
+	
 	/**
 	 * Build the embedded database.
 	 * @return the embedded database

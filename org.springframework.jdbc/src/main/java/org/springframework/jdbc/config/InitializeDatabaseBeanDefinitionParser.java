@@ -40,11 +40,11 @@ import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses {@code initialize-database} element and
- * creates a {@link BeanDefinition} for {@link DataSourceInitializer}. Picks up nested {@code script} elements and
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses an {@code initialize-database} element and
+ * creates a {@link BeanDefinition} of type {@link DataSourceInitializer}. Picks up nested {@code script} elements and
  * configures a {@link ResourceDatabasePopulator} for them.
-@author Dave Syer
- *
+ * @author Dave Syer
+ * @since 3.0
  */
 public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
@@ -70,7 +70,6 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 	}
 
 	private BeanDefinition createDatabasePopulator(Element element, List<Element> scripts, ParserContext context) {
-
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
 		builder.addPropertyValue("ignoreFailedDrops", element.getAttribute("ignore-failures").equals("DROPS"));
 		builder.addPropertyValue("continueOnError", element.getAttribute("ignore-failures").equals("ALL"));
@@ -89,7 +88,6 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 		builder.addPropertyValue("scripts", resourcesFactory.getBeanDefinition());
 
 		return builder.getBeanDefinition();
-
 	}
 
 	private AbstractBeanDefinition getSourcedBeanDefinition(BeanDefinitionBuilder builder, Element source,
@@ -104,6 +102,7 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 		private static final Log logger = LogFactory.getLog(SortedResourcesFactoryBean.class);
 		
 		private ResourceLoader resourceLoader;
+		
 		private List<String> locations;
 
 		public SortedResourcesFactoryBean(ResourceLoader resourceLoader, List<String> locations) {
@@ -115,9 +114,9 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 		public Resource[] getObject() throws Exception {
 			List<Resource> scripts = new ArrayList<Resource>();
 			for (String location : locations) {
-
+				
 				if (logger.isDebugEnabled()) {
-					logger.debug("Adding resources from pattern: "+location);
+					logger.debug("Adding resources from pattern: " + location);
 				}
 
 				if (resourceLoader instanceof ResourcePatternResolver) {
