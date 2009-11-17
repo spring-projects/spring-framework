@@ -20,6 +20,14 @@ public class JdbcNamespaceIntegrationTest {
 		context.close();
 	}
 
+	@Test
+	public void testCreateWithResourcePattern() throws Exception {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/jdbc/config/jdbc-config-pattern.xml");
+		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
+		context.close();
+	}
+
 	private void assertCorrectSetup(DataSource dataSource) {
 		JdbcTemplate t = new JdbcTemplate(dataSource);
 		assertEquals(1, t.queryForInt("select count(*) from T_TEST"));
