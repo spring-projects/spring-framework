@@ -36,7 +36,6 @@ public class DataSourceInitializer implements InitializingBean {
 
 	/**
 	 * Flag to explicitly enable or disable the database populator.
-	 * 
 	 * @param enabled true if the database populator will be called on startup
 	 */
 	public void setEnabled(boolean enabled) {
@@ -45,7 +44,6 @@ public class DataSourceInitializer implements InitializingBean {
 
 	/**
 	 * The {@link DatabasePopulator} to use to populate the data source.  Mandatory with no default.
-	 * 
 	 * @param databasePopulator the database populator to use.
 	 */
 	public void setDatabasePopulator(DatabasePopulator databasePopulator) {
@@ -54,7 +52,6 @@ public class DataSourceInitializer implements InitializingBean {
 
 	/**
 	 * The {@link DataSource} to populate when this component is initialized.  Mandatory with no default.
-	 * 
 	 * @param dataSource the DataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
@@ -62,8 +59,7 @@ public class DataSourceInitializer implements InitializingBean {
 	}
 
 	/**
-	 * Use the populator to set up data in the data source.   Both properties are mandatory with no defaults. 
-	 * 
+	 * Use the populator to set up data in the data source.  Both properties are mandatory with no defaults. 
 	 * @see InitializingBean#afterPropertiesSet()
 	 */
 	public void afterPropertiesSet() throws Exception {
