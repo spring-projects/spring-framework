@@ -29,6 +29,7 @@ import org.junit.Test;
  *
  * @author Rick Evans
  * @author Arjen Poutsma
+ * @author Dave Syer
  */
 public final class ResourceEditorTests {
 
