@@ -63,6 +63,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
@@ -369,7 +370,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 		if (JAXBElement.class.isAssignableFrom(clazz)) {
 			return true;
 		}
-		else if (clazz.getAnnotation(XmlRootElement.class) != null) {
+		else if (AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null) {
 			return true;
 		}
 		if (StringUtils.hasLength(this.contextPath)) {

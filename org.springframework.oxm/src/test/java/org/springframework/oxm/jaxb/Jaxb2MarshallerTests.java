@@ -184,4 +184,20 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		verify(mimeContainer);
 		assertTrue("No XML written", writer.toString().length() > 0);
 	}
+
+	@Test
+	public void subclass() throws Exception {
+		assertTrue("Flights subclass is not supported", marshaller.supports(FlightsSubclass.class));
+		FlightType flight = new FlightType();
+		flight.setNumber(42L);
+		FlightsSubclass flights = new FlightsSubclass();
+		flights.getFlight().add(flight);
+		StringWriter writer = new StringWriter();
+		marshaller.marshal(flights, new StreamResult(writer));
+		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+	}
+
+	private static class FlightsSubclass extends Flights {
+
+	}
 }
