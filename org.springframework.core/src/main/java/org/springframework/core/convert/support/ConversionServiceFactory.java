@@ -18,18 +18,30 @@ package org.springframework.core.convert.support;
 import org.springframework.core.convert.ConversionService;
 
 /**
- * A factor for creating common ConversionService configurations.
+ * A factory for creating common ConversionService configurations.
  * @author Keith Donald
  * @since 3.0
  */
 public final class ConversionServiceFactory {
 
+	private static ConversionService DEFAULT_INSTANCE;
+	
 	private ConversionServiceFactory() {
 
 	}
 
 	/**
-	 * Create a default ConversionService.
+	 * Get the shared default ConversionService.
+	 */
+	public static synchronized ConversionService getDefault() {
+		if (DEFAULT_INSTANCE == null) {
+			DEFAULT_INSTANCE = createDefault();
+		}
+		return DEFAULT_INSTANCE;
+	}
+	
+	/**
+	 * Create a new default ConversionService prototype that can be safely modified.
 	 */
 	public static ConversionService createDefault() {
 		GenericConversionService conversionService = new GenericConversionService();
@@ -58,6 +70,7 @@ public final class ConversionServiceFactory {
 		conversionService.addConverterFactory(new CharacterToNumberFactory());
 		conversionService.addConverter(new ObjectToStringConverter());
 		conversionService.addGenericConverter(new ObjectToObjectGenericConverter());
+		conversionService.addGenericConverter(new EntityConverter(conversionService));
 		return conversionService;
 	}
 }
