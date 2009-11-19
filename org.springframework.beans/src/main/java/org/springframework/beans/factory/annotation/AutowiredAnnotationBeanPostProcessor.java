@@ -303,61 +303,65 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(final Class clazz) {
+	private InjectionMetadata findAutowiringMetadata(Class clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
 		if (metadata == null) {
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(clazz);
 				if (metadata == null) {
-					LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
-					Class<?> targetClass = clazz;
-
-					do {
-						LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
-						for (Field field : targetClass.getDeclaredFields()) {
-							Annotation annotation = findAutowiredAnnotation(field);
-							if (annotation != null) {
-								if (Modifier.isStatic(field.getModifiers())) {
-									if (logger.isWarnEnabled()) {
-										logger.warn("Autowired annotation is not supported on static fields: " + field);
-									}
-									continue;
-								}
-								boolean required = determineRequiredStatus(annotation);
-								currElements.add(new AutowiredFieldElement(field, required));
-							}
-						}
-						for (Method method : targetClass.getDeclaredMethods()) {
-							Annotation annotation = findAutowiredAnnotation(method);
-							if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-								if (Modifier.isStatic(method.getModifiers())) {
-									if (logger.isWarnEnabled()) {
-										logger.warn("Autowired annotation is not supported on static methods: " + method);
-									}
-									continue;
-								}
-								if (method.getParameterTypes().length == 0) {
-									if (logger.isWarnEnabled()) {
-										logger.warn("Autowired annotation should be used on methods with actual parameters: " + method);
-									}
-								}
-								boolean required = determineRequiredStatus(annotation);
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								currElements.add(new AutowiredMethodElement(method, required, pd));
-							}
-						}
-						elements.addAll(0, currElements);
-						targetClass = targetClass.getSuperclass();
-					}
-					while (targetClass != null && targetClass != Object.class);
-
-					metadata = new InjectionMetadata(clazz, elements);
+					metadata = buildAutowiringMetadata(clazz);
 					this.injectionMetadataCache.put(clazz, metadata);
 				}
 			}
 		}
 		return metadata;
+	}
+
+	private InjectionMetadata buildAutowiringMetadata(Class clazz) {
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		Class<?> targetClass = clazz;
+
+		do {
+			LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
+			for (Field field : targetClass.getDeclaredFields()) {
+				Annotation annotation = findAutowiredAnnotation(field);
+				if (annotation != null) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static fields: " + field);
+						}
+						continue;
+					}
+					boolean required = determineRequiredStatus(annotation);
+					currElements.add(new AutowiredFieldElement(field, required));
+				}
+			}
+			for (Method method : targetClass.getDeclaredMethods()) {
+				Annotation annotation = findAutowiredAnnotation(method);
+				if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+					if (Modifier.isStatic(method.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static methods: " + method);
+						}
+						continue;
+					}
+					if (method.getParameterTypes().length == 0) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation should be used on methods with actual parameters: " + method);
+						}
+					}
+					boolean required = determineRequiredStatus(annotation);
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+					currElements.add(new AutowiredMethodElement(method, required, pd));
+				}
+			}
+			elements.addAll(0, currElements);
+			targetClass = targetClass.getSuperclass();
+		}
+		while (targetClass != null && targetClass != Object.class);
+
+		return new InjectionMetadata(clazz, elements);
 	}
 
 	private Annotation findAutowiredAnnotation(AccessibleObject ao) {
