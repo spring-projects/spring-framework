@@ -78,7 +78,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 					return new PrinterConverter(fieldType, printer, conversionService).convert(source, sourceType, targetType);
 				}
 				public String toString() {
-					return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " + String.class.getName();
+					return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " + String.class.getName() + " : " + annotationFormatterFactory;
 				}
 			});
 			getConverterRegistry().addGenericConverter(new ConditionalGenericConverter() {
@@ -93,7 +93,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 					return new ParserConverter(fieldType, parser, conversionService).convert(source, sourceType, targetType);		
 				}
 				public String toString() {
-					return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName();
+					return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName() + " : " + annotationFormatterFactory;
 				}				
 			});
 		}
@@ -166,6 +166,10 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 		private Class<?> resolvePrinterObjectType(Printer<?> printer) {
 			return GenericTypeResolver.resolveTypeArgument(printer.getClass(), Printer.class);
 		}
+		
+		public String toString() {
+			return this.fieldType.getName() + " -> " + String.class.getName() + " : " + this.printer;
+		}
 	}
 
 	private static class ParserConverter implements GenericConverter {
@@ -207,6 +211,11 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 			}
 			return parsedValue;
 		}
+
+		public String toString() {
+			return String.class.getName() + " -> " + this.fieldType.getName() + " : " + this.parser;
+		}
+
 	}
 	
 }

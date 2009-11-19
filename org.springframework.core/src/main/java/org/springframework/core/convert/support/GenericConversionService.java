@@ -19,9 +19,12 @@ package org.springframework.core.convert.support;
 import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -129,14 +132,19 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("ConversionService converters = ").append("\n");
+		List<String> converterStrings = new ArrayList<String>();
 		for (Map<Class<?>, MatchableConverters> targetConverters : this.converters.values()) {
 			for (MatchableConverters matchable : targetConverters.values()) {
-				builder.append("\t");
-				builder.append(matchable);
-				builder.append("\n");
+				converterStrings.add(matchable.toString());
 			}
+		}
+		Collections.sort(converterStrings);
+		StringBuilder builder = new StringBuilder();
+		builder.append("ConversionService converters = ").append("\n");
+		for (String converterString : converterStrings) {
+			builder.append("\t");
+			builder.append(converterString);
+			builder.append("\n");			
 		}
 		return builder.toString();
 	}
@@ -435,7 +443,17 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 		public String toString() {
 			if (this.conditionalConverters != null) {
-				return "[" + this.conditionalConverters + "; default = " + this.defaultConverter + "]";
+				StringBuilder builder = new StringBuilder();
+				for (Iterator<ConditionalGenericConverter> it = this.conditionalConverters.iterator(); it.hasNext(); ) {
+					builder.append(it.next());
+					if (it.hasNext()) {
+						builder.append(", ");
+					}
+				}
+				if (this.defaultConverter != null) {
+					builder.append(", ").append(this.defaultConverter);
+				}
+				return builder.toString();
 			} else {
 				return this.defaultConverter.toString();
 			}
