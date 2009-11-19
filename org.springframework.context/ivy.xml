@@ -30,7 +30,6 @@
 	</publications>
 
 	<dependencies>
-		<dependency org="com.oracle.oc4j" name="com.springsource.oracle.classloader" rev="10.1.3.1" conf="provided->compile"/>
 		<dependency org="com.sun.enterprise" name="com.springsource.com.sun.enterprise.loader" rev="1.0.0" conf="provided->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="optional, backport-util-concurrent->compile"/>
 		<dependency org="javax.annotation" name="com.springsource.javax.annotation" rev="1.0.0" conf="provided, ejb->compile"/>
@@ -46,10 +45,6 @@
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="optional, aspectj->compile"/>
 		<dependency org="org.beanshell" name="com.springsource.bsh" rev="2.0.0.b4" conf="optional, beanshell->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.3" conf="optional, groovy->compile"/>
-		<!--
-		<dependency org="org.jboss.cl" name="com.springsource.org.jboss.classloader" rev="2.0.5.GA" conf="provided->compile"/>
-		<dependency org="org.jboss.util" name="com.springsource.org.jboss.util" rev="2.2.13.GA" conf="provided, runtime->compile"/>
-		-->
 		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="optional->compile"/>
 		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.2.0" conf="optional, jruby->compile"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="compile->compile"/>

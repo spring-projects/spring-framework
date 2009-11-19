@@ -18,8 +18,6 @@ package org.springframework.instrument.classloading.oc4j;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import oracle.classloader.util.ClassLoaderUtilities;
-
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -38,8 +36,7 @@ import org.springframework.util.ClassUtils;
  */
 public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 
-	private final ClassLoader classLoader;
-
+	private final OC4JClassLoaderAdapter classLoader;
 
 	/**
 	 * Creates a new instance of thie {@link OC4JLoadTimeWeaver} class
@@ -49,7 +46,7 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	public OC4JLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
 	}
-	
+
 	/**
 	 * Creates a new instance of the {@link OC4JLoadTimeWeaver} class
 	 * using the supplied {@link ClassLoader}.
@@ -57,23 +54,21 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	public OC4JLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
-		this.classLoader = classLoader;
+		this.classLoader = new OC4JClassLoaderAdapter(classLoader);
 	}
-
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		// Since OC4J 10.1.3's PolicyClassLoader is going to be removed,
 		// we rely on the ClassLoaderUtilities API instead.
-		OC4JClassPreprocessorAdapter processor = new OC4JClassPreprocessorAdapter(transformer);
-		ClassLoaderUtilities.addPreprocessor(this.classLoader, processor);
+		classLoader.addTransformer(transformer);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return this.classLoader;
+		return classLoader.getClassLoader();
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
-		return ClassLoaderUtilities.copy(this.classLoader);
+		return classLoader.getThrowawayClassLoader();
 	}
 }
