@@ -120,7 +120,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private String scope;
 
-	private boolean singleton = false;
+	private boolean singleton = true;
 
 	private boolean prototype = false;
 
@@ -170,6 +170,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private String description;
 
 	private Resource resource;
+
 
 	/**
 	 * Create a new AbstractBeanDefinition with default settings.
