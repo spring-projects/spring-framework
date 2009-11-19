@@ -17,35 +17,37 @@
 package org.springframework.core.convert.converter;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.GenericConversionService;
 
 /**
- * Uniform converter interface as returned from {@link GenericConversionService#getConverter}.
- *
- * <p>This interface is primarily an internal detail of the {@link GenericConversionService}
- * implementation. It should generally not be implemented by application code directly.
- * See {@link Converter} and {@link ConverterFactory} interfaces for simpler public converter SPIs.
+ * Generic converter interface for converting between two or more types.
+ * <p>
+ * This is the most flexible of the Converter SPI interfaces, but also the most complex.
+ * It is flexible in that a GenericConverter may support converting between multiple source/target type pairs (see {@link #getConvertibleTypes()}.
+ * In addition, GenericConverter implementations have access to source/target {@link TypeDescriptor field context} during the type conversion process.
+ * This allows for resolving source and target field metadata such as annotations and generics information, which can be used influence the conversion logic.
+ * <p>
+ * This interface should generally not be used when the simpler {@link Converter} or {@link ConverterFactory} interfaces are sufficient.
  *
  * @author Keith Donald
  * @since 3.0
+ * @see TypeDescriptor
  * @see Converter
  * @see ConverterFactory
- * @see GenericConversionService
  */
 public interface GenericConverter {
 
 	/**
 	 * The source and target types this converter can convert between.
-	 * Each entry in the returned array is a two-element array where the first element is a sourceType that can be converted from, 
-	 * and the second element is a targetType that can be converted to.
+	 * Each entry in the returned array is a convertible source-to-target type pair, also expressed as an array.
+	 * For each pair, the first array element is a sourceType that can be converted from, and the second array element is a targetType that can be converted to.
 	 */
 	public Class<?>[][] getConvertibleTypes();
 
 	/**
 	 * Convert the source to the targetType described by the TypeDescriptor.
 	 * @param source the source object to convert (may be null)
-	 * @param sourceType context about the source type to convert from
-	 * @param targetType context about the target type to convert to
+	 * @param sourceType the type descriptor of the field we are converting from
+	 * @param targetType the type descriptor of the field we are converting to
 	 * @return the converted object
 	 */
 	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
