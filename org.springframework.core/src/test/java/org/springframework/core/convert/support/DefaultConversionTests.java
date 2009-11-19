@@ -549,7 +549,6 @@ public class DefaultConversionTests {
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
 		String result = conversionService.convert(foo, String.class);
-		System.out.println(result);
 		assertTrue(result.contains("1=BAR"));
 		assertTrue(result.contains("2=BAZ"));
 	}
