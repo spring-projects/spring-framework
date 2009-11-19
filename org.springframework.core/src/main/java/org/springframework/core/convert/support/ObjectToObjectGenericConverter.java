@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -40,6 +41,10 @@ final class ObjectToObjectGenericConverter implements ConditionalGenericConverte
 		Class<?> sourceClass = sourceType.getObjectType();
 		Class<?> targetClass = targetType.getObjectType();		
 		return getValueOfMethodOn(targetClass, sourceClass) != null || getConstructor(targetClass, sourceClass) != null;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Object.class, Object.class } };
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

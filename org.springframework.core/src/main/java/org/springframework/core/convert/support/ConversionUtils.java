@@ -24,6 +24,7 @@ import java.util.RandomAccess;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 
 final class ConversionUtils {
 

@@ -23,8 +23,9 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypeConverter;
@@ -98,7 +99,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	 */
 	private static class TypeConvertorUsingConversionService implements TypeConverter {
 
-		private final DefaultConversionService service = new DefaultConversionService();
+		private final ConversionService service = ConversionServiceFactory.createDefault();
 
 		public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 			return this.service.canConvert(sourceType, targetType);

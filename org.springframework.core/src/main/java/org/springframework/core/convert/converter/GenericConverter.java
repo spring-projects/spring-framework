@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.core.convert.support;
+package org.springframework.core.convert.converter;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.converter.ConverterFactory;
+import org.springframework.core.convert.support.GenericConversionService;
 
 /**
  * Uniform converter interface as returned from {@link GenericConversionService#getConverter}.
@@ -34,6 +33,13 @@ import org.springframework.core.convert.converter.ConverterFactory;
  * @see GenericConversionService
  */
 public interface GenericConverter {
+
+	/**
+	 * The source and target types this converter can convert between.
+	 * Each entry in the returned array is a two-element array where the first element is a sourceType that can be converted from, 
+	 * and the second element is a targetType that can be converted to.
+	 */
+	public Class<?>[][] getConvertibleTypes();
 
 	/**
 	 * Convert the source to the targetType described by the TypeDescriptor.

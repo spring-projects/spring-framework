@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;

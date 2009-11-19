@@ -16,6 +16,15 @@
 
 package org.springframework.beans.factory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.security.AccessControlContext;
@@ -31,19 +40,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import static org.junit.Assert.*;
 import org.junit.Test;
-import test.beans.DerivedTestBean;
-import test.beans.DummyFactory;
-import test.beans.ITestBean;
-import test.beans.LifecycleBean;
-import test.beans.NestedTestBean;
-import test.beans.TestBean;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -72,10 +74,18 @@ import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.StopWatch;
+
+import test.beans.DerivedTestBean;
+import test.beans.DummyFactory;
+import test.beans.ITestBean;
+import test.beans.LifecycleBean;
+import test.beans.NestedTestBean;
+import test.beans.TestBean;
 
 /**
  * Tests properties population and autowire behavior.
@@ -831,7 +841,7 @@ public final class DefaultListableBeanFactoryTests {
 	@Test
 	public void testCustomConverter() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		DefaultConversionService conversionService = new DefaultConversionService();
+		GenericConversionService conversionService = (GenericConversionService) ConversionServiceFactory.createDefault();
 		conversionService.addConverter(new Converter<String, Float>() {
 			public Float convert(String source) {
 				try {

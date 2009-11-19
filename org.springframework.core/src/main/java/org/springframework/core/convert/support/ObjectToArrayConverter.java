@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,6 +37,10 @@ final class ObjectToArrayConverter implements GenericConverter {
 
 	public ObjectToArrayConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Object.class, Object[].class } };
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

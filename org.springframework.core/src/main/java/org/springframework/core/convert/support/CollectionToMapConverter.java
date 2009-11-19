@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.style.StylerUtils;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from a Collection to a Map.
@@ -37,6 +37,10 @@ final class CollectionToMapConverter implements GenericConverter {
 
 	public CollectionToMapConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Collection.class, Map.class } };
 	}
 
 	@SuppressWarnings("unchecked")

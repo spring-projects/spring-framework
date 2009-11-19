@@ -24,7 +24,7 @@ import java.math.BigInteger;
 import java.util.Locale;
 
 import org.junit.Test;
-import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.converter.Converter;
 
@@ -186,20 +186,20 @@ public class DefaultConversionServiceTests {
 	
 	@Test
 	public void convertObjectToObjectValueOFMethod() {
-		DefaultConversionService conversionService = new DefaultConversionService();
+		ConversionService conversionService = ConversionServiceFactory.createDefault();
 		assertEquals(new Integer(3), conversionService.convert("3", Integer.class));
 	}
 
 	@Test
 	public void convertObjectToObjectConstructor() {
-		DefaultConversionService conversionService = new DefaultConversionService();
+		ConversionService conversionService = ConversionServiceFactory.createDefault();
 		assertEquals(new SSN("123456789"), conversionService.convert("123456789", SSN.class));
 		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
 	}
 
 	@Test(expected=ConverterNotFoundException.class)
 	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
-		DefaultConversionService conversionService = new DefaultConversionService();
+		ConversionService conversionService = ConversionServiceFactory.createDefault();
 		conversionService.convert(new Long(3), SSN.class);
 	}
 

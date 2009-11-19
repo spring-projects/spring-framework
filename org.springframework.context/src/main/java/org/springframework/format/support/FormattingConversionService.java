@@ -24,11 +24,10 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.core.convert.support.ConditionalGenericConverter;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.GenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -42,34 +41,18 @@ import org.springframework.format.Printer;
  */
 public class FormattingConversionService implements FormatterRegistry, ConversionService {
 
-	private GenericConversionService conversionService = new GenericConversionService();
-
-	/**
-	 * Creates a new FormattingConversionService, initially with no Formatters registered.
-	 * A {@link DefaultConversionService} is configured as the parent conversion service to support primitive type conversion.
-	 */
-	public FormattingConversionService() {
-		this.conversionService.setParent(new DefaultConversionService());
-	}
-
-	/**
-	 * Creates a new FormattingConversionService, initially with no Formatters registered.
-	 * The conversion logic contained in the specified parent is merged with this service.
-	 */
-	public FormattingConversionService(ConversionService parent) {
-		this.conversionService.setParent(parent);
-	}
+	private ConversionService conversionService = ConversionServiceFactory.createDefault();
 
 	// implementing FormattingRegistry
-
+	
 	public void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser) {
-		this.conversionService.addGenericConverter(fieldType, String.class, new PrinterConverter(printer, this.conversionService));
-		this.conversionService.addGenericConverter(String.class, fieldType, new ParserConverter(parser, this.conversionService));
+		getConverterRegistry().addGenericConverter(new PrinterConverter(fieldType, printer, this.conversionService));
+		getConverterRegistry().addGenericConverter(new ParserConverter(fieldType, parser, this.conversionService));
 	}
 
 	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
-		this.conversionService.addGenericConverter(fieldType, String.class, new PrinterConverter(formatter, this.conversionService));
-		this.conversionService.addGenericConverter(String.class, fieldType, new ParserConverter(formatter, this.conversionService));
+		getConverterRegistry().addGenericConverter(new PrinterConverter(fieldType, formatter, this.conversionService));
+		getConverterRegistry().addGenericConverter(new ParserConverter(fieldType, formatter, this.conversionService));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -83,25 +66,31 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 		}		
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 		for (final Class<?> fieldType : fieldTypes) {
-			this.conversionService.addGenericConverter(fieldType, String.class, new ConditionalGenericConverter() {
+			getConverterRegistry().addGenericConverter(new ConditionalGenericConverter() {
+				public Class<?>[][] getConvertibleTypes() {
+					return new Class<?>[][] { { fieldType, String.class } };
+				}
 				public boolean matches(TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
 					return sourceFieldType.getAnnotation(annotationType) != null;
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 					Printer<?> printer = annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType), sourceType.getType());
-					return new PrinterConverter(printer, conversionService).convert(source, sourceType, targetType);
+					return new PrinterConverter(fieldType, printer, conversionService).convert(source, sourceType, targetType);
 				}
 				public String toString() {
 					return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " + String.class.getName();
 				}
 			});
-			this.conversionService.addGenericConverter(String.class, fieldType, new ConditionalGenericConverter() {
+			getConverterRegistry().addGenericConverter(new ConditionalGenericConverter() {
+				public Class<?>[][] getConvertibleTypes() {
+					return new Class<?>[][] { { String.class, fieldType } };
+				}
 				public boolean matches(TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
 					return targetFieldType.getAnnotation(annotationType) != null;
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 					Parser<?> parser = annotationFormatterFactory.getParser(targetType.getAnnotation(annotationType), targetType.getType());
-					return new ParserConverter(parser, conversionService).convert(source, sourceType, targetType);		
+					return new ParserConverter(fieldType, parser, conversionService).convert(source, sourceType, targetType);		
 				}
 				public String toString() {
 					return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName();
@@ -111,7 +100,7 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 	}
 
 	public ConverterRegistry getConverterRegistry() {
-		return this.conversionService;
+		return (ConverterRegistry) this.conversionService;
 	}
 
 	// implementing ConverisonService
@@ -146,6 +135,8 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 	
 	private static class PrinterConverter implements GenericConverter {
 
+		private Class<?> fieldType;
+		
 		private TypeDescriptor printerObjectType;
 
 		@SuppressWarnings("unchecked")
@@ -153,10 +144,15 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 
 		private ConversionService conversionService;
 
-		public PrinterConverter(Printer<?> printer, ConversionService conversionService) {
+		public PrinterConverter(Class<?> fieldType, Printer<?> printer, ConversionService conversionService) {
+			this.fieldType = fieldType;
 			this.printerObjectType = TypeDescriptor.valueOf(resolvePrinterObjectType(printer));
 			this.printer = printer;
 			this.conversionService = conversionService;
+		}
+
+		public Class<?>[][] getConvertibleTypes() {
+			return new Class<?>[][] { { this.fieldType, String.class } };
 		}
 
 		@SuppressWarnings("unchecked")
@@ -174,13 +170,20 @@ public class FormattingConversionService implements FormatterRegistry, Conversio
 
 	private static class ParserConverter implements GenericConverter {
 
+		private Class<?> fieldType;
+		
 		private Parser<?> parser;
 
 		private ConversionService conversionService;
 
-		public ParserConverter(Parser<?> parser, ConversionService conversionService) {
+		public ParserConverter(Class<?> fieldType, Parser<?> parser, ConversionService conversionService) {
+			this.fieldType = fieldType;
 			this.parser = parser;
 			this.conversionService = conversionService;
+		}
+
+		public Class<?>[][] getConvertibleTypes() {
+			return new Class<?>[][] { { String.class, this.fieldType } };
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

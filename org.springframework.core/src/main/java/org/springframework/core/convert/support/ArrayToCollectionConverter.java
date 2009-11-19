@@ -24,6 +24,7 @@ import java.util.Collection;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from an array to a collection.
@@ -37,6 +38,10 @@ final class ArrayToCollectionConverter implements GenericConverter {
 
 	public ArrayToCollectionConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Object[].class, Collection.class } };
 	}
 
 	@SuppressWarnings("unchecked")

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.support;
+package org.springframework.core.convert.converter;
 
 import org.springframework.core.convert.TypeDescriptor;
 
@@ -23,6 +23,7 @@ import org.springframework.core.convert.TypeDescriptor;
  * For example, when converting from a String to a Date field, an implementation might return true only if the target Date field has also been annotated with <code>@DateTimeFormat</code>.
  * @author Keith Donald
  * @since 3.0
+ * TODO - consider collapsing into ConditionalGenericConverter
  */
 public interface ConverterMatcher {
 
