@@ -31,6 +31,7 @@ public class JodaTimeFormattingTests {
 	public void setUp() {
 		JodaTimeFormattingConfigurer configurer = new JodaTimeFormattingConfigurer();
 		configurer.installJodaTimeFormatting(conversionService);
+		System.out.println(conversionService);
 
 		binder = new DataBinder(new JodaTimeBean());
 		binder.setConversionService(conversionService);
