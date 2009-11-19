@@ -406,7 +406,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				if (this.conditionalConverters == null) {
 					this.conditionalConverters = new LinkedList<ConditionalGenericConverter>();
 				}
-				this.conditionalConverters.add((ConditionalGenericConverter) converter);
+				this.conditionalConverters.addFirst((ConditionalGenericConverter) converter);
 			} else {
 				this.defaultConverter = converter;
 			}
