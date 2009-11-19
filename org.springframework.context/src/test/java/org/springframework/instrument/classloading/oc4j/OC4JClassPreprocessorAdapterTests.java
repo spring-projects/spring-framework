@@ -57,9 +57,4 @@ public final class OC4JClassPreprocessorAdapterTests {
 
 		verify(transformer);
 	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void testCtorWithNullClassFileTransformer() {
-		new OC4JClassPreprocessorAdapter(null);
-	}
 }

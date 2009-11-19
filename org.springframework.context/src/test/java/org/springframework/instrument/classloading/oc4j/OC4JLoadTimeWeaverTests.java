@@ -31,9 +31,4 @@ public final class OC4JLoadTimeWeaverTests {
 		new OC4JLoadTimeWeaver(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testAddTransformerWithNullTransformer() {
-				new OC4JLoadTimeWeaver().addTransformer(null);
-	}
-
 }
