@@ -40,7 +40,7 @@ public class StandardTypeConverter implements TypeConverter {
 	private final ConversionService conversionService;
 
 	public StandardTypeConverter() {
-		this.conversionService = ConversionServiceFactory.createDefault();
+		this.conversionService = ConversionServiceFactory.getDefault();
 	}
 
 	public StandardTypeConverter(ConversionService conversionService) {
