@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from a Map to a single Object.
@@ -37,6 +38,10 @@ final class MapToObjectConverter implements GenericConverter {
 
 	public MapToObjectConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Map.class, Object.class } };
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

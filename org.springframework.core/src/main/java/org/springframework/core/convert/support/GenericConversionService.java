@@ -19,12 +19,10 @@ package org.springframework.core.convert.support;
 import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
 
 import java.lang.reflect.Array;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +33,9 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
+import org.springframework.core.convert.converter.ConverterMatcher;
 import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -50,74 +50,16 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	private static final Log logger = LogFactory.getLog(GenericConversionService.class);
 	
 	private static final GenericConverter NO_OP_CONVERTER = new GenericConverter() {
+		public Class<?>[][] getConvertibleTypes() {
+			return null;
+		}
+		
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return source;
 		}
 	};
 
 	private final Map<Class<?>, Map<Class<?>, MatchableConverters>> converters = new HashMap<Class<?>, Map<Class<?>, MatchableConverters>>(36);
-
-	private ConversionService parent;
-
-	private GenericConverter parentConverterAdapter = new GenericConverter() {
-		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return parent.convert(source, sourceType, targetType);
-		}
-	};
-
-	public GenericConversionService() {
-		addGenericConverter(Object[].class, Object[].class, new ArrayToArrayConverter(this));
-		addGenericConverter(Object[].class, Collection.class, new ArrayToCollectionConverter(this));
-		addGenericConverter(Object[].class, Map.class, new ArrayToMapConverter(this));
-		addGenericConverter(Object[].class, Object.class, new ArrayToObjectConverter(this));
-		addGenericConverter(Collection.class, Collection.class, new CollectionToCollectionConverter(this));
-		addGenericConverter(Collection.class, Object[].class, new CollectionToArrayConverter(this));
-		addGenericConverter(Collection.class, Map.class, new CollectionToMapConverter(this));
-		addGenericConverter(Collection.class, Object.class, new CollectionToObjectConverter(this));
-		addGenericConverter(Map.class, Map.class, new MapToMapConverter(this));
-		addGenericConverter(Map.class, Object[].class, new MapToArrayConverter(this));
-		addGenericConverter(Map.class, Collection.class, new MapToCollectionConverter(this));
-		addGenericConverter(Map.class, Object.class, new MapToObjectConverter(this));
-		addGenericConverter(Object.class, Object[].class, new ObjectToArrayConverter(this));
-		addGenericConverter(Object.class, Collection.class, new ObjectToCollectionConverter(this));
-		addGenericConverter(Object.class, Map.class, new ObjectToMapConverter(this));
-	}
-	
-	/**
-	 * Registers the converters in the set provided.
-	 * JavaBean-friendly alternative to calling {@link #addConverter(Converter)}.
-	 * @see #addConverter(Converter)
-	 */
-	public void setConverters(Set<Converter<?, ?>> converters) {
-		for (Converter<?, ?> converter : converters) {
-			addConverter(converter);
-		}
-	}
-
-	/**
-	 * Registers the converter factories in the set provided.
-	 * JavaBean-friendly alternative to calling {@link #addConverterFactory(ConverterFactory)}.
-	 * @see #addConverterFactory(ConverterFactory)
-	 */
-	public void setConverterFactories(Set<ConverterFactory<?, ?>> converters) {
-		for (ConverterFactory<?, ?> converterFactory : converters) {
-			addConverterFactory(converterFactory);
-		}
-	}
-
-	/**
-	 * Set the parent of this conversion service. This is optional.
-	 */
-	public void setParent(ConversionService parent) {
-		this.parent = parent;
-	}
-
-	/**
-	 * Returns the parent of this conversion service. May be null.
-	 */
-	public ConversionService getParent() {
-		return this.parent;
-	}
 
 	// implementing ConverterRegistry
 
@@ -127,9 +69,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			throw new IllegalArgumentException(
 					"Unable to the determine sourceType <S> and targetType <T> your Converter<S, T> converts between; declare these types or implement ConverterInfo");
 		}
-		Class<?> sourceType = typeInfo[0];
-		Class<?> targetType = typeInfo[1];
-		addConverter(sourceType, targetType, converter);
+		addGenericConverter(new ConverterAdapter(typeInfo, converter));
 	}
 
 	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
@@ -138,11 +78,16 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			throw new IllegalArgumentException(
 					"Unable to the determine sourceType <S> and targetRangeType R your ConverterFactory<S, R> converts between; declare these types or implement ConverterInfo");
 		}
-		Class<?> sourceType = typeInfo[0];
-		Class<?> targetType = typeInfo[1];
-		addConverterFactory(sourceType, targetType, converterFactory);
+		addGenericConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
 	}
 
+	public void addGenericConverter(GenericConverter converter) {
+		Class<?>[][] convertibleTypes = converter.getConvertibleTypes();
+		for (Class<?>[] convertibleType : convertibleTypes) {
+			getMatchableConvertersList(convertibleType[0], convertibleType[1]).add(converter);			
+		}
+	}
+	
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
 		getSourceConverterMap(sourceType).remove(targetType);
 	}
@@ -182,50 +127,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return invokeConverter(converter, source, sourceType, targetType);
 	}
 
-	/**
-	 * Registers a GenericConverter for the source/target type pair.
-	 * @param sourceType the source type to convert from
-	 * @param targetType the target type to convert to
-	 * @param converter the generic converter.
-	 */
-	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter) {
-		getMatchableConvertersList(sourceType, targetType).add(converter);
-	}
-
-	/**
-	 * Registers a GenericConverter for the source/target type pair that will only be matched if the provided matcher returns true.
-	 * @param sourceType the source type to convert from
-	 * @param targetType the target type to convert to
-	 * @param matcher a matcher can restrict a match of the converter based on source and target runtime field types
-	 * @param converter the generic converter.
-	 */
-	public void addGenericConverter(Class<?> sourceType, Class<?> targetType, GenericConverter converter,
-			ConverterMatcher matcher) {
-		getMatchableConvertersList(sourceType, targetType).add(matcher, converter);
-	}
-
-	/**
-	 * Registers a Converter with the sourceType and targetType to index on specified explicitly.
-	 * This method performs better than {@link #addConverter(Converter)} because there parameterized types S and T don't have to be discovered.
-	 * @param sourceType the source type to convert from
-	 * @param targetType the target type to convert to
-	 * @param converter the converter.
-	 */
-	public void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
-		addGenericConverter(sourceType, targetType, new ConverterAdapter(converter));
-	}
-
-	/**
-	 * Registers a ConverterFactory with the sourceType and targetType to index on specified explicitly.
-	 * This method performs better than {@link #addConverter(ConverterFactory)} because there parameterized types S and T don't have to be discovered.
-	 * @param sourceType the source type to convert from
-	 * @param targetType the target type to convert to
-	 * @param converter the converter.factory
-	 */
-	public void addConverterFactory(Class<?> sourceType, Class<?> targetType, ConverterFactory<?, ?> converterFactory) {
-		addGenericConverter(sourceType, targetType, new ConverterFactoryAdapter(converterFactory));
-	}
-
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("ConversionService converters = ").append("\n");
@@ -235,9 +136,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				builder.append(matchable);
 				builder.append("\n");
 			}
-		}
-		if (this.parent != null) {
-			builder.append("parent = ").append(this.parent);
 		}
 		return builder.toString();
 	}
@@ -275,8 +173,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		GenericConverter converter = findConverterForClassPair(sourceType, targetType);
 		if (converter != null) {
 			return converter;
-		} else if (this.parent != null && this.parent.canConvert(sourceType, targetType)) {
-			return this.parentConverterAdapter;
 		} else {
 			return getDefaultConverter(sourceType, targetType);
 		}
@@ -443,10 +339,17 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	@SuppressWarnings("unchecked")
 	private final class ConverterAdapter implements GenericConverter {
 
+		private final Class<?>[] typeInfo;
+		
 		private final Converter converter;
 
-		public ConverterAdapter(Converter<?, ?> converter) {
+		public ConverterAdapter(Class<?>[] typeInfo, Converter<?, ?> converter) {
 			this.converter = converter;
+			this.typeInfo = typeInfo;
+		}
+		
+		public Class<?>[][] getConvertibleTypes() {
+			return new Class[][] { this.typeInfo };
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -464,12 +367,19 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	@SuppressWarnings("unchecked")
 	private final class ConverterFactoryAdapter implements GenericConverter {
 
+		private final Class<?>[] typeInfo;
+
 		private final ConverterFactory converterFactory;
 
-		public ConverterFactoryAdapter(ConverterFactory<?, ?> converterFactory) {
+		public ConverterFactoryAdapter(Class<?>[] typeInfo, ConverterFactory<?, ?> converterFactory) {
 			this.converterFactory = converterFactory;
+			this.typeInfo = typeInfo;			
 		}
 
+		public Class<?>[][] getConvertibleTypes() {
+			return new Class[][] { this.typeInfo };
+		}
+		
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
 				return convertNullSource(sourceType, targetType);

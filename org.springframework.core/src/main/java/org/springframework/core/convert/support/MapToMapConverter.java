@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from a source Map to a target Map type.
@@ -35,6 +36,10 @@ final class MapToMapConverter implements GenericConverter {
 
 	public MapToMapConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Map.class, Map.class } };
 	}
 
 	@SuppressWarnings("unchecked")

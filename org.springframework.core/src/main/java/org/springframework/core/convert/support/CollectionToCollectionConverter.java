@@ -24,6 +24,7 @@ import java.util.Collection;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from a source Collection to target Collection type.
@@ -37,6 +38,10 @@ final class CollectionToCollectionConverter implements GenericConverter {
 
 	public CollectionToCollectionConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Collection.class, Collection.class } };
 	}
 
 	@SuppressWarnings("unchecked")

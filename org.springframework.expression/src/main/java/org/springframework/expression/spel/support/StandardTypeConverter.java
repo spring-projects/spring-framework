@@ -20,7 +20,7 @@ import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -40,7 +40,7 @@ public class StandardTypeConverter implements TypeConverter {
 	private final ConversionService conversionService;
 
 	public StandardTypeConverter() {
-		this.conversionService = new DefaultConversionService();
+		this.conversionService = ConversionServiceFactory.createDefault();
 	}
 
 	public StandardTypeConverter(ConversionService conversionService) {

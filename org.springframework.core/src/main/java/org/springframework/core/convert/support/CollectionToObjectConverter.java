@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from a Collection to a single Object.
@@ -38,6 +39,10 @@ final class CollectionToObjectConverter implements GenericConverter {
 
 	public CollectionToObjectConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
+	}
+
+	public Class<?>[][] getConvertibleTypes() {
+		return new Class<?>[][] { { Collection.class, Object.class } };
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

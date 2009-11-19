@@ -34,7 +34,15 @@ public interface ConverterRegistry {
 	void addConverterFactory(ConverterFactory<?, ?> converterFactory);
 
 	/**
-	 * Remove the conversion logic for the sourceType to the targetType.
+	 * Add a generic converter to this registry.
+	 * @param sourceType the source type to convert from
+	 * @param targetType the target type to convert to
+	 * @param converter the generic converter
+	 */
+	void addGenericConverter(GenericConverter converter);
+	
+	/**
+	 * Remove any converters from sourceType to targetType.
 	 * @param sourceType the source type
 	 * @param targetType the target type
 	 */

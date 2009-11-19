@@ -20,9 +20,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
@@ -73,7 +71,7 @@ public class StandardComponentsTests {
 	
 	@Test
 	public void testStandardTypeConverter() throws EvaluationException {
-		TypeConverter tc = new StandardTypeConverter(new DefaultConversionService());
+		TypeConverter tc = new StandardTypeConverter();
 		tc.convertValue(3, TypeDescriptor.valueOf(Double.class));
 	}
 

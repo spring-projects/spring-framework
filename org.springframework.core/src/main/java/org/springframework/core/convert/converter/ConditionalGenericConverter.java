@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.core.convert.support;
+package org.springframework.core.convert.converter;
+
 
 /**
  * A generic converter that, as a ConverterMatcher, conditionally executes.

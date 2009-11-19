@@ -30,18 +30,11 @@ import org.springframework.util.ClassUtils;
  */
 public class FormattingConversionServiceFactoryBean implements FactoryBean<ConversionService>, InitializingBean {
 
-	private ConversionService parent;
-	
-	private FormattingConversionService conversionService;
-	
-	public void setParent(ConversionService parent) {
-		this.parent = parent;
-	}	
-	
+	private FormattingConversionService conversionService = new FormattingConversionService();
+		
 	// implementing InitializingBean
 	
 	public void afterPropertiesSet() {
-		initConversionService();
 		installNumberFormatting();
 		installJodaTimeFormattingIfPresent();
 	}
@@ -61,14 +54,6 @@ public class FormattingConversionServiceFactoryBean implements FactoryBean<Conve
 	}
 
 	// internal helpers
-	
-	private void initConversionService() {
-		if (this.parent != null) {
-			this.conversionService = new FormattingConversionService(this.parent);
-		} else {
-			this.conversionService = new FormattingConversionService();
-		}
-	}
 	
 	private void installNumberFormatting() {
 		this.conversionService.addFormatterForFieldType(Number.class, new NumberFormatter());

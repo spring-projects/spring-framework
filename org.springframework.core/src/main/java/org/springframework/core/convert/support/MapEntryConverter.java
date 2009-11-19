@@ -20,6 +20,7 @@ import static org.springframework.core.convert.support.ConversionUtils.invokeCon
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Helper for converting map entries.
