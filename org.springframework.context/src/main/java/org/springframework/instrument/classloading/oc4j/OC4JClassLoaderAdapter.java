@@ -61,7 +61,7 @@ class OC4JClassLoaderAdapter {
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "ClassFileTransformer must not be null");
 		try {
-			OC4JClassPreProcessorAdapter adapter = new OC4JClassPreProcessorAdapter(transformer);
+			OC4JClassPreprocessorAdapter adapter = new OC4JClassPreprocessorAdapter(transformer);
 			Object adapterInstance = Proxy.newProxyInstance(this.processorClass.getClassLoader(),
 					new Class[] { this.processorClass }, adapter);
 			this.addTransformer.invoke(null, new Object[] { this.classLoader, adapterInstance });

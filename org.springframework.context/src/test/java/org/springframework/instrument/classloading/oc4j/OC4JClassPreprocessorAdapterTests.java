@@ -16,16 +16,19 @@
 
 package org.springframework.instrument.classloading.oc4j;
 
-import static org.easymock.EasyMock.*;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.isNull;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertNotNull;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
-import org.easymock.AbstractMatcher;
-import org.easymock.MockControl;
 import org.junit.Test;
 
 /**
@@ -59,5 +62,4 @@ public final class OC4JClassPreprocessorAdapterTests {
 	public void testCtorWithNullClassFileTransformer() {
 		new OC4JClassPreprocessorAdapter(null);
 	}
-
 }
