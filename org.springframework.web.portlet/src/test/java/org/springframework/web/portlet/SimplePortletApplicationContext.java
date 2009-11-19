@@ -46,19 +46,19 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 		registerSingleton("controller1", TestFormController.class, pvs);
 		
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("bindOnNewForm", "true");
+		pvs.add("bindOnNewForm", "true");
 		registerSingleton("controller2", TestFormController.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("requireSession", "true");
-		pvs.addPropertyValue("sessionForm", "true");
-		pvs.addPropertyValue("bindOnNewForm", "true");
+		pvs.add("requireSession", "true");
+		pvs.add("sessionForm", "true");
+		pvs.add("bindOnNewForm", "true");
 		registerSingleton("controller3", TestFormController.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("requireSession", "true");
-		pvs.addPropertyValue("sessionForm", "true");
-		pvs.addPropertyValue("bindOnNewForm", "false");
+		pvs.add("requireSession", "true");
+		pvs.add("sessionForm", "true");
+		pvs.add("bindOnNewForm", "false");
 		registerSingleton("controller4", TestFormController.class, pvs);
 
 		pvs = new MutablePropertyValues();

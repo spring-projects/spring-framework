@@ -38,7 +38,7 @@ public class NumberFormattingTests {
 	@Test
 	public void testDefaultNumberFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.addPropertyValue("numberDefault", "3,339.12");
+		propertyValues.add("numberDefault", "3,339.12");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("3,339", binder.getBindingResult().getFieldValue("numberDefault"));		
@@ -47,7 +47,7 @@ public class NumberFormattingTests {
 	@Test
 	public void testDefaultNumberFormattingAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.addPropertyValue("numberDefaultAnnotated", "3,339.12");
+		propertyValues.add("numberDefaultAnnotated", "3,339.12");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("3,339.12", binder.getBindingResult().getFieldValue("numberDefaultAnnotated"));		
@@ -56,7 +56,7 @@ public class NumberFormattingTests {
 	@Test
 	public void testCurrencyFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.addPropertyValue("currency", "$3,339.12");
+		propertyValues.add("currency", "$3,339.12");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("$3,339.12", binder.getBindingResult().getFieldValue("currency"));		
@@ -65,7 +65,7 @@ public class NumberFormattingTests {
 	@Test
 	public void testPercentFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.addPropertyValue("percent", "53%");
+		propertyValues.add("percent", "53%");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("53%", binder.getBindingResult().getFieldValue("percent"));
@@ -74,7 +74,7 @@ public class NumberFormattingTests {
 	@Test
 	public void testPatternFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.addPropertyValue("pattern", "1,25.00");
+		propertyValues.add("pattern", "1,25.00");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("1,25.00", binder.getBindingResult().getFieldValue("pattern"));

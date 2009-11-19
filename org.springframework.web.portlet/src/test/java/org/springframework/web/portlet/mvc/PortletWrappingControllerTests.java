@@ -187,7 +187,7 @@ public final class PortletWrappingControllerTests {
 
 		public void refresh() throws BeansException {
 			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue("portletClass", MyPortlet.class);
+			pvs.add("portletClass", MyPortlet.class);
 			registerSingleton(PORTLET_WRAPPING_CONTROLLER_BEAN_NAME, PortletWrappingController.class, pvs);
 			super.refresh();
 		}

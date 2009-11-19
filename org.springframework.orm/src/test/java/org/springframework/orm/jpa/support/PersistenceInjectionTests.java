@@ -182,7 +182,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		gac.registerBeanDefinition("annotationProcessor",
 				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
 		RootBeanDefinition bd = new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class);
-		bd.getPropertyValues().addPropertyValue("entityManager", mockEm2);
+		bd.getPropertyValues().add("entityManager", mockEm2);
 		gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(), bd);
 		gac.refresh();
 
@@ -228,7 +228,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		gac.registerBeanDefinition("annotationProcessor",
 				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
 		RootBeanDefinition bd = new RootBeanDefinition(DefaultPublicPersistenceUnitSetter.class);
-		bd.getPropertyValues().addPropertyValue("emf", mockEmf2);
+		bd.getPropertyValues().add("emf", mockEmf2);
 		gac.registerBeanDefinition(DefaultPublicPersistenceUnitSetter.class.getName(), bd);
 		gac.refresh();
 
@@ -246,7 +246,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory2", mockEmf2);
 		gac.registerAlias("entityManagerFactory2", "Person");
 		RootBeanDefinition processorDef = new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class);
-		processorDef.getPropertyValues().addPropertyValue("defaultPersistenceUnitName", "entityManagerFactory");
+		processorDef.getPropertyValues().add("defaultPersistenceUnitName", "entityManagerFactory");
 		gac.registerBeanDefinition("annotationProcessor", processorDef);
 		gac.registerBeanDefinition(DefaultPublicPersistenceUnitSetter.class.getName(),
 				new RootBeanDefinition(DefaultPublicPersistenceUnitSetter.class));
@@ -273,7 +273,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory2", mockEmf2);
 		RootBeanDefinition processorDef = new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class);
-		processorDef.getPropertyValues().addPropertyValue("defaultPersistenceUnitName", "entityManagerFactory");
+		processorDef.getPropertyValues().add("defaultPersistenceUnitName", "entityManagerFactory");
 		gac.registerBeanDefinition("annotationProcessor", processorDef);
 		gac.registerBeanDefinition(DefaultPublicPersistenceUnitSetter.class.getName(),
 				new RootBeanDefinition(DefaultPublicPersistenceUnitSetter.class));

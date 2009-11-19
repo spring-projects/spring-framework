@@ -49,8 +49,8 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("commandClass", "org.springframework.beans.TestBean");
-		pvs.addPropertyValue("formView", "form");
+		pvs.add("commandClass", "org.springframework.beans.TestBean");
+		pvs.add("formView", "form");
 		registerSingleton("/form.do", SimpleFormController.class, pvs);
 
 		registerSingleton("/locale.do", LocaleChecker.class);
@@ -66,7 +66,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("viewResolver", InternalResourceViewResolver.class);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("location", "org/springframework/web/context/WEB-INF/sessionContext.xml");
+		pvs.add("location", "org/springframework/web/context/WEB-INF/sessionContext.xml");
 		registerSingleton("viewResolver2", XmlViewResolver.class, pvs);
 
 		super.refresh();

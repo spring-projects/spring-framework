@@ -48,10 +48,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("location", "${user.dir}/test");
+		pvs.add("location", "${user.dir}/test");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
@@ -73,10 +73,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithSystemPropertiesInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("location", "${user.dir}/test/${user.dir}");
+		pvs.add("location", "${user.dir}/test/${user.dir}");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
@@ -102,10 +102,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemPropertiesInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("location", "${myprop}/test/${myprop}");
+		pvs.add("location", "${myprop}/test/${myprop}");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
@@ -121,10 +121,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithMultiLevelCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "name${var}");
+		pvs.add("name", "name${var}");
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "var=${m}var\nm=${var2}\nvar2=${var}");
+		pvs.add("properties", "var=${m}var\nm=${var2}\nvar2=${var}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
@@ -139,10 +139,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithNestedCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "name${var}");
+		pvs.add("name", "name${var}");
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "var=${m}var\nm=${var2}\nvar2=${m}");
+		pvs.add("properties", "var=${m}var\nm=${var2}\nvar2=${m}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();

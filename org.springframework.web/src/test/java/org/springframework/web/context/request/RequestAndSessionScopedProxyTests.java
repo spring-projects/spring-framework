@@ -41,7 +41,7 @@ public class RequestAndSessionScopedProxyTests extends TestCase {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setScope(WebApplicationContext.SCOPE_REQUEST);
-		bd.getPropertyValues().addPropertyValue("name", "abc");
+		bd.getPropertyValues().add("name", "abc");
 		wac.registerBeanDefinition(targetBeanName, bd);
 		wac.refresh();
 
@@ -81,7 +81,7 @@ public class RequestAndSessionScopedProxyTests extends TestCase {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setScope(WebApplicationContext.SCOPE_SESSION);
-		bd.getPropertyValues().addPropertyValue("name", "abc");
+		bd.getPropertyValues().add("name", "abc");
 		wac.registerBeanDefinition(targetBeanName, bd);
 		wac.refresh();
 

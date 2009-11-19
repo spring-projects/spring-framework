@@ -83,11 +83,11 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 			proxyDefinition.setPropertyValues(mpvs);
 
 			// set the target
-			mpvs.addPropertyValue("target", existingDefinition);
+			mpvs.add("target", existingDefinition);
 
 			// create the interceptor names list
 			ManagedList interceptorList = new ManagedList();
-			mpvs.addPropertyValue("interceptorNames", interceptorList);
+			mpvs.add("interceptorNames", interceptorList);
 
 			result = new BeanDefinitionHolder(proxyDefinition, existingBeanName);
 		}

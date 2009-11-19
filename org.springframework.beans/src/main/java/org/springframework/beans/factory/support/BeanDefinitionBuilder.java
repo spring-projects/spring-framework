@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.util.ObjectUtils;
 
@@ -194,7 +193,8 @@ public class BeanDefinitionBuilder  {
 	 * and all additions are at the present point.
 	 */
 	public BeanDefinitionBuilder addConstructorArgValue(Object value) {
-		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(this.constructorArgIndex++, value);
+		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(
+				this.constructorArgIndex++, value);
 		return this;
 	}
 
@@ -203,14 +203,16 @@ public class BeanDefinitionBuilder  {
 	 * @see #addConstructorArgValue(Object)
 	 */
 	public BeanDefinitionBuilder addConstructorArgReference(String beanName) {
-		return addConstructorArgValue(new RuntimeBeanReference(beanName));
+		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(
+				this.constructorArgIndex++, new RuntimeBeanReference(beanName));
+		return this;
 	}
 
 	/**
 	 * Add the supplied property value under the given name.
 	 */
 	public BeanDefinitionBuilder addPropertyValue(String name, Object value) {
-		this.beanDefinition.getPropertyValues().addPropertyValue(new PropertyValue(name, value));
+		this.beanDefinition.getPropertyValues().add(name, value);
 		return this;
 	}
 
@@ -220,7 +222,8 @@ public class BeanDefinitionBuilder  {
 	 * @param beanName the name of the bean being referenced
 	 */
 	public BeanDefinitionBuilder addPropertyReference(String name, String beanName) {
-		return addPropertyValue(name, new RuntimeBeanReference(beanName));
+		this.beanDefinition.getPropertyValues().add(name, new RuntimeBeanReference(beanName));
+		return this;
 	}
 
 	/**

@@ -99,12 +99,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <i>load-time weaving</i> is involved, to make sure that actual bean
 	 * classes are loaded as lazily as possible. The temporary loader is
 	 * then removed once the BeanFactory completes its bootstrap phase.
+	 * @since 2.5
 	 */
 	void setTempClassLoader(ClassLoader tempClassLoader);
 
 	/**
 	 * Return the temporary ClassLoader to use for type matching purposes,
 	 * if any.
+	 * @since 2.5
 	 */
 	ClassLoader getTempClassLoader();
 
@@ -128,22 +130,26 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>There is no expression support active in a BeanFactory by default.
 	 * An ApplicationContext will typically set a standard expression strategy
 	 * here, supporting "#{...}" expressions in a Unified EL compatible style.
+	 * @since 3.0
 	 */
 	void setBeanExpressionResolver(BeanExpressionResolver resolver);
 
 	/**
 	 * Return the resolution strategy for expressions in bean definition values.
+	 * @since 3.0
 	 */
 	BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
 	 * Specify a Spring 3.0 ConversionService to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
+	 * @since 3.0
 	 */
 	void setConversionService(ConversionService conversionService);
 
 	/**
 	 * Return the associated ConversionService, if any.
+	 * @since 3.0
 	 */
 	ConversionService getConversionService();
 
@@ -183,6 +189,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * any custom editors or custom editor registrars irrelevant.
 	 * @see #addPropertyEditorRegistrar
 	 * @see #registerCustomEditor
+	 * @since 2.5
 	 */
 	void setTypeConverter(TypeConverter typeConverter);
 
@@ -191,12 +198,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * instance for each call, since TypeConverters are usually <i>not</i> thread-safe.
 	 * <p>If the default PropertyEditor mechanism is active, the returned
 	 * TypeConverter will be aware of all custom editors that have been registered.
+	 * @since 2.5
 	 */
 	TypeConverter getTypeConverter();
 
 	/**
 	 * Add a String resolver for embedded values such as annotation attributes.
 	 * @param valueResolver the String resolver to apply to embedded values
+	 * @since 3.0
 	 */
 	void addEmbeddedValueResolver(StringValueResolver valueResolver);
 
@@ -204,6 +213,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Resolve the given embedded value, e.g. an annotation attribute.
 	 * @param value the value to resolve
 	 * @return the resolved value (may be the original value as-is)
+	 * @since 3.0
 	 */
 	String resolveEmbeddedValue(String value);
 
@@ -253,6 +263,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Provides a security access control context relevant to this factory.
 	 * @return the applicable AccessControlContext (never <code>null</code>)
+	 * @since 3.0
 	 */
 	AccessControlContext getAccessControlContext();
 
@@ -284,6 +295,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>The value resolver may for example resolve placeholders
 	 * in target bean names and even in alias names.
 	 * @param valueResolver the StringValueResolver to apply
+	 * @since 2.5
 	 */
 	void resolveAliases(StringValueResolver valueResolver);
 
@@ -294,6 +306,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param beanName the name of the bean to retrieve the merged definition for
 	 * @return a (potentially merged) BeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean definition with the given name
+	 * @since 2.5
 	 */
 	BeanDefinition getMergedBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
@@ -303,6 +316,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @return whether the bean is a FactoryBean
 	 * (<code>false</code> means the bean exists but is not a FactoryBean)
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 2.5
 	 */
 	boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException;
 
@@ -310,6 +324,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Determine whether the specified bean is currently in creation.
 	 * @param beanName the name of the bean
 	 * @return whether the bean is currently in creation
+	 * @since 2.5
 	 */
 	boolean isCurrentlyInCreation(String beanName);
 
@@ -318,6 +333,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * to be destroyed before the given bean is destroyed.
 	 * @param beanName the name of the bean
 	 * @param dependentBeanName the name of the dependent bean
+	 * @since 2.5
 	 */
 	void registerDependentBean(String beanName, String dependentBeanName);
 
@@ -325,6 +341,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Return the names of all beans which depend on the specified bean, if any.
 	 * @param beanName the name of the bean
 	 * @return the array of dependent bean names, or an empty array if none
+	 * @since 2.5
 	 */
 	String[] getDependentBeans(String beanName);
 
@@ -333,6 +350,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param beanName the name of the bean
 	 * @return the array of names of beans which the bean depends on,
 	 * or an empty array if none
+	 * @since 2.5
 	 */
 	String[] getDependenciesForBean(String beanName);
 

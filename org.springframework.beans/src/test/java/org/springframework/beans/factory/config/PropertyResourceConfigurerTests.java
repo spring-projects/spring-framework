@@ -351,11 +351,11 @@ public final class PropertyResourceConfigurerTests {
 		Map singletonMap = Collections.singletonMap("myKey", "myValue");
 		if (parentChildSeparation) {
 			MutablePropertyValues pvs1 = new MutablePropertyValues();
-			pvs1.addPropertyValue("age", "${age}");
+			pvs1.add("age", "${age}");
 			MutablePropertyValues pvs2 = new MutablePropertyValues();
-			pvs2.addPropertyValue("name", "name${var}${var}${");
-			pvs2.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
-			pvs2.addPropertyValue("someMap", singletonMap);
+			pvs2.add("name", "name${var}${var}${");
+			pvs2.add("spouse", new RuntimeBeanReference("${ref}"));
+			pvs2.add("someMap", singletonMap);
 			RootBeanDefinition parent = new RootBeanDefinition(TestBean.class, pvs1);
 			ChildBeanDefinition bd = new ChildBeanDefinition("${parent}", pvs2);
 			factory.registerBeanDefinition("parent1", parent);
@@ -363,10 +363,10 @@ public final class PropertyResourceConfigurerTests {
 		}
 		else {
 			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue("age", "${age}");
-			pvs.addPropertyValue("name", "name${var}${var}${");
-			pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
-			pvs.addPropertyValue("someMap", singletonMap);
+			pvs.add("age", "${age}");
+			pvs.add("name", "name${var}${var}${");
+			pvs.add("spouse", new RuntimeBeanReference("${ref}"));
+			pvs.add("someMap", singletonMap);
 			RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
 			factory.registerBeanDefinition("tb1", bd);
 		}
@@ -379,13 +379,13 @@ public final class PropertyResourceConfigurerTests {
 		List<Object> friends = new ManagedList<Object>();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
-		pvs.addPropertyValue("friends", friends);
+		pvs.add("friends", friends);
 
 		Set<Object> someSet = new ManagedSet<Object>();
 		someSet.add("na${age}me");
 		someSet.add(new RuntimeBeanReference("${ref}"));
 		someSet.add(new TypedStringValue("${age}", Integer.class));
-		pvs.addPropertyValue("someSet", someSet);
+		pvs.add("someSet", someSet);
 
 		Map<Object, Object> someMap = new ManagedMap<Object, Object>();
 		someMap.put(new TypedStringValue("key${age}"), new TypedStringValue("${age}"));
@@ -393,11 +393,11 @@ public final class PropertyResourceConfigurerTests {
 		someMap.put("key1", new RuntimeBeanReference("${ref}"));
 		someMap.put("key2", "${age}name");
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
-		innerPvs.addPropertyValue("touchy", "${os.name}");
+		innerPvs.add("touchy", "${os.name}");
 		someMap.put("key3", new RootBeanDefinition(TestBean.class, innerPvs));
 		MutablePropertyValues innerPvs2 = new MutablePropertyValues(innerPvs);
 		someMap.put("${key4}", new BeanDefinitionHolder(new ChildBeanDefinition("tb1", innerPvs2), "child"));
-		pvs.addPropertyValue("someMap", someMap);
+		pvs.add("someMap", someMap);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, cas, pvs);
 		factory.registerBeanDefinition("tb2", bd);

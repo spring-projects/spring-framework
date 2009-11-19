@@ -80,7 +80,7 @@ public class DefinitionMetadataEqualsHashCodeTests extends TestCase {
 		definition.setLazyInit(true);
 		definition.getMethodOverrides().addOverride(new LookupOverride("foo", "bar"));
 		definition.getMethodOverrides().addOverride(new ReplaceOverride("foo", "bar"));
-		definition.getPropertyValues().addPropertyValue("foo", "bar");
+		definition.getPropertyValues().add("foo", "bar");
 		definition.setResourceDescription("desc");
 		definition.setRole(BeanDefinition.ROLE_APPLICATION);
 		definition.setScope(BeanDefinition.SCOPE_PROTOTYPE);

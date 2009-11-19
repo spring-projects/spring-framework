@@ -72,7 +72,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setThreadNamePrefix("testExecutor");
 		executor.afterPropertiesSet();
-		processorDefinition.getPropertyValues().addPropertyValue("executor", executor);
+		processorDefinition.getPropertyValues().add("executor", executor);
 		BeanDefinition targetDefinition = new RootBeanDefinition(AsyncAnnotationBeanPostProcessorTests.TestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);

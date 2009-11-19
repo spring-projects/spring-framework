@@ -72,7 +72,7 @@ public class ServletContextSupportTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("attributeName", "myAttr");
+		pvs.add("attributeName", "myAttr");
 		wac.registerSingleton("importedAttr", ServletContextAttributeFactoryBean.class, pvs);
 		wac.refresh();
 
@@ -87,7 +87,7 @@ public class ServletContextSupportTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("attributeName", "myAttr");
+		pvs.add("attributeName", "myAttr");
 		wac.registerSingleton("importedAttr", ServletContextAttributeFactoryBean.class, pvs);
 
 		try {
@@ -109,7 +109,7 @@ public class ServletContextSupportTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("initParamName", "myParam");
+		pvs.add("initParamName", "myParam");
 		wac.registerSingleton("importedParam", ServletContextParameterFactoryBean.class, pvs);
 		wac.refresh();
 
@@ -124,7 +124,7 @@ public class ServletContextSupportTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("initParamName", "myParam");
+		pvs.add("initParamName", "myParam");
 		wac.registerSingleton("importedParam", ServletContextParameterFactoryBean.class, pvs);
 
 		try {
@@ -163,16 +163,16 @@ public class ServletContextSupportTests {
 		wac.setServletContext(sc);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("age", "${age}");
+		pvs.add("name", "${key4}name${var}${var}${");
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
+		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my");
 		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
 
 		wac.refresh();
@@ -193,16 +193,16 @@ public class ServletContextSupportTests {
 		wac.setServletContext(sc);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("age", "${age}");
+		pvs.add("name", "${key4}name${var}${var}${");
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
+		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
 		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
 
 		wac.refresh();
@@ -223,17 +223,17 @@ public class ServletContextSupportTests {
 		wac.setServletContext(sc);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("age", "${age}");
+		pvs.add("name", "${key4}name${var}${var}${");
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
-		pvs.addPropertyValue("contextOverride", Boolean.TRUE);
+		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
+		pvs.add("contextOverride", Boolean.TRUE);
 		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
 
 		wac.refresh();
@@ -255,18 +255,18 @@ public class ServletContextSupportTests {
 		wac.setServletContext(sc);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "${key4}name${var}${var}${");
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("age", "${age}");
+		pvs.add("name", "${key4}name${var}${var}${");
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
-		pvs.addPropertyValue("contextOverride", Boolean.TRUE);
-		pvs.addPropertyValue("searchContextAttributes", Boolean.TRUE);
+		pvs.add("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=yourkey4");
+		pvs.add("contextOverride", Boolean.TRUE);
+		pvs.add("searchContextAttributes", Boolean.TRUE);
 		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
 
 		wac.refresh();
@@ -287,9 +287,9 @@ public class ServletContextSupportTests {
 		wac.setServletContext(sc);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "name${var}${var}${");
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("age", "${age}");
+		pvs.add("name", "name${var}${var}${");
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
 		ConstructorArgumentValues cas = new ConstructorArgumentValues();
@@ -300,29 +300,29 @@ public class ServletContextSupportTests {
 		List<Object> friends = new ManagedList<Object>();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
-		pvs.addPropertyValue("friends", friends);
+		pvs.add("friends", friends);
 
 		Set<Object> someSet = new ManagedSet<Object>();
 		someSet.add("na${age}me");
 		someSet.add(new RuntimeBeanReference("${ref}"));
-		pvs.addPropertyValue("someSet", someSet);
+		pvs.add("someSet", someSet);
 
 		Map<String, Object> someMap = new ManagedMap<String, Object>();
 		someMap.put("key1", new RuntimeBeanReference("${ref}"));
 		someMap.put("key2", "${age}name");
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
-		innerPvs.addPropertyValue("touchy", "${os.name}");
+		innerPvs.add("touchy", "${os.name}");
 		someMap.put("key3", new RootBeanDefinition(TestBean.class, innerPvs));
 		MutablePropertyValues innerPvs2 = new MutablePropertyValues(innerPvs);
 		someMap.put("${key4}", new BeanDefinitionHolder(new ChildBeanDefinition("tb1", innerPvs2), "child"));
-		pvs.addPropertyValue("someMap", someMap);
+		pvs.add("someMap", someMap);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, cas, pvs);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "var=${m}var\nref=tb2\nm=my");
-		pvs.addPropertyValue("searchContextAttributes", Boolean.TRUE);
+		pvs.add("properties", "var=${m}var\nref=tb2\nm=my");
+		pvs.add("searchContextAttributes", Boolean.TRUE);
 		wac.registerSingleton("configurer", ServletContextPropertyPlaceholderConfigurer.class, pvs);
 		sc.setAttribute("age", new Integer(98));
 

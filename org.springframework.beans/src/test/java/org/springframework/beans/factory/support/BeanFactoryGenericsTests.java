@@ -58,7 +58,7 @@ public class BeanFactoryGenericsTests {
 		Set<String> input = new HashSet<String>();
 		input.add("4");
 		input.add("5");
-		rbd.getPropertyValues().addPropertyValue("integerSet", input);
+		rbd.getPropertyValues().add("integerSet", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
@@ -75,7 +75,7 @@ public class BeanFactoryGenericsTests {
 		List<String> input = new ArrayList<String>();
 		input.add("http://localhost:8080");
 		input.add("http://localhost:9090");
-		rbd.getPropertyValues().addPropertyValue("resourceList", input);
+		rbd.getPropertyValues().add("resourceList", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
@@ -105,7 +105,7 @@ public class BeanFactoryGenericsTests {
 
 		List input = new ArrayList();
 		input.add(1);
-		rbd.getPropertyValues().addPropertyValue("testBeanList", input);
+		rbd.getPropertyValues().add("testBeanList", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
 		try {
@@ -137,7 +137,7 @@ public class BeanFactoryGenericsTests {
 		Map<String, String> input = new HashMap<String, String>();
 		input.put("4", "5");
 		input.put("6", "7");
-		rbd.getPropertyValues().addPropertyValue("shortMap", input);
+		rbd.getPropertyValues().add("shortMap", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");

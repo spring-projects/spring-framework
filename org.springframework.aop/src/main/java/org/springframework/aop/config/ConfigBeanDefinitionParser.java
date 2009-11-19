@@ -154,12 +154,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 			Object pointcut = parsePointcutProperty(advisorElement, parserContext);
 			if (pointcut instanceof BeanDefinition) {
-				advisorDef.getPropertyValues().addPropertyValue(POINTCUT, pointcut);
+				advisorDef.getPropertyValues().add(POINTCUT, pointcut);
 				parserContext.registerComponent(
 						new AdvisorComponentDefinition(advisorBeanName, advisorDef, (BeanDefinition) pointcut));
 			}
 			else if (pointcut instanceof String) {
-				advisorDef.getPropertyValues().addPropertyValue(POINTCUT, new RuntimeBeanReference((String) pointcut));
+				advisorDef.getPropertyValues().add(POINTCUT, new RuntimeBeanReference((String) pointcut));
 				parserContext.registerComponent(
 						new AdvisorComponentDefinition(advisorBeanName, advisorDef));
 			}
@@ -183,12 +183,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 					"'advice-ref' attribute contains empty value.", advisorElement, this.parseState.snapshot());
 		}
 		else {
-			advisorDefinition.getPropertyValues().addPropertyValue(
+			advisorDefinition.getPropertyValues().add(
 					ADVICE_BEAN_NAME, new RuntimeBeanNameReference(adviceRef));
 		}
 
 		if (advisorElement.hasAttribute(ORDER_PROPERTY)) {
-			advisorDefinition.getPropertyValues().addPropertyValue(
+			advisorDefinition.getPropertyValues().add(
 					ORDER_PROPERTY, advisorElement.getAttribute(ORDER_PROPERTY));
 		}
 
@@ -321,14 +321,14 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 			// create the method factory bean
 			RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
-			methodDefinition.getPropertyValues().addPropertyValue("targetBeanName", aspectName);
-			methodDefinition.getPropertyValues().addPropertyValue("methodName", adviceElement.getAttribute("method"));
+			methodDefinition.getPropertyValues().add("targetBeanName", aspectName);
+			methodDefinition.getPropertyValues().add("methodName", adviceElement.getAttribute("method"));
 			methodDefinition.setSynthetic(true);
 
 			// create instance factory definition
 			RootBeanDefinition aspectFactoryDef =
 					new RootBeanDefinition(SimpleBeanFactoryAwareAspectInstanceFactory.class);
-			aspectFactoryDef.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
+			aspectFactoryDef.getPropertyValues().add("aspectBeanName", aspectName);
 			aspectFactoryDef.setSynthetic(true);
 
 			// register the pointcut
@@ -341,7 +341,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			advisorDefinition.setSource(parserContext.extractSource(adviceElement));
 			advisorDefinition.getConstructorArgumentValues().addGenericArgumentValue(adviceDef);
 			if (aspectElement.hasAttribute(ORDER_PROPERTY)) {
-				advisorDefinition.getPropertyValues().addPropertyValue(
+				advisorDefinition.getPropertyValues().add(
 						ORDER_PROPERTY, aspectElement.getAttribute(ORDER_PROPERTY));
 			}
 
@@ -369,19 +369,19 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement, parserContext));
 		adviceDefinition.setSource(parserContext.extractSource(adviceElement));
 
-		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY, aspectName);
-		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY, order);
+		adviceDefinition.getPropertyValues().add(ASPECT_NAME_PROPERTY, aspectName);
+		adviceDefinition.getPropertyValues().add(DECLARATION_ORDER_PROPERTY, order);
 
 		if (adviceElement.hasAttribute(RETURNING)) {
-			adviceDefinition.getPropertyValues().addPropertyValue(
+			adviceDefinition.getPropertyValues().add(
 					RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
 		}
 		if (adviceElement.hasAttribute(THROWING)) {
-			adviceDefinition.getPropertyValues().addPropertyValue(
+			adviceDefinition.getPropertyValues().add(
 					THROWING_PROPERTY, adviceElement.getAttribute(THROWING));
 		}
 		if (adviceElement.hasAttribute(ARG_NAMES)) {
-			adviceDefinition.getPropertyValues().addPropertyValue(
+			adviceDefinition.getPropertyValues().add(
 					ARG_NAMES_PROPERTY, adviceElement.getAttribute(ARG_NAMES));
 		}
 
@@ -507,7 +507,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(AspectJExpressionPointcut.class);
 		beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		beanDefinition.setSynthetic(true);
-		beanDefinition.getPropertyValues().addPropertyValue(EXPRESSION, expression);
+		beanDefinition.getPropertyValues().add(EXPRESSION, expression);
 		return beanDefinition;
 	}
 

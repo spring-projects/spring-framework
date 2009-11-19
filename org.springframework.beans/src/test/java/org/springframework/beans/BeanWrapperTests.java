@@ -36,7 +36,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
@@ -252,7 +251,7 @@ public final class BeanWrapperTests {
 	@Test
 	public void testIgnoringIndexedProperty() {
 		MutablePropertyValues values = new MutablePropertyValues();
-		values.addPropertyValue("toBeIgnored[0]", new Integer(42));
+		values.add("toBeIgnored[0]", new Integer(42));
 		BeanWrapper bw = new BeanWrapperImpl(new Object());
 		bw.setPropertyValues(values, true);
 	}
@@ -260,7 +259,7 @@ public final class BeanWrapperTests {
 	@Test
 	public void testConvertPrimitiveToString() {
 		MutablePropertyValues values = new MutablePropertyValues();
-		values.addPropertyValue("name", new Integer(42));
+		values.add("name", new Integer(42));
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.setPropertyValues(values);
@@ -270,7 +269,7 @@ public final class BeanWrapperTests {
 	@Test
 	public void testConvertClassToString() {
 		MutablePropertyValues values = new MutablePropertyValues();
-		values.addPropertyValue("name", Integer.class);
+		values.add("name", Integer.class);
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
@@ -874,16 +873,16 @@ public final class BeanWrapperTests {
 		assertEquals("nameY", bw.getPropertyValue("map[key4][1].name"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].name", "name5");
-		pvs.addPropertyValue("array[1].name", "name4");
-		pvs.addPropertyValue("list[0].name", "name3");
-		pvs.addPropertyValue("list[1].name", "name2");
-		pvs.addPropertyValue("set[0].name", "name8");
-		pvs.addPropertyValue("set[1].name", "name9");
-		pvs.addPropertyValue("map[key1].name", "name1");
-		pvs.addPropertyValue("map['key.3'].name", "name0");
-		pvs.addPropertyValue("map[key4][0].name", "nameA");
-		pvs.addPropertyValue("map[key4][1].name", "nameB");
+		pvs.add("array[0].name", "name5");
+		pvs.add("array[1].name", "name4");
+		pvs.add("list[0].name", "name3");
+		pvs.add("list[1].name", "name2");
+		pvs.add("set[0].name", "name8");
+		pvs.add("set[1].name", "name9");
+		pvs.add("map[key1].name", "name1");
+		pvs.add("map['key.3'].name", "name0");
+		pvs.add("map[key4][0].name", "nameA");
+		pvs.add("map[key4][1].name", "nameB");
 		bw.setPropertyValues(pvs);
 		assertEquals("name5", tb0.getName());
 		assertEquals("name4", tb1.getName());
@@ -927,16 +926,16 @@ public final class BeanWrapperTests {
 		assertEquals(tb5, bw.getPropertyValue("map[\"key2\"]"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0]", tb5);
-		pvs.addPropertyValue("array[1]", tb4);
-		pvs.addPropertyValue("list[0]", tb3);
-		pvs.addPropertyValue("list[1]", tb2);
-		pvs.addPropertyValue("list[2]", tb0);
-		pvs.addPropertyValue("list[4]", tb1);
-		pvs.addPropertyValue("map[key1]", tb1);
-		pvs.addPropertyValue("map['key2']", tb0);
-		pvs.addPropertyValue("map[key5]", tb4);
-		pvs.addPropertyValue("map['key9']", tb5);
+		pvs.add("array[0]", tb5);
+		pvs.add("array[1]", tb4);
+		pvs.add("list[0]", tb3);
+		pvs.add("list[1]", tb2);
+		pvs.add("list[2]", tb0);
+		pvs.add("list[4]", tb1);
+		pvs.add("map[key1]", tb1);
+		pvs.add("map['key2']", tb0);
+		pvs.add("map[key5]", tb4);
+		pvs.add("map['key9']", tb5);
 		bw.setPropertyValues(pvs);
 		assertEquals(tb5, bean.getArray()[0]);
 		assertEquals(tb4, bean.getArray()[1]);
@@ -976,15 +975,15 @@ public final class BeanWrapperTests {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("map[key1]", "rod");
-		pvs.addPropertyValue("map[key2]", "rob");
+		pvs.add("map[key1]", "rod");
+		pvs.add("map[key2]", "rob");
 		bw.setPropertyValues(pvs);
 		assertEquals("rod", ((TestBean) bean.getMap().get("key1")).getName());
 		assertEquals("rob", ((TestBean) bean.getMap().get("key2")).getName());
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("map[key1]", "rod");
-		pvs.addPropertyValue("map[key2]", "");
+		pvs.add("map[key1]", "rod");
+		pvs.add("map[key2]", "");
 		try {
 			bw.setPropertyValues(pvs);
 			fail("Should have thrown TypeMismatchException");
@@ -1012,7 +1011,7 @@ public final class BeanWrapperTests {
 		inputMap.put(new Integer(1), "rod");
 		inputMap.put(new Integer(2), "rob");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("map", Collections.unmodifiableMap(inputMap));
+		pvs.add("map", Collections.unmodifiableMap(inputMap));
 		bw.setPropertyValues(pvs);
 		assertEquals("rod", ((TestBean) bean.getMap().get(new Integer(1))).getName());
 		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
@@ -1035,7 +1034,7 @@ public final class BeanWrapperTests {
 		inputMap.put(new Integer(1), "rod");
 		inputMap.put(new Integer(2), "rob");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("map", new ReadOnlyMap(inputMap));
+		pvs.add("map", new ReadOnlyMap(inputMap));
 		bw.setPropertyValues(pvs);
 		assertEquals("rod", ((TestBean) bean.getMap().get(new Integer(1))).getName());
 		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
@@ -1051,7 +1050,7 @@ public final class BeanWrapperTests {
 		inputMap.put(new Integer(2), "rob");
 		ReadOnlyMap readOnlyMap = new ReadOnlyMap(inputMap);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("map", readOnlyMap);
+		pvs.add("map", readOnlyMap);
 		bw.setPropertyValues(pvs);
 		assertSame(readOnlyMap, bean.getMap());
 		assertFalse(readOnlyMap.isAccessed());

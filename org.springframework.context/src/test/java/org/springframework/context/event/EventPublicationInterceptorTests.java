@@ -98,7 +98,7 @@ public class EventPublicationInterceptorTests {
 
 		StaticApplicationContext ctx = new TestContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("applicationEventClass", TestEvent.class.getName());
+		pvs.add("applicationEventClass", TestEvent.class.getName());
 		// should automatically receive applicationEventPublisher reference
 		ctx.registerSingleton("publisher", EventPublicationInterceptor.class, pvs);
 		ctx.registerSingleton("otherListener", FactoryBeanTestListener.class);

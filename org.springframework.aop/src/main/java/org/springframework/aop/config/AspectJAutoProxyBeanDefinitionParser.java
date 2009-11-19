@@ -65,7 +65,7 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		if (!includePatterns.isEmpty()) {
 			includePatterns.setSource(parserContext.extractSource(element));
-			beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
+			beanDef.getPropertyValues().add("includePatterns", includePatterns);
 		}
 	}
 

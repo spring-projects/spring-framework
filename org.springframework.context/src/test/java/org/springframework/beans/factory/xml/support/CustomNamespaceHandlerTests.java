@@ -215,8 +215,8 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			definition.setBeanClass(TestBean.class);
 
 			MutablePropertyValues mpvs = new MutablePropertyValues();
-			mpvs.addPropertyValue("name", element.getAttribute("name"));
-			mpvs.addPropertyValue("age", element.getAttribute("age"));
+			mpvs.add("name", element.getAttribute("name"));
+			mpvs.add("age", element.getAttribute("age"));
 			definition.setPropertyValues(mpvs);
 
 			parserContext.getRegistry().registerBeanDefinition(element.getAttribute("id"), definition);
@@ -244,8 +244,8 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			BeanDefinition def = definition.getBeanDefinition();
 
 			MutablePropertyValues mpvs = (def.getPropertyValues() == null) ? new MutablePropertyValues() : def.getPropertyValues();
-			mpvs.addPropertyValue("name", element.getAttribute("name"));
-			mpvs.addPropertyValue("age", element.getAttribute("age"));
+			mpvs.add("name", element.getAttribute("name"));
+			mpvs.add("age", element.getAttribute("age"));
 
 			((AbstractBeanDefinition) def).setPropertyValues(mpvs);
 			return definition;

@@ -80,7 +80,7 @@ public class AnnotationProcessorPerformanceTests {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("spouse"));
+		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
 		TestBean spouse = (TestBean) ctx.getBean("spouse");
@@ -133,7 +133,7 @@ public class AnnotationProcessorPerformanceTests {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("spouse"));
+		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
 		TestBean spouse = (TestBean) ctx.getBean("spouse");

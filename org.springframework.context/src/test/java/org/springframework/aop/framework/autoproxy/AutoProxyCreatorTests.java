@@ -51,13 +51,13 @@ public final class AutoProxyCreatorTests {
 		sac.registerSingleton("testInterceptor", TestInterceptor.class);
 
 		RootBeanDefinition proxyCreator = new RootBeanDefinition(BeanNameAutoProxyCreator.class);
-		proxyCreator.getPropertyValues().addPropertyValue("interceptorNames", "testInterceptor");
-		proxyCreator.getPropertyValues().addPropertyValue("beanNames", "singletonToBeProxied,innerBean,singletonFactoryToBeProxied");
+		proxyCreator.getPropertyValues().add("interceptorNames", "testInterceptor");
+		proxyCreator.getPropertyValues().add("beanNames", "singletonToBeProxied,innerBean,singletonFactoryToBeProxied");
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("beanNameAutoProxyCreator", proxyCreator);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		RootBeanDefinition innerBean = new RootBeanDefinition(TestBean.class);
-		bd.getPropertyValues().addPropertyValue("spouse", new BeanDefinitionHolder(innerBean, "innerBean"));
+		bd.getPropertyValues().add("spouse", new BeanDefinitionHolder(innerBean, "innerBean"));
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("singletonToBeProxied", bd);
 
 		sac.registerSingleton("singletonFactoryToBeProxied", DummyFactory.class);
@@ -100,8 +100,8 @@ public final class AutoProxyCreatorTests {
 		sac.registerSingleton("testInterceptor", TestInterceptor.class);
 
 		RootBeanDefinition proxyCreator = new RootBeanDefinition(BeanNameAutoProxyCreator.class);
-		proxyCreator.getPropertyValues().addPropertyValue("interceptorNames", "testInterceptor");
-		proxyCreator.getPropertyValues().addPropertyValue("beanNames", "singletonToBeProxied,&singletonFactoryToBeProxied");
+		proxyCreator.getPropertyValues().add("interceptorNames", "testInterceptor");
+		proxyCreator.getPropertyValues().add("beanNames", "singletonToBeProxied,&singletonFactoryToBeProxied");
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("beanNameAutoProxyCreator", proxyCreator);
 
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
@@ -182,7 +182,7 @@ public final class AutoProxyCreatorTests {
 		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("singleton", "false");
+		pvs.add("singleton", "false");
 		sac.registerSingleton("prototypeFactoryToBeProxied", DummyFactory.class, pvs);
 
 		sac.refresh();
@@ -205,7 +205,7 @@ public final class AutoProxyCreatorTests {
 		StaticApplicationContext sac = new StaticApplicationContext();
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("proxyFactoryBean", "false");
+		pvs.add("proxyFactoryBean", "false");
 		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class, pvs);
 
 		sac.registerSingleton("singletonFactoryToBeProxied", DummyFactory.class);
@@ -236,11 +236,11 @@ public final class AutoProxyCreatorTests {
 		StaticApplicationContext sac = new StaticApplicationContext();
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("proxyObject", "false");
+		pvs.add("proxyObject", "false");
 		sac.registerSingleton("testAutoProxyCreator", TestAutoProxyCreator.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("singleton", "false");
+		pvs.add("singleton", "false");
 		sac.registerSingleton("prototypeFactoryToBeProxied", DummyFactory.class, pvs);
 
 		sac.refresh();

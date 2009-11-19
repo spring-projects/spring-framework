@@ -131,7 +131,7 @@ public class ApplicationContextEventTests {
 	public void innerBeanAsListener() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(TestBean.class);
-		listenerDef.getPropertyValues().addPropertyValue("friends", new RootBeanDefinition(BeanThatListens.class));
+		listenerDef.getPropertyValues().add("friends", new RootBeanDefinition(BeanThatListens.class));
 		context.registerBeanDefinition("listener", listenerDef);
 		context.refresh();
 		context.publishEvent(new MyEvent(this));

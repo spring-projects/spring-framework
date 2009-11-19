@@ -763,7 +763,7 @@ public final class XmlBeanFactoryTests {
 		XmlBeanFactory xbf = new XmlBeanFactory(AUTOWIRE_CONTEXT);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "kerry");
+		pvs.add("name", "kerry");
 		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class, pvs));
 		xbf.setParentBeanFactory(lbf);
 		doTestAutowire(xbf);
