@@ -673,6 +673,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 				}
 			};
 			schedulerThread.setName("Quartz Scheduler [" + scheduler.getSchedulerName() + "]");
+			schedulerThread.setDaemon(true);
 			schedulerThread.start();
 		}
 	}
