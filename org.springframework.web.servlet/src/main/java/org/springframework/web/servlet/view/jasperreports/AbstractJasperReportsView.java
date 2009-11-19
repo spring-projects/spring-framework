@@ -518,11 +518,10 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 
 	/**
 	 * Finds the report data to use for rendering the report and then invokes the
-	 * <code>renderReport</code> method that should be implemented by the subclass.
+	 * {@link #renderReport} method that should be implemented by the subclass.
 	 * @param model the model map, as passed in for view rendering. Must contain
 	 * a report data value that can be converted to a <code>JRDataSource</code>,
-	 * acccording to the <code>getReportData</code> method.
-	 * @see #getReportData
+	 * acccording to the rules of the {@link #fillReport} method.
 	 */
 	@Override
 	protected void renderMergedOutputModel(
@@ -579,9 +578,11 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Create a populated <code>JasperPrint</code> instance from the configured
 	 * <code>JasperReport</code> instance.
-	 * <p>By default, thois method will use any <code>JRDataSource</code> instance
-	 * (or wrappable <code>Object</code>) that can be located using {@link #getReportData}.
-	 * If no <code>JRDataSource</code> can be found, this method will use a JDBC
+	 * <p>By default, this method will use any <code>JRDataSource</code> instance
+	 * (or wrappable <code>Object</code>) that can be located using {@link #setReportDataKey},
+	 * a lookup for type <code>JRDataSource</code> in the model Map, or a special value
+	 * retrieved via {@link #getReportData}.
+	 * <p>If no <code>JRDataSource</code> can be found, this method will use a JDBC
 	 * <code>Connection</code> obtained from the configured <code>javax.sql.DataSource</code>
 	 * (or a DataSource attribute in the model). If no JDBC DataSource can be found
 	 * either, the JasperReports engine will be invoked with plain model Map,
@@ -709,17 +710,14 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Find an instance of <code>JRDataSource</code> in the given model map or create an
-	 * appropriate JRDataSource for passed-in report data.
-	 * <p>The default implementation checks for a model object under the
-	 * specified "reportDataKey" first, then falls back to looking for a value
-	 * of type <code>JRDataSource</code>, <code>java.util.Collection</code>,
-	 * object array (in that order).
+	 * Create an appropriate <code>JRDataSource</code> for passed-in report data.
+	 * Called by {@link #fillReport} when its own lookup steps were not successful.
+	 * <p>The default implementation looks for a value of type <code>java.util.Collection</code>
+	 * or object array (in that order). Can be overridden in subclasses.
 	 * @param model the model map, as passed in for view rendering
 	 * @return the <code>JRDataSource</code> or <code>null</code> if the data source is not found
-	 * @see #setReportDataKey
-	 * @see #convertReportData
 	 * @see #getReportDataTypes
+	 * @see #convertReportData
 	 */
 	protected JRDataSource getReportData(Map<String, Object> model) {
 		// Try to find matching attribute, of given prioritized types.
