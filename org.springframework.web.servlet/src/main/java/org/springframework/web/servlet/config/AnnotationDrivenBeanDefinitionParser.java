@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.convert.ConversionService;
@@ -30,7 +33,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
-import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses the {@code annotation-driven} element to configure
@@ -46,84 +48,70 @@ import org.w3c.dom.Element;
  * <li>Configures the validator if specified, otherwise defaults to a fresh {@link Validator} instance created by the default {@link LocalValidatorFactoryBean} <i>if the JSR-303 API is present in the classpath.
  * </ul>
  * </ol>
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
+class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
+
+	private static final boolean jsr303Present = ClassUtils.isPresent(
+			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
-		BeanDefinitionHolder handlerMappingHolder = registerDefaultAnnotationHandlerMapping(element, source, parserContext);
-		BeanDefinitionHolder handlerAdapterHolder = registerAnnotationMethodHandlerAdapter(element, source, parserContext);
-		
+
+		RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+		mappingDef.setSource(source);
+		mappingDef.getPropertyValues().add("order", 0);
+		String mappingName = parserContext.getReaderContext().registerWithGeneratedName(mappingDef);
+
+		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+		bindingDef.setSource(source);
+		bindingDef.getPropertyValues().add("conversionService", getConversionService(element, source, parserContext));
+		bindingDef.getPropertyValues().add("validator", getValidator(element, source, parserContext));
+
+		RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+		adapterDef.setSource(source);
+		adapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
+		String adapterName = parserContext.getReaderContext().registerWithGeneratedName(adapterDef);
+
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		parserContext.pushContainingComponent(compDefinition);
-		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingHolder));
-		parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterHolder));
+		parserContext.registerComponent(new BeanComponentDefinition(mappingDef, mappingName));
+		parserContext.registerComponent(new BeanComponentDefinition(adapterDef, adapterName));
 		parserContext.popAndRegisterContainingComponent();
 		
 		return null;
 	}
 	
-	// internal helpers
-	
-	private BeanDefinitionHolder registerDefaultAnnotationHandlerMapping(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = createBeanBuilder(DefaultAnnotationHandlerMapping.class, source);
-		builder.addPropertyValue("order", 0);
-		return registerBeanDefinition(builder.getBeanDefinition(), context);
-	}
 
-	private BeanDefinitionHolder registerAnnotationMethodHandlerAdapter(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = createBeanBuilder(AnnotationMethodHandlerAdapter.class, source);
-		builder.addPropertyValue("webBindingInitializer", createWebBindingInitializer(element, source, context));
-		return registerBeanDefinition(builder.getBeanDefinition(), context);
-	}
-
-	private BeanDefinition createWebBindingInitializer(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = createBeanBuilder(ConfigurableWebBindingInitializer.class, source);
-		addConversionService(builder, element, source, context);
-		addValidator(builder, element, source, context);		
-		return builder.getBeanDefinition();
-	}
-
-	private void addConversionService(BeanDefinitionBuilder builder, Element element, Object source, ParserContext context) {
+	private Object getConversionService(Element element, Object source, ParserContext parserContext) {
 		if (element.hasAttribute("conversion-service")) {
-			builder.addPropertyReference("conversionService", element.getAttribute("conversion-service"));
-		} else {
-			builder.addPropertyValue("conversionService", createDefaultConversionService(element, source, context));
+			return new RuntimeBeanReference(element.getAttribute("conversion-service"));
+		}
+		else {
+			RootBeanDefinition conversionDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+			conversionDef.setSource(source);
+			String conversionName = parserContext.getReaderContext().registerWithGeneratedName(conversionDef);
+			return new RuntimeBeanReference(conversionName);
 		}
 	}
 
-	private void addValidator(BeanDefinitionBuilder builder, Element element, Object source, ParserContext context) {
+	private Object getValidator(Element element, Object source, ParserContext parserContext) {
 		if (element.hasAttribute("validator")) {
-			builder.addPropertyReference("validator", element.getAttribute("validator"));
-		} else {
-			if (ClassUtils.isPresent("javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader())) {
-				builder.addPropertyValue("validator", createDefaultValidator(element, source, context));
-			}
+			return new RuntimeBeanReference(element.getAttribute("validator"));
 		}
-	}
-
-	private BeanDefinition createDefaultConversionService(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = createBeanBuilder(FormattingConversionServiceFactoryBean.class, source);
-		return builder.getBeanDefinition();
-	}
-
-	private BeanDefinition createDefaultValidator(Element element, Object source, ParserContext context) {
-		BeanDefinitionBuilder builder = createBeanBuilder(LocalValidatorFactoryBean.class, source);
-		return builder.getBeanDefinition();
-	}
-
-	private BeanDefinitionHolder registerBeanDefinition(BeanDefinition definition, ParserContext context) {
-		String beanName = context.getReaderContext().generateBeanName(definition);
-		context.getRegistry().registerBeanDefinition(beanName, definition);
-		return new BeanDefinitionHolder(definition, beanName);		
-	}
-	
-	private BeanDefinitionBuilder createBeanBuilder(Class<?> clazz, Object source) {
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
-		builder.getRawBeanDefinition().setSource(source);
-		return builder;
+		else if (jsr303Present) {
+			RootBeanDefinition validatorDef = new RootBeanDefinition(LocalValidatorFactoryBean.class);
+			validatorDef.setSource(source);
+			String validatorName = parserContext.getReaderContext().registerWithGeneratedName(validatorDef);
+			return new RuntimeBeanReference(validatorName);
+		}
+		else {
+			return null;
+		}
 	}
 
 }
