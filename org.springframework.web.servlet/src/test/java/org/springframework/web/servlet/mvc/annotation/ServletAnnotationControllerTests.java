@@ -97,7 +97,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
@@ -270,7 +269,7 @@ public class ServletAnnotationControllerTests {
 				wac.registerBeanDefinition("controller",
 						new RootBeanDefinition(EmptyParameterListHandlerMethodController.class));
 				RootBeanDefinition vrDef = new RootBeanDefinition(InternalResourceViewResolver.class);
-				vrDef.getPropertyValues().addPropertyValue("suffix", ".jsp");
+				vrDef.getPropertyValues().add("suffix", ".jsp");
 				wac.registerBeanDefinition("viewResolver", vrDef);
 				wac.refresh();
 				return wac;
@@ -342,7 +341,7 @@ public class ServletAnnotationControllerTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
 				RootBeanDefinition ppc = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
-				ppc.getPropertyValues().addPropertyValue("properties", "myKey=foo");
+				ppc.getPropertyValues().add("properties", "myKey=foo");
 				wac.registerBeanDefinition("ppc", ppc);
 				wac.refresh();
 				return wac;
@@ -469,7 +468,7 @@ public class ServletAnnotationControllerTests {
 						new RootBeanDefinition(MyCommandProvidingFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
+				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -496,8 +495,8 @@ public class ServletAnnotationControllerTests {
 						new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
-				adapterDef.getPropertyValues().addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
+				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
+				adapterDef.getPropertyValues().add("customArgumentResolver", new MySpecialArgumentResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -748,7 +747,7 @@ public class ServletAnnotationControllerTests {
 				InternalPathMethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 				methodNameResolver.setSuffix("Handle");
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().addPropertyValue("methodNameResolver", methodNameResolver);
+				adapterDef.getPropertyValues().add("methodNameResolver", methodNameResolver);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -784,7 +783,7 @@ public class ServletAnnotationControllerTests {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				RootBeanDefinition mapping = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
-				mapping.getPropertyValues().addPropertyValue("excludedPackages", null);
+				mapping.getPropertyValues().add("excludedPackages", null);
 				wac.registerBeanDefinition("handlerMapping", mapping);
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MethodNameDispatchingController.class));
 				wac.refresh();
@@ -1009,7 +1008,7 @@ public class ServletAnnotationControllerTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().addPropertyValue("messageConverters", new MyMessageConverter());
+				adapterDef.getPropertyValues().add("messageConverters", new MyMessageConverter());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -1064,7 +1063,7 @@ public class ServletAnnotationControllerTests {
 						new RootBeanDefinition(ModelAndViewResolverController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues()
-						.addPropertyValue("customModelAndViewResolver", new MyModelAndViewResolver());
+						.add("customModelAndViewResolver", new MyModelAndViewResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;

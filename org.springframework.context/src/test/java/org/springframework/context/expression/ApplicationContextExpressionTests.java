@@ -86,7 +86,7 @@ public class ApplicationContextExpressionTests {
 
 		GenericBeanDefinition bd0 = new GenericBeanDefinition();
 		bd0.setBeanClass(TestBean.class);
-		bd0.getPropertyValues().addPropertyValue("name", "myName");
+		bd0.getPropertyValues().add("name", "myName");
 		bd0.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "original"));
 		ac.registerBeanDefinition("tb0", bd0);
 
@@ -100,9 +100,9 @@ public class ApplicationContextExpressionTests {
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
 		bd2.setBeanClass(TestBean.class);
 		bd2.setScope("myScope");
-		bd2.getPropertyValues().addPropertyValue("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
-		bd2.getPropertyValues().addPropertyValue("age", "#{mySpecialAttr}");
-		bd2.getPropertyValues().addPropertyValue("country", "${code} #{systemProperties.country}");
+		bd2.getPropertyValues().add("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
+		bd2.getPropertyValues().add("age", "#{mySpecialAttr}");
+		bd2.getPropertyValues().add("country", "${code} #{systemProperties.country}");
 		ac.registerBeanDefinition("tb2", bd2);
 
 		GenericBeanDefinition bd3 = new GenericBeanDefinition();
@@ -179,8 +179,8 @@ public class ApplicationContextExpressionTests {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 		RootBeanDefinition rbd = new RootBeanDefinition(PrototypeTestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
-		rbd.getPropertyValues().addPropertyValue("country2", new TypedStringValue("#{systemProperties.country}"));
+		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
+		rbd.getPropertyValues().add("country2", new TypedStringValue("#{systemProperties.country}"));
 		ac.registerBeanDefinition("test", rbd);
 		ac.refresh();
 
@@ -215,7 +215,7 @@ public class ApplicationContextExpressionTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue("#{systemProperties.name}");
-		rbd.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
+		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
 		ac.registerBeanDefinition("test", rbd);
 		ac.refresh();
 		StopWatch sw = new StopWatch();
@@ -246,7 +246,7 @@ public class ApplicationContextExpressionTests {
 
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(TestBean.class);
-		bd.getPropertyValues().addPropertyValue("country", "#{systemProperties.country}");
+		bd.getPropertyValues().add("country", "#{systemProperties.country}");
 		ac.registerBeanDefinition("tb", bd);
 
 		SecurityManager oldSecurityManager = System.getSecurityManager();

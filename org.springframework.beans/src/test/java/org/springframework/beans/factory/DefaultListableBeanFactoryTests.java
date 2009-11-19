@@ -550,7 +550,7 @@ public final class DefaultListableBeanFactoryTests {
 	public void testSelfReference() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("self"));
+		pvs.add("spouse", new RuntimeBeanReference("self"));
 		lbf.registerBeanDefinition("self", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean self = (TestBean) lbf.getBean("self");
 		assertEquals(self, self.getSpouse());
@@ -561,7 +561,7 @@ public final class DefaultListableBeanFactoryTests {
 		try {
 			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue("ag", "foobar");
+			pvs.add("ag", "foobar");
 			lbf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
 			lbf.getBean("tb");
 			fail("Should throw exception on invalid property");
@@ -685,8 +685,8 @@ public final class DefaultListableBeanFactoryTests {
 
 		RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
 		parentDefinition.setAbstract(true);
-		parentDefinition.getPropertyValues().addPropertyValue("name", EXPECTED_NAME);
-		parentDefinition.getPropertyValues().addPropertyValue("age", new Integer(EXPECTED_AGE));
+		parentDefinition.getPropertyValues().add("name", EXPECTED_NAME);
+		parentDefinition.getPropertyValues().add("age", new Integer(EXPECTED_AGE));
 
 		ChildBeanDefinition childDefinition = new ChildBeanDefinition("alias");
 
@@ -832,7 +832,7 @@ public final class DefaultListableBeanFactoryTests {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("myFloat", "1,1");
+		pvs.add("myFloat", "1,1");
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
 		assertTrue(testBean.getMyFloat().floatValue() == 1.1f);
@@ -855,7 +855,7 @@ public final class DefaultListableBeanFactoryTests {
 		});
 		lbf.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("myFloat", "1,1");
+		pvs.add("myFloat", "1,1");
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
 		assertTrue(testBean.getMyFloat().floatValue() == 1.1f);
@@ -871,7 +871,7 @@ public final class DefaultListableBeanFactoryTests {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("myFloat", new RuntimeBeanReference("myFloat"));
+		pvs.add("myFloat", new RuntimeBeanReference("myFloat"));
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));
 		lbf.registerSingleton("myFloat", "1,1");
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
@@ -884,7 +884,7 @@ public final class DefaultListableBeanFactoryTests {
 		NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 		lbf.setTypeConverter(new CustomTypeConverter(nf));
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("myFloat", "1,1");
+		pvs.add("myFloat", "1,1");
 		ConstructorArgumentValues cav = new ConstructorArgumentValues();
 		cav.addIndexedArgumentValue(0, "myName");
 		cav.addIndexedArgumentValue(1, "myAge");
@@ -901,7 +901,7 @@ public final class DefaultListableBeanFactoryTests {
 		NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 		lbf.setTypeConverter(new CustomTypeConverter(nf));
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("myFloat", new RuntimeBeanReference("myFloat"));
+		pvs.add("myFloat", new RuntimeBeanReference("myFloat"));
 		ConstructorArgumentValues cav = new ConstructorArgumentValues();
 		cav.addIndexedArgumentValue(0, "myName");
 		cav.addIndexedArgumentValue(1, "myAge");
@@ -973,8 +973,8 @@ public final class DefaultListableBeanFactoryTests {
 	public void testRegisterExistingSingletonWithAutowire() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Tony");
-		pvs.addPropertyValue("age", "48");
+		pvs.add("name", "Tony");
+		pvs.add("age", "48");
 		RootBeanDefinition bd = new RootBeanDefinition(DependenciesBean.class, pvs);
 		bd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
@@ -1115,7 +1115,7 @@ public final class DefaultListableBeanFactoryTests {
 	public void testAutowireWithSatisfiedJavaBeanDependency() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
+		pvs.add("name", "Rod");
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
 		lbf.registerBeanDefinition("rod", bd);
 		assertEquals(1, lbf.getBeanDefinitionCount());
@@ -1131,7 +1131,7 @@ public final class DefaultListableBeanFactoryTests {
 	public void testAutowireWithSatisfiedConstructorDependency() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
+		pvs.add("name", "Rod");
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
 		lbf.registerBeanDefinition("rod", bd);
 		assertEquals(1, lbf.getBeanDefinitionCount());
@@ -1392,7 +1392,7 @@ public final class DefaultListableBeanFactoryTests {
 	public void testApplyBeanPropertyValues() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "99");
+		pvs.add("age", "99");
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean tb = new TestBean();
 		assertEquals(0, tb.getAge());
@@ -1404,7 +1404,7 @@ public final class DefaultListableBeanFactoryTests {
 	public void testApplyBeanPropertyValuesWithIncompleteDefinition() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "99");
+		pvs.add("age", "99");
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(null, pvs));
 		TestBean tb = new TestBean();
 		assertEquals(0, tb.getAge());
@@ -1418,7 +1418,7 @@ public final class DefaultListableBeanFactoryTests {
 	public void testConfigureBean() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "99");
+		pvs.add("age", "99");
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean tb = new TestBean();
 		assertEquals(0, tb.getAge());
@@ -1434,7 +1434,7 @@ public final class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
 		lbf.registerBeanDefinition("spouse", bd);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "99");
+		pvs.add("age", "99");
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_NAME));
 		TestBean tb = new TestBean();
 		lbf.configureBean(tb, "test");
@@ -1753,8 +1753,8 @@ public final class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().addPropertyValue("name", "juergen");
-		rbd.getPropertyValues().addPropertyValue("age", "99");
+		rbd.getPropertyValues().add("name", "juergen");
+		rbd.getPropertyValues().add("age", "99");
 		lbf.registerBeanDefinition("test", rbd);
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
@@ -1802,7 +1802,7 @@ public final class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("spouse"));
+		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		lbf.registerBeanDefinition("test", rbd);
 		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
 		TestBean spouse = (TestBean) lbf.getBean("spouse");
@@ -1882,7 +1882,7 @@ public final class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanWithFactoryMethod.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", expectedNameFromProperties);
+		pvs.add("name", expectedNameFromProperties);
 		instanceFactoryDefinition.setPropertyValues(pvs);
 		lbf.registerBeanDefinition("factoryBeanInstance", instanceFactoryDefinition);
 

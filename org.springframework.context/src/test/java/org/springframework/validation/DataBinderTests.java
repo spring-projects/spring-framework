@@ -59,9 +59,9 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		assertTrue(binder.isIgnoreUnknownFields());
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", "032");
-		pvs.addPropertyValue("nonExisting", "someValue");
+		pvs.add("name", "Rod");
+		pvs.add("age", "032");
+		pvs.add("nonExisting", "someValue");
 
 		binder.bind(pvs);
 		binder.close();
@@ -92,8 +92,8 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		assertTrue(binder.isIgnoreUnknownFields());
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("jedi", "on");
+		pvs.add("name", "Rod");
+		pvs.add("jedi", "on");
 
 		binder.bind(pvs);
 		binder.close();
@@ -107,8 +107,8 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		assertTrue(binder.isIgnoreUnknownFields());
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse.name", "Kerry");
-		pvs.addPropertyValue("spouse.jedi", "on");
+		pvs.add("spouse.name", "Kerry");
+		pvs.add("spouse.jedi", "on");
 
 		binder.bind(pvs);
 		binder.close();
@@ -122,9 +122,9 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.setIgnoreUnknownFields(false);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", new Integer(32));
-		pvs.addPropertyValue("nonExisting", "someValue");
+		pvs.add("name", "Rod");
+		pvs.add("age", new Integer(32));
+		pvs.add("nonExisting", "someValue");
 
 		try {
 			binder.bind(pvs);
@@ -139,8 +139,8 @@ public class DataBinderTests extends TestCase {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("spouse.age", new Integer(32));
+		pvs.add("name", "Rod");
+		pvs.add("spouse.age", new Integer(32));
 
 		try {
 			binder.bind(pvs);
@@ -156,8 +156,8 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.setIgnoreInvalidFields(true);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("spouse.age", new Integer(32));
+		pvs.add("name", "Rod");
+		pvs.add("spouse.age", new Integer(32));
 
 		binder.bind(pvs);
 	}
@@ -166,9 +166,9 @@ public class DataBinderTests extends TestCase {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", "32x");
-		pvs.addPropertyValue("touchy", "m.y");
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
+		pvs.add("touchy", "m.y");
 		binder.bind(pvs);
 
 		try {
@@ -215,9 +215,9 @@ public class DataBinderTests extends TestCase {
 			rod = new TestBean();
 			binder = new DataBinder(rod, "person");
 			pvs = new MutablePropertyValues();
-			pvs.addPropertyValue("name", "Rod");
-			pvs.addPropertyValue("age", "32x");
-			pvs.addPropertyValue("touchy", "m.y");
+			pvs.add("name", "Rod");
+			pvs.add("age", "32x");
+			pvs.add("touchy", "m.y");
 			binder.bind(pvs);
 			assertEquals(binder.getBindingResult(), ex.getBindingResult());
 		}
@@ -243,10 +243,10 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", "32x");
-		pvs.addPropertyValue("touchy", "m.y");
-		pvs.addPropertyValue("spouse", "Kerry");
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
+		pvs.add("touchy", "m.y");
+		pvs.add("spouse", "Kerry");
 		binder.bind(pvs);
 
 		try {
@@ -290,7 +290,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb);
 		binder.registerCustomEditor(Integer.class, "object", new CustomNumberEditor(Integer.class, true));
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("object", "1");
+		pvs.add("object", "1");
 		binder.bind(pvs);
 		assertEquals(new Integer(1), tb.getObject());
 	}
@@ -302,7 +302,7 @@ public class DataBinderTests extends TestCase {
 		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("myFloat", "1,2");
+		pvs.add("myFloat", "1,2");
 
 		LocaleContextHolder.setLocale(Locale.GERMAN);
 		try {
@@ -330,8 +330,8 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod);
 		binder.setAllowedFields(new String[] {"name", "myparam"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", "32x");
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
 
 		binder.bind(pvs);
 		binder.close();
@@ -344,8 +344,8 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(rod);
 		binder.setDisallowedFields(new String[] {"age"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", "32x");
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
 
 		binder.bind(pvs);
 		binder.close();
@@ -362,8 +362,8 @@ public class DataBinderTests extends TestCase {
 		binder.setAllowedFields(new String[] {"name", "myparam"});
 		binder.setDisallowedFields(new String[] {"age"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", "32x");
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
 
 		binder.bind(pvs);
 		binder.close();
@@ -380,8 +380,8 @@ public class DataBinderTests extends TestCase {
 		binder.setAllowedFields(new String[] {"name", "age"});
 		binder.setDisallowedFields(new String[] {"age"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("age", "32x");
+		pvs.add("name", "Rod");
+		pvs.add("age", "32x");
 
 		binder.bind(pvs);
 		binder.close();
@@ -398,9 +398,9 @@ public class DataBinderTests extends TestCase {
 		binder.setAllowedFields(new String[] {"nam*", "*ouchy"});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "Rod");
-		pvs.addPropertyValue("touchy", "Rod");
-		pvs.addPropertyValue("age", "32x");
+		pvs.add("name", "Rod");
+		pvs.add("touchy", "Rod");
+		pvs.add("age", "32x");
 
 		binder.bind(pvs);
 		binder.close();
@@ -425,10 +425,10 @@ public class DataBinderTests extends TestCase {
 		binder.setDisallowedFields(new String[] {"someMap['key3']", "someMap[key4]"});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("someMap[key1]", "value1");
-		pvs.addPropertyValue("someMap['key2']", "value2");
-		pvs.addPropertyValue("someMap[key3]", "value3");
-		pvs.addPropertyValue("someMap['key4']", "value4");
+		pvs.add("someMap[key1]", "value1");
+		pvs.add("someMap['key2']", "value2");
+		pvs.add("someMap[key3]", "value3");
+		pvs.add("someMap['key4']", "value4");
 
 		binder.bind(pvs);
 		binder.close();
@@ -453,10 +453,10 @@ public class DataBinderTests extends TestCase {
 		binder.setRequiredFields(new String[] {"touchy", "name", "age", "date", "spouse.name"});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("touchy", "");
-		pvs.addPropertyValue("name", null);
-		pvs.addPropertyValue("age", null);
-		pvs.addPropertyValue("spouse.name", "     ");
+		pvs.add("touchy", "");
+		pvs.add("name", null);
+		pvs.add("age", null);
+		pvs.add("spouse.name", "     ");
 
 		binder.bind(pvs);
 
@@ -483,9 +483,9 @@ public class DataBinderTests extends TestCase {
 		binder.setRequiredFields(new String[] {"someMap[key1]", "someMap[key2]", "someMap['key3']", "someMap[key4]"});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("someMap[key1]", "value1");
-		pvs.addPropertyValue("someMap['key2']", "value2");
-		pvs.addPropertyValue("someMap[key3]", "value3");
+		pvs.add("someMap[key1]", "value1");
+		pvs.add("someMap['key2']", "value2");
+		pvs.add("someMap[key3]", "value3");
 
 		binder.bind(pvs);
 
@@ -505,8 +505,8 @@ public class DataBinderTests extends TestCase {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", "someValue");
-		pvs.addPropertyValue("spouse.name", "test");
+		pvs.add("spouse", "someValue");
+		pvs.add("spouse.name", "test");
 		binder.bind(pvs);
 
 		assertNotNull(tb.getSpouse());
@@ -528,9 +528,9 @@ public class DataBinderTests extends TestCase {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "value");
-		pvs.addPropertyValue("touchy", "value");
-		pvs.addPropertyValue("spouse.name", "sue");
+		pvs.add("name", "value");
+		pvs.add("touchy", "value");
+		pvs.add("spouse.name", "sue");
 		binder.bind(pvs);
 
 		binder.getBindingResult().rejectValue("name", "someCode", "someMessage");
@@ -564,7 +564,7 @@ public class DataBinderTests extends TestCase {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "");
+		pvs.add("age", "");
 		binder.bind(pvs);
 
 		assertEquals("argh", binder.getBindingResult().getFieldValue("age"));
@@ -585,8 +585,8 @@ public class DataBinderTests extends TestCase {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "value");
-		pvs.addPropertyValue("touchy", "value");
+		pvs.add("name", "value");
+		pvs.add("touchy", "value");
 		binder.bind(pvs);
 
 		binder.getBindingResult().rejectValue("name", "someCode", "someMessage");
@@ -613,12 +613,12 @@ public class DataBinderTests extends TestCase {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "value");
+		pvs.add("name", "value");
 		binder.bind(pvs);
 		assertEquals("value", tb.getName());
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "vaLue");
+		pvs.add("name", "vaLue");
 		binder.bind(pvs);
 		assertEquals("value", tb.getName());
 	}
@@ -638,7 +638,7 @@ public class DataBinderTests extends TestCase {
 		tb.setSpouse(tb2);
 		DataBinder db = new DataBinder(tb, "tb");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse.age", "argh");
+		pvs.add("spouse.age", "argh");
 		db.bind(pvs);
 		Errors errors = db.getBindingResult();
 		Validator testValidator = new TestBeanValidator();
@@ -865,7 +865,7 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("set", new String[] {"10", "20", "30"});
+		pvs.add("set", new String[] {"10", "20", "30"});
 		binder.bind(pvs);
 
 		assertEquals(tb.getSet(), binder.getBindingResult().getFieldValue("set"));
@@ -876,7 +876,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue(tb.getSet().contains(new Integer(30)));
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("set", null);
+		pvs.add("set", null);
 		binder.bind(pvs);
 
 		assertNull(tb.getSet());
@@ -887,7 +887,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(Set.class, new CustomCollectionEditor(TreeSet.class, true));
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("set", null);
+		pvs.add("set", null);
 		binder.bind(pvs);
 
 		assertTrue(tb.getSet() instanceof TreeSet);
@@ -903,7 +903,7 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0]", "a");
+		pvs.add("array[0]", "a");
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0].name", "NOT_ROD", "are you sure you're not Rod?");
@@ -942,7 +942,7 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "a");
+		pvs.add("array[0].nestedIndexedBean.list[0].name", "a");
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0].nestedIndexedBean.list[0].name", "NOT_ROD", "are you sure you're not Rod?");
@@ -981,8 +981,8 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "test1");
-		pvs.addPropertyValue("array[1].nestedIndexedBean.list[1].name", "test2");
+		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
+		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
 		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
 		assertEquals("listtest2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
@@ -1004,8 +1004,8 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "test1");
-		pvs.addPropertyValue("array[1].nestedIndexedBean.list[1].name", "test2");
+		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
+		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
 		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
 		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
@@ -1027,8 +1027,8 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].nestedIndexedBean.list[0].name", "test1");
-		pvs.addPropertyValue("array[1].nestedIndexedBean.list[1].name", "test2");
+		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
+		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
 		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
 		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
@@ -1050,7 +1050,7 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0]", "a");
+		pvs.add("array[0]", "a");
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0]", "NOT_ROD", "are you sure you're not Rod?");
@@ -1156,7 +1156,7 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0]", "a");
+		pvs.add("array[0]", "a");
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 		errors.rejectValue("array[0]", "NOT_ROD", "are you sure you're not Rod?");
@@ -1182,7 +1182,7 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("stringArray", "a1-b2");
+		pvs.add("stringArray", "a1-b2");
 		binder.bind(pvs);
 		assertTrue(!binder.getBindingResult().hasErrors());
 		assertEquals(2, tb.getStringArray().length);
@@ -1199,7 +1199,7 @@ public class DataBinderTests extends TestCase {
 			}
 		});
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("stringArray", new String[] {"a1", "b2"});
+		pvs.add("stringArray", new String[] {"a1", "b2"});
 		binder.bind(pvs);
 		assertTrue(!binder.getBindingResult().hasErrors());
 		assertEquals(2, tb.getStringArray().length);
@@ -1211,7 +1211,7 @@ public class DataBinderTests extends TestCase {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "32x");
+		pvs.add("age", "32x");
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 		FieldError ageError = errors.getFieldError("age");
@@ -1237,7 +1237,7 @@ public class DataBinderTests extends TestCase {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "32x");
+		pvs.add("age", "32x");
 		binder.bind(pvs);
 		Errors errors = binder.getBindingResult();
 
@@ -1257,8 +1257,8 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		TestBean tb1 = new TestBean("tb1", 99);
 		TestBean tb2 = new TestBean("tb2", 99);
-		pvs.addPropertyValue("list[0]", tb1);
-		pvs.addPropertyValue("list[1]", tb2);
+		pvs.add("list[0]", tb1);
+		pvs.add("list[1]", tb2);
 		binder.bind(pvs);
 		assertEquals(tb1.getName(), binder.getBindingResult().getFieldValue("list[0].name"));
 		assertEquals(tb2.getName(), binder.getBindingResult().getFieldValue("list[1].name"));
@@ -1322,8 +1322,8 @@ public class DataBinderTests extends TestCase {
 		String beanName = "foobar";
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("name", name);
-		mpvs.addPropertyValue("beanName", beanName);
+		mpvs.add("name", name);
+		mpvs.add("beanName", beanName);
 
 		binder.bind(mpvs);
 

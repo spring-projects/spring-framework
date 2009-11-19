@@ -201,7 +201,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyCommandProvidingFormController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
+				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -228,8 +228,8 @@ public class PortletAnnotationControllerTests extends TestCase {
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
 				wac.registerBeanDefinition("controller2", new RootBeanDefinition(MyOtherTypedCommandProvidingFormController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
-				adapterDef.getPropertyValues().addPropertyValue("customArgumentResolver", new MySpecialArgumentResolver());
+				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
+				adapterDef.getPropertyValues().add("customArgumentResolver", new MySpecialArgumentResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -448,7 +448,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 						new RootBeanDefinition(ModelAndViewResolverController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues()
-						.addPropertyValue("customModelAndViewResolver", new MyModelAndViewResolver());
+						.add("customModelAndViewResolver", new MyModelAndViewResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;

@@ -1083,7 +1083,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (String propertyName : propertyNames) {
 			if (containsBean(propertyName)) {
 				Object bean = getBean(propertyName);
-				pvs.addPropertyValue(propertyName, bean);
+				pvs.add(propertyName, bean);
 				registerDependentBean(propertyName, beanName);
 				if (logger.isDebugEnabled()) {
 					logger.debug(
@@ -1131,7 +1131,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 				Object autowiredArgument = resolveDependency(desc, beanName, autowiredBeanNames, converter);
 				if (autowiredArgument != null) {
-					pvs.addPropertyValue(propertyName, autowiredArgument);
+					pvs.add(propertyName, autowiredArgument);
 				}
 				for (String autowiredBeanName : autowiredBeanNames) {
 					registerDependentBean(autowiredBeanName, beanName);

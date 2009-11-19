@@ -123,8 +123,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		Map portletModeMap = new ManagedMap();
 		portletModeMap.put("view", new RuntimeBeanReference("viewController"));
 		portletModeMap.put("edit", new RuntimeBeanReference("editController"));
-		pvs.addPropertyValue("portletModeMap", portletModeMap);
-		pvs.addPropertyValue("interceptors", interceptors);
+		pvs.add("portletModeMap", portletModeMap);
+		pvs.add("interceptors", interceptors);
 		registerSingleton("handlerMapping3", PortletModeHandlerMapping.class, pvs);
 		
 		pvs = new MutablePropertyValues();
@@ -137,9 +137,9 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		parameterMap.put("exception2", new RuntimeBeanReference("exceptionThrowingHandler2"));
 		parameterMap.put("myPortlet", new RuntimeBeanReference("myPortlet"));
 		parameterMap.put("unknown", new RuntimeBeanReference("unknownHandler"));
-		pvs.addPropertyValue("parameterMap", parameterMap);
-		pvs.addPropertyValue("parameterName", "myParam");
-		pvs.addPropertyValue("order", "2");
+		pvs.add("parameterMap", parameterMap);
+		pvs.add("parameterName", "myParam");
+		pvs.add("order", "2");
 		registerSingleton("handlerMapping2", ParameterHandlerMapping.class, pvs);
 		
 		pvs = new MutablePropertyValues();
@@ -148,28 +148,28 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		innerMap.put("help2", new RuntimeBeanReference("helpController2"));
 		Map outerMap = new ManagedMap();
 		outerMap.put("help", innerMap);
-		pvs.addPropertyValue("portletModeParameterMap", outerMap);
-		pvs.addPropertyValue("order", "1");
+		pvs.add("portletModeParameterMap", outerMap);
+		pvs.add("order", "1");
 		registerSingleton("handlerMapping1", PortletModeParameterHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("order", "1");
-		pvs.addPropertyValue("exceptionMappings",
+		pvs.add("order", "1");
+		pvs.add("exceptionMappings",
 		    "java.lang.IllegalAccessException=failed-illegalaccess\n" +
 		    "PortletRequestBindingException=failed-binding\n" +
 		    "UnavailableException=failed-unavailable");
-		pvs.addPropertyValue("defaultErrorView", "failed-default-1");
+		pvs.add("defaultErrorView", "failed-default-1");
 		registerSingleton("exceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("order", "0");
-		pvs.addPropertyValue("exceptionMappings", 
+		pvs.add("order", "0");
+		pvs.add("exceptionMappings",
 				"java.lang.Exception=failed-exception\n" +
 				"java.lang.RuntimeException=failed-runtime");
 		List mappedHandlers = new ManagedList();
 		mappedHandlers.add(new RuntimeBeanReference("exceptionThrowingHandler1"));
-		pvs.addPropertyValue("mappedHandlers", mappedHandlers);
-		pvs.addPropertyValue("defaultErrorView", "failed-default-0");
+		pvs.add("mappedHandlers", mappedHandlers);
+		pvs.add("defaultErrorView", "failed-default-0");
 		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
 		addMessage("test", Locale.ENGLISH, "test message");

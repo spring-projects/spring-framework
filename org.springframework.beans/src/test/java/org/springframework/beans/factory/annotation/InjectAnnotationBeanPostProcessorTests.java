@@ -126,7 +126,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 		bf.addBeanPostProcessor(bpp);
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
 		TestBean tb2 = new TestBean();
-		annotatedBd.getPropertyValues().addPropertyValue("testBean2", tb2);
+		annotatedBd.getPropertyValues().add("testBean2", tb2);
 		bf.registerBeanDefinition("annotatedBean", annotatedBd);
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);

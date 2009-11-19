@@ -90,15 +90,15 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 				basepath + "messages",
 				basepath + "more-messages"};
 		}
-		pvs.addPropertyValue("basenames", basenames);
+		pvs.add("basenames", basenames);
 		if (!fallbackToSystemLocale) {
-			pvs.addPropertyValue("fallbackToSystemLocale", Boolean.FALSE);
+			pvs.add("fallbackToSystemLocale", Boolean.FALSE);
 		}
 		if (useCodeAsDefaultMessage) {
-			pvs.addPropertyValue("useCodeAsDefaultMessage", Boolean.TRUE);
+			pvs.add("useCodeAsDefaultMessage", Boolean.TRUE);
 		}
 		if (alwaysUseMessageFormat) {
-			pvs.addPropertyValue("alwaysUseMessageFormat", Boolean.TRUE);
+			pvs.add("alwaysUseMessageFormat", Boolean.TRUE);
 		}
 		Class clazz = reloadable ?
 				(Class) ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;

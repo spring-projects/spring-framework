@@ -48,25 +48,25 @@ public class JaxWsSupportTests extends TestCase {
 
 		GenericBeanDefinition exporterDef = new GenericBeanDefinition();
 		exporterDef.setBeanClass(SimpleJaxWsServiceExporter.class);
-		exporterDef.getPropertyValues().addPropertyValue("baseAddress", "http://localhost:9999/");
+		exporterDef.getPropertyValues().add("baseAddress", "http://localhost:9999/");
 		ac.registerBeanDefinition("exporter", exporterDef);
 
 		GenericBeanDefinition clientDef = new GenericBeanDefinition();
 		clientDef.setBeanClass(JaxWsPortProxyFactoryBean.class);
-		clientDef.getPropertyValues().addPropertyValue("wsdlDocumentUrl", "http://localhost:9999/OrderService?wsdl");
-		clientDef.getPropertyValues().addPropertyValue("namespaceUri", "http://jaxws.remoting.springframework.org/");
-		clientDef.getPropertyValues().addPropertyValue("username", "juergen");
-		clientDef.getPropertyValues().addPropertyValue("password", "hoeller");
-		clientDef.getPropertyValues().addPropertyValue("serviceName", "OrderService");
-		clientDef.getPropertyValues().addPropertyValue("serviceInterface", OrderService.class);
-		clientDef.getPropertyValues().addPropertyValue("lookupServiceOnStartup", Boolean.FALSE);
+		clientDef.getPropertyValues().add("wsdlDocumentUrl", "http://localhost:9999/OrderService?wsdl");
+		clientDef.getPropertyValues().add("namespaceUri", "http://jaxws.remoting.springframework.org/");
+		clientDef.getPropertyValues().add("username", "juergen");
+		clientDef.getPropertyValues().add("password", "hoeller");
+		clientDef.getPropertyValues().add("serviceName", "OrderService");
+		clientDef.getPropertyValues().add("serviceInterface", OrderService.class);
+		clientDef.getPropertyValues().add("lookupServiceOnStartup", Boolean.FALSE);
 		ac.registerBeanDefinition("client", clientDef);
 
 		GenericBeanDefinition serviceFactoryDef = new GenericBeanDefinition();
 		serviceFactoryDef.setBeanClass(LocalJaxWsServiceFactoryBean.class);
-		serviceFactoryDef.getPropertyValues().addPropertyValue("wsdlDocumentUrl", "http://localhost:9999/OrderService?wsdl");
-		serviceFactoryDef.getPropertyValues().addPropertyValue("namespaceUri", "http://jaxws.remoting.springframework.org/");
-		serviceFactoryDef.getPropertyValues().addPropertyValue("serviceName", "OrderService");
+		serviceFactoryDef.getPropertyValues().add("wsdlDocumentUrl", "http://localhost:9999/OrderService?wsdl");
+		serviceFactoryDef.getPropertyValues().add("namespaceUri", "http://jaxws.remoting.springframework.org/");
+		serviceFactoryDef.getPropertyValues().add("serviceName", "OrderService");
 		ac.registerBeanDefinition("orderService", serviceFactoryDef);
 
 		ac.registerBeanDefinition("accessor", new RootBeanDefinition(ServiceAccessor.class));

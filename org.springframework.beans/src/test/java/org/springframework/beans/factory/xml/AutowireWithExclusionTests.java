@@ -57,7 +57,7 @@ public class AutowireWithExclusionTests extends TestCase {
 		parent.preInstantiateSingletons();
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
 		RootBeanDefinition robDef = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		robDef.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("sally"));
+		robDef.getPropertyValues().add("spouse", new RuntimeBeanReference("sally"));
 		child.registerBeanDefinition("rob2", robDef);
 		TestBean rob = (TestBean) child.getBean("rob2");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
@@ -71,10 +71,10 @@ public class AutowireWithExclusionTests extends TestCase {
 		parent.preInstantiateSingletons();
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
 		RootBeanDefinition robDef = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		robDef.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("sally"));
+		robDef.getPropertyValues().add("spouse", new RuntimeBeanReference("sally"));
 		child.registerBeanDefinition("rob2", robDef);
 		RootBeanDefinition propsDef = new RootBeanDefinition(PropertiesFactoryBean.class);
-		propsDef.getPropertyValues().addPropertyValue("properties", "name=props3");
+		propsDef.getPropertyValues().add("properties", "name=props3");
 		child.registerBeanDefinition("props3", propsDef);
 		TestBean rob = (TestBean) child.getBean("rob2");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
@@ -87,10 +87,10 @@ public class AutowireWithExclusionTests extends TestCase {
 		parent.preInstantiateSingletons();
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
 		RootBeanDefinition robDef = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		robDef.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("sally"));
+		robDef.getPropertyValues().add("spouse", new RuntimeBeanReference("sally"));
 		child.registerBeanDefinition("rob2", robDef);
 		RootBeanDefinition propsDef = new RootBeanDefinition(PropertiesFactoryBean.class);
-		propsDef.getPropertyValues().addPropertyValue("properties", "name=props3");
+		propsDef.getPropertyValues().add("properties", "name=props3");
 		propsDef.setPrimary(true);
 		child.registerBeanDefinition("props3", propsDef);
 		TestBean rob = (TestBean) child.getBean("rob2");
@@ -105,10 +105,10 @@ public class AutowireWithExclusionTests extends TestCase {
 		parent.preInstantiateSingletons();
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
 		RootBeanDefinition robDef = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		robDef.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("sally"));
+		robDef.getPropertyValues().add("spouse", new RuntimeBeanReference("sally"));
 		child.registerBeanDefinition("rob2", robDef);
 		RootBeanDefinition propsDef = new RootBeanDefinition(PropertiesFactoryBean.class);
-		propsDef.getPropertyValues().addPropertyValue("properties", "name=props3");
+		propsDef.getPropertyValues().add("properties", "name=props3");
 		propsDef.setPrimary(true);
 		child.registerBeanDefinition("props3", propsDef);
 		TestBean rob = (TestBean) child.getBean("rob2");

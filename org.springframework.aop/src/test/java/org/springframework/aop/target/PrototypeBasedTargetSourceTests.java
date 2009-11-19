@@ -40,7 +40,7 @@ public final class PrototypeBasedTargetSourceTests {
 	@Test
 	public void testSerializability() throws Exception {
 		MutablePropertyValues tsPvs = new MutablePropertyValues();
-		tsPvs.addPropertyValue("targetBeanName", "person");
+		tsPvs.add("targetBeanName", "person");
 		RootBeanDefinition tsBd = new RootBeanDefinition(TestTargetSource.class, tsPvs);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();

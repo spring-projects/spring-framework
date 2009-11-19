@@ -244,7 +244,7 @@ public class UriTemplateServletAnnotationControllerTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(ImplicitSubPathController.class));
 				RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
-				mappingDef.getPropertyValues().addPropertyValue("useDefaultSuffixPattern", false);
+				mappingDef.getPropertyValues().add("useDefaultSuffixPattern", false);
 				wac.registerBeanDefinition("handlerMapping", mappingDef);
 				wac.refresh();
 				return wac;

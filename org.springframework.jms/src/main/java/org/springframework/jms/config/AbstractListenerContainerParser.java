@@ -116,7 +116,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 					"Listener 'ref' attribute contains empty value.", listenerEle);
 		}
 		else {
-			listenerDef.getPropertyValues().addPropertyValue("delegate", new RuntimeBeanReference(ref));
+			listenerDef.getPropertyValues().add("delegate", new RuntimeBeanReference(ref));
 		}
 
 		String method = null;
@@ -127,7 +127,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 						"Listener 'method' attribute contains empty value.", listenerEle);
 			}
 		}
-		listenerDef.getPropertyValues().addPropertyValue("defaultListenerMethod", method);
+		listenerDef.getPropertyValues().add("defaultListenerMethod", method);
 
 		if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
 			String messageConverter = containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
@@ -136,7 +136,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 						"Listener container 'message-converter' attribute contains empty value.", containerEle);
 			}
 			else {
-				listenerDef.getPropertyValues().addPropertyValue("messageConverter", 
+				listenerDef.getPropertyValues().add("messageConverter",
 						new RuntimeBeanReference(messageConverter));
 			}
 		}
@@ -146,10 +146,10 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
 			String responseDestination = listenerEle.getAttribute(RESPONSE_DESTINATION_ATTRIBUTE);
 			boolean pubSubDomain = indicatesPubSub(containerDef);
-			listenerDef.getPropertyValues().addPropertyValue(
+			listenerDef.getPropertyValues().add(
 					pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName", responseDestination);
 			if (containerDef.getPropertyValues().contains("destinationResolver")) {
-				listenerDef.getPropertyValues().addPropertyValue("destinationResolver",
+				listenerDef.getPropertyValues().add("destinationResolver",
 						containerDef.getPropertyValues().getPropertyValue("destinationResolver").getValue());
 			}
 		}
@@ -159,7 +159,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		listenerDef.setBeanClassName(
 				"org.springframework.jms.listener.adapter.MessageListenerAdapter" + (jms102 ? "102" : ""));
 
-		containerDef.getPropertyValues().addPropertyValue("messageListener", listenerDef);
+		containerDef.getPropertyValues().add("messageListener", listenerDef);
 
 		String containerBeanName = listenerEle.getAttribute(ID_ATTRIBUTE);
 		// If no bean id is given auto generate one using the ReaderContext's BeanNameGenerator 
@@ -188,7 +188,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			parserContext.getReaderContext().error(
 					"Listener 'destination' attribute contains empty value.", ele);
 		}
-		configDef.getPropertyValues().addPropertyValue("destinationName", destination);
+		configDef.getPropertyValues().add("destinationName", destination);
 
 		if (ele.hasAttribute(SUBSCRIPTION_ATTRIBUTE)) {
 			String subscription = ele.getAttribute(SUBSCRIPTION_ATTRIBUTE);
@@ -196,7 +196,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error(
 						"Listener 'subscription' attribute contains empty value.", ele);
 			}
-			configDef.getPropertyValues().addPropertyValue("durableSubscriptionName", subscription);
+			configDef.getPropertyValues().add("durableSubscriptionName", subscription);
 		}
 
 		if (ele.hasAttribute(SELECTOR_ATTRIBUTE)) {
@@ -205,7 +205,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error(
 						"Listener 'selector' attribute contains empty value.", ele);
 			}
-			configDef.getPropertyValues().addPropertyValue("messageSelector", selector);
+			configDef.getPropertyValues().add("messageSelector", selector);
 		}
 	}
 
@@ -227,8 +227,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			parserContext.getReaderContext().error("Invalid listener container 'destination-type': " +
 					"only \"queue\", \"topic\" and \"durableTopic\" supported.", ele);
 		}
-		configDef.getPropertyValues().addPropertyValue("pubSubDomain", pubSubDomain);
-		configDef.getPropertyValues().addPropertyValue("subscriptionDurable", subscriptionDurable);
+		configDef.getPropertyValues().add("pubSubDomain", pubSubDomain);
+		configDef.getPropertyValues().add("subscriptionDurable", subscriptionDurable);
 
 		if (ele.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
 			String clientId = ele.getAttribute(CLIENT_ID_ATTRIBUTE);
@@ -236,7 +236,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error(
 						"Listener 'client-id' attribute contains empty value.", ele);
 			}
-			configDef.getPropertyValues().addPropertyValue("clientId", clientId);
+			configDef.getPropertyValues().add("clientId", clientId);
 		}
 	}
 

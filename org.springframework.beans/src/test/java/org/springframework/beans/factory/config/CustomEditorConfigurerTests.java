@@ -60,10 +60,10 @@ public final class CustomEditorConfigurerTests {
 		cec.postProcessBeanFactory(bf);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("date", "2.12.1975");
+		pvs.add("date", "2.12.1975");
 		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class, pvs));
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
+		pvs.add("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
 		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class, pvs));
 
 		TestBean tb1 = (TestBean) bf.getBean("tb1");
@@ -83,10 +83,10 @@ public final class CustomEditorConfigurerTests {
 		cec.postProcessBeanFactory(bf);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("date", "2.12.1975");
+		pvs.add("date", "2.12.1975");
 		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class, pvs));
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
+		pvs.add("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
 		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class, pvs));
 
 		TestBean tb1 = (TestBean) bf.getBean("tb1");
@@ -105,7 +105,7 @@ public final class CustomEditorConfigurerTests {
 		cec.postProcessBeanFactory(bf);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("date", "2.12.1975");
+		pvs.add("date", "2.12.1975");
 		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
 
 		TestBean tb = (TestBean) bf.getBean("tb");
@@ -123,7 +123,7 @@ public final class CustomEditorConfigurerTests {
 		cec.postProcessBeanFactory(bf);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("date", "2.12.1975");
+		pvs.add("date", "2.12.1975");
 		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
 
 		TestBean tb = (TestBean) bf.getBean("tb");
@@ -141,7 +141,7 @@ public final class CustomEditorConfigurerTests {
 		cec.postProcessBeanFactory(bf);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("stringArray", "xxx");
+		pvs.add("stringArray", "xxx");
 		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
 
 		TestBean tb = (TestBean) bf.getBean("tb");

@@ -85,25 +85,25 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 			}
 		}
 		if (StringUtils.hasText(connectionFactoryBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("connectionFactory",
+			containerDef.getPropertyValues().add("connectionFactory",
 					new RuntimeBeanReference(connectionFactoryBeanName));
 		}
 
 		String taskExecutorBeanName = containerEle.getAttribute(TASK_EXECUTOR_ATTRIBUTE);
 		if (StringUtils.hasText(taskExecutorBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("taskExecutor",
+			containerDef.getPropertyValues().add("taskExecutor",
 					new RuntimeBeanReference(taskExecutorBeanName));
 		}
 
 		String errorHandlerBeanName = containerEle.getAttribute(ERROR_HANDLER_ATTRIBUTE);
 		if (StringUtils.hasText(errorHandlerBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("errorHandler",
+			containerDef.getPropertyValues().add("errorHandler",
 					new RuntimeBeanReference(errorHandlerBeanName));
 		}
 
 		String destinationResolverBeanName = containerEle.getAttribute(DESTINATION_RESOLVER_ATTRIBUTE);
 		if (StringUtils.hasText(destinationResolverBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("destinationResolver",
+			containerDef.getPropertyValues().add("destinationResolver",
 					new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
@@ -117,17 +117,17 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 				}
 			}
 			else {
-				containerDef.getPropertyValues().addPropertyValue("cacheLevelName", "CACHE_" + cache.toUpperCase());
+				containerDef.getPropertyValues().add("cacheLevelName", "CACHE_" + cache.toUpperCase());
 			}
 		}
 
 		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
 		if (acknowledgeMode != null) {
 			if (acknowledgeMode == Session.SESSION_TRANSACTED) {
-				containerDef.getPropertyValues().addPropertyValue("sessionTransacted", Boolean.TRUE);
+				containerDef.getPropertyValues().add("sessionTransacted", Boolean.TRUE);
 			}
 			else {
-				containerDef.getPropertyValues().addPropertyValue("sessionAcknowledgeMode", acknowledgeMode);
+				containerDef.getPropertyValues().add("sessionAcknowledgeMode", acknowledgeMode);
 			}
 		}
 
@@ -138,7 +138,7 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 						"'transaction-manager' attribute not supported for listener container of type \"simple\".", containerEle);
 			}
 			else {
-				containerDef.getPropertyValues().addPropertyValue("transactionManager",
+				containerDef.getPropertyValues().add("transactionManager",
 						new RuntimeBeanReference(transactionManagerBeanName));
 			}
 		}
@@ -146,18 +146,18 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		int[] concurrency = parseConcurrency(containerEle, parserContext);
 		if (concurrency != null) {
 			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", concurrency[0]);
-				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", concurrency[1]);
+				containerDef.getPropertyValues().add("concurrentConsumers", concurrency[0]);
+				containerDef.getPropertyValues().add("maxConcurrentConsumers", concurrency[1]);
 			}
 			else {
-				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", concurrency[1]);
+				containerDef.getPropertyValues().add("concurrentConsumers", concurrency[1]);
 			}
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
 		if (StringUtils.hasText(prefetch)) {
 			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().addPropertyValue("maxMessagesPerTask", new Integer(prefetch));
+				containerDef.getPropertyValues().add("maxMessagesPerTask", new Integer(prefetch));
 			}
 		}
 

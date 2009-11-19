@@ -45,16 +45,16 @@ public class BeanDefinitionTests extends TestCase {
 
 	public void testBeanDefinitionEqualityWithPropertyValues() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		bd.getPropertyValues().addPropertyValue("name", "myName");
-		bd.getPropertyValues().addPropertyValue("age", "99");
+		bd.getPropertyValues().add("name", "myName");
+		bd.getPropertyValues().add("age", "99");
 		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
-		otherBd.getPropertyValues().addPropertyValue("name", "myName");
+		otherBd.getPropertyValues().add("name", "myName");
 		assertTrue(!bd.equals(otherBd));
 		assertTrue(!otherBd.equals(bd));
-		otherBd.getPropertyValues().addPropertyValue("age", "11");
+		otherBd.getPropertyValues().add("age", "11");
 		assertTrue(!bd.equals(otherBd));
 		assertTrue(!otherBd.equals(bd));
-		otherBd.getPropertyValues().addPropertyValue("age", "99");
+		otherBd.getPropertyValues().add("age", "99");
 		assertTrue(bd.equals(otherBd));
 		assertTrue(otherBd.equals(bd));
 		assertTrue(bd.hashCode() == otherBd.hashCode());
@@ -117,8 +117,8 @@ public class BeanDefinitionTests extends TestCase {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5));
-		bd.getPropertyValues().addPropertyValue("name", "myName");
-		bd.getPropertyValues().addPropertyValue("age", "99");
+		bd.getPropertyValues().add("name", "myName");
+		bd.getPropertyValues().add("age", "99");
 
 		ChildBeanDefinition childBd = new ChildBeanDefinition("bd");
 

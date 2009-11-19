@@ -206,7 +206,7 @@ public class WebDataBinder extends DataBinder {
 				if (pv.getName().startsWith(fieldDefaultPrefix)) {
 					String field = pv.getName().substring(fieldDefaultPrefix.length());
 					if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
-						mpvs.addPropertyValue(field, pv.getValue());
+						mpvs.add(field, pv.getValue());
 					} 
 					mpvs.removePropertyValue(pv);
 				}
@@ -234,7 +234,7 @@ public class WebDataBinder extends DataBinder {
 					String field = pv.getName().substring(fieldMarkerPrefix.length());
 					if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
 						Class fieldType = getPropertyAccessor().getPropertyType(field);
-						mpvs.addPropertyValue(field, getEmptyValue(field, fieldType));
+						mpvs.add(field, getEmptyValue(field, fieldType));
 					}
 					mpvs.removePropertyValue(pv);
 				}
@@ -282,7 +282,7 @@ public class WebDataBinder extends DataBinder {
 			String key = entry.getKey();
 			MultipartFile value = entry.getValue();
 			if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
-				mpvs.addPropertyValue(key, value);
+				mpvs.add(key, value);
 			}
 		}
 	}

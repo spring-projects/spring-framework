@@ -884,12 +884,12 @@ public class CustomEditorTests {
 		assertEquals("name5", bw.getPropertyValue("map[\"key2\"].name"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].name", "name5");
-		pvs.addPropertyValue("array[1].name", "name4");
-		pvs.addPropertyValue("list[0].name", "name3");
-		pvs.addPropertyValue("list[1].name", "name2");
-		pvs.addPropertyValue("map[key1].name", "name1");
-		pvs.addPropertyValue("map['key2'].name", "name0");
+		pvs.add("array[0].name", "name5");
+		pvs.add("array[1].name", "name4");
+		pvs.add("list[0].name", "name3");
+		pvs.add("list[1].name", "name2");
+		pvs.add("map[key1].name", "name1");
+		pvs.add("map['key2'].name", "name0");
 		bw.setPropertyValues(pvs);
 		assertEquals("prefixname5", tb0.getName());
 		assertEquals("prefixname4", tb1.getName());
@@ -948,12 +948,12 @@ public class CustomEditorTests {
 		assertEquals("name5", bw.getPropertyValue("map[\"key2\"].name"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].name", "name5");
-		pvs.addPropertyValue("array[1].name", "name4");
-		pvs.addPropertyValue("list[0].name", "name3");
-		pvs.addPropertyValue("list[1].name", "name2");
-		pvs.addPropertyValue("map[key1].name", "name1");
-		pvs.addPropertyValue("map['key2'].name", "name0");
+		pvs.add("array[0].name", "name5");
+		pvs.add("array[1].name", "name4");
+		pvs.add("list[0].name", "name3");
+		pvs.add("list[1].name", "name2");
+		pvs.add("map[key1].name", "name1");
+		pvs.add("map['key2'].name", "name0");
 		bw.setPropertyValues(pvs);
 		assertEquals("arrayname5", tb0.getName());
 		assertEquals("arrayname4", tb1.getName());
@@ -1027,12 +1027,12 @@ public class CustomEditorTests {
 		assertEquals("name5", bw.getPropertyValue("map[\"key2\"].name"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].name", "name5");
-		pvs.addPropertyValue("array[1].name", "name4");
-		pvs.addPropertyValue("list[0].name", "name3");
-		pvs.addPropertyValue("list[1].name", "name2");
-		pvs.addPropertyValue("map[key1].name", "name1");
-		pvs.addPropertyValue("map['key2'].name", "name0");
+		pvs.add("array[0].name", "name5");
+		pvs.add("array[1].name", "name4");
+		pvs.add("list[0].name", "name3");
+		pvs.add("list[1].name", "name2");
+		pvs.add("map[key1].name", "name1");
+		pvs.add("map['key2'].name", "name0");
 		bw.setPropertyValues(pvs);
 		assertEquals("array0name5", tb0.getName());
 		assertEquals("array1name4", tb1.getName());
@@ -1105,12 +1105,12 @@ public class CustomEditorTests {
 		assertEquals("name5", bw.getPropertyValue("map['key2'].nestedIndexedBean.map[\"key2\"].name"));
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].nestedIndexedBean.array[0].name", "name5");
-		pvs.addPropertyValue("array[1].nestedIndexedBean.array[1].name", "name4");
-		pvs.addPropertyValue("list[0].nestedIndexedBean.list[0].name", "name3");
-		pvs.addPropertyValue("list[1].nestedIndexedBean.list[1].name", "name2");
-		pvs.addPropertyValue("map[key1].nestedIndexedBean.map[\"key1\"].name", "name1");
-		pvs.addPropertyValue("map['key2'].nestedIndexedBean.map[key2].name", "name0");
+		pvs.add("array[0].nestedIndexedBean.array[0].name", "name5");
+		pvs.add("array[1].nestedIndexedBean.array[1].name", "name4");
+		pvs.add("list[0].nestedIndexedBean.list[0].name", "name3");
+		pvs.add("list[1].nestedIndexedBean.list[1].name", "name2");
+		pvs.add("map[key1].nestedIndexedBean.map[\"key1\"].name", "name1");
+		pvs.add("map['key2'].nestedIndexedBean.map[key2].name", "name0");
 		bw.setPropertyValues(pvs);
 		assertEquals("arrayname5", tb0.getNestedIndexedBean().getArray()[0].getName());
 		assertEquals("arrayname4", tb1.getNestedIndexedBean().getArray()[1].getName());
@@ -1159,12 +1159,12 @@ public class CustomEditorTests {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0].nestedIndexedBean.array[0].name", "name5");
-		pvs.addPropertyValue("array[1].nestedIndexedBean.array[1].name", "name4");
-		pvs.addPropertyValue("list[0].nestedIndexedBean.list[0].name", "name3");
-		pvs.addPropertyValue("list[1].nestedIndexedBean.list[1].name", "name2");
-		pvs.addPropertyValue("map[key1].nestedIndexedBean.map[\"key1\"].name", "name1");
-		pvs.addPropertyValue("map['key2'].nestedIndexedBean.map[key2].name", "name0");
+		pvs.add("array[0].nestedIndexedBean.array[0].name", "name5");
+		pvs.add("array[1].nestedIndexedBean.array[1].name", "name4");
+		pvs.add("list[0].nestedIndexedBean.list[0].name", "name3");
+		pvs.add("list[1].nestedIndexedBean.list[1].name", "name2");
+		pvs.add("map[key1].nestedIndexedBean.map[\"key1\"].name", "name1");
+		pvs.add("map['key2'].nestedIndexedBean.map[key2].name", "name0");
 		bw.setPropertyValues(pvs);
 		assertEquals("arrayname5", tb0.getNestedIndexedBean().getArray()[0].getName());
 		assertEquals("name4", tb1.getNestedIndexedBean().getArray()[1].getName());
@@ -1207,12 +1207,12 @@ public class CustomEditorTests {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0]", "a");
-		pvs.addPropertyValue("array[1]", "b");
-		pvs.addPropertyValue("list[0]", "c");
-		pvs.addPropertyValue("list[1]", "d");
-		pvs.addPropertyValue("map[key1]", "e");
-		pvs.addPropertyValue("map['key2']", "f");
+		pvs.add("array[0]", "a");
+		pvs.add("array[1]", "b");
+		pvs.add("list[0]", "c");
+		pvs.add("list[1]", "d");
+		pvs.add("map[key1]", "e");
+		pvs.add("map['key2']", "f");
 		bw.setPropertyValues(pvs);
 		assertEquals("arraya", bean.getArray()[0].getName());
 		assertEquals("arrayb", bean.getArray()[1].getName());
@@ -1282,12 +1282,12 @@ public class CustomEditorTests {
 		});
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("array[0]", "a");
-		pvs.addPropertyValue("array[1]", "b");
-		pvs.addPropertyValue("list[0]", "c");
-		pvs.addPropertyValue("list[1]", "d");
-		pvs.addPropertyValue("map[key1]", "e");
-		pvs.addPropertyValue("map['key2']", "f");
+		pvs.add("array[0]", "a");
+		pvs.add("array[1]", "b");
+		pvs.add("list[0]", "c");
+		pvs.add("list[1]", "d");
+		pvs.add("map[key1]", "e");
+		pvs.add("map['key2']", "f");
 		bw.setPropertyValues(pvs);
 		assertEquals("array0a", bean.getArray()[0].getName());
 		assertEquals("array1b", bean.getArray()[1].getName());

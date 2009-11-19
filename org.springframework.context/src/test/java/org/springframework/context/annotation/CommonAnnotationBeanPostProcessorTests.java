@@ -264,7 +264,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
 		TestBean tb5 = new TestBean();
-		annotatedBd.getPropertyValues().addPropertyValue("testBean2", tb5);
+		annotatedBd.getPropertyValues().add("testBean2", tb5);
 		bf.registerBeanDefinition("annotatedBean", annotatedBd);
 		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(NamedResourceInjectionBean.class));
 		TestBean tb = new TestBean();

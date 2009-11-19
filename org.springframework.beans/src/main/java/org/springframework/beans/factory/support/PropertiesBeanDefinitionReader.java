@@ -459,11 +459,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					// It doesn't matter if the referenced bean hasn't yet been registered:
 					// this will ensure that the reference is resolved at runtime.
 					Object val = new RuntimeBeanReference(ref);
-					pvs.addPropertyValue(property, val);
+					pvs.add(property, val);
 				}
 				else {
 					// It's a normal bean property.
-					pvs.addPropertyValue(property, readValue(entry));
+					pvs.add(property, readValue(entry));
 				}
 			}
 		}

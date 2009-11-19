@@ -139,7 +139,7 @@ public class BeanDefinitionVisitor {
 		for (PropertyValue pv : pvArray) {
 			Object newVal = resolveValue(pv.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, pv.getValue())) {
-				pvs.addPropertyValue(pv.getName(), newVal);
+				pvs.add(pv.getName(), newVal);
 			}
 		}
 	}

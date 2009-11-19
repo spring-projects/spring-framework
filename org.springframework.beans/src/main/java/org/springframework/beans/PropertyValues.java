@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,16 @@ public interface PropertyValues {
 	PropertyValue getPropertyValue(String propertyName);
 
 	/**
+	 * Return the changes since the previous PropertyValues.
+	 * Subclasses should also override <code>equals</code>.
+	 * @param old old property values
+	 * @return PropertyValues updated or new properties.
+	 * Return empty PropertyValues if there are no changes.
+	 * @see java.lang.Object#equals
+	 */
+	PropertyValues changesSince(PropertyValues old);
+
+	/**
 	 * Is there a property value (or other processing entry) for this property?
 	 * @param propertyName the name of the property we're interested in
 	 * @return whether there is a property value for this property
@@ -50,15 +60,5 @@ public interface PropertyValues {
 	 * Does this holder not contain any PropertyValue objects at all?
 	 */
 	boolean isEmpty();
-
-	/**
-	 * Return the changes since the previous PropertyValues.
-	 * Subclasses should also override <code>equals</code>.
-	 * @param old old property values
-	 * @return PropertyValues updated or new properties.
-	 * Return empty PropertyValues if there are no changes.
-	 * @see java.lang.Object#equals
-	 */
-	PropertyValues changesSince(PropertyValues old);
 
 }

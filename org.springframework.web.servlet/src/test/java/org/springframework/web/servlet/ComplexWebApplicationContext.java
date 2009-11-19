@@ -97,22 +97,22 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		interceptors.add(new MyWebRequestInterceptor());
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(
+		pvs.add(
 				"mappings", "/view.do=viewHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler");
-		pvs.addPropertyValue("interceptors", interceptors);
+		pvs.add("interceptors", interceptors);
 		registerSingleton("myUrlMapping1", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(
+		pvs.add(
 				"mappings", "/form.do=localeHandler\n/unknown.do=unknownHandler\nservlet.do=myServlet");
-		pvs.addPropertyValue("order", "2");
+		pvs.add("order", "2");
 		registerSingleton("myUrlMapping2", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(
+		pvs.add(
 				"mappings", "/form.do=formHandler\n/head.do=headController\n" +
 				"body.do=bodyController\n/noview*=noviewController\n/noview/simple*=noviewController");
-		pvs.addPropertyValue("order", "1");
+		pvs.add("order", "1");
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
 
 		registerSingleton("myDummyAdapter", MyDummyAdapter.class);
@@ -121,21 +121,21 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("noviewController", NoViewController.class);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("order", new Integer(0));
-		pvs.addPropertyValue("basename", "org.springframework.web.servlet.complexviews");
+		pvs.add("order", new Integer(0));
+		pvs.add("basename", "org.springframework.web.servlet.complexviews");
 		registerSingleton("viewResolver", ResourceBundleViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("suffix", ".jsp");
+		pvs.add("suffix", ".jsp");
 		registerSingleton("viewResolver2", InternalResourceViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("commandClass", "org.springframework.beans.TestBean");
-		pvs.addPropertyValue("formView", "form");
+		pvs.add("commandClass", "org.springframework.beans.TestBean");
+		pvs.add("formView", "form");
 		registerSingleton("formHandler", SimpleFormController.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("viewName", "form");
+		pvs.add("viewName", "form");
 		registerSingleton("viewHandler", ParameterizableViewController.class, pvs);
 
 		registerSingleton("localeHandler", ComplexLocaleChecker.class);
@@ -150,21 +150,21 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("myServlet", MyServlet.class);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("order", "1");
-		pvs.addPropertyValue("exceptionMappings",
+		pvs.add("order", "1");
+		pvs.add("exceptionMappings",
 		    "java.lang.IllegalAccessException=failed2\n" +
 		    "ServletRequestBindingException=failed3");
-		pvs.addPropertyValue("defaultErrorView", "failed0");
+		pvs.add("defaultErrorView", "failed0");
 		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("order", "0");
-		pvs.addPropertyValue("exceptionMappings", "java.lang.Exception=failed1");
+		pvs.add("order", "0");
+		pvs.add("exceptionMappings", "java.lang.Exception=failed1");
 		List mappedHandlers = new ManagedList();
 		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
-		pvs.addPropertyValue("mappedHandlers", mappedHandlers);
-		pvs.addPropertyValue("defaultStatusCode", "500");
-		pvs.addPropertyValue("defaultErrorView", "failed2");
+		pvs.add("mappedHandlers", mappedHandlers);
+		pvs.add("defaultStatusCode", "500");
+		pvs.add("defaultErrorView", "failed2");
 		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
 		registerSingleton("multipartResolver", MockMultipartResolver.class);
