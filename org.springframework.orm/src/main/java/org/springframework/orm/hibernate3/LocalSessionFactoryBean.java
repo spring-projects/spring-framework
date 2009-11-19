@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,14 @@ import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cache.CacheProvider;
+import org.hibernate.cache.RegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
 import org.hibernate.event.EventListeners;
+import org.hibernate.jdbc.Work;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.transaction.JTATransactionFactory;
 
@@ -88,7 +90,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p><b>Requires Hibernate 3.2 or later.</b> Note that this factory will use
+ * <p><b>Requires Hibernate 3.3 or later.</b> Note that this factory will use
  * "on_close" as default Hibernate connection release mode, unless in the
  * case of a "jtaTransactionManager" specified, for the reason that
  * this is appropriate for most Spring-based applications (in particular when
@@ -112,6 +114,9 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	private static final ThreadLocal<TransactionManager> configTimeTransactionManagerHolder =
 			new ThreadLocal<TransactionManager>();
+
+	private static final ThreadLocal<RegionFactory> configTimeRegionFactoryHolder =
+			new ThreadLocal<RegionFactory>();
 
 	private static final ThreadLocal<CacheProvider> configTimeCacheProviderHolder =
 			new ThreadLocal<CacheProvider>();
@@ -146,6 +151,18 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
+	 * Return the RegionFactory for the currently configured Hibernate SessionFactory,
+	 * to be used by LocalRegionFactoryProxy.
+	 * <p>This instance will be set before initialization of the corresponding
+	 * SessionFactory, and reset immediately afterwards. It is thus only available
+	 * during configuration.
+	 * @see #setCacheRegionFactory
+	 */
+	public static RegionFactory getConfigTimeRegionFactory() {
+		return configTimeRegionFactoryHolder.get();
+	}
+
+	/**
 	 * Return the CacheProvider for the currently configured Hibernate SessionFactory,
 	 * to be used by LocalCacheProviderProxy.
 	 * <p>This instance will be set before initialization of the corresponding
@@ -173,7 +190,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 
-	private Class configurationClass = Configuration.class;
+	private Class<? extends Configuration> configurationClass = Configuration.class;
 
 	private Resource[] configLocations;
 
@@ -190,6 +207,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	private Properties hibernateProperties;
 
 	private TransactionManager jtaTransactionManager;
+
+	private RegionFactory cacheRegionFactory;
 
 	private CacheProvider cacheProvider;
 
@@ -231,12 +250,13 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see org.hibernate.cfg.Configuration
 	 * @see org.hibernate.cfg.AnnotationConfiguration
 	 */
-	public void setConfigurationClass(Class configurationClass) {
+	@SuppressWarnings("unchecked")
+	public void setConfigurationClass(Class<?> configurationClass) {
 		if (configurationClass == null || !Configuration.class.isAssignableFrom(configurationClass)) {
 			throw new IllegalArgumentException(
-					"configurationClass must be assignable to [org.hibernate.cfg.Configuration]");
+					"'configurationClass' must be assignable to [org.hibernate.cfg.Configuration]");
 		}
-		this.configurationClass = configurationClass;
+		this.configurationClass = (Class<? extends Configuration>) configurationClass;
 	}
 
 	/**
@@ -360,12 +380,28 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
+	 * Set the Hibernate RegionFactory to use for the SessionFactory.
+	 * Allows for using a Spring-managed RegionFactory instance.
+	 * <p>As of Hibernate 3.3, this is the preferred mechanism for configuring
+	 * caches, superseding the {@link #setCacheProvider CacheProvider SPI}.
+	 * <p>Note: If this is set, the Hibernate settings should not define a
+	 * cache provider to avoid meaningless double configuration.
+	 * @see LocalRegionFactoryProxy
+	 */
+	public void setCacheRegionFactory(RegionFactory cacheRegionFactory) {
+		this.cacheRegionFactory = cacheRegionFactory;
+	}
+
+	/**
 	 * Set the Hibernate CacheProvider to use for the SessionFactory.
 	 * Allows for using a Spring-managed CacheProvider instance.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * cache provider to avoid meaningless double configuration.
-	 * @see LocalCacheProviderProxy
+	 * @deprecated as of Spring 3.0, following Hibernate 3.3's deprecation
+	 * of the CacheProvider SPI
+	 * @see #setCacheRegionFactory
 	 */
+	@Deprecated
 	public void setCacheProvider(CacheProvider cacheProvider) {
 		this.cacheProvider = cacheProvider;
 	}
@@ -523,6 +559,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			// Make Spring-provided JTA TransactionManager available.
 			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
+		if (this.cacheRegionFactory != null) {
+			// Make Spring-provided Hibernate RegionFactory available.
+			configTimeRegionFactoryHolder.set(this.cacheRegionFactory);
+		}
 		if (this.cacheProvider != null) {
 			// Make Spring-provided Hibernate CacheProvider available.
 			configTimeCacheProviderHolder.set(this.cacheProvider);
@@ -622,7 +662,11 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				config.setProperty(Environment.CONNECTION_PROVIDER, providerClass.getName());
 			}
 
-			if (this.cacheProvider != null) {
+			if (this.cacheRegionFactory != null) {
+				// Expose Spring-provided Hibernate RegionFactory.
+				config.setProperty(Environment.CACHE_REGION_FACTORY, LocalRegionFactoryProxy.class.getName());
+			}
+			else if (this.cacheProvider != null) {
 				// Expose Spring-provided Hibernate CacheProvider.
 				config.setProperty(Environment.CACHE_PROVIDER, LocalCacheProviderProxy.class.getName());
 			}
@@ -733,19 +777,18 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 		finally {
 			if (dataSource != null) {
-				// Reset DataSource holder.
 				configTimeDataSourceHolder.set(null);
 			}
 			if (this.jtaTransactionManager != null) {
-				// Reset TransactionManager holder.
 				configTimeTransactionManagerHolder.set(null);
 			}
+			if (this.cacheRegionFactory != null) {
+				configTimeCacheProviderHolder.set(null);
+			}
 			if (this.cacheProvider != null) {
-				// Reset CacheProvider holder.
 				configTimeCacheProviderHolder.set(null);
 			}
 			if (this.lobHandler != null) {
-				// Reset LobHandler holder.
 				configTimeLobHandlerHolder.set(null);
 			}
 			if (overrideClassLoader) {
@@ -768,7 +811,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see org.hibernate.cfg.Configuration#Configuration()
 	 */
 	protected Configuration newConfiguration() throws HibernateException {
-		return (Configuration) BeanUtils.instantiateClass(this.configurationClass);
+		return BeanUtils.instantiateClass(this.configurationClass);
 	}
 
 	/**
@@ -891,12 +934,15 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		logger.info("Dropping database schema for Hibernate SessionFactory");
 		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
 		hibernateTemplate.execute(
-			new HibernateCallback() {
+			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
-					executeSchemaScript(con, sql);
+					session.doWork(new Work() {
+						public void execute(Connection connection) throws SQLException {
+							Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+							String[] sql = getConfiguration().generateDropSchemaScript(dialect);
+							executeSchemaScript(connection, sql);
+						}
+					});
 					return null;
 				}
 			}
@@ -920,12 +966,15 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		logger.info("Creating database schema for Hibernate SessionFactory");
 		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
 		hibernateTemplate.execute(
-			new HibernateCallback() {
+			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-					String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
-					executeSchemaScript(con, sql);
+					session.doWork(new Work() {
+						public void execute(Connection connection) throws SQLException {
+							Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+							String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
+							executeSchemaScript(connection, sql);
+						}
+					});
 					return null;
 				}
 			}
@@ -952,13 +1001,16 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
 		hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 		hibernateTemplate.execute(
-			new HibernateCallback() {
+			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-					DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
-					String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
-					executeSchemaScript(con, sql);
+					session.doWork(new Work() {
+						public void execute(Connection connection) throws SQLException {
+							Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+							DatabaseMetadata metadata = new DatabaseMetadata(connection, dialect);
+							String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
+							executeSchemaScript(connection, sql);
+						}
+					});
 					return null;
 				}
 			}

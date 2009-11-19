@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
@@ -39,6 +38,8 @@ import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cache.CacheProvider;
 import org.hibernate.cache.NoCacheProvider;
+import org.hibernate.cache.RegionFactory;
+import org.hibernate.cache.impl.NoCachingRegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.ImprovedNamingStrategy;
@@ -79,7 +80,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-
 			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
 						config.getProperty(Environment.CONNECTION_PROVIDER));
@@ -89,6 +89,37 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 			}
 		};
 		sfb.setDataSource(ds);
+		sfb.afterPropertiesSet();
+		assertTrue(sfb.getConfiguration() != null);
+		assertEquals("newSessionFactory", invocations.get(0));
+	}
+
+	public void testLocalSessionFactoryBeanWithCacheRegionFactory() throws Exception {
+		final RegionFactory regionFactory = new NoCachingRegionFactory(null);
+		final List invocations = new ArrayList();
+		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
+			protected Configuration newConfiguration() {
+				return new Configuration() {
+					public Configuration addInputStream(InputStream is) {
+						try {
+							is.close();
+						}
+						catch (IOException ex) {
+						}
+						invocations.add("addResource");
+						return this;
+					}
+				};
+			}
+			protected SessionFactory newSessionFactory(Configuration config) {
+				assertEquals(LocalRegionFactoryProxy.class.getName(),
+						config.getProperty(Environment.CACHE_REGION_FACTORY));
+				assertSame(regionFactory, LocalSessionFactoryBean.getConfigTimeRegionFactory());
+				invocations.add("newSessionFactory");
+				return null;
+			}
+		};
+		sfb.setCacheRegionFactory(regionFactory);
 		sfb.afterPropertiesSet();
 		assertTrue(sfb.getConfiguration() != null);
 		assertEquals("newSessionFactory", invocations.get(0));

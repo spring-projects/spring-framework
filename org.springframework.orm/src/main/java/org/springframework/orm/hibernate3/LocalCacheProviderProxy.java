@@ -29,7 +29,7 @@ import org.hibernate.cache.CacheProvider;
  *
  * @author Juergen Hoeller
  * @since 2.5.1
- * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setCacheProvider
+ * @see LocalSessionFactoryBean#setCacheProvider
  */
 public class LocalCacheProviderProxy implements CacheProvider {
 
