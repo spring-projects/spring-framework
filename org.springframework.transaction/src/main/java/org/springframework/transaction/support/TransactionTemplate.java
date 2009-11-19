@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.support;
 
+import java.lang.reflect.UndeclaredThrowableException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -123,7 +125,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		}
 		else {
 			TransactionStatus status = this.transactionManager.getTransaction(this);
-			T result = null;
+			T result;
 			try {
 				result = action.doInTransaction(status);
 			}
@@ -136,6 +138,11 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 				// Transactional code threw error -> rollback
 				rollbackOnException(status, err);
 				throw err;
+			}
+			catch (Exception ex) {
+				// Transactional code threw unexpected exception -> rollback
+				rollbackOnException(status, ex);
+				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
 			}
 			this.transactionManager.commit(status);
 			return result;
