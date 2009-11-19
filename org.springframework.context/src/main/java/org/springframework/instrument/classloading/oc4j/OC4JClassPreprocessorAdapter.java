@@ -30,16 +30,16 @@ import java.security.ProtectionDomain;
  * 
  * @author Costin Leau
  */
-class OC4JClassPreProcessorAdapter implements InvocationHandler {
+class OC4JClassPreprocessorAdapter implements InvocationHandler {
 
 	private final ClassFileTransformer transformer;
 
 	/**
-	 * Creates a new {@link OC4JClassPreProcessorAdapter}.
+	 * Creates a new {@link OC4JClassPreprocessorAdapter}.
 	 * @param transformer the {@link ClassFileTransformer} to be adapted (must
 	 * not be <code>null</code>)
 	 */
-	public OC4JClassPreProcessorAdapter(ClassFileTransformer transformer) {
+	public OC4JClassPreprocessorAdapter(ClassFileTransformer transformer) {
 		this.transformer = transformer;
 	}
 
