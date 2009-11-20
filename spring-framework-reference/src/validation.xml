@@ -175,9 +175,9 @@ public class Person {
 		messages and suchlike.</para>
 		<para>More information on the <interfacename>MessageCodesResolver</interfacename> and the default
 		strategy can be found online with the Javadocs for
-		<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/validation/MessageCodesResolver.html">MessageCodesResolver</ulink>
+		<ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/validation/MessageCodesResolver.html">MessageCodesResolver</ulink>
 		and
-		<ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/validation/DefaultMessageCodesResolver.html">DefaultMessageCodesResolver</ulink>
+		<ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/validation/DefaultMessageCodesResolver.html">DefaultMessageCodesResolver</ulink>
 		respectively.</para>
 	</section>
 
