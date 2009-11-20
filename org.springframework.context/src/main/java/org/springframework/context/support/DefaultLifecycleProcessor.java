@@ -174,6 +174,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					bean.stop();
 				}
 			}
+			else if (bean instanceof SmartLifecycle) {
+				// don't wait for beans that aren't running
+				latch.countDown();
+			}
 			lifecycleBeans.remove(beanName);
 		}
 	}
