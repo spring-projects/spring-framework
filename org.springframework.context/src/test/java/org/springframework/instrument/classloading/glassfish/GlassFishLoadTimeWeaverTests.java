@@ -48,7 +48,7 @@ public class GlassFishLoadTimeWeaverTests {
 
 	private class DummyInstrumentableClassLoader extends SecureClassLoader {
 
-		static String INSTR_CL_NAME = GlassFishClassLoaderAdapter.INSTRUMENTABLE_CLASSLOADER_GLASSFISH_V2;
+		String INSTR_CL_NAME = GlassFishClassLoaderAdapter.INSTRUMENTABLE_CLASSLOADER_GLASSFISH_V2;
 
 		public DummyInstrumentableClassLoader() {
 			super();
