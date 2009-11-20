@@ -944,7 +944,7 @@ public interface ConversionService {
 <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean" />]]>
 			</programlisting>
 			<para>
-				A default ConversionService can convert betweenstrings, numbers, enums, collections, maps, and other common types.
+				A default ConversionService can convert between strings, numbers, enums, collections, maps, and other common types.
 				To suppliment or override the default converters with your own custom converter(s), set the <code>converters</code> property.
 				Property values may implement either of the Converter, ConverterFactory, or GenericConverter interfaces.
 			</para>
