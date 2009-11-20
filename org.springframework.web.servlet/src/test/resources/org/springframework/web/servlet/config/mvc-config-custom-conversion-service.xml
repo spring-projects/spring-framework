@@ -7,6 +7,6 @@
 
 	<mvc:annotation-driven conversion-service="conversionService" />
 	
-	<bean id="conversionService" class="org.springframework.core.convert.support.ConversionServiceFactory" factory-method="createDefault" />
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean" />
 	
 </beans>
