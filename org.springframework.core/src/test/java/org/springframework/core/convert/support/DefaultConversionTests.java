@@ -36,6 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -47,6 +49,22 @@ public class DefaultConversionTests {
 
 	private ConversionService conversionService = ConversionServiceFactory.getDefault();
 	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testUnmodifiableListConversion() {
+		List<String> stringList = new ArrayList<String>();
+		stringList.add("foo");
+		stringList.add("bar");
+
+		List<String> frozenList = Collections.unmodifiableList(stringList);
+		
+		List<String> converted = conversionService.convert(frozenList, List.class);
+
+		// The converted list should contain all the elements in the original list
+		Assert.assertEquals(frozenList, converted);
+		Assert.assertNotSame(frozenList, converted);
+	}
+
 	@Test
 	public void testStringToCharacter() {
 		assertEquals(Character.valueOf('1'), conversionService.convert("1", Character.class));

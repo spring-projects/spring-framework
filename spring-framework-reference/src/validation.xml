@@ -752,17 +752,17 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 		<title>Spring 3 Type Conversion</title>
 		<para>
 			Spring 3 introduces a <filename>core.convert</filename> package that provides a general type conversion system.
-			The system defines an API to implement type conversion logic, as well as an API to execute type conversions at runtime.
-			Within a Spring container, if configured, this system can be used as an alternative to PropertyEditors to convert externalized bean property value strings to required property types.
+			The system defines an SPI to implement type conversion logic, as well as an API to execute type conversions at runtime.
+			Within a Spring container, this system can be used as an alternative to PropertyEditors to convert externalized bean property value strings to required property types.
 			The public API may also be used anywhere in your application where type conversion is needed.
 		</para>
 		<section id="core-convert-Converter-API">
-			<title>Converter API</title>
+			<title>Converter SPI</title>
 			<para>
-				The API to implement type conversion logic is simple and strongly typed:
+				The SPI to implement type conversion logic is simple and strongly typed:
 			</para>
 			<programlisting language="java"><![CDATA[
-package org.springframework.core.converter;
+package org.springframework.core.convert.converter;
     
 public interface Converter<S, T> {
 
@@ -778,13 +778,14 @@ public interface Converter<S, T> {
 				Take care to ensure your Converter implementation is thread-safe.
 			</para>
 			<para>
-				Several converter implementations are provided in the <filename>core.convert.converters</filename> package as a convenience.
+				Several converter implementations are provided in the <filename>core.convert.support</filename> package as a convenience.
 				These include converters from Strings to Numbers and other common types.
 				Consider <classname>StringToInteger</classname> as an example Converter implementation:
 			</para>
-			<programlisting language="java">package org.springframework.core.convert.converters;
+			<programlisting language="java">
+package org.springframework.core.convert.support;
     
-public class StringToInteger implements Converter&lt;String, Integer&gt; {
+final class StringToInteger implements Converter&lt;String, Integer&gt; {
 
     public Integer convert(String source) {
         return Integer.valueOf(source);
@@ -795,10 +796,10 @@ public class StringToInteger implements Converter&lt;String, Integer&gt; {
 		<section id="core-convert-ConverterFactory-SPI">
 			<title>ConverterFactory</title>
 			<para>
-				When you need to centralize the conversion logic for an entire class hierarchy, for example, when converting from String to java.lang.Enum objects, implement a <interfacename>ConverterFactory</interfacename>:
+				When you need to centralize the conversion logic for an entire class hierarchy, for example, when converting from String to java.lang.Enum objects, implement <interfacename>ConverterFactory</interfacename>:
 			</para>
 			<programlisting language="java"><![CDATA[
-package org.springframework.core.converter;
+package org.springframework.core.convert.converter;
 
 public interface ConverterFactory<S, R> {
 
@@ -813,17 +814,19 @@ public interface ConverterFactory<S, R> {
 				Consider the <classname>StringToEnum</classname> ConverterFactory as an example:
 			</para>
 			<programlisting language="java"><![CDATA[
-public class StringToEnumFactory implements ConverterFactory<String, Enum> {
+package org.springframework.core.convert.support;
+
+final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
     public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
-        return new StringToEnum(targetType);
+        return new StringToEnumConverter(targetType);
     }
 
-    private final class StringToEnum<T extends Enum> implements Converter<String, T> {
+    private final class StringToEnumConverter<T extends Enum> implements Converter<String, T> {
 
         private Class<T> enumType;
 		
-        public StringToEnum(Class<T> enumType) {
+        public StringToEnumConverter(Class<T> enumType) {
             this.enumType = enumType;
         }
         
@@ -832,29 +835,93 @@ public class StringToEnumFactory implements ConverterFactory<String, Enum> {
         }
     }
 }]]></programlisting>
-		</section>		
+		</section>
+		<section id="core-convert-GenericConverter-SPI">
+			<title>GenericConverter</title>
+			<para>
+				When you require a sophisticated Converter implementation, consider the GenericConverter interface.
+				With a more flexible but less strongly typed signature, a GenericConverter supports converting between multiple source and target types.
+				In addition, a GenericConverter makes available source and target field context you can use when implementing your conversion logic.
+				Such context allows a type conversion to be driven by a field annotation, or generic information declared on a field signature.
+			</para>
+			<programlisting language="java"><![CDATA[
+package org.springframework.core.convert.converter;
+
+public interface GenericConverter {
+
+    public Class<?>[][] getConvertibleTypes();
+
+    Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+
+}]]>
+			</programlisting>
+			<para>
+				To implement a GenericConverter, have getConvertibleTypes() return the supported source-&gt;target type pairs.
+				Then implement convert(Object, TypeDescriptor, TypeDescriptor) to implement your conversion logic.
+				The source TypeDescriptor provides access to the source field holding the value being converted.
+				The target TypeDescriptor provides access to the target field where the converted value will be set.
+			</para>
+			<para>
+				A good example of a GenericConverter is a converter that converts between a Java Array and a Collection.
+				Such an ArrayToCollectionConverter introspects the field that declares the target Collection type to resolve the Collection's element type.
+				This allows each element in the source array to be converted to the Collection element type before the Collection is set on the target field. 
+			</para>
+			<note>
+				<para>
+					Because GenericConverter is a more complex SPI interface, only use it when you need it.
+					Favor Converter or ConverterFactory for basic type conversion needs.
+				</para>
+			</note>
+			<section id="core-convert-ConditionalGenericConverter-SPI">
+				<title>ConditionalGenericConverter</title>
+				<para>
+					Sometimes you only want a Converter to execute if a specific condition holds true.
+					For example, you might only want to execute a Converter if a specific annotation is present on the target field.
+					Or you might only want to execute a Converter if a specific method, such as static valueOf method, is defined on the target class.
+					ConditionalGenericConverter is an subinterface of GenericConverter that allows you to define such custom matching criteria:		
+				</para>
+				<programlisting language="java"><![CDATA[
+public interface ConditionalGenericConverter extends GenericConverter {
+
+    boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
+	
+}]]>
+				</programlisting>
+				<para>
+					A good example of a ConditionalGenericConverter is an EntityConverter that converts between an persistent entity identifier and an entity reference.
+					Such a EntityConverter might only match if the target entity type declares a static finder method e.g. findAccount(Long).
+					You would perform such a finder method check in the implementation of matches(TypeDescriptor, TypeDescriptor).
+				</para>				
+			</section>
+		</section>
 		<section id="core-convert-ConversionService-API">
 			<title>ConversionService API</title>
 			<para>
-				The ConversionService defines a public API for executing type conversion logic at runtime.
+				The ConversionService defines a unified API for executing type conversion logic at runtime.
 				Converters are often executed behind this facade interface:
 			</para>
 			<programlisting language="java"><![CDATA[
+package org.springframework.core.convert;
+
 public interface ConversionService {
 
     boolean canConvert(Class<?> sourceType, Class<?> targetType);
     
     <T> T convert(Object source, Class<T> targetType);
+    
+    boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+    Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 	
 }]]></programlisting>
 			<para>
 				Most ConversionService implementations also implement <interface>ConverterRegistry</interface>, which provides an SPI for registering converters.
-				Internally, a ConversionService implementation delegates to its registered Converters and ConverterFactories to carry out type conversion logic.
+				Internally, a ConversionService implementation delegates to its registered converters to carry out type conversion logic.
 			</para>
 			<para>
-				Two ConversionService implementations are provided with the system in the <filename>core.convert.support</filename> package.
-				<classname>GenericConversionService</classname> is a generic implementation designed to be explicitly configured, either programatically or declaratively as a Spring bean.
-				<classname>DefaultConversionService</classname> is a subclass that pre-registers the common Converters in the <filename>core.converter</filename> package as a convenience.
+				A robust ConversionService implementation is provided in the <filename>core.convert.support</filename> package.
+				<classname>GenericConversionService</classname> is the general-purpose implementation suitable for use in most environments.
+				<classname>ConversionServiceFactory</classname> provides a convenient factory for creating common ConversionService configurations.
 			</para>
 		</section>
 		<section id="core-convert-Spring-config">
@@ -871,16 +938,18 @@ public interface ConversionService {
 				</para>
 			</note>
 			<para>
-				To register the DefaultConversionService with Spring, simply configure it as a bean with the id <code>conversionService</code>:
+				To register a default ConversionService with Spring, add the following bean definition with id <code>conversionService</code>:
 			</para>
 			<programlisting language="xml"><![CDATA[
-<bean id="conversionService" class="org.springframework.core.convert.support.DefaultConversionService" />]]>
+<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean" />]]>
 			</programlisting>
 			<para>
-				To override the default set of converters with your own custom converter(s), set the <code>converters</code> property:
+				A default ConversionService can convert betweenstrings, numbers, enums, collections, maps, and other common types.
+				To suppliment or override the default converters with your own custom converter(s), set the <code>converters</code> property.
+				Property values may implement either of the Converter, ConverterFactory, or GenericConverter interfaces.
 			</para>
 			<programlisting language="xml"><![CDATA[
-<bean id="conversionService" class="org.springframework.core.convert.support.DefaultConversionService">
+<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
     <property name="converters">
         <list>
             <bean class="example.MyCustomConverter" />
