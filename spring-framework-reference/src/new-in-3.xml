@@ -65,12 +65,6 @@
     url="http://www.springsource.org/documentation"> Spring
     Documentation</ulink> page.</para>
 
-    <sidebar id="new-in-3-intro-work-in-progress">
-      <title>Note:</title>
-
-      <para>This document is not yet available. It will be available for the
-      Spring 3.0 final release.</para>
-    </sidebar>
   </section>
 
   <section id="new-in-3-modules-build">
