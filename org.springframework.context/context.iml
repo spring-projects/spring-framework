@@ -81,15 +81,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.sun.enterprise/com.springsource.com.sun.enterprise.loader/1.0.0/com.springsource.com.sun.enterprise.loader-1.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/edu.emory.mathcs.backport/com.springsource.edu.emory.mathcs.backport/3.0.0/com.springsource.edu.emory.mathcs.backport-3.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
