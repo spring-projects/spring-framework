@@ -64,12 +64,13 @@ import org.springframework.util.FileCopyUtils;
  *
  * <p>Coded via reflection to avoid dependencies on Oracle classes.
  * Even reads in Oracle constants via reflection because of different Oracle
- * drivers (classes12, ojdbc14) having different constant values! As this
- * LobHandler initializes Oracle classes on instantiation, do not define this
- * as eager-initializing singleton if you do not want to depend on the Oracle
+ * drivers (classes12, ojdbc14, ojdbc5, ojdbc6) having different constant values!
+ * As this LobHandler initializes Oracle classes on instantiation, do not define
+ * this as eager-initializing singleton if you do not want to depend on the Oracle
  * JAR being in the class path: use "lazy-init=true" to avoid this issue.
  *
  * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @since 04.12.2003
  * @see #setNativeJdbcExtractor
  * @see oracle.sql.BLOB
@@ -85,12 +86,16 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	private static final String MODE_READWRITE_FIELD_NAME = "MODE_READWRITE";
 
+	private static final String MODE_READONLY_FIELD_NAME = "MODE_READONLY";
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private NativeJdbcExtractor nativeJdbcExtractor;
 
 	private Boolean cache = Boolean.TRUE;
+
+	private Boolean releaseResourcesAfterRead = Boolean.FALSE;
 
 	private Class blobClass;
 
@@ -99,6 +104,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 	private final Map<Class, Integer> durationSessionConstants = new HashMap<Class, Integer>(2);
 
 	private final Map<Class, Integer> modeReadWriteConstants = new HashMap<Class, Integer>(2);
+
+	private final Map<Class, Integer> modeReadOnlyConstants = new HashMap<Class, Integer>(2);
 
 
 	/**
@@ -123,7 +130,9 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Set whether to cache the temporary LOB in the buffer cache.
-	 * This value will be passed into BLOB/CLOB.createTemporary. Default is "true".
+	 * This value will be passed into BLOB/CLOB.createTemporary.
+	 *
+	 * <p>Default is <code>true</code>.
 	 * @see oracle.sql.BLOB#createTemporary
 	 * @see oracle.sql.CLOB#createTemporary
 	 */
@@ -131,17 +140,42 @@ public class OracleLobHandler extends AbstractLobHandler {
 		this.cache = cache;
 	}
 
+	/**
+	 * Set whether to agressively release any resources used by the LOB. If set to <code>true</code>
+	 * then you can only read the LOB values once. Any subsequent reads will fail since the resources
+	 * have been closed.
+	 *
+	 * <p>Setting this property to <code>true</code> can be useful when your queries generates large
+	 * temporary LOBs that occupy space in the TEMPORARY tablespace or when you want to free up any
+	 * memory allocated by the driver for the LOB reading.
+	 *
+	 * <p>Default is <code>false</code>.
+	 * 
+	 * @see oracle.sql.BLOB#freeTemporary
+	 * @see oracle.sql.CLOB#freeTemporary
+	 * @see oracle.sql.BLOB#open
+	 * @see oracle.sql.CLOB#open
+	 * @see oracle.sql.BLOB#close
+	 * @see oracle.sql.CLOB#close
+	 * @since 3.0
+	 */
+	public void setReleaseResourcesAfterRead(boolean releaseResources) {
+		this.releaseResourcesAfterRead = releaseResources;
+	}
+
 
 	/**
 	 * Retrieve the <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
 	 * classes via reflection, and initialize the values for the
-	 * DURATION_SESSION and MODE_READWRITE constants defined there.
+	 * DURATION_SESSION, MODE_READWRITE and MODE_READONLY constants defined there.
 	 * @param con the Oracle Connection, for using the exact same class loader
 	 * that the Oracle driver was loaded with
 	 * @see oracle.sql.BLOB#DURATION_SESSION
 	 * @see oracle.sql.BLOB#MODE_READWRITE
+	 * @see oracle.sql.BLOB#MODE_READONLY
 	 * @see oracle.sql.CLOB#DURATION_SESSION
 	 * @see oracle.sql.CLOB#MODE_READWRITE
+	 * @see oracle.sql.CLOB#MODE_READONLY
 	 */
 	protected synchronized void initOracleDriverClasses(Connection con) {
 		if (this.blobClass == null) {
@@ -152,6 +186,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 						this.blobClass, this.blobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
 				this.modeReadWriteConstants.put(
 						this.blobClass, this.blobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
+				this.modeReadOnlyConstants.put(
+						this.blobClass, this.blobClass.getField(MODE_READONLY_FIELD_NAME).getInt(null));
 
 				// Initialize oracle.sql.CLOB class
 				this.clobClass = con.getClass().getClassLoader().loadClass(CLOB_CLASS_NAME);
@@ -159,6 +195,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 						this.clobClass, this.clobClass.getField(DURATION_SESSION_FIELD_NAME).getInt(null));
 				this.modeReadWriteConstants.put(
 						this.clobClass, this.clobClass.getField(MODE_READWRITE_FIELD_NAME).getInt(null));
+				this.modeReadOnlyConstants.put(
+						this.clobClass, this.clobClass.getField(MODE_READONLY_FIELD_NAME).getInt(null));
 			}
 			catch (Exception ex) {
 				throw new InvalidDataAccessApiUsageException(
@@ -172,37 +210,153 @@ public class OracleLobHandler extends AbstractLobHandler {
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle BLOB as bytes");
 		Blob blob = rs.getBlob(columnIndex);
-		return (blob != null ? blob.getBytes(1, (int) blob.length()) : null);
+		initializeResourcesBeforeRead(rs.getStatement().getConnection(), blob);
+		byte[] retVal = (blob != null ? blob.getBytes(1, (int) blob.length()) : null);
+		releaseResourcesAfterRead(rs.getStatement().getConnection(), blob);
+		return retVal;
 	}
 
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle BLOB as binary stream");
 		Blob blob = rs.getBlob(columnIndex);
-		return (blob != null ? blob.getBinaryStream() : null);
+		initializeResourcesBeforeRead(rs.getStatement().getConnection(), blob);
+		InputStream retVal = (blob != null ? blob.getBinaryStream() : null);
+		releaseResourcesAfterRead(rs.getStatement().getConnection(), blob);
+		return retVal;
 	}
 
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle CLOB as string");
 		Clob clob = rs.getClob(columnIndex);
-		return (clob != null ? clob.getSubString(1, (int) clob.length()) : null);
+		initializeResourcesBeforeRead(rs.getStatement().getConnection(), clob);
+		String retVal = (clob != null ? clob.getSubString(1, (int) clob.length()) : null);
+		releaseResourcesAfterRead(rs.getStatement().getConnection(), clob);
+		return retVal;
 	}
 
 	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle CLOB as ASCII stream");
 		Clob clob = rs.getClob(columnIndex);
-		return (clob != null ? clob.getAsciiStream() : null);
+		initializeResourcesBeforeRead(rs.getStatement().getConnection(), clob);
+		InputStream retVal = (clob != null ? clob.getAsciiStream() : null);
+		releaseResourcesAfterRead(rs.getStatement().getConnection(), clob);
+		return retVal;
 	}
 
 	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle CLOB as character stream");
 		Clob clob = rs.getClob(columnIndex);
-		return (clob != null ? clob.getCharacterStream() : null);
+		initializeResourcesBeforeRead(rs.getStatement().getConnection(), clob);
+		Reader retVal = (clob != null ? clob.getCharacterStream() : null);
+		releaseResourcesAfterRead(rs.getStatement().getConnection(), clob);
+		return retVal;
 	}
 
 	public LobCreator getLobCreator() {
 		return new OracleLobCreator();
 	}
 
+	/**
+	 * Initialize any LOB resources before a read is done.
+	 *
+	 * <p>This implementation calls
+	 * <code>BLOB.open(BLOB.MODE_READONLY)</code> or <code>CLOB.open(CLOB.MODE_READONLY)</code>
+	 * on any non-temporary LOBs  
+	 * if <code>releaseResourcesAfterRead</code> property is set to <code>true</code>.
+	 * <p>This method can be overridden by sublcasses if different behavior is desired.
+	 * @param con the connection to be usde for initilization
+	 * @param lob the LOB to initialize
+	 */
+	protected void initializeResourcesBeforeRead(Connection con, Object lob) {
+		if (releaseResourcesAfterRead) {
+			initOracleDriverClasses(con);
+			try {
+				/*
+				if (!((BLOB)lob.isTemporary() {
+				*/
+				Method isTemporary = lob.getClass().getMethod("isTemporary");
+				Boolean temporary = (Boolean) isTemporary.invoke(lob);
+				if (!temporary) {
+					/*
+					((BLOB)lob).open(BLOB.MODE_READONLY);
+					*/
+					Method open = lob.getClass().getMethod("open", int.class);
+					open.invoke(lob, modeReadOnlyConstants.get(lob.getClass()));
+				}
+			}
+			catch (InvocationTargetException ex) {
+				logger.error("Could not open Oracle LOB", ex.getTargetException());
+			}
+			catch (Exception ex) {
+				throw new DataAccessResourceFailureException("Could not open Oracle LOB", ex);
+			}
+		}
+	}
+
+	/**
+	 * Release any LOB resources after read is complete.
+	 *
+	 * <p>If <code>releaseResourcesAfterRead</code> property is set to <code>true</code>
+	 * then this implementation calls
+	 * <code>BLOB.close()</code> or <code>CLOB.close()</code>
+	 * on any non-temporary LOBs that are open or
+	 * <code>BLOB.freeTemporary()</code> or <code>CLOB.freeTemporary()</code>
+	 * on any temporary LOBs.
+	 *
+	 * <p>This method can be overridden by sublcasses if different behavior is desired.
+	 * @param con the connection to be usde for initilization
+	 * @param lob the LOB to initialize
+	 */
+	protected void releaseResourcesAfterRead(Connection con, Object lob) {
+		if (releaseResourcesAfterRead) {
+			initOracleDriverClasses(con);
+			Boolean temporary = Boolean.FALSE;
+			try {
+				/*
+				if (((BLOB)lob.isTemporary() {
+				*/
+				Method isTemporary = lob.getClass().getMethod("isTemporary");
+				temporary = (Boolean) isTemporary.invoke(lob);
+				if (temporary) {
+					/*
+					((BLOB)lob).freeTemporary();
+					*/
+					Method freeTemporary = lob.getClass().getMethod("freeTemporary");
+					freeTemporary.invoke(lob);
+				}
+				else {
+					/*
+					if (((BLOB)lob.isOpen() {
+					*/
+					Method isOpen = lob.getClass().getMethod("isOpen");
+					Boolean open = (Boolean) isOpen.invoke(lob);
+					if (open) {
+						/*
+						((BLOB)lob).close();
+						*/
+						Method close = lob.getClass().getMethod("close");
+						close.invoke(lob);
+					}
+				}
+			}
+			catch (InvocationTargetException ex) {
+				if (temporary) {
+					logger.error("Could not free Oracle LOB", ex.getTargetException());
+				}
+				else {
+					logger.error("Could not close Oracle LOB", ex.getTargetException());
+				}
+			}
+			catch (Exception ex) {
+				if (temporary) {
+					throw new DataAccessResourceFailureException("Could not free Oracle LOB", ex);
+				}
+				else {
+					throw new DataAccessResourceFailureException("Could not close Oracle LOB", ex);
+				}
+			}
+		}
+	}
 
 	/**
 	 * LobCreator implementation for Oracle databases.
