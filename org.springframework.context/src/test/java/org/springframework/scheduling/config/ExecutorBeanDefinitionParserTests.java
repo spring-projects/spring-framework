@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -56,6 +57,11 @@ public class ExecutorBeanDefinitionParserTests {
 		assertEquals(42, this.getMaxPoolSize(executor));
 	}
 
+	@Test(expected = BeanCreationException.class)
+	public void invalidPoolSize() {
+		this.context.getBean("invalidPoolSize");
+	}
+
 	@Test
 	public void rangeWithBoundedQueue() {
 		Object executor = this.context.getBean("rangeWithBoundedQueue");
@@ -72,6 +78,38 @@ public class ExecutorBeanDefinitionParserTests {
 		assertEquals(37, this.getKeepAliveSeconds(executor));
 		assertEquals(true, this.getAllowCoreThreadTimeOut(executor));
 		assertEquals(Integer.MAX_VALUE, this.getQueueCapacity(executor));
+	}
+
+	@Test
+	public void propertyPlaceholderWithSingleSize() {
+		Object executor = this.context.getBean("propertyPlaceholderWithSingleSize");
+		assertEquals(123, this.getCorePoolSize(executor));
+		assertEquals(123, this.getMaxPoolSize(executor));
+		assertEquals(60, this.getKeepAliveSeconds(executor));
+		assertEquals(false, this.getAllowCoreThreadTimeOut(executor));
+		assertEquals(Integer.MAX_VALUE, this.getQueueCapacity(executor));
+	}
+
+	@Test
+	public void propertyPlaceholderWithRange() {
+		Object executor = this.context.getBean("propertyPlaceholderWithRange");
+		assertEquals(5, this.getCorePoolSize(executor));
+		assertEquals(25, this.getMaxPoolSize(executor));
+		assertEquals(false, this.getAllowCoreThreadTimeOut(executor));
+		assertEquals(10, this.getQueueCapacity(executor));
+	}
+
+	@Test
+	public void propertyPlaceholderWithRangeAndCoreThreadTimeout() {
+		Object executor = this.context.getBean("propertyPlaceholderWithRangeAndCoreThreadTimeout");
+		assertEquals(99, this.getCorePoolSize(executor));
+		assertEquals(99, this.getMaxPoolSize(executor));
+		assertEquals(true, this.getAllowCoreThreadTimeOut(executor));
+	}
+
+	@Test(expected = BeanCreationException.class)
+	public void propertyPlaceholderWithInvalidPoolSize() {
+		this.context.getBean("propertyPlaceholderWithInvalidPoolSize");
 	}
 
 

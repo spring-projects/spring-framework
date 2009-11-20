@@ -22,7 +22,6 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,12 +35,7 @@ public class ExecutorBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 
 	@Override
 	protected String getBeanClassName(Element element) {
-		if (shouldUseBackport(element)) {
-			return "org.springframework.scheduling.backportconcurrent.ThreadPoolTaskExecutor";
-		}
-		else {
-			return "org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor";
-		}
+		return "org.springframework.scheduling.config.TaskExecutorFactoryBean";
 	}
 
 	@Override
@@ -56,48 +50,8 @@ public class ExecutorBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 		}
 		configureRejectionPolicy(element, builder);
 		String poolSize = element.getAttribute("pool-size");
-		if (!StringUtils.hasText(poolSize)) {
-			return;
-		}
-		Integer[] range = null;
-		try {
-			int separatorIndex = poolSize.indexOf('-');
-			if (separatorIndex != -1) {
-				range = new Integer[2];
-				range[0] = Integer.valueOf(poolSize.substring(0, separatorIndex));
-				range[1] = Integer.valueOf(poolSize.substring(separatorIndex + 1, poolSize.length()));
-				if (range[0] > range[1]) {
-					parserContext.getReaderContext().error(
-							"Lower bound of pool-size range must not exceed the upper bound.", element);
-				}
-				if (!StringUtils.hasText(queueCapacity)) {
-					// no queue-capacity provided, so unbounded
-					if (range[0] == 0) {
-						// actually set 'corePoolSize' to the upper bound of the range
-						// but allow core threads to timeout
-						builder.addPropertyValue("allowCoreThreadTimeOut", true);
-						range[0] = range[1];
-					}
-					else {
-						// non-zero lower bound implies a core-max size range
-						parserContext.getReaderContext().error(
-								"A non-zero lower bound for the size range requires a queue-capacity value.", element);
-					}
-				}
-			}
-			else {
-				Integer value = Integer.valueOf(poolSize);
-				range = new Integer[] {value, value};
-			}
-		}
-		catch (NumberFormatException ex) {
-			parserContext.getReaderContext().error("Invalid pool-size value [" + poolSize + "]: only single " +
-					"maximum integer (e.g. \"5\") and minimum-maximum range (e.g. \"3-5\") are supported.",
-					element, ex);
-		}
-		if (range != null) {
-			builder.addPropertyValue("corePoolSize", range[0]);
-			builder.addPropertyValue("maxPoolSize", range[1]);
+		if (StringUtils.hasText(poolSize)) {
+			builder.addPropertyValue("poolSize", poolSize);
 		}
 	}
 
@@ -127,12 +81,6 @@ public class ExecutorBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 			policyClassName = rejectionPolicy;
 		}
 		builder.addPropertyValue("rejectedExecutionHandler", new RootBeanDefinition(policyClassName));
-	}
-
-	private boolean shouldUseBackport(Element element) {
-		String poolSize = element.getAttribute("pool-size");
-		return (StringUtils.hasText(poolSize) && poolSize.startsWith("0") &&
-				JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16);
 	}
 
 }
