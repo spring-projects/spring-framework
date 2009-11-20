@@ -48,25 +48,7 @@ import org.springframework.core.convert.converter.Converter;
 
 public class DefaultConversionTests {
 
-	private ConversionService conversionService = ConversionServiceFactory.getDefault();
-	
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testUnmodifiableListConversion() {
-		List<String> stringList = new ArrayList<String>();
-		stringList.add("foo");
-		stringList.add("bar");
-
-		List<String> frozenList = Collections.unmodifiableList(stringList);
-		
-		List<String> converted = conversionService.convert(frozenList, List.class);
-
-		// The converted list should contain all the elements in the original list
-		Assert.assertEquals(frozenList, converted);
-		// Looks like it was supposed to be a copy (but CollectionToCollectionConverter
-		// doesn't work that way right now).  Commented out (DS).
-		// Assert.assertNotSame(frozenList, converted);
-	}
+	private ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 
 	@Test
 	public void testStringToCharacter() {
@@ -738,6 +720,24 @@ public class DefaultConversionTests {
 		} catch (ConversionFailedException e) {
 			assertTrue(e.getCause() instanceof ConverterNotFoundException);
 		}
+	}
+	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testUnmodifiableListConversion() {
+		List<String> stringList = new ArrayList<String>();
+		stringList.add("foo");
+		stringList.add("bar");
+
+		List<String> frozenList = Collections.unmodifiableList(stringList);
+		
+		List<String> converted = conversionService.convert(frozenList, List.class);
+
+		// The converted list should contain all the elements in the original list
+		Assert.assertEquals(frozenList, converted);
+		// TODO Looks like it was supposed to be a copy (but CollectionToCollectionConverter
+		// doesn't work that way right now).  Commented out (DS).
+		// Assert.assertNotSame(frozenList, converted);
 	}
 	
 }

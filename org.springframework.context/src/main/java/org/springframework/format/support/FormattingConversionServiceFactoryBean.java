@@ -18,6 +18,7 @@ package org.springframework.format.support;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.joda.JodaTimeFormattingConfigurer;
 import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.format.number.NumberFormatter;
@@ -25,18 +26,22 @@ import org.springframework.util.ClassUtils;
 
 /**
  * A factory for a FormattingConversionService that installs default formatters for common types such as numbers and datetimes.
+ * Subclasses may override {@link #installFormatters(FormatterRegistry)} to register custom formatters.
  * @author Keith Donald
  * @since 3.0
  */
 public class FormattingConversionServiceFactoryBean implements FactoryBean<ConversionService>, InitializingBean {
 
-	private FormattingConversionService conversionService = new FormattingConversionService();
-		
+	private static final boolean jodaTimePresent = ClassUtils.isPresent(
+			"org.joda.time.DateTime", FormattingConversionService.class.getClassLoader());
+
+	private FormattingConversionService conversionService;
+
 	// implementing InitializingBean
 	
 	public void afterPropertiesSet() {
-		installNumberFormatting();
-		installJodaTimeFormattingIfPresent();
+		this.conversionService = new FormattingConversionService();
+		installFormatters(this.conversionService);
 	}
 	
 	// implementing FactoryBean
@@ -45,7 +50,7 @@ public class FormattingConversionServiceFactoryBean implements FactoryBean<Conve
 		return this.conversionService;
 	}
 
-	public Class<? extends ConversionService> getObjectType() {
+	public Class<ConversionService> getObjectType() {
 		return ConversionService.class;
 	}
 
@@ -53,17 +58,14 @@ public class FormattingConversionServiceFactoryBean implements FactoryBean<Conve
 		return true;
 	}
 
-	// internal helpers
+	// subclassing hooks 
 	
-	private void installNumberFormatting() {
-		this.conversionService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		this.conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+	protected void installFormatters(FormatterRegistry registry) {
+		registry.addFormatterForFieldType(Number.class, new NumberFormatter());
+		registry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());		
+		if (jodaTimePresent) {
+			new JodaTimeFormattingConfigurer().installJodaTimeFormatting(registry);			
+		}		
 	}
-	
-	private void installJodaTimeFormattingIfPresent() {
-		if (ClassUtils.isPresent("org.joda.time.DateTime", FormattingConversionService.class.getClassLoader())) {
-			new JodaTimeFormattingConfigurer().installJodaTimeFormatting(this.conversionService);			
-		}
-	}
-	
+
 }

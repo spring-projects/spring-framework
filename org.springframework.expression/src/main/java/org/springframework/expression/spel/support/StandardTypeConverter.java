@@ -37,10 +37,12 @@ import org.springframework.util.Assert;
  */
 public class StandardTypeConverter implements TypeConverter {
 
+	private static ConversionService DEFAULT_INSTANCE;
+	
 	private final ConversionService conversionService;
 
 	public StandardTypeConverter() {
-		this.conversionService = ConversionServiceFactory.getDefault();
+		this.conversionService = getDefaultConversionService();		
 	}
 
 	public StandardTypeConverter(ConversionService conversionService) {
@@ -64,4 +66,12 @@ public class StandardTypeConverter implements TypeConverter {
 		}
 	}
 
+	private ConversionService getDefaultConversionService() {
+		synchronized(this) {
+			if (DEFAULT_INSTANCE == null) {
+				DEFAULT_INSTANCE = ConversionServiceFactory.createDefaultConversionService();
+			}
+		}
+		return DEFAULT_INSTANCE;
+	}
 }

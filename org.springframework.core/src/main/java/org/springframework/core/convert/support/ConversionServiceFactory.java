@@ -25,26 +25,14 @@ import org.springframework.core.convert.ConversionService;
  */
 public final class ConversionServiceFactory {
 
-	private static ConversionService DEFAULT_INSTANCE;
-	
 	private ConversionServiceFactory() {
 
 	}
 
 	/**
-	 * Get the shared default ConversionService.
-	 */
-	public static synchronized ConversionService getDefault() {
-		if (DEFAULT_INSTANCE == null) {
-			DEFAULT_INSTANCE = createDefault();
-		}
-		return DEFAULT_INSTANCE;
-	}
-	
-	/**
 	 * Create a new default ConversionService prototype that can be safely modified.
 	 */
-	public static ConversionService createDefault() {
+	public static ConversionService createDefaultConversionService() {
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addGenericConverter(new ArrayToArrayConverter(conversionService));
 		conversionService.addGenericConverter(new ArrayToCollectionConverter(conversionService));

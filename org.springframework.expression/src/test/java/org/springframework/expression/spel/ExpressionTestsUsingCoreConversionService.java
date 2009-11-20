@@ -99,7 +99,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	 */
 	private static class TypeConvertorUsingConversionService implements TypeConverter {
 
-		private final ConversionService service = ConversionServiceFactory.createDefault();
+		private final ConversionService service = ConversionServiceFactory.createDefaultConversionService();
 
 		public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 			return this.service.canConvert(sourceType, targetType);
