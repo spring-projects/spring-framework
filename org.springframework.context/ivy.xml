@@ -30,7 +30,6 @@
 	</publications>
 
 	<dependencies>
-		<dependency org="com.sun.enterprise" name="com.springsource.com.sun.enterprise.loader" rev="1.0.0" conf="provided->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="optional, backport-util-concurrent->compile"/>
 		<dependency org="javax.annotation" name="com.springsource.javax.annotation" rev="1.0.0" conf="provided, ejb->compile"/>
 		<dependency org="javax.ejb" name="com.springsource.javax.ejb" rev="3.0.0" conf="provided, ejb->compile"/>

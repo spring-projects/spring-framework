@@ -18,28 +18,26 @@ package org.springframework.instrument.classloading.glassfish;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import com.sun.enterprise.loader.InstrumentableClassLoader;
-
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link LoadTimeWeaver} implementation for GlassFish's
- * {@link InstrumentableClassLoader}.
+ * {@link InstrumentableClassLoader}. 
+ * 
+ * <p/>Since Spring 3.0.0, GlassFish V3 is supported as well.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0.1
- * @see com.sun.enterprise.loader.InstrumentableClassLoader
  */
 public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 
-	private final InstrumentableClassLoader classLoader;
-
+	private final GlassFishClassLoaderAdapter classLoader;
 
 	/**
-	 * Create a new instance of the <code>GlassFishLoadTimeWeaver</code> class
+	 * Creates a new instance of the <code>GlassFishLoadTimeWeaver</code> class
 	 * using the default {@link ClassLoader}.
 	 * @see #GlassFishLoadTimeWeaver(ClassLoader)
 	 */
@@ -48,49 +46,25 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * Create a new instance of the <code>GlassFishLoadTimeWeaver</code> class.
+	 * Creates a new instance of the <code>GlassFishLoadTimeWeaver</code> class.
 	 * @param classLoader the specific {@link ClassLoader} to use; must not be <code>null</code>
 	 * @throws IllegalArgumentException if the supplied <code>classLoader</code> is <code>null</code>;
 	 * or if the supplied <code>classLoader</code> is not an {@link InstrumentableClassLoader}
 	 */
 	public GlassFishLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
-		InstrumentableClassLoader icl = determineClassLoader(classLoader);
-		if (icl == null) {
-			throw new IllegalArgumentException(classLoader + " and its parents are not suitable ClassLoaders: " +
-					"An [" + InstrumentableClassLoader.class.getName() + "] implementation is required.");
-		}
-		this.classLoader = icl;
+		this.classLoader = new GlassFishClassLoaderAdapter(classLoader);
 	}
-
-	/**
-	 * Determine the GlassFish {@link InstrumentableClassLoader} for the given
-	 * {@link ClassLoader}.
-	 * @param classLoader the <code>ClassLoader</code> to check
-	 * @return the <code>InstrumentableClassLoader</code>, or <code>null</code> if none found
-	 */
-	protected InstrumentableClassLoader determineClassLoader(ClassLoader classLoader) {
-		// Detect transformation-aware ClassLoader by traversing the hierarchy
-		// (as in GlassFish, Spring can be loaded by the WebappClassLoader).
-		for (ClassLoader cl = classLoader; cl != null; cl = cl.getParent()) {
-			if (cl instanceof InstrumentableClassLoader) {
-				return (InstrumentableClassLoader) cl;
-			}
-		}
-		return null;
-	}
-
 
 	public void addTransformer(ClassFileTransformer transformer) {
-		this.classLoader.addTransformer(new ClassTransformerAdapter(transformer));
+		this.classLoader.addTransformer(transformer);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return (ClassLoader) this.classLoader;
+		return this.classLoader.getClassLoader();
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
-		return this.classLoader.copy();
+		return this.classLoader.getThrowawayClassLoader();
 	}
-
 }

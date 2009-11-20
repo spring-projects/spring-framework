@@ -23,7 +23,7 @@ import java.security.ProtectionDomain;
 import javax.persistence.spi.ClassTransformer;
 
 /**
- * Adapter that implements the JPA ClassTransformer interface (as required by GlassFish)
+ * Adapter that implements the JPA ClassTransformer interface (as required by GlassFish V1 and V2)
  * based on a given JDK 1.5 ClassFileTransformer.
  *
  * @author Costin Leau
@@ -34,7 +34,6 @@ class ClassTransformerAdapter implements ClassTransformer {
 
 	private final ClassFileTransformer classFileTransformer;
 
-
 	/**
 	 * Build a new ClassTransformerAdapter for the given ClassFileTransformer.
 	 * @param classFileTransformer the JDK 1.5 ClassFileTransformer to wrap
@@ -43,15 +42,13 @@ class ClassTransformerAdapter implements ClassTransformer {
 		this.classFileTransformer = classFileTransformer;
 	}
 
-
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
-		byte[] result = this.classFileTransformer.transform(
-				loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+		byte[] result = this.classFileTransformer.transform(loader, className, classBeingRedefined, protectionDomain,
+				classfileBuffer);
 
 		// If no transformation was done, return null.
 		return (result == classfileBuffer ? null : result);
 	}
-
 }
