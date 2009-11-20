@@ -841,7 +841,7 @@ public final class DefaultListableBeanFactoryTests {
 	@Test
 	public void testCustomConverter() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		GenericConversionService conversionService = (GenericConversionService) ConversionServiceFactory.createDefault();
+		GenericConversionService conversionService = (GenericConversionService) ConversionServiceFactory.createDefaultConversionService();
 		conversionService.addConverter(new Converter<String, Float>() {
 			public Float convert(String source) {
 				try {

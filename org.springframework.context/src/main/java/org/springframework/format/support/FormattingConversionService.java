@@ -41,7 +41,7 @@ import org.springframework.format.Printer;
  */
 public class FormattingConversionService implements FormatterRegistry, ConversionService {
 
-	private ConversionService conversionService = ConversionServiceFactory.createDefault();
+	private ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 
 	// implementing FormattingRegistry
 	
