@@ -20,7 +20,7 @@
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Enables the detection of @Async annotations on any Spring-managed object. If present,
+	Enables the detection of @Async and @Scheduled annotations on any Spring-managed object. If present,
 	a proxy will be generated for executing the annotated methods asynchronously.
 			]]></xsd:documentation>
 		</xsd:annotation>
