@@ -28,13 +28,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -74,6 +74,8 @@ public class MvcNamespaceTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml", getClass()));
 		assertEquals(4, container.getBeanDefinitionCount());
+		container.refresh();
+
 		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
@@ -99,6 +101,8 @@ public class MvcNamespaceTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml", getClass()));
 		assertEquals(4, container.getBeanDefinitionCount());
+		container.refresh();
+
 		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
@@ -120,6 +124,8 @@ public class MvcNamespaceTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-validator.xml", getClass()));
 		assertEquals(4, container.getBeanDefinitionCount());
+		container.refresh();
+
 		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
@@ -140,11 +146,12 @@ public class MvcNamespaceTests {
 	}
 	
 	@Test
-	@Ignore
 	public void testInterceptors() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml", getClass()));
 		assertEquals(4, container.getBeanDefinitionCount());
+		container.refresh();
+
 		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setRootHandler(new TestController());
@@ -153,9 +160,9 @@ public class MvcNamespaceTests {
 		request.addParameter("theme", "green");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(2, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[0] instanceof LocaleChangeInterceptor);
-		assertTrue(chain.getInterceptors()[1] instanceof ThemeChangeInterceptor);
+		assertEquals(3, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
 	}
 
 	@Controller

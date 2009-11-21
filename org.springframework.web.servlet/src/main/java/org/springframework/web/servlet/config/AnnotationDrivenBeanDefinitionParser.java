@@ -16,14 +16,13 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -74,7 +73,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		Element interceptors = DomUtils.getChildElementByTagName(element, "interceptors");
 		if (interceptors != null) {
 			List<Element> beans = DomUtils.getChildElementsByTagName(interceptors, "bean");
-			List<BeanDefinition> interceptorBeans = new ArrayList<BeanDefinition>(beans.size());
+			List<BeanDefinition> interceptorBeans = new ManagedList<BeanDefinition>(beans.size());
 			for (Element bean : beans) {
 				interceptorBeans.add(parserContext.getDelegate().parseBeanDefinitionElement(bean).getBeanDefinition());				
 			}
