@@ -1253,7 +1253,7 @@ public interface FormatterRegistry {
 			</programlisting>
 			<para>
 				A custom ConversionService instance is often constructed by a FactoryBean that internally registers custom Formatters and Converters programatically before the ConversionService is returned.
-				See FormatingConversionServiceFactoryBean for an example.		
+				See FormattingConversionServiceFactoryBean for an example.		
 			</para>
 		</section>
 	</section>
