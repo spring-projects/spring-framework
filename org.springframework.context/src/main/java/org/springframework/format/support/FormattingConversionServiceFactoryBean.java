@@ -60,6 +60,10 @@ public class FormattingConversionServiceFactoryBean implements FactoryBean<Conve
 
 	// subclassing hooks 
 	
+	/**
+	 * Install Formatters and Converters into the new FormattingConversionService using the FormatterRegistry SPI.
+	 * Subclasses may override to customize the set of formatters and/or converters that are installed.
+	 */
 	protected void installFormatters(FormatterRegistry registry) {
 		registry.addFormatterForFieldType(Number.class, new NumberFormatter());
 		registry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());		
