@@ -16,9 +16,11 @@
 
 package org.springframework.web.servlet.config;
 
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -28,11 +30,13 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.xml.DomUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
+import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses the {@code annotation-driven} element to configure
@@ -67,6 +71,16 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		mappingDef.getPropertyValues().add("order", 0);
 		String mappingName = parserContext.getReaderContext().registerWithGeneratedName(mappingDef);
 
+		Element interceptors = DomUtils.getChildElementByTagName(element, "interceptors");
+		if (interceptors != null) {
+			List<Element> beans = DomUtils.getChildElementsByTagName(interceptors, "bean");
+			List<BeanDefinition> interceptorBeans = new ArrayList<BeanDefinition>(beans.size());
+			for (Element bean : beans) {
+				interceptorBeans.add(parserContext.getDelegate().parseBeanDefinitionElement(bean).getBeanDefinition());				
+			}
+			mappingDef.getPropertyValues().add("interceptors", interceptorBeans);			
+		}
+		
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 		bindingDef.setSource(source);
 		bindingDef.getPropertyValues().add("conversionService", getConversionService(element, source, parserContext));
