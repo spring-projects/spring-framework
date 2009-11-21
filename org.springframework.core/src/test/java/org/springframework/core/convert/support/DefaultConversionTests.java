@@ -712,15 +712,6 @@ public class DefaultConversionTests {
 				getClass().getField("genericMap2")));
 		assertEquals(new Long(1), result.get(1L));
 	}
-
-	@Test
-	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
-		try {
-			conversionService.convert("1", Integer[].class);
-		} catch (ConversionFailedException e) {
-			assertTrue(e.getCause() instanceof ConverterNotFoundException);
-		}
-	}
 	
 	@Test
 	@SuppressWarnings("unchecked")

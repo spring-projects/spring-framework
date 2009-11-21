@@ -129,5 +129,16 @@ public class GenericConversionServiceTests {
 		Integer three = conversionService.convert("3", int.class);
 		assertEquals(3, three.intValue());
 	}
+	
+	@Test
+	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
+		try {
+			conversionService.addGenericConverter(new ObjectToArrayConverter(conversionService));
+			conversionService.convert("1", Integer[].class);
+			fail("Should hace failed");
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}
+	}
 
 }
