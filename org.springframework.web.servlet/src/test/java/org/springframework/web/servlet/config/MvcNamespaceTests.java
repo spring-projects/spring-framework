@@ -130,6 +130,19 @@ public class MvcNamespaceTests {
 		assertTrue(container.getBean(TestValidator.class).validatorInvoked);
 		assertFalse(handler.recordedValidationError);
 	}
+	
+	@Test
+	public void testInterceptors() throws Exception {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
+		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml", getClass()));
+		assertEquals(4, container.getBeanDefinitionCount());
+		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
+		assertNotNull(mapping);
+		assertEquals(0, mapping.getOrder());
+		AnnotationMethodHandlerAdapter adapter = container.getBean(AnnotationMethodHandlerAdapter.class);
+		assertNotNull(adapter);
+		assertNotNull(container.getBean(FormattingConversionServiceFactoryBean.class));
+	}
 
 	@Controller
 	public static class TestController {
