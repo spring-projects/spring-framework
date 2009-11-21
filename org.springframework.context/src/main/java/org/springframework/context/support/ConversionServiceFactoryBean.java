@@ -71,6 +71,9 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 	
 	/**
 	 * Creates the ConversionService instance returned by this factory bean.
+	 * Creates a default conversion service instance by default.
+	 * Subclasses may override to customize the ConversionService instance that gets created.
+	 * @see ConversionServiceFactory#createDefaultConversionService()
 	 */
 	protected ConversionService createConversionService() {
 		return ConversionServiceFactory.createDefaultConversionService();

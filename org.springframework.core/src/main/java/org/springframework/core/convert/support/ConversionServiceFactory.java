@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
  * A factory for creating common ConversionService configurations.
@@ -31,6 +32,7 @@ public final class ConversionServiceFactory {
 
 	/**
 	 * Create a new default ConversionService prototype that can be safely modified.
+	 * Callers may cast the returned ConversionService to a {@link ConverterRegistry} to supplement or override the default converters. 
 	 */
 	public static ConversionService createDefaultConversionService() {
 		GenericConversionService conversionService = new GenericConversionService();
