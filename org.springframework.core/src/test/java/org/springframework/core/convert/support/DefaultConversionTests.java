@@ -735,8 +735,8 @@ public class DefaultConversionTests {
 
 		// The converted list should contain all the elements in the original list
 		Assert.assertEquals(frozenList, converted);
-		// TODO Looks like it was supposed to be a copy (but CollectionToCollectionConverter
-		// doesn't work that way right now).  Commented out (DS).
+		// Would fail since CollectionToCollectionConverter does not create a copy if source list (including elements) are compatible with target list - 
+		// TODO is this optimization a suitable default?
 		// Assert.assertNotSame(frozenList, converted);
 	}
 	
