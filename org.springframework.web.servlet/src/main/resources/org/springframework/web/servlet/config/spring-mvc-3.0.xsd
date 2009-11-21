@@ -22,7 +22,7 @@
 						<xsd:documentation source="java:org.springframework.web.servlet.HandlerInterceptor"><![CDATA[
 	The ordered list of interceptors that intercept HTTP Servlet Requests mapped to Controllers.
 	Interceptors allow a request to be pre/post processed before/after handling.
-	Each inteceptor should be configured as an inner bean that implements the org.springframework.web.servlet.HandlerInterceptor interface.
+	Each inteceptor should be configured as an inner bean that implements either the org.springframework.web.servlet.HandlerInterceptor or org.springframework.web.context.request.WebRequestInterceptor interface.
 						]]></xsd:documentation>
 					</xsd:annotation>			
 					<xsd:complexType>
