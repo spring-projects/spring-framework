@@ -252,6 +252,12 @@ public class DefaultConversionTests {
 	}
 
 	@Test
+	public void convertObjectToObjectFinderMethodWithNull() {
+		TestEntity e = (TestEntity) conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(TestEntity.class));
+		assertNull(e);
+	}
+
+	@Test
 	public void convertObjectToObjectFinderMethodWithIdConversion() {
 		TestEntity e = conversionService.convert("1", TestEntity.class);
 		assertEquals(new Long(1), e.getId());
@@ -261,6 +267,12 @@ public class DefaultConversionTests {
 	public void testToObjectToStringIdProperty() {
 		String id = conversionService.convert(new TestEntity(1L), String.class);
 		assertEquals("1", id);		
+	}
+
+	@Test
+	public void testToObjectToStringIdPropertyWithNull() {
+		String id = (String) conversionService.convert(null, TypeDescriptor.valueOf(TestEntity.class), TypeDescriptor.valueOf(String.class));
+		assertNull(id);	
 	}
 
 	public static class TestEntity {

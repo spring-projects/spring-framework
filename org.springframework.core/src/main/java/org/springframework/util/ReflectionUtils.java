@@ -193,6 +193,9 @@ public abstract class ReflectionUtils {
 	 * @return the invocation result, if any
 	 */
 	public static Object invokeMethod(Method method, Object target, Object... args) {
+		if (target == null) {
+			throw new IllegalArgumentException("target cannot be null");
+		}
 		try {
 			return method.invoke(target, args);
 		}
