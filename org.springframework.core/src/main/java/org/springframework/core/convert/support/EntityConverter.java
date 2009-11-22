@@ -18,7 +18,6 @@ package org.springframework.core.convert.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ClassUtils;
@@ -34,9 +33,9 @@ import org.springframework.util.ReflectionUtils;
  */
 final class EntityConverter implements ConditionalGenericConverter {
 
-	private ConversionService conversionService;
+	private GenericConversionService conversionService;
 
-	public EntityConverter(ConversionService conversionService) {
+	public EntityConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 	
@@ -56,6 +55,9 @@ final class EntityConverter implements ConditionalGenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return this.conversionService.convertNullSource(sourceType, targetType);
+		}
 		if (String.class.equals(targetType.getType())) {
 			Method idAccessor = getIdAccessor(sourceType.getType());
 			Object id = ReflectionUtils.invokeMethod(idAccessor, source);

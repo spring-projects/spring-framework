@@ -41,7 +41,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 		}
 
 		public T convert(String source) {
-			if ("".equals(source)) {
+			if (source.length() == 0) {
 				// It's an empty enum identifier: reset the enum value to null.
 				return null;
 			}

@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.StringUtils;
 
 /**
  * Converts String to a Boolean.
@@ -50,8 +49,8 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 	}
 	
 	public Boolean convert(String source) {
-		String value = (source != null ? source.trim() : null);
-		if (!StringUtils.hasLength(value)) {
+		String value = source.trim();
+		if (value.length() == 0) {
 			return null;
 		}
 		else if (trueValues.contains(value)) {
