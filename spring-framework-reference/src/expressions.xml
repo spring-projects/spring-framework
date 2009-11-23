@@ -191,11 +191,14 @@ String message = exp.getValue(String.class);</programlisting>
     the registered type converter.</para>
 
     <para>The more common usage of SpEL is to provide an expression string that
-    is evaluated against a specific object instance. In the following example
+    is evaluated against a specific object instance (called the root object). 
+    There are two options here and which to choose depends on whether the object 
+    against which the expression is being evaluated will be changing with each 
+    call to evaluate the expression.  In the following example
     we retrieve the <literal>name</literal> property from an instance of the
     Inventor class.</para>
 
-    <para><programlisting language="java">// Create and set a calendar 
+    <programlisting language="java">// Create and set a calendar 
 GregorianCalendar c = new GregorianCalendar();
 c.set(1856, 7, 9);
 
@@ -208,21 +211,54 @@ Expression exp = parser.parseExpression("<emphasis role="bold">name</emphasis>")
 EvaluationContext context = new StandardEvaluationContext();
 context.setRootObject(tesla);
 
-String name = (String) exp.getValue(context);</programlisting>In the last
+String name = (String) exp.getValue(context);</programlisting>
+<para>In the last
     line, the value of the string variable 'name' will be set to "Nikola
     Tesla". The class StandardEvaluationContext is where you can specify which
-    object the "name" property will be evaluated against. You can reuse the
-    same expression over and over again and set a new root object on the
-    evaluation context. Expressions are evaluated using reflection.</para>
+    object the "name" property will be evaluated against.  This is the mechanism
+    to use if the root object is unlikely to change, it can simply be set once
+    in the evaluation context.  If the root object is likely to change
+    repeatedly, it can be supplied on each call to <literal>getValue</literal>, 
+    as this next example shows:</para>
+    
+    <programlisting language="java">/ Create and set a calendar 
+GregorianCalendar c = new GregorianCalendar();
+c.set(1856, 7, 9);
+
+//  The constructor arguments are name, birthday, and nationality.
+Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
+
+ExpressionParser parser = new SpelExpressionParser();
+Expression exp = parser.parseExpression("<emphasis role="bold">name</emphasis>");
+
+String name = (String) exp.getValue(tesla);
+    </programlisting><para>In this case the inventor <literal>tesla</literal> has been
+    supplied directly to <literal>getValue</literal> and the expression
+    evaluation infrastructure creates and manages a default evaluation context 
+    internally - it did not require one to be supplied.</para>
+    
+    <para>The StandardEvaluationContext is relatively expensive to construct and
+    during repeated usage it builds up cached state that enables subsequent
+    expression evaluations to be performed more quickly.  For this reason it is
+    better to cache and reuse them where possible, rather than construct a new 
+    one for each expression evaluation.
+    </para>
+    <para>In some cases it can be desirable to use a configured evaluation context and
+    yet still supply a different root object on each call to <literal>getValue</literal>.
+    <literal>getValue</literal> allows both to be specified on the same call.
+    In these situations the root object passed on the call is considered to override
+    any (which maybe null) specified on the evaluation context.</para>
 
     <para>
 	<note>
-        <para>In standalone usage of SpEL you will need to create the parser
-        as well as provide an evaluation context. However, more common usage
+        <para>In standalone usage of SpEL there is a need to create the parser,
+        parse expressions and perhaps provide evaluation contexts and a root
+        context object. However, more common usage
         is to provide only the SpEL expression string as part of a
         configuration file, for example for Spring bean or Spring Web Flow
         definitions. In this case, the parser, evaluation context, root object
-        and any predefined variables will be set up for you implicitly.</para>
+        and any predefined variables are all set up implicitly, requiring
+        the user to specify nothing other than the expressions.</para>
     </note>
 	As a final introductory example, the use of a boolean operator is
     shown using the Inventor object in the previous example.</para>
@@ -243,7 +279,7 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
       instances for increased performance.</para>
 
       <para>The <classname>StandardEvaluationContext</classname> is where you
-      specify the root object to evaluate against via the method
+      may specify the root object to evaluate against via the method
       <methodname>setRootObject</methodname> or passing the root object into
       the constructor. You can also specify variables and functions that
       will be used in the expression using the methods
