@@ -61,7 +61,7 @@ public final class ConversionServiceFactory {
 		conversionService.addConverterFactory(new CharacterToNumberFactory());
 		conversionService.addConverter(new ObjectToStringConverter());
 		conversionService.addGenericConverter(new ObjectToObjectGenericConverter());
-		conversionService.addGenericConverter(new EntityConverter(conversionService));
+		conversionService.addGenericConverter(new IdToEntityConverter(conversionService));
 		return conversionService;
 	}
 }

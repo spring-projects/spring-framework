@@ -25,59 +25,41 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Converts an entity identifier to a entity reference by calling a static finder method on the target entity type.
- * Also converts a entity reference to a String by printing its id property to String.
- * For id-to-entity conversion to match, the finder method must be public, static, have the signature 'find[EntityName]([IdType])', and return an instance of the desired entity type.
- * For entity-to-string conversion to match, a getter method for the 'id' property must be defined.
+ * For this converter to match, the finder method must be public, static, have the signature 'find[EntityName]([IdType])', and return an instance of the desired entity type.
  * @author Keith Donald
  * @since 3.0
  */
-final class EntityConverter implements ConditionalGenericConverter {
+final class IdToEntityConverter implements ConditionalGenericConverter {
 
 	private GenericConversionService conversionService;
 
-	public EntityConverter(GenericConversionService conversionService) {
+	public IdToEntityConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
-	
+
 	public Class<?>[][] getConvertibleTypes() {
-		return new Class[][] { 
-				{ Object.class, Object.class },
-				{ Object.class, String.class }
-		};
+		return new Class[][] { { Object.class, Object.class } };
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (String.class.equals(targetType.getType())) {
-			return getIdAccessor(sourceType.getType()) != null;
-		} else {
-			return getFinder(targetType.getType()) != null;
-		}
+		Method finder = getFinder(targetType.getType());
+		return finder != null && this.conversionService.canConvert(sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0]));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}
-		if (String.class.equals(targetType.getType())) {
-			Method idAccessor = getIdAccessor(sourceType.getType());
-			Object id = ReflectionUtils.invokeMethod(idAccessor, source);
-			return this.conversionService.convert(id, String.class);
-		} else {
-			Method finder = getFinder(targetType.getType());			
-			Object id = conversionService.convert(source, sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0]));
-			return ReflectionUtils.invokeMethod(finder, source, id);			
-		}
+		Method finder = getFinder(targetType.getType());
+		Object id = this.conversionService.convert(source, sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0]));
+		return ReflectionUtils.invokeMethod(finder, source, id);
 	}
 
-	private Method getIdAccessor(Class<?> entityClass) {
-		return ClassUtils.getMethodIfAvailable(entityClass, "getId");
-	}
-	
 	private Method getFinder(Class<?> entityClass) {
 		String finderMethod = "find" + getEntityName(entityClass);
 		Method[] methods = entityClass.getDeclaredMethods();
 		for (Method method : methods) {
-			if (Modifier.isStatic(method.getModifiers()) && method.getParameterTypes().length == 1) {
+			if (Modifier.isStatic(method.getModifiers()) && method.getParameterTypes().length == 1 && method.getReturnType().equals(entityClass)) {
 				if (method.getName().equals(finderMethod)) {
 					return method;
 				}

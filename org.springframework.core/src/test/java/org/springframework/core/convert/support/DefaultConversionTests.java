@@ -263,18 +263,6 @@ public class DefaultConversionTests {
 		assertEquals(new Long(1), e.getId());
 	}
 
-	@Test
-	public void testToObjectToStringIdProperty() {
-		String id = conversionService.convert(new TestEntity(1L), String.class);
-		assertEquals("1", id);		
-	}
-
-	@Test
-	public void testToObjectToStringIdPropertyWithNull() {
-		String id = (String) conversionService.convert(null, TypeDescriptor.valueOf(TestEntity.class), TypeDescriptor.valueOf(String.class));
-		assertNull(id);	
-	}
-
 	public static class TestEntity {
 
 		private Long id;
