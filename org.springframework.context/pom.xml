@@ -101,8 +101,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy</artifactId>
-			<version>1.7-beta-1</version>
+			<artifactId>groovy-all</artifactId>
+			<version>1.6.3</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
