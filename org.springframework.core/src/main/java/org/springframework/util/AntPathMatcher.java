@@ -412,7 +412,7 @@ public class AntPathMatcher implements PathMatcher {
 			else if (bracketCount2 < bracketCount1) {
 				return 1;
 			}
-			return 0;
+			return pattern2.length() - pattern1.length();
 		}
 	}
 

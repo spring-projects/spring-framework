@@ -221,6 +221,22 @@ public class UriTemplateServletAnnotationControllerTests {
 
 	}
 
+	@Test
+	public void multiPaths() throws Exception {
+		initServlet(MultiPathController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/category/page/5");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle4-page-5", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/category/page/5.html");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle4-page-5", response.getContentAsString());
+	}
+
+
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -257,6 +273,17 @@ public class UriTemplateServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("test-hotel.with.dot", response.getContentAsString());
 	}
+
+	@Test
+	public void customRegex() throws Exception {
+		initServlet(CustomRegexController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42", response.getContentAsString());
+	}
+
 
 	/*
 	 * Controllers
@@ -371,11 +398,23 @@ public class UriTemplateServletAnnotationControllerTests {
 	@RequestMapping("hotels")
 	public static class ImplicitSubPathController {
 
-		@RequestMapping("{hotel}")
+		@RequestMapping("{hotel:.*}")
 		public void handleHotel(@PathVariable String hotel, Writer writer) throws IOException {
 			writer.write("test-" + hotel);
 		}
 	}
+
+	@Controller
+	public static class CustomRegexController {
+
+		@RequestMapping("/{root:\\d+}")
+		public void handle(@PathVariable("root") int root, Writer writer) throws IOException {
+			assertEquals("Invalid path variable value", 42, root);
+			writer.write("test-" + root);
+		}
+
+	}
+
 
 	@Controller
 	@RequestMapping("hotels")
@@ -427,6 +466,36 @@ public class UriTemplateServletAnnotationControllerTests {
 		@RequestMapping(method = RequestMethod.DELETE, value = "/{hotelId}")
 		public void remove(@PathVariable long hotelId, Writer writer) {
 		}
+	}
+
+	@Controller
+	@RequestMapping("/category")
+	public static class MultiPathController {
+
+		@RequestMapping(value = {"/{category}/page/{page}", "/**/{category}/page/{page}"})
+		public void category(@PathVariable String category, @PathVariable int page, Writer writer) throws IOException {
+			writer.write("handle1-");
+			writer.write("category-" + category);
+			writer.write("page-" + page);
+		}
+
+		@RequestMapping(value = {"/{category}", "/**/{category}"})
+		public void category(@PathVariable String category, Writer writer) throws IOException {
+			writer.write("handle2-");
+			writer.write("category-" + category);
+		}
+
+		@RequestMapping(value = {""})
+		public void category(Writer writer) throws IOException {
+			writer.write("handle3");
+		}
+
+		@RequestMapping(value = {"/page/{page}"})
+		public void category(@PathVariable int page, Writer writer) throws IOException {
+			writer.write("handle4-");
+			writer.write("page-" + page);
+		}
+
 	}
 
 }
