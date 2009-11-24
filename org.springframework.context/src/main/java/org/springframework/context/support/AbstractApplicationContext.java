@@ -298,19 +298,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return the internal LifecycleProcessor used by the context.
-	 * @return the internal LifecycleProcessor (never <code>null</code>)
-	 * @throws IllegalStateException if the context has not been initialized yet
-	 */
-	private LifecycleProcessor getLifecycleProcessor() {
-		if (this.lifecycleProcessor == null) {
-			throw new IllegalStateException("LifecycleProcessor not initialized - " +
-					"call 'refresh' before invoking lifecycle methods via the context: " + this);
-		}
-		return this.lifecycleProcessor;
-	}
-
-	/**
 	 * Return the internal ApplicationEventMulticaster used by the context.
 	 * @return the internal ApplicationEventMulticaster (never <code>null</code>)
 	 * @throws IllegalStateException if the context has not been initialized yet
@@ -321,6 +308,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					"call 'refresh' before multicasting events via the context: " + this);
 		}
 		return this.applicationEventMulticaster;
+	}
+
+	/**
+	 * Return the internal LifecycleProcessor used by the context.
+	 * @return the internal LifecycleProcessor (never <code>null</code>)
+	 * @throws IllegalStateException if the context has not been initialized yet
+	 */
+	private LifecycleProcessor getLifecycleProcessor() {
+		if (this.lifecycleProcessor == null) {
+			throw new IllegalStateException("LifecycleProcessor not initialized - " +
+					"call 'refresh' before invoking lifecycle methods via the context: " + this);
+		}
+		return this.lifecycleProcessor;
 	}
 
 	/**
@@ -400,14 +400,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
 
-				// Initialize conversion service for this context.
-				initConversionService();
-
 				// Initialize message source for this context.
 				initMessageSource();
-
-				// Initialize lifecycle processor for this context.
-				initLifecycleProcessor();
 
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
@@ -493,6 +487,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
 		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
+
+		// Initialize conversion service for this context.
+		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
+			beanFactory.setConversionService(
+					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
+		}
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
 		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
@@ -705,16 +705,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Initialize the BeanFactory's ConversionService.
-	 */
-	protected void initConversionService() {
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
-			beanFactory.setConversionService(beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
-		}
-	}
-
-	/**
 	 * Initialize the MessageSource.
 	 * Use parent's if none defined in this context.
 	 */
@@ -749,6 +739,31 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * Initialize the ApplicationEventMulticaster.
+	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
+	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
+	 */
+	protected void initApplicationEventMulticaster() {
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
+			this.applicationEventMulticaster =
+					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
+			}
+		}
+		else {
+			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
+			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
+						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
+						"': using default [" + this.applicationEventMulticaster + "]");
+			}
+		}
+	}
+
+	/**
 	 * Initialize the LifecycleProcessor.
 	 * Uses DefaultLifecycleProcessor if none defined in the context.
 	 * @see org.springframework.context.support.DefaultLifecycleProcessor
@@ -771,31 +786,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.debug("Unable to locate LifecycleProcessor with name '" +
 						LIFECYCLE_PROCESSOR_BEAN_NAME +
 						"': using default [" + this.lifecycleProcessor + "]");
-			}
-		}
-	}
-
-	/**
-	 * Initialize the ApplicationEventMulticaster.
-	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
-	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
-	 */
-	protected void initApplicationEventMulticaster() {
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
-			this.applicationEventMulticaster =
-					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
-			}
-		}
-		else {
-			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
-			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
-						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
-						"': using default [" + this.applicationEventMulticaster + "]");
 			}
 		}
 	}
@@ -858,7 +848,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * {@link org.springframework.context.event.ContextRefreshedEvent}.
 	 */
 	protected void finishRefresh() {
-		this.lifecycleProcessor.onRefresh();
+		// Initialize lifecycle processor for this context.
+		initLifecycleProcessor();
+
+		// Propagate refresh to lifecycle processor first.
+		getLifecycleProcessor().onRefresh();
 
 		// Publish the final event.
 		publishEvent(new ContextRefreshedEvent(this));
