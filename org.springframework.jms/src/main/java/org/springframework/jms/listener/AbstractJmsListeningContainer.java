@@ -65,7 +65,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean autoStartup = true;
 
-	private int shutdownOrder = Integer.MAX_VALUE;
+	private int phase = Integer.MAX_VALUE;
 
 	private String beanName;
 
@@ -119,18 +119,21 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	/**
-	 * Specify the order in which this container should be stopped.
-	 * By default it will be stopped in the last group. 
+	 * Specify the phase in which this container should be started and
+	 * stopped. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value
+	 * is Integer.MAX_VALUE meaning that this container starts as late
+	 * as possible and stops as soon as possible.
 	 */
-	public void setShutdownOrder(int shutdownOrder) {
-		this.shutdownOrder = shutdownOrder;
+	public void setPhase(int phase) {
+		this.phase = phase;
 	}
 
 	/**
-	 * Return the order in which this container will be stopped.
+	 * Return the phase in which this container will be started and stopped.
 	 */
-	public int getShutdownOrder() {
-		return this.shutdownOrder;
+	public int getPhase() {
+		return this.phase;
 	}
 
 	public void setBeanName(String beanName) {

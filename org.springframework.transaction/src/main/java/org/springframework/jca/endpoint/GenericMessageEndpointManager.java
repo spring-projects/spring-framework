@@ -154,7 +154,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 
 	private boolean autoStartup = true;
 
-	private int shutdownOrder = Integer.MAX_VALUE;
+	private int phase = Integer.MAX_VALUE;
 
 	private boolean running = false;
 
@@ -229,18 +229,21 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	}
 
 	/**
-	 * Specify the order in which this endpoint manager should be stopped.
-	 * By default it will be stopped in the last group. 
+	 * Specify the phase in which this endpoint manager should be started
+	 * and stopped. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value is
+	 * Integer.MAX_VALUE meaning that this endpoint manager starts as late
+	 * as possible and stops as soon as possible.
 	 */
-	public void setShutdownOrder(int shutdownOrder) {
-		this.shutdownOrder = shutdownOrder;
+	public void setPhase(int phase) {
+		this.phase = phase;
 	}
 
 	/**
-	 * Return the order in which this endpoint manager will be stopped.
+	 * Return the phase in which this endpoint manager will be started and stopped.
 	 */
-	public int getShutdownOrder() {
-		return this.shutdownOrder;
+	public int getPhase() {
+		return this.phase;
 	}
 
 	/**
