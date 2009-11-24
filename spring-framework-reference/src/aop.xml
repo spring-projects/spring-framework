@@ -3212,8 +3212,10 @@ public class ProfilingAspect {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
 
     <lineannotation>&lt;!-- a service object; we will be profiling its methods --&gt;</lineannotation>
     &lt;bean id="entitlementCalculationService"
@@ -3437,8 +3439,10 @@ public final class Main {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
 
     &lt;context:load-time-weaver/&gt;
 
@@ -3530,8 +3534,10 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
 
     &lt;context:load-time-weaver
             <emphasis role="bold">weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"</emphasis>/&gt;
@@ -3634,7 +3640,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
           setup work.</para>
 
           <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;
 </programlisting>

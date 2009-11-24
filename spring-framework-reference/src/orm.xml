@@ -425,12 +425,14 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 
   <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
 
-  &lt;bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
+  &lt;bean id="transactionManager" 
+            class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
   &lt;/bean&gt;
   
   &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
+    &lt;aop:pointcut id="productServiceMethods" 
+            expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
   &lt;/aop:config&gt;
 
@@ -459,7 +461,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
     }
 
     <lineannotation>// notice the absence of transaction demarcation code in this method</lineannotation>
-    <lineannotation>// Spring's declarative transaction infrastructure will be demarcating transactions on your behalf </lineannotation>
+    <lineannotation>// Spring's declarative transaction infrastructure will be demarcating</lineannotation>
+    <lineannotation>// transactions on your behalf </lineannotation>
     public void increasePriceOfAllProductsInCategory(final String category) {
         List productsToChange = this.productDao.loadProductsByCategory(category);
         <lineannotation>// ...</lineannotation>
@@ -515,7 +518,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 
   <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
 
-  &lt;bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
+  &lt;bean id="transactionManager"
+            class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
   &lt;/bean&gt;
   
@@ -633,7 +637,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 
   &lt;jee:jndi-lookup id="dataSource2" jndi-name="java:comp/env/jdbc/myds2"/&gt;
 
-  &lt;bean id="mySessionFactory1" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
+  &lt;bean id="mySessionFactory1"
+            class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
     &lt;property name="dataSource" ref="myDataSource1"/&gt;
     &lt;property name="mappingResources"&gt;
       &lt;list&gt;
@@ -648,7 +653,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
     &lt;/property&gt;
   &lt;/bean&gt;
 
-  &lt;bean id="mySessionFactory2" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
+  &lt;bean id="mySessionFactory2"
+            class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
     &lt;property name="dataSource" ref="myDataSource2"/&gt;
     &lt;property name="mappingResources"&gt;
       &lt;list&gt;
@@ -678,7 +684,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
   &lt;/bean&gt;
 
   &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
+    &lt;aop:pointcut id="productServiceMethods"
+                expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
   &lt;/aop:config&gt;
 
@@ -1169,7 +1176,8 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
   &lt;/tx:advice&gt;
 
   &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
+    &lt;aop:pointcut id="productServiceMethods"
+            expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
   &lt;/aop:config&gt;
 
@@ -1504,7 +1512,8 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
                 file:</para>
 
                 <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
                 <para>Tomcat 5.0.x and 5.5.x series support several context
@@ -1539,7 +1548,8 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 <emphasis>useSystemClassLoaderAsParent</emphasis> to
                 <literal>false</literal> to fix the problem: <programlisting
                 language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;</programlisting></para>
               </listitem>
@@ -1563,7 +1573,8 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 file:</para>
 
                 <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
                 <para>The Tomcat 6.0.x (similar to 5.0.x/5.5.x) series
