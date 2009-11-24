@@ -386,8 +386,8 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
    <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
       <property name="velocityProperties">
          <value>
-            resource.loader=class
-            class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+          resource.loader=class
+          class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
          </value>
       </property>
    </bean>

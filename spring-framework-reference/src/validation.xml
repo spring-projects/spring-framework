@@ -117,7 +117,8 @@ public class Person {
 
    public CustomerValidator(Validator addressValidator) {
       if (addressValidator == null) {
-          throw new IllegalArgumentException("The supplied [Validator] is required and must not be null.");
+          throw new IllegalArgumentException(
+            "The supplied [Validator] is required and must not be null.");
       }
       if (!addressValidator.supports(Address.class)) {
           throw new IllegalArgumentException(
@@ -729,7 +730,8 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
         this.customPropertyEditorRegistrar = propertyEditorRegistrar;
     }
 
-    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
+    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
+                        throws Exception {
         ]]><emphasis role="bold">this.customPropertyEditorRegistrar.registerCustomEditors(binder);</emphasis><![CDATA[
     }
 
