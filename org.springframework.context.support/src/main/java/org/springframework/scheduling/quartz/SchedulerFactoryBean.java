@@ -190,7 +190,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private int startupDelay = 0;
 
-	private int shutdownOrder = Integer.MAX_VALUE;
+	private int phase = Integer.MAX_VALUE;
 
 	private boolean exposeSchedulerInRepository = false;
 
@@ -376,18 +376,21 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 	/**
-	 * Specify the order in which this scheduler should be stopped.
-	 * By default it will be stopped in the last group. 
+	 * Specify the phase in which this scheduler should be started and
+	 * stopped. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value
+	 * is Integer.MAX_VALUE meaning that this scheduler starts as late
+	 * as possible and stops as soon as possible.
 	 */
-	public void setShutdownOrder(int shutdownOrder) {
-		this.shutdownOrder = shutdownOrder;
+	public void setPhase(int phase) {
+		this.phase = phase;
 	}
 
 	/**
-	 * Return the order in which this scheduler will be stopped.
+	 * Return the phase in which this scheduler will be started and stopped.
 	 */
-	public int getShutdownOrder() {
-		return this.shutdownOrder;
+	public int getPhase() {
+		return this.phase;
 	}
 
 	/**

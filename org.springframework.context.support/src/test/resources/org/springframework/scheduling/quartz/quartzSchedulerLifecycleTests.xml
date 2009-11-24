@@ -7,7 +7,7 @@
 	<bean id="lazyInitSchedulerWithDefaultShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="true"/>
 
 	<bean id="lazyInitSchedulerWithCustomShutdownOrder" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="true">
-		<property name="shutdownOrder" value="99"/>
+		<property name="phase" value="99"/>
 	</bean>
 
 </beans>

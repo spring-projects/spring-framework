@@ -33,14 +33,28 @@ public interface SmartLifecycle extends Lifecycle {
 	boolean isAutoStartup();
 
 	/**
-	 * Return the order in which this Lifecycle component should be stopped.
-	 * The shutdown process begins with the component(s) having the <i>lowest</i>
-	 * value and ends with the highest value (Integer.MIN_VALUE is the lowest
-	 * possible, and Integer.MAX_VALUE is the highest possible). Any Lifecycle
-	 * components within the context that do not also implement SmartLifecycle
-	 * will be treated as if they have a value of Integer.MAX_VALUE.
+	 * Return the phase within which this Lifecycle component should be started
+	 * and stopped. The startup process begins with the <i>lowest</i> phase
+	 * value and ends with the <i>highest</i> phase value (Integer.MIN_VALUE is
+	 * the lowest possible, and Integer.MAX_VALUE is the highest possible). The
+	 * shutdown process will apply the reverse order. Any components with the
+	 * same value will be arbitrarily ordered within the same phase.
+	 * <p>
+	 * Example: if component B depends on component A having already started, then
+	 * component A should have a lower phase value than component B. During the
+	 * shutdown process, component B would be stopped before component A.
+	 * <p>
+	 * Any Lifecycle components within the context that do not also implement
+	 * SmartLifecycle will be treated as if they have a phase value of 0. That
+	 * way a SmartLifecycle implementation may start before those Lifecycle
+	 * components if it has a negative phase value, or it may start after
+	 * those components if it has a positive phase value.
+	 * <p>
+	 * Any explicit "depends-on" relationship will take precedence over
+	 * the phase order such that the dependent bean always starts after its
+	 * dependency and always stops before its dependency.
 	 */
-	int getShutdownOrder();
+	int getPhase();
 
 	/**
 	 * Indicates that a Lifecycle component must stop if it is currently running.
