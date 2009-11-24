@@ -19,6 +19,8 @@ package org.springframework.web.servlet.handler;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -214,12 +216,19 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			return buildPathExposingHandler(handler, urlPath, null);
 		}
 		// Pattern match?
-		String bestPathMatch = null;
+		List<String> matchingPaths = new ArrayList<String>();
 		for (String registeredPath : this.handlerMap.keySet()) {
-			if (getPathMatcher().match(registeredPath, urlPath) &&
-					(bestPathMatch == null || bestPathMatch.length() < registeredPath.length())) {
-				bestPathMatch = registeredPath;
+			if (getPathMatcher().match(registeredPath, urlPath)) {
+				matchingPaths.add(registeredPath);
 			}
+		}
+		String bestPathMatch = null;
+		if (!matchingPaths.isEmpty()) {
+			Collections.sort(matchingPaths, getPathMatcher().getPatternComparator(urlPath));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Matching path for request [" + urlPath + "] are " + matchingPaths);
+			}
+			bestPathMatch = matchingPaths.get(0);
 		}
 		if (bestPathMatch != null) {
 			handler = this.handlerMap.get(bestPathMatch);

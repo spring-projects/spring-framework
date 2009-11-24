@@ -395,6 +395,11 @@ public class AntPathMatcherTests {
 
 		assertEquals(-1, comparator.compare("/hotels/*", "/hotels/*/**"));
 		assertEquals(1, comparator.compare("/hotels/*/**", "/hotels/*"));
+
+		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/new.*"));
+
+		// longer is better
+		assertEquals(1, comparator.compare("/hotels", "/hotels2"));
 	}
 
 	@Test
@@ -466,6 +471,14 @@ public class AntPathMatcherTests {
 		assertEquals("/hotels/new", paths.get(0));
 		assertEquals("/hotels/{hotel}", paths.get(1));
 		assertEquals("/hotels/*", paths.get(2));
+		paths.clear();
+
+		paths.add("/hotels/ne*");
+		paths.add("/hotels/n*");
+		Collections.shuffle(paths);
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/ne*", paths.get(0));
+		assertEquals("/hotels/n*", paths.get(1));
 		paths.clear();
 	}
 

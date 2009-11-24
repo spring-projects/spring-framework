@@ -73,7 +73,10 @@ import java.lang.annotation.Target;
  * exposed by the Servlet/Portlet API.
  * <li>{@link PathVariable @PathVariable} annotated parameters for access to
  * URI template values (i.e. /hotels/{hotel}). Variable values will be
- * converted to the declared method argument type.
+ * converted to the declared method argument type. By default, the URI template
+ * will match against the regular expression {@code [^\.]*} (i.e. any character
+ * other than period), but this can be changed by specifying another regular
+ * expression, like so: /hotels/{hotel:\d+}.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
  * specific Servlet/Portlet request parameters. Parameter values will be
  * converted to the declared method argument type. Additionally,
