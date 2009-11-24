@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -42,11 +41,10 @@ import org.springframework.util.Assert;
  * Spring-managed transactions. Similar to a transactional JNDI ConnectionFactory
  * as provided by a J2EE server.
  *
- * <p>Messaging code that should remain unaware of Spring's JMS support can work
- * with this proxy to seamlessly participate in Spring-managed transactions.
- * Note that the transaction manager, for example {@link JmsTransactionManager},
- * still needs to work with the underlying ConnectionFactory, <i>not</i> with
- * this proxy.
+ * <p>Messaging code which should remain unaware of Spring's JMS support can work with
+ * this proxy to seamlessly participate in Spring-managed transactions. Note that the
+ * transaction manager, for example {@link JmsTransactionManager}, still needs to work
+ * with the underlying ConnectionFactory, <i>not</i> with this proxy.
  *
  * <p><b>Make sure that TransactionAwareConnectionFactoryProxy is the outermost
  * ConnectionFactory of a chain of ConnectionFactory proxies/adapters.</b>
@@ -191,7 +189,7 @@ public class TransactionAwareConnectionFactoryProxy
 	 * @param target the original Connection to wrap
 	 * @return the wrapped Connection
 	 */
-	private Connection getTransactionAwareConnectionProxy(Connection target) {
+	protected Connection getTransactionAwareConnectionProxy(Connection target) {
 		List<Class> classes = new ArrayList<Class>(3);
 		classes.add(Connection.class);
 		if (target instanceof QueueConnection) {
