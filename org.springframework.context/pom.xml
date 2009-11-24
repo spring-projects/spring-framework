@@ -16,12 +16,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.sun.enterprise</groupId>
-			<artifactId>com.springsource.com.sun.enterprise.loader</artifactId>
-			<version>1.0.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>backport-util-concurrent</groupId>
 			<artifactId>backport-util-concurrent</artifactId>
 			<version>3.0</version>
