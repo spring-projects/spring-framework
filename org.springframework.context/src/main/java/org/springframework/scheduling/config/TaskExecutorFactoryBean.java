@@ -21,6 +21,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.Assert;
@@ -108,6 +109,9 @@ public class TaskExecutorFactoryBean implements FactoryBean<TaskExecutor>, BeanN
 				this.setValueIfNotNull("maxPoolSize", range[1]);
 			}
 			this.target = (TaskExecutor) this.beanWrapper.getWrappedInstance();
+			if (this.target instanceof InitializingBean) {
+				((InitializingBean)this.target).afterPropertiesSet();
+			}
 		}
 	}
 

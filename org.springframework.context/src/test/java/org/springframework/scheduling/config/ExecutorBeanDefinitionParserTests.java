@@ -18,6 +18,10 @@ package org.springframework.scheduling.config;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +29,7 @@ import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * @author Mark Fisher
@@ -41,13 +46,20 @@ public class ExecutorBeanDefinitionParserTests {
 	}
 
 	@Test
-	public void defaultExecutor() {
+	public void defaultExecutor() throws Exception {
 		Object executor = this.context.getBean("default");
 		assertEquals(1, this.getCorePoolSize(executor));
 		assertEquals(Integer.MAX_VALUE, this.getMaxPoolSize(executor));
 		assertEquals(Integer.MAX_VALUE, this.getQueueCapacity(executor));
 		assertEquals(60, this.getKeepAliveSeconds(executor));
 		assertEquals(false, this.getAllowCoreThreadTimeOut(executor));
+		FutureTask<String> task = new FutureTask<String>(new Callable<String>() {
+			public String call() throws Exception {
+				return "foo";
+			}
+		});
+		((ThreadPoolTaskExecutor)executor).execute(task);
+		assertEquals("foo", task.get());
 	}
 
 	@Test
