@@ -432,7 +432,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				if (mappingInfo.paths.length > 0) {
 					List<String> matchedPaths = new ArrayList<String>(mappingInfo.paths.length);
 					for (String methodLevelPattern : mappingInfo.paths) {
-						String matchedPattern = getMatchedPattern(methodLevelPattern, lookupPath);
+						String matchedPattern = getMatchedPattern(methodLevelPattern, lookupPath, request);
 						if (matchedPattern != null) {
 							if (mappingInfo.matches(request)) {
 								match = true;
@@ -518,12 +518,23 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			}
 		}
 
-		private String getMatchedPattern(String methodLevelPattern, String lookupPath) {
-			if ((!hasTypeLevelMapping() || ObjectUtils.isEmpty(getTypeLevelMapping().value())) &&
-					isPathMatchInternal(methodLevelPattern, lookupPath)) {
-				return methodLevelPattern;
-			}
-			if (hasTypeLevelMapping()) {
+		/**
+		 * Determines the matched pattern for the given methodLevelPattern and path.
+		 *
+		 * <p>Uses the following algorithm:
+		 * <ol>
+		 * <li>If there is a type-level mapping with path information, it is
+		 * {@linkplain PathMatcher#combine(String, String) combined} with the method-level pattern.
+		 * <li>If there is a {@linkplain HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern} in the
+		 * request, it is combined with the method-level pattern.
+		 * <li>Otherwise, 
+		 * @param methodLevelPattern
+		 * @param lookupPath
+		 * @param request
+		 * @return
+		 */
+		private String getMatchedPattern(String methodLevelPattern, String lookupPath, HttpServletRequest request) {
+			if (hasTypeLevelMapping() && (!ObjectUtils.isEmpty(getTypeLevelMapping().value()))) {
 				String[] typeLevelPatterns = getTypeLevelMapping().value();
 				for (String typeLevelPattern : typeLevelPatterns) {
 					if (!typeLevelPattern.startsWith("/")) {
@@ -534,7 +545,17 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						return combinedPattern;
 					}
 				}
-
+				return null;
+			}
+			String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+			if (StringUtils.hasText(bestMatchingPattern)) {
+				String combinedPattern = pathMatcher.combine(bestMatchingPattern, methodLevelPattern);
+				if (!combinedPattern.equals(bestMatchingPattern) && (isPathMatchInternal(combinedPattern, lookupPath))) {
+					return combinedPattern;
+				}
+			}
+			if (isPathMatchInternal(methodLevelPattern, lookupPath)) {
+				return methodLevelPattern;
 			}
 			return null;
 		}

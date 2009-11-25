@@ -65,6 +65,16 @@ public interface HandlerMapping {
 	String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE = HandlerMapping.class.getName() + ".pathWithinHandlerMapping";
 
 	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains the
+	 * best matching pattern within the handler mapping.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations. URL-based HandlerMappings will
+	 * typically support it, but handlers should not necessarily expect
+	 * this request attribute to be present in all scenarios.
+	 */
+	String BEST_MATCHING_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPattern";
+
+	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains the URI
 	 * templates map, mapping variable names to values.
 	 * <p>Note: This attribute is not required to be supported by all
@@ -73,7 +83,6 @@ public interface HandlerMapping {
 	 * this request attribute to be present in all scenarios.
 	 */
 	String URI_TEMPLATE_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".uriTemplateVariables";
-
 
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made

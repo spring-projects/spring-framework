@@ -55,6 +55,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -107,6 +108,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
@@ -1159,6 +1161,75 @@ public class ServletAnnotationControllerTests {
 		assertEquals("Content-Type=[text/html],Custom-Header=[value21,value22]", response.getContentAsString());
 	}
 
+	@Test
+	public void controllerClassNameNoTypeLevelAnn() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(BookController.class));
+				RootBeanDefinition mapping = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
+				mapping.getPropertyValues().add("excludedPackages", null);
+				wac.registerBeanDefinition("handlerMapping", mapping);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/book/list");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("list", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/book/show");
+		request.addParameter("id", "12");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("show-id=12", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/book");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("create", response.getContentAsString());
+	}
+
+	@Test
+	public void simpleUrlHandlerMapping() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(BookController.class));
+				RootBeanDefinition hmDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+				hmDef.getPropertyValues().add("mappings", "/book/*=controller\n/book=controller");
+				wac.registerBeanDefinition("handlerMapping", hmDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/book/list");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("list", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/book/show");
+		request.addParameter("id", "12");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("show-id=12", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/book");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("create", response.getContentAsString());
+	}
+
+
 
 	/*
 	 * Controllers
@@ -2033,5 +2104,5 @@ public class ServletAnnotationControllerTests {
 
 	}
 
-
+	
 }
