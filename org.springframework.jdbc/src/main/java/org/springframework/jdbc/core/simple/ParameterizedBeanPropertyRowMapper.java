@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,9 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long, Long,
  * float, Float, double, Double, BigDecimal, <code>java.util.Date</code>, etc.
  *
- * <p>The mapper can be configured to use the primitives default value when mapping null values by
- * passing in 'true' for the 'primitivesDefaultedForNullValue' using the {@link #newInstance(Class, boolean)} method.
- * Also see {@link BeanPropertyRowMapper#setPrimitivesDefaultedForNullValue(boolean)}
+ * <p>The mapper can be configured to use the primitives default value when mapping null values
+ * by setting the {@link #setPrimitivesDefaultedForNullValue 'primitivesDefaultedForNullValue'}
+ * flag to 'true'.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
@@ -59,19 +59,8 @@ public class ParameterizedBeanPropertyRowMapper<T> extends BeanPropertyRowMapper
 	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public static <T> ParameterizedBeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {
-		return newInstance(mappedClass, false);
-	}
-
-	/**
-	 * Static factory method to create a new ParameterizedBeanPropertyRowMapper
-	 * (with the mapped class specified only once).
-	 * @param mappedClass the class that each row should be mapped to
-	 * @param primitivesDefaultedForNullValue whether we're defaulting primitives when mapping a null value
-	 */
-	public static <T> ParameterizedBeanPropertyRowMapper<T> newInstance(Class<T> mappedClass, boolean primitivesDefaultedForNullValue) {
 		ParameterizedBeanPropertyRowMapper<T> newInstance = new ParameterizedBeanPropertyRowMapper<T>();
 		newInstance.setMappedClass(mappedClass);
-		newInstance.setPrimitivesDefaultedForNullValue(primitivesDefaultedForNullValue);
 		return newInstance;
 	}
 
