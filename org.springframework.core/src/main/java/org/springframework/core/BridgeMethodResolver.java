@@ -53,7 +53,9 @@ public abstract class BridgeMethodResolver {
 	 * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
 	 * In such a case, the supplied {@link Method} instance is returned directly to the caller.
 	 * Callers are <strong>not</strong> required to check for bridging before calling this method.
-	 * @throws IllegalStateException if no bridged {@link Method} can be found
+	 * @param bridgeMethod the method to introspect
+	 * @return the original method (either the bridged method or the passed-in method
+	 * if no more specific one could be found)
 	 */
 	public static Method findBridgedMethod(Method bridgeMethod) {
 		if (bridgeMethod == null || !bridgeMethod.isBridge()) {
@@ -72,12 +74,16 @@ public abstract class BridgeMethodResolver {
 			return candidateMethods.get(0);
 		}
 		// Search for candidate match.
-		Method result = searchCandidates(candidateMethods, bridgeMethod);
-		if (result == null) {
-			throw new IllegalStateException(
-					"Unable to locate bridged method for bridge method '" + bridgeMethod + "'");
+		Method bridgedMethod = searchCandidates(candidateMethods, bridgeMethod);
+		if (bridgedMethod != null) {
+			// Bridged method found...
+			return bridgedMethod;
 		}
-		return result;
+		else {
+			// A bridge method was passed in but we couldn't find the bridged method.
+			// Let's proceed with the passed-in method and hope for the best...
+			return bridgeMethod;
+		}
 	}
 
 	/**
