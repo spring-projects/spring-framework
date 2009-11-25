@@ -178,7 +178,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 					rawHandler = getApplicationContext().getBean(handlerName);
 				}
 				validateHandler(rawHandler, request);
-				handler = buildPathExposingHandler(rawHandler, lookupPath, null);
+				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
 		}
 		if (handler != null && logger.isDebugEnabled()) {
@@ -213,35 +213,35 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				handler = getApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
-			return buildPathExposingHandler(handler, urlPath, null);
+			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
 		// Pattern match?
-		List<String> matchingPaths = new ArrayList<String>();
-		for (String registeredPath : this.handlerMap.keySet()) {
-			if (getPathMatcher().match(registeredPath, urlPath)) {
-				matchingPaths.add(registeredPath);
+		List<String> matchingPatterns = new ArrayList<String>();
+		for (String registeredPattern : this.handlerMap.keySet()) {
+			if (getPathMatcher().match(registeredPattern, urlPath)) {
+				matchingPatterns.add(registeredPattern);
 			}
 		}
-		String bestPathMatch = null;
-		if (!matchingPaths.isEmpty()) {
-			Collections.sort(matchingPaths, getPathMatcher().getPatternComparator(urlPath));
+		String bestPatternMatch = null;
+		if (!matchingPatterns.isEmpty()) {
+			Collections.sort(matchingPatterns, getPathMatcher().getPatternComparator(urlPath));
 			if (logger.isDebugEnabled()) {
-				logger.debug("Matching path for request [" + urlPath + "] are " + matchingPaths);
+				logger.debug("Matching patterns for request [" + urlPath + "] are " + matchingPatterns);
 			}
-			bestPathMatch = matchingPaths.get(0);
+			bestPatternMatch = matchingPatterns.get(0);
 		}
-		if (bestPathMatch != null) {
-			handler = this.handlerMap.get(bestPathMatch);
+		if (bestPatternMatch != null) {
+			handler = this.handlerMap.get(bestPatternMatch);
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
 				handler = getApplicationContext().getBean(handlerName);
 			}
 			validateHandler(handler, request);
-			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPathMatch, urlPath);
+			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPatternMatch, urlPath);
 			Map<String, String> uriTemplateVariables =
-					getPathMatcher().extractUriTemplateVariables(bestPathMatch, urlPath);
-			return buildPathExposingHandler(handler, pathWithinMapping, uriTemplateVariables);
+					getPathMatcher().extractUriTemplateVariables(bestPatternMatch, urlPath);
+			return buildPathExposingHandler(handler, bestPatternMatch, pathWithinMapping, uriTemplateVariables);
 		}
 		// No handler found...
 		return null;
@@ -269,11 +269,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @param uriTemplateVariables the URI template variables, can be <code>null</code> if no variables found
 	 * @return the final handler object
 	 */
-	protected Object buildPathExposingHandler(
-			Object rawHandler, String pathWithinMapping, Map<String, String> uriTemplateVariables) {
+	protected Object buildPathExposingHandler(Object rawHandler,
+			String bestMatchingPattern,
+			String pathWithinMapping,
+			Map<String, String> uriTemplateVariables) {
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
-		chain.addInterceptor(new PathExposingHandlerInterceptor(pathWithinMapping));
+		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
 		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
 			chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));
 		}
@@ -286,7 +288,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @param request the request to expose the path to
 	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
 	 */
-	protected void exposePathWithinMapping(String pathWithinMapping, HttpServletRequest request) {
+	protected void exposePathWithinMapping(String bestMatchingPattern, String pathWithinMapping, HttpServletRequest request) {
+		request.setAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatchingPattern);
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 	}
 
@@ -384,15 +387,18 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	private class PathExposingHandlerInterceptor extends HandlerInterceptorAdapter {
 
+		private final String bestMatchingPattern;
+
 		private final String pathWithinMapping;
 
-		private PathExposingHandlerInterceptor(String pathWithinMapping) {
+		private PathExposingHandlerInterceptor(String bestMatchingPattern, String pathWithinMapping) {
+			this.bestMatchingPattern = bestMatchingPattern;
 			this.pathWithinMapping = pathWithinMapping;
 		}
 
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-			exposePathWithinMapping(this.pathWithinMapping, request);
+			exposePathWithinMapping(this.bestMatchingPattern, this.pathWithinMapping, request);
 			return true;
 		}
 	}
