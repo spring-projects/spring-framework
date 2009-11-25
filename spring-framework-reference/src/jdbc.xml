@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="jdbc">
@@ -2811,7 +2811,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
     <section id="jdbc-embedded-database-using-HSQL">
       <title>Using HSQL</title>
 
-      <para>Spring supports HSQL 1.0.0 to 2.0.0. HSQL is the default embedded
+      <para>Spring supports HSQL 1.8.0 and above. HSQL is the default embedded
       database if no type is specified explicitly. To specify HSQL explicitly, 
       set the <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>HSQL</literal>. If
@@ -2823,7 +2823,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
     <section id="jdbc-embedded-database-using-H2">
       <title>Using H2</title>
 
-      <para>Spring supports H2 1.8.0 to 2.0.0. To enable H2, set the
+      <para>Spring supports the H2 database as well. To enable H2, set the
       <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>H2</literal>. If
       you are using the builder API, call the
@@ -2834,7 +2834,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
     <section id="jdbc-embedded-database-using-Derby">
       <title>Using Derby</title>
 
-      <para>Spring supports Apache Derby 10.5.1.1 to 10.6.0. To enable Derby,
+      <para>Spring also supports Apache Derby 10.5 and above. To enable Derby,
       set the <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>Derby</literal>. If
       using the builder API, call the
