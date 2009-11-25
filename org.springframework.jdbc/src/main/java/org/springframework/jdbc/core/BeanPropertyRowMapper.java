@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Create a new BeanPropertyRowMapper, accepting unpopulated properties
 	 * in the target bean.
+	 * <p>Consider using the {@link #newInstance} factory method instead,
+	 * which allows for specifying the mapped type once only.
 	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public BeanPropertyRowMapper(Class<T> mappedClass) {
@@ -204,21 +206,22 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
-	 * Set whether we're defaulting Java primitives in the case of mapping a null value from corresponding
-	 * database fields.
+	 * Set whether we're defaulting Java primitives in the case of mapping a null value
+	 * from corresponding database fields.
 	 * <p>Default is <code>false</code>, throwing an exception when nulls are mapped to Java primitives.
+	 */
+	public void setPrimitivesDefaultedForNullValue(boolean primitivesDefaultedForNullValue) {
+		this.primitivesDefaultedForNullValue = primitivesDefaultedForNullValue;
+	}
+
+	/**
+	 * Return whether we're defaulting Java primitives in the case of mapping a null value
+	 * from corresponding database fields.
 	 */
 	public boolean isPrimitivesDefaultedForNullValue() {
 		return primitivesDefaultedForNullValue;
 	}
 
-	/**
-	 * Return whether we're defaulting Java primitives in the case of mapping a null value from corresponding
-	 * database fields.
-	 */
-	public void setPrimitivesDefaultedForNullValue(boolean primitivesDefaultedForNullValue) {
-		this.primitivesDefaultedForNullValue = primitivesDefaultedForNullValue;
-	}
 
 	/**
 	 * Extract the values for all columns in the current row.
@@ -303,6 +306,18 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 */
 	protected Object getColumnValue(ResultSet rs, int index, PropertyDescriptor pd) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index, pd.getPropertyType());
+	}
+
+
+	/**
+	 * Static factory method to create a new BeanPropertyRowMapper
+	 * (with the mapped class specified only once).
+	 * @param mappedClass the class that each row should be mapped to
+	 */
+	public static <T> BeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {
+		BeanPropertyRowMapper<T> newInstance = new BeanPropertyRowMapper<T>();
+		newInstance.setMappedClass(mappedClass);
+		return newInstance;
 	}
 
 }
