@@ -44,6 +44,8 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 
 	private final Object target;
 
+	private final boolean autoGrowNestedPaths;
+
 	private transient BeanWrapper beanWrapper;
 
 
@@ -53,8 +55,19 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * @param objectName the name of the target object
 	 */
 	public BeanPropertyBindingResult(Object target, String objectName) {
+		this(target, objectName, true);
+	}
+
+	/**
+	 * Creates a new instance of the {@link BeanPropertyBindingResult} class.
+	 * @param target the target bean to bind onto
+	 * @param objectName the name of the target object
+	 * @param autoGrowNestedPaths whether to "auto-grow" a nested path that contains a null value
+	 */
+	public BeanPropertyBindingResult(Object target, String objectName, boolean autoGrowNestedPaths) {
 		super(objectName);
 		this.target = target;
+		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
 
 
@@ -73,7 +86,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 		if (this.beanWrapper == null) {
 			this.beanWrapper = createBeanWrapper();
 			this.beanWrapper.setExtractOldValueForEditor(true);
-			this.beanWrapper.setAutoGrowNestedPaths(true);
+			this.beanWrapper.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
 		}
 		return this.beanWrapper;
 	}
