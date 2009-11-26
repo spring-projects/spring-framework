@@ -16,20 +16,16 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.List;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
-import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.xml.DomUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -56,44 +52,34 @@ import org.w3c.dom.Element;
  * @author Juergen Hoeller
  * @since 3.0
  */
-class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
+public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jsr303Present = ClassUtils.isPresent(
-			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+			"javax.validation.Validator", InterceptorsBeanDefinitionParser.class.getClassLoader());
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 
-		RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
-		mappingDef.setSource(source);
-		mappingDef.getPropertyValues().add("order", 0);
-		String mappingName = parserContext.getReaderContext().registerWithGeneratedName(mappingDef);
+		RootBeanDefinition annMappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+		annMappingDef.setSource(source);
+		annMappingDef.getPropertyValues().add("order", 0);
+		String annMappingName = parserContext.getReaderContext().registerWithGeneratedName(annMappingDef);
 
-		Element interceptors = DomUtils.getChildElementByTagName(element, "interceptors");
-		if (interceptors != null) {
-			List<Element> beans = DomUtils.getChildElementsByTagName(interceptors, "bean");
-			List<BeanDefinition> interceptorBeans = new ManagedList<BeanDefinition>(beans.size());
-			for (Element bean : beans) {
-				interceptorBeans.add(parserContext.getDelegate().parseBeanDefinitionElement(bean).getBeanDefinition());				
-			}
-			mappingDef.getPropertyValues().add("interceptors", interceptorBeans);			
-		}
-		
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 		bindingDef.setSource(source);
 		bindingDef.getPropertyValues().add("conversionService", getConversionService(element, source, parserContext));
 		bindingDef.getPropertyValues().add("validator", getValidator(element, source, parserContext));
 
-		RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-		adapterDef.setSource(source);
-		adapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
-		String adapterName = parserContext.getReaderContext().registerWithGeneratedName(adapterDef);
+		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+		annAdapterDef.setSource(source);
+		annAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
+		String adapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
 
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		parserContext.pushContainingComponent(compDefinition);
-		parserContext.registerComponent(new BeanComponentDefinition(mappingDef, mappingName));
-		parserContext.registerComponent(new BeanComponentDefinition(adapterDef, adapterName));
+		parserContext.registerComponent(new BeanComponentDefinition(annMappingDef, annMappingName));
+		parserContext.registerComponent(new BeanComponentDefinition(annAdapterDef, adapterName));
 		parserContext.popAndRegisterContainingComponent();
 		
 		return null;

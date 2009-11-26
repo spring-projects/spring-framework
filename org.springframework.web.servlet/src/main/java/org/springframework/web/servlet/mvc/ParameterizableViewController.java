@@ -56,14 +56,15 @@ import org.springframework.web.servlet.ModelAndView;
  *      <td>viewName</td>
  *      <td><i>null</i></td>
  *      <td>the name of the view the viewResolver will use to forward to
- *          (if this property is not set, an exception will be thrown during
- *          initialization)</td>
+ *          (if this property is not set, a null view name will be returned
+ *          directing the caller to calculate the view name from the current request)</td>
  *  </tr>
  * </table>
  * </p>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Keith Donald
  */
 public class ParameterizableViewController extends AbstractController {
 	
@@ -84,14 +85,6 @@ public class ParameterizableViewController extends AbstractController {
 		return this.viewName;
 	}
 
-	@Override
-	protected void initApplicationContext() {
-		if (this.viewName == null) {
-			throw new IllegalArgumentException("Property 'viewName' is required");
-		}
-	}
-
-
 	/**
 	 * Return a ModelAndView object with the specified view name.
 	 * @see #getViewName()
@@ -99,7 +92,6 @@ public class ParameterizableViewController extends AbstractController {
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-
 		return new ModelAndView(getViewName());
 	}
 
