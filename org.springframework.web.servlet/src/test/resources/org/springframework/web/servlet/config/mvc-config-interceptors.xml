@@ -5,11 +5,11 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
-	<mvc:annotation-driven>
-		<mvc:interceptors>
-			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
-			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
-		</mvc:interceptors>
-	</mvc:annotation-driven>
+	<mvc:annotation-driven />
+
+	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+		<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+	</mvc:interceptors>
 	
 </beans>

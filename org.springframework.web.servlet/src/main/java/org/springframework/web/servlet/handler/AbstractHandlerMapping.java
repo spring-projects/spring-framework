@@ -19,6 +19,7 @@ package org.springframework.web.servlet.handler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -130,6 +131,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #adaptInterceptor
 	 */
 	protected void initInterceptors() {
+		// TODO consider impact on backwards compatibility here
+		Map<String, HandlerInterceptor> globalInterceptors = getApplicationContext().getBeansOfType(HandlerInterceptor.class);
+		if (globalInterceptors != null) {
+			this.interceptors.addAll(globalInterceptors.values());
+		}
+		
 		if (!this.interceptors.isEmpty()) {
 			this.adaptedInterceptors = new HandlerInterceptor[this.interceptors.size()];
 			for (int i = 0; i < this.interceptors.size(); i++) {

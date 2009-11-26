@@ -16,22 +16,6 @@
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="interceptors" minOccurs="0">
-					<xsd:annotation>
-						<xsd:documentation source="java:org.springframework.web.servlet.HandlerInterceptor"><![CDATA[
-	The ordered list of interceptors that intercept HTTP Servlet Requests mapped to Controllers.
-	Interceptors allow a request to be pre/post processed before/after handling.
-	Each inteceptor should be configured as an inner bean that implements either the org.springframework.web.servlet.HandlerInterceptor or org.springframework.web.context.request.WebRequestInterceptor interface.
-						]]></xsd:documentation>
-					</xsd:annotation>			
-					<xsd:complexType>
-						<xsd:sequence>
-							<xsd:element ref="beans:bean" maxOccurs="unbounded" />
-						</xsd:sequence>
-					</xsd:complexType>
-				</xsd:element>
-			</xsd:sequence>		
 			<xsd:attribute name="conversion-service" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation source="java:org.springframework.core.convert.ConversionService"><![CDATA[
@@ -59,6 +43,48 @@
 							<tool:expected-type type="java:org.springframework.validation.Validator" />
 						</tool:annotation>
 					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="interceptors">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.web.servlet.HandlerInterceptor"><![CDATA[
+	The ordered set of interceptors that intercept HTTP Servlet Requests handled by Controllers.
+	Interceptors allow a request to be pre/post processed before/after handling.
+	Each inteceptor should be configured as an inner bean that implements either the org.springframework.web.servlet.HandlerInterceptor or org.springframework.web.context.request.WebRequestInterceptor interface.
+	The interceptors in this set are automatically configured on each registered HandlerMapping. 
+			]]></xsd:documentation>
+		</xsd:annotation>			
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="beans:bean" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="view-controller">
+		<xsd:annotation>
+			<xsd:documentation
+				source="java:org.springframework.web.servlet.mvc.ParameterizableViewController"><![CDATA[
+	Defines a simple Controller that selects a view to render the response.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="path" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The URL path the view is mapped to.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="view-name" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The name of the view to render.  Optional.
+	If not specified, the view name will be determined from the current HttpServletRequest by the DispatcherServlet's RequestToViewNameTranslator.
+					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 		</xsd:complexType>
