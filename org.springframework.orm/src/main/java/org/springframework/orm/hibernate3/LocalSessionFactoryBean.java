@@ -34,7 +34,6 @@ import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cache.CacheProvider;
-import org.hibernate.cache.RegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
@@ -90,13 +89,11 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p><b>Requires Hibernate 3.3 or later.</b> Note that this factory will use
- * "on_close" as default Hibernate connection release mode, unless in the
- * case of a "jtaTransactionManager" specified, for the reason that
- * this is appropriate for most Spring-based applications (in particular when
- * using Spring's HibernateTransactionManager). Hibernate 3.0 used "on_close"
- * as its own default too; however, Hibernate 3.1 changed this to "auto"
- * (i.e. "after_statement" or "after_transaction").
+ * <p><b>Requires Hibernate 3.2 or later, with Hibernate 3.3 being recommended.</b>
+ * Note that this factory will use "on_close" as default Hibernate connection
+ * release mode, unless in the case of a "jtaTransactionManager" specified,
+ * for the reason that this is appropriate for most Spring-based applications
+ * (in particular when using Spring's HibernateTransactionManager).
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -115,8 +112,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	private static final ThreadLocal<TransactionManager> configTimeTransactionManagerHolder =
 			new ThreadLocal<TransactionManager>();
 
-	private static final ThreadLocal<RegionFactory> configTimeRegionFactoryHolder =
-			new ThreadLocal<RegionFactory>();
+	private static final ThreadLocal<Object> configTimeRegionFactoryHolder =
+			new ThreadLocal<Object>();
 
 	private static final ThreadLocal<CacheProvider> configTimeCacheProviderHolder =
 			new ThreadLocal<CacheProvider>();
@@ -158,7 +155,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * during configuration.
 	 * @see #setCacheRegionFactory
 	 */
-	public static RegionFactory getConfigTimeRegionFactory() {
+	static Object getConfigTimeRegionFactory() {
 		return configTimeRegionFactoryHolder.get();
 	}
 
@@ -208,7 +205,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	private TransactionManager jtaTransactionManager;
 
-	private RegionFactory cacheRegionFactory;
+	private Object cacheRegionFactory;
 
 	private CacheProvider cacheProvider;
 
@@ -384,11 +381,13 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * Allows for using a Spring-managed RegionFactory instance.
 	 * <p>As of Hibernate 3.3, this is the preferred mechanism for configuring
 	 * caches, superseding the {@link #setCacheProvider CacheProvider SPI}.
+	 * For Hibernate 3.2 compatibility purposes, the accepted reference is of type
+	 * Object: the actual type is <code>org.hibernate.cache.RegionFactory</code>.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * cache provider to avoid meaningless double configuration.
-	 * @see LocalRegionFactoryProxy
+	 * @see org.hibernate.cache.RegionFactory
 	 */
-	public void setCacheRegionFactory(RegionFactory cacheRegionFactory) {
+	public void setCacheRegionFactory(Object cacheRegionFactory) {
 		this.cacheRegionFactory = cacheRegionFactory;
 	}
 
@@ -664,7 +663,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.cacheRegionFactory != null) {
 				// Expose Spring-provided Hibernate RegionFactory.
-				config.setProperty(Environment.CACHE_REGION_FACTORY, LocalRegionFactoryProxy.class.getName());
+				config.setProperty(Environment.CACHE_REGION_FACTORY,
+						"org.springframework.orm.hibernate3.LocalRegionFactoryProxy");
 			}
 			else if (this.cacheProvider != null) {
 				// Expose Spring-provided Hibernate CacheProvider.
