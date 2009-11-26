@@ -16,28 +16,35 @@
 
 package org.springframework.http;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.nio.charset.Charset;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class MediaTypeTests {
 
 	@Test
 	public void includes() throws Exception {
-		MediaType type1 = new MediaType("text", "plain");
-		MediaType type2 = new MediaType("text", "plain");
-		assertTrue("Equal types is not inclusive", type1.includes(type2));
-		type1 = new MediaType("text");
-		assertTrue("All subtypes is not inclusive", type1.includes(type2));
-		type1 = MediaType.ALL;
-		assertTrue("All types is not inclusive", type1.includes(type2));
+		MediaType textPlain = new MediaType("text", "plain");
+		assertTrue("Equal types is not inclusive", textPlain.includes(textPlain));
+		MediaType allText = new MediaType("text");
+		assertTrue("All subtypes is not inclusive", allText.includes(textPlain));
+		assertFalse("All subtypes is not inclusive", textPlain.includes(allText));
+		assertTrue("All types is not inclusive", MediaType.ALL.includes(textPlain));
+		assertFalse("All types is not inclusive", textPlain.includes(MediaType.ALL));
+
+		MediaType applicationSoapXml = new MediaType("application", "soap+xml");
+		MediaType applicationWildcardXml = new MediaType("application", "*+xml");
+
+		assertTrue(applicationSoapXml.includes(applicationSoapXml));
+		assertTrue(applicationWildcardXml.includes(applicationWildcardXml));
+
+		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
+		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
 	}
 
 	@Test
