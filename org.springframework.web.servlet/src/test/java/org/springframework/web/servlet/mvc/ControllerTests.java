@@ -46,24 +46,11 @@ public class ControllerTests extends TestCase {
 		String viewName = "viewName";
 		ParameterizableViewController pvc = new ParameterizableViewController();
 		pvc.setViewName(viewName);
-		pvc.initApplicationContext();
 		// We don't care about the params.
 		ModelAndView mv = pvc.handleRequest(new MockHttpServletRequest("GET", "foo.html"), null);
 		assertTrue("model has no data", mv.getModel().size() == 0);
 		assertTrue("model has correct viewname", mv.getViewName().equals(viewName));
 		assertTrue("getViewName matches", pvc.getViewName().equals(viewName));
-	}
-
-	public void testParameterizableViewControllerWithPropertyNotSet() {
-		ParameterizableViewController pvc = new ParameterizableViewController();
-		try {
-			pvc.initApplicationContext();
-			fail("should require viewName property to be set");
-		}
-		catch (IllegalArgumentException ex){
-			// expected
-			assertTrue("meaningful exception message", ex.getMessage().indexOf("viewName") != -1);
-		}
 	}
 
 	public void testServletForwardingController() throws Exception {
