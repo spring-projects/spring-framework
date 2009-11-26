@@ -43,7 +43,7 @@ import org.springframework.web.util.WebUtils;
  *  <li>Inspection of supported methods (ServletException if request method
  *      is not support)</li>
  *  <li>If session is required, try to get it (ServletException if not found)</li>
- *  <li>Set caching headers if needed according to cacheSeconds propery</li>
+ *  <li>Set caching headers if needed according to the cacheSeconds property</li>
  *  <li>Call abstract method {@link #handleRequestInternal(HttpServletRequest,HttpServletResponse) handleRequestInternal()}
  *      (optionally synchronizing around the call on the HttpSession),
  *      which should be implemented by extending classes to provide actual
