@@ -42,7 +42,7 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 
 
 	public LocalRegionFactoryProxy() {
-		RegionFactory rf = LocalSessionFactoryBean.getConfigTimeRegionFactory();
+		RegionFactory rf = (RegionFactory) LocalSessionFactoryBean.getConfigTimeRegionFactory();
 		// absolutely needs thread-bound RegionFactory to initialize
 		if (rf == null) {
 			throw new IllegalStateException("No Hibernate RegionFactory found - " +
