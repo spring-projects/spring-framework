@@ -26,11 +26,12 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  * and value.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @author Dave Syer
+ * @since 1.2.5
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
  * @see System#getProperty(String)
- * @since 1.2.5
  */
 public abstract class SystemPropertyUtils {
 
@@ -43,11 +44,13 @@ public abstract class SystemPropertyUtils {
 	/** Value separator for system property placeholders: ":" */
 	public static final String VALUE_SEPARATOR = ":";
 
-	private static final PropertyPlaceholderHelper strictHelper = new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX,
-			PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
 
-	private static final PropertyPlaceholderHelper nonStrictHelper = new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX,
-			PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, true);
+	private static final PropertyPlaceholderHelper strictHelper =
+			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
+
+	private static final PropertyPlaceholderHelper nonStrictHelper =
+			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, true);
+
 
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
@@ -55,7 +58,6 @@ public abstract class SystemPropertyUtils {
 	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
 	 * @see #PLACEHOLDER_SUFFIX
-	 *
 	 * @throws IllegalArgumentException if there is an unresolvable placeholder
 	 */
 	public static String resolvePlaceholders(final String text) {
@@ -66,49 +68,41 @@ public abstract class SystemPropertyUtils {
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
 	 * Unresolvable placeholders with no default value are ignored and passed through unchanged if the
 	 * flag is set to true.
-	 * 
 	 * @param text the String to resolve
 	 * @param ignoreUnresolvablePlaceholders flag to determine is unresolved placeholders are ignored
 	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
 	 * @see #PLACEHOLDER_SUFFIX
-	 * 
 	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
-	 * 
 	 */
 	public static String resolvePlaceholders(final String text, boolean ignoreUnresolvablePlaceholders) {
-		if (ignoreUnresolvablePlaceholders) {
-			return nonStrictHelper.replacePlaceholders(text, new PlaceholderResolverImplementation(text));
-		}
-		return strictHelper.replacePlaceholders(text, new PlaceholderResolverImplementation(text));
+		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
+		return helper.replacePlaceholders(text, new SystemPropertyPlaceholderResolver(text));
 	}
 
-	private static final class PlaceholderResolverImplementation implements PlaceholderResolver {
+
+	private static class SystemPropertyPlaceholderResolver implements PlaceholderResolver {
+
 		private final String text;
 
-		private PlaceholderResolverImplementation(String text) {
+		public SystemPropertyPlaceholderResolver(String text) {
 			this.text = text;
 		}
 
 		public String resolvePlaceholder(String placeholderName) {
-			String propVal = null;
 			try {
-				propVal = System.getProperty(placeholderName);
+				String propVal = System.getProperty(placeholderName);
 				if (propVal == null) {
 					// Fall back to searching the system environment.
 					propVal = System.getenv(placeholderName);
 				}
-
-				if (propVal == null) {
-					System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" + text
-							+ "] as system property: neither system property nor environment variable found");
-				}
-			} catch (Throwable ex) {
-				System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" + text
-						+ "] as system property: " + ex);
-
+				return propVal;
 			}
-			return propVal;
+			catch (Throwable ex) {
+				System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
+						this.text + "] as system property: " + ex);
+				return null;
+			}
 		}
 	}
 
