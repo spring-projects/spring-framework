@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	protected static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
 
 	protected static final String CONCURRENCY_ATTRIBUTE = "concurrency";
+
+	protected static final String PHASE_ATTRIBUTE = "phase";
 
 	protected static final String PREFETCH_ATTRIBUTE = "prefetch";
 
