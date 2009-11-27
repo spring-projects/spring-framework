@@ -17,13 +17,41 @@
 package org.springframework.context;
 
 /**
- * An extension of the Lifecycle interface for those beans that require to be
+ * An extension of the Lifecycle interface for those objects that require to be
  * started upon ApplicationContext refresh and/or shutdown in a particular order.
+ * The {@link #isAutoStartup()} return value indicates whether this object should
+ * be started at the time of a context refresh. The callback-accepting
+ * {@link #stop(Runnable)} method is useful for objects that have an asynchronous
+ * shutdown process. Any implementation of this interface <i>must</i> invoke the
+ * callback's run() method upon shutdown completion to avoid unnecessary delays
+ * in the overall ApplicationContext shutdown. 
+ * <p>
+ * This interface extends {@link Phased}, and the {@link #getPhase()} method's
+ * return value indicates the phase within which this Lifecycle component should
+ * be started and stopped. The startup process begins with the <i>lowest</i>
+ * phase value and ends with the <i>highest</i> phase value (Integer.MIN_VALUE
+ * is the lowest possible, and Integer.MAX_VALUE is the highest possible). The
+ * shutdown process will apply the reverse order. Any components with the
+ * same value will be arbitrarily ordered within the same phase.
+ * <p>
+ * Example: if component B depends on component A having already started, then
+ * component A should have a lower phase value than component B. During the
+ * shutdown process, component B would be stopped before component A.
+ * <p>
+ * Any explicit "depends-on" relationship will take precedence over
+ * the phase order such that the dependent bean always starts after its
+ * dependency and always stops before its dependency.
+ * <p>
+ * Any Lifecycle components within the context that do not also implement
+ * SmartLifecycle will be treated as if they have a phase value of 0. That
+ * way a SmartLifecycle implementation may start before those Lifecycle
+ * components if it has a negative phase value, or it may start after
+ * those components if it has a positive phase value.
  * 
  * @author Mark Fisher
  * @since 3.0
  */
-public interface SmartLifecycle extends Lifecycle {
+public interface SmartLifecycle extends Lifecycle, Phased {
 
 	/**
 	 * Return whether this Lifecycle component should be started automatically
@@ -31,30 +59,6 @@ public interface SmartLifecycle extends Lifecycle {
 	 * "false" indicates that the component is intended to be started manually.
 	 */
 	boolean isAutoStartup();
-
-	/**
-	 * Return the phase within which this Lifecycle component should be started
-	 * and stopped. The startup process begins with the <i>lowest</i> phase
-	 * value and ends with the <i>highest</i> phase value (Integer.MIN_VALUE is
-	 * the lowest possible, and Integer.MAX_VALUE is the highest possible). The
-	 * shutdown process will apply the reverse order. Any components with the
-	 * same value will be arbitrarily ordered within the same phase.
-	 * <p>
-	 * Example: if component B depends on component A having already started, then
-	 * component A should have a lower phase value than component B. During the
-	 * shutdown process, component B would be stopped before component A.
-	 * <p>
-	 * Any Lifecycle components within the context that do not also implement
-	 * SmartLifecycle will be treated as if they have a phase value of 0. That
-	 * way a SmartLifecycle implementation may start before those Lifecycle
-	 * components if it has a negative phase value, or it may start after
-	 * those components if it has a positive phase value.
-	 * <p>
-	 * Any explicit "depends-on" relationship will take precedence over
-	 * the phase order such that the dependent bean always starts after its
-	 * dependency and always stops before its dependency.
-	 */
-	int getPhase();
 
 	/**
 	 * Indicates that a Lifecycle component must stop if it is currently running.
