@@ -16,10 +16,11 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.asList;
+import java.util.Arrays;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Converts from a source array to a target array type.
@@ -40,7 +41,7 @@ final class ArrayToArrayConverter implements GenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
-		return this.helperConverter.convert(asList(source), sourceType, targetType);
+		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}
 
 }

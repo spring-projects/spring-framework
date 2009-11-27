@@ -16,12 +16,12 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.asList;
-
+import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Converts from an array to a Map.
@@ -42,7 +42,7 @@ final class ArrayToMapConverter implements GenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.convert(asList(source), sourceType, targetType);
+		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}
 
 }

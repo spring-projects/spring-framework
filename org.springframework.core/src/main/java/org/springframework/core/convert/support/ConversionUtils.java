@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
-import java.lang.reflect.Array;
-import java.util.AbstractList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.RandomAccess;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
-final class ConversionUtils {
+/**
+ * Internal utilities for the conversion package.
+ *
+ * @author Keith Donald
+ * @since 3.0
+ */
+abstract class ConversionUtils {
 
-	private ConversionUtils() {
-	}
-	
 	public static Object invokeConverter(GenericConverter converter, Object source, TypeDescriptor sourceType,
 			TypeDescriptor targetType) {
 		try {
 			return converter.convert(source, sourceType, targetType);
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}
 	}
@@ -69,26 +70,4 @@ final class ConversionUtils {
 		return new TypeDescriptor[] { TypeDescriptor.valueOf(keyType), TypeDescriptor.valueOf(valueType) };
 	}
 
-	public static List<?> asList(Object array) {
-		return array != null ? new ArrayList(array) : null;
-	}
-	
-	@SuppressWarnings("serial")
-	private static class ArrayList extends AbstractList<Object> implements RandomAccess, java.io.Serializable {
-
-		private Object array;
-
-		ArrayList(Object array) {
-			this.array = array;
-		}
-
-		public int size() {
-			return Array.getLength(array);
-		}
-
-		public Object get(int index) {
-			return Array.get(array, index);
-		}
-		
-	}
 }
