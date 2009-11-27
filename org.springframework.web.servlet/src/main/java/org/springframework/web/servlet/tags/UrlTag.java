@@ -18,23 +18,21 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 import org.springframework.web.util.UriUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
@@ -44,7 +42,7 @@ import org.springframework.util.StringUtils;
  * <ul>
  * <li>URL encoded template URI variables</li>
  * <li>HTML/XML escaping of URLs</li>
- * <li>JavaScipt escaping of URLs</li>
+ * <li>JavaScript escaping of URLs</li>
  * </ul>
  * 
  * <p>Template URI variables are indicated in the {@link #setValue(String) 'value'}
@@ -235,13 +233,11 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @param includeQueryStringDelimiter true if the query string should start
 	 * with a '?' instead of '&'
 	 * @return the query string
-	 * @throws JspException
 	 */
 	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
 			throws JspException {
 
 		String encoding = pageContext.getResponse().getCharacterEncoding();
-
 		StringBuilder qs = new StringBuilder();
 		for (Param param : params) {
 			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
@@ -274,12 +270,11 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @param params parameters used to replace template markers
 	 * @param usedParams set of template parameter names that have been replaced
 	 * @return the URL with template parameters replaced
-	 * @throws JspException
 	 */
 	protected String replaceUriTemplateParams(String uri, List<Param> params, Set<String> usedParams)
 			throws JspException {
-		String encoding = pageContext.getResponse().getCharacterEncoding();
 
+		String encoding = pageContext.getResponse().getCharacterEncoding();
 		for (Param param : params) {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {

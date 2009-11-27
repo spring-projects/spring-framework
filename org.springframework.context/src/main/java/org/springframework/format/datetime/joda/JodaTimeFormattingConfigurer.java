@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.datetime.joda;
 
 import java.util.Calendar;
@@ -26,19 +27,22 @@ import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 
 /**
  * Configures Joda Time's Formatting system for use with Spring.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
- * @see #setDateStyle(String)
- * @see #setTimeStyle(String)
- * @see #setDateTimeStyle(String)
- * @see #setUseISOFormat(boolean)
- * @see #installJodaTimeFormatting(FormatterRegistry)
+ * @see #setDateStyle
+ * @see #setTimeStyle
+ * @see #setDateTimeStyle
+ * @see #setUseIsoFormat
+ * @see #installJodaTimeFormatting
  */
 public class JodaTimeFormattingConfigurer {
 
@@ -48,12 +52,12 @@ public class JodaTimeFormattingConfigurer {
 
 	private String dateTimeStyle;
 
-	private boolean useISOFormat;
+	private boolean useIsoFormat;
+
 
 	/**
 	 * Set the default format style of Joda {@link LocalDate} objects.
 	 * Default is {@link DateTimeFormat#shortDate()}.
-	 * @param dateStyle the date format style
 	 */
 	public void setDateStyle(String dateStyle) {
 		this.dateStyle = dateStyle;
@@ -62,16 +66,15 @@ public class JodaTimeFormattingConfigurer {
 	/**
 	 * Set the default format style of Joda {@link LocalTime} objects.
 	 * Default is {@link DateTimeFormat#shortTime()}.
-	 * @param timeStyle the time format style
 	 */
 	public void setTimeStyle(String timeStyle) {
 		this.timeStyle = timeStyle;
 	}
 
 	/**
-	 * Set the default format style of Joda {@link LocalDateTime} and {@link DateTime} objects, as well as JDK {@link Date} and {@link Calendar} objects.
+	 * Set the default format style of Joda {@link LocalDateTime} and {@link DateTime} objects,
+	 * as well as JDK {@link Date} and {@link Calendar} objects.
 	 * Default is {@link DateTimeFormat#shortDateTime()}.
-	 * @param dateTimeStyle the date time format style
 	 */
 	public void setDateTimeStyle(String dateTimeStyle) {
 		this.dateTimeStyle = dateTimeStyle;
@@ -81,27 +84,30 @@ public class JodaTimeFormattingConfigurer {
 	 * Set whether standard ISO formatting should be applied to all Date/Time types.
 	 * Default is false (no).
 	 * If set to true, the dateStyle, timeStyle, and dateTimeStyle properties are ignored.
-	 * @param useISOFormat true to enable ISO formatting
 	 */
-	public void setUseISOFormat(boolean useISOFormat) {
-		this.useISOFormat = useISOFormat;
+	public void setUseIsoFormat(boolean useIsoFormat) {
+		this.useIsoFormat = useIsoFormat;
 	}
+
 
 	/**
 	 * Install Joda Time formatters given the current configuration of this {@link JodaTimeFormattingConfigurer}.
 	 */
 	public void installJodaTimeFormatting(FormatterRegistry formatterRegistry) {
-		JodaTimeConverters.registerConverters(formatterRegistry.getConverterRegistry());
+		JodaTimeConverters.registerConverters(formatterRegistry);
 
 		DateTimeFormatter jodaDateFormatter = getJodaDateFormatter();
-		formatterRegistry.addFormatterForFieldType(LocalDate.class, new ReadablePartialPrinter(jodaDateFormatter), new DateTimeParser(jodaDateFormatter));
+		formatterRegistry.addFormatterForFieldType(LocalDate.class,
+				new ReadablePartialPrinter(jodaDateFormatter), new DateTimeParser(jodaDateFormatter));
 
 		DateTimeFormatter jodaTimeFormatter = getJodaTimeFormatter();
-		formatterRegistry.addFormatterForFieldType(LocalTime.class, new ReadablePartialPrinter(jodaTimeFormatter), new DateTimeParser(jodaTimeFormatter));
+		formatterRegistry.addFormatterForFieldType(LocalTime.class,
+				new ReadablePartialPrinter(jodaTimeFormatter), new DateTimeParser(jodaTimeFormatter));
 
 		DateTimeFormatter jodaDateTimeFormatter = getJodaDateTimeFormatter();
 		Parser<DateTime> dateTimeParser = new DateTimeParser(jodaDateTimeFormatter);
-		formatterRegistry.addFormatterForFieldType(LocalDateTime.class, new ReadablePartialPrinter(jodaDateTimeFormatter), dateTimeParser);
+		formatterRegistry.addFormatterForFieldType(LocalDateTime.class,
+				new ReadablePartialPrinter(jodaDateTimeFormatter), dateTimeParser);
 
 		Printer<ReadableInstant> readableInstantPrinter = new ReadableInstantPrinter(jodaDateTimeFormatter);
 		formatterRegistry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
@@ -111,37 +117,42 @@ public class JodaTimeFormattingConfigurer {
 		formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
 	}
 
+
 	// internal helpers
-	
+
 	private DateTimeFormatter getJodaDateFormatter() {
-		if (this.useISOFormat) {
+		if (this.useIsoFormat) {
 			return ISODateTimeFormat.date();
 		}
 		if (this.dateStyle != null) {
 			return DateTimeFormat.forStyle(this.dateStyle + "-");
-		} else {
+
+		}
+		else {
 			return DateTimeFormat.shortDate();
 		}
 	}
 
 	private DateTimeFormatter getJodaTimeFormatter() {
-		if (this.useISOFormat) {
+		if (this.useIsoFormat) {
 			return ISODateTimeFormat.time();
 		}
 		if (this.timeStyle != null) {
 			return DateTimeFormat.forStyle("-" + this.timeStyle);
-		} else {
+		}
+		else {
 			return DateTimeFormat.shortTime();
 		}
 	}
 
 	private DateTimeFormatter getJodaDateTimeFormatter() {
-		if (this.useISOFormat) {
+		if (this.useIsoFormat) {
 			return ISODateTimeFormat.dateTime();
 		}
 		if (this.dateTimeStyle != null) {
 			return DateTimeFormat.forStyle(this.dateTimeStyle);
-		} else {
+		}
+		else {
 			return DateTimeFormat.shortDateTime();
 		}
 	}
