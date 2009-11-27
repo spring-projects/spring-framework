@@ -20,9 +20,14 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
+
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.type.JavaType;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.type.TypeFactory;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -39,24 +44,24 @@ import org.springframework.util.Assert;
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the {@link
- * #setSupportedMediaTypes(List) supportedMediaTypes} property, and overriding the {@link #getContentType(Object)}
+ * #setSupportedMediaTypes(List) supportedMediaTypes} property.
  * method.
  *
  * @author Arjen Poutsma
  * @see org.springframework.web.servlet.view.json.BindingJacksonJsonView
  * @since 3.0
  */
-public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageConverter<T> {
+public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
+
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	private ObjectMapper objectMapper = new ObjectMapper();
-
-	private JsonEncoding encoding = JsonEncoding.UTF8;
 
 	private boolean prefixJson = false;
 
 	/** Construct a new {@code BindingJacksonHttpMessageConverter}, */
 	public MappingJacksonHttpMessageConverter() {
-		super(new MediaType("application", "json"));
+		super(new MediaType("application", "json", DEFAULT_CHARSET));
 	}
 
 	/**
@@ -73,12 +78,6 @@ public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 		this.objectMapper = objectMapper;
 	}
 
-	/** Sets the {@code JsonEncoding} for this converter. By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used. */
-	public void setEncoding(JsonEncoding encoding) {
-		Assert.notNull(encoding, "'encoding' must not be null");
-		this.encoding = encoding;
-	}
-
 	/**
 	 * Indicates whether the JSON output by this view should be prefixed with "{} &&". Default is false.
 	 *
@@ -91,30 +90,50 @@ public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 	}
 
 	@Override
-	public boolean supports(Class<? extends T> clazz) {
-		return objectMapper.canSerialize(clazz);
+	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		JavaType javaType = TypeFactory.fromClass(clazz);
+		return objectMapper.canDeserialize(javaType) && isSupported(mediaType);
 	}
 
 	@Override
-	protected T readInternal(Class<T> clazz, HttpInputMessage inputMessage)
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		return objectMapper.canSerialize(clazz) && isSupported(mediaType);
+	}
+
+	@Override
+	protected boolean supports(Class<?> clazz) {
+		// should not be called, since we override canRead/Write
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected Object readInternal(Class<Object> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 		return objectMapper.readValue(inputMessage.getBody(), clazz);
 	}
 
 	@Override
-	protected MediaType getDefaultContentType(T t) {
-		Charset charset = Charset.forName(encoding.getJavaName());
-		return new MediaType("application", "json", charset);
-	}
-
-	@Override
-	protected void writeInternal(T t, HttpOutputMessage outputMessage)
+	protected void writeInternal(Object o, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+		JsonEncoding encoding = getEncoding(outputMessage.getHeaders().getContentType());
 		JsonGenerator jsonGenerator =
 				objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
 		if (prefixJson) {
 			jsonGenerator.writeRaw("{} && ");
 		}
-		objectMapper.writeValue(jsonGenerator, t);
+		objectMapper.writeValue(jsonGenerator, o);
 	}
+
+	private JsonEncoding getEncoding(MediaType contentType) {
+		if (contentType != null && contentType.getCharSet() != null) {
+			Charset charset = contentType.getCharSet();
+			for (JsonEncoding encoding : JsonEncoding.values()) {
+				if (charset.name().equals(encoding.getJavaName())) {
+					return encoding;
+				}
+			}
+		}
+		return JsonEncoding.UTF8;
+	}
+
 }
