@@ -17,6 +17,7 @@
     <orderEntry type="module" module-name="expression" />
     <orderEntry type="module" module-name="instrument" />
     <orderEntry type="library" name="AOP Alliance" level="project" />
+    <orderEntry type="library" name="ASM" level="project" />
     <orderEntry type="library" name="AspectJ" level="project" />
     <orderEntry type="library" name="CGLIB" level="project" />
     <orderEntry type="library" name="Commons Logging" level="project" />
@@ -72,6 +73,17 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.antlr/2.7.7/com.springsource.antlr-2.7.7.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.antlr/2.7.7/com.springsource.antlr-sources-2.7.7.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.beanshell/com.springsource.bsh/2.0.0.b4/com.springsource.bsh-2.0.0.b4.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -101,11 +113,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.6.3/com.springsource.org.codehaus.groovy-1.6.3.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.6.5/com.springsource.org.codehaus.groovy-1.6.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.6.3/com.springsource.org.codehaus.groovy-sources-1.6.3.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.6.5/com.springsource.org.codehaus.groovy-sources-1.6.5.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
