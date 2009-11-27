@@ -55,8 +55,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 
 	/**
-	 * Specify the maximum time allotted for the shutdown of any phase
-	 * (group of SmartLifecycle beans with the same 'phase' value).
+	 * Specify the maximum time allotted in milliseconds for the shutdown of
+	 * any phase (group of SmartLifecycle beans with the same 'phase' value).
 	 * The default value is 30 seconds.
 	 */
 	public void setTimeoutPerShutdownPhase(long timeoutPerShutdownPhase) {

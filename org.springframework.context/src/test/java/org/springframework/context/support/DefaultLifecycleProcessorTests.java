@@ -18,13 +18,19 @@ package org.springframework.context.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Test;
 
+import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.Lifecycle;
+import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.SmartLifecycle;
 
 /**
@@ -32,6 +38,29 @@ import org.springframework.context.SmartLifecycle;
  * @since 3.0
  */
 public class DefaultLifecycleProcessorTests {
+
+	@Test
+	public void defaultLifecycleProcessorInstance() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.refresh();
+		Object lifecycleProcessor = new DirectFieldAccessor(context).getPropertyValue("lifecycleProcessor");
+		assertNotNull(lifecycleProcessor);
+		assertEquals(DefaultLifecycleProcessor.class, lifecycleProcessor.getClass());
+	}
+
+	@Test
+	public void customLifecycleProcessorInstance() {
+		BeanDefinition beanDefinition = new RootBeanDefinition(DefaultLifecycleProcessor.class);
+		beanDefinition.getPropertyValues().addPropertyValue("timeoutPerShutdownPhase", 1000);
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBeanDefinition("lifecycleProcessor", beanDefinition);
+		context.refresh();
+		LifecycleProcessor bean = context.getBean("lifecycleProcessor", LifecycleProcessor.class);
+		Object contextLifecycleProcessor = new DirectFieldAccessor(context).getPropertyValue("lifecycleProcessor");
+		assertNotNull(contextLifecycleProcessor);
+		assertSame(bean, contextLifecycleProcessor);
+		assertEquals(1000L, new DirectFieldAccessor(contextLifecycleProcessor).getPropertyValue("timeoutPerShutdownPhase"));
+	}
 
 	@Test
 	public void singleSmartLifecycleAutoStartup() throws Exception {
