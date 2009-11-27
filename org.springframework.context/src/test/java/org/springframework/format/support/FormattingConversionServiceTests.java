@@ -16,9 +16,6 @@
 
 package org.springframework.format.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
@@ -27,11 +24,14 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.format.datetime.joda.DateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
@@ -48,6 +48,7 @@ public class FormattingConversionServiceTests {
 	@Before
 	public void setUp() {
 		formattingService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(formattingService);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
@@ -59,15 +60,15 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForTypeWithFormatter() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		String formatted = formattingService.convert(new Integer(3), String.class);
+		String formatted = formattingService.convert(3, String.class);
 		assertEquals("3", formatted);
-		Integer i = (Integer) formattingService.convert("3", Integer.class);
+		Integer i = formattingService.convert("3", Integer.class);
 		assertEquals(new Integer(3), i);
 	}
 
 	@Test
 	public void testFormatFieldForTypeWithPrinterParserWithCoersion() throws ParseException {
-		formattingService.getConverterRegistry().addConverter(new Converter<DateTime, LocalDate>() {
+		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
 			public LocalDate convert(DateTime source) {
 				return source.toLocalDate();
 			}
@@ -76,18 +77,18 @@ public class FormattingConversionServiceTests {
 				.shortDate()), new DateTimeParser(DateTimeFormat.shortDate()));
 		String formatted = formattingService.convert(new LocalDate(2009, 10, 31), String.class);
 		assertEquals("10/31/09", formatted);
-		LocalDate date = (LocalDate) formattingService.convert("10/31/09", LocalDate.class);
+		LocalDate date = formattingService.convert("10/31/09", LocalDate.class);
 		assertEquals(new LocalDate(2009, 10, 31), date);
 	}
 
 	@Test
 	public void testFormatFieldForAnnotation() throws Exception {
-		formattingService.getConverterRegistry().addConverter(new Converter<Date, Long>() {
+		formattingService.addConverter(new Converter<Date, Long>() {
 			public Long convert(Date source) {
 				return source.getTime();
 			}
 		});
-		formattingService.getConverterRegistry().addConverter(new Converter<DateTime, Date>() {
+		formattingService.addConverter(new Converter<DateTime, Date>() {
 			public Date convert(DateTime source) {
 				return source.toDate();
 			}

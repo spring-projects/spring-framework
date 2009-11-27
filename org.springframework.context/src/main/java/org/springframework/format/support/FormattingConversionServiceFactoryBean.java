@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.support;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.joda.JodaTimeFormattingConfigurer;
 import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
@@ -25,40 +26,47 @@ import org.springframework.format.number.NumberFormatter;
 import org.springframework.util.ClassUtils;
 
 /**
- * A factory for a FormattingConversionService that installs default formatters for common types such as numbers and datetimes.
- * Subclasses may override {@link #installFormatters(FormatterRegistry)} to register custom formatters.
+ * A factory for a {@link FormattingConversionService} that installs default
+ * formatters for common types such as numbers and datetimes.
+ *
+ * <p>Subclasses may override {@link #installFormatters(FormatterRegistry)}
+ * to register custom formatters.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-public class FormattingConversionServiceFactoryBean implements FactoryBean<ConversionService>, InitializingBean {
+public class FormattingConversionServiceFactoryBean
+		implements FactoryBean<FormattingConversionService>, InitializingBean {
 
 	private static final boolean jodaTimePresent = ClassUtils.isPresent(
 			"org.joda.time.DateTime", FormattingConversionService.class.getClassLoader());
 
 	private FormattingConversionService conversionService;
 
-	// implementing InitializingBean
-	
+
 	public void afterPropertiesSet() {
 		this.conversionService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(this.conversionService);
 		installFormatters(this.conversionService);
 	}
 	
 	// implementing FactoryBean
 	
-	public ConversionService getObject() {
+	public FormattingConversionService getObject() {
 		return this.conversionService;
 	}
 
-	public Class<ConversionService> getObjectType() {
-		return ConversionService.class;
+	public Class<? extends FormattingConversionService> getObjectType() {
+		return FormattingConversionService.class;
 	}
 
 	public boolean isSingleton() {
 		return true;
 	}
 
-	// subclassing hooks 
+
+	// subclassing hooks
 	
 	/**
 	 * Install Formatters and Converters into the new FormattingConversionService using the FormatterRegistry SPI.
