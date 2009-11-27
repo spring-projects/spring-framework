@@ -33,6 +33,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
+import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.util.Assert;
 
@@ -220,8 +221,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	private static int getPhase(Lifecycle bean) {
-		return (bean instanceof SmartLifecycle) ?
-				((SmartLifecycle) bean).getPhase() : 0;
+		return (bean instanceof Phased) ?
+				((Phased) bean).getPhase() : 0;
 	}
 
 
