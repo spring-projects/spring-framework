@@ -16,11 +16,9 @@
 
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
- * A factory for creating common ConversionService configurations.
+ * A factory for common ConversionService configurations.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -31,7 +29,7 @@ public abstract class ConversionServiceFactory {
 	/**
 	 * Create a new default ConversionService instance that can be safely modified.
 	 */
-	public static ConversionService createDefaultConversionService() {
+	public static GenericConversionService createDefaultConversionService() {
 		GenericConversionService conversionService = new GenericConversionService();
 		addDefaultConverters(conversionService);
 		return conversionService;
@@ -39,7 +37,6 @@ public abstract class ConversionServiceFactory {
 
 	/**
 	 * Populate the given ConversionService instance with all applicable default converters.
-	 * Callers may cast the returned ConversionService to a {@link ConverterRegistry} to supplement or override the default converters. 
 	 */
 	public static void addDefaultConverters(GenericConversionService conversionService) {
 		conversionService.addGenericConverter(new ArrayToArrayConverter(conversionService));

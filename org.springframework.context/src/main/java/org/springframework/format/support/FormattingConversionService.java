@@ -73,8 +73,8 @@ public class FormattingConversionService extends GenericConversionService
 				public Class<?>[][] getConvertibleTypes() {
 					return new Class<?>[][] {{fieldType, String.class}};
 				}
-				public boolean matches(TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
-					return (sourceFieldType.getAnnotation(annotationType) != null);
+				public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+					return (sourceType.getAnnotation(annotationType) != null);
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 					Printer<?> printer = annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType), sourceType.getType());
@@ -89,8 +89,8 @@ public class FormattingConversionService extends GenericConversionService
 				public Class<?>[][] getConvertibleTypes() {
 					return new Class<?>[][] {{String.class, fieldType}};
 				}
-				public boolean matches(TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
-					return (targetFieldType.getAnnotation(annotationType) != null);
+				public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+					return (targetType.getAnnotation(annotationType) != null);
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 					Parser<?> parser = annotationFormatterFactory.getParser(targetType.getAnnotation(annotationType), targetType.getType());
