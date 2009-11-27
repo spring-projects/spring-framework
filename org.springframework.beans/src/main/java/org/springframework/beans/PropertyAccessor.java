@@ -148,7 +148,7 @@ public interface PropertyAccessor {
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 */
-	void setPropertyValues(Map map) throws BeansException;
+	void setPropertyValues(Map<?, ?> map) throws BeansException;
 
 	/**
 	 * The preferred way to perform a batch update.

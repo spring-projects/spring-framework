@@ -50,7 +50,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 		setPropertyValue(pv.getName(), pv.getValue());
 	}
 
-	public void setPropertyValues(Map map) throws BeansException {
+	public void setPropertyValues(Map<?, ?> map) throws BeansException {
 		setPropertyValues(new MutablePropertyValues(map));
 	}
 
