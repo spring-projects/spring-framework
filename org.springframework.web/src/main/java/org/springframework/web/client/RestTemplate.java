@@ -35,8 +35,11 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.util.UriTemplate;
 
 /**
@@ -98,6 +101,13 @@ import org.springframework.web.util.UriTemplate;
  */
 public class RestTemplate extends HttpAccessor implements RestOperations {
 
+	private static final boolean jaxb2Present =
+			ClassUtils.isPresent("javax.xml.bind.Binder", RestTemplate.class.getClassLoader());
+
+	private static final boolean jacksonPresent =
+			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", RestTemplate.class.getClassLoader()) &&
+					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", RestTemplate.class.getClassLoader());
+
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
 
 	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
@@ -110,6 +120,12 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new FormHttpMessageConverter());
 		this.messageConverters.add(new SourceHttpMessageConverter());
+		if (jaxb2Present) {
+			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
+		}
+		if (jacksonPresent) {
+			this.messageConverters.add(new MappingJacksonHttpMessageConverter());
+		}
 	}
 
 	/**
