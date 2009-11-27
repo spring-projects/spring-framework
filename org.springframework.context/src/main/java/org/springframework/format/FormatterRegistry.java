@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format;
 
 import java.lang.annotation.Annotation;
@@ -23,9 +24,10 @@ import org.springframework.core.convert.converter.ConverterRegistry;
  * A registry of field formatting logic.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-public interface FormatterRegistry {
+public interface FormatterRegistry extends ConverterRegistry {
 
 	/**
 	 * Adds a Formatter to format fields of a specific type.
@@ -57,14 +59,5 @@ public interface FormatterRegistry {
 	 * @param annotationFormatterFactory the annotation formatter factory to add
 	 */
 	void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory);
-	
-	/**
-	 * Returns the registry of Converters that coerse field values to types required by Formatters.
-	 * Allows clients to register their own custom converters directly.
-	 * For example, a date/time formatting configuration might expect a java.util.Date field value to be coersed to a Long for formatting.
-	 * Registering a simpler DateToLongConverter allievates the need to register multiple formatters for closely related types.
-	 * @return the converter registry, allowing new Converters to be registered
-	 */
-	ConverterRegistry getConverterRegistry();
 
 }

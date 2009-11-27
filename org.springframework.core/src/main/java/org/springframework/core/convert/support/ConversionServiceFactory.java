@@ -21,21 +21,27 @@ import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
  * A factory for creating common ConversionService configurations.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-public final class ConversionServiceFactory {
-
-	private ConversionServiceFactory() {
-
-	}
+public abstract class ConversionServiceFactory {
 
 	/**
-	 * Create a new default ConversionService prototype that can be safely modified.
-	 * Callers may cast the returned ConversionService to a {@link ConverterRegistry} to supplement or override the default converters. 
+	 * Create a new default ConversionService instance that can be safely modified.
 	 */
 	public static ConversionService createDefaultConversionService() {
 		GenericConversionService conversionService = new GenericConversionService();
+		addDefaultConverters(conversionService);
+		return conversionService;
+	}
+
+	/**
+	 * Populate the given ConversionService instance with all applicable default converters.
+	 * Callers may cast the returned ConversionService to a {@link ConverterRegistry} to supplement or override the default converters. 
+	 */
+	public static void addDefaultConverters(GenericConversionService conversionService) {
 		conversionService.addGenericConverter(new ArrayToArrayConverter(conversionService));
 		conversionService.addGenericConverter(new ArrayToCollectionConverter(conversionService));
 		conversionService.addGenericConverter(new ArrayToMapConverter(conversionService));
@@ -51,6 +57,7 @@ public final class ConversionServiceFactory {
 		conversionService.addGenericConverter(new ObjectToArrayConverter(conversionService));
 		conversionService.addGenericConverter(new ObjectToCollectionConverter(conversionService));
 		conversionService.addGenericConverter(new ObjectToMapConverter(conversionService));
+		conversionService.addConverter(new ObjectToStringConverter());
 		conversionService.addConverter(new StringToBooleanConverter());
 		conversionService.addConverter(new StringToCharacterConverter());
 		conversionService.addConverter(new StringToLocaleConverter());
@@ -59,9 +66,8 @@ public final class ConversionServiceFactory {
 		conversionService.addConverterFactory(new StringToEnumConverterFactory());
 		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
 		conversionService.addConverterFactory(new CharacterToNumberFactory());
-		conversionService.addConverter(new ObjectToStringConverter());
 		conversionService.addGenericConverter(new ObjectToObjectGenericConverter());
 		conversionService.addGenericConverter(new IdToEntityConverter(conversionService));
-		return conversionService;
 	}
+
 }
