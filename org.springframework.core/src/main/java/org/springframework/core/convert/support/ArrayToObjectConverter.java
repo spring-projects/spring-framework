@@ -16,10 +16,11 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.asList;
+import java.util.Arrays;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Converts from an array to a single Object.
@@ -36,11 +37,11 @@ final class ArrayToObjectConverter implements GenericConverter {
 	}
 
 	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Object[].class, Object.class } };
+		return new Class<?>[][] {{Object[].class, Object.class}};
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.convert(asList(source), sourceType, targetType);
+		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}
 
 }
