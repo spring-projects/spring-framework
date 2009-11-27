@@ -7,12 +7,13 @@
 
 	<jms:listener-container connection-factory="testConnectionFactory" task-executor="testTaskExecutor"
 			destination-resolver="testDestinationResolver" message-converter="testMessageConverter"
-			transaction-manager="testTransactionManager" error-handler="testErrorHandler">
+			transaction-manager="testTransactionManager" error-handler="testErrorHandler" phase="99">
 		<jms:listener id="listener1" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener2" destination="testDestination" ref="testBean2" method="setName" response-destination="responseDestination"/>
 	</jms:listener-container>
 
-	<jms:listener-container>
+	<!-- TODO: remove the task-executor reference once issue with blocking on stop is resolved -->
+	<jms:listener-container task-executor="testTaskExecutor">
 		<jms:listener destination="testDestination" ref="testBean3"/>
 	</jms:listener-container>
 
@@ -53,5 +54,10 @@
 	<bean id="testBean2" class="org.springframework.beans.TestBean"/>
 
 	<bean id="testBean3" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestMessageListener"/>
+
+	<!-- TODO: remove this once issue with blocking on stop is resolved -->
+	<bean id="lifecycleProcessor" class="org.springframework.context.support.DefaultLifecycleProcessor">
+		<property name="timeoutPerShutdownPhase" value="0"/>
+	</bean>
 
 </beans>

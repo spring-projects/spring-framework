@@ -37,6 +37,7 @@ import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.Phased;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
@@ -144,6 +145,19 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertNull(defaultErrorHandler);
 	}
 
+	public void testPhases() {
+		int phase1 = getPhase("listener1");
+		int phase2 = getPhase("listener2");
+		int phase3 = getPhase("listener3");
+		int phase4 = getPhase("listener4");
+		int defaultPhase = getPhase(DefaultMessageListenerContainer.class.getName() + "#0");
+		assertEquals(99, phase1);
+		assertEquals(99, phase2);
+		assertEquals(Integer.MAX_VALUE, phase3);
+		assertEquals(Integer.MAX_VALUE, phase4);
+		assertEquals(Integer.MAX_VALUE, defaultPhase);
+	}
+
 	private MessageListener getListener(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
 		return (MessageListener) container.getMessageListener();
@@ -152,6 +166,14 @@ public class JmsNamespaceHandlerTests extends TestCase {
 	private ErrorHandler getErrorHandler(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
 		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
+	}
+
+	public int getPhase(String containerBeanName) {
+		Object container = this.context.getBean(containerBeanName);
+		if (!(container instanceof Phased)) {
+			throw new IllegalStateException("Container '" + containerBeanName + "' does not implement Phased.");
+		}
+		return ((Phased) container).getPhase();
 	}
 
 	public void testComponentRegistration() {
