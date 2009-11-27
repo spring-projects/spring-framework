@@ -57,6 +57,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private HandlerInterceptor[] adaptedInterceptors;
 
+	private boolean detectInterceptors;
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
@@ -100,6 +101,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		this.interceptors.addAll(Arrays.asList(interceptors));
 	}
 
+	/**
+	 * Configure whether this handler mapping should detect interceptors registered in the WebApplicationContext.
+	 * If true, {@link HandlerInterceptor} and {@link WebRequestInterceptor} beans will be detected by type and added to the interceptors list.
+	 * Default is false.
+	 * @param detectInterceptors the detect interceptors flag
+	 */
+	public void setDetectInterceptors(boolean detectInterceptors) {
+		this.detectInterceptors = detectInterceptors;
+	}
 
 	/**
 	 * Initializes the interceptors.
@@ -131,10 +141,17 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #adaptInterceptor
 	 */
 	protected void initInterceptors() {
-		// TODO consider impact on backwards compatibility here
-		Map<String, HandlerInterceptor> globalInterceptors = getApplicationContext().getBeansOfType(HandlerInterceptor.class);
-		if (globalInterceptors != null) {
-			this.interceptors.addAll(globalInterceptors.values());
+		if (this.detectInterceptors) {
+			Map<String, HandlerInterceptor> handlerInterceptors = getApplicationContext().getBeansOfType(HandlerInterceptor.class);
+			if (handlerInterceptors != null && !handlerInterceptors.isEmpty()) {
+				this.interceptors.addAll(handlerInterceptors.values());
+			}
+			Map<String, WebRequestInterceptor> webInterceptors = getApplicationContext().getBeansOfType(WebRequestInterceptor.class);
+			if (webInterceptors != null && !webInterceptors.isEmpty()) {
+				for (WebRequestInterceptor interceptor : webInterceptors.values()) {
+					this.interceptors.add(new WebRequestHandlerInterceptorAdapter(interceptor));			
+				}
+			}			
 		}
 		
 		if (!this.interceptors.isEmpty()) {

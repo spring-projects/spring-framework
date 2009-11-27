@@ -55,7 +55,7 @@ import org.w3c.dom.Element;
 public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jsr303Present = ClassUtils.isPresent(
-			"javax.validation.Validator", InterceptorsBeanDefinitionParser.class.getClassLoader());
+			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -64,6 +64,7 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 		RootBeanDefinition annMappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
 		annMappingDef.setSource(source);
 		annMappingDef.getPropertyValues().add("order", 0);
+		annMappingDef.getPropertyValues().add("detectInterceptors", true);
 		String annMappingName = parserContext.getReaderContext().registerWithGeneratedName(annMappingDef);
 
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);

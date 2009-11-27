@@ -48,10 +48,12 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.Log4jNestedDiagnosticContextInterceptor;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
@@ -145,7 +147,7 @@ public class MvcNamespaceTests {
 	public void testInterceptors() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml", getClass()));
-		assertEquals(6, container.getBeanDefinitionCount());
+		assertEquals(7, container.getBeanDefinitionCount());
 		container.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
@@ -157,9 +159,10 @@ public class MvcNamespaceTests {
 		request.addParameter("theme", "green");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
+		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
 	}
 
 	@Test

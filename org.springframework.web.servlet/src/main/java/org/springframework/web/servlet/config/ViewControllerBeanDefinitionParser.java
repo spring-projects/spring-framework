@@ -53,6 +53,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 			handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 			handlerMappingDef.setSource(source);
 			handlerMappingDef.getPropertyValues().add("order", "1");
+			handlerMappingDef.getPropertyValues().add("detectInterceptors", true);			
 			this.handlerMappingBeanName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);			
 		} else {
 			handlerMappingDef = (RootBeanDefinition) parserContext.getReaderContext().getRegistry().getBeanDefinition(this.handlerMappingBeanName);
