@@ -55,6 +55,7 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 		super(new MediaType("application", "x-www-form-urlencoded"));
 	}
 
+	@Override
 	public boolean supports(Class<? extends MultiValueMap<String, String>> clazz) {
 		return MultiValueMap.class.isAssignableFrom(clazz);
 	}
@@ -87,7 +88,7 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 	@Override
 	protected void writeInternal(MultiValueMap<String, String> form, HttpOutputMessage outputMessage)
 			throws IOException {
-		MediaType contentType = getContentType(form);
+		MediaType contentType = getDefaultContentType(form);
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
 		StringBuilder builder = new StringBuilder();
 		for (Iterator<Map.Entry<String, List<String>>> entryIterator = form.entrySet().iterator();

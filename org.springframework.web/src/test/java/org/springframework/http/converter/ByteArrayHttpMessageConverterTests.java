@@ -26,9 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class ByteArrayHttpMessageConverterTests {
 
 	private ByteArrayHttpMessageConverter converter;
@@ -51,7 +49,7 @@ public class ByteArrayHttpMessageConverterTests {
 	public void write() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		byte[] body = new byte[]{0x1, 0x2};
-		converter.write(body, outputMessage);
+		converter.write(body, null, outputMessage);
 		assertArrayEquals("Invalid result", body, outputMessage.getBodyAsBytes());
 		assertEquals("Invalid content-type", new MediaType("application", "octet-stream"),
 				outputMessage.getHeaders().getContentType());

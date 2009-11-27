@@ -42,8 +42,15 @@ public class BufferedImageHttpMessageConverterTests {
 	}
 
 	@Test
-	public void supports() {
-		assertTrue("Image not supported", converter.supports(BufferedImage.class));
+	public void canRead() {
+		assertTrue("Image not supported", converter.canRead(BufferedImage.class, null));
+		assertTrue("Image not supported", converter.canRead(BufferedImage.class, new MediaType("image", "png")));
+	}
+
+	@Test
+	public void canWrite() {
+		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, null));
+		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, new MediaType("image", "png")));
 	}
 
 	@Test
@@ -60,11 +67,25 @@ public class BufferedImageHttpMessageConverterTests {
 	@Test
 	public void write() throws IOException {
 		Resource logo = new ClassPathResource("logo.jpg", BufferedImageHttpMessageConverterTests.class);
-		MediaType contentType = new MediaType("image", "png");
-		converter.setContentType(contentType);
 		BufferedImage body = ImageIO.read(logo.getFile());
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(body, outputMessage);
+		MediaType contentType = new MediaType("image", "png");
+		converter.write(body, contentType, outputMessage);
+		assertEquals("Invalid content type", contentType, outputMessage.getHeaders().getContentType());
+		assertTrue("Invalid size", outputMessage.getBodyAsBytes().length > 0);
+		BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));
+		assertEquals("Invalid height", 500, result.getHeight());
+		assertEquals("Invalid width", 750, result.getWidth());
+	}
+
+	@Test
+	public void writeDefaultContentType() throws IOException {
+		Resource logo = new ClassPathResource("logo.jpg", BufferedImageHttpMessageConverterTests.class);
+		MediaType contentType = new MediaType("image", "png");
+		converter.setDefaultContentType(contentType);
+		BufferedImage body = ImageIO.read(logo.getFile());
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(body, contentType, outputMessage);
 		assertEquals("Invalid content type", contentType, outputMessage.getHeaders().getContentType());
 		assertTrue("Invalid size", outputMessage.getBodyAsBytes().length > 0);
 		BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));

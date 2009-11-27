@@ -35,11 +35,19 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 
-/** @author Arjen Poutsma */
+/**
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and write {@link
+ * Source} objects.
+ *
+ * @author Arjen Poutsma
+ * @since 3.0
+ */
 public class SourceHttpMessageConverter<T extends Source> extends AbstractXmlHttpMessageConverter<T> {
 
+	@Override
 	public boolean supports(Class<? extends T> clazz) {
-		return Source.class.isAssignableFrom(clazz);
+		return DOMSource.class.equals(clazz) || SAXSource.class.equals(clazz) || StreamSource.class.equals(clazz) ||
+				Source.class.equals(clazz);
 	}
 
 	@Override
@@ -52,11 +60,11 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractXmlHtt
 				return (T) new DOMSource(domResult.getNode());
 			}
 			else if (SAXSource.class.equals(clazz)) {
-				ByteArrayInputStream bis = transformToByteArray(source);
+				ByteArrayInputStream bis = transformToByteArrayInputStream(source);
 				return (T) new SAXSource(new InputSource(bis));
 			}
 			else if (StreamSource.class.equals(clazz) || Source.class.equals(clazz)) {
-				ByteArrayInputStream bis = transformToByteArray(source);
+				ByteArrayInputStream bis = transformToByteArrayInputStream(source);
 				return (T) new StreamSource(bis);
 			}
 			else {
@@ -65,11 +73,12 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractXmlHtt
 			}
 		}
 		catch (TransformerException ex) {
-			throw new HttpMessageNotReadableException("Could not transform from [" + source + "]", ex);
+			throw new HttpMessageNotReadableException("Could not transform from [" + source + "] to [" + clazz + "]",
+					ex);
 		}
 	}
 
-	private ByteArrayInputStream transformToByteArray(Source source) throws TransformerException {
+	private ByteArrayInputStream transformToByteArrayInputStream(Source source) throws TransformerException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		transform(source, new StreamResult(bos));
 		return new ByteArrayInputStream(bos.toByteArray());

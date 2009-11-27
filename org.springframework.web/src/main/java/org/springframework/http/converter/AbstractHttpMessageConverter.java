@@ -56,14 +56,22 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	protected AbstractHttpMessageConverter() {
 	}
 
-	/** Construct an {@code AbstractHttpMessageConverter} with one supported media type. */
+	/**
+	 * Construct an {@code AbstractHttpMessageConverter} with one supported media type.
+	 *
+	 * @param supportedMediaType the supported media type
+	 */
 	protected AbstractHttpMessageConverter(MediaType supportedMediaType) {
-		this.supportedMediaTypes = Collections.singletonList(supportedMediaType);
+		setSupportedMediaTypes(Collections.singletonList(supportedMediaType));
 	}
 
-	/** Construct an {@code AbstractHttpMessageConverter} with multiple supported media type. */
+	/**
+	 * Construct an {@code AbstractHttpMessageConverter} with multiple supported media type.
+	 *
+	 * @param supportedMediaTypes the supported media types
+	 */
 	protected AbstractHttpMessageConverter(MediaType... supportedMediaTypes) {
-		this.supportedMediaTypes = Arrays.asList(supportedMediaTypes);
+		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
 
 	/** Set the list of {@link MediaType} objects supported by this converter. */
@@ -77,8 +85,59 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * {@inheritDoc} <p>This implementation simple delegates to {@link #readInternal(Class, HttpInputMessage)}. Future
-	 * implementations might add some default behavior, however.
+	 * {@inheritDoc}
+	 *
+	 * <p>This implementation checks if the given class is {@linkplain #supports(Class) supported}, and if the {@linkplain
+	 * #getSupportedMediaTypes() supported media types} {@linkplain MediaType#includes(MediaType) include} the given media
+	 * type.
+	 */
+	public boolean canRead(Class<? extends T> clazz, MediaType mediaType) {
+		return supports(clazz) && isSupported(mediaType);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>This implementation checks if the given class is {@linkplain #supports(Class) supported}, and if the {@linkplain
+	 * #getSupportedMediaTypes() supported media types} {@linkplain MediaType#includes(MediaType) include} the given media
+	 * type.
+	 */
+	public boolean canWrite(Class<? extends T> clazz, MediaType mediaType) {
+		return supports(clazz) && isSupported(mediaType);
+	}
+
+	/**
+	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List) supported media types} include the given media
+	 * type.
+	 *
+	 * @param mediaType the media type
+	 * @return true if the supported media types include the media type, or if the media type is {@code null}
+	 */
+	protected boolean isSupported(MediaType mediaType) {
+		if (mediaType == null) {
+			return true;
+		}
+		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
+			if (supportedMediaType.includes(mediaType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Indicates whether the given class is supported by this converter.
+	 *
+	 * @param clazz the class to test for support
+	 * @return <code>true</code> if supported; <code>false</code> otherwise
+	 */
+	protected abstract boolean supports(Class<? extends T> clazz);
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>This implementation simple delegates to {@link #readInternal(Class, HttpInputMessage)}. Future implementations
+	 * might add some default behavior, however.
 	 */
 	public final T read(Class<T> clazz, HttpInputMessage inputMessage) throws IOException {
 		return readInternal(clazz, inputMessage);
@@ -97,17 +156,22 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 			throws IOException, HttpMessageNotReadableException;
 
 	/**
-	 * {@inheritDoc} <p>This implementation delegates to {@link #getContentType(Object)} and {@link
-	 * #getContentLength(Object)}, and sets the corresponding headers on the output message. It then calls {@link
-	 * #writeInternal(Object, HttpOutputMessage)}.
+	 * {@inheritDoc}
+	 *
+	 * <p>This implementation delegates to {@link #getDefaultContentType(Object)} if a content type was not provided, calls
+	 * {@link #getContentLength}, and sets the corresponding headers on the output message. It then calls {@link
+	 * #writeInternal}.
 	 */
-	public final void write(T t, HttpOutputMessage outputMessage) throws IOException {
+	public final void write(T t, MediaType contentType, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
 		HttpHeaders headers = outputMessage.getHeaders();
-		MediaType contentType = getContentType(t);
+		if (contentType == null) {
+			contentType = getDefaultContentType(t);
+		}
 		if (contentType != null) {
 			headers.setContentType(contentType);
 		}
-		Long contentLength = getContentLength(t);
+		Long contentLength = getContentLength(t, contentType);
 		if (contentLength != null) {
 			headers.setContentLength(contentLength);
 		}
@@ -116,30 +180,35 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Returns the content type for the given type. <p>By default, this returns the first element of the {@link
-	 * #setSupportedMediaTypes(List) supportedMediaTypes} property, if any. Can be overriden in subclasses.
+	 * Returns the default content type for the given type. Called when {@link #write} is invoked without a specified
+	 * content type parameter.
+	 *
+	 * <p>By default, this returns the first element of the {@link #setSupportedMediaTypes(List) supportedMediaTypes}
+	 * property, if any. Can be overriden in subclasses.
 	 *
 	 * @param t the type to return the content type for
 	 * @return the content type, or <code>null</code> if not known
 	 */
-	protected MediaType getContentType(T t) {
+	protected MediaType getDefaultContentType(T t) {
 		List<MediaType> mediaTypes = getSupportedMediaTypes();
 		return (!mediaTypes.isEmpty() ? mediaTypes.get(0) : null);
 	}
 
 	/**
-	 * Returns the content length for the given type. <p>By default, this returns <code>null</code>. Can be overriden in
+	 * Returns the content length for the given type.
+	 *
+	 * <p>By default, this returns {@code null}, meaning that the content length is unknown. Can be overriden in
 	 * subclasses.
 	 *
 	 * @param t the type to return the content length for
-	 * @return the content length, or <code>null</code> if not known
+	 * @return the content length, or {@code null} if not known
 	 */
-	protected Long getContentLength(T t) {
+	protected Long getContentLength(T t, MediaType contentType) {
 		return null;
 	}
 
 	/**
-	 * Abstract template method that writes the actual body. Invoked from {@link #write(Object, HttpOutputMessage)}.
+	 * Abstract template method that writes the actual body. Invoked from {@link #write}.
 	 *
 	 * @param t the object to write to the output message
 	 * @param outputMessage the message to write to

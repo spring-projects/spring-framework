@@ -54,9 +54,7 @@ public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 
 	private boolean prefixJson = false;
 
-	/**
-	 * Construct a new {@code BindingJacksonHttpMessageConverter},
-	 */
+	/** Construct a new {@code BindingJacksonHttpMessageConverter}, */
 	public MappingJacksonHttpMessageConverter() {
 		super(new MediaType("application", "json"));
 	}
@@ -75,9 +73,7 @@ public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 		this.objectMapper = objectMapper;
 	}
 
-	/**
-	 * Sets the {@code JsonEncoding} for this converter. By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used.
-	 */
+	/** Sets the {@code JsonEncoding} for this converter. By default, {@linkplain JsonEncoding#UTF8 UTF-8} is used. */
 	public void setEncoding(JsonEncoding encoding) {
 		Assert.notNull(encoding, "'encoding' must not be null");
 		this.encoding = encoding;
@@ -94,6 +90,7 @@ public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 		this.prefixJson = prefixJson;
 	}
 
+	@Override
 	public boolean supports(Class<? extends T> clazz) {
 		return objectMapper.canSerialize(clazz);
 	}
@@ -105,7 +102,7 @@ public class MappingJacksonHttpMessageConverter<T> extends AbstractHttpMessageCo
 	}
 
 	@Override
-	protected MediaType getContentType(T t) {
+	protected MediaType getDefaultContentType(T t) {
 		Charset charset = Charset.forName(encoding.getJavaName());
 		return new MediaType("application", "json", charset);
 	}
