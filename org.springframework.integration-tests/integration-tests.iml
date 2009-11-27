@@ -77,11 +77,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.5.1/com.springsource.org.codehaus.groovy-1.5.1.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.6.5/com.springsource.org.codehaus.groovy-1.6.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.5.1/com.springsource.org.codehaus.groovy-sources-1.5.1.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.groovy/com.springsource.org.codehaus.groovy/1.6.5/com.springsource.org.codehaus.groovy-sources-1.6.5.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

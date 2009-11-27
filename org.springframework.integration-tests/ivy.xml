@@ -64,7 +64,7 @@
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity" rev="1.5.0" conf="test->compile"/>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity.tools.view" rev="1.4.0" conf="test->compile"/>
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="test->compile"/>
-		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.3" conf="test->compile"/>
+		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.5" conf="test->compile"/>
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="test->compile"/>
