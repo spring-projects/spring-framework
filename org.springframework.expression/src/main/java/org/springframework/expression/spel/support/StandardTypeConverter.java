@@ -28,7 +28,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link TypeConverter} interface, delegating to a core Spring {@link ConversionService}.
+ * Default implementation of the {@link TypeConverter} interface,
+ * delegating to a core Spring {@link ConversionService}.
  * 
  * @author Juergen Hoeller
  * @author Andy Clement
@@ -37,18 +38,25 @@ import org.springframework.util.Assert;
  */
 public class StandardTypeConverter implements TypeConverter {
 
-	private static ConversionService DEFAULT_INSTANCE;
+	private static ConversionService defaultConversionService;
 	
 	private final ConversionService conversionService;
 
+
 	public StandardTypeConverter() {
-		this.conversionService = getDefaultConversionService();		
+		synchronized (this) {
+			if (defaultConversionService == null) {
+				defaultConversionService = ConversionServiceFactory.createDefaultConversionService();
+			}
+		}
+		this.conversionService = defaultConversionService;
 	}
 
 	public StandardTypeConverter(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService must not be null");
 		this.conversionService = conversionService;
 	}
+
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		return this.conversionService.canConvert(sourceType, targetType);
@@ -57,21 +65,15 @@ public class StandardTypeConverter implements TypeConverter {
 	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 		try {
 			return this.conversionService.convert(value, TypeDescriptor.forObject(value), typeDescriptor);
-		} catch (ConverterNotFoundException cenfe) {
-			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR, value != null ? value
-					.getClass() : null, typeDescriptor.asString());
-		} catch (ConversionException ce) {
-			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR, value != null ? value.getClass()
-					: null, typeDescriptor.asString());
+		}
+		catch (ConverterNotFoundException cenfe) {
+			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR,
+					(value != null ? value.getClass() : null), typeDescriptor.asString());
+		}
+		catch (ConversionException ce) {
+			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR,
+					(value != null ? value.getClass() : null), typeDescriptor.asString());
 		}
 	}
 
-	private ConversionService getDefaultConversionService() {
-		synchronized(this) {
-			if (DEFAULT_INSTANCE == null) {
-				DEFAULT_INSTANCE = ConversionServiceFactory.createDefaultConversionService();
-			}
-		}
-		return DEFAULT_INSTANCE;
-	}
 }

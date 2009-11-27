@@ -194,7 +194,7 @@ public abstract class SessionFactoryUtils {
 	 * @see HibernateTemplate
 	 */
 	public static Session getSession(SessionFactory sessionFactory, boolean allowCreate)
-	    throws DataAccessResourceFailureException, IllegalStateException {
+			throws DataAccessResourceFailureException, IllegalStateException {
 
 		try {
 			return doGetSession(sessionFactory, null, null, allowCreate);
@@ -251,7 +251,7 @@ public abstract class SessionFactoryUtils {
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
 	 */
 	public static Session doGetSession(SessionFactory sessionFactory, boolean allowCreate)
-	    throws HibernateException, IllegalStateException {
+			throws HibernateException, IllegalStateException {
 
 		return doGetSession(sessionFactory, null, null, allowCreate);
 	}

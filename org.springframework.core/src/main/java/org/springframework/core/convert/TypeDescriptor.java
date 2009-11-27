@@ -26,6 +26,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Context about a type to convert to.
@@ -42,6 +43,7 @@ public class TypeDescriptor {
 	 */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
+
 	private Class<?> type;
 
 	private TypeDescriptor elementType;
@@ -51,6 +53,7 @@ public class TypeDescriptor {
 	private Field field;
 
 	private Annotation[] cachedFieldAnnotations;
+
 
 	/**
 	 * Create a new descriptor for the given type.
@@ -99,6 +102,7 @@ public class TypeDescriptor {
 		this.elementType = elementType;
 	}
 
+
 	/**
 	 * Return the wrapped MethodParameter, if any.
 	 * <p>Note: Either MethodParameter or Field is available.
@@ -124,11 +128,14 @@ public class TypeDescriptor {
 	public Class<?> getType() {
 		if (this.type != null) {
 			return this.type;
-		} else if (this.field != null) {
+		}
+		else if (this.field != null) {
 			return this.field.getType();
-		} else if (this.methodParameter != null) {
+		}
+		else if (this.methodParameter != null) {
 			return this.methodParameter.getParameterType();
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -139,7 +146,7 @@ public class TypeDescriptor {
 	 */
 	public Class<?> getObjectType() {
 		Class<?> type = getType();
-		return type != null ? ClassUtils.resolvePrimitiveIfNecessary(type) : type;
+		return (type != null ? ClassUtils.resolvePrimitiveIfNecessary(type) : type);
 	}
 
 	/**
@@ -147,8 +154,7 @@ public class TypeDescriptor {
 	 * @param type the type to test against
 	 */
 	public boolean typeEquals(Class<?> type) {
-		Class<?> thisType = getType();
-		return thisType != null ? thisType.equals(type) : false;
+		return ObjectUtils.nullSafeEquals(getType(), type);
 	}
 
 	/**
@@ -158,7 +164,8 @@ public class TypeDescriptor {
 		Class<?> type = getType();
 		if (type != null) {
 			return getType().getName();
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -198,14 +205,17 @@ public class TypeDescriptor {
 	 * Return the element type as a type descriptor.
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
-		if (elementType != null) {
-			return elementType;
-		} else {
+		if (this.elementType != null) {
+			return this.elementType;
+		}
+		else {
 			if (isArray()) {
 				return TypeDescriptor.valueOf(getArrayComponentType());
-			} else if (isCollection()) {
+			}
+			else if (isCollection()) {
 				return TypeDescriptor.valueOf(getCollectionElementType());
-			} else {
+			}
+			else {
 				return TypeDescriptor.NULL;
 			}
 		}
@@ -232,9 +242,11 @@ public class TypeDescriptor {
 	public Class<?> getMapKeyType() {
 		if (this.field != null) {
 			return GenericCollectionTypeResolver.getMapKeyFieldType(field);
-		} else if (this.methodParameter != null) {
+		}
+		else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -246,9 +258,11 @@ public class TypeDescriptor {
 	public Class<?> getMapValueType() {
 		if (this.field != null) {
 			return GenericCollectionTypeResolver.getMapValueFieldType(this.field);
-		} else if (this.methodParameter != null) {
+		}
+		else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -276,9 +290,11 @@ public class TypeDescriptor {
 				this.cachedFieldAnnotations = this.field.getAnnotations();
 			}
 			return this.cachedFieldAnnotations;
-		} else if (this.methodParameter != null) {
+		}
+		else if (this.methodParameter != null) {
 			return this.methodParameter.getParameterAnnotations();
-		} else {
+		}
+		else {
 			return new Annotation[0];
 		}
 	}
@@ -324,6 +340,28 @@ public class TypeDescriptor {
 		return type != null && ClassUtils.isAssignable(targetType.getType(), type);
 	}
 
+	private Class<?> getArrayComponentType() {
+		return getType().getComponentType();
+	}
+
+	@SuppressWarnings("unchecked")
+	private Class<?> getCollectionElementType() {
+		if (this.type != null) {
+			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type);
+		}
+		else if (this.field != null) {
+			return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
+		}
+		else {
+			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
+		}
+	}
+
+	private boolean isTypeAssignableTo(Class<?> clazz) {
+		Class<?> type = getType();
+		return (type != null && ClassUtils.isAssignable(clazz, type));
+	}
+
 	/**
 	 * @return a textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages
 	 */
@@ -332,7 +370,8 @@ public class TypeDescriptor {
 		if (isArray()) {
 			// TODO should properly handle multi dimensional arrays
 			stringValue.append(getArrayComponentType().getName()).append("[]");
-		} else {
+		}
+		else {
 			Class<?> clazz = getType();
 			if (clazz == null) {
 				return "null";
@@ -355,27 +394,23 @@ public class TypeDescriptor {
 		return stringValue.toString();
 	}
 
-	// internal helpers
-
-	private Class<?> getArrayComponentType() {
-		return getType().getComponentType();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Class<?> getCollectionElementType() {
-		if (this.type != null) {
-			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type);
-		} else if (this.field != null) {
-			return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
-		} else {
-			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
+	public String toString() {
+		if (this == TypeDescriptor.NULL) {
+			return "[TypeDescriptor.NULL]";
+		}
+		else {
+			StringBuilder builder = new StringBuilder();
+			builder.append("[TypeDescriptor ");
+			Annotation[] anns = getAnnotations();
+			for (Annotation ann : anns) {
+				builder.append("@").append(ann.annotationType().getName()).append(' ');
+			}
+			builder.append(getType().getName());
+			builder.append("]");
+			return builder.toString();
 		}
 	}
 
-	private boolean isTypeAssignableTo(Class<?> clazz) {
-		Class<?> type = getType();
-		return (type != null && ClassUtils.isAssignable(clazz, type));
-	}
 
 	// static factory methods
 
@@ -406,21 +441,5 @@ public class TypeDescriptor {
 	public static TypeDescriptor collection(Class<?> type, TypeDescriptor elementType) {
 		return new TypeDescriptor(type, elementType);
 	}
-	
-	public String toString() {
-		if (this == TypeDescriptor.NULL) {
-			return "[TypeDescriptor.NULL]";
-		} else {
-			StringBuilder builder = new StringBuilder();
-			builder.append("[TypeDescriptor ");
-			Annotation[] anns = getAnnotations();
-			for (Annotation ann : anns) {
-				builder.append("@" + ann.annotationType().getName()).append(' ');
-			}
-			builder.append(getType().getName());
-			builder.append("]");
-			return builder.toString();
-		}
-	}
-	
+
 }

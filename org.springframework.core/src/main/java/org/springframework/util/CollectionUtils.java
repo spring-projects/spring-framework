@@ -213,7 +213,7 @@ public abstract class CollectionUtils {
 	 * or <code>null</code> if none or more than one such value found
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T findValueOfType(Collection collection, Class<T> type) {
+	public static <T> T findValueOfType(Collection<?> collection, Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
 		}
@@ -239,11 +239,11 @@ public abstract class CollectionUtils {
 	 * @return a value of one of the given types found if there is a clear match,
 	 * or <code>null</code> if none or more than one such value found
 	 */
-	public static Object findValueOfType(Collection collection, Class[] types) {
+	public static Object findValueOfType(Collection<?> collection, Class<?>[] types) {
 		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
 			return null;
 		}
-		for (Class type : types) {
+		for (Class<?> type : types) {
 			Object value = findValueOfType(collection, type);
 			if (value != null) {
 				return value;
@@ -264,8 +264,7 @@ public abstract class CollectionUtils {
 		}
 		boolean hasCandidate = false;
 		Object candidate = null;
-		for (Iterator it = collection.iterator(); it.hasNext();) {
-			Object elem = it.next();
+		for (Object elem : collection) {
 			if (!hasCandidate) {
 				hasCandidate = true;
 				candidate = elem;
@@ -286,6 +285,7 @@ public abstract class CollectionUtils {
 		return new EnumerationIterator<E>(enumeration);
 	}
 
+
 	/**
 	 * Iterator wrapping an Enumeration.
 	 */
@@ -298,15 +298,16 @@ public abstract class CollectionUtils {
 		}
 
 		public boolean hasNext() {
-			return enumeration.hasMoreElements();
+			return this.enumeration.hasMoreElements();
 		}
 
 		public E next() {
-			return enumeration.nextElement();
+			return this.enumeration.nextElement();
 		}
 
 		public void remove() throws UnsupportedOperationException {
 			throw new UnsupportedOperationException("Not supported");
 		}
 	}
+
 }

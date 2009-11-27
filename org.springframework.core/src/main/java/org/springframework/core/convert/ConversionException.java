@@ -24,7 +24,6 @@ import org.springframework.core.NestedRuntimeException;
  * @author Keith Donald
  * @since 3.0 
  */
-@SuppressWarnings("serial")
 public abstract class ConversionException extends NestedRuntimeException {
 
 	/**
