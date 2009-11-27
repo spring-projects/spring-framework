@@ -44,6 +44,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String ERROR_HANDLER_ATTRIBUTE = "error-handler";
 
+	private static final String PHASE_ATTRIBUTE = "phase";
+
 	private static final String CACHE_ATTRIBUTE = "cache";
 
 
@@ -105,6 +107,11 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		if (StringUtils.hasText(destinationResolverBeanName)) {
 			containerDef.getPropertyValues().add("destinationResolver",
 					new RuntimeBeanReference(destinationResolverBeanName));
+		}
+
+		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
+		if (StringUtils.hasText(phase)) {
+			containerDef.getPropertyValues().add("phase", phase);
 		}
 
 		String cache = containerEle.getAttribute(CACHE_ATTRIBUTE);
