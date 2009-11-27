@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.annotation;
 
 import java.lang.annotation.ElementType;
@@ -43,7 +44,7 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see org.joda.time.format.DateTimeFormat
  */
-@Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DateTimeFormat {
 
@@ -68,6 +69,7 @@ public @interface DateTimeFormat {
 	 * Set this attribute when you wish to format your field in accordance with a custom date time pattern not represented by a style or ISO format.
 	 */
 	String pattern() default "";
+
 
 	/**
 	 * Common ISO date time format patterns.
@@ -96,6 +98,6 @@ public @interface DateTimeFormat {
 		 * Indicates that no ISO-based format pattern should be applied.
 		 */
 		NONE
-		
 	}
+
 }

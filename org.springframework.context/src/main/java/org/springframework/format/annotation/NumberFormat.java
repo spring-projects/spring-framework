@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.annotation;
 
 import java.lang.annotation.ElementType;
@@ -36,7 +37,7 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see java.text.NumberFormat
  */
-@Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NumberFormat {
 
@@ -53,6 +54,7 @@ public @interface NumberFormat {
 	 * Set this attribute when you wish to format your field in accordance with a custom number pattern not represented by a style.
 	 */
 	String pattern() default "";
+
 
 	/**
 	 * Common number format styles.
@@ -75,6 +77,6 @@ public @interface NumberFormat {
 		 * The percent format for the current locale.
 		 */
 		PERCENT
-
 	}
+
 }
