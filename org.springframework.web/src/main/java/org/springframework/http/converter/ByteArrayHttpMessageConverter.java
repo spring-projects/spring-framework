@@ -29,8 +29,7 @@ import org.springframework.util.FileCopyUtils;
  *
  * <p>By default, this converter supports all media types (<code>&#42;&#47;&#42;</code>), and writes with a {@code
  * Content-Type} of {@code application/octet-stream}. This can be overridden by setting the {@link
- * #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property, and overridding {@link
- * #getContentType(byte[])}.
+ * #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -39,9 +38,10 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 
 	/** Creates a new instance of the {@code ByteArrayHttpMessageConverter}. */
 	public ByteArrayHttpMessageConverter() {
-		super(MediaType.ALL);
+		super(new MediaType("application", "octet-stream"), MediaType.ALL);
 	}
 
+	@Override
 	public boolean supports(Class<? extends byte[]> clazz) {
 		return byte[].class.equals(clazz);
 	}
@@ -60,12 +60,7 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	}
 
 	@Override
-	protected MediaType getContentType(byte[] bytes) {
-		return new MediaType("application", "octet-stream");
-	}
-
-	@Override
-	protected Long getContentLength(byte[] bytes) {
+	protected Long getContentLength(byte[] bytes, MediaType contentType) {
 		return (long) bytes.length;
 	}
 

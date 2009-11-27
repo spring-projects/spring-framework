@@ -32,20 +32,35 @@ import org.springframework.http.MediaType;
 public interface HttpMessageConverter<T> {
 
 	/**
-	 * Indicate whether the given class is supported by this converter.
+	 * Indicates whether the given class can be read by this converter.
 	 *
-	 * @param clazz the class to test for support
-	 * @return <code>true</code> if supported; <code>false</code> otherwise
+	 * @param clazz the class to test for readability
+	 * @param mediaType the media type to read, can be {@code null} if not specified
+	 * @return <code>true</code> if readable; <code>false</code> otherwise
 	 */
-	boolean supports(Class<? extends T> clazz);
+	boolean canRead(Class<? extends T> clazz, MediaType mediaType);
 
-	/** Return the list of {@link MediaType} objects supported by this converter. */
+	/**
+	 * Indicates whether the given class can be written by this converter.
+	 *
+	 * @param clazz the class to test for writability
+	 * @param mediaType the media type to write, can be {@code null} if not specified
+	 * @return <code>true</code> if writable; <code>false</code> otherwise
+	 */
+	boolean canWrite(Class<? extends T> clazz, MediaType mediaType);
+
+	/**
+	 * Return the list of {@link MediaType} objects supported by this converter.
+	 *
+	 * @return the list of supported media types
+	 */
 	List<MediaType> getSupportedMediaTypes();
 
 	/**
 	 * Read an object of the given type form the given input message, and returns it.
 	 *
-	 * @param clazz the type of object to return
+	 * @param clazz the type of object to return. This type must have previously been passed to the {@link #canRead
+	 * canRead} method of this interface, which must have returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
 	 * @return the converted object
 	 * @throws IOException in case of I/O errors
@@ -56,11 +71,16 @@ public interface HttpMessageConverter<T> {
 	/**
 	 * Write an given object to the given output message.
 	 *
-	 * @param t the object to write to the output message
+	 * @param t the object to write to the output message. The type of this object must have previously been passed to the
+	 * {@link #canWrite canWrite} method of this interface, which must have returned {@code true}.
+	 * @param contentType the content type to use when writing. May be {@code null} to indicate that the the default
+	 * content type of the converter must be used. If not {@code null}, this media type must have previously been passed to
+	 * the {@link #canWrite canWrite} method of this interface, which must have returned {@code true}.
 	 * @param outputMessage the message to write to
 	 * @throws IOException in case of I/O errors
 	 * @throws HttpMessageNotWritableException in case of conversion errors
 	 */
-	void write(T t, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException;
+	void write(T t, MediaType contentType, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException;
 
 }

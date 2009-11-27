@@ -68,7 +68,7 @@ public class MarshallingHttpMessageConverterTests {
 		marshaller.marshal(eq(body), isA(StreamResult.class));
 
 		replay(marshaller, unmarshaller);
-		converter.write(body, outputMessage);
+		converter.write(body, null, outputMessage);
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 		verify(marshaller, unmarshaller);

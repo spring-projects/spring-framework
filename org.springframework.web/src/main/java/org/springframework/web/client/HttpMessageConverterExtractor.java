@@ -36,29 +36,28 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 	private final Class<T> responseType;
 
-	private final List<HttpMessageConverter<T>> messageConverters;
+	private final List<HttpMessageConverter<?>> messageConverters;
 
 	/**
 	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given response type and message
 	 * converters. The given converters must support the response type.
 	 */
-	public HttpMessageConverterExtractor(Class<T> responseType, List<HttpMessageConverter<T>> messageConverters) {
+	public HttpMessageConverterExtractor(Class<T> responseType, List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notNull(responseType, "'responseType' must not be null");
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.responseType = responseType;
 		this.messageConverters = messageConverters;
 	}
 
+	@SuppressWarnings("unchecked")
 	public T extractData(ClientHttpResponse response) throws IOException {
 		MediaType contentType = response.getHeaders().getContentType();
 		if (contentType == null) {
 			throw new RestClientException("Cannot extract response: no Content-Type found");
 		}
-		for (HttpMessageConverter<T> messageConverter : messageConverters) {
-			for (MediaType supportedMediaType : messageConverter.getSupportedMediaTypes()) {
-				if (supportedMediaType.includes(contentType)) {
-					return messageConverter.read(this.responseType, response);
-				}
+		for (HttpMessageConverter messageConverter : messageConverters) {
+			if (messageConverter.canRead(responseType, contentType)) {
+				return (T) messageConverter.read(this.responseType, response);
 			}
 		}
 		throw new RestClientException(

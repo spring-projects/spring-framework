@@ -94,7 +94,7 @@ public class SourceHttpMessageConverterTests {
 
 		SourceHttpMessageConverter<Source> converter = new SourceHttpMessageConverter<Source>();
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(domSource, outputMessage);
+		converter.write(domSource, null, outputMessage);
 		assertXMLEqual("Invalid result", "<root>Hello World</root>",
 				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),

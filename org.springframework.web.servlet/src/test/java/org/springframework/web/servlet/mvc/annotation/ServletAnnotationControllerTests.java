@@ -30,12 +30,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -52,10 +52,10 @@ import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -63,14 +63,16 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
@@ -79,9 +81,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -445,7 +447,8 @@ public class ServletAnnotationControllerTests {
 				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
 				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+				wac.getBeanFactory()
+						.registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -639,8 +642,8 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("mySurpriseView", response.getContentAsString());
 
-		MyParameterDispatchingController deserialized = (MyParameterDispatchingController)
-				SerializationTestUtils.serializeAndDeserialize(servlet.getWebApplicationContext().getBean("controller"));
+		MyParameterDispatchingController deserialized = (MyParameterDispatchingController) SerializationTestUtils
+				.serializeAndDeserialize(servlet.getWebApplicationContext().getBean("controller"));
 		assertNotNull(deserialized.request);
 		assertNotNull(deserialized.session);
 	}
@@ -947,7 +950,23 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void responseBodyNoAcceptableMediaType() throws ServletException, IOException {
-		initServlet(RequestBodyController.class);
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
+				RootBeanDefinition converterDef = new RootBeanDefinition(StringHttpMessageConverter.class);
+				converterDef.getPropertyValues().add("supportedMediaTypes", new MediaType("text", "plain"));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				StringHttpMessageConverter converter = new StringHttpMessageConverter();
+				converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("text", "plain")));
+				adapterDef.getPropertyValues().add("messageConverters", converter);
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
 		String requestBody = "Hello World";
@@ -975,7 +994,19 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void unsupportedRequestBody() throws ServletException, IOException {
-		initServlet(RequestBodyController.class);
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("messageConverters", new ByteArrayHttpMessageConverter());
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
 		String requestBody = "Hello World";
@@ -1061,11 +1092,9 @@ public class ServletAnnotationControllerTests {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller",
-						new RootBeanDefinition(ModelAndViewResolverController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(ModelAndViewResolverController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues()
-						.add("customModelAndViewResolver", new MyModelAndViewResolver());
+				adapterDef.getPropertyValues().add("customModelAndViewResolver", new MyModelAndViewResolver());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -1086,7 +1115,7 @@ public class ServletAnnotationControllerTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
 		request.setCookies(new Cookie("date", "2008-11-18"));
-		MockHttpServletResponse response  = new MockHttpServletResponse();
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("test-108", response.getContentAsString());
 	}
@@ -1096,7 +1125,7 @@ public class ServletAnnotationControllerTests {
 		initServlet(AmbiguousParamsController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
-		MockHttpServletResponse response  = new MockHttpServletResponse();
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("noParams", response.getContentAsString());
 
@@ -1115,7 +1144,6 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 	}
-
 
 	@Test
 	public void requestParamMap() throws Exception {
@@ -1229,11 +1257,9 @@ public class ServletAnnotationControllerTests {
 		assertEquals("create", response.getContentAsString());
 	}
 
-
-
 	/*
-	 * Controllers
-	 */
+		 * Controllers
+		 */
 
 	@RequestMapping("/myPath.do")
 	private static class MyController extends AbstractController {
@@ -1470,7 +1496,8 @@ public class ServletAnnotationControllerTests {
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
 		private ValidTestBean createTestBean(@RequestParam T defaultName,
-				Map<String, Object> model, @RequestParam Date date) {
+				Map<String, Object> model,
+				@RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
 			ValidTestBean tb = new ValidTestBean();
 			tb.setName(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
@@ -1740,9 +1767,10 @@ public class ServletAnnotationControllerTests {
 					}
 					List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 					if (errors.hasFieldErrors("age")) {
-						response.getWriter().write(viewName + "-" + tb.getName() + "-" +
-								errors.getFieldError("age").getCode() + "-" + testBeans.get(0).getName() + "-" +
-								model.get("myKey") + (model.containsKey("yourKey") ? "-" + model.get("yourKey") : ""));
+						response.getWriter()
+								.write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
+										"-" + testBeans.get(0).getName() + "-" + model.get("myKey") +
+										(model.containsKey("yourKey") ? "-" + model.get("yourKey") : ""));
 					}
 					else {
 						response.getWriter().write(viewName + "-" + tb.getName() + "-" + tb.getAge() + "-" +
@@ -1760,6 +1788,7 @@ public class ServletAnnotationControllerTests {
 				public String getContentType() {
 					return null;
 				}
+
 				public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 					request.getSession().setAttribute("model", model);
 				}
@@ -1787,6 +1816,7 @@ public class ServletAnnotationControllerTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Controller
 	public @interface MyControllerAnnotation {
+
 	}
 
 	@MyControllerAnnotation
@@ -1835,8 +1865,8 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping("/myPath.do")
 		public void myHandle(@RequestParam(value = "id", defaultValue = "${myKey}") String id,
 				@RequestHeader(defaultValue = "#{systemProperties.myHeader}") String header,
-				@Value("#{request.contextPath}") String contextPath, HttpServletResponse response)
-				throws IOException {
+				@Value("#{request.contextPath}") String contextPath,
+				HttpServletResponse response) throws IOException {
 			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header) + "-" + contextPath);
 		}
 	}
@@ -1873,7 +1903,6 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-
 	@Controller
 	public static class PathOrderingController {
 
@@ -1888,7 +1917,6 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-
 	@Controller
 	public static class RequestBodyController {
 
@@ -1901,7 +1929,11 @@ public class ServletAnnotationControllerTests {
 
 	public static class MyMessageConverter implements HttpMessageConverter {
 
-		public boolean supports(Class clazz) {
+		public boolean canRead(Class clazz, MediaType mediaType) {
+			return true;
+		}
+
+		public boolean canWrite(Class clazz, MediaType mediaType) {
 			return true;
 		}
 
@@ -1914,7 +1946,7 @@ public class ServletAnnotationControllerTests {
 			throw new HttpMessageNotReadableException("Could not read");
 		}
 
-		public void write(Object o, HttpOutputMessage outputMessage)
+		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			throw new UnsupportedOperationException("Not implemented");
 		}
@@ -1955,8 +1987,11 @@ public class ServletAnnotationControllerTests {
 
 	public static class MyModelAndViewResolver implements ModelAndViewResolver {
 
-		public ModelAndView resolveModelAndView(Method handlerMethod, Class handlerType,
-				Object returnValue, ExtendedModelMap implicitModel, NativeWebRequest webRequest) {
+		public ModelAndView resolveModelAndView(Method handlerMethod,
+				Class handlerType,
+				Object returnValue,
+				ExtendedModelMap implicitModel,
+				NativeWebRequest webRequest) {
 			if (returnValue instanceof MySpecialArg) {
 				return new ModelAndView(new View() {
 					public String getContentType() {
@@ -2002,8 +2037,7 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping(method = RequestMethod.GET)
-		public void handle(@CookieValue("date") Date date, Writer writer)
-				throws IOException {
+		public void handle(@CookieValue("date") Date date, Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
 			writer.write("test-" + date.getYear());
 		}
@@ -2043,7 +2077,8 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/multiValueMap")
-		public void multiValueMap(@RequestParam MultiValueMap<String, String> params, Writer writer) throws IOException {
+		public void multiValueMap(@RequestParam MultiValueMap<String, String> params, Writer writer)
+				throws IOException {
 			for (Iterator<Map.Entry<String, List<String>>> it1 = params.entrySet().iterator(); it1.hasNext();) {
 				Map.Entry<String, List<String>> entry = it1.next();
 				writer.write(entry.getKey() + "=[");
@@ -2078,7 +2113,8 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/multiValueMap")
-		public void multiValueMap(@RequestHeader MultiValueMap<String, String> headers, Writer writer) throws IOException {
+		public void multiValueMap(@RequestHeader MultiValueMap<String, String> headers, Writer writer)
+				throws IOException {
 			for (Iterator<Map.Entry<String, List<String>>> it1 = headers.entrySet().iterator(); it1.hasNext();) {
 				Map.Entry<String, List<String>> entry = it1.next();
 				writer.write(entry.getKey() + "=[");
@@ -2104,5 +2140,5 @@ public class ServletAnnotationControllerTests {
 
 	}
 
-	
+
 }

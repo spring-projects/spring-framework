@@ -18,7 +18,6 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collections;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -28,9 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class StringHttpMessageConverterTests {
 
 	private StringHttpMessageConverter converter;
@@ -55,7 +52,7 @@ public class StringHttpMessageConverterTests {
 		Charset iso88591 = Charset.forName("ISO-8859-1");
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
-		converter.write(body, outputMessage);
+		converter.write(body, null, outputMessage);
 		assertEquals("Invalid result", body, outputMessage.getBodyAsString(iso88591));
 		assertEquals("Invalid content-type", new MediaType("text", "plain", iso88591),
 				outputMessage.getHeaders().getContentType());
@@ -67,13 +64,12 @@ public class StringHttpMessageConverterTests {
 	@Test
 	public void writeUTF8() throws IOException {
 		Charset utf8 = Charset.forName("UTF-8");
-		converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("text", "plain", utf8)));
+		MediaType contentType = new MediaType("text", "plain", utf8);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
-		converter.write(body, outputMessage);
+		converter.write(body, contentType, outputMessage);
 		assertEquals("Invalid result", body, outputMessage.getBodyAsString(utf8));
-		assertEquals("Invalid content-type", new MediaType("text", "plain", utf8),
-				outputMessage.getHeaders().getContentType());
+		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
 		assertEquals("Invalid content-length", body.getBytes(utf8).length,
 				outputMessage.getHeaders().getContentLength());
 		assertFalse("Invalid accept-charset", outputMessage.getHeaders().getAcceptCharset().isEmpty());

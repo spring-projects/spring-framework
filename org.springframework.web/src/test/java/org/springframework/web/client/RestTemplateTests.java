@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,9 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 
 /** @author Arjen Poutsma */
 @SuppressWarnings("unchecked")
@@ -65,18 +62,7 @@ public class RestTemplateTests {
 		converter = createMock(HttpMessageConverter.class);
 		template = new RestTemplate(requestFactory);
 		template.setErrorHandler(errorHandler);
-		template.setMessageConverters(new HttpMessageConverter<?>[]{converter});
-	}
-
-	@Test
-	public void getSupportedMessageBodyConverters() {
-		ByteArrayHttpMessageConverter byteArrayConverter = new ByteArrayHttpMessageConverter();
-		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
-		template.setMessageConverters(new HttpMessageConverter<?>[]{byteArrayConverter, stringConverter});
-
-		List<HttpMessageConverter<String>> result = template.getSupportedMessageConverters(String.class);
-		assertEquals("Invalid amount of String converters", 1, result.size());
-		assertEquals("Invalid String converters", stringConverter, result.get(0));
+		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
 	}
 
 	@Test
@@ -136,9 +122,9 @@ public class RestTemplateTests {
 
 	@Test
 	public void getForObject() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(2);
+		expect(converter.canRead(String.class, null)).andReturn(true);
 		MediaType textPlain = new MediaType("text", "plain");
-		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.GET)).andReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		expect(request.getHeaders()).andReturn(requestHeaders);
@@ -147,6 +133,7 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		expect(converter.canRead(String.class, textPlain)).andReturn(true);
 		String expected = "Hello World";
 		expect(converter.read(String.class, response)).andReturn(expected);
 		response.close();
@@ -161,27 +148,10 @@ public class RestTemplateTests {
 	}
 
 	@Test
-	public void getForObjectUnsupportedClass() throws Exception {
-		expect(converter.supports(String.class)).andReturn(false);
-
-		replayMocks();
-
-		try {
-			template.getForObject("http://example.com/{p}", String.class, "resource");
-			fail("IllegalArgumentException expected");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-
-		verifyMocks();
-	}
-
-	@Test
 	public void getUnsupportedMediaType() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(2);
+		expect(converter.canRead(String.class, null)).andReturn(true);
 		MediaType supportedMediaType = new MediaType("foo", "bar");
-		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(supportedMediaType)).times(2);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(supportedMediaType));
 		expect(requestFactory.createRequest(new URI("http://example.com/resource"), HttpMethod.GET)).andReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		expect(request.getHeaders()).andReturn(requestHeaders);
@@ -191,6 +161,7 @@ public class RestTemplateTests {
 		MediaType contentType = new MediaType("bar", "baz");
 		responseHeaders.setContentType(contentType);
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		expect(converter.canRead(String.class, contentType)).andReturn(false);
 		response.close();
 
 		replayMocks();
@@ -224,10 +195,10 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocation() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(2);
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
 		String helloWorld = "Hello World";
-		converter.write(helloWorld, request);
+		expect(converter.canWrite(String.class, null)).andReturn(true);
+		converter.write(helloWorld, null, request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
@@ -246,10 +217,10 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForLocationNoLocation() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(2);
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
 		String helloWorld = "Hello World";
-		converter.write(helloWorld, request);
+		expect(converter.canWrite(String.class, null)).andReturn(true);
+		converter.write(helloWorld, null, request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
@@ -284,21 +255,22 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForObject() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(2);
-		expect(converter.supports(Integer.class)).andReturn(true).times(2);
 		MediaType textPlain = new MediaType("text", "plain");
-		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+		expect(converter.canRead(Integer.class, null)).andReturn(true);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		expect(this.request.getHeaders()).andReturn(requestHeaders);
 		String request = "Hello World";
-		converter.write(request, this.request);
+		expect(converter.canWrite(String.class, null)).andReturn(true);
+		converter.write(request, null, this.request);
 		expect(this.request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		expect(response.getHeaders()).andReturn(responseHeaders);
 		Integer expected = 42;
+		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
 		response.close();
 
@@ -313,9 +285,9 @@ public class RestTemplateTests {
 
 	@Test
 	public void postForObjectNull() throws Exception {
-		expect(converter.supports(Integer.class)).andReturn(true).times(2);
 		MediaType textPlain = new MediaType("text", "plain");
-		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+		expect(converter.canRead(Integer.class, null)).andReturn(true);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		expect(request.getHeaders()).andReturn(requestHeaders).times(2);
@@ -324,6 +296,7 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(null);
 		response.close();
 
@@ -336,10 +309,10 @@ public class RestTemplateTests {
 
 	@Test
 	public void put() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(2);
+		expect(converter.canWrite(String.class, null)).andReturn(true);
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.PUT)).andReturn(request);
 		String helloWorld = "Hello World";
-		converter.write(helloWorld, request);
+		converter.write(helloWorld, null, request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
 		response.close();
@@ -402,7 +375,7 @@ public class RestTemplateTests {
 
 	@Test
 	public void ioException() throws Exception {
-		expect(converter.supports(String.class)).andReturn(true).times(2);
+		expect(converter.canRead(String.class, null)).andReturn(true);
 		MediaType mediaType = new MediaType("foo", "bar");
 		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(mediaType));
 		expect(requestFactory.createRequest(new URI("http://example.com/resource"), HttpMethod.GET)).andReturn(request);

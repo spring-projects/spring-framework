@@ -36,8 +36,9 @@ import org.springframework.http.converter.HttpMessageConversionException;
  * Abstract base class for {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverters} that
  * convert from/to XML.
  *
- * <p>By default, subclasses of this converter support {@code text/xml} and {@code application/xml}. This can be
- * overridden by setting the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
+ * <p>By default, subclasses of this converter support {@code text/xml}, {@code application/xml}, and {@code
+ * application/*-xml}. This can be overridden by setting the {@link #setSupportedMediaTypes(java.util.List)
+ * supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -48,10 +49,10 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 
 	/**
 	 * Protected constructor that sets the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} to {@code
-	 * text/xml} and {@code application/xml}.
+	 * text/xml} and {@code application/xml}, and {@code application/*-xml}.
 	 */
 	protected AbstractXmlHttpMessageConverter() {
-		super(new MediaType("application", "xml"), new MediaType("text", "xml"));
+		super(new MediaType("application", "xml"), new MediaType("text", "xml"), new MediaType("application", "*+xml"));
 	}
 
 	/** Invokes {@link #readFromSource(Class, HttpHeaders, Source)}. */

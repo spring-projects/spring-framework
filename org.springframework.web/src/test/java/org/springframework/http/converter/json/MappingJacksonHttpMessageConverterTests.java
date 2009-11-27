@@ -39,7 +39,7 @@ public class MappingJacksonHttpMessageConverterTests {
 	public void setUp() {
 		converter = new MappingJacksonHttpMessageConverter<MyBean>();
 	}
-	
+
 	@Test
 	public void supports() {
 		assertTrue(converter.supports(MyBean.class));
@@ -68,10 +68,10 @@ public class MappingJacksonHttpMessageConverterTests {
 				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		HashMap<String,Object> result = converter.read(HashMap.class, inputMessage);
+		HashMap<String, Object> result = converter.read(HashMap.class, inputMessage);
 		assertEquals("Foo", result.get("string"));
 		assertEquals(42, result.get("number"));
-		assertEquals(42D, (Double)result.get("fraction"), 0D);
+		assertEquals(42D, (Double) result.get("fraction"), 0D);
 		List array = new ArrayList();
 		array.add("Foo");
 		array.add("Bar");
@@ -90,7 +90,7 @@ public class MappingJacksonHttpMessageConverterTests {
 		body.setArray(new String[]{"Foo", "Bar"});
 		body.setBool(true);
 		body.setBytes(new byte[]{0x1, 0x2});
-		converter.write(body, outputMessage);
+		converter.write(body, null, outputMessage);
 		Charset utf8 = Charset.forName("UTF-8");
 		String result = outputMessage.getBodyAsString(utf8);
 		assertTrue(result.contains("\"string\":\"Foo\""));

@@ -32,7 +32,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
  *
- * <p>By default, this converter supports all text media types (<code>text&#47;&#42;</code>), and writes with a {@code
+ * <p>By default, this converter supports all media types (<code>&#42;&#47;&#42;</code>), and writes with a {@code
  * Content-Type} of {@code text/plain}. This can be overridden by setting the {@link
  * #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
  *
@@ -46,10 +46,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	private final List<Charset> availableCharsets;
 
 	public StringHttpMessageConverter() {
-		super(new MediaType("text", "plain", DEFAULT_CHARSET), new MediaType("text", "*"));
+		super(new MediaType("text", "plain", DEFAULT_CHARSET), MediaType.ALL);
 		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
 	}
 
+	@Override
 	public boolean supports(Class<? extends String> clazz) {
 		return String.class.equals(clazz);
 	}
@@ -62,9 +63,9 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
-	protected Long getContentLength(String s) {
-		Charset charset = getContentType(s).getCharSet();
-		if (charset != null) {
+	protected Long getContentLength(String s, MediaType contentType) {
+		if (contentType != null && contentType.getCharSet() != null) {
+			Charset charset = contentType.getCharSet();
 			try {
 				return (long) s.getBytes(charset.name()).length;
 			}
@@ -81,14 +82,15 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected void writeInternal(String s, HttpOutputMessage outputMessage) throws IOException {
 		outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
-		MediaType contentType = getContentType(s);
+		MediaType contentType = outputMessage.getHeaders().getContentType();
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
 		FileCopyUtils.copy(s, new OutputStreamWriter(outputMessage.getBody(), charset));
 	}
 
 	/**
-	 * Return the list of supported {@link Charset}. <p>By default, returns {@link Charset#availableCharsets()}. Can be
-	 * overridden in subclasses.
+	 * Return the list of supported {@link Charset}.
+	 *
+	 * <p>By default, returns {@link Charset#availableCharsets()}. Can be overridden in subclasses.
 	 *
 	 * @return the list of accepted charsets
 	 */

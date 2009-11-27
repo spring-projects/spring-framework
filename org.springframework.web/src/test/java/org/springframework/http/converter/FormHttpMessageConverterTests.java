@@ -30,9 +30,7 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-/**
- * @author Arjen Poutsma
- */
+/** @author Arjen Poutsma */
 public class FormHttpMessageConverterTests {
 
 	private FormHttpMessageConverter converter;
@@ -67,7 +65,7 @@ public class FormHttpMessageConverterTests {
 		body.add("name 2", "value 2+2");
 		body.add("name 3", null);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(body, outputMessage);
+		converter.write(body, null, outputMessage);
 		Charset iso88591 = Charset.forName("ISO-8859-1");
 		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
 				outputMessage.getBodyAsString(iso88591));
