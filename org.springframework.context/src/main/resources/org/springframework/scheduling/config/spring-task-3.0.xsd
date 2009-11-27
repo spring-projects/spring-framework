@@ -84,7 +84,10 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The bean name for the generated ThreadPoolTaskExecutor instance.
-	It will also be used as the default thread name prefix.
+	This value will also be used as the thread name prefix which is why it is
+	required even when defining the executor as an inner bean: The executor
+	won't be directly accessible then but will nevertheless use the specified
+	id as the thread name prefix of the threads that it manages.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
