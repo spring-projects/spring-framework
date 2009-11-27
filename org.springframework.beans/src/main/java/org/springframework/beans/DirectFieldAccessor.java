@@ -122,8 +122,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		try {
 			ReflectionUtils.makeAccessible(field);
 			oldValue = field.get(this.target);
-			Object convertedValue =
-					this.typeConverterDelegate.convertIfNecessary(propertyName, oldValue, newValue, field.getType());
+			Object convertedValue = this.typeConverterDelegate.convertIfNecessary(oldValue, newValue, field);
 			field.set(this.target, convertedValue);
 		}
 		catch (IllegalAccessException ex) {
@@ -139,8 +138,8 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		}
 	}
 
-	public Object convertIfNecessary(
-			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
+	public <T> T convertIfNecessary(
+			Object value, Class<T> requiredType, MethodParameter methodParam) throws TypeMismatchException {
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
 		}
