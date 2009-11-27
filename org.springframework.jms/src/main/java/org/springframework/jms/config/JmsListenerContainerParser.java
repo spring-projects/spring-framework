@@ -44,8 +44,6 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String ERROR_HANDLER_ATTRIBUTE = "error-handler";
 
-	private static final String PHASE_ATTRIBUTE = "phase";
-
 	private static final String CACHE_ATTRIBUTE = "cache";
 
 

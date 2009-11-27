@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,11 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 		int[] concurrency = parseConcurrency(containerEle, parserContext);
 		if (concurrency != null) {
 			configDef.getPropertyValues().add("maxConcurrency", concurrency[1]);
+		}
+
+		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
+		if (StringUtils.hasText(phase)) {
+			containerDef.getPropertyValues().add("phase", phase);
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);

@@ -18,7 +18,7 @@
 	</jms:listener-container>
 
 	<jms:jca-listener-container resource-adapter="testResourceAdapter" activation-spec-factory="testActivationSpecFactory"
-			message-converter="testMessageConverter">
+			message-converter="testMessageConverter" phase="77">
 		<jms:listener id="listener3" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener4" destination="testDestination" ref="testBean2" method="setName" response-destination="responseDestination"/>
 	</jms:jca-listener-container>

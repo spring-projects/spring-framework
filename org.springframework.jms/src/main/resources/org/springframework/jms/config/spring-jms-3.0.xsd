@@ -391,6 +391,16 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="phase" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The lifecycle phase within which this container should start and stop. The lower
+	the value the earlier this container will start and the later it will stop. The
+	default is Integer.MAX_VALUE meaning the container will start as late as possible
+	and stop as soon as possible.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 

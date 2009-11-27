@@ -153,8 +153,8 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		int defaultPhase = getPhase(DefaultMessageListenerContainer.class.getName() + "#0");
 		assertEquals(99, phase1);
 		assertEquals(99, phase2);
-		assertEquals(Integer.MAX_VALUE, phase3);
-		assertEquals(Integer.MAX_VALUE, phase4);
+		assertEquals(77, phase3);
+		assertEquals(77, phase4);
 		assertEquals(Integer.MAX_VALUE, defaultPhase);
 	}
 
