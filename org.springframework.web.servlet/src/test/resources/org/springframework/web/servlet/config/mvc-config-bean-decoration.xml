@@ -8,9 +8,6 @@
 
 	<mvc:annotation-driven />
 
-	<mvc:interceptors>
-		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
-	</mvc:interceptors>
-	
-	
+	<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
+
 </beans>
