@@ -102,8 +102,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * but would complicate the code. And it would work only for static pointcuts.
 	 */
 	protected ReflectiveMethodInvocation(
-	    Object proxy, Object target, Method method, Object[] arguments,
-	    Class targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
+			Object proxy, Object target, Method method, Object[] arguments,
+			Class targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
 
 		this.proxy = proxy;
 		this.target = target;

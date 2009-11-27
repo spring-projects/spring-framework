@@ -22,12 +22,12 @@ package org.springframework.core.convert;
  * @author Keith Donald
  * @since 3.0
  */
-@SuppressWarnings("serial")
 public final class ConversionFailedException extends ConversionException {
 
 	private final TypeDescriptor sourceType;
 
 	private final TypeDescriptor targetType;
+
 
 	/**
 	 * Create a new conversion exception.
@@ -37,10 +37,12 @@ public final class ConversionFailedException extends ConversionException {
 	 * @param cause the cause of the conversion failure
 	 */
 	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
-		super(buildDefaultMessage(value, sourceType, targetType, cause), cause);
+		super("Unable to convert value " + value + " from type [" + sourceType.getName() + "] to type [" +
+				targetType.getName() + "]; reason = '" + cause.getMessage() + "'", cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 	}
+
 
 	/**
 	 * Return the source type we tried to convert the value from.
@@ -54,12 +56,6 @@ public final class ConversionFailedException extends ConversionException {
 	 */
 	public TypeDescriptor getTargetType() {
 		return this.targetType;
-	}
-
-	private static String buildDefaultMessage(Object value, TypeDescriptor sourceType, TypeDescriptor targetType,
-			Throwable cause) {
-		return "Unable to convert value " + value + " from type [" + sourceType.getName() + "] to type ["
-				+ targetType.getName() + "]; reason = '" + cause.getMessage() + "'";
 	}
 
 }
