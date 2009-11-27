@@ -37,6 +37,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -969,7 +970,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					// Pass full property name and old value in here, since we want full
 					// conversion ability for map values.
 					convertedMapValue = this.typeConverterDelegate.convertIfNecessary(
-							propertyName, oldValue, pv.getValue(), mapValueType, null,
+							propertyName, oldValue, pv.getValue(), mapValueType,
 							new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length + 1));
 				}
 				catch (IllegalArgumentException ex) {

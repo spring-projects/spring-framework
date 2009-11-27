@@ -85,7 +85,7 @@ class TypeConverterDelegate {
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType) throws IllegalArgumentException {
-		return convertIfNecessary(null, null, newValue, requiredType, null, null);
+		return convertIfNecessary(null, null, newValue, requiredType, TypeDescriptor.valueOf(requiredType));
 	}
 
 	/**
@@ -101,7 +101,8 @@ class TypeConverterDelegate {
 	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType, MethodParameter methodParam)
 			throws IllegalArgumentException {
 
-		return convertIfNecessary(null, null, newValue, requiredType, null, methodParam);
+		return convertIfNecessary(null, null, newValue, requiredType,
+				(methodParam != null ? new TypeDescriptor(methodParam) : TypeDescriptor.valueOf(requiredType)));
 	}
 
 	/**
@@ -118,7 +119,25 @@ class TypeConverterDelegate {
 			String propertyName, Object oldValue, Object newValue, Class<T> requiredType)
 			throws IllegalArgumentException {
 
-		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, null, null);
+		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, TypeDescriptor.valueOf(requiredType));
+	}
+
+	/**
+	 * Convert the value to the required type (if necessary from a String),
+	 * for the specified property.
+	 * @param propertyName name of the property
+	 * @param oldValue the previous value, if available (may be <code>null</code>)
+	 * @param newValue the proposed new value
+	 * @param requiredType the type we must convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * @param methodParam the method parameter that is the target of the conversion
+	 * @return the new value, possibly the result of type conversion
+	 * @throws IllegalArgumentException if type conversion failed
+	 */
+	public <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
+			Class<T> requiredType, MethodParameter methodParam) throws IllegalArgumentException {
+
+		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, new TypeDescriptor(methodParam));
 	}
 
 	/**
@@ -132,9 +151,22 @@ class TypeConverterDelegate {
 	public Object convertIfNecessary(Object oldValue, Object newValue, PropertyDescriptor descriptor)
 			throws IllegalArgumentException {
 
-		return convertIfNecessary(
-				descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(), descriptor,
-				BeanUtils.getWriteMethodParameter(descriptor));
+		return convertIfNecessary(descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(),
+				new BeanTypeDescriptor(descriptor));
+	}
+
+	/**
+	 * Convert the value to the required type for the specified property.
+	 * @param oldValue the previous value, if available (may be <code>null</code>)
+	 * @param newValue the proposed new value
+	 * @param field the field that is the target of the conversion
+	 * @return the new value, possibly the result of type conversion
+	 * @throws IllegalArgumentException if type conversion failed
+	 */
+	public Object convertIfNecessary(Object oldValue, Object newValue, Field field)
+			throws IllegalArgumentException {
+
+		return convertIfNecessary(field.getName(), oldValue, newValue, field.getType(), new TypeDescriptor(field));
 	}
 
 
@@ -146,17 +178,13 @@ class TypeConverterDelegate {
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
 	 * (or <code>null</code> if not known, for example in case of a collection element)
-	 * @param descriptor the JavaBeans descriptor for the property
-	 * @param methodParam the method parameter that is the target of the conversion
-	 * (may be <code>null</code>)
+	 * @param typeDescriptor the descriptor for the target property or field
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T convertIfNecessary(
-			String propertyName, Object oldValue, Object newValue, Class<T> requiredType,
-			PropertyDescriptor descriptor, MethodParameter methodParam)
-			throws IllegalArgumentException {
+	private <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
+			Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
 		Object convertedValue = newValue;
 
@@ -167,23 +195,15 @@ class TypeConverterDelegate {
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && convertedValue != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.valueOf(convertedValue.getClass());
-			TypeDescriptor targetTypeDesc;
-			if (methodParam != null) {
-				targetTypeDesc = (descriptor != null ?
-						new BeanTypeDescriptor(methodParam, descriptor) : new TypeDescriptor(methodParam));
-			}
-			else {
-				targetTypeDesc = TypeDescriptor.valueOf(requiredType);
-			}
-			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
-				return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
+			if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
+				return (T) conversionService.convert(convertedValue, sourceTypeDesc, typeDescriptor);
 			}
 		}
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (editor == null) {
-				editor = findDefaultEditor(requiredType, descriptor);
+				editor = findDefaultEditor(requiredType, typeDescriptor);
 			}
 			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
@@ -199,12 +219,12 @@ class TypeConverterDelegate {
 				else if (convertedValue instanceof Collection) {
 					// Convert elements to target type, if determined.
 					convertedValue = convertToTypedCollection(
-							(Collection) convertedValue, propertyName, requiredType, methodParam);
+							(Collection) convertedValue, propertyName, requiredType, typeDescriptor);
 				}
 				else if (convertedValue instanceof Map) {
 					// Convert keys and values to respective target type, if determined.
 					convertedValue = convertToTypedMap(
-							(Map) convertedValue, propertyName, requiredType, methodParam);
+							(Map) convertedValue, propertyName, requiredType, typeDescriptor);
 				}
 				if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
 					convertedValue = Array.get(convertedValue, 0);
@@ -316,10 +336,11 @@ class TypeConverterDelegate {
 	 * @param descriptor the JavaBeans descriptor for the property
 	 * @return the corresponding editor, or <code>null</code> if none
 	 */
-	protected PropertyEditor findDefaultEditor(Class requiredType, PropertyDescriptor descriptor) {
+	protected PropertyEditor findDefaultEditor(Class requiredType, TypeDescriptor typeDescriptor) {
 		PropertyEditor editor = null;
-		if (descriptor != null) {
-			editor = descriptor.createPropertyEditor(this.targetObject);
+		if (typeDescriptor instanceof BeanTypeDescriptor) {
+			PropertyDescriptor pd = ((BeanTypeDescriptor) typeDescriptor).getPropertyDescriptor();
+			editor = pd.createPropertyEditor(this.targetObject);
 		}
 		if (editor == null && requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
@@ -484,9 +505,10 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	protected Collection convertToTypedCollection(
-			Collection original, String propertyName, Class requiredType, MethodParameter methodParam) {
+			Collection original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		boolean originalAllowed = requiredType.isInstance(original);
+		MethodParameter methodParam = typeDescriptor.getMethodParameter();
 		Class elementType = null;
 		if (methodParam != null) {
 			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
@@ -540,7 +562,7 @@ class TypeConverterDelegate {
 				methodParam.increaseNestingLevel();
 			}
 			Object convertedElement =
-					convertIfNecessary(indexedPropertyName, null, element, elementType, null, methodParam);
+					convertIfNecessary(indexedPropertyName, null, element, elementType, typeDescriptor);
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}
@@ -551,10 +573,11 @@ class TypeConverterDelegate {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map convertToTypedMap(Map original, String propertyName, Class requiredType, MethodParameter methodParam) {
+	protected Map convertToTypedMap(Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 		boolean originalAllowed = requiredType.isInstance(original);
 		Class keyType = null;
 		Class valueType = null;
+		MethodParameter methodParam = typeDescriptor.getMethodParameter();
 		if (methodParam != null) {
 			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
 			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
@@ -609,11 +632,11 @@ class TypeConverterDelegate {
 				methodParam.increaseNestingLevel();
 				methodParam.setTypeIndexForCurrentLevel(0);
 			}
-			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, null, methodParam);
+			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, typeDescriptor);
 			if (methodParam != null) {
 				methodParam.setTypeIndexForCurrentLevel(1);
 			}
-			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, null, methodParam);
+			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, typeDescriptor);
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}
