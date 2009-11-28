@@ -24,12 +24,15 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.ViewResolver;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
@@ -142,12 +145,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	protected void initInterceptors() {
 		if (this.detectInterceptors) {
-			Map<String, HandlerInterceptor> handlerInterceptors = getApplicationContext().getBeansOfType(HandlerInterceptor.class);
-			if (handlerInterceptors != null && !handlerInterceptors.isEmpty()) {
+			Map<String, HandlerInterceptor> handlerInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), HandlerInterceptor.class, true, false);
+			if (!handlerInterceptors.isEmpty()) {
 				this.interceptors.addAll(handlerInterceptors.values());
 			}
-			Map<String, WebRequestInterceptor> webInterceptors = getApplicationContext().getBeansOfType(WebRequestInterceptor.class);
-			if (webInterceptors != null && !webInterceptors.isEmpty()) {
+			Map<String, WebRequestInterceptor> webInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), WebRequestInterceptor.class, true, false);
+			if (!webInterceptors.isEmpty()) {
 				for (WebRequestInterceptor interceptor : webInterceptors.values()) {
 					this.interceptors.add(new WebRequestHandlerInterceptorAdapter(interceptor));			
 				}
@@ -155,6 +158,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 		
 		if (!this.interceptors.isEmpty()) {
+			OrderComparator.sort(this.interceptors);
 			this.adaptedInterceptors = new HandlerInterceptor[this.interceptors.size()];
 			for (int i = 0; i < this.interceptors.size(); i++) {
 				Object interceptor = this.interceptors.get(i);
