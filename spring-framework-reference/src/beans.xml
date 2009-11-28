@@ -3206,6 +3206,12 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope
       <interfacename>BeanPostProcessor</interfacename> yourself. For more
       information, see <xref linkend="beans-factory-extension" />.</para>
 
+      <para>In addition to the initialization and destruction callbacks,
+      Spring-managed objects may also implement the
+      <interfacename>Lifecycle</interfacename> interface so that those
+      objects can participate in the startup and shutdown process as
+      driven by the container's own lifecycle.</para>
+
       <para>The lifecycle callback interfaces are described in this
       section.</para>
 
@@ -3445,6 +3451,116 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope
             method</para>
           </listitem>
         </itemizedlist>
+      </section>
+
+      <section id="beans-factory-lifecycle-processor">
+        <title>Startup and shutdown callbacks</title>
+
+        <para>The <interfacename>Lifecycle</interfacename> interface defines
+        the essential methods for any object that has its own lifecycle
+        requirements (e.g. starts and stops some background process):</para>
+
+        <programlisting language="java">public interface Lifecycle {
+
+    void start();
+
+    void stop();
+
+    boolean isRunning();
+
+}</programlisting>
+
+        <para>Any Spring-managed object may implement that interface. Then,
+        when the ApplicationContext itself starts and stops, it will cascade
+        those calls to all Lifecycle implementations defined within that context.
+        It does this by delegating to a <interfacename>LifecycleProcessor</interfacename>:
+        </para>
+
+        <programlisting language="java">public interface LifecycleProcessor extends Lifecycle {
+
+    void onRefresh();
+
+    void onClose();
+
+}</programlisting>
+
+        <para>Notice that the <interfacename>LifecycleProcessor</interfacename>
+        is itself an extension of the <interfacename>Lifecycle</interfacename>
+        interface. It also adds two other methods for reacting to the context
+        being refreshed and closed.</para>
+
+        <para>The order of startup and shutdown invocations can be important.
+        If a "depends-on" relationship exists between any two objects, the
+        dependent side will start <emphasis>after</emphasis> its dependency,
+        and it will stop <emphasis>before</emphasis> its dependency. However,
+        at times the direct dependencies are unknown. You may only know that
+        objects of a certain type should start prior to objects of another
+        type. In those cases, the <interfacename>SmartLifecycle</interfacename>
+        interface defines another option, namely the <methodname>getPhase()</methodname>
+        method as defined on its super-interface, <interfacename>Phased</interfacename>.
+       </para>
+
+       <programlisting language="java">public interface Phased {
+
+    int getPhase();
+
+}
+
+
+public interface SmartLifecycle extends Lifecycle, Phased {
+
+    boolean isAutoStartup();
+
+    void stop(Runnable callback);
+
+}</programlisting>
+
+        <para>When starting, the objects with the lowest phase start first, and
+        when stopping, the reverse order is followed. Therefore, an object that
+        implements <interfacename>SmartLifecycle</interfacename> and whose getPhase()
+        method returns <literal>Integer.MIN_VALUE</literal> would be among the first
+        to start and the last to stop. At the other end of the spectrum, a phase
+        value of <literal>Integer.MAX_VALUE</literal> would indicate that the
+        object should be started last and stopped first (likely because it
+        depends on other processes to be running). When considering the phase value,
+        it's also important to know that the default phase for any "normal"
+        <interfacename>Lifecycle</interfacename> object that does not implement
+        <interfacename>SmartLifecycle</interfacename> would be 0. Therefore, any
+        negative phase value would indicate that an object should start before
+        those standard components (and stop after them), and vice versa for any
+        positive phase value.</para>
+
+        <para>As you can see the stop method defined by <interfacename>SmartLifecycle</interfacename>
+        accepts a callback. Any implementation <emphasis>must</emphasis> invoke that
+        callback's run() method after that implementation's shutdown process is complete.
+        That enables asynchronous shutdown where necessary since the default
+        implementation of the <interfacename>LifecycleProcessor</interfacename>
+        interface, <classname>DefaultLifecycleProcessor</classname>, will wait
+        up to its timeout value for the group of objects within each phase to
+        invoke that callback. The default per-phase timeout is 30 seconds. You
+        can override the default lifecycle processor instance by defining a bean
+        named "lifecycleProcessor" within the context. If you only want to modify
+        the timeout, then defining the following would be sufficient:</para>
+
+        <programlisting language="xml"><![CDATA[<bean id="lifecycleProcessor" class="org.springframework.context.support.DefaultLifecycleProcessor">
+    <!-- timeout value in milliseconds -->
+    <property name="timeoutPerShutdownPhase" value="10000"/>
+</bean>]]></programlisting>
+
+        <para>As mentioned, the <interfacename>LifecycleProcessor</interfacename> interface
+        defines callback methods for the refreshing and closing of the context as well. The
+        latter will simply drive the shutdown process as if stop() had been called explicitly,
+        but it will happen when the context is closing. The 'refresh' callback on the other
+        hand enables another feature of <interfacename>SmartLifecycle</interfacename> beans.
+        When the context is refreshed (after all objects have been instantiated and initialized),
+        that callback will be invoked, and at that point the default lifecycle processor will
+        check the boolean value returned by each <interfacename>SmartLifecycle</interfacename>
+        object's <methodname>isAutoStartup()</methodname> method. If "true", then that object
+        will be started at that point rather than waiting for an explicit invocation of the
+        context's or its own start() method (unlike the context refresh, the context start does
+        not happen automatically for a standard context implementation). The "phase" value as
+        well as any "depends-on" relationships will determine the startup order in the same way
+        as described above.</para>
       </section>
 
       <section id="beans-factory-shutdown">
