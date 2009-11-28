@@ -75,8 +75,8 @@ public final class CurrencyFormatter extends AbstractNumberFormatter {
 	}
 
 
-	public BigDecimal parse(String formatted, Locale locale) throws ParseException {
-		BigDecimal decimal = (BigDecimal) super.parse(formatted, locale);
+	public BigDecimal parse(String text, Locale locale) throws ParseException {
+		BigDecimal decimal = (BigDecimal) super.parse(text, locale);
 		if (decimal != null) {
 			if (this.roundingMode != null) {
 				decimal = decimal.setScale(this.fractionDigits, this.roundingMode);

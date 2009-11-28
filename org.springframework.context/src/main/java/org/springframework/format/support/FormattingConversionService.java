@@ -17,12 +17,10 @@
 package org.springframework.format.support;
 
 import java.lang.annotation.Annotation;
-import java.text.ParseException;
 import java.util.Set;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -164,27 +162,21 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			String submittedValue = (String) source;
-			if (submittedValue == null || submittedValue.length() == 0) {
+			String text = (String) source;
+			if (text == null || text.length() == 0) {
 				return null;
 			}
-			Object parsedValue;
 			try {
-				parsedValue = this.parser.parse(submittedValue, LocaleContextHolder.getLocale());
+				Object result = this.parser.parse(text, LocaleContextHolder.getLocale());
+				TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
+				if (!resultType.isAssignableTo(targetType)) {
+					result = this.conversionService.convert(result, resultType, targetType);
+				}
+				return result;
 			}
-			catch (ParseException ex) {
+			catch (Exception ex) {
 				throw new ConversionFailedException(sourceType, targetType, source, ex);
 			}
-			TypeDescriptor parsedObjectType = TypeDescriptor.valueOf(parsedValue.getClass());
-			if (!parsedObjectType.isAssignableTo(targetType)) {
-				try {
-					parsedValue = this.conversionService.convert(parsedValue, parsedObjectType, targetType);
-				}
-				catch (ConversionException ex) {
-					throw new ConversionFailedException(sourceType, targetType, source, ex);
-				}
-			}
-			return parsedValue;
 		}
 
 		public String toString() {

@@ -101,8 +101,8 @@ public class DateFormatter implements Formatter<Date> {
 		return getDateFormat(locale).format(date);
 	}
 
-	public Date parse(String formatted, Locale locale) throws ParseException {
-		return getDateFormat(locale).parse(formatted);
+	public Date parse(String text, Locale locale) throws ParseException {
+		return getDateFormat(locale).parse(text);
 	}
 
 
