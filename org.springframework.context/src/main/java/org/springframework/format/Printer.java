@@ -29,9 +29,9 @@ public interface Printer<T> {
 
 	/**
 	 * Print the object of type T for display.
-	 * @param object the object to print
+	 * @param object the instance to print
 	 * @param locale the current user locale
-	 * @return the printed string
+	 * @return the printed text string
 	 */
 	String print(T object, Locale locale);
 

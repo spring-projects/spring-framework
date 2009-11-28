@@ -39,7 +39,7 @@ public final class DateTimeParser implements Parser<DateTime> {
 		this.formatter = formatter;
 	}
 
-	public DateTime parse(String printed, Locale locale) throws ParseException {
-		return JodaTimeContextHolder.getFormatter(this.formatter, locale).parseDateTime(printed);
+	public DateTime parse(String text, Locale locale) throws ParseException {
+		return JodaTimeContextHolder.getFormatter(this.formatter, locale).parseDateTime(text);
 	}
 }

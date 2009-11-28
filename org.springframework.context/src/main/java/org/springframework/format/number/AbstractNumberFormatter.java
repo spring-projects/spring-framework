@@ -44,21 +44,21 @@ public abstract class AbstractNumberFormatter implements Formatter<Number> {
 		this.lenient = lenient;
 	}
 
-	public String print(Number integer, Locale locale) {
-		return getNumberFormat(locale).format(integer);
+	public String print(Number number, Locale locale) {
+		return getNumberFormat(locale).format(number);
 	}
 
-	public Number parse(String formatted, Locale locale) throws ParseException {
+	public Number parse(String text, Locale locale) throws ParseException {
 		NumberFormat format = getNumberFormat(locale);
 		ParsePosition position = new ParsePosition(0);
-		Number number = format.parse(formatted, position);
+		Number number = format.parse(text, position);
 		if (position.getErrorIndex() != -1) {
-			throw new ParseException(formatted, position.getIndex());
+			throw new ParseException(text, position.getIndex());
 		}
 		if (!this.lenient) {
-			if (formatted.length() != position.getIndex()) {
+			if (text.length() != position.getIndex()) {
 				// indicates a part of the string that was not parsed
-				throw new ParseException(formatted, position.getIndex());
+				throw new ParseException(text, position.getIndex());
 			}
 		}
 		return number;
