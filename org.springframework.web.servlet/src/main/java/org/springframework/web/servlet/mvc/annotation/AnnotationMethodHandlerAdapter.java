@@ -320,6 +320,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 	/**
+	 * Returns the message body converters to use. These converters are used to convert from and to HTTP requests and
+	 * responses.
+	 */
+	public HttpMessageConverter<?>[] getMessageConverters() {
+		return messageConverters;
+	}
+
+	/**
 	 * Set the message body converters to use. These converters are used to convert from and to HTTP requests and
 	 * responses.
 	 */
@@ -605,7 +613,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		private ServletHandlerMethodInvoker(HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore, parameterNameDiscoverer,
-					customArgumentResolvers, messageConverters);
+					customArgumentResolvers, getMessageConverters());
 		}
 
 		@Override
@@ -792,8 +800,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
 			Class<?> returnValueType = returnValue.getClass();
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-			if (messageConverters != null) {
-				for (HttpMessageConverter messageConverter : messageConverters) {
+			if (getMessageConverters() != null) {
+				for (HttpMessageConverter messageConverter : getMessageConverters()) {
 					allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
 					for (MediaType acceptedMediaType : acceptedMediaTypes) {
 						if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {

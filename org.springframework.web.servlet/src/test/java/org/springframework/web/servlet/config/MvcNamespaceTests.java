@@ -16,20 +16,15 @@
 
 package org.springframework.web.servlet.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Date;
 import java.util.Locale;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;
@@ -38,6 +33,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
+import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -61,35 +63,47 @@ import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
 /**
  * @author Keith Donald
+ * @author Arjen Poutsma 
  */
 public class MvcNamespaceTests {
 
-	private GenericWebApplicationContext container;
+	private GenericWebApplicationContext appContext;
 
 	@Before
 	public void setUp() {
-		container = new GenericWebApplicationContext();
-		container.setServletContext(new MockServletContext());
+		appContext = new GenericWebApplicationContext();
+		appContext.setServletContext(new MockServletContext());
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
 	@Test
 	public void testDefaultConfig() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml", getClass()));
-		assertEquals(4, container.getBeanDefinitionCount());
-		container.refresh();
+		assertEquals(4, appContext.getBeanDefinitionCount());
+		appContext.refresh();
 
-		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
+		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
 
-		AnnotationMethodHandlerAdapter adapter = container.getBean(AnnotationMethodHandlerAdapter.class);
+		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
 		assertNotNull(adapter);
-		assertNotNull(container.getBean(FormattingConversionServiceFactoryBean.class));
-		assertNotNull(container.getBean(ConversionService.class));
-		assertNotNull(container.getBean(LocalValidatorFactoryBean.class));
-		assertNotNull(container.getBean(Validator.class));
+
+		HttpMessageConverter[] messageConverters = adapter.getMessageConverters();
+		assertNotNull(messageConverters);
+		assertEquals(6, messageConverters.length);
+		assertTrue(ByteArrayHttpMessageConverter.class.equals(messageConverters[0].getClass()));
+		assertTrue(StringHttpMessageConverter.class.equals(messageConverters[1].getClass()));
+		assertTrue(FormHttpMessageConverter.class.equals(messageConverters[2].getClass()));
+		assertTrue(SourceHttpMessageConverter.class.equals(messageConverters[3].getClass()));
+		assertTrue(Jaxb2RootElementHttpMessageConverter.class.equals(messageConverters[4].getClass()));
+		assertTrue(MappingJacksonHttpMessageConverter.class.equals(messageConverters[5].getClass()));
+
+		assertNotNull(appContext.getBean(FormattingConversionServiceFactoryBean.class));
+		assertNotNull(appContext.getBean(ConversionService.class));
+		assertNotNull(appContext.getBean(LocalValidatorFactoryBean.class));
+		assertNotNull(appContext.getBean(Validator.class));
 
 		TestController handler = new TestController();
 
@@ -103,12 +117,12 @@ public class MvcNamespaceTests {
 
 	@Test(expected=ConversionFailedException.class)
 	public void testCustomConversionService() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml", getClass()));
-		assertEquals(4, container.getBeanDefinitionCount());
-		container.refresh();
+		assertEquals(4, appContext.getBeanDefinitionCount());
+		appContext.refresh();
 
-		AnnotationMethodHandlerAdapter adapter = container.getBean(AnnotationMethodHandlerAdapter.class);
+		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
 		assertNotNull(adapter);
 
 		TestController handler = new TestController();
@@ -122,12 +136,12 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testCustomValidator() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-validator.xml", getClass()));
-		assertEquals(4, container.getBeanDefinitionCount());
-		container.refresh();
+		assertEquals(4, appContext.getBeanDefinitionCount());
+		appContext.refresh();
 
-		AnnotationMethodHandlerAdapter adapter = container.getBean(AnnotationMethodHandlerAdapter.class);
+		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
 		assertNotNull(adapter);
 
 		TestController handler = new TestController();
@@ -138,18 +152,18 @@ public class MvcNamespaceTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		adapter.handle(request, response, handler);
 
-		assertTrue(container.getBean(TestValidator.class).validatorInvoked);
+		assertTrue(appContext.getBean(TestValidator.class).validatorInvoked);
 		assertFalse(handler.recordedValidationError);
 	}
 	
 	@Test
 	public void testInterceptors() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml", getClass()));
-		assertEquals(7, container.getBeanDefinitionCount());
-		container.refresh();
+		assertEquals(7, appContext.getBeanDefinitionCount());
+		appContext.refresh();
 
-		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
+		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(new TestController());
 		
@@ -177,12 +191,12 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testBeanDecoration() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-bean-decoration.xml", getClass()));
-		assertEquals(6, container.getBeanDefinitionCount());
-		container.refresh();
+		assertEquals(6, appContext.getBeanDefinitionCount());
+		appContext.refresh();
 
-		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
+		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(new TestController());		
 
@@ -199,12 +213,12 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllers() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml", getClass()));
-		assertEquals(8, container.getBeanDefinitionCount());
-		container.refresh();
+		assertEquals(8, appContext.getBeanDefinitionCount());
+		appContext.refresh();
 
-		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
+		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(new TestController());		
 
@@ -214,10 +228,10 @@ public class MvcNamespaceTests {
 		assertEquals(3, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
 
-		SimpleUrlHandlerMapping mapping2 = container.getBean(SimpleUrlHandlerMapping.class);
+		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping2);
 		
-		SimpleControllerHandlerAdapter adapter = container.getBean(SimpleControllerHandlerAdapter.class);
+		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
 		assertNotNull(adapter);
 		
 		request.setRequestURI("/foo");
