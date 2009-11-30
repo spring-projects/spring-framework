@@ -50,52 +50,54 @@
 
 	<xsd:element name="interceptors">
 		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.web.servlet.HandlerInterceptor"><![CDATA[
+			<xsd:documentation><![CDATA[
 	The ordered set of interceptors that intercept HTTP Servlet Requests handled by Controllers.
-	Interceptors allow a request to be pre/post processed before/after handling.
-	Each inteceptor should be configured as an inner bean that implements either the org.springframework.web.servlet.HandlerInterceptor or org.springframework.web.context.request.WebRequestInterceptor interface.
-	The interceptors in this set are automatically configured on each registered HandlerMapping. 
+	Interceptors allow requests to be pre/post processed before/after handling.
+	Each inteceptor must implement the org.springframework.web.servlet.HandlerInterceptor or org.springframework.web.context.request.WebRequestInterceptor interface.
+	The interceptors in this set are automatically configured on each registered HandlerMapping.
+	The URI paths each interceptor applies to are configurable.
 			]]></xsd:documentation>
 		</xsd:annotation>			
 		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="interceptor" maxOccurs="unbounded">
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:element ref="beans:bean">
 					<xsd:annotation>
 						<xsd:documentation source="java:org.springframework.web.servlet.handler.MappedInterceptor"><![CDATA[
-	Registers a interceptor definition.
+	Registers an interceptor that intercepts every request regardless of its URI path.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="interceptor">
+					<xsd:annotation>
+						<xsd:documentation source="java:org.springframework.web.servlet.handler.MappedInterceptor"><![CDATA[
+	Registers an interceptor that interceptors requests sent to one or more URI paths.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
-						<xsd:choice minOccurs="0" maxOccurs="unbounded">
-							<xsd:element ref="beans:constructor-arg"/>
-							<xsd:element ref="beans:property"/>
-						</xsd:choice>
-						<xsd:attribute name="path" type="xsd:string">
-							<xsd:annotation>
-								<xsd:documentation><![CDATA[
-	The path into the application intercepted by this interceptor.
-	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
-	If not specified, the interceptor intercepts all paths ("/**").
-								]]></xsd:documentation>
-							</xsd:annotation>
-						</xsd:attribute>
-						<xsd:attribute name="class" type="xsd:string" use="required">
-							<xsd:annotation>
-								<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The interceptor class.
-	Must implement org.springframework.web.servlet.HandlerInterceptor or org.springframework.web.context.request.WebRequestInterceptor.
-								]]></xsd:documentation>
-							<xsd:appinfo>
-								<tool:annotation kind="direct">
-									<tool:expected-type type="java.lang.Class"/>
-								</tool:annotation>
-							</xsd:appinfo>								
-							</xsd:annotation>
-						</xsd:attribute>
-						<xsd:anyAttribute namespace="##other" processContents="lax"/>		
+						<xsd:sequence>
+							<xsd:element name="path" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:attribute name="value" type="xsd:string" use="required">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	A path into the application intercepted by this interceptor.
+	Exact path mapping URIås (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
+											]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>								
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element ref="beans:bean">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	The interceptor's bean definition.
+											]]></xsd:documentation>
+										</xsd:annotation>							
+							</xsd:element>						
+						</xsd:sequence>
 					</xsd:complexType>			
 				</xsd:element>
-			</xsd:sequence>
+			</xsd:choice>
 		</xsd:complexType>
 	</xsd:element>
 

@@ -35,7 +35,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.style.StylerUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -49,7 +48,6 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.request.Log4jNestedDiagnosticContextInterceptor;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
@@ -166,6 +164,11 @@ public class MvcNamespaceTests {
 		assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
 
 		request.setRequestURI("/logged/accounts/12345");
+		chain = mapping.getHandler(request);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+
+		request.setRequestURI("/foo/logged");
 		chain = mapping.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);

@@ -4,7 +4,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 class MappedInterceptors {
@@ -26,9 +25,14 @@ class MappedInterceptors {
 	}
 	
 	private boolean matches(MappedInterceptor interceptor, String lookupPath, PathMatcher pathMatcher) {
-		String pathPattern = interceptor.getPathPattern();
-		if (StringUtils.hasText(pathPattern)) {
-			return pathMatcher.match(pathPattern, lookupPath);
+		String[] pathPatterns = interceptor.getPathPatterns();
+		if (pathPatterns != null) {
+			for (String pattern : pathPatterns) {
+				if (pathMatcher.match(pattern, lookupPath)) {
+					return true;
+				}
+			}
+			return false;
 		} else {
 			return true;
 		}

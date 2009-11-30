@@ -25,7 +25,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  */
 public final class MappedInterceptor {
 	
-	private final String pathPattern;
+	private final String[] pathPatterns;
 	
 	private final HandlerInterceptor interceptor;
 
@@ -34,8 +34,8 @@ public final class MappedInterceptor {
 	 * @param pathPattern the path pattern
 	 * @param interceptor the interceptor
 	 */
-	public MappedInterceptor(String pathPattern, HandlerInterceptor interceptor) {
-		this.pathPattern = pathPattern;
+	public MappedInterceptor(String[] pathPatterns, HandlerInterceptor interceptor) {
+		this.pathPatterns = pathPatterns;
 		this.interceptor = interceptor;
 	}
 
@@ -44,16 +44,16 @@ public final class MappedInterceptor {
 	 * @param pathPattern the path pattern
 	 * @param interceptor the interceptor
 	 */
-	public MappedInterceptor(String pathPattern, WebRequestInterceptor interceptor) {
-		this.pathPattern = pathPattern;
+	public MappedInterceptor(String[] pathPatterns, WebRequestInterceptor interceptor) {
+		this.pathPatterns = pathPatterns;
 		this.interceptor = new WebRequestHandlerInterceptorAdapter(interceptor);
 	}
 
 	/**
 	 * The path into the application the interceptor is mapped to.
 	 */
-	public String getPathPattern() {
-		return pathPattern;
+	public String[] getPathPatterns() {
+		return pathPatterns;
 	}
 
 	/**
