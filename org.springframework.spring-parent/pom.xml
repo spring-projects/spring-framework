@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <!--
-    
-    This POM cannot be used to build Spring; it is a work in progress and should only be used as
-    part of a Maven repository upload bundle using artifacts created by the spring build system. 
-    
-  -->
+      
+      This POM cannot be used to build Spring; it is a work in progress and should only be used as
+      part of a Maven repository upload bundle using artifacts created by the spring build system. 
+      
+	-->
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
@@ -30,7 +30,7 @@
       <layout>legacy</layout>
       <snapshots><enabled>false</enabled></snapshots>
     </repository>
-    <!-- for use with jexcelapi 2.6.8, portlet 2.0, hibernate 3.3.1, javax.el/el-api 2.1 -->
+    <!-- for use with jexcelapi 2.6.8, portlet 2.0, javax.el/el-api 2.1 -->
     <repository>
       <id>jboss</id>
       <name>JBoss Repository</name>
@@ -77,10 +77,10 @@
         </exclusions>
       </dependency>
       <dependency>
-	<groupId>javax.inject</groupId>
-	<artifactId>com.springsource.javax.inject</artifactId>
-	<version>0.9.0.PFD</version>
-	<scope>provided</scope> 
+		<groupId>javax.inject</groupId>
+		<artifactId>com.springsource.javax.inject</artifactId>
+		<version>0.9.0.PFD</version>
+		<scope>provided</scope> 
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -89,40 +89,50 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-	<groupId>org.aspectj</groupId>
-	<artifactId>aspectjweaver</artifactId>
-	<version>1.6.5</version>
-	<optional>true</optional>
+		<groupId>org.aspectj</groupId>
+		<artifactId>aspectjweaver</artifactId>
+		<version>1.6.5</version>
+		<optional>true</optional>
       </dependency>
       <dependency>
-	<groupId>org.easymock</groupId>
-	<artifactId>easymock</artifactId>
-	<version>2.5.1</version>
-	<scope>test</scope>
+		<groupId>org.easymock</groupId>
+		<artifactId>easymock</artifactId>
+		<version>2.5.1</version>
+		<scope>test</scope>
       </dependency>
       <dependency>
-	<groupId>log4j</groupId>
-	<artifactId>log4j</artifactId>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.5.8</version>
+      </dependency>
+      <dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-log4j12</artifactId>
+		<version>1.5.8</version>
+      </dependency>
+      <dependency>
+		<groupId>log4j</groupId>
+		<artifactId>log4j</artifactId>
         <version>1.2.15</version>
-	<scope>test</scope>
-	<exclusions>
-	  <exclusion>
-	    <groupId>javax.mail</groupId>
-	    <artifactId>mail</artifactId>
-	  </exclusion>
-	  <exclusion>
-	    <groupId>javax.jms</groupId>
-	    <artifactId>jms</artifactId>
-	  </exclusion>
-	  <exclusion>
-	    <groupId>com.sun.jdmk</groupId>
-	    <artifactId>jmxtools</artifactId>
-	  </exclusion>
-	  <exclusion>
-	    <groupId>com.sun.jmx</groupId>
-	    <artifactId>jmxri</artifactId>
-	  </exclusion>
-	</exclusions>
+		<scope>test</scope>
+		<exclusions>
+		  <exclusion>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+		  </exclusion>
+		  <exclusion>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms</artifactId>
+		  </exclusion>
+		  <exclusion>
+			<groupId>com.sun.jdmk</groupId>
+			<artifactId>jmxtools</artifactId>
+		  </exclusion>
+		  <exclusion>
+			<groupId>com.sun.jmx</groupId>
+			<artifactId>jmxri</artifactId>
+		  </exclusion>
+		</exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -198,13 +208,20 @@
   </profiles>
 
   <build>
+	<extensions>
+	  <extension>
+		<groupId>org.springframework.build.aws</groupId>
+		<artifactId>org.springframework.build.aws.maven</artifactId>
+		<version>2.0.0.RELEASE</version>
+	  </extension>
+	</extensions>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-	<configuration>
-	  <source>1.5</source>
-	  <target>1.5</target>
+		<configuration>
+		  <source>1.5</source>
+		  <target>1.6</target>
         </configuration>
       </plugin>
       <plugin>
@@ -218,7 +235,7 @@
             <exclude>**/Abstract*.java</exclude>
           </excludes>
           <junitArtifactName>junit:junit</junitArtifactName>
-	  <argLine>-Xmx512m</argLine>
+		  <argLine>-Xmx512m</argLine>
         </configuration>
       </plugin>
     </plugins>
