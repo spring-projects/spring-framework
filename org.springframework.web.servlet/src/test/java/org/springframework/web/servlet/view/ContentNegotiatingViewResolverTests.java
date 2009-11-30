@@ -280,4 +280,29 @@ public class ContentNegotiatingViewResolverTests {
 		verify(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2, viewMock3);
 	}
 
+	@Test
+	public void resolveViewContentTypeNull() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+		ViewResolver viewResolverMock = createMock(ViewResolver.class);
+		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
+
+		View viewMock = createMock("application_xml", View.class);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(viewResolverMock.resolveViewName(viewName, locale)).andReturn(viewMock);
+		expect(viewMock.getContentType()).andReturn(null);
+
+		replay(viewResolverMock, viewMock);
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertNull("Invalid view", result);
+
+		verify(viewResolverMock, viewMock);
+	}
+
 }
