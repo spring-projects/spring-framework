@@ -129,7 +129,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         <title>Configuration</title>
 
         <para>The form tag library comes bundled in
-        <literal>org.springframework.web.servlet-3.0.0.RC1.jar</literal>.
+        <literal>org.springframework.web.servlet-3.0.0.RELEASE.jar</literal>.
         The library descriptor is called
         <literal>spring-form.tld</literal>.</para>
 
