@@ -350,12 +350,15 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 
 		for (View candidateView : candidateViews) {
-			MediaType viewMediaType = MediaType.parseMediaType(candidateView.getContentType());
-			for (MediaType requestedMediaType : requestedMediaTypes) {
-				if (requestedMediaType.includes(viewMediaType)) {
-					if (!views.containsKey(requestedMediaType)) {
-						views.put(requestedMediaType, candidateView);
-						break;
+			String contentType = candidateView.getContentType();
+			if (StringUtils.hasText(contentType)) {
+				MediaType viewMediaType = MediaType.parseMediaType(contentType);
+				for (MediaType requestedMediaType : requestedMediaTypes) {
+					if (requestedMediaType.includes(viewMediaType)) {
+						if (!views.containsKey(requestedMediaType)) {
+							views.put(requestedMediaType, candidateView);
+							break;
+						}
 					}
 				}
 			}
