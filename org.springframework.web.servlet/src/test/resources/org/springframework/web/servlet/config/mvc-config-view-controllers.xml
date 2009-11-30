@@ -12,8 +12,8 @@
 	<mvc:view-controller path="/bar" view-name="baz" />
 
 	<mvc:interceptors>
-		<mvc:interceptor class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
-		<mvc:interceptor class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+		<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
 	</mvc:interceptors>
 	
 </beans>

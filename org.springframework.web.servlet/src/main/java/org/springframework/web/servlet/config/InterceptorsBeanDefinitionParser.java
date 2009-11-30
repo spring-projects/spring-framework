@@ -37,16 +37,28 @@ import org.w3c.dom.Element;
 class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		List<Element> interceptors = DomUtils.getChildElementsByTagName(element, "interceptor");
+		List<Element> interceptors = DomUtils.getChildElementsByTagName(element, new String[] { "bean", "interceptor" });
 		for (Element interceptor : interceptors) {
 			RootBeanDefinition mappedInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
-			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, interceptor.getAttribute("path"));
-			RootBeanDefinition interceptorDef = new RootBeanDefinition(interceptor.getAttribute("class"));
-			BeanDefinitionHolder holder = new BeanDefinitionHolder(interceptorDef, parserContext.getReaderContext().generateBeanName(interceptorDef));
-			holder = parserContext.getDelegate().decorateBeanDefinitionIfRequired(interceptor, holder);
-			parserContext.getDelegate().parseConstructorArgElements(interceptor, interceptorDef);
-			parserContext.getDelegate().parsePropertyElements(interceptor, interceptorDef);
-			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, holder);
+			mappedInterceptorDef.setSource(parserContext.extractSource(interceptor));
+			String[] pathPatterns;
+			BeanDefinitionHolder interceptorDef;
+			if ("interceptor".equals(interceptor.getLocalName())) {
+				List<Element> paths = DomUtils.getChildElementsByTagName(interceptor, "path");
+				pathPatterns = new String[paths.size()];
+				for (int i = 0; i < paths.size(); i++) {
+					pathPatterns[i] = paths.get(i).getAttribute("value");
+				}
+				Element interceptorBean = DomUtils.getChildElementByTagName(interceptor, "bean");
+				interceptorDef = parserContext.getDelegate().parseBeanDefinitionElement(interceptorBean);
+				interceptorDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(interceptorBean, interceptorDef);
+			} else {
+				pathPatterns = null;
+				interceptorDef = parserContext.getDelegate().parseBeanDefinitionElement(interceptor);
+				interceptorDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(interceptor, interceptorDef);				
+			}
+			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, pathPatterns);
+			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, interceptorDef);
 			parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
 		}
 		return null;
