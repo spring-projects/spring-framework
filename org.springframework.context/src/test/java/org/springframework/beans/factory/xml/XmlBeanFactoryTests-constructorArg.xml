@@ -109,7 +109,12 @@
 		<constructor-arg><value>29</value></constructor-arg>
 	</bean>
 
-	<bean id="rod17" class="org.springframework.beans.factory.xml.SimpleConstructorArgBean" scope="prototype">
+	<bean id="rod17" parent="rod16">
+		<constructor-arg name="otherSpouse"><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg name="spouse"><ref bean="kerry1"/></constructor-arg>
+	</bean>
+
+	<bean id="rod18" class="org.springframework.beans.factory.xml.SimpleConstructorArgBean" scope="prototype">
 	</bean>
 
 	<bean id="kerry1" class="org.springframework.beans.TestBean">

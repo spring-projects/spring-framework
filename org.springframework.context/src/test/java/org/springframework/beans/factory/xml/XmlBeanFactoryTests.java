@@ -955,19 +955,24 @@ public final class XmlBeanFactoryTests {
 		assertEquals(kerry2, rod16.getSpouse1());
 		assertEquals(kerry1, rod16.getSpouse2());
 		assertEquals(29, rod16.getAge());
+
+		ConstructorDependenciesBean rod17 = (ConstructorDependenciesBean) xbf.getBean("rod17");
+		assertEquals(kerry1, rod17.getSpouse1());
+		assertEquals(kerry2, rod17.getSpouse2());
+		assertEquals(29, rod17.getAge());
 	}
 
 	public @Test void testPrototypeWithExplicitArguments() {
 		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
-		SimpleConstructorArgBean cd1 = (SimpleConstructorArgBean) xbf.getBean("rod17");
+		SimpleConstructorArgBean cd1 = (SimpleConstructorArgBean) xbf.getBean("rod18");
 		assertEquals(0, cd1.getAge());
-		SimpleConstructorArgBean cd2 = (SimpleConstructorArgBean) xbf.getBean("rod17", 98);
+		SimpleConstructorArgBean cd2 = (SimpleConstructorArgBean) xbf.getBean("rod18", 98);
 		assertEquals(98, cd2.getAge());
-		SimpleConstructorArgBean cd3 = (SimpleConstructorArgBean) xbf.getBean("rod17", "myName");
+		SimpleConstructorArgBean cd3 = (SimpleConstructorArgBean) xbf.getBean("rod18", "myName");
 		assertEquals("myName", cd3.getName());
-		SimpleConstructorArgBean cd4 = (SimpleConstructorArgBean) xbf.getBean("rod17");
+		SimpleConstructorArgBean cd4 = (SimpleConstructorArgBean) xbf.getBean("rod18");
 		assertEquals(0, cd4.getAge());
-		SimpleConstructorArgBean cd5 = (SimpleConstructorArgBean) xbf.getBean("rod17", 97);
+		SimpleConstructorArgBean cd5 = (SimpleConstructorArgBean) xbf.getBean("rod18", 97);
 		assertEquals(97, cd5.getAge());
 	}
 
