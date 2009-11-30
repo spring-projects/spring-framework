@@ -16,20 +16,24 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -67,7 +71,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private final Map<String, Object> handlerMap = new LinkedHashMap<String, Object>();
 
-
+	private MappedInterceptors mappedInterceptors;
+	
 	/**
 	 * Set if URL lookup should always use the full path within the current servlet
 	 * context. Else, the path within the current servlet mapping is used if applicable
@@ -151,6 +156,21 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		this.lazyInitHandlers = lazyInitHandlers;
 	}
 
+	public void setMappedInterceptors(MappedInterceptor[] mappedInterceptors) {
+		this.mappedInterceptors = new MappedInterceptors(mappedInterceptors);
+	}
+
+	
+	@Override
+	protected void initInterceptors() {
+		super.initInterceptors();
+		
+		Map<String, MappedInterceptor> mappedInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), MappedInterceptor.class, true, false);
+		if (!mappedInterceptors.isEmpty()) {
+			this.mappedInterceptors = new MappedInterceptors(mappedInterceptors.values().toArray(new MappedInterceptor[mappedInterceptors.size()]));
+		}
+
+	}
 
 	/**
 	 * Look up a handler for the URL path of the given request.
@@ -179,6 +199,18 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				}
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
+			}
+		}
+		if (handler != null & this.mappedInterceptors != null) {
+			Set<HandlerInterceptor> mappedInterceptors = this.mappedInterceptors.getInterceptors(lookupPath, this.pathMatcher);
+			if (!mappedInterceptors.isEmpty()) {
+				HandlerExecutionChain chain;
+				if (handler instanceof HandlerExecutionChain) {
+					chain = (HandlerExecutionChain) handler;
+				} else {
+					chain = new HandlerExecutionChain(handler);
+				}
+				chain.addInterceptors(mappedInterceptors.toArray(new HandlerInterceptor[mappedInterceptors.size()]));
 			}
 		}
 		if (handler != null && logger.isDebugEnabled()) {
