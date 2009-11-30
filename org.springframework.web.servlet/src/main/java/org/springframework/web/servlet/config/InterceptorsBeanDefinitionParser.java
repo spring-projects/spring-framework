@@ -44,10 +44,10 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 			String[] pathPatterns;
 			BeanDefinitionHolder interceptorDef;
 			if ("interceptor".equals(interceptor.getLocalName())) {
-				List<Element> paths = DomUtils.getChildElementsByTagName(interceptor, "path");
+				List<Element> paths = DomUtils.getChildElementsByTagName(interceptor, "mapping");
 				pathPatterns = new String[paths.size()];
 				for (int i = 0; i < paths.size(); i++) {
-					pathPatterns[i] = paths.get(i).getAttribute("value");
+					pathPatterns[i] = paths.get(i).getAttribute("path");
 				}
 				Element interceptorBean = DomUtils.getChildElementByTagName(interceptor, "bean");
 				interceptorDef = parserContext.getDelegate().parseBeanDefinitionElement(interceptorBean);

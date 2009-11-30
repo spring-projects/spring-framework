@@ -75,9 +75,9 @@
 					</xsd:annotation>
 					<xsd:complexType>
 						<xsd:sequence>
-							<xsd:element name="path" maxOccurs="unbounded">
+							<xsd:element name="mapping" maxOccurs="unbounded">
 								<xsd:complexType>
-									<xsd:attribute name="value" type="xsd:string" use="required">
+									<xsd:attribute name="path" type="xsd:string" use="required">
 										<xsd:annotation>
 											<xsd:documentation><![CDATA[
 	A path into the application intercepted by this interceptor.
