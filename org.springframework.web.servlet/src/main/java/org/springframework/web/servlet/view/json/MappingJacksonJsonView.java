@@ -119,22 +119,26 @@ public class MappingJacksonJsonView extends AbstractView {
 	protected void renderMergedOutputModel(Map<String, Object> model,
 			HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		model = filterModel(model);
+		Object value = filterModel(model);
 		JsonGenerator generator =
 				objectMapper.getJsonFactory().createJsonGenerator(response.getOutputStream(), encoding);
 		if (prefixJson) {
 			generator.writeRaw("{} && ");
 		}
-		objectMapper.writeValue(generator, model);
+		objectMapper.writeValue(generator, value);
 	}
 
 	/**
-	 * Filters out undesired attributes from the given model.
+	 * Filters out undesired attributes from the given model. The return value can be either another {@link Map}, or a
+	 * single value object.
 	 *
 	 * <p>Default implementation removes {@link BindingResult} instances and entries not included in the {@link
 	 * #setRenderedAttributes(Set) renderedAttributes} property.
+	 *
+	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
+	 * @return the object to be rendered
 	 */
-	protected Map<String, Object> filterModel(Map<String, Object> model) {
+	protected Object filterModel(Map<String, Object> model) {
 		Map<String, Object> result = new HashMap<String, Object>(model.size());
 		Set<String> renderedAttributes =
 				!CollectionUtils.isEmpty(this.renderedAttributes) ? this.renderedAttributes : model.keySet();
