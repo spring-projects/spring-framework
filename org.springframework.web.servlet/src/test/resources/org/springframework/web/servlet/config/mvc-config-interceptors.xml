@@ -7,8 +7,10 @@
 
 	<mvc:annotation-driven />
 
-	<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
-	<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
-	<bean class="org.springframework.web.context.request.Log4jNestedDiagnosticContextInterceptor" />
-
+	<mvc:interceptors>
+		<mvc:interceptor class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+		<mvc:interceptor path="/**" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+		<mvc:interceptor path="/logged/**" class="org.springframework.web.context.request.Log4jNestedDiagnosticContextInterceptor" />		
+	</mvc:interceptors>
+	
 </beans>

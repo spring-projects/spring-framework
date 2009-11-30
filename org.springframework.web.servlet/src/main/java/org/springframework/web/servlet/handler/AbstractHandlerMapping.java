@@ -60,8 +60,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private HandlerInterceptor[] adaptedInterceptors;
 
-	private boolean detectInterceptors;
-
 	/**
 	 * Specify the order value for this HandlerMapping bean.
 	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
@@ -105,16 +103,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Configure whether this handler mapping should detect interceptors registered in the WebApplicationContext.
-	 * If true, {@link HandlerInterceptor} and {@link WebRequestInterceptor} beans will be detected by type and added to the interceptors list.
-	 * Default is false.
-	 * @param detectInterceptors the detect interceptors flag
-	 */
-	public void setDetectInterceptors(boolean detectInterceptors) {
-		this.detectInterceptors = detectInterceptors;
-	}
-
-	/**
 	 * Initializes the interceptors.
 	 * @see #extendInterceptors(java.util.List)
 	 * @see #initInterceptors()
@@ -144,21 +132,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #adaptInterceptor
 	 */
 	protected void initInterceptors() {
-		if (this.detectInterceptors) {
-			Map<String, HandlerInterceptor> handlerInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), HandlerInterceptor.class, true, false);
-			if (!handlerInterceptors.isEmpty()) {
-				this.interceptors.addAll(handlerInterceptors.values());
-			}
-			Map<String, WebRequestInterceptor> webInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), WebRequestInterceptor.class, true, false);
-			if (!webInterceptors.isEmpty()) {
-				for (WebRequestInterceptor interceptor : webInterceptors.values()) {
-					this.interceptors.add(new WebRequestHandlerInterceptorAdapter(interceptor));			
-				}
-			}			
-		}
-		
 		if (!this.interceptors.isEmpty()) {
-			OrderComparator.sort(this.interceptors);
 			this.adaptedInterceptors = new HandlerInterceptor[this.interceptors.size()];
 			for (int i = 0; i < this.interceptors.size(); i++) {
 				Object interceptor = this.interceptors.get(i);

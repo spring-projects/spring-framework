@@ -35,6 +35,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -155,21 +156,27 @@ public class MvcNamespaceTests {
 		mapping.setDefaultHandler(new TestController());
 		
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/accounts/12345");
 		request.addParameter("locale", "en");
 		request.addParameter("theme", "green");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(4, chain.getInterceptors().length);
+		assertEquals(3, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+
+		request.setRequestURI("/logged/accounts/12345");
+		chain = mapping.getHandler(request);
+		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+
 	}
 
 	@Test
 	public void testBeanDecoration() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(container);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-bean-decoration.xml", getClass()));
-		assertEquals(5, container.getBeanDefinitionCount());
+		assertEquals(6, container.getBeanDefinitionCount());
 		container.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = container.getBean(DefaultAnnotationHandlerMapping.class);
@@ -179,10 +186,12 @@ public class MvcNamespaceTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(2, chain.getInterceptors().length);
+		assertEquals(3, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
 		LocaleChangeInterceptor interceptor = (LocaleChangeInterceptor) chain.getInterceptors()[1];
 		assertEquals("lang", interceptor.getParamName());
+		ThemeChangeInterceptor interceptor2 = (ThemeChangeInterceptor) chain.getInterceptors()[2];
+		assertEquals("style", interceptor2.getParamName());
 	}
 
 	@Test

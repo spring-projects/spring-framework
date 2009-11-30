@@ -64,7 +64,6 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 		RootBeanDefinition annMappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
 		annMappingDef.setSource(source);
 		annMappingDef.getPropertyValues().add("order", 0);
-		annMappingDef.getPropertyValues().add("detectInterceptors", true);
 		String annMappingName = parserContext.getReaderContext().registerWithGeneratedName(annMappingDef);
 
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
