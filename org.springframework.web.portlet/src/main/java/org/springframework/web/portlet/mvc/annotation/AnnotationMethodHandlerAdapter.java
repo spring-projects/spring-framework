@@ -600,8 +600,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			if (Cookie.class.isAssignableFrom(paramType)) {
 				return cookieValue;
 			}
-			else {
+			else if (cookieValue != null) {
 				return cookieValue.getValue();
+			}
+			else {
+				return null;
 			}
 		}
 
