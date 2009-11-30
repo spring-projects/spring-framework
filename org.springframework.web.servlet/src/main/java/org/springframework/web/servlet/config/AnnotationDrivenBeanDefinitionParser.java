@@ -16,46 +16,70 @@
 
 package org.springframework.web.servlet.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
+import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
-import org.w3c.dom.Element;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses the {@code annotation-driven} element to configure
- * a Spring MVC web application.
- * <p>
- * Responsible for:
+ * {@link BeanDefinitionParser} that parses the {@code annotation-driven} element to configure a Spring MVC web
+ * application.
+ *
+ * <p>Responsible for:
  * <ol>
- * <li>Registering a DefaultAnnotationHandlerMapping bean for mapping HTTP Servlet Requests to @Controller methods using @RequestMapping annotations.
+ * <li>Registering a DefaultAnnotationHandlerMapping bean for mapping HTTP Servlet Requests to @Controller methods
+ * using @RequestMapping annotations.
  * <li>Registering a AnnotationMethodHandlerAdapter bean for invoking annotated @Controller methods.
- * Will configure the HandlerAdapter's <code>webBindingInitializer</code> property for centrally configuring @Controller DataBinder instances:
+ * Will configure the HandlerAdapter's <code>webBindingInitializer</code> property for centrally configuring
+ * {@code @Controller} {@code DataBinder} instances:
  * <ul>
- * <li>Configures the conversionService if specified, otherwise defaults to a fresh {@link ConversionService} instance created by the default {@link FormattingConversionServiceFactoryBean}.
- * <li>Configures the validator if specified, otherwise defaults to a fresh {@link Validator} instance created by the default {@link LocalValidatorFactoryBean} <i>if the JSR-303 API is present in the classpath.
+ * <li>Configures the conversionService if specified, otherwise defaults to a fresh {@link ConversionService} instance
+ * created by the default {@link FormattingConversionServiceFactoryBean}.
+ * <li>Configures the validator if specified, otherwise defaults to a fresh {@link Validator} instance created by the
+ * default {@link LocalValidatorFactoryBean} <em>if the JSR-303 API is present on the classpath</em>.
+ * <li>Configures standard {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverters},
+ * including the {@link Jaxb2RootElementHttpMessageConverter} <em>if JAXB2 is present on the classpath</em>, and
+ * the {@link MappingJacksonHttpMessageConverter} <em>if Jackson is present on the classpath</em>.
  * </ul>
  * </ol>
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 3.0
  */
 public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jsr303Present = ClassUtils.isPresent(
 			"javax.validation.Validator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean jaxb2Present =
+			ClassUtils.isPresent("javax.xml.bind.Binder", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean jacksonPresent =
+			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
+					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -74,6 +98,7 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 		annAdapterDef.setSource(source);
 		annAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
+		annAdapterDef.getPropertyValues().add("messageConverters", getMessageConverters(source));
 		String adapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
 
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
@@ -111,6 +136,22 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 		else {
 			return null;
 		}
+	}
+
+	private ManagedList<RootBeanDefinition> getMessageConverters(Object source) {
+		ManagedList<RootBeanDefinition> messageConverters = new ManagedList<RootBeanDefinition>();
+		messageConverters.setSource(source);
+		messageConverters.add(new RootBeanDefinition(ByteArrayHttpMessageConverter.class));
+		messageConverters.add(new RootBeanDefinition(StringHttpMessageConverter.class));
+		messageConverters.add(new RootBeanDefinition(FormHttpMessageConverter.class));
+		messageConverters.add(new RootBeanDefinition(SourceHttpMessageConverter.class));
+		if (jaxb2Present) {
+			messageConverters.add(new RootBeanDefinition(Jaxb2RootElementHttpMessageConverter.class));
+		}
+		if (jacksonPresent) {
+			messageConverters.add(new RootBeanDefinition(MappingJacksonHttpMessageConverter.class));
+		}
+		return messageConverters;
 	}
 
 }
