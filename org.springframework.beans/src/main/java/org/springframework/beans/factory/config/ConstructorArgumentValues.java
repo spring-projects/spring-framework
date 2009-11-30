@@ -76,7 +76,7 @@ public class ConstructorArgumentValues {
 			}
 			for (ValueHolder valueHolder : other.genericArgumentValues) {
 				if (!this.genericArgumentValues.contains(valueHolder)) {
-					this.genericArgumentValues.add(valueHolder.copy());
+					addOrMergeGenericArgumentValue(valueHolder.copy());
 				}
 			}
 		}
@@ -84,7 +84,7 @@ public class ConstructorArgumentValues {
 
 
 	/**
-	 * Add argument value for the given index in the constructor argument list.
+	 * Add an argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
 	 * @param value the argument value
 	 */
@@ -93,7 +93,7 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
-	 * Add argument value for the given index in the constructor argument list.
+	 * Add an argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
 	 * @param value the argument value
 	 * @param type the type of the constructor argument
@@ -103,7 +103,7 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
-	 * Add argument value for the given index in the constructor argument list.
+	 * Add an argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
 	 * @param newValue the argument value in the form of a ValueHolder
 	 */
@@ -114,7 +114,7 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
-	 * Add argument value for the given index in the constructor argument list,
+	 * Add an argument value for the given index in the constructor argument list,
 	 * merging the new value (typically a collection) with the current value
 	 * if demanded: see {@link org.springframework.beans.Mergeable}.
 	 * @param key the index in the constructor argument list
@@ -183,7 +183,7 @@ public class ConstructorArgumentValues {
 
 
 	/**
-	 * Add generic argument value to be matched by type.
+	 * Add a generic argument value to be matched by type.
 	 * <p>Note: A single generic argument value will just be used once,
 	 * rather than matched multiple times.
 	 * @param value the argument value
@@ -193,7 +193,7 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
-	 * Add generic argument value to be matched by type.
+	 * Add a generic argument value to be matched by type.
 	 * <p>Note: A single generic argument value will just be used once,
 	 * rather than matched multiple times.
 	 * @param value the argument value
@@ -204,7 +204,7 @@ public class ConstructorArgumentValues {
 	}
 
 	/**
-	 * Add generic argument value to be matched by type.
+	 * Add a generic argument value to be matched by type or name (if available).
 	 * <p>Note: A single generic argument value will just be used once,
 	 * rather than matched multiple times.
 	 * @param newValue the argument value in the form of a ValueHolder
@@ -215,8 +215,31 @@ public class ConstructorArgumentValues {
 	public void addGenericArgumentValue(ValueHolder newValue) {
 		Assert.notNull(newValue, "ValueHolder must not be null");
 		if (!this.genericArgumentValues.contains(newValue)) {
-			this.genericArgumentValues.add(newValue);
+			addOrMergeGenericArgumentValue(newValue);
 		}
+	}
+
+	/**
+	 * Add a generic argument value, merging the new value (typically a collection)
+	 * with the current value if demanded: see {@link org.springframework.beans.Mergeable}.
+	 * @param newValue the argument value in the form of a ValueHolder
+	 */
+	private void addOrMergeGenericArgumentValue(ValueHolder newValue) {
+		if (newValue.getName() != null) {
+			for (Iterator<ValueHolder> it = this.genericArgumentValues.iterator(); it.hasNext();) {
+				ValueHolder currentValue = it.next();
+				if (newValue.getName().equals(currentValue.getName())) {
+					if (newValue.getValue() instanceof Mergeable) {
+						Mergeable mergeable = (Mergeable) newValue.getValue();
+						if (mergeable.isMergeEnabled()) {
+							newValue.setValue(mergeable.merge(currentValue.getValue()));
+						}
+					}
+					it.remove();
+				}
+			}
+		}
+		this.genericArgumentValues.add(newValue);
 	}
 
 	/**
@@ -244,8 +267,8 @@ public class ConstructorArgumentValues {
 	 * resolution process.
 	 * @param requiredType the type to match (can be <code>null</code> to find
 	 * an arbitrary next generic argument value)
-	 * @param requiredName the type to match (can be <code>null</code> to match
-	 * unnamed values only)
+	 * @param requiredName the name to match (can be <code>null</code> to not
+	 * match argument values by name)
 	 * @param usedValueHolders a Set of ValueHolder objects that have already been used
 	 * in the current resolution process and should therefore not be returned again
 	 * @return the ValueHolder for the argument, or <code>null</code> if none found
