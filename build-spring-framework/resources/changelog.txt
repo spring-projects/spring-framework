@@ -3,6 +3,21 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.0.RC3 (2009-12-01)
+-----------------------------------------
+
+* fixed bean definition import via "classpath*:" URLs
+* added chaining-capable "add" method to MutablePropertyValues
+* constructor arguments can be overridden by name in child bean definitions
+* BeanDefinitions return isSingleton()=true by default again, with scope name empty
+* init/destroy methods get processed in the order of declaration at each hierarchy level
+* fixed lookup of LifecycleProcessor bean in a Spring Dynamic Modules environment
+* fixed transaction synchronization setup with TransactionAwareDataSourceProxy involved
+* added support for Hibernate 3.3 RegionFactory cache SPI to LocalSessionFactoryBean
+* mvc:annotation-driven exposes default Validator and ConversionService as top-level beans
+* JSR-303 SpringValidatorAdapter uses field name as first argument (analogous to bind errors)
+
+
 Changes in version 3.0.0.RC2 (2009-11-13)
 -----------------------------------------
 
