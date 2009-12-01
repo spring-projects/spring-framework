@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,15 @@ package org.springframework.web.servlet.handler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.ViewResolver;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
@@ -50,7 +45,7 @@ import org.springframework.web.servlet.ViewResolver;
  * @see org.springframework.web.servlet.HandlerInterceptor
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
-	implements HandlerMapping, Ordered {
+		implements HandlerMapping, Ordered {
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
@@ -59,6 +54,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private final List<Object> interceptors = new ArrayList<Object>();
 
 	private HandlerInterceptor[] adaptedInterceptors;
+
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
@@ -102,6 +98,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		this.interceptors.addAll(Arrays.asList(interceptors));
 	}
 
+
 	/**
 	 * Initializes the interceptors.
 	 * @see #extendInterceptors(java.util.List)
@@ -123,7 +120,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * allowing to add further interceptors before as well as after the existing
 	 * interceptors
 	 */
-	protected void extendInterceptors(List interceptors) {
+	protected void extendInterceptors(List<Object> interceptors) {
 	}
 
 	/**

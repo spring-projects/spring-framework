@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.converter;
 
 /**
@@ -35,9 +36,6 @@ public interface ConverterRegistry {
 
 	/**
 	 * Add a generic converter to this registry.
-	 * @param sourceType the source type to convert from
-	 * @param targetType the target type to convert to
-	 * @param converter the generic converter
 	 */
 	void addGenericConverter(GenericConverter converter);
 	
