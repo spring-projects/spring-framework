@@ -361,28 +361,22 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
 		    definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			SuspendedResourcesHolder suspendedResources = suspend(null);
-			DefaultTransactionStatus status = null;
+			if (debugEnabled) {
+				logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
+			}
 			try {
-				if (debugEnabled) {
-					logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
-				}
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-				status = newTransactionStatus(
+				DefaultTransactionStatus status = instantiateTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
 				doBegin(transaction, definition);
+				prepareSynchronization(status, definition);
 				return status;
 			}
 			catch (RuntimeException ex) {
-				if (status != null && status.isNewSynchronization()) {
-					TransactionSynchronizationManager.clear();
-				}
 				resume(null, suspendedResources);
 				throw ex;
 			}
 			catch (Error err) {
-				if (status != null && status.isNewSynchronization()) {
-					TransactionSynchronizationManager.clear();
-				}
 				resume(null, suspendedResources);
 				throw err;
 			}
@@ -422,25 +416,19 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 						definition.getName() + "]");
 			}
 			SuspendedResourcesHolder suspendedResources = suspend(transaction);
-			DefaultTransactionStatus status = null;
 			try {
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-				status = newTransactionStatus(
+				DefaultTransactionStatus status = instantiateTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
 				doBegin(transaction, definition);
+				prepareSynchronization(status, definition);
 				return status;
 			}
 			catch (RuntimeException beginEx) {
-				if (status != null && status.isNewSynchronization()) {
-					TransactionSynchronizationManager.clear();
-				}
 				resumeAfterBeginException(transaction, suspendedResources, beginEx);
 				throw beginEx;
 			}
 			catch (Error beginErr) {
-				if (status != null && status.isNewSynchronization()) {
-					TransactionSynchronizationManager.clear();
-				}
 				resumeAfterBeginException(transaction, suspendedResources, beginErr);
 				throw beginErr;
 			}
@@ -469,23 +457,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Usually only for JTA: Spring synchronization might get activated here
 				// in case of a pre-existing JTA transaction.
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-				DefaultTransactionStatus status = newTransactionStatus(
+				DefaultTransactionStatus status = instantiateTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, null);
-				try {
-					doBegin(transaction, definition);
-				}
-				catch (RuntimeException beginEx) {
-					if (status != null && status.isNewSynchronization()) {
-						TransactionSynchronizationManager.clear();
-					}
-					throw beginEx;
-				}
-				catch (Error beginErr) {
-					if (status != null && status.isNewSynchronization()) {
-						TransactionSynchronizationManager.clear();
-					}
-					throw beginErr;
-				}
+				doBegin(transaction, definition);
+				prepareSynchronization(status, definition);
 				return status;
 			}
 		}
@@ -519,34 +494,44 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Create a new TransactionStatus for the given arguments,
-	 * initializing transaction synchronization as appropriate.
+	 * also initializing transaction synchronization as appropriate.
 	 */
 	protected DefaultTransactionStatus newTransactionStatus(
 			TransactionDefinition definition, Object transaction, boolean newTransaction,
 			boolean newSynchronization, boolean debug, Object suspendedResources) {
 
+		DefaultTransactionStatus status = instantiateTransactionStatus(
+				definition, transaction, newTransaction, newSynchronization, debug, suspendedResources);
+		prepareSynchronization(status, definition);
+		return status;
+	}
+
+	/**
+	 * Create a rae TransactionStatus instance for the given arguments.
+	 */
+	private DefaultTransactionStatus instantiateTransactionStatus(
+			TransactionDefinition definition, Object transaction, boolean newTransaction,
+			boolean newSynchronization, boolean debug, Object suspendedResources) {
+
 		boolean actualNewSynchronization = newSynchronization &&
 				!TransactionSynchronizationManager.isSynchronizationActive();
-		try {
-			if (actualNewSynchronization) {
-				TransactionSynchronizationManager.setActualTransactionActive(transaction != null);
-				TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
-						(definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) ?
-								definition.getIsolationLevel() : null);
-				TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
-				TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
-				TransactionSynchronizationManager.initSynchronization();
-			}
-			return new DefaultTransactionStatus(
-					transaction, newTransaction, actualNewSynchronization,
-					definition.isReadOnly(), debug, suspendedResources);
-		}
-		catch (Error err) {
-			// Can only really be an OutOfMemoryError...
-			if (actualNewSynchronization) {
-				TransactionSynchronizationManager.clear();
-			}
-			throw err;
+		return new DefaultTransactionStatus(
+				transaction, newTransaction, actualNewSynchronization,
+				definition.isReadOnly(), debug, suspendedResources);
+	}
+
+	/**
+	 * Initialize transaction synchronization as appropriate.
+	 */
+	private void prepareSynchronization(DefaultTransactionStatus status, TransactionDefinition definition) {
+		if (status.isNewSynchronization()) {
+			TransactionSynchronizationManager.setActualTransactionActive(status.hasTransaction());
+			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
+					(definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) ?
+							definition.getIsolationLevel() : null);
+			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
+			TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
+			TransactionSynchronizationManager.initSynchronization();
 		}
 	}
 
