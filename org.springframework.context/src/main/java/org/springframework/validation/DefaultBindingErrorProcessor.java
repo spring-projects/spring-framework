@@ -78,9 +78,10 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 
 	/**
 	 * Return FieldError arguments for a binding error on the given field.
-	 * Invoked for each missing required fields and each type mismatch.
-	 * <p>Default implementation returns a DefaultMessageSourceResolvable
-	 * with "objectName.field" and "field" as codes.
+	 * Invoked for each missing required field and each type mismatch.
+	 * <p>The default implementation returns a single argument of type
+	 * DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes.
+	 * @param objectName the name of the target object
 	 * @param field the field that caused the binding error
 	 * @return the Object array that represents the FieldError arguments
 	 * @see org.springframework.validation.FieldError#getArguments
