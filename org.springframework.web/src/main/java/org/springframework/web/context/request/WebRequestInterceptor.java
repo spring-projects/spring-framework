@@ -20,15 +20,15 @@ import org.springframework.ui.ModelMap;
 
 /**
  * Interface for general web request interception. Allows for being applied
- * to Servlet request as well as Portlet request environments, through
- * building on the {@link WebRequest} abstraction.
+ * to Servlet request as well as Portlet request environments, by building
+ * on the {@link WebRequest} abstraction.
  *
  * <p>This interface assumes MVC-style request processing: A handler gets executed,
  * exposes a set of model objects, then a view gets rendered based on that model.
  * Alternatively, a handler may also process the request completely, with no
  * view to be rendered.
  *
- * <p>This interface is deliberatly minimalistic to keep the dependencies of
+ * <p>This interface is deliberately minimalistic to keep the dependencies of
  * generic request interceptors as minimal as feasible.
  *
  * <p><b>NOTE:</b> While this interceptor is applied to the entire request processing
