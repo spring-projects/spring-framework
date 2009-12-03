@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.instrument.classloading.jboss;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -30,13 +31,15 @@ import org.springframework.util.ClassUtils;
  * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.</p> 
  * 
  * @author Costin Leau
+ * @since 3.0
  */
 public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final JBossClassLoaderAdapter classLoader;
 
+
 	/**
-	 * Creates a new instance of the {@link JBossLoadTimeWeaver} class using
+	 * Create a new instance of the {@link JBossLoadTimeWeaver} class using
 	 * the default {@link ClassLoader class loader}.
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
@@ -45,7 +48,7 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * Creates a new instance of the {@link JBossLoadTimeWeaver} class using
+	 * Create a new instance of the {@link JBossLoadTimeWeaver} class using
 	 * the supplied {@link ClassLoader}.
 	 * @param classLoader the <code>ClassLoader</code> to delegate to for
 	 * weaving (must not be <code>null</code>)
@@ -54,6 +57,7 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = new JBossClassLoaderAdapter(classLoader);
 	}
+
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.classLoader.addTransformer(transformer);
@@ -66,4 +70,5 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}
+
 }
