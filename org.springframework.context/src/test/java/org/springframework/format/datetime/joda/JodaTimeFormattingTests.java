@@ -292,11 +292,13 @@ public class JodaTimeFormattingTests {
 		@DateTimeFormat(style="MS")
 		private DateTime dateTimeAnnotated;
 
+		@DateTimeFormat
 		private Date date;
 
 		@DateTimeFormat(style="S-")
 		private Date dateAnnotated;
 
+		@DateTimeFormat
 		private Calendar calendar;
 
 		@DateTimeFormat(style="S-")
