@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.number;
 
 import java.math.BigDecimal;
@@ -30,6 +31,7 @@ import org.springframework.format.annotation.NumberFormat.Style;
 
 /**
  * Formats fields annotated with the {@link NumberFormat} annotation.
+ *
  * @author Keith Donald
  * @since 3.0
  * @see NumberFormat
@@ -37,10 +39,12 @@ import org.springframework.format.annotation.NumberFormat.Style;
 public final class NumberFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<NumberFormat> {
 
 	private final Set<Class<?>> fieldTypes;
-	
+
+
 	public NumberFormatAnnotationFormatterFactory() {
 		this.fieldTypes = Collections.unmodifiableSet(createFieldTypes());
 	}
+
 
 	public Set<Class<?>> getFieldTypes() {
 		return this.fieldTypes;
@@ -53,6 +57,7 @@ public final class NumberFormatAnnotationFormatterFactory implements AnnotationF
 	public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
 		return configureFormatterFrom(annotation, fieldType);
 	}
+
 
 	// internal helpers
 	
@@ -71,13 +76,16 @@ public final class NumberFormatAnnotationFormatterFactory implements AnnotationF
 	private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
 		if (!annotation.pattern().isEmpty()) {
 			return new NumberFormatter(annotation.pattern());
-		} else {
+		}
+		else {
 			Style style = annotation.style();
 			if (style == Style.PERCENT) {
 				return new PercentFormatter();
-			} else if (style == Style.CURRENCY) {
+			}
+			else if (style == Style.CURRENCY) {
 				return new CurrencyFormatter();
-			} else {
+			}
+			else {
 				return new NumberFormatter();
 			}
 		}
