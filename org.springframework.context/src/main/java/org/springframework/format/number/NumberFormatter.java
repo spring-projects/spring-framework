@@ -38,18 +38,26 @@ public final class NumberFormatter extends AbstractNumberFormatter {
 
 	private String pattern;
 
+
+	/**
+	 * Create a new NumberFormatter without a pattern.
+	 */
 	public NumberFormatter() {
-		
 	}
 
+	/**
+	 * Create a new NumberFormatter with the specified pattern.
+	 * @param pattern the format pattern
+	 * @see #setPattern
+	 */
 	public NumberFormatter(String pattern) {
 		this.pattern = pattern;
 	}
 
+
 	/**
 	 * Sets the pattern to use to format number values.
 	 * If not specified, the default DecimalFormat pattern is used.
-	 * @param pattern the format pattern
 	 * @see DecimalFormat#applyPattern(String)
 	 */
 	public void setPattern(String pattern) {
