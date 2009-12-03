@@ -1004,7 +1004,7 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
-              <para><classname>@PathVariabe</classname> annotated parameters
+              <para><classname>@PathVariable</classname> annotated parameters
               for access to URI template variables. See <xref
               linkend="mvc-ann-requestmapping-uri-templates" />.</para>
             </listitem>
