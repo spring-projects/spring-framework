@@ -625,6 +625,29 @@ public class DataBinderTests extends TestCase {
 		assertEquals("value", tb.getName());
 	}
 
+	public void testJavaBeanPropertyConventions() {
+		Book book = new Book();
+		DataBinder binder = new DataBinder(book);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("title", "my book");
+		pvs.add("ISBN", "1234");
+		pvs.add("NInStock", "5");
+		binder.bind(pvs);
+		assertEquals("my book", book.getTitle());
+		assertEquals("1234", book.getISBN());
+		assertEquals(5, book.getNInStock());
+
+		pvs = new MutablePropertyValues();
+		pvs.add("Title", "my other book");
+		pvs.add("iSBN", "6789");
+		pvs.add("nInStock", "0");
+		binder.bind(pvs);
+		assertEquals("my other book", book.getTitle());
+		assertEquals("6789", book.getISBN());
+		assertEquals(0, book.getNInStock());
+	}
+
 	public void testValidatorNoErrors() {
 		TestBean tb = new TestBean();
 		tb.setAge(33);
@@ -1333,6 +1356,40 @@ public class DataBinderTests extends TestCase {
 		String[] disallowedFields = binder.getBindingResult().getSuppressedFields();
 		assertEquals(1, disallowedFields.length);
 		assertEquals("beanName", disallowedFields[0]);
+	}
+
+
+	private static class Book {
+
+		private String Title;
+
+		private String ISBN;
+
+		private int nInStock;
+
+		public String getTitle() {
+			return Title;
+		}
+
+		public void setTitle(String title) {
+			Title = title;
+		}
+
+		public String getISBN() {
+			return ISBN;
+		}
+
+		public void setISBN(String ISBN) {
+			this.ISBN = ISBN;
+		}
+
+		public int getNInStock() {
+			return nInStock;
+		}
+
+		public void setNInStock(int nInStock) {
+			this.nInStock = nInStock;
+		}
 	}
 
 

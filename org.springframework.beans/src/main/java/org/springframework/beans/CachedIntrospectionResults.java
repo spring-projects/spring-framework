@@ -22,6 +22,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,12 +30,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
@@ -130,7 +131,7 @@ public class CachedIntrospectionResults {
 	 * @throws BeansException in case of introspection failure
 	 */
 	static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
-		CachedIntrospectionResults results = null;
+		CachedIntrospectionResults results;
 		Object value = classCache.get(beanClass);
 		if (value instanceof Reference) {
 			Reference ref = (Reference) value;
@@ -265,8 +266,15 @@ public class CachedIntrospectionResults {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
-	PropertyDescriptor getPropertyDescriptor(String propertyName) {
-		return this.propertyDescriptorCache.get(propertyName);
+	PropertyDescriptor getPropertyDescriptor(String name) {
+		PropertyDescriptor pd = this.propertyDescriptorCache.get(name);
+		if (pd == null && StringUtils.hasLength(name)) {
+			pd = this.propertyDescriptorCache.get(name.substring(0, 1).toLowerCase() + name.substring(1));
+			if (pd == null) {
+				pd = this.propertyDescriptorCache.get(name.substring(0, 1).toUpperCase() + name.substring(1));
+			}
+		}
+		return pd;
 	}
 
 	PropertyDescriptor[] getPropertyDescriptors() {
