@@ -235,10 +235,7 @@ public class ProductDaoImpl implements ProductDao {
     will then cover the other ORM technologies, showing briefer examples
     there.</para>
 
-    <para><note>
-        <para>As of Spring 2.5, Spring requires Hibernate 3.1 or later.
-        Neither Hibernate 2.1 nor Hibernate 3.0 are supported.</para>
-      </note></para>
+    <para><note>As of Spring 3.0, Spring requires Hibernate 3.2 or later.</note></para>
 
     <section id="orm-session-factory-setup">
       <title><interfacename>SessionFactory</interfacename> setup in a Spring
