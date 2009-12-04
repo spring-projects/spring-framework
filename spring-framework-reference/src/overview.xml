@@ -351,7 +351,7 @@ TR: OK. Added to diagram.--></para>
     scalable, fail-safe web applications that might need declarative
     security.</para>
 
-    <section>
+    <section id=""dependency-management>
       <title>Dependency Management and Naming Conventions</title>
 
       <para>Dependency management and dependency injection are different
@@ -843,7 +843,7 @@ TR: OK. Added to diagram.--></para>
    &lt;/dependency&gt;
    &lt;dependency&gt;
       &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
-      &lt;artifactId&gt;jcl-slf4j&lt;/artifactId&gt;
+      &lt;artifactId&gt;jcl-over-slf4j&lt;/artifactId&gt;
       &lt;version&gt;1.5.8&lt;/version&gt;
       &lt;scope&gt;runtime&lt;/scope&gt;
    &lt;/dependency&gt;
@@ -878,7 +878,7 @@ TR: OK. Added to diagram.--></para>
       and generates fewer dependencies, is to bind directly to <ulink type=""
       url="http://logback.qos.ch">Logback</ulink>. This removes the extra
       binding step because Logback implements SLF4J directly, so you only need
-      to depend on two libaries not four (<code>jcl-slf4j</code> and
+      to depend on two libaries not four (<code>jcl-over-slf4j</code> and
       <code>logback</code>). If you do that you might also need to exlude the
       slf4j-api dependency from other external dependencies (not Spring),
       because you only want one version of that API on the classpath.</para>
