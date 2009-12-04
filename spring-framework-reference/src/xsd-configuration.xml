@@ -342,7 +342,7 @@ public class Client {
                 with values taken from the supplied <literal>'sourceList'</literal>.
                 </para>
                 <para>After...</para>
-                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with the supplied values --&gt;</lineannotation><![CDATA[
 <util:list id="emails">
     <value>pechorin@hero.org</value>
     <value>raskolnikov@slums.org</value>
@@ -387,7 +387,7 @@ public class Client {
                 with key-value pairs taken from the supplied <literal>'sourceMap'</literal>.
                 </para>
                 <para>After...</para>
-                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with the supplied key-value pairs --&gt;</lineannotation><![CDATA[
 <util:map id="emails">
     <entry key="pechorin" value="pechorin@hero.org"/>
     <entry key="raskolnikov" value="raskolnikov@slums.org"/>
@@ -432,7 +432,7 @@ public class Client {
                 with values taken from the supplied <literal>'sourceSet'</literal>.
                 </para>
                 <para>After...</para>
-                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
+                <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with the supplied values --&gt;</lineannotation><![CDATA[
 <util:set id="emails">
     <value>pechorin@hero.org</value>
     <value>raskolnikov@slums.org</value>
