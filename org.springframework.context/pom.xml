@@ -80,6 +80,7 @@
 			<artifactId>aopalliance</artifactId>
 			<version>1.0</version>
 			<scope>compile</scope>
+			<optional>true</optional>
 		</dependency>
 		<!-- common logging dependency is in spring-core -->
 		<dependency>
