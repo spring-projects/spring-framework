@@ -1290,7 +1290,7 @@ public class PersonForm {
 public class PersonForm {
 
     @NotNull
-    @Max(64)
+    @Size(max=64)
     private String name;
     
     @Min(0)
