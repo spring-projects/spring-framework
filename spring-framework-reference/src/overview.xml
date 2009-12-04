@@ -351,7 +351,7 @@ TR: OK. Added to diagram.--></para>
     scalable, fail-safe web applications that might need declarative
     security.</para>
 
-    <section id=""dependency-management>
+    <section id="dependency-management">
       <title>Dependency Management and Naming Conventions</title>
 
       <para>Dependency management and dependency injection are different
