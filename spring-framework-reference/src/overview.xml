@@ -415,7 +415,9 @@ TR: OK. Added to diagram.--></para>
             (<code>org.springframework.*-&lt;version&gt;.jar</code>), and the
             dependencies are also in this "long" form, with external libraries
             (not from SpringSource) having the prefix
-            <code>com.springsource</code>.</para>
+            <code>com.springsource</code>. See the <ulink security=""
+            url="http://www.springsource.com/repository/app/faq">FAQ</ulink>
+            for more information.</para>
           </listitem>
 
           <listitem>
@@ -576,10 +578,23 @@ TR: OK. Added to diagram.--></para>
         libraries in order to use Spring for simple use cases. For basic
         dependency injection there is only one mandatory external dependency,
         and that is for logging (see below for a more detailed description of
-        logging options). If you are using Maven for dependency management you
-        don't even need to supply the logging dependency explicitly. For
-        example, to create an application context and use dependency injection
-        to configure an application, your Maven dependencies will look like
+        logging options).</para>
+
+        <para>Next we outline the basic steps needed to configure an
+        application that depends on Spring, first with Maven and then with
+        Ivy. In all cases, if anything is unclear, refer to the documentation
+        of your dependency management system, or look at some sample code -
+        Spring itself uses Ivy to manage dependencies when it is building, and
+        our samples mostly use Maven.</para>
+      </section>
+
+      <section>
+        <title>Maven Dependency Management</title>
+
+        <para>If you are using Maven for dependency management you don't even
+        need to supply the logging dependency explicitly. For example, to
+        create an application context and use dependency injection to
+        configure an application, your Maven dependencies will look like
         this:</para>
 
         <para><programlisting>&lt;dependencies&gt;
@@ -659,14 +674,53 @@ TR: OK. Added to diagram.--></para>
         that can be used to search for and download dependencies. It also has
         handy snippets of Maven and Ivy configuration that you can copy and
         paste if you are using those tools.</para>
+      </section>
 
-        <para>If you prefer to use <ulink url="http://ant.apache.org/ivy">
-		Ivy</ulink> to manage dependencies then there are
-        similar names and configuration options there (refer to the
-        documentation of your dependency management system, or look at some
-        sample code - Spring itself uses Ivy to manage dependencies when it is
-        building).</para>
+      <section>
+        <title>Ivy Dependency Management</title>
 
+        <para>If you prefer to use <ulink
+        url="http://ant.apache.org/ivy">Ivy</ulink> to manage dependencies
+        then there are similar names and configuration options. </para>
+
+        <para>To configure Ivy to point to the SpringSource EBR add the
+        following resolvers to your
+        <filename>ivysettings.xml</filename>:</para>
+
+        <programlisting>&lt;resolvers&gt;
+  
+  &lt;url name="com.springsource.repository.bundles.release"&gt;
+
+    &lt;ivy pattern="http://repository.springsource.com/ivy/bundles/release/
+      [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
+    &lt;artifact pattern="http://repository.springsource.com/ivy/bundles/release/
+      [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
+
+  &lt;/url&gt;
+
+  &lt;url name="com.springsource.repository.bundles.external"&gt;
+
+    &lt;ivy pattern="http://repository.springsource.com/ivy/bundles/external/
+       [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
+    &lt;artifact pattern="http://repository.springsource.com/ivy/bundles/external/
+       [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt; 
+
+  &lt;/url&gt;
+
+&lt;/resolvers&gt;</programlisting>
+
+        <para>The XML above is not valid because the lines are too long - if
+        you copy-paste then remove the extra line endings in the middle of the
+        url patterns.</para>
+
+        <para>Once Ivy is configured to look in the EBR adding a dependency is
+        easy. Simply pull up the details page for the bundle in question in
+        the repository browser and you'll find an Ivy snippet ready for you to
+        include in your dependencies section. For example (in
+        <filename>ivy.xml</filename>): </para>
+
+        <programlisting>&lt;dependency org="org.springframework" 
+      name="org.springframework.core" rev="3.0.0.RELEASE" conf="compile-&gt;runtime"/&gt;</programlisting>
       </section>
     </section>
 
@@ -697,32 +751,33 @@ TR: OK. Added to diagram.--></para>
       Spring and specifically from the central module called
       <code>spring-core</code>.</para>
 
-      <para>The nice thing about <code>commons-logging</code> is that you don't need
-      anything else to make your application work. It has a runtime discovery
-      algorithm that looks for other logging frameworks in well known places
-      on the classpath and uses one that it thinks is appropriate (or you can
-      tell it which one if you need to). If nothing else is available you get
-      pretty nice looking logs just from the JDK (java.util.logging or JUL for
-      short). You should find that your Spring application works and logs
-      happily to the console out of the box in most situations, and that's
-      important.</para>
+      <para>The nice thing about <code>commons-logging</code> is that you
+      don't need anything else to make your application work. It has a runtime
+      discovery algorithm that looks for other logging frameworks in well
+      known places on the classpath and uses one that it thinks is appropriate
+      (or you can tell it which one if you need to). If nothing else is
+      available you get pretty nice looking logs just from the JDK
+      (java.util.logging or JUL for short). You should find that your Spring
+      application works and logs happily to the console out of the box in most
+      situations, and that's important.</para>
 
       <section>
         <title>Not Using Commons Logging</title>
 
-        <para>Unfortunately, the worst thing about <code>commons-logging</code>, and what
-        has made it unpopular with new tools, is also the runtime discovery
-        algorithm. If we could turn back the clock and start Spring now as a
-        new project it would use a different logging dependency. Probably the
-        first choice would be the Simple Logging Framework for Java (<ulink
-        url="http://www.slf4j.org">SLF4J</ulink>), 
-		which is also used by a lot of other tools
-        that people use with Spring inside their applications.</para>
+        <para>Unfortunately, the worst thing about
+        <code>commons-logging</code>, and what has made it unpopular with new
+        tools, is also the runtime discovery algorithm. If we could turn back
+        the clock and start Spring now as a new project it would use a
+        different logging dependency. Probably the first choice would be the
+        Simple Logging Framework for Java (<ulink
+        url="http://www.slf4j.org">SLF4J</ulink>), which is also used by a lot
+        of other tools that people use with Spring inside their
+        applications.</para>
 
-        <para>To switch off <code>commons-logging</code> is easy: just make sure it isn't
-        on the classpath at runtime. In Maven terms you exclude the
-        dependency, and because of the way that the Spring dependencies are
-        declared, you only have to do that once.</para>
+        <para>To switch off <code>commons-logging</code> is easy: just make
+        sure it isn't on the classpath at runtime. In Maven terms you exclude
+        the dependency, and because of the way that the Spring dependencies
+        are declared, you only have to do that once.</para>
 
         <programlisting>&lt;dependencies&gt;
    &lt;dependency&gt;
@@ -750,28 +805,28 @@ TR: OK. Added to diagram.--></para>
       </section>
 
       <para>SLF4J is a cleaner dependency and more efficient at runtime than
-      <code>commons-logging</code> because it uses compile-time bindings instead of runtime
-      discovery of the other logging frameworks it integrates. This also means
-      that you have to be more explicit about what you want to happen at
-      runtime, and declare it or configure it accordingly. SLF4J provides
-      bindings to many common logging frameworks, so you can usually choose
-      one that you already use, and bind to that for configuration and
-      management.</para>
+      <code>commons-logging</code> because it uses compile-time bindings
+      instead of runtime discovery of the other logging frameworks it
+      integrates. This also means that you have to be more explicit about what
+      you want to happen at runtime, and declare it or configure it
+      accordingly. SLF4J provides bindings to many common logging frameworks,
+      so you can usually choose one that you already use, and bind to that for
+      configuration and management.</para>
 
       <para>SLF4J provides bindings to many common logging frameworks,
       including JCL, and it also does the reverse: bridges between other
       logging frameworks and itself. So to use SLF4J with Spring you need to
-      replace the <code>commons-logging</code> dependency with the SLF4J-JCL bridge. Once
-      you have done that then logging calls from within Spring will be
-      translated into logging calls to the SLF4J API, so if other libraries in
-      your application use that API, then you have a single place to configure
-      and manage logging.</para>
+      replace the <code>commons-logging</code> dependency with the SLF4J-JCL
+      bridge. Once you have done that then logging calls from within Spring
+      will be translated into logging calls to the SLF4J API, so if other
+      libraries in your application use that API, then you have a single place
+      to configure and manage logging.</para>
 
       <para>A common choice might be to bridge Spring to SLF4J, and then
       provide explicit binding from SLF4J to Log4J. You need to supply 4
-      dependencies (and exclude the existing <code>commons-logging</code>): the bridge, the
-      SLF4J API, the binding to Log4J, and the Log4J implementation itself. In
-      Maven you would do that like this</para>
+      dependencies (and exclude the existing <code>commons-logging</code>):
+      the bridge, the SLF4J API, the binding to Log4J, and the Log4J
+      implementation itself. In Maven you would do that like this</para>
 
       <programlisting>&lt;dependencies&gt;
    &lt;dependency&gt;
@@ -821,13 +876,12 @@ TR: OK. Added to diagram.--></para>
 
       <para>A more common choice amongst SLF4J users, which uses fewer steps
       and generates fewer dependencies, is to bind directly to <ulink type=""
-      url="http://logback.qos.ch">Logback</ulink>. 
-	  This removes the extra binding step because
-      Logback implements SLF4J directly, so you only need to depend on two
-      libaries not four (<code>jcl-slf4j</code> and <code>logback</code>). If
-      you do that you might also need to exlude the slf4j-api dependency from
-      other external dependencies (not Spring), because you only want one
-      version of that API on the classpath.</para>
+      url="http://logback.qos.ch">Logback</ulink>. This removes the extra
+      binding step because Logback implements SLF4J directly, so you only need
+      to depend on two libaries not four (<code>jcl-slf4j</code> and
+      <code>logback</code>). If you do that you might also need to exlude the
+      slf4j-api dependency from other external dependencies (not Spring),
+      because you only want one version of that API on the classpath.</para>
 
       <section>
         <title>Using Log4J</title>
