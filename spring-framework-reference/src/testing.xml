@@ -158,7 +158,7 @@
       <para>The Spring Framework provides first class support for
       integration testing in
       the <filename class="libraryfile">spring-test</filename> module.
-      The name of the actual jar file might include the the release
+      The name of the actual jar file might include the release
       version and might also be in the
       long <filename>org.springframework.test</filename> form,
       depending on where you got it from (see
@@ -168,7 +168,7 @@
       contains valuable classes for integration testing with a Spring
       container. This testing does not rely on an application server
       or other deployment environment. Such tests are slower to run
-      than unit tests but much faster to than the equivalent Cactus
+      than unit tests but much faster than the equivalent Cactus
       tests or remote tests that rely on deployment to an application
       server.</para>
 
