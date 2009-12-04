@@ -11,6 +11,7 @@
 
 	<configurations>
 		<include file="${spring.build.dir}/common/default-ivy-configurations.xml"/>
+		<conf name="commons-logging" extends="runtime" description="JARs needed to run with Commons Logging"/>
 	</configurations>
 
 	<publications>
@@ -20,7 +21,7 @@
 
 	<dependencies>
 		<!-- compile dependencies -->
-		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile->runtime" />
+		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile, commons-logging->runtime" />
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="compile->runtime" />
 		<!-- test dependencies -->
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->runtime"/>
