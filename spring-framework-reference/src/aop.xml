@@ -3115,7 +3115,7 @@ public class Account {
       <emphasis>without making any modifications to the application server's
       launch script</emphasis> that will be needed to add
       <literal>-javaagent:path/to/aspectjweaver.jar</literal> or (as we describe later in this
-      section) <literal>-javaagent:path/to/org.springframework.instrument.jar</literal> (previously named
+      section) <literal>-javaagent:path/to/spring-instrument.jar</literal> (previously named
       <literal>spring-agent.jar</literal>). Developers simply modify
       one or more files that form the application context to enable load-time
       weaving instead of relying on administrators who typically are in charge
@@ -3258,7 +3258,7 @@ public final class Main {
         (supplied with Spring) to switch on the LTW. This is the command line
         we will use to run the above <classname>Main</classname> class:</para>
 
-        <programlisting>java -javaagent:C:/projects/foo/lib/global/org.springframework.instrument.jar foo.Main</programlisting>
+        <programlisting>java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main</programlisting>
 
         <para>The '<literal>-javaagent</literal>' is a Java 5+ flag for
         specifying and enabling <ulink
@@ -3266,8 +3266,8 @@ public final class Main {
         to instrument programs running on the JVM</ulink>. The Spring
         Framework ships with such an agent, the
         <classname>InstrumentationSavingAgent</classname>, which is packaged
-        in the <filename class="libraryfile">org.springframework.instrument.jar</filename> (previously
-        named <filename class="libraryfile">spring-agent.jar</filename>) that
+        in the <filename class="libraryfile">spring-instrument.jar</filename>
+		that
         was supplied as the value of the <literal>-javaagent</literal>
         argument in the above example.</para>
 
@@ -3368,8 +3368,8 @@ public final class Main {
 
         <orderedlist>
           <listitem>
-            <para><filename class="libraryfile">spring.jar</filename> (version
-            2.5 or later)</para>
+            <para><filename class="libraryfile">spring-aop.jar</filename> (version
+            2.5 or later, plus all mandatory dependencies)</para>
           </listitem>
 
           <listitem>
@@ -3390,8 +3390,7 @@ public final class Main {
         <orderedlist>
           <listitem>
             <para><filename
-            class="libraryfile">org.springframework.instrument.jar</filename> (previously named
-             <filename class="libraryfile">spring-agent.jar</filename>)</para>
+            class="libraryfile">spring-instrument.jar</filename></para>
           </listitem>
         </orderedlist>
       </section>
@@ -3509,7 +3508,7 @@ http://www.springframework.org/schema/context
                 <entry><para>JVM started with Spring
                 <classname>InstrumentationSavingAgent</classname></para>
                 <para><emphasis><literal>(java
-                -javaagent:path/to/org.springframework.instrument.jar)</literal></emphasis></para></entry>
+                -javaagent:path/to/spring-instrument.jar)</literal></emphasis></para></entry>
                 <entry><para><classname>InstrumentationLoadTimeWeaver</classname></para></entry>
               </row>
 
@@ -3623,8 +3622,7 @@ http://www.springframework.org/schema/context
           (standalone as well as application server based) through the use of
           the Spring-provided instrumentation agent. To do so, start
           the VM by by specifying the
-          <literal>-javaagent:path/to/org.springframework.instrument.jar</literal> option
-          (the jar was previously named <literal>spring-agent.jar</literal>).
+          <literal>-javaagent:path/to/spring-instrument.jar</literal> option.
           Note that this requires modification of the VM launch script
           which may prevent you from using this in application server
           environments (depending on your operation policies).</para>
@@ -3639,8 +3637,7 @@ http://www.springframework.org/schema/context
           looks as follows, to be included either in Tomcat's central
           <literal>server.xml</literal> file or in an application-specific
           <literal>META-INF/context.xml</literal> file within the WAR root.
-          Spring's <literal>org.springframework.instrument.tomcat.jar</literal> 
-          (previously named <literal>spring-tomcat-weaver.jar</literal>) needs to be
+          Spring's <literal>spring-instrument-tomcat.jar</literal> needs to be
           included in Tomcat's common lib directory in order to make this
           setup work.</para>
 
@@ -3677,7 +3674,7 @@ http://www.springframework.org/schema/context
           You can enable LTW by simply activating <literal>context:load-time-weaver</literal>
           as described earlier. Specifically, you do <emphasis>not</emphasis>
           need to modify the launch script to add
-          <literal>-javaagent:path/to/org.springframework.instrument.jar</literal>.</para>
+          <literal>-javaagent:path/to/spring-instrument.jar</literal>.</para>
 
           <para>GlassFish provides an instrumentation-capable ClassLoader as well,
           but only in its EAR environment. For GlassFish web applications,

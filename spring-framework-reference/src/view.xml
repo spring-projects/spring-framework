@@ -100,7 +100,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       escaping of characters.</para>
 
       <para>The tag library descriptor (TLD) is included in the <filename
-      class="libraryfile">org.springframework.web.servlet-3.0.0.RELEASE.jar</filename>.
+      class="libraryfile">spring-webmvc.jar</filename>.
       Further information about the individual tags can be found in
       the appendix entitled <xref linkend="spring.tld" />.</para>
     </section>
@@ -129,7 +129,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         <title>Configuration</title>
 
         <para>The form tag library comes bundled in
-        <literal>org.springframework.web.servlet-3.0.0.RELEASE.jar</literal>.
+        <literal>spring-webmvc.jar</literal>.
         The library descriptor is called
         <literal>spring-form.tld</literal>.</para>
 
@@ -1004,7 +1004,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       <literal>WEB-INF/lib</literal> folder where they are guaranteed to be
       found by a Java EE server and added to the classpath for your application.
       It is of course assumed that you already have the <filename
-      class="libraryfile">spring.jar</filename> in your <filename
+      class="libraryfile">spring-webmvc.jar</filename> in your <filename
       class="directory">'WEB-INF/lib'</filename> directory too! If you make use of
       Spring's 'dateToolAttribute' or 'numberToolAttribute' in your Velocity
       views, you will also need to include the <filename
@@ -1098,7 +1098,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <literal>VelocityConfigurer</literal> bean definition above.</para>
 
         <programlisting language="xml">&lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
-  &lt;property name="configLocation value="/WEB-INF/velocity.properties"/&gt;
+  &lt;property name="configLocation" value="/WEB-INF/velocity.properties"/&gt;
 &lt;/bean&gt;</programlisting>
 
         <para>Alternatively, you can specify velocity properties directly in
@@ -1170,7 +1170,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <title>The bind macros</title>
 
         <para>A standard set of macros are maintained within the
-        <literal>spring.jar</literal> file for both languages, so they are
+        <literal>spring-webmvc.jar</literal> file for both languages, so they are
         always available to a suitably configured application.</para>
 
         <para>Some of the macros defined in the Spring libraries are
@@ -1865,7 +1865,7 @@ home.root=words</programlisting>
           |
           +- lib
           |   |
-          |   +- spring.jar
+          |   +- spring-*.jar
           |
           +- xsl
           |   |
