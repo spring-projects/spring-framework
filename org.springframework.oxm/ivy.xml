@@ -11,6 +11,7 @@
 
 	<configurations>
 		<include file="${spring.build.dir}/common/default-ivy-configurations.xml"/>
+		<conf name="commons-logging" extends="runtime" description="JARs needed to run with Commons Logging"/>
 		<conf name="castor" extends="runtime" description="JARs needed to use Castor"/>
 		<conf name="jms" extends="runtime" description="JARs needed to use OXM in JMS"/>
 		<conf name="jaxb" extends="runtime" description="JARs needed to use JAXB"/>
@@ -32,7 +33,7 @@
 		<dependency org="net.sourceforge.jibx" name="com.springsource.org.jibx.runtime" rev="1.1.5"
 					conf="optional, jibx->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1"
-					conf="compile->compile"/>
+					conf="compile, commons-logging->compile"/>
 		<!--Xerces dependency should be removed when BRITS-259 is fixed-->
 		<dependency org="org.apache.xerces" name="com.springsource.org.apache.xerces" rev="2.8.1"
 					conf="optional, castor->compile"/>
