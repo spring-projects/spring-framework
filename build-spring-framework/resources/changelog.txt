@@ -3,6 +3,15 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.0.GA (2009-12-10)
+----------------------------------------
+
+* bean property names are matched leniently ("title" and "Title"; "ISBN" and "iSBN")
+* full support for formatters and formatting annotations on array/collection elements
+* no default number formatter (relying on plain java.lang.Number parsing and rendering)
+* no default formatters for Date/Calendar (requiring explicit use of @DateTimeFormat)
+
+
 Changes in version 3.0.0.RC3 (2009-12-01)
 -----------------------------------------
 
