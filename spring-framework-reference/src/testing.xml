@@ -157,7 +157,7 @@
 
       <para>The Spring Framework provides first class support for integration
       testing in the <filename
-      class="libraryfile">org.springframework.test-VERSION.jar</filename>
+      class="libraryfile">spring-test.jar</filename>
       library (where <literal>VERSION</literal> is the release version). This
       library includes the <literal>org.springframework.test</literal>
       package, which contains valuable classes for integration testing with a
