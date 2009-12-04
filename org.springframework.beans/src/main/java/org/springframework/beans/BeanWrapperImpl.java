@@ -354,13 +354,15 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			String canonicalName = PropertyAccessorUtils.getPropertyName(propertyName);
+			PropertyDescriptor pd = getPropertyDescriptorInternal(canonicalName);
 			if (pd != null) {
+				Class type = getPropertyType(propertyName);
 				if (pd.getReadMethod() != null) {
-					return new BeanTypeDescriptor(new MethodParameter(pd.getReadMethod(), -1), pd);
+					return new BeanTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), type);
 				}
 				else if (pd.getWriteMethod() != null) {
-					return new BeanTypeDescriptor(BeanUtils.getWriteMethodParameter(pd), pd);
+					return new BeanTypeDescriptor(pd, BeanUtils.getWriteMethodParameter(pd), type);
 				}
 			}
 		}
@@ -579,7 +581,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 		}
 		catch (Exception ex) {
-			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name, "Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
+					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
 		}
 	}
 	

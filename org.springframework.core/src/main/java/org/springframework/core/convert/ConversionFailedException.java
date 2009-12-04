@@ -20,6 +20,7 @@ package org.springframework.core.convert;
  * Thrown when an attempt to execute a type conversion fails.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public final class ConversionFailedException extends ConversionException {
@@ -37,8 +38,8 @@ public final class ConversionFailedException extends ConversionException {
 	 * @param cause the cause of the conversion failure
 	 */
 	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
-		super("Unable to convert value " + value + " from type [" + sourceType.getName() + "] to type [" +
-				targetType.getName() + "]; reason = '" + cause.getMessage() + "'", cause);
+		super("Unable to convert value " + value + " from type '" + sourceType.getName() +
+				"' to type '" + targetType.getName() + "'", cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 	}

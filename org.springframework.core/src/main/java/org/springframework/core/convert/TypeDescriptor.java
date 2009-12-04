@@ -78,6 +78,19 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Create a new type descriptor from a method or constructor parameter.
+	 * <p>Use this constructor when a target conversion point originates from a method parameter,
+	 * such as a setter method argument.
+	 * @param methodParameter the MethodParameter to wrap
+	 * @param type the specific type to expose (may be an array/collection element)
+	 */
+	protected TypeDescriptor(MethodParameter methodParameter, Class type) {
+		Assert.notNull(methodParameter, "MethodParameter must not be null");
+		this.methodParameter = methodParameter;
+		this.type = type;
+	}
+
+	/**
 	 * Create a new type descriptor for a field.
 	 * Use this constructor when a target conversion point originates from a field.
 	 * @param field the field to wrap
@@ -158,16 +171,11 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Returns the name of this type; the fully qualified classname.
+	 * Returns the name of this type: the fully qualified class name.
 	 */
 	public String getName() {
 		Class<?> type = getType();
-		if (type != null) {
-			return getType().getName();
-		}
-		else {
-			return null;
-		}
+		return (type != null ? ClassUtils.getQualifiedName(type) : null);
 	}
 
 	/**
@@ -396,17 +404,16 @@ public class TypeDescriptor {
 
 	public String toString() {
 		if (this == TypeDescriptor.NULL) {
-			return "[TypeDescriptor.NULL]";
+			return "TypeDescriptor.NULL";
 		}
 		else {
 			StringBuilder builder = new StringBuilder();
-			builder.append("[TypeDescriptor ");
+			builder.append("TypeDescriptor ");
 			Annotation[] anns = getAnnotations();
 			for (Annotation ann : anns) {
 				builder.append("@").append(ann.annotationType().getName()).append(' ');
 			}
-			builder.append(getType().getName());
-			builder.append("]");
+			builder.append(ClassUtils.getQualifiedName(getType()));
 			return builder.toString();
 		}
 	}
