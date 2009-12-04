@@ -40,7 +40,6 @@ import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
 import org.hibernate.event.EventListeners;
-import org.hibernate.jdbc.Work;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.transaction.JTATransactionFactory;
 
@@ -936,13 +935,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		hibernateTemplate.execute(
 			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					session.doWork(new Work() {
-						public void execute(Connection connection) throws SQLException {
-							Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-							String[] sql = getConfiguration().generateDropSchemaScript(dialect);
-							executeSchemaScript(connection, sql);
-						}
-					});
+					Connection con = session.connection();
+					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
+					executeSchemaScript(con, sql);
 					return null;
 				}
 			}
@@ -968,13 +964,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		hibernateTemplate.execute(
 			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					session.doWork(new Work() {
-						public void execute(Connection connection) throws SQLException {
-							Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-							String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
-							executeSchemaScript(connection, sql);
-						}
-					});
+					Connection con = session.connection();
+					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+					String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
+					executeSchemaScript(con, sql);
 					return null;
 				}
 			}
@@ -1003,14 +996,11 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		hibernateTemplate.execute(
 			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					session.doWork(new Work() {
-						public void execute(Connection connection) throws SQLException {
-							Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-							DatabaseMetadata metadata = new DatabaseMetadata(connection, dialect);
-							String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
-							executeSchemaScript(connection, sql);
-						}
-					});
+					Connection con = session.connection();
+					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+					DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
+					String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
+					executeSchemaScript(con, sql);
 					return null;
 				}
 			}
