@@ -769,7 +769,7 @@ TR: OK. Added to diagram.--></para>
         tools, is also the runtime discovery algorithm. If we could turn back
         the clock and start Spring now as a new project it would use a
         different logging dependency. Probably the first choice would be the
-        Simple Logging Framework for Java (<ulink
+        Simple Logging Facade for Java (<ulink
         url="http://www.slf4j.org">SLF4J</ulink>), which is also used by a lot
         of other tools that people use with Spring inside their
         applications.</para>
