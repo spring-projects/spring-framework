@@ -776,11 +776,13 @@ parser.parseExpression("Name = #newName").getValue(context);
 System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
       <section>
-        <title>The #this variable</title>
+        <title>The #this and #root variables</title>
 
         <para>The variable #this is always defined and refers to the current
-        evaluation object (the object against which unqualified references
-        will be resolved).</para>
+        evaluation object (against which unqualified references are resolved).
+        The variable #root is always defined and refers to the root
+        context object.  Although #this may vary as components of an expression
+        are evaluated, #root always refers to the root.</para>
 
         <programlisting language="java">// create an array of integers
 List&lt;Integer&gt; primes = new ArrayList&lt;Integer&gt;();
