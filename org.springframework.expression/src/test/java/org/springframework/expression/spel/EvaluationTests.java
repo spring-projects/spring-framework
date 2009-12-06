@@ -367,7 +367,27 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testTernaryOperatorWithNullValue() {
 		parser.parseExpression("null ? 0 : 1").getValue();
 	}
+	
+	@Test
+	public void methodCallWithRootReferenceThroughParameter() {
+		evaluate("placeOfBirth.doubleIt(inventions.length)", 18, Integer.class);
+	}
 
+	@Test
+	public void ctorCallWithRootReferenceThroughParameter() {
+		evaluate("new org.springframework.expression.spel.testresources.PlaceOfBirth(inventions[0].toString()).city", "Telephone repeater", String.class);
+	}
+
+	@Test
+	public void fnCallWithRootReferenceThroughParameter() {
+		evaluate("#reverseInt(inventions.length, inventions.length, inventions.length)", "int[3]{9,9,9}", int[].class);
+	}
+	
+	@Test
+	public void methodCallWithRootReferenceThroughParameterThatIsAFunctionCall() {
+		evaluate("placeOfBirth.doubleIt(#reverseInt(inventions.length,2,3)[2])", 18, Integer.class);
+	}
+	
 	@Test
 	public void testIndexer03() {
 		evaluate("'christian'[8]", "n", String.class);
