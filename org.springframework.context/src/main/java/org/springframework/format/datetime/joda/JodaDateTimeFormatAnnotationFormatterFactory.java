@@ -46,13 +46,22 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see DateTimeFormat
  */
-public final class DateTimeFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<DateTimeFormat> {
+public final class JodaDateTimeFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<DateTimeFormat> {
 
 	private final Set<Class<?>> fieldTypes;
 	
 
-	public DateTimeFormatAnnotationFormatterFactory() {
-		this.fieldTypes = Collections.unmodifiableSet(createFieldTypes());
+	public JodaDateTimeFormatAnnotationFormatterFactory() {
+		Set<Class<?>> rawFieldTypes = new HashSet<Class<?>>(8);
+		rawFieldTypes.add(LocalDate.class);
+		rawFieldTypes.add(LocalTime.class);
+		rawFieldTypes.add(LocalDateTime.class);
+		rawFieldTypes.add(DateTime.class);
+		rawFieldTypes.add(DateMidnight.class);
+		rawFieldTypes.add(Date.class);
+		rawFieldTypes.add(Calendar.class);
+		rawFieldTypes.add(Long.class);
+		this.fieldTypes = Collections.unmodifiableSet(rawFieldTypes);
 	}
 
 	public Set<Class<?>> getFieldTypes() {
@@ -85,19 +94,6 @@ public final class DateTimeFormatAnnotationFormatterFactory implements Annotatio
 
 	// internal helpers
 	
-	private Set<Class<?>> createFieldTypes() {
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
-		fieldTypes.add(LocalDate.class);
-		fieldTypes.add(LocalTime.class);
-		fieldTypes.add(LocalDateTime.class);
-		fieldTypes.add(DateTime.class);
-		fieldTypes.add(DateMidnight.class);
-		fieldTypes.add(Date.class);
-		fieldTypes.add(Calendar.class);
-		fieldTypes.add(Long.class);
-		return fieldTypes;
-	}
-
 	private DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
 		if (StringUtils.hasLength(annotation.pattern())) {
 			return forPattern(annotation.pattern());

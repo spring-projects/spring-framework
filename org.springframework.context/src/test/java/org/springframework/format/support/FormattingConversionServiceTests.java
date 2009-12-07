@@ -32,7 +32,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConversionServiceFactory;
-import org.springframework.format.datetime.joda.DateTimeFormatAnnotationFormatterFactory;
+import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
 import org.springframework.format.number.NumberFormatter;
@@ -93,7 +93,7 @@ public class FormattingConversionServiceTests {
 				return source.toDate();
 			}
 		});
-		formattingService.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 		String formatted = (String) formattingService.convert(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime()
 				.toDate(), new TypeDescriptor(Model.class.getField("date")), TypeDescriptor.valueOf(String.class));
 		assertEquals("10/31/09", formatted);

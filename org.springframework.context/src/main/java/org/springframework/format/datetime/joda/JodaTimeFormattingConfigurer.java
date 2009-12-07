@@ -112,7 +112,7 @@ public class JodaTimeFormattingConfigurer {
 		Printer<ReadableInstant> readableInstantPrinter = new ReadableInstantPrinter(jodaDateTimeFormatter);
 		formatterRegistry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
 
-		formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+		formatterRegistry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 	}
 
 
