@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.datetime.joda;
 
 import org.joda.time.Chronology;
@@ -22,6 +23,7 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * A context that holds user-specific Joda Time settings such as the user's Chronology (calendar system) and time zone.
  * A <code>null</code> property value indicate the user has not specified a setting.
+ *
  * @author Keith Donald
  * @since 3.0
  * @see JodaTimeContextHolder
@@ -32,19 +34,27 @@ public class JodaTimeContext {
 
 	private DateTimeZone timeZone;
 
+
+	/**
+	 * Set the user's chronology.
+	 */
+	public void setChronology(Chronology chronology) {
+		this.chronology = chronology;
+	}
+
 	/**
 	 * The user's chronology (calendar system).
 	 * Null if not specified.
 	 */
 	public Chronology getChronology() {
-		return chronology;
+		return this.chronology;
 	}
 
 	/**
-	 * Sets the user's chronology.
+	 * Set the user's timezone.
 	 */
-	public void setChronology(Chronology chronology) {
-		this.chronology = chronology;
+	public void setTimeZone(DateTimeZone timeZone) {
+		this.timeZone = timeZone;
 	}
 
 	/**
@@ -55,12 +65,6 @@ public class JodaTimeContext {
 		return timeZone;
 	}
 
-	/**
-	 * Sets the user's timezone.
-	 */
-	public void setTimeZone(DateTimeZone timeZone) {
-		this.timeZone = timeZone;
-	}
 
 	/**
 	 * Gets the Formatter with the this context's settings applied to the base <code>formatter</code>.
