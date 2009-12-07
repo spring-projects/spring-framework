@@ -17,11 +17,17 @@
 package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -31,10 +37,6 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Default implementation of the {@link BeanDefinitionDocumentReader} interface.
@@ -171,15 +173,15 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 		// Discover whether the location is an absolute or relative URI 
 		boolean absoluteLocation = false;
-		
 		try {
 			absoluteLocation = ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();
-		} catch (Exception ex) {
-			// cannot convert to an URI, considering the location relative
-			// unless it is the well-known Spring prefix classpath*: 
 		}
-		
-		// check the 
+		catch (URISyntaxException ex) {
+			// cannot convert to an URI, considering the location relative
+			// unless it is the well-known Spring prefix "classpath*:"
+		}
+
+		// Absolute or relative?
 		if (absoluteLocation) {
 			try {
 				int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
@@ -195,9 +197,17 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		else {
 			// No URL -> considering resource location as relative to the current file.
 			try {
-				String baseLocation = getReaderContext().getResource().getURL().toString();
-				int importCount = getReaderContext().getReader().loadBeanDefinitions(
-						StringUtils.applyRelativePath(baseLocation, location), actualResources);
+				int importCount;
+				Resource relativeResource = getReaderContext().getResource().createRelative(location);
+				if (relativeResource.exists()) {
+					importCount = getReaderContext().getReader().loadBeanDefinitions(relativeResource);
+					actualResources.add(relativeResource);
+				}
+				else {
+					String baseLocation = getReaderContext().getResource().getURL().toString();
+					importCount = getReaderContext().getReader().loadBeanDefinitions(
+							StringUtils.applyRelativePath(baseLocation, location), actualResources);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Imported " + importCount + " bean definitions from relative location [" + location + "]");
 				}
