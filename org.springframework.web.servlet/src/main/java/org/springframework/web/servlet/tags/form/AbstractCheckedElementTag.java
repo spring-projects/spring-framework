@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
-
 import javax.servlet.jsp.JspException;
 
 /**
@@ -52,7 +51,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 			tagWriter.writeAttribute("checked", "checked");
 		}
 	}
-	
+
 	/**
 	 * Determines whether the supplied value matched the selected value
 	 * through delegating to {@link SelectedValueComparator#isSelected}.
@@ -68,7 +67,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 */
 	protected void renderFromBoolean(Boolean boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", "true");
-		if (boundValue.booleanValue()) {
+		if (boundValue) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
 	}

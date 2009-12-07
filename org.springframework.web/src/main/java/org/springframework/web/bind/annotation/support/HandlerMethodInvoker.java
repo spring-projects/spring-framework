@@ -81,8 +81,8 @@ import org.springframework.web.context.request.WebRequest;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
- * @see #invokeHandlerMethod
  * @since 2.5.2
+ * @see #invokeHandlerMethod
  */
 public class HandlerMethodInvoker {
 
@@ -103,6 +103,7 @@ public class HandlerMethodInvoker {
 
 	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
+
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver) {
 		this(methodResolver, null);
 	}
@@ -111,12 +112,9 @@ public class HandlerMethodInvoker {
 		this(methodResolver, bindingInitializer, new DefaultSessionAttributeStore(), null, null, null);
 	}
 
-	public HandlerMethodInvoker(HandlerMethodResolver methodResolver,
-			WebBindingInitializer bindingInitializer,
-			SessionAttributeStore sessionAttributeStore,
-			ParameterNameDiscoverer parameterNameDiscoverer,
-			WebArgumentResolver[] customArgumentResolvers,
-			HttpMessageConverter[] messageConverters) {
+	public HandlerMethodInvoker(HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer,
+			SessionAttributeStore sessionAttributeStore, ParameterNameDiscoverer parameterNameDiscoverer,
+			WebArgumentResolver[] customArgumentResolvers, HttpMessageConverter[] messageConverters) {
 
 		this.methodResolver = methodResolver;
 		this.bindingInitializer = bindingInitializer;
@@ -126,10 +124,9 @@ public class HandlerMethodInvoker {
 		this.messageConverters = messageConverters;
 	}
 
-	public final Object invokeHandlerMethod(Method handlerMethod,
-			Object handler,
-			NativeWebRequest webRequest,
-			ExtendedModelMap implicitModel) throws Exception {
+
+	public final Object invokeHandlerMethod(Method handlerMethod, Object handler,
+			NativeWebRequest webRequest, ExtendedModelMap implicitModel) throws Exception {
 
 		Method handlerMethodToInvoke = BridgeMethodResolver.findBridgedMethod(handlerMethod);
 		try {
@@ -174,10 +171,8 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object[] resolveHandlerArguments(Method handlerMethod,
-			Object handler,
-			NativeWebRequest webRequest,
-			ExtendedModelMap implicitModel) throws Exception {
+	private Object[] resolveHandlerArguments(Method handlerMethod, Object handler,
+			NativeWebRequest webRequest, ExtendedModelMap implicitModel) throws Exception {
 
 		Class[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
@@ -340,10 +335,8 @@ public class HandlerMethodInvoker {
 		}
 	}
 
-	private Object[] resolveInitBinderArguments(Object handler,
-			Method initBinderMethod,
-			WebDataBinder binder,
-			NativeWebRequest webRequest) throws Exception {
+	private Object[] resolveInitBinderArguments(Object handler, Method initBinderMethod,
+			WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
 
 		Class[] initBinderParams = initBinderMethod.getParameterTypes();
 		Object[] initBinderArgs = new Object[initBinderParams.length];
@@ -410,12 +403,9 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object resolveRequestParam(String paramName,
-			boolean required,
-			String defaultValue,
-			MethodParameter methodParam,
-			NativeWebRequest webRequest,
-			Object handlerForInitBinderCall) throws Exception {
+	private Object resolveRequestParam(String paramName, boolean required, String defaultValue,
+			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
+			throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
 		if (Map.class.isAssignableFrom(paramType)) {
@@ -471,12 +461,9 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object resolveRequestHeader(String headerName,
-			boolean required,
-			String defaultValue,
-			MethodParameter methodParam,
-			NativeWebRequest webRequest,
-			Object handlerForInitBinderCall) throws Exception {
+	private Object resolveRequestHeader(String headerName, boolean required, String defaultValue,
+			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
+			throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
 		if (Map.class.isAssignableFrom(paramType)) {
@@ -532,7 +519,9 @@ public class HandlerMethodInvoker {
 		}
 	}
 
-	/** Resolves the given {@link RequestBody @RequestBody} annotation. */
+	/**
+	 * Resolves the given {@link RequestBody @RequestBody} annotation.
+	 */
 	@SuppressWarnings("unchecked")
 	protected Object resolveRequestBody(MethodParameter methodParam, NativeWebRequest webRequest, Object handler)
 			throws Exception {
@@ -563,8 +552,8 @@ public class HandlerMethodInvoker {
 	}
 
 	/**
-	 * Return a {@link HttpInputMessage} for the given {@link NativeWebRequest}. Throws an UnsupportedOperationException by
-	 * default.
+	 * Return a {@link HttpInputMessage} for the given {@link NativeWebRequest}.
+	 * <p>Throws an UnsupportedOperationException by default.
 	 */
 	protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
 		throw new UnsupportedOperationException("@RequestBody not supported");
@@ -596,7 +585,10 @@ public class HandlerMethodInvoker {
 		return binder.convertIfNecessary(cookieValue, paramType, methodParam);
 	}
 
-	/** Resolves the given {@link CookieValue @CookieValue} annotation. Throws an UnsupportedOperationException by default. */
+	/**
+	 * Resolves the given {@link CookieValue @CookieValue} annotation.
+	 * <p>Throws an UnsupportedOperationException by default.
+	 */
 	protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
 			throws Exception {
 
@@ -619,8 +611,8 @@ public class HandlerMethodInvoker {
 	}
 
 	/**
-	 * Resolves the given {@link PathVariable @PathVariable} annotation. Throws an UnsupportedOperationException by
-	 * default.
+	 * Resolves the given {@link PathVariable @PathVariable} annotation.
+	 * <p>Throws an UnsupportedOperationException by default.
 	 */
 	protected String resolvePathVariable(String pathVarName, Class paramType, NativeWebRequest webRequest)
 			throws Exception {
@@ -652,11 +644,8 @@ public class HandlerMethodInvoker {
 		return value;
 	}
 
-	private WebRequestDataBinder resolveModelAttribute(String attrName,
-			MethodParameter methodParam,
-			ExtendedModelMap implicitModel,
-			NativeWebRequest webRequest,
-			Object handler) throws Exception {
+	private WebRequestDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
+			ExtendedModelMap implicitModel, NativeWebRequest webRequest, Object handler) throws Exception {
 
 		// Bind request parameter onto object...
 		String name = attrName;
@@ -683,10 +672,8 @@ public class HandlerMethodInvoker {
 	}
 
 	@SuppressWarnings("unchecked")
-	public final void updateModelAttributes(Object handler,
-			Map<String, Object> mavModel,
-			ExtendedModelMap implicitModel,
-			NativeWebRequest webRequest) throws Exception {
+	public final void updateModelAttributes(Object handler, Map<String, Object> mavModel,
+			ExtendedModelMap implicitModel, NativeWebRequest webRequest) throws Exception {
 
 		if (this.methodResolver.hasSessionAttributes() && this.sessionStatus.isComplete()) {
 			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
@@ -753,9 +740,7 @@ public class HandlerMethodInvoker {
 		throw new IllegalStateException(message);
 	}
 
-	protected void doBind(WebRequestDataBinder binder,
-			NativeWebRequest webRequest,
-			boolean validate,
+	protected void doBind(WebRequestDataBinder binder, NativeWebRequest webRequest, boolean validate,
 			boolean failOnErrors) throws Exception {
 
 		binder.bind(webRequest);
@@ -803,10 +788,8 @@ public class HandlerMethodInvoker {
 		return WebArgumentResolver.UNRESOLVED;
 	}
 
-	protected final void addReturnValueAsModelAttribute(Method handlerMethod,
-			Class handlerType,
-			Object returnValue,
-			ExtendedModelMap implicitModel) {
+	protected final void addReturnValueAsModelAttribute(Method handlerMethod, Class handlerType,
+			Object returnValue, ExtendedModelMap implicitModel) {
 
 		ModelAttribute attr = AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class);
 		String attrName = (attr != null ? attr.value() : "");

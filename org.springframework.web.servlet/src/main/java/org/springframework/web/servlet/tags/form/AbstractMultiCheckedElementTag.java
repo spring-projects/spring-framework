@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.jsp.JspException;
 
 import org.springframework.beans.BeanWrapper;
@@ -103,13 +102,17 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		this.itemValue = itemValue;
 	}
 
+	/**
+	 * Get the name of the property mapped to the '<code>value</code>' attribute
+	 * of the '<code>input type="checkbox/radio"</code>' tag.
+	 */
 	protected String getItemValue() {
 		return this.itemValue;
 	}
 
 	/**
-	 * Set the value to be displayed as part
-	 * of the '<code>input type="checkbox/radio"</code>' tag.
+	 * Set the value to be displayed as part of the
+	 * '<code>input type="checkbox/radio"</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemLabel(String itemLabel) {
@@ -118,8 +121,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	}
 
 	/**
-	 * Get the value to be displayed as part
-	 * of the '<code>input type="checkbox/radio"</code>' tag.
+	 * Get the value to be displayed as part of the
+	 * '<code>input type="checkbox/radio"</code>' tag.
 	 */
 	protected String getItemLabel() {
 		return this.itemLabel;
@@ -183,7 +186,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		Object items = getItems();
-		Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+		Object itemsObject = (items instanceof String ? evaluate("items", items) : items);
 
 		String itemValue = getItemValue();
 		String itemLabel = getItemLabel();

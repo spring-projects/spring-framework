@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -72,7 +71,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	private final Map<String, Object> handlerMap = new LinkedHashMap<String, Object>();
 
 	private MappedInterceptors mappedInterceptors;
-	
+
+
 	/**
 	 * Set if URL lookup should always use the full path within the current servlet
 	 * context. Else, the path within the current servlet mapping is used if applicable
@@ -164,10 +164,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	@Override
 	protected void initInterceptors() {
 		super.initInterceptors();
-		
-		Map<String, MappedInterceptor> mappedInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), MappedInterceptor.class, true, false);
+		Map<String, MappedInterceptor> mappedInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				getApplicationContext(), MappedInterceptor.class, true, false);
 		if (!mappedInterceptors.isEmpty()) {
-			this.mappedInterceptors = new MappedInterceptors(mappedInterceptors.values().toArray(new MappedInterceptor[mappedInterceptors.size()]));
+			this.mappedInterceptors = new MappedInterceptors(mappedInterceptors.values().toArray(
+					new MappedInterceptor[mappedInterceptors.size()]));
 		}
 
 	}
@@ -201,8 +202,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
 		}
-		if (handler != null & this.mappedInterceptors != null) {
-			Set<HandlerInterceptor> mappedInterceptors = this.mappedInterceptors.getInterceptors(lookupPath, this.pathMatcher);
+		if (handler != null && this.mappedInterceptors != null) {
+			Set<HandlerInterceptor> mappedInterceptors =
+					this.mappedInterceptors.getInterceptors(lookupPath, this.pathMatcher);
 			if (!mappedInterceptors.isEmpty()) {
 				HandlerExecutionChain chain;
 				if (handler instanceof HandlerExecutionChain) {
@@ -434,6 +436,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			return true;
 		}
 	}
+
 
 	/**
 	 * Special interceptor for exposing the
