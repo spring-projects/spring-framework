@@ -100,6 +100,10 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	@Override
 	public Method getWriteMethod() {
+		return this.writeMethod;
+	}
+
+	public Method getWriteMethodForActualAccess() {
 		Set<Method> ambiguousCandidates = this.ambiguousWriteMethods;
 		if (ambiguousCandidates != null) {
 			this.ambiguousWriteMethods = null;
