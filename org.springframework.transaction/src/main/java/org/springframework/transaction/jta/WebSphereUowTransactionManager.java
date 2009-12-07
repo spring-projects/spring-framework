@@ -330,7 +330,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 		}
 
 		public void run() {
-			DefaultTransactionStatus status = newTransactionStatus(
+			DefaultTransactionStatus status = prepareTransactionStatus(
 					this.definition, (this.actualTransaction ? this : null),
 					this.newTransaction, this.newSynchronization, this.debug, null);
 			try {

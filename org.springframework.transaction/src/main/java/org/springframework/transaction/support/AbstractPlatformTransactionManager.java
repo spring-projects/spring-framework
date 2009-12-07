@@ -366,7 +366,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			try {
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-				DefaultTransactionStatus status = instantiateTransactionStatus(
+				DefaultTransactionStatus status = newTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
 				doBegin(transaction, definition);
 				prepareSynchronization(status, definition);
@@ -384,7 +384,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		else {
 			// Create "empty" transaction: no actual transaction, but potentially synchronization.
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-			return newTransactionStatus(definition, null, true, newSynchronization, debugEnabled, null);
+			return prepareTransactionStatus(definition, null, true, newSynchronization, debugEnabled, null);
 		}
 	}
 
@@ -406,7 +406,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			Object suspendedResources = suspend(transaction);
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-			return newTransactionStatus(
+			return prepareTransactionStatus(
 					definition, null, false, newSynchronization, debugEnabled, suspendedResources);
 		}
 
@@ -418,7 +418,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			SuspendedResourcesHolder suspendedResources = suspend(transaction);
 			try {
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-				DefaultTransactionStatus status = instantiateTransactionStatus(
+				DefaultTransactionStatus status = newTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
 				doBegin(transaction, definition);
 				prepareSynchronization(status, definition);
@@ -448,7 +448,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// through the SavepointManager API implemented by TransactionStatus.
 				// Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.
 				DefaultTransactionStatus status =
-						newTransactionStatus(definition, transaction, false, false, debugEnabled, null);
+						prepareTransactionStatus(definition, transaction, false, false, debugEnabled, null);
 				status.createAndHoldSavepoint();
 				return status;
 			}
@@ -457,7 +457,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Usually only for JTA: Spring synchronization might get activated here
 				// in case of a pre-existing JTA transaction.
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-				DefaultTransactionStatus status = instantiateTransactionStatus(
+				DefaultTransactionStatus status = newTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, null);
 				doBegin(transaction, definition);
 				prepareSynchronization(status, definition);
@@ -489,18 +489,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 		}
 		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-		return newTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);
+		return prepareTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);
 	}
 
 	/**
 	 * Create a new TransactionStatus for the given arguments,
 	 * also initializing transaction synchronization as appropriate.
+	 * @see #newTransactionStatus
+	 * @see #prepareTransactionStatus
 	 */
-	protected DefaultTransactionStatus newTransactionStatus(
+	protected final DefaultTransactionStatus prepareTransactionStatus(
 			TransactionDefinition definition, Object transaction, boolean newTransaction,
 			boolean newSynchronization, boolean debug, Object suspendedResources) {
 
-		DefaultTransactionStatus status = instantiateTransactionStatus(
+		DefaultTransactionStatus status = newTransactionStatus(
 				definition, transaction, newTransaction, newSynchronization, debug, suspendedResources);
 		prepareSynchronization(status, definition);
 		return status;
@@ -509,7 +511,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Create a rae TransactionStatus instance for the given arguments.
 	 */
-	private DefaultTransactionStatus instantiateTransactionStatus(
+	protected DefaultTransactionStatus newTransactionStatus(
 			TransactionDefinition definition, Object transaction, boolean newTransaction,
 			boolean newSynchronization, boolean debug, Object suspendedResources) {
 
@@ -523,7 +525,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Initialize transaction synchronization as appropriate.
 	 */
-	private void prepareSynchronization(DefaultTransactionStatus status, TransactionDefinition definition) {
+	protected void prepareSynchronization(DefaultTransactionStatus status, TransactionDefinition definition) {
 		if (status.isNewSynchronization()) {
 			TransactionSynchronizationManager.setActualTransactionActive(status.hasTransaction());
 			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
@@ -1268,7 +1270,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		// Initialize transient fields.
 		this.logger = LogFactory.getLog(getClass());
 	}
-
 
 	/**
 	 * Holder for suspended resources.
