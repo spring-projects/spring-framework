@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.datetime.joda;
 
 import java.text.ParseException;
@@ -20,10 +21,12 @@ import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
+
 import org.springframework.format.Parser;
 
 /**
  * Parses Joda Time {@link DateTime} instances using a {@link DateTimeFormatter}.
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -32,7 +35,7 @@ public final class DateTimeParser implements Parser<DateTime> {
 	private final DateTimeFormatter formatter;
 
 	/**
-	 * Creates a new DateTimeParser.
+	 * Create a new DateTimeParser.
 	 * @param formatter the Joda DateTimeFormatter instance
 	 */
 	public DateTimeParser(DateTimeFormatter formatter) {
@@ -42,4 +45,5 @@ public final class DateTimeParser implements Parser<DateTime> {
 	public DateTime parse(String text, Locale locale) throws ParseException {
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).parseDateTime(text);
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.format.datetime.joda;
 
 import java.util.Calendar;
@@ -24,22 +25,20 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.ReadableInstant;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
  * Installs lower-level type converters required to integrate Joda Time support into Spring's field formatting system.
+ *
  * @author Keith Donald
  * @since 3.0
  */
 final class JodaTimeConverters {
 
-	private JodaTimeConverters() {
-		
-	}
-	
 	/**
-	 * Installs the converters into the converter registry.
+	 * Install the converters into the converter registry.
 	 * @param registry the converter registry
 	 */
 	public static void registerConverters(ConverterRegistry registry) {
@@ -54,9 +53,8 @@ final class JodaTimeConverters {
 		registry.addConverter(new CalendarToReadableInstantConverter());
 	}
 
-	// internal helpers
-	
-	/** 
+
+	/**
 	 * Used when binding a parsed DateTime to a LocalDate field.
 	 * @see DateTimeParser 
 	 **/
@@ -129,7 +127,7 @@ final class JodaTimeConverters {
 	/** 
 	 * Used when printing a java.util.Date field with a MillisecondInstantPrinter.
 	 * @see MillisecondInstantPrinter
-	 * @see DateTimeFormatAnnotationFormatterFactory
+	 * @see JodaDateTimeFormatAnnotationFormatterFactory
 	 */	
 	private static class DateToLongConverter implements Converter<Date, Long> {
 		public Long convert(Date source) {
@@ -140,7 +138,7 @@ final class JodaTimeConverters {
 	/** 
 	 * Used when printing a java.util.Calendar field with a ReadableInstantPrinter.
 	 * @see MillisecondInstantPrinter
-	 * @see DateTimeFormatAnnotationFormatterFactory
+	 * @see JodaDateTimeFormatAnnotationFormatterFactory
 	 */	
 	private static class CalendarToReadableInstantConverter implements Converter<Calendar, ReadableInstant> {
 		public ReadableInstant convert(Calendar source) {

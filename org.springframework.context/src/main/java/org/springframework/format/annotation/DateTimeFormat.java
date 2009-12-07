@@ -73,8 +73,6 @@ public @interface DateTimeFormat {
 
 	/**
 	 * Common ISO date time format patterns.
-	 * @author Keith Donald
-	 * @since 3.0
 	 */
 	public enum ISO {
 		
