@@ -36,6 +36,7 @@ import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.util.StringUtils;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation.
@@ -98,7 +99,7 @@ public final class DateTimeFormatAnnotationFormatterFactory implements Annotatio
 	}
 
 	private DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
-		if (!annotation.pattern().isEmpty()) {
+		if (StringUtils.hasLength(annotation.pattern())) {
 			return forPattern(annotation.pattern());
 		}
 		else if (annotation.iso() != ISO.NONE) {
