@@ -393,8 +393,8 @@ public class AntPathMatcherTests {
 		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
 		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
 
-		assertEquals(-1, comparator.compare("/hotels/*", "/hotels/*/**"));
-		assertEquals(1, comparator.compare("/hotels/*/**", "/hotels/*"));
+		assertEquals(-2, comparator.compare("/hotels/*", "/hotels/*/**"));
+		assertEquals(2, comparator.compare("/hotels/*/**", "/hotels/*"));
 
 		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/new.*"));
 
@@ -466,7 +466,6 @@ public class AntPathMatcherTests {
 		paths.add("/hotels/*");
 		paths.add("/hotels/{hotel}");
 		paths.add("/hotels/new");
-		Collections.shuffle(paths);
 		Collections.sort(paths, comparator);
 		assertEquals("/hotels/new", paths.get(0));
 		assertEquals("/hotels/{hotel}", paths.get(1));
@@ -479,6 +478,15 @@ public class AntPathMatcherTests {
 		Collections.sort(paths, comparator);
 		assertEquals("/hotels/ne*", paths.get(0));
 		assertEquals("/hotels/n*", paths.get(1));
+		paths.clear();
+
+		comparator = pathMatcher.getPatternComparator("/hotels/new.html");
+		paths.add("/hotels/new.*");
+		paths.add("/hotels/{hotel}");
+		Collections.shuffle(paths);
+		Collections.sort(paths, comparator);
+		assertEquals("/hotels/new.*", paths.get(0));
+		assertEquals("/hotels/{hotel}", paths.get(1));
 		paths.clear();
 	}
 
