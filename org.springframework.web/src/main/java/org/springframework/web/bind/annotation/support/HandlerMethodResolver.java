@@ -87,7 +87,7 @@ public class HandlerMethodResolver {
 						modelAttributeMethods.add(specificMethod);
 					}
 				}
-			});
+			}, ReflectionUtils.NON_BRIDGED_METHODS);
 		}
 		this.typeLevelMapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
 		SessionAttributes sessionAttributes = handlerType.getAnnotation(SessionAttributes.class);
@@ -99,7 +99,7 @@ public class HandlerMethodResolver {
 	}
 
 	protected boolean isHandlerMethod(Method method) {
-		return method.isAnnotationPresent(RequestMapping.class);
+		return AnnotationUtils.findAnnotation(method, RequestMapping.class) != null;
 	}
 
 
