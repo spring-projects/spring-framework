@@ -398,7 +398,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	@RequestMapping("hotels")
 	public static class ImplicitSubPathController {
 
-		@RequestMapping("{hotel:.*}")
+		@RequestMapping("{hotel}")
 		public void handleHotel(@PathVariable String hotel, Writer writer) throws IOException {
 			writer.write("test-" + hotel);
 		}

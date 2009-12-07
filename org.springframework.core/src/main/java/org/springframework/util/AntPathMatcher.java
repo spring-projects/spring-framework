@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * PathMatcher implementation for Ant-style path patterns. Examples are provided below.
@@ -43,6 +45,8 @@ import java.util.Map;
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
+
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
 
 	/** Default path separator: "/" */
 	public static final String DEFAULT_PATH_SEPARATOR = "/";
@@ -396,23 +400,56 @@ public class AntPathMatcher implements PathMatcher {
 			else if (pattern2EqualsPath) {
 				return 1;
 			}
-			int wildCardCount1 = StringUtils.countOccurrencesOf(pattern1, "*");
-			int wildCardCount2 = StringUtils.countOccurrencesOf(pattern2, "*");
+			int wildCardCount1 = getWildCardCount(pattern1);
+			int wildCardCount2 = getWildCardCount(pattern2);
+
+			int bracketCount1 = StringUtils.countOccurrencesOf(pattern1, "{");
+			int bracketCount2 = StringUtils.countOccurrencesOf(pattern2, "{");
+
+			int totalCount1 = wildCardCount1 + bracketCount1;
+			int totalCount2 = wildCardCount2 + bracketCount2;
+
+			if (totalCount1 != totalCount2) {
+				return totalCount1 - totalCount2;
+			}
+
+			int pattern1Length = getPatternLength(pattern1);
+			int pattern2Length = getPatternLength(pattern2);
+
+			if (pattern1Length != pattern2Length) {
+				return pattern2Length - pattern1Length;
+			}
+
 			if (wildCardCount1 < wildCardCount2) {
 				return -1;
 			}
 			else if (wildCardCount2 < wildCardCount1) {
 				return 1;
 			}
-			int bracketCount1 = StringUtils.countOccurrencesOf(pattern1, "{");
-			int bracketCount2 = StringUtils.countOccurrencesOf(pattern2, "{");
+
 			if (bracketCount1 < bracketCount2) {
 				return -1;
 			}
 			else if (bracketCount2 < bracketCount1) {
 				return 1;
 			}
-			return pattern2.length() - pattern1.length();
+
+			return 0;
+		}
+
+		private int getWildCardCount(String pattern) {
+			if (pattern.endsWith(".*")) {
+				pattern = pattern.substring(0, pattern.length() - 2);
+			}
+			return StringUtils.countOccurrencesOf(pattern, "*");
+		}
+
+		/**
+		 * Returns the length of the given pattern, where template variables are considered to be 1 long.
+		 */
+		private int getPatternLength(String pattern) {
+			Matcher m = VARIABLE_PATTERN.matcher(pattern);
+			return m.replaceAll("#").length();
 		}
 	}
 
