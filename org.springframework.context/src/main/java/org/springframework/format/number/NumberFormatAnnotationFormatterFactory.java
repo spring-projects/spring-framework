@@ -28,6 +28,7 @@ import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
+import org.springframework.util.StringUtils;
 
 /**
  * Formats fields annotated with the {@link NumberFormat} annotation.
@@ -74,7 +75,7 @@ public final class NumberFormatAnnotationFormatterFactory implements AnnotationF
 	}
 
 	private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
-		if (!annotation.pattern().isEmpty()) {
+		if (StringUtils.hasLength(annotation.pattern())) {
 			return new NumberFormatter(annotation.pattern());
 		}
 		else {
