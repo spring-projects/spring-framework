@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.handler;
 
 import org.springframework.web.context.request.WebRequestInterceptor;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Holds information about a HandlerInterceptor mapped to a path into the application.
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -29,9 +31,10 @@ public final class MappedInterceptor {
 	
 	private final HandlerInterceptor interceptor;
 
+
 	/**
-	 * Creates a new mapped interceptor.
-	 * @param pathPattern the path pattern
+	 * Create a new mapped interceptor.
+	 * @param pathPatterns the path patterns
 	 * @param interceptor the interceptor
 	 */
 	public MappedInterceptor(String[] pathPatterns, HandlerInterceptor interceptor) {
@@ -40,8 +43,8 @@ public final class MappedInterceptor {
 	}
 
 	/**
-	 * Creates a new mapped interceptor.
-	 * @param pathPattern the path pattern
+	 * Create a new mapped interceptor.
+	 * @param pathPatterns the path patterns
 	 * @param interceptor the interceptor
 	 */
 	public MappedInterceptor(String[] pathPatterns, WebRequestInterceptor interceptor) {
@@ -49,18 +52,19 @@ public final class MappedInterceptor {
 		this.interceptor = new WebRequestHandlerInterceptorAdapter(interceptor);
 	}
 
+
 	/**
 	 * The path into the application the interceptor is mapped to.
 	 */
 	public String[] getPathPatterns() {
-		return pathPatterns;
+		return this.pathPatterns;
 	}
 
 	/**
 	 * The actual Interceptor reference.
 	 */
 	public HandlerInterceptor getInterceptor() {
-		return interceptor;
+		return this.interceptor;
 	}
 		
 }

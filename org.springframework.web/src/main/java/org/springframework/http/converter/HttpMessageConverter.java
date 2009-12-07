@@ -33,7 +33,6 @@ public interface HttpMessageConverter<T> {
 
 	/**
 	 * Indicates whether the given class can be read by this converter.
-	 *
 	 * @param clazz the class to test for readability
 	 * @param mediaType the media type to read, can be {@code null} if not specified
 	 * @return <code>true</code> if readable; <code>false</code> otherwise
@@ -42,7 +41,6 @@ public interface HttpMessageConverter<T> {
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
-	 *
 	 * @param clazz the class to test for writability
 	 * @param mediaType the media type to write, can be {@code null} if not specified
 	 * @return <code>true</code> if writable; <code>false</code> otherwise
@@ -51,14 +49,12 @@ public interface HttpMessageConverter<T> {
 
 	/**
 	 * Return the list of {@link MediaType} objects supported by this converter.
-	 *
 	 * @return the list of supported media types
 	 */
 	List<MediaType> getSupportedMediaTypes();
 
 	/**
 	 * Read an object of the given type form the given input message, and returns it.
-	 *
 	 * @param clazz the type of object to return. This type must have previously been passed to the {@link #canRead
 	 * canRead} method of this interface, which must have returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
