@@ -1060,7 +1060,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}
-				final Method writeMethod = pd.getWriteMethod();
+				final Method writeMethod = (pd instanceof GenericTypeAwarePropertyDescriptor ?
+						((GenericTypeAwarePropertyDescriptor) pd).getWriteMethodForActualAccess() :
+						pd.getWriteMethod());
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()) && !writeMethod.isAccessible()) {
 					if (System.getSecurityManager()!= null) {
 						AccessController.doPrivileged(new PrivilegedAction<Object>() {
