@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 
 /**
- * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}. Parsing and
- * decorating of individual {@link Node Nodes} is done via {@link BeanDefinitionParser} and
- * {@link BeanDefinitionDecorator} strategy interfaces respectively. Provides the
- * {@link #registerBeanDefinitionParser}, {@link #registerBeanDefinitionDecorator} methods
- * for registering a {@link BeanDefinitionParser} or {@link BeanDefinitionDecorator} to handle
- * a specific element.
+ * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}.
+ * Parsing and decorating of individual {@link Node Nodes} is done via {@link BeanDefinitionParser}
+ * and {@link BeanDefinitionDecorator} strategy interfaces, respectively.
+ *
+ * <p>Provides the {@link #registerBeanDefinitionParser} and {@link #registerBeanDefinitionDecorator}
+ * methods for registering a {@link BeanDefinitionParser} or {@link BeanDefinitionDecorator}
+ * to handle a specific element.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -68,7 +69,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Parses the supplied {@link Element} by delegating to the {@link BeanDefinitionParser} that is
 	 * registered for that {@link Element}.
 	 */
-	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		return findParserForElement(element, parserContext).parse(element, parserContext);
 	}
 
@@ -90,7 +91,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Decorates the supplied {@link Node} by delegating to the {@link BeanDefinitionDecorator} that
 	 * is registered to handle that {@link Node}.
 	 */
-	public final BeanDefinitionHolder decorate(
+	public BeanDefinitionHolder decorate(
 			Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 
 		return findDecoratorForNode(node, parserContext).decorate(node, definition, parserContext);
