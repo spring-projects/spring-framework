@@ -89,6 +89,30 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void doubles() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(DoubleController.class));
+				RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+				mappingDef.getPropertyValues().add("useDefaultSuffixPattern", false);
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/lat/1.2/long/3.4");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertEquals("latitude-1.2-longitude-3.4", response.getContentAsString());
+	}
+
+	@Test
 	public void ambiguous() throws Exception {
 		initServlet(AmbiguousUriTemplateController.class);
 
@@ -411,6 +435,17 @@ public class UriTemplateServletAnnotationControllerTests {
 		public void handle(@PathVariable("root") int root, Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", 42, root);
 			writer.write("test-" + root);
+		}
+
+	}
+
+	@Controller
+	public static class DoubleController {
+
+		@RequestMapping("/lat/{latitude}/long/{longitude}")
+		public void testLatLong(@PathVariable Double latitude, @PathVariable Double longitude, Writer writer)
+			throws IOException {
+			writer.write("latitude-" + latitude + "-longitude-" + longitude);
 		}
 
 	}
