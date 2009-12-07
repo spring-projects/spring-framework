@@ -1083,22 +1083,25 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		try {
 			doRegisterAfterCompletionWithJtaTransaction(txObject, synchronizations);
 		}
-		catch (RollbackException ex) {
-			logger.debug("Participating in existing JTA transaction that has been marked for rollback: " +
-					"cannot register Spring after-completion callbacks with outer JTA transaction - " +
-					"immediately performing Spring after-completion callbacks with outcome status 'rollback'. " +
-					"Original exception: " + ex);
-			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
-		}
-		catch (IllegalStateException ex) {
-			logger.debug("Participating in existing JTA transaction, but unexpected internal transaction " +
-					"state encountered: cannot register Spring after-completion callbacks with outer JTA " +
-					"transaction - processing Spring after-completion callbacks with outcome status 'unknown'" +
-					"Original exception: " + ex);
-			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
-		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on registerSynchronization", ex);
+		}
+		catch (Exception ex) {
+			// Note: JBoss throws plain RuntimeException with RollbackException as cause.
+			if (ex instanceof RollbackException || ex.getCause() instanceof RollbackException) {
+				logger.debug("Participating in existing JTA transaction that has been marked for rollback: " +
+						"cannot register Spring after-completion callbacks with outer JTA transaction - " +
+						"immediately performing Spring after-completion callbacks with outcome status 'rollback'. " +
+						"Original exception: " + ex);
+				invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
+			}
+			else {
+				logger.debug("Participating in existing JTA transaction, but unexpected internal transaction " +
+						"state encountered: cannot register Spring after-completion callbacks with outer JTA " +
+						"transaction - processing Spring after-completion callbacks with outcome status 'unknown'" +
+						"Original exception: " + ex);
+				invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
+			}
 		}
 	}
 
