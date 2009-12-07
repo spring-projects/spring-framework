@@ -1257,6 +1257,28 @@ public class ServletAnnotationControllerTests {
 		assertEquals("create", response.getContentAsString());
 	}
 
+	@Test
+	public void requestMappingInterface() throws Exception {
+		initServlet(IMyControllerImpl.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handle");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle", response.getContentAsString());
+
+	}
+	
+	@Test
+	public void requestMappingBaseClass() throws Exception {
+		initServlet(MyAbstractControllerImpl.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handle");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle", response.getContentAsString());
+
+	}
+
 	/*
 		 * Controllers
 		 */
@@ -2138,6 +2160,35 @@ public class ServletAnnotationControllerTests {
 			multiValueMap(headers, writer);
 		}
 
+	}
+
+	public interface IMyController {
+
+		@RequestMapping("/handle")
+		void handle(Writer writer) throws IOException;
+	}
+
+	@Controller
+	public static class IMyControllerImpl implements IMyController {
+
+		public void handle(Writer writer) throws IOException {
+			writer.write("handle");
+		}
+	}
+
+	public static abstract class MyAbstractController {
+
+		@RequestMapping("/handle")
+		public abstract void handle(Writer writer) throws IOException;
+	}
+
+	@Controller
+	public static class MyAbstractControllerImpl extends MyAbstractController {
+
+		@Override
+		public void handle(Writer writer) throws IOException {
+			writer.write("handle");
+		}
 	}
 
 

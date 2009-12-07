@@ -561,7 +561,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Action to take on each method.
 	 */
-	public static interface MethodCallback {
+	public interface MethodCallback {
 
 		/**
 		 * Perform an operation using the given method.
@@ -574,7 +574,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to method fields to be operated on by a method callback.
 	 */
-	public static interface MethodFilter {
+	public interface MethodFilter {
 
 		/**
 		 * Determine whether the given method matches.
@@ -586,7 +586,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback interface invoked on each field in the hierarchy.
 	 */
-	public static interface FieldCallback {
+	public interface FieldCallback {
 
 		/**
 		 * Perform an operation using the given field.
@@ -599,7 +599,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to filter fields to be operated on by a field callback.
 	 */
-	public static interface FieldFilter {
+	public interface FieldFilter {
 
 		/**
 		 * Determine whether the given field matches.
@@ -616,6 +616,16 @@ public abstract class ReflectionUtils {
 
 		public boolean matches(Field field) {
 			return !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
+		}
+	};
+
+	/**
+	 * Pre-built MethodFilter that matches all non-bridge methods.
+	 */
+	public static MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
+
+		public boolean matches(Method method) {
+			return !method.isBridge();
 		}
 	};
 
