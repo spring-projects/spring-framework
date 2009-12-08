@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Proxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.TargetSource;
@@ -114,18 +113,20 @@ public final class AutoProxyCreatorTests {
 		ITestBean singletonToBeProxied = (ITestBean) sac.getBean("singletonToBeProxied");
 		assertTrue(Proxy.isProxyClass(singletonToBeProxied.getClass()));
 
+		// 2 invocations coming from FactoryBean inspection during lifecycle startup
+
 		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptor");
-		assertEquals(0, ti.nrOfInvocations);
+		assertEquals(2, ti.nrOfInvocations);
 		singletonToBeProxied.getName();
-		assertEquals(1, ti.nrOfInvocations);
+		assertEquals(3, ti.nrOfInvocations);
 
 		FactoryBean<?> factory = (FactoryBean<?>) sac.getBean("&singletonFactoryToBeProxied");
 		assertTrue(Proxy.isProxyClass(factory.getClass()));
 		TestBean tb = (TestBean) sac.getBean("singletonFactoryToBeProxied");
 		assertFalse(AopUtils.isAopProxy(tb));
-		assertEquals(3, ti.nrOfInvocations);
+		assertEquals(5, ti.nrOfInvocations);
 		tb.getAge();
-		assertEquals(3, ti.nrOfInvocations);
+		assertEquals(5, ti.nrOfInvocations);
 	}
 
 	@Test
