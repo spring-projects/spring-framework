@@ -47,7 +47,7 @@
 		<dependency org="org.beanshell" name="com.springsource.bsh" rev="2.0.0.b4" conf="optional, beanshell->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.5" conf="optional, groovy->compile"/>
 		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="optional->compile"/>
-		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.2.0" conf="optional, jruby->compile"/>
+		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.4.0" conf="optional, jruby->compile"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="compile->compile"/>
