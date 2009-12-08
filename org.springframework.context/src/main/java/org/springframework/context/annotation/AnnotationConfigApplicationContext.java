@@ -114,7 +114,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * Perform a scan within the specified base packages.
 	 * @param basePackages the packages to check for annotated classes
 	 */
-	public void scan(String[] basePackages) {
+	public void scan(String... basePackages) {
 		this.scanner.scan(basePackages);
 	}
 
