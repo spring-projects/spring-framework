@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,14 @@ package org.springframework.context;
  * restricting the visibility of activity-controlled components to the Lifecycle
  * interface.
  *
+ * <p>Note that the Lifecycle interface is only supported on <b>top-level singleton beans</b>.
+ * On any other component, the Lifecycle interface will remain undetected and hence ignored.
+ * Also, note that the extended {@link SmartLifecycle} interface provides more sophisticated
+ * integration with the container's startup and shutdown phases.
+ *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see SmartLifecycle
  * @see ConfigurableApplicationContext
  * @see org.springframework.jms.listener.AbstractMessageListenerContainer
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean

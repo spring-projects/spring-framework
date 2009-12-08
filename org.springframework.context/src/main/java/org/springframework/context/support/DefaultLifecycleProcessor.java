@@ -39,8 +39,9 @@ import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link LifecycleProcessor} strategy.
- * 
+ *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
@@ -64,18 +65,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
-		Assert.isTrue(beanFactory instanceof ConfigurableListableBeanFactory,
-				"A ConfigurableListableBeanFactory is required.");
+		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, beanFactory);
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
-	/*
-	 * Lifecycle implementation
-	 */
 
-	public boolean isRunning() {
-		return this.running;
-	}
+	// Lifecycle implementation
 
 	/**
 	 * Start all registered beans that implement Lifecycle and are
@@ -87,7 +82,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * the dependent bean regardless of the declared phase.
 	 */
 	public void start() {
-		this.startBeans(false);
+		startBeans(false);
+		this.running = true;
 	}
 
 	/**
@@ -100,35 +96,26 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * the dependency bean regardless of the declared phase.
 	 */
 	public void stop() {
-		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
-		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle lifecycle = entry.getValue();
-			int shutdownOrder = getPhase(lifecycle);
-			LifecycleGroup group = phases.get(shutdownOrder);
-			if (group == null) {
-				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans);
-				phases.put(shutdownOrder, group);
-			}
-			group.add(entry.getKey(), lifecycle);
-		}
-		if (phases.size() > 0) {
-			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
-			Collections.sort(keys, Collections.reverseOrder());
-			for (Integer key : keys) {
-				phases.get(key).stop();
-			}
-		}
+		stopBeans();
 		this.running = false;
 	}
 
 	public void onRefresh() {
-		this.startBeans(true);
+		startBeans(true);
+		this.running = true;
 	}
 
 	public void onClose() {
-		stop();
+		stopBeans();
+		this.running = false;
 	}
+
+	public boolean isRunning() {
+		return this.running;
+	}
+
+
+	// internal helpers
 
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
@@ -152,7 +139,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				phases.get(key).start();
 			}
 		}
-		this.running = true;
 	}
 
 	/**
@@ -172,6 +158,28 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				bean.start();
 			}
 			lifecycleBeans.remove(beanName);
+		}
+	}
+
+	private void stopBeans() {
+		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
+		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
+		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
+			Lifecycle lifecycle = entry.getValue();
+			int shutdownOrder = getPhase(lifecycle);
+			LifecycleGroup group = phases.get(shutdownOrder);
+			if (group == null) {
+				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans);
+				phases.put(shutdownOrder, group);
+			}
+			group.add(entry.getKey(), lifecycle);
+		}
+		if (phases.size() > 0) {
+			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
+			Collections.sort(keys, Collections.reverseOrder());
+			for (Integer key : keys) {
+				phases.get(key).stop();
+			}
 		}
 	}
 
@@ -209,20 +217,22 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	private Map<String, Lifecycle> getLifecycleBeans() {
-		String[] beanNames = beanFactory.getSingletonNames();
+		String[] beanNames = this.beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
 		for (String beanName : beanNames) {
-			Object bean = beanFactory.getSingleton(beanName);
-			if (bean instanceof Lifecycle && !this.equals(bean)) {
-				beans.put(beanName, (Lifecycle) bean);
+			if (this.beanFactory.containsSingleton(beanName) ||
+					SmartLifecycle.class.isAssignableFrom(this.beanFactory.getType(beanName))) {
+				Object bean = this.beanFactory.getBean(beanName);
+				if (!this.equals(bean)) {
+					beans.put(beanName, (Lifecycle) bean);
+				}
 			}
 		}
 		return beans;
 	}
 
 	private static int getPhase(Lifecycle bean) {
-		return (bean instanceof Phased) ?
-				((Phased) bean).getPhase() : 0;
+		return (bean instanceof Phased) ? ((Phased) bean).getPhase() : 0;
 	}
 
 
