@@ -22,23 +22,39 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import static org.junit.matchers.JUnitMatchers.*;
+import static org.springframework.util.StringUtils.uncapitalize;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation6.ComponentForScanning;
+import org.springframework.context.annotation6.ConfigForScanning;
+import org.springframework.context.annotation6.Jsr330NamedForScanning;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Chris Beams
  */
-public class ConfigurationClassApplicationContextTests {
+public class AnnotationConfigApplicationContextTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void nullGetBeanParameterIsDisallowed() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		context.getBean((Class<?>)null);
 	}
+	
+	@Test
+	public void scanAndRefresh() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.scan("org.springframework.context.annotation6");
+		context.refresh();
+		context.getBean(uncapitalize(ConfigForScanning.class.getSimpleName()));
+		context.getBean("testBean"); // contributed by ConfigForScanning
+		context.getBean(uncapitalize(ComponentForScanning.class.getSimpleName()));
+		context.getBean(uncapitalize(Jsr330NamedForScanning.class.getSimpleName()));
+	}
 
 	@Test
-	public void addConfigurationClass() {
+	public void registerAndRefresh() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(Config.class, NameConfig.class);
 		context.refresh();
@@ -63,7 +79,7 @@ public class ConfigurationClassApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
 		// attempt to retrieve the instance by its generated bean name
-		Config configObject = (Config) context.getBean("configurationClassApplicationContextTests.Config");
+		Config configObject = (Config) context.getBean("annotationConfigApplicationContextTests.Config");
 		assertNotNull(configObject);
 	}
 

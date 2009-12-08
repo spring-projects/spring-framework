@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Chris Beams
  */
-public class ConfigurationClassWebApplicationContextTests {
+public class AnnotationConfigWebApplicationContextTests {
 
 	@Test
 	public void testSingleWellFormedConfigLocation() {
