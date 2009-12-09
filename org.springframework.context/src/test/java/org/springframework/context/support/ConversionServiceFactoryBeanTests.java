@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
@@ -41,8 +42,8 @@ public class ConversionServiceFactoryBeanTests {
 			}
 		});
 		converters.add(new GenericConverter() {
-			public Class<?>[][] getConvertibleTypes() {
-				return new Class[][] { { String.class, Baz.class } };
+			public Set<ConvertiblePair> getConvertibleTypes() {
+				return Collections.singleton(new ConvertiblePair(String.class, Baz.class));
 			}
 			public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 				return new Baz();
