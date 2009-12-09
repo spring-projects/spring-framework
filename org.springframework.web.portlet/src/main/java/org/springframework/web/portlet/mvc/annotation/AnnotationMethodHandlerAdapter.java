@@ -70,6 +70,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,6 +88,7 @@ import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
+import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -212,7 +214,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	}
 
 	/**
-	 * Set a custom WebArgumentResolvers to use for special method parameter types.
+	 * Set a custom WebArgumentResolver to use for special method parameter types.
 	 * Such a custom WebArgumentResolver will kick in first, having a chance to
 	 * resolve an argument value before the standard argument handling kicks in.
 	 */
@@ -380,6 +382,26 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 
 	/**
+	 * Template method for creating a new PortletRequestDataBinder instance.
+	 * <p>The default implementation creates a standard PortletRequestDataBinder.
+	 * This can be overridden for custom PortletRequestDataBinder subclasses.
+	 * @param request current portlet request
+	 * @param target the target object to bind onto (or <code>null</code>
+	 * if the binder is just used to convert a plain parameter value)
+	 * @param objectName the objectName of the target object
+	 * @return the PortletRequestDataBinder instance to use
+	 * @throws Exception in case of invalid state or arguments
+	 * @see PortletRequestDataBinder#bind(javax.portlet.PortletRequest)
+	 * @see PortletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
+	 */
+	protected PortletRequestDataBinder createBinder(
+			PortletRequest request, Object target, String objectName) throws Exception {
+
+		return new PortletRequestDataBinder(target, objectName);
+	}
+
+
+	/**
 	 * Portlet-specific subclass of {@link HandlerMethodResolver}.
 	 */
 	private static class PortletHandlerMethodResolver extends HandlerMethodResolver {
@@ -508,6 +530,20 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		@Override
+		protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
+				throws Exception {
+
+			return AnnotationMethodHandlerAdapter.this.createBinder(
+					(PortletRequest) webRequest.getNativeRequest(), target, objectName);
+		}
+
+		@Override
+		protected void doBind(WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
+			PortletRequestDataBinder portletBinder = (PortletRequestDataBinder) binder;
+			portletBinder.bind((PortletRequest) webRequest.getNativeRequest());
+		}
+
+		@Override
 		protected Object resolveDefaultValue(String value) {
 			if (beanFactory == null) {
 				return value;
@@ -610,8 +646,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 			// Invoke custom resolvers if present...
 			if (customModelAndViewResolvers != null) {
 				for (ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
-					org.springframework.web.servlet.ModelAndView smav = mavResolver
-							.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
+					org.springframework.web.servlet.ModelAndView smav =
+							mavResolver.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
 					if (smav != ModelAndViewResolver.UNRESOLVED) {
 						return (smav.isReference() ?
 								new ModelAndView(smav.getViewName(), smav.getModelMap()) :
