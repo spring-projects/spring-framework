@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +56,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	private static final Log logger = LogFactory.getLog(GenericConversionService.class);
 
 	private static final GenericConverter NO_OP_CONVERTER = new GenericConverter() {
-		public Class<?>[][] getConvertibleTypes() {
+		public Set<ConvertiblePair> getConvertibleTypes() {
 			return null;
 		}
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -71,7 +72,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	// implementing ConverterRegistry
 
 	public void addConverter(Converter<?, ?> converter) {
-		Class<?>[] typeInfo = getRequiredTypeInfo(converter, Converter.class);
+		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converter, Converter.class);
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> which " +
 							"your Converter<S, T> converts between; declare these generic types.");
@@ -80,7 +81,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
-		Class<?>[] typeInfo = getRequiredTypeInfo(converterFactory, ConverterFactory.class);
+		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converterFactory, ConverterFactory.class);
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetRangeType R which " +
 					"your ConverterFactory<S, R> converts between; declare these generic types.");
@@ -89,9 +90,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	public void addGenericConverter(GenericConverter converter) {
-		Class<?>[][] convertibleTypes = converter.getConvertibleTypes();
-		for (Class<?>[] convertibleType : convertibleTypes) {
-			getMatchableConvertersList(convertibleType[0], convertibleType[1]).add(converter);
+		Set<GenericConverter.ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
+		for (GenericConverter.ConvertiblePair convertibleType : convertibleTypes) {
+			getMatchableConvertersList(convertibleType.getSourceType(), convertibleType.getTargetType()).add(converter);
 		}
 	}
 
@@ -213,8 +214,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	// internal helpers
 
-	private Class<?>[] getRequiredTypeInfo(Object converter, Class<?> genericIfc) {
-		return GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
+	private GenericConverter.ConvertiblePair getRequiredTypeInfo(Object converter, Class<?> genericIfc) {
+		Class[] args = GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
+		return (args != null ? new GenericConverter.ConvertiblePair(args[0], args[1]) : null);
 	}
 
 	private MatchableConverters getMatchableConvertersList(Class<?> sourceType, Class<?> targetType) {
@@ -370,17 +372,17 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	@SuppressWarnings("unchecked")
 	private final class ConverterAdapter implements GenericConverter {
 
-		private final Class<?>[] typeInfo;
+		private final ConvertiblePair typeInfo;
 
 		private final Converter converter;
 
-		public ConverterAdapter(Class<?>[] typeInfo, Converter<?, ?> converter) {
+		public ConverterAdapter(ConvertiblePair typeInfo, Converter<?, ?> converter) {
 			this.converter = converter;
 			this.typeInfo = typeInfo;
 		}
 
-		public Class<?>[][] getConvertibleTypes() {
-			return new Class[][] {this.typeInfo};
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return Collections.singleton(this.typeInfo);
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -391,7 +393,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 
 		public String toString() {
-			return this.typeInfo[0].getName() + " -> " + this.typeInfo[1].getName() + " : " + this.converter.toString(); 
+			return this.typeInfo.getSourceType().getName() + " -> " + this.typeInfo.getTargetType().getName() +
+					" : " + this.converter.toString();
 		}
 	}
 
@@ -399,17 +402,17 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	@SuppressWarnings("unchecked")
 	private final class ConverterFactoryAdapter implements GenericConverter {
 
-		private final Class<?>[] typeInfo;
+		private final ConvertiblePair typeInfo;
 
 		private final ConverterFactory converterFactory;
 
-		public ConverterFactoryAdapter(Class<?>[] typeInfo, ConverterFactory<?, ?> converterFactory) {
+		public ConverterFactoryAdapter(ConvertiblePair typeInfo, ConverterFactory<?, ?> converterFactory) {
 			this.converterFactory = converterFactory;
 			this.typeInfo = typeInfo;
 		}
 
-		public Class<?>[][] getConvertibleTypes() {
-			return new Class[][] {this.typeInfo};
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return Collections.singleton(this.typeInfo);
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -420,8 +423,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 
 		public String toString() {
-			return this.typeInfo[0].getName() + " -> " + this.typeInfo[1].getName() + " : " +
-					this.converterFactory.toString();
+			return this.typeInfo.getSourceType().getName() + " -> " + this.typeInfo.getTargetType().getName() +
+					" : " + this.converterFactory.toString();
 		}
 	}
 

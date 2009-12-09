@@ -17,7 +17,9 @@
 package org.springframework.core.convert.support;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -37,8 +39,8 @@ final class ArrayToMapConverter implements GenericConverter {
 		this.helperConverter = new CollectionToMapConverter(conversionService);
 	}
 
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Object[].class, Map.class } };
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object[].class, Map.class));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

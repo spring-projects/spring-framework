@@ -16,13 +16,14 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.Set;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import static org.springframework.core.convert.support.ConversionUtils.*;
 import org.springframework.util.StringUtils;
 
 /**
@@ -39,8 +40,8 @@ final class ObjectToArrayConverter implements GenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Object.class, Object[].class } };
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object.class, Object[].class));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

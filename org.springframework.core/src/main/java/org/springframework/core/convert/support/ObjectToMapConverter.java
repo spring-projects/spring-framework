@@ -17,8 +17,10 @@
 package org.springframework.core.convert.support;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
@@ -38,8 +40,8 @@ final class ObjectToMapConverter implements GenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Object.class, Map.class } };
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object.class, Map.class));
 	}
 
 	@SuppressWarnings("unchecked")

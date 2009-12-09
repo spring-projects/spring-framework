@@ -16,9 +16,16 @@
 
 package org.springframework.core.convert.support;
 
+import java.util.Set;
+
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterFactory;
+import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * A factory for common ConversionService configurations.
+ * A factory for common {@link org.springframework.core.convert.ConversionService}
+ * configurations.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -65,6 +72,32 @@ public abstract class ConversionServiceFactory {
 		conversionService.addConverterFactory(new CharacterToNumberFactory());
 		conversionService.addGenericConverter(new ObjectToObjectGenericConverter());
 		conversionService.addGenericConverter(new IdToEntityConverter(conversionService));
+	}
+
+	/**
+	 * Register the given converter objects with the given target registry.
+	 * @param converters the converter objects: implementing {@link Converter},
+	 * {@link ConverterFactory}, or {@link GenericConverter}
+	 * @param registry the target registry to register with
+	 */
+	public static void registerConverters(Set<Object> converters, ConverterRegistry registry) {
+		if (converters != null) {
+			for (Object converter : converters) {
+				if (converter instanceof Converter<?, ?>) {
+					registry.addConverter((Converter<?, ?>) converter);
+				}
+				else if (converter instanceof ConverterFactory<?, ?>) {
+					registry.addConverterFactory((ConverterFactory<?, ?>) converter);
+				}
+				else if (converter instanceof GenericConverter) {
+					registry.addGenericConverter((GenericConverter) converter);
+				}
+				else {
+					throw new IllegalArgumentException("Each converter object must implement one of the " +
+							"Converter, ConverterFactory, or GenericConverter interfaces");
+				}
+			}
+		}
 	}
 
 }

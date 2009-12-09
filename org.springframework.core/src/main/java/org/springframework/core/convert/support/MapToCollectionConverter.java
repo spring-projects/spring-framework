@@ -16,14 +16,15 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
-
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import static org.springframework.core.convert.support.ConversionUtils.*;
 
 /**
  * Converts from a Map to a Collection.
@@ -39,8 +40,8 @@ final class MapToCollectionConverter implements GenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Map.class, Collection.class } };
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Map.class, Collection.class));
 	}
 
 	@SuppressWarnings("unchecked")

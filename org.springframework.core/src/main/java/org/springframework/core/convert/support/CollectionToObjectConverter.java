@@ -16,14 +16,14 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getElementType;
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import static org.springframework.core.convert.support.ConversionUtils.*;
 
 /**
  * Converts from a Collection to a single Object.
@@ -41,8 +41,8 @@ final class CollectionToObjectConverter implements GenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Collection.class, Object.class } };
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Collection.class, Object.class));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

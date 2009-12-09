@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert.support;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
@@ -24,8 +27,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Converts an entity identifier to a entity reference by calling a static finder method on the target entity type.
- * For this converter to match, the finder method must be public, static, have the signature 'find[EntityName]([IdType])', and return an instance of the desired entity type.
+ * Converts an entity identifier to a entity reference by calling a static finder method
+ * on the target entity type.
+ *
+ * <p>For this converter to match, the finder method must be public, static, have the signature
+ * <code>find[EntityName]([IdType])</code>, and return an instance of the desired entity type.
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -37,8 +44,8 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class[][] { { Object.class, Object.class } };
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object.class, Object.class));
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
