@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,11 +86,10 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * without attempts to check further codes.
 	 * <p>To be able to work with "useCodeAsDefaultMessage" turned on in the parent,
 	 * AbstractMessageSource and AbstractApplicationContext contain special checks
-	 * to delegate to the internal <code>getMessageInternal</code> method if available.
+	 * to delegate to the internal {@link #getMessageInternal} method if available.
 	 * In general, it is recommended to just use "useCodeAsDefaultMessage" during
 	 * development and not rely on it in production in the first place, though.
 	 * @see #getMessage(String, Object[], Locale)
-	 * @see #getMessageInternal
 	 * @see org.springframework.validation.FieldError
 	 */
 	public void setUseCodeAsDefaultMessage(boolean useCodeAsDefaultMessage) {
@@ -101,7 +100,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * Return whether to use the message code as default message instead of
 	 * throwing a NoSuchMessageException. Useful for development and debugging.
 	 * Default is "false".
-	 * <p>Alternatively, consider overriding the <code>getDefaultMessage</code>
+	 * <p>Alternatively, consider overriding the {@link #getDefaultMessage}
 	 * method to return a custom fallback message for an unresolvable code.
 	 * @see #getDefaultMessage(String)
 	 */
@@ -242,10 +241,9 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 	/**
 	 * Return a fallback default message for the given code, if any.
-	 * <p>Default is to return the code itself if "useCodeAsDefaultMessage"
-	 * is activated, or return no fallback else. In case of no fallback,
-	 * the caller will usually receive a NoSuchMessageException from
-	 * <code>getMessage</code>.
+	 * <p>Default is to return the code itself if "useCodeAsDefaultMessage" is activated,
+	 * or return no fallback else. In case of no fallback, the caller will usually
+	 * receive a NoSuchMessageException from <code>getMessage</code>.
 	 * @param code the message code that we couldn't resolve
 	 * and that we didn't receive an explicit default message for
 	 * @return the default message to use, or <code>null</code> if none
@@ -259,10 +257,10 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 	/**
-	 * Render the given default message String. The default message is
-	 * passed in as specified by the caller and can be rendered into
-	 * a fully formatted default message shown to the user.
-	 * <p>The default implementation passes the String to <code>formatMessage</code>,
+	 * Render the given default message String. The default message is passed in
+	 * as specified by the caller and can be rendered into a fully formatted
+	 * default message shown to the user.
+	 * <p>The default implementation passes the String to {@link #formatMessage},
 	 * resolving any argument placeholders found in them. Subclasses may override
 	 * this method to plug in custom processing of default messages.
 	 * @param defaultMessage the passed-in default message String
@@ -279,8 +277,8 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 
 	/**
-	 * Searches through the given array of objects, find any
-	 * MessageSourceResolvable objects and resolve them.
+	 * Searches through the given array of objects, finds any MessageSourceResolvable
+	 * objects and resolves them.
 	 * <p>Allows for messages to have MessageSourceResolvables as arguments.
 	 * @param args array of arguments for a message
 	 * @param locale the locale to resolve through
@@ -304,17 +302,15 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 	/**
-	 * Subclasses can override this method to resolve a message without
-	 * arguments in an optimized fashion, that is, to resolve a message
-	 * without involving a MessageFormat.
-	 * <p>The default implementation <i>does</i> use MessageFormat,
-	 * through delegating to the <code>resolveCode</code> method.
-	 * Subclasses are encouraged to replace this with optimized resolution.
-	 * <p>Unfortunately, <code>java.text.MessageFormat</code> is not
-	 * implemented in an efficient fashion. In particular, it does not
-	 * detect that a message pattern doesn't contain argument placeholders
-	 * in the first place. Therefore, it's advisable to circumvent
-	 * MessageFormat completely for messages without arguments.
+	 * Subclasses can override this method to resolve a message without arguments
+	 * in an optimized fashion, i.e. to resolve without involving a MessageFormat.
+	 * <p>The default implementation <i>does</i> use MessageFormat, through
+	 * delegating to the {@link #resolveCode} method. Subclasses are encouraged
+	 * to replace this with optimized resolution.
+	 * <p>Unfortunately, <code>java.text.MessageFormat</code> is not implemented
+	 * in an efficient fashion. In particular, it does not detect that a message
+	 * pattern doesn't contain argument placeholders in the first place. Therefore,
+	 * it is advisable to circumvent MessageFormat for messages without arguments.
 	 * @param code the code of the message to resolve
 	 * @param locale the Locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
@@ -338,7 +334,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * to allow for appropriate caching of MessageFormats in subclasses.
 	 * <p><b>Subclasses are encouraged to provide optimized resolution
 	 * for messages without arguments, not involving MessageFormat.</b>
-	 * See <code>resolveCodeWithoutArguments</code> javadoc for details.
+	 * See the {@link #resolveCodeWithoutArguments} javadoc for details.
 	 * @param code the code of the message to resolve
 	 * @param locale the Locale to resolve the code for
 	 * (subclasses are encouraged to support internationalization)
