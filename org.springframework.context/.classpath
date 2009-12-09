@@ -33,8 +33,8 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.objectweb.asm/com.springsource.org.objectweb.asm.commons/3.1.0/com.springsource.org.objectweb.asm.commons-3.1.0.jar" sourcepath="IVY_CACHE/org.objectweb.asm/com.springsource.org.objectweb.asm.commons/3.1.0/com.springsource.org.objectweb.asm.commons-sources-3.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.validator/4.0.0.GA/com.springsource.org.hibernate.validator-4.0.0.GA.jar" sourcepath="/IVY_CACHE/org.hibernate/com.springsource.org.hibernate.validator/4.0.0.GA/com.springsource.org.hibernate.validator-sources-4.0.0.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.joda/com.springsource.org.joda.time/1.6.0/com.springsource.org.joda.time-1.6.0.jar" sourcepath="/IVY_CACHE/org.joda/com.springsource.org.joda.time/1.6.0/com.springsource.org.joda.time-sources-1.6.0.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.jruby/com.springsource.org.jruby/1.2.0/com.springsource.org.jruby-1.2.0.jar" sourcepath="/IVY_CACHE/org.jruby/com.springsource.org.jruby/1.2.0/com.springsource.org.jruby-sources-1.2.0.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-4.7.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.6.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.jruby/com.springsource.org.jruby/1.4.0/com.springsource.org.jruby-1.4.0.jar" sourcepath="/IVY_CACHE/org.jruby/com.springsource.org.jruby/1.4.0/com.springsource.org.jruby-sources-1.4.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-4.7.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.7.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.inject/com.springsource.org.atinject.tck/1.0.0/com.springsource.org.atinject.tck-1.0.0.jar" sourcepath="/IVY_CACHE/javax.inject/com.springsource.org.atinject.tck/1.0.0/com.springsource.org.atinject.tck-sources-1.0.0.jar"/>
 	
 	<classpathentry kind="output" path="target/classes"/>
