@@ -80,6 +80,8 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -435,6 +437,26 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 
 	/**
+	 * Template method for creating a new ServletRequestDataBinder instance.
+	 * <p>The default implementation creates a standard ServletRequestDataBinder.
+	 * This can be overridden for custom ServletRequestDataBinder subclasses.
+	 * @param request current HTTP request
+	 * @param target the target object to bind onto (or <code>null</code>
+	 * if the binder is just used to convert a plain parameter value)
+	 * @param objectName the objectName of the target object
+	 * @return the ServletRequestDataBinder instance to use
+	 * @throws Exception in case of invalid state or arguments
+	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
+	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
+	 */
+	protected ServletRequestDataBinder createBinder(
+			HttpServletRequest request, Object target, String objectName) throws Exception {
+
+		return new ServletRequestDataBinder(target, objectName);
+	}
+
+
+	/**
 	 * Servlet-specific subclass of {@link HandlerMethodResolver}.
 	 */
 	private class ServletHandlerMethodResolver extends HandlerMethodResolver {
@@ -554,7 +576,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		/**
 		 * Determines the matched pattern for the given methodLevelPattern and path.
-		 *
 		 * <p>Uses the following algorithm: <ol> <li>If there is a type-level mapping with path information, it is {@linkplain
 		 * PathMatcher#combine(String, String) combined} with the method-level pattern. <li>If there is a {@linkplain
 		 * HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern} in the request, it is combined with the
@@ -662,6 +683,26 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@Override
+		protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
+				throws Exception {
+
+			return AnnotationMethodHandlerAdapter.this.createBinder(
+					(HttpServletRequest) webRequest.getNativeRequest(), target, objectName);
+		}
+
+		@Override
+		protected void doBind(WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
+			ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
+			servletBinder.bind((ServletRequest) webRequest.getNativeRequest());
+		}
+
+		@Override
+		protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
+			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+			return new ServletServerHttpRequest(servletRequest);
+		}
+
+		@Override
 		protected Object resolveDefaultValue(String value) {
 			if (beanFactory == null) {
 				return value;
@@ -672,12 +713,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				return value;
 			}
 			return exprResolver.evaluate(placeholdersResolved, expressionContext);
-		}
-
-		@Override
-		protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
-			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
-			return new ServletServerHttpRequest(servletRequest);
 		}
 
 		@Override

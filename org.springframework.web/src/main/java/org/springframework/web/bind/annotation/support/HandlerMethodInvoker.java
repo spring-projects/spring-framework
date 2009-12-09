@@ -51,6 +51,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -287,7 +288,7 @@ public class HandlerMethodInvoker {
 				args[i] = resolvePathVariable(pathVarName, methodParam, webRequest, handler);
 			}
 			else if (attrName != null) {
-				WebRequestDataBinder binder =
+				WebDataBinder binder =
 						resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
 				boolean assignBindingResult = (args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 				if (binder.getTarget() != null) {
@@ -433,7 +434,7 @@ public class HandlerMethodInvoker {
 			}
 			paramValue = checkValue(paramName, paramValue, paramType);
 		}
-		WebRequestDataBinder binder = new WebRequestDataBinder(null, paramName);
+		WebDataBinder binder = createBinder(webRequest, null, paramName);
 		initBinder(handlerForInitBinderCall, paramName, binder, webRequest);
 		return binder.convertIfNecessary(paramValue, paramType, methodParam);
 	}
@@ -486,7 +487,7 @@ public class HandlerMethodInvoker {
 			}
 			headerValue = checkValue(headerName, headerValue, paramType);
 		}
-		WebRequestDataBinder binder = new WebRequestDataBinder(null, headerName);
+		WebDataBinder binder = createBinder(webRequest, null, headerName);
 		initBinder(handlerForInitBinderCall, headerName, binder, webRequest);
 		return binder.convertIfNecessary(headerValue, paramType, methodParam);
 	}
@@ -551,20 +552,9 @@ public class HandlerMethodInvoker {
 		throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
 	}
 
-	/**
-	 * Return a {@link HttpInputMessage} for the given {@link NativeWebRequest}.
-	 * <p>Throws an UnsupportedOperationException by default.
-	 */
-	protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
-		throw new UnsupportedOperationException("@RequestBody not supported");
-	}
-
-	private Object resolveCookieValue(String cookieName,
-			boolean required,
-			String defaultValue,
-			MethodParameter methodParam,
-			NativeWebRequest webRequest,
-			Object handlerForInitBinderCall) throws Exception {
+	private Object resolveCookieValue(String cookieName, boolean required, String defaultValue,
+			MethodParameter methodParam, NativeWebRequest webRequest, Object handlerForInitBinderCall)
+			throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
 		if (cookieName.length() == 0) {
@@ -580,7 +570,7 @@ public class HandlerMethodInvoker {
 			}
 			cookieValue = checkValue(cookieName, cookieValue, paramType);
 		}
-		WebRequestDataBinder binder = new WebRequestDataBinder(null, cookieName);
+		WebDataBinder binder = createBinder(webRequest, null, cookieName);
 		initBinder(handlerForInitBinderCall, cookieName, binder, webRequest);
 		return binder.convertIfNecessary(cookieValue, paramType, methodParam);
 	}
@@ -595,17 +585,15 @@ public class HandlerMethodInvoker {
 		throw new UnsupportedOperationException("@CookieValue not supported");
 	}
 
-	private Object resolvePathVariable(String pathVarName,
-			MethodParameter methodParam,
-			NativeWebRequest webRequest,
-			Object handlerForInitBinderCall) throws Exception {
+	private Object resolvePathVariable(String pathVarName, MethodParameter methodParam,
+			NativeWebRequest webRequest, Object handlerForInitBinderCall) throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
 		if (pathVarName.length() == 0) {
 			pathVarName = getRequiredParameterName(methodParam);
 		}
 		String pathVarValue = resolvePathVariable(pathVarName, paramType, webRequest);
-		WebRequestDataBinder binder = new WebRequestDataBinder(null, pathVarName);
+		WebDataBinder binder = createBinder(webRequest, null, pathVarName);
 		initBinder(handlerForInitBinderCall, pathVarName, binder, webRequest);
 		return binder.convertIfNecessary(pathVarValue, paramType, methodParam);
 	}
@@ -644,7 +632,7 @@ public class HandlerMethodInvoker {
 		return value;
 	}
 
-	private WebRequestDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
+	private WebDataBinder resolveModelAttribute(String attrName, MethodParameter methodParam,
 			ExtendedModelMap implicitModel, NativeWebRequest webRequest, Object handler) throws Exception {
 
 		// Bind request parameter onto object...
@@ -666,7 +654,7 @@ public class HandlerMethodInvoker {
 		else {
 			bindObject = BeanUtils.instantiateClass(paramType);
 		}
-		WebRequestDataBinder binder = new WebRequestDataBinder(bindObject, name);
+		WebDataBinder binder = createBinder(webRequest, bindObject, name);
 		initBinder(handler, name, binder, webRequest);
 		return binder;
 	}
@@ -695,7 +683,7 @@ public class HandlerMethodInvoker {
 					(isSessionAttr || isBindingCandidate(attrValue))) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
 				if (mavModel != null && !model.containsKey(bindingResultKey)) {
-					WebRequestDataBinder binder = new WebRequestDataBinder(attrValue, attrName);
+					WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
 					initBinder(handler, attrName, binder, webRequest);
 					mavModel.put(bindingResultKey, binder.getBindingResult());
 				}
@@ -740,16 +728,34 @@ public class HandlerMethodInvoker {
 		throw new IllegalStateException(message);
 	}
 
-	protected void doBind(WebRequestDataBinder binder, NativeWebRequest webRequest, boolean validate,
-			boolean failOnErrors) throws Exception {
+	protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
+			throws Exception {
 
-		binder.bind(webRequest);
+		return new WebRequestDataBinder(target, objectName);
+	}
+
+	private void doBind(WebDataBinder binder, NativeWebRequest webRequest, boolean validate, boolean failOnErrors)
+			throws Exception {
+
+		doBind(binder, webRequest);
 		if (validate) {
 			binder.validate();
 		}
-		if (failOnErrors) {
-			binder.closeNoCatch();
+		if (failOnErrors && binder.getBindingResult().hasErrors()) {
+			throw new BindException(binder.getBindingResult());
 		}
+	}
+
+	protected void doBind(WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
+		((WebRequestDataBinder) binder).bind(webRequest);
+	}
+
+	/**
+	 * Return a {@link HttpInputMessage} for the given {@link NativeWebRequest}.
+	 * <p>Throws an UnsupportedOperationException by default.
+	 */
+	protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
+		throw new UnsupportedOperationException("@RequestBody not supported");
 	}
 
 	protected Object resolveDefaultValue(String value) {
