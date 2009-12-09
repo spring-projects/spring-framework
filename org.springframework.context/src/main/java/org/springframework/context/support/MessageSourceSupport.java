@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public abstract class MessageSourceSupport {
 		if (msg == null || (!this.alwaysUseMessageFormat && (args == null || args.length == 0))) {
 			return msg;
 		}
-		MessageFormat messageFormat = null;
+		MessageFormat messageFormat;
 		synchronized (this.cachedMessageFormats) {
 			messageFormat = this.cachedMessageFormats.get(msg);
 			if (messageFormat == null) {
@@ -112,9 +112,6 @@ public abstract class MessageSourceSupport {
 	 * @return the MessageFormat instance
 	 */
 	protected MessageFormat createMessageFormat(String msg, Locale locale) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating MessageFormat for pattern [" + msg + "] and locale '" + locale + "'");
-		}
 		return new MessageFormat((msg != null ? msg : ""), locale);
 	}
 
