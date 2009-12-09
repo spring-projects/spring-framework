@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract application context loader, which provides a basis for all concrete
  * implementations of the {@link ContextLoader} strategy. Provides a
- * <em>Template Method</em> based approach for
- * {@link #processLocations(Class,String...) processing} locations.
+ * <em>Template Method</em> based approach for {@link #processLocations processing}
+ * locations.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -46,9 +46,8 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * {@link #generateDefaultLocations(Class) generated} for the specified
 	 * {@link Class class} and the configured
 	 * {@link #getResourceSuffix() resource suffix}; otherwise, the supplied
-	 * <code>locations</code> will be
-	 * {@link #modifyLocations(Class,String...) modified} if necessary and
-	 * returned.
+	 * <code>locations</code> will be {@link #modifyLocations modified} if
+	 * necessary and returned.
 	 * @param clazz the class with which the locations are associated: to be
 	 * used when generating default locations
 	 * @param locations the unmodified locations to use for loading the
