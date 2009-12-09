@@ -387,12 +387,12 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 					this.bfgInstancesByKey.remove(this.resourceLocation);
 					this.bfgInstancesByObj.remove(groupContext);
 					throw new BootstrapException("Unable to initialize group definition. " +
-						"Group resource name [" + this.resourceLocation + "], factory key [" + factoryKey + "]", ex);
+							"Group resource name [" + this.resourceLocation + "], factory key [" + factoryKey + "]", ex);
 				}
 			}
 
 			try {
-				BeanFactory beanFactory = null;
+				BeanFactory beanFactory;
 				if (factoryKey != null) {
 					beanFactory = bfg.definition.getBean(factoryKey, BeanFactory.class);
 				}
