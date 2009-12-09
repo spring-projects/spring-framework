@@ -16,18 +16,23 @@
 
 package org.springframework.core.convert.support;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.fail;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 
+/**
+ * @author Keith Donald
+ * @author Juergen Hoeller
+ */
 public class GenericConversionServiceTests {
 
 	private GenericConversionService conversionService = new GenericConversionService();
@@ -53,7 +58,8 @@ public class GenericConversionServiceTests {
 		try {
 			conversionService.convert("3", Integer.class);
 			fail("Should have thrown an exception");
-		} catch (ConverterNotFoundException e) {
+		}
+		catch (ConverterNotFoundException e) {
 		}
 	}
 
@@ -91,7 +97,8 @@ public class GenericConversionServiceTests {
 		try {
 			conversionService.convert("BOGUS", Integer.class);
 			fail("Should have failed");
-		} catch (ConversionFailedException e) {
+		}
+		catch (ConversionFailedException e) {
 
 		}
 	}
@@ -136,9 +143,72 @@ public class GenericConversionServiceTests {
 			conversionService.addGenericConverter(new ObjectToArrayConverter(conversionService));
 			conversionService.convert("1", Integer[].class);
 			fail("Should hace failed");
-		} catch (ConversionFailedException e) {
+		}
+		catch (ConversionFailedException e) {
 			assertTrue(e.getCause() instanceof ConverterNotFoundException);
 		}
 	}
+
+	@Test
+	public void testListToIterableConversion() {
+		GenericConversionService conversionService = new GenericConversionService();
+		List<Object> raw = new ArrayList<Object>();
+		raw.add("one");
+		raw.add("two");
+		Object converted = conversionService.convert(raw, Iterable.class);
+		assertSame(raw, converted);
+	}
+
+	@Test
+	public void testListToObjectConversion() {
+		GenericConversionService conversionService = new GenericConversionService();
+		List<Object> raw = new ArrayList<Object>();
+		raw.add("one");
+		raw.add("two");
+		Object converted = conversionService.convert(raw, Object.class);
+		assertSame(raw, converted);
+	}
+
+	@Test
+	public void testMapToObjectConversionBug() {
+		GenericConversionService conversionService = new GenericConversionService();
+		Map<Object, Object> raw = new HashMap<Object, Object>();
+		raw.put("key", "value");
+		Object converted = conversionService.convert(raw, Object.class);
+		assertSame(raw, converted);
+	}
+
+	@Test
+	public void testInterfaceToString() {
+		GenericConversionService conversionService = new GenericConversionService();
+		conversionService.addConverter(new MyBaseInterfaceConverter());
+		conversionService.addConverter(new ObjectToStringConverter());
+		Object converted = conversionService.convert(new MyInterfaceImplementer(), String.class);
+		assertEquals("RESULT", converted);
+	}
+
+
+	private interface MyBaseInterface {
+
+	}
+
+
+	private interface MyInterface extends MyBaseInterface {
+
+	}
+
+
+	private static class MyInterfaceImplementer implements MyInterface {
+
+	}
+
+
+	private class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
+
+		public String convert(MyBaseInterface source) {
+			return "RESULT";
+		}
+	}
+
 
 }
