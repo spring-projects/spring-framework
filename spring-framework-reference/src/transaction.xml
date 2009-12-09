@@ -1416,9 +1416,7 @@ public class DefaultFooService implements FooService {
       <interfacename>@Transactional</interfacename> annotation is not enough
       to activate the transactional behavior. The
       <interfacename>@Transactional</interfacename> annotation is simply
-      metadata that can be consumed by something<!--Please identify *something* . 
-TR: OK AS IS.it's not defined what this something is. could be code written by the user or could be an 
-existing BeanPostProcessor provided or something else--> that is
+      metadata that can be consumed by some runtime infrastructure that is
       <interfacename>@Transactional</interfacename>-aware and that can use the
       metadata to configure the appropriate beans with transactional behavior.
       In the preceding example, the
@@ -1433,8 +1431,8 @@ existing BeanPostProcessor provided or something else--> that is
           <interfacename>@Transactional</interfacename> annotation on an
           interface (or an interface method), but this works only as you would
           expect it to if you are using interface-based proxies. The fact that
-          annotations are <emphasis>not inherited</emphasis> means that if you
-          are using class-based proxies
+          Java annotations are <emphasis>not inherited from interfaces</emphasis>
+          means that if you are using class-based proxies
           (<literal>proxy-target-class="true"</literal>) or the weaving-based
           aspect (<literal>mode="aspectj"</literal>), then the transaction
           settings are not recognized by the proxying and weaving
