@@ -40,17 +40,25 @@ import java.lang.annotation.Target;
 public @interface ContextConfiguration {
 
 	/**
-	 * The resource locations to use for loading an
-	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
-	 */
-	String[] locations() default {};
-
-	/**
 	 * Alias for {@link #locations() locations}.
-	 * 
 	 * @since 3.0
 	 */
 	String[] value() default {};
+
+	/**
+	 * The resource locations to use for loading an
+	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
+	 * <p>Check out {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations)}'s
+	 * javadoc for details on how a location String will be interpreted at runtime,
+	 * in particular in case of a relative path. Also, check out the documentation on
+	 * {@link org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations}
+	 * for details on the default locations that are going to be used if none are specified.
+	 * <p>Note that the above-mentioned default rules only apply for a standard
+	 * {@link org.springframework.test.context.support.AbstractContextLoader} subclass
+	 * such as {@link org.springframework.test.context.support.GenericXmlContextLoader}
+	 * which is the effective default implementation used at runtime.
+	 */
+	String[] locations() default {};
 
 	/**
 	 * Whether or not {@link #locations() resource locations} from superclasses
@@ -91,6 +99,10 @@ public @interface ContextConfiguration {
 	 * which is annotated with <code>&#064;ContextConfiguration</code> and specifies
      * an explicit loader. If no class in the hierarchy specifies an explicit
      * loader, a default loader will be used instead.
+	 * <p>The default concrete implementation chosen at runtime will be
+	 * {@link org.springframework.test.context.support.GenericXmlContextLoader}.
+	 * Also check out {@link org.springframework.test.context.support.AbstractContextLoader}'s
+	 * javadoc for details on the default behavior there.
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
 

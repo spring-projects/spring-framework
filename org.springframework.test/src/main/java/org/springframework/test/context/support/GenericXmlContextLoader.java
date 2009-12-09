@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
- * <p>
  * Concrete implementation of {@link AbstractGenericContextLoader} which reads
  * bean definitions from XML resources.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -32,12 +30,8 @@ import org.springframework.context.support.GenericApplicationContext;
 public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 
 	/**
-	 * <p>
-	 * Creates a new {@link XmlBeanDefinitionReader}.
-	 * </p>
-	 *
+	 * Create a new {@link XmlBeanDefinitionReader}.
 	 * @return a new XmlBeanDefinitionReader.
-	 * @see AbstractGenericContextLoader#createBeanDefinitionReader(GenericApplicationContext)
 	 * @see XmlBeanDefinitionReader
 	 */
 	@Override
@@ -47,8 +41,6 @@ public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 
 	/**
 	 * Returns &quot;<code>-context.xml</code>&quot;.
-	 *
-	 * @see org.springframework.test.context.support.AbstractContextLoader#getResourceSuffix()
 	 */
 	@Override
 	public String getResourceSuffix() {
