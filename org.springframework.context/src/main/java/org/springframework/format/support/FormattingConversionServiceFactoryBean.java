@@ -51,12 +51,25 @@ public class FormattingConversionServiceFactoryBean
 	private static final boolean jodaTimePresent = ClassUtils.isPresent(
 			"org.joda.time.DateTime", FormattingConversionService.class.getClassLoader());
 
+	private Set<Object> converters;
+
 	private FormattingConversionService conversionService;
 
+
+	/**
+	 * Configure the set of custom converter objects that should be added:
+	 * implementing {@link org.springframework.core.convert.converter.Converter},
+	 * {@link org.springframework.core.convert.converter.ConverterFactory},
+	 * or {@link org.springframework.core.convert.converter.GenericConverter}.
+	 */
+	public void setConverters(Set<Object> converters) {
+		this.converters = converters;
+	}
 
 	public void afterPropertiesSet() {
 		this.conversionService = new FormattingConversionService();
 		ConversionServiceFactory.addDefaultConverters(this.conversionService);
+		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
 		installFormatters(this.conversionService);
 	}
 

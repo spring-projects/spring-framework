@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.context.support;
 
 import java.util.Set;
@@ -20,38 +21,50 @@ import java.util.Set;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.GenericConversionService;
 
 /**
  * A factory for a ConversionService that installs default converters appropriate for most environments.
- * Set the <code>converters</code> property to supplement or override the default converters.
+ * Set the {@link #setConverters "converters"} property to supplement or override the default converters.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  * @see ConversionServiceFactory#createDefaultConversionService()
  */
 public class ConversionServiceFactoryBean implements FactoryBean<ConversionService>, InitializingBean {
 
 	private Set<Object> converters;
-	
-	private ConversionService conversionService;
+
+	private GenericConversionService conversionService;
+
 
 	/**
-	 * Configure the set of custom Converters that should be added.
+	 * Configure the set of custom converter objects that should be added:
+	 * implementing {@link org.springframework.core.convert.converter.Converter},
+	 * {@link org.springframework.core.convert.converter.ConverterFactory},
+	 * or {@link org.springframework.core.convert.converter.GenericConverter}.
 	 */
 	public void setConverters(Set<Object> converters) {
 		this.converters = converters;
 	}
 
-	// implementing InitializingBean
-
 	public void afterPropertiesSet() {
 		this.conversionService = createConversionService();
-		registerConverters(this.converters, (ConverterRegistry) this.conversionService);
+		ConversionServiceFactory.addDefaultConverters(this.conversionService);
+		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
 	}
+
+	/**
+	 * Create the ConversionService instance returned by this factory bean.
+	 * <p>Creates a simple {@link GenericConversionService} instance by default.
+	 * Subclasses may override to customize the ConversionService instance that gets created.
+	 */
+	protected GenericConversionService createConversionService() {
+		return new GenericConversionService();
+	}
+
 
 	// implementing FactoryBean
 	
@@ -60,41 +73,11 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 	}
 
 	public Class<? extends ConversionService> getObjectType() {
-		return ConversionService.class;
+		return GenericConversionService.class;
 	}
 
 	public boolean isSingleton() {
 		return true;
 	}
 
-	// subclassing hooks
-	
-	/**
-	 * Creates the ConversionService instance returned by this factory bean.
-	 * Creates a default conversion service instance by default.
-	 * Subclasses may override to customize the ConversionService instance that gets created.
-	 * @see ConversionServiceFactory#createDefaultConversionService()
-	 */
-	protected ConversionService createConversionService() {
-		return ConversionServiceFactory.createDefaultConversionService();
-	}
-
-	// internal helpers
-	
-	private void registerConverters(Set<Object> converters, ConverterRegistry registry) {
-		if (converters != null) {
-			for (Object converter : converters) {
-				if (converter instanceof Converter<?, ?>) {
-					registry.addConverter((Converter<?, ?>) converter);
-				} else if (converter instanceof ConverterFactory<?, ?>) {
-					registry.addConverterFactory((ConverterFactory<?, ?>) converter);
-				} else if (converter instanceof GenericConverter) {
-					registry.addGenericConverter((GenericConverter) converter);
-				} else {
-					throw new IllegalArgumentException("Each converter must implement one of the Converter, ConverterFactory, or GenericConverter interfaces");
-				}
-			}
-		}		
-	}
-	
 }
