@@ -17,6 +17,7 @@
 package org.springframework.format.support;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -41,17 +42,16 @@ import org.springframework.format.Printer;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class FormattingConversionService extends GenericConversionService
-		implements FormatterRegistry {
-
-	public void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser) {
-		addGenericConverter(new PrinterConverter(fieldType, printer, this));
-		addGenericConverter(new ParserConverter(fieldType, parser, this));
-	}
+public class FormattingConversionService extends GenericConversionService implements FormatterRegistry {
 
 	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
 		addGenericConverter(new PrinterConverter(fieldType, formatter, this));
 		addGenericConverter(new ParserConverter(fieldType, formatter, this));
+	}
+
+	public void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser) {
+		addGenericConverter(new PrinterConverter(fieldType, printer, this));
+		addGenericConverter(new ParserConverter(fieldType, parser, this));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -68,8 +68,8 @@ public class FormattingConversionService extends GenericConversionService
 
 		for (final Class<?> fieldType : fieldTypes) {
 			addGenericConverter(new ConditionalGenericConverter() {
-				public Class<?>[][] getConvertibleTypes() {
-					return new Class<?>[][] {{fieldType, String.class}};
+				public Set<ConvertiblePair> getConvertibleTypes() {
+					return Collections.singleton(new ConvertiblePair(fieldType, String.class));
 				}
 				public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 					return (sourceType.getAnnotation(annotationType) != null);
@@ -84,8 +84,8 @@ public class FormattingConversionService extends GenericConversionService
 				}
 			});
 			addGenericConverter(new ConditionalGenericConverter() {
-				public Class<?>[][] getConvertibleTypes() {
-					return new Class<?>[][] {{String.class, fieldType}};
+				public Set<ConvertiblePair> getConvertibleTypes() {
+					return Collections.singleton(new ConvertiblePair(String.class, fieldType));
 				}
 				public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 					return (targetType.getAnnotation(annotationType) != null);
@@ -121,8 +121,8 @@ public class FormattingConversionService extends GenericConversionService
 			this.conversionService = conversionService;
 		}
 
-		public Class<?>[][] getConvertibleTypes() {
-			return new Class<?>[][] { { this.fieldType, String.class } };
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return Collections.singleton(new ConvertiblePair(this.fieldType, String.class));
 		}
 
 		@SuppressWarnings("unchecked")
@@ -130,7 +130,7 @@ public class FormattingConversionService extends GenericConversionService
 			if (!sourceType.isAssignableTo(this.printerObjectType)) {
 				source = this.conversionService.convert(source, sourceType, this.printerObjectType);
 			}
-			return source != null ? this.printer.print(source, LocaleContextHolder.getLocale()) : "";
+			return (source != null ? this.printer.print(source, LocaleContextHolder.getLocale()) : "");
 		}
 		
 		private Class<?> resolvePrinterObjectType(Printer<?> printer) {
@@ -157,8 +157,8 @@ public class FormattingConversionService extends GenericConversionService
 			this.conversionService = conversionService;
 		}
 
-		public Class<?>[][] getConvertibleTypes() {
-			return new Class<?>[][] { { String.class, this.fieldType } };
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return Collections.singleton(new ConvertiblePair(String.class, this.fieldType));
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
