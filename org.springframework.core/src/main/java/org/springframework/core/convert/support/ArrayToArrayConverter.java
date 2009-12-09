@@ -17,6 +17,8 @@
 package org.springframework.core.convert.support;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -35,9 +37,9 @@ final class ArrayToArrayConverter implements GenericConverter {
 	public ArrayToArrayConverter(GenericConversionService conversionService) {
 		this.helperConverter = new CollectionToArrayConverter(conversionService);
 	}
-	
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Object[].class, Object[].class } };
+
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object[].class, Object[].class));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		

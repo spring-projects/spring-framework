@@ -19,6 +19,8 @@ package org.springframework.core.convert.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -27,9 +29,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Generic Converter that attempts to convert a source Object to a targetType by delegating to methods on the targetType.
- * Calls the static valueOf(sourceType) method on the targetType to perform the conversion, if such a method exists.
- * Else calls the targetType's Constructor that accepts a single sourceType argument, if such a Constructor exists.
+ * Generic Converter that attempts to convert a source Object to a target type
+ * by delegating to methods on the target type.
+ *
+ * <p>Calls the static <code>valueOf(sourceType)</code> method on the target type
+ * to perform the conversion, if such a method exists. Else calls the target type's
+ * Constructor that accepts a single sourceType argument, if such a Constructor exists.
  * Else throws a ConversionFailedException.
  *
  * @author Keith Donald
@@ -40,11 +45,12 @@ final class ObjectToObjectGenericConverter implements ConditionalGenericConverte
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
 		Class<?> targetClass = targetType.getObjectType();		
-		return getValueOfMethodOn(targetClass, sourceClass) != null || getConstructor(targetClass, sourceClass) != null;
+		return getValueOfMethodOn(targetClass, sourceClass) != null ||
+				getConstructor(targetClass, sourceClass) != null;
 	}
 
-	public Class<?>[][] getConvertibleTypes() {
-		return new Class<?>[][] { { Object.class, Object.class } };
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object.class, Object.class));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -57,23 +63,29 @@ final class ObjectToObjectGenericConverter implements ConditionalGenericConverte
 		Method method = getValueOfMethodOn(targetClass, sourceClass);
 		if (method != null) {
 			target = ReflectionUtils.invokeMethod(method, null, source);
-		} else {
+		}
+		else {
 			Constructor<?> constructor = getConstructor(targetClass, sourceClass);
 			if (constructor != null) {
 				try {
 					target = constructor.newInstance(source);
-				} catch (IllegalArgumentException e) {
-					throw new ConversionFailedException(sourceType, targetType, source, e);
-				} catch (InstantiationException e) {
-					throw new ConversionFailedException(sourceType, targetType, source, e);
-				} catch (IllegalAccessException e) {
-					throw new ConversionFailedException(sourceType, targetType, source, e);
-				} catch (InvocationTargetException e) {
-					throw new ConversionFailedException(sourceType, targetType, source, e);
 				}
-			} else {
-				throw new IllegalStateException("No static valueOf(" + sourceClass.getName()
-						+ ") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
+				catch (IllegalArgumentException ex) {
+					throw new ConversionFailedException(sourceType, targetType, source, ex);
+				}
+				catch (InstantiationException ex) {
+					throw new ConversionFailedException(sourceType, targetType, source, ex);
+				}
+				catch (IllegalAccessException ex) {
+					throw new ConversionFailedException(sourceType, targetType, source, ex);
+				}
+				catch (InvocationTargetException ex) {
+					throw new ConversionFailedException(sourceType, targetType, source, ex);
+				}
+			}
+			else {
+				throw new IllegalStateException("No static valueOf(" + sourceClass.getName() +
+						") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
 			}
 		}
 		return target;
