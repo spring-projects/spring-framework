@@ -154,8 +154,8 @@ public abstract class SharedEntityManagerCreator {
 				// JPA 2.0: return EntityManagerFactory without creating an EntityManager.
 				return this.targetFactory;
 			}
-			else if (method.getName().equals("getQueryBuilder") || method.getName().equals("getMetamodel")) {
-				// JPA 2.0: return EntityManagerFactory's QueryBuilder/Metamodel (avoid creation of EntityManager)
+			else if (method.getName().equals("getCriteriaBuilder") || method.getName().equals("getMetamodel")) {
+				// JPA 2.0: return EntityManagerFactory's CriteriaBuilder/Metamodel (avoid creation of EntityManager)
 				try {
 					return EntityManagerFactory.class.getMethod(method.getName()).invoke(this.targetFactory);
 				}
