@@ -16,14 +16,15 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
-import static org.springframework.core.convert.support.ConversionUtils.*;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts from a source Map to a target Map type.
@@ -31,7 +32,7 @@ import static org.springframework.core.convert.support.ConversionUtils.*;
  * @author Keith Donald
  * @since 3.0
  */
-final class MapToMapConverter implements GenericConverter {
+final class MapToMapConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
@@ -41,6 +42,11 @@ final class MapToMapConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Map.class, Map.class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor()) && 
+			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor());
 	}
 
 	@SuppressWarnings("unchecked")

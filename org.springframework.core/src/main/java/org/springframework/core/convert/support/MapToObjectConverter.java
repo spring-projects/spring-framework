@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -24,8 +26,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
-import static org.springframework.core.convert.support.ConversionUtils.*;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts from a Map to a single Object.
@@ -33,7 +34,7 @@ import static org.springframework.core.convert.support.ConversionUtils.*;
  * @author Keith Donald
  * @since 3.0
  */
-final class MapToObjectConverter implements GenericConverter {
+final class MapToObjectConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
@@ -43,6 +44,11 @@ final class MapToObjectConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Map.class, Object.class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType) &&
+			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

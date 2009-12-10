@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts from a Map to an array.
@@ -30,11 +30,11 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class MapToArrayConverter implements GenericConverter {
+final class MapToArrayConverter implements ConditionalGenericConverter {
 
-	private final GenericConverter mapToCollectionHelperConverter;
+	private final MapToCollectionConverter mapToCollectionHelperConverter;
 
-	private final GenericConverter collectionToArrayHelperConverter;
+	private final CollectionToArrayConverter collectionToArrayHelperConverter;
 
 	public MapToArrayConverter(GenericConversionService conversionService) {
 		this.mapToCollectionHelperConverter = new MapToCollectionConverter(conversionService);
@@ -43,6 +43,10 @@ final class MapToArrayConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Map.class, Object[].class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.mapToCollectionHelperConverter.matches(sourceType, targetType);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

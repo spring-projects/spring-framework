@@ -16,6 +16,9 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getElementType;
+import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,8 +27,8 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
-import static org.springframework.core.convert.support.ConversionUtils.*;
 
 /**
  * Converts from a Collection to an array.
@@ -33,7 +36,7 @@ import static org.springframework.core.convert.support.ConversionUtils.*;
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToArrayConverter implements GenericConverter {
+final class CollectionToArrayConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
@@ -43,6 +46,10 @@ final class CollectionToArrayConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Collection.class, Object[].class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
