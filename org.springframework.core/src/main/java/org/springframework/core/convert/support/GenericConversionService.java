@@ -215,7 +215,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	// internal helpers
 
 	private GenericConverter.ConvertiblePair getRequiredTypeInfo(Object converter, Class<?> genericIfc) {
-		Class[] args = GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
+		Class<?>[] args = GenericTypeResolver.resolveTypeArguments(converter.getClass(), genericIfc);
 		return (args != null ? new GenericConverter.ConvertiblePair(args[0], args[1]) : null);
 	}
 
