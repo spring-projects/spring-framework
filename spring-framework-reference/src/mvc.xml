@@ -28,8 +28,8 @@
 
       <para>Some methods in the core classes of Spring Web MVC are marked
       <literal>final</literal>. As a developer you cannot override these
-      methods to supply your own behavior. This has not been done arbitrarily, but
-      specifically with this principal in mind.</para>
+      methods to supply your own behavior. This has not been done arbitrarily,
+      but specifically with this principal in mind.</para>
 
       <para>For an explanation of this principle, refer to <emphasis>Expert
       Spring Web MVC and Web Flow</emphasis> by Seth Ladd and others;
@@ -161,7 +161,7 @@
 
         <listitem>
           <para><emphasis>A JSP form tag library, introduced in Spring 2.0,
-          that makes writing forms in JSP pages much easier.</emphasis>  For
+          that makes writing forms in JSP pages much easier.</emphasis> For
           information on the tag library descriptor, see the appendix entitled
           <xref linkend="spring-form.tld" /></para>
         </listitem>
@@ -281,9 +281,8 @@
     <interfacename>WebApplicationContext</interfacename>, which inherits all
     the beans already defined in the root
     <interfacename>WebApplicationContext</interfacename>. These inherited
-    beans can be overridden in the servlet-specific scope, and
-    you can define new scope-specific beans local to a given servlet
-    instance.</para>
+    beans can be overridden in the servlet-specific scope, and you can define
+    new scope-specific beans local to a given servlet instance.</para>
 
     <para><mediaobject>
         <imageobject role="fo">
@@ -327,11 +326,12 @@
 
     <para>With the above servlet configuration in place, <!--Is this something you need to do (in above example)? -->you
     will need to have a file called <literal>/WEB-INF/</literal><emphasis
-    role="bold">golfing</emphasis><literal>-servlet.xml</literal> in your application;
-    this file will contain all of your Spring Web MVC-specific components
-    (beans). You can change the exact location of this configuration file
-    through a servlet initialization parameter (see below for details).
-    </para>
+    role="bold">golfing</emphasis><literal>-servlet.xml</literal> in your
+    application; this file will contain all of your Spring Web MVC-specific
+    components (beans). You can change the exact location of this
+    configuration file through a servlet initialization parameter (see below
+    for details).</para>
+
     <!--See *where* for details? Give x-ref to section talks about how to change the location of the file through servlet init. param.-->
 
     <para>The <interfacename>WebApplicationContext</interfacename> is an
@@ -353,7 +353,7 @@
     <interfacename>WebApplicationContext</interfacename>, just as you
     configure any other bean. However, for most beans, sensible defaults are
     provided so you initially do not need to configure them. <!--Which beans have defaults? What do you mean you *initially* don't need to configure them? What determines whether you need to and --><!--when, if not *initially*? In table below, indicate which are defaults, which have to be configured.-->These
-    beans are described in the following table. </para>
+    beans are described in the following table.</para>
 
     <table id="mvc-webappctx-special-beans-tbl">
       <title>Special beans in the
@@ -397,7 +397,7 @@
           </row>
 
           <row>
-            <entry> <link linkend="mvc-localeresolver">locale
+            <entry><link linkend="mvc-localeresolver">locale
             resolver</link></entry>
 
             <entry>A <link linkend="mvc-localeresolver">locale resolver</link>
@@ -424,7 +424,7 @@
             <entry><link linkend="mvc-exceptionhandlers">handler exception
             resolvers</link></entry>
 
-            <entry> Contains functionality to map exceptions to views or
+            <entry>Contains functionality to map exceptions to views or
             implement other more complex exception handling code.</entry>
           </row>
         </tbody>
@@ -451,14 +451,17 @@
         in the process to resolve the locale to use when processing the
         request (rendering the view, preparing data, and so on). If you do not
         need locale resolving, you do not need it.</para>
-      <!--Reword 'if you don't need local resolving, you dont need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
+        <!--Reword 'if you don't need local resolving, you dont need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
       </listitem>
 
       <listitem>
         <para>The theme resolver is bound to the request to let elements such
         as views determine which theme to use. If you do not use themes, you
         can ignore it.</para>
-      <!-- MLP perhaps say that there are not side effect to this binding.etc... Clarify *ignore it*. Does this step still occur if you don't use themes? --><!--And what if you DO use themes, what do you do and when? Same question re locale resolving.-->
+
+        <!-- MLP perhaps say that there are not side effect to this binding.etc... Clarify *ignore it*. Does this step still occur if you don't use themes? -->
+
+        <!--And what if you DO use themes, what do you do and when? Same question re locale resolving.-->
       </listitem>
 
       <listitem>
@@ -479,10 +482,11 @@
 
       <listitem>
         <para>If a model is returned, the view is rendered. If no model is
-        returned, (may be due to a preprocessor or postprocessor
-        intercepting the request, perhaps for security reasons), no view is
-        rendered, because the request could already have been fulfilled.</para>
-    <!--fulfilled how and by what?-->
+        returned, (may be due to a preprocessor or postprocessor intercepting
+        the request, perhaps for security reasons), no view is rendered,
+        because the request could already have been fulfilled.</para>
+
+        <!--fulfilled how and by what?-->
       </listitem>
     </orderedlist>
 
@@ -497,18 +501,19 @@
     specified by the Servlet API. The process of determining the last
     modification date for a specific request is straightforward: the
     <classname>DispatcherServlet</classname> looks up an appropriate handler
-    mapping and tests whether the handler that is found
-    implements the
+    mapping and tests whether the handler that is found implements the
     <emphasis><interfacename>LastModified</interfacename></emphasis>
     interface. If so, the value of the <literal>long
     getLastModified(request)</literal> method of the
     <interfacename>LastModified</interfacename> interface is returned to the
     client.</para>
 
-    <para>You can customize individual <classname>DispatcherServlet</classname>
-      instances by adding servlet initialization parameters (<literal>init-param</literal> elements) 
-       to the servlet declaration in the <literal>web.xml</literal> file. See the following table for the list
-      of supported parameters.</para>
+    <para>You can customize individual
+    <classname>DispatcherServlet</classname> instances by adding servlet
+    initialization parameters (<literal>init-param</literal> elements) to the
+    servlet declaration in the <literal>web.xml</literal> file. See the
+    following table for the list of supported parameters.</para>
+
     <!--Reword above sentence to specify whether configuring parameters in table configures last-modification-date, or are they further -->
     <!--customization for some other purpose? If so, need to explain how you config last-modification-date-->
 
@@ -588,7 +593,8 @@
       <emphasis>PetClinic</emphasis> sample, a web application that leverages
       the annotation support described in this section, in the context of
       simple form processing. The <emphasis>PetClinic</emphasis> application
-      resides in the <literal>org.springframework.samples.petclinic</literal> module.</para>
+      resides in the <literal>org.springframework.samples.petclinic</literal>
+      module.</para>
 
       <!-- MLP Note removed reference to imagedb -->
     </tip>
@@ -640,7 +646,7 @@ public class HelloWorldController {
       for autodetection, aligned with Spring general support for detecting
       component classes in the classpath and auto-registering bean definitions
       for them.</para>
-     <!-- MLP Bev.changed to 'also supports autodetection -->
+      <!-- MLP Bev.changed to 'also supports autodetection -->
       <para>To enable autodetection of such annotated controllers, you add
       component scanning to your configuration. Use the
       <emphasis>spring-context</emphasis> schema as shown in the following XML
@@ -670,14 +676,14 @@ public class HelloWorldController {
 
       <para>You use the <interfacename>@RequestMapping</interfacename>
       annotation to map URLs such as <filename>/appointments</filename> onto
-      an entire class or a particular handler method. Typically the class-level annotation
-      maps a specific request path (or path pattern) onto a form controller,
-      with additional method-level annotations narrowing the primary mapping
-      for a specific HTTP method request method ("GET"/"POST") or specific
-      HTTP request parameters.</para>
+      an entire class or a particular handler method. Typically the
+      class-level annotation maps a specific request path (or path pattern)
+      onto a form controller, with additional method-level annotations
+      narrowing the primary mapping for a specific HTTP method request method
+      ("GET"/"POST") or specific HTTP request parameters.</para>
 
-      <para>The following example shows a controller in a Spring MVC application
-      that uses this annotation:</para>
+      <para>The following example shows a controller in a Spring MVC
+      application that uses this annotation:</para>
 
       <programlisting language="java">@Controller
 <emphasis role="bold">@RequestMapping("/appointments")</emphasis>
@@ -818,15 +824,15 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ow
         names can only be done if your code is compiled with debugging
         enabled. If you do have not debugging enabled, you must specify the
         name of the URI Template variable name in the @PathVariable annotation
-        in order to bind the resolved value of the variable name to a 
-        method parameter. For example:</para>
+        in order to bind the resolved value of the variable name to a method
+        parameter. For example:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String ownerId, Model model) {
   // implementation omitted
 }</programlisting>
-    <para>
-        You can also use a controller method with the following
+
+        <para>You can also use a controller method with the following
         signature:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
@@ -847,8 +853,8 @@ public String findPet(<emphasis role="bold">@PathVariable</emphasis> String owne
 }
 </programlisting>
 
-        <para>The following code snippet shows the usage of path variables on a
-        relative path, so that the <methodname>findPet()</methodname> method
+        <para>The following code snippet shows the usage of path variables on
+        a relative path, so that the <methodname>findPet()</methodname> method
         will be invoked for <filename>/owners/42/pets/21</filename>, for
         instance.</para>
 
@@ -922,21 +928,22 @@ public class RelativePathUriTemplateController {
 
         <para>Similarly, path mappings can be narrowed down through header
         conditions:</para>
-        
+
         <programlisting language="java">@Controller
 @RequestMapping("/owners/{ownerId}")
 public class RelativePathUriTemplateController {
 
 @RequestMapping(value = "/pets", method = RequestMethod.POST, <emphasis
-              role="bold">headers="content-type=text/*"</emphasis>)
+            role="bold">headers="content-type=text/*"</emphasis>)
   public void addPet(Pet pet, @PathVariable String ownerId) {    
     // implementation omitted
   }
 }</programlisting>
 
-        <para>In the above example, the <methodname>addPet()</methodname> method is
-        only invoked when the <literal>content-type</literal> matches the <literal>text/*</literal>
-        pattern, for example, <literal>text/xml</literal>.</para>
+        <para>In the above example, the <methodname>addPet()</methodname>
+        method is only invoked when the <literal>content-type</literal>
+        matches the <literal>text/*</literal> pattern, for example,
+        <literal>text/xml</literal>.</para>
       </section>
 
       <section id="mvc-ann-requestmapping-arguments">
@@ -946,8 +953,7 @@ public class RelativePathUriTemplateController {
         <classname>@RequestMapping</classname> can have very flexible
         signatures. They may have arguments of the following types, in
         arbitrary order (except for validation results, which need to follow
-        right after the corresponding command object, if desired):
-        <!--Reword preceding sentence to clarify, make it a complete sentence and no parentheses: first it says validation results *must*--><!--immediately follow command object, but then it says *if desired*. Clarify what must happen if what is desired. And are validation --><!-- results a type of argument? Relate to the sentence that precedes it.-->
+        right after the corresponding command object, if desired): <!--Reword preceding sentence to clarify, make it a complete sentence and no parentheses: first it says validation results *must*--><!--immediately follow command object, but then it says *if desired*. Clarify what must happen if what is desired. And are validation --><!-- results a type of argument? Relate to the sentence that precedes it.-->
         <itemizedlist>
             <listitem>
               <para>Request or response objects (Servlet API). Choose any
@@ -1110,10 +1116,10 @@ public class RelativePathUriTemplateController {
 
             <listitem>
               <para>A <classname>String</classname> value that is interpreted
-              as the logical view name, with the model implicitly determined through
-              command objects and <literal>@ModelAttribute</literal> annotated
-              reference data accessor methods. The handler method may also
-              programmatically enrich the model by declaring a
+              as the logical view name, with the model implicitly determined
+              through command objects and <literal>@ModelAttribute</literal>
+              annotated reference data accessor methods. The handler method
+              may also programmatically enrich the model by declaring a
               <interfacename>Model</interfacename> argument (see
               above).</para>
             </listitem>
@@ -1293,8 +1299,8 @@ public String helloWorld()  {
         <para>The above example will result in the text <literal>Hello
         World</literal> being written to the HTTP response stream.</para>
 
-        <para>As with <interfacename>@RequestBody</interfacename>, Spring converts
-        the returned object to a response body by using an
+        <para>As with <interfacename>@RequestBody</interfacename>, Spring
+        converts the returned object to a response body by using an
         <interfacename>HttpMessageConverter</interfacename>. For more
         information on these converters, see the previous section and <link
         linkend="rest-message-conversion">Message Converters</link>.</para>
@@ -1312,10 +1318,10 @@ public String helloWorld()  {
         controller gets a reference to the object holding the data entered in
         the form.</para>
 
-        <para>You can also use <classname>@ModelAttribute</classname> at
-        the method level to provide <emphasis>reference data</emphasis> for
-        the model (see the <literal>populatePetTypes()</literal> method in
-        the following example). For this usage the method signature can contain
+        <para>You can also use <classname>@ModelAttribute</classname> at the
+        method level to provide <emphasis>reference data</emphasis> for the
+        model (see the <literal>populatePetTypes()</literal> method in the
+        following example). For this usage the method signature can contain
         the same types as documented previously for the
         <classname>@RequestMapping</classname> annotation.</para>
 
@@ -1371,12 +1377,12 @@ public class EditPetForm {
         <para>The type-level <classname>@SessionAttributes</classname>
         annotation declares session attributes used by a specific handler.
         This will typically list the names of model attributes or types of
-        model attributes which should be
-        transparently stored in the session or some conversational storage,
-        serving as form-backing beans between subsequent requests.</para>
+        model attributes which should be transparently stored in the session
+        or some conversational storage, serving as form-backing beans between
+        subsequent requests.</para>
 
-        <para>The following code snippet shows the usage of this
-        annotation, specifying the model attribute name:</para>
+        <para>The following code snippet shows the usage of this annotation,
+        specifying the model attribute name:</para>
 
         <programlisting language="java">@Controller
 @RequestMapping("/editPet.do")
@@ -1431,7 +1437,8 @@ Keep-Alive              300
 </programlisting>
 
         <para>The following code sample demonstrates how to get the value of
-        the <literal>Accept-Encoding</literal> and <literal>Keep-Alive</literal> headers:</para>
+        the <literal>Accept-Encoding</literal> and
+        <literal>Keep-Alive</literal> headers:</para>
 
         <programlisting language="java">@RequestMapping("/displayHeaderInfo.do")
 public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encoding")</emphasis> String encoding,
@@ -1537,88 +1544,80 @@ public class MyFormController {
     <classname>DefaultAnnotationHandlerMapping</classname>, which looks for
     <interfacename>@RequestMapping</interfacename> annotations on
     <interfacename>@Controllers</interfacename>. Typically, you do not need to
-    override this default mapping, unless you need to override the default property values.
-    These properties are:</para>
+    override this default mapping, unless you need to override the default
+    property values. These properties are:</para>
 
-	<variablelist>
-		<varlistentry>
-			<term><literal>interceptors</literal></term>
-			<listitem>
-				<para>
-					List of interceptors to use.
-					<interfacename>HandlerInterceptor</interfacename>s are discussed in
-					<xref linkend="mvc-handlermapping-interceptor" />.
-				</para>
-			</listitem>
-		</varlistentry>
+    <variablelist>
+      <varlistentry>
+        <term><literal>interceptors</literal></term>
+        <listitem>
+          <para>List of interceptors to use.
+          <interfacename>HandlerInterceptor</interfacename>s are discussed in
+          <xref linkend="mvc-handlermapping-interceptor" />.</para>
+        </listitem>
+      </varlistentry>
 
-		<varlistentry>
-			<term><literal>defaultHandler</literal></term>
-			<listitem>
-				<para>Default handler to use, when this handler mapping does not result
-				in a matching handler.</para>
-			</listitem>
-		</varlistentry>
+      <varlistentry>
+        <term><literal>defaultHandler</literal></term>
+        <listitem>
+          <para>Default handler to use, when this handler mapping does not
+          result in a matching handler.</para>
+        </listitem>
+      </varlistentry>
 
-		<varlistentry>
-			<term><literal>order</literal></term>
-			<listitem>
-				<para>
-					Based on the value of the order property (see the
-					<literal>org.springframework.core.Ordered</literal>
-					interface), Spring sorts all handler mappings available in the context
-					and applies the first matching handler.
-				</para>
-			</listitem>
-		</varlistentry>
+      <varlistentry>
+        <term><literal>order</literal></term>
+        <listitem>
+          <para>Based on the value of the order property (see the
+          <literal>org.springframework.core.Ordered</literal> interface),
+          Spring sorts all handler mappings available in the context and
+          applies the first matching handler.</para>
+        </listitem>
+      </varlistentry>
 
-		<varlistentry>
-			<term><literal>alwaysUseFullPath</literal></term>
-			<listitem>
-				<para>
-					If <literal>true</literal> , Spring uses the full path within the current
-					servlet context to find an appropriate handler. If <literal>false</literal>
-					(the default), the path within the current servlet mapping is used. For
-					example, if a servlet is mapped using <literal>/testing/*</literal>
-					and the <literal>alwaysUseFullPath</literal> property is set to true,
-					<literal>/testing/viewPage.html</literal> is used, whereas if the
-					property is set to false, <literal>/viewPage.html</literal> is used.
-				</para>
-			</listitem>
-		</varlistentry>
+      <varlistentry>
+        <term><literal>alwaysUseFullPath</literal></term>
+        <listitem>
+          <para>If <literal>true</literal> , Spring uses the full path within
+          the current servlet context to find an appropriate handler. If
+          <literal>false</literal> (the default), the path within the current
+          servlet mapping is used. For example, if a servlet is mapped using
+          <literal>/testing/*</literal> and the
+          <literal>alwaysUseFullPath</literal> property is set to true,
+          <literal>/testing/viewPage.html</literal> is used, whereas if the
+          property is set to false, <literal>/viewPage.html</literal> is
+          used.</para>
+        </listitem>
+      </varlistentry>
 
-		<varlistentry>
-			<term><literal>urlDecode</literal></term>
-			<listitem>
-				<para>
-					Defaults to <literal>true</literal>, as of Spring 2.5. <!--OK, or do you mean 3.0?-->
-					If you prefer to compare encoded paths, set this flag to <literal>false</literal>.
-					However, the <interfacename>HttpServletRequest</interfacename> always exposes the
-					servlet path in decoded form. Be aware that the servlet path will not match when
-					compared with encoded paths.
-				</para>
-			</listitem>
-		</varlistentry>
+      <varlistentry>
+        <term><literal>urlDecode</literal></term>
+        <listitem>
+          <para>Defaults to <literal>true</literal>, as of Spring 2.5. <!--OK, or do you mean 3.0?-->
+          If you prefer to compare encoded paths, set this flag to
+          <literal>false</literal>. However, the
+          <interfacename>HttpServletRequest</interfacename> always exposes the
+          servlet path in decoded form. Be aware that the servlet path will
+          not match when compared with encoded paths.</para>
+        </listitem>
+      </varlistentry>
 
-		<varlistentry>
-			<term><literal>lazyInitHandlers</literal></term>
-			<listitem>
-				<para>
-					Allows lazy initialization of <emphasis>singleton</emphasis>
-					handlers (prototype handlers are always lazy-initialized).
-					The default value is <literal>false</literal>.
-				</para>
-			</listitem>
-		</varlistentry>
-	</variablelist>
+      <varlistentry>
+        <term><literal>lazyInitHandlers</literal></term>
+        <listitem>
+          <para>Allows lazy initialization of <emphasis>singleton</emphasis>
+          handlers (prototype handlers are always lazy-initialized). The
+          default value is <literal>false</literal>.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
 
-	<note>
-		<para>
-			The <literal>alwaysUseFullPath</literal>, <literal>urlDecode</literal>, and
-			<literal>lazyInitHandlers</literal> properties are only available to subclasses of
-			<interfacename>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</interfacename>.
-		</para>
-	</note>
+    <note>
+      <para>The <literal>alwaysUseFullPath</literal>,
+      <literal>urlDecode</literal>, and <literal>lazyInitHandlers</literal>
+      properties are only available to subclasses of
+      <interfacename>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</interfacename>.</para>
+    </note>
 
     <para>The following example shows how to override the default mapping and
     add an interceptor:</para>
@@ -1660,12 +1659,12 @@ public class MyFormController {
       view) and does not continue executing the other interceptors and the
       actual handler in the execution chain.</para>
 
-      <para>The following example defines a handler mapping which maps
-        all requests matching the URL patterns "/*.form" and "/*.view" to a particular
-        controller, <literal>editAccountFormController</literal>. 
-         An interceptor has been added that intercepts these
-      requests and reroutes the user to a specific page if the time is not
-      between 9 a.m. and 6 p.m.</para>
+      <para>The following example defines a handler mapping which maps all
+      requests matching the URL patterns "/*.form" and "/*.view" to a
+      particular controller, <literal>editAccountFormController</literal>. An
+      interceptor has been added that intercepts these requests and reroutes
+      the user to a specific page if the time is not between 9 a.m. and 6
+      p.m.</para>
 
       <programlisting language="xml">&lt;beans&gt;
     &lt;bean id="handlerMapping"
@@ -1757,13 +1756,13 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <interfacename>ViewResolver</interfacename> interface</title>
 
       <para>As discussed in <xref linkend="mvc-controller" />, all handler
-      methods in the Spring Web MVC controllers must resolve to a logical
-      view name, either explicitly (e.g., by returning a <literal>String</literal>,
-      <literal>View</literal>, or <literal>ModelAndView</literal>) or implicitly
-      (i.e., based on conventions). Views in Spring are
-      addressed by a logical view name and are resolved by a view resolver. Spring
-      comes with quite a few view resolvers. This table lists most of them; a
-      couple of examples follow.</para>
+      methods in the Spring Web MVC controllers must resolve to a logical view
+      name, either explicitly (e.g., by returning a <literal>String</literal>,
+      <literal>View</literal>, or <literal>ModelAndView</literal>) or
+      implicitly (i.e., based on conventions). Views in Spring are addressed
+      by a logical view name and are resolved by a view resolver. Spring comes
+      with quite a few view resolvers. This table lists most of them; a couple
+      of examples follow.</para>
 
       <table id="mvc-view-resolvers-tbl">
         <title>View resolvers</title>
@@ -1830,10 +1829,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
               <entry>Convenient subclass of
               <classname>UrlBasedViewResolver</classname> that supports
               <classname>InternalResourceView</classname> (in effect, Servlets
-              and JSPs) and subclasses such as
-              <classname>JstlView</classname> and
-              <classname>TilesView</classname>. You can specify the view class
-              for all views generated by this resolver by using
+              and JSPs) and subclasses such as <classname>JstlView</classname>
+              and <classname>TilesView</classname>. You can specify the view
+              class for all views generated by this resolver by using
               <literal>setViewClass(..)</literal>. See the Javadocs for the
               <classname>UrlBasedViewResolver</classname> class for
               details.</entry>
@@ -1875,8 +1873,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     &lt;property name="suffix" value=".jsp"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>When returning <literal>test</literal> as a logical view name, this view
-      resolver forwards the request to the
+      <para>When returning <literal>test</literal> as a logical view name,
+      this view resolver forwards the request to the
       <classname>RequestDispatcher</classname> that will send the request to
       <literal>/WEB-INF/jsp/test.jsp</literal>.</para>
 
@@ -1894,11 +1892,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <classname>ResourceBundle</classname> identified by the basename, and
       for each view it is supposed to resolve, it uses the value of the
       property <literal>[viewname].(class)</literal> as the view class and the
-      value of the property <literal>[viewname].url</literal> as the view url. 
-      Examples can be found in the next chapter which covers view technologies.
-      As you can see, you can identify a parent view, from which all views in
-      the properties file <quote>extend</quote>. This
-      way you can specify a default view class, for example.</para>
+      value of the property <literal>[viewname].url</literal> as the view url.
+      Examples can be found in the next chapter which covers view
+      technologies. As you can see, you can identify a parent view, from which
+      all views in the properties file <quote>extend</quote>. This way you can
+      specify a default view class, for example.</para>
 
       <note>
         <para>Subclasses of <classname>AbstractCachingViewResolver</classname>
@@ -1950,7 +1948,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>If a specific view resolver does not result in a view, Spring
       examines the context for other view resolvers. If additional view
       resolvers exist, Spring continues to inspect them. <!--So what happens after Spring inspects them?-->If
-      they do not exist, Spring throws an <classname>Exception</classname>.</para>
+      they do not exist, Spring throws an
+      <classname>Exception</classname>.</para>
 
       <para>The contract of a view resolver specifies that a view resolver
       <emphasis>can</emphasis> return null to indicate the view could not be
@@ -1977,34 +1976,35 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       view name, which a view resolver resolves to a particular view
       technology. For view technologies such as JSPs that are processed
       through the Servlet or JSP engine, this resolution is usually handled
-      through the combination of <classname>InternalResourceViewResolver</classname> and
-      <classname>InternalResourceView</classname>, which
-      issues an internal forward or include via the Servlet API's
+      through the combination of
+      <classname>InternalResourceViewResolver</classname> and
+      <classname>InternalResourceView</classname>, which issues an internal
+      forward or include via the Servlet API's
       <literal>RequestDispatcher.forward(..)</literal> method or
       <literal>RequestDispatcher.include()</literal> method. For other view
-      technologies, such as Velocity, XSLT, and so on, the view itself
-      writes the content directly to the response stream.</para>
+      technologies, such as Velocity, XSLT, and so on, the view itself writes
+      the content directly to the response stream.</para>
 
       <para>It is sometimes desirable to issue an HTTP redirect back to the
-      client, before the view is rendered. This is desirable, for example, when
-      one controller has been called with <literal>POST</literal>ed data, and
-      the response is actually a delegation to another controller (for example
-      on a successful form submission). In this case, a normal internal
-      forward will mean that the other controller will also see the same
-      <literal>POST</literal> data, which is potentially problematic if it can
-      confuse it with other expected data. Another reason to perform a redirect
-      before displaying the result is to eliminate the possibility
-      of the user submitting the form data multiple times. In this scenario,
-      the browser will first send an initial <literal>POST</literal>; it will
-      then receive a response to redirect to a different URL; and finally
-      the browser will perform a subsequent <literal>GET</literal> for the
-      URL named in the redirect response. Thus, from the perspective of the
+      client, before the view is rendered. This is desirable, for example,
+      when one controller has been called with <literal>POST</literal>ed data,
+      and the response is actually a delegation to another controller (for
+      example on a successful form submission). In this case, a normal
+      internal forward will mean that the other controller will also see the
+      same <literal>POST</literal> data, which is potentially problematic if
+      it can confuse it with other expected data. Another reason to perform a
+      redirect before displaying the result is to eliminate the possibility of
+      the user submitting the form data multiple times. In this scenario, the
+      browser will first send an initial <literal>POST</literal>; it will then
+      receive a response to redirect to a different URL; and finally the
+      browser will perform a subsequent <literal>GET</literal> for the URL
+      named in the redirect response. Thus, from the perspective of the
       browser, the current page does not reflect the result of a
-      <literal>POST</literal> but rather of a <literal>GET</literal>. The
-      end effect is that there is no way the user can accidentally
-      re-<literal>POST</literal> the same data by performing a refresh. The refresh
-      forces a <literal>GET</literal> of the result page, not a resend of the
-      initial <literal>POST</literal> data.</para>
+      <literal>POST</literal> but rather of a <literal>GET</literal>. The end
+      effect is that there is no way the user can accidentally
+      re-<literal>POST</literal> the same data by performing a refresh. The
+      refresh forces a <literal>GET</literal> of the result page, not a resend
+      of the initial <literal>POST</literal> data.</para>
 
       <section id="mvc-redirecting-redirect-view">
         <title><classname>RedirectView</classname></title>
@@ -2020,10 +2020,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         <para>The <classname>RedirectView</classname> issues an
         <literal>HttpServletResponse.sendRedirect()</literal> call that
         returns to the client browser as an HTTP redirect. <!--Does preceding happen after what happens in first paragraph? Clarify sequence of events.-->All
-        model attributes are exposed as HTTP query parameters. This means
-        that the model must contain only objects (generally Strings or
-        objects converted to a String representation), which can be readily converted to a
-        textual HTTP query parameter.</para>
+        model attributes are exposed as HTTP query parameters. This means that
+        the model must contain only objects (generally Strings or objects
+        converted to a String representation), which can be readily converted
+        to a textual HTTP query parameter.</para>
 
         <para>If you use <classname>RedirectView</classname> and the view is
         created by the controller itself, it is recommended that you configure
@@ -2038,19 +2038,19 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         <para>While the use of <classname>RedirectView</classname> works fine,
         if the controller itself creates the
-        <classname>RedirectView</classname>, there is no avoiding the
-        fact that the controller is aware that a redirection is happening.
-        This is really suboptimal and couples things too tightly. The
-        controller should not really care about how the response gets
-        handled. In general it should operate only in terms of view names that
-        have been injected into it.</para>
+        <classname>RedirectView</classname>, there is no avoiding the fact
+        that the controller is aware that a redirection is happening. This is
+        really suboptimal and couples things too tightly. The controller
+        should not really care about how the response gets handled. In general
+        it should operate only in terms of view names that have been injected
+        into it.</para>
 
         <para>The special <literal>redirect:</literal> prefix allows you to
         accomplish this. If a view name is returned that has the prefix
-        <literal>redirect:</literal>, the <classname>UrlBasedViewResolver</classname> (and all
-        subclasses) will recognize this as a special indication that a redirect is
-        needed. The rest of the view name will be treated as the redirect
-        URL.</para>
+        <literal>redirect:</literal>, the
+        <classname>UrlBasedViewResolver</classname> (and all subclasses) will
+        recognize this as a special indication that a redirect is needed. The
+        rest of the view name will be treated as the redirect URL.</para>
 
         <para>The net effect is the same as if the controller had returned a
         <classname>RedirectView</classname>, but now the controller itself can
@@ -2082,9 +2082,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         multiple view resolvers, instead.)<!--I think the preceding sentences were a bit garbled. I tried to reword a bit. And is this paragraph logical?--></para>
 
         <para>As with the <literal>redirect:</literal> prefix, if the view
-        name with the <literal>forward:</literal> prefix is injected into the controller, the
-        controller does not detect that anything special is happening in terms
-        of handling the response.<!--Can you reword to clarify the point? The controller does not detect what?--></para>
+        name with the <literal>forward:</literal> prefix is injected into the
+        controller, the controller does not detect that anything special is
+        happening in terms of handling the response.<!--Can you reword to clarify the point? The controller does not detect what?--></para>
       </section>
     </section>
 
@@ -2099,10 +2099,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
       <itemizedlist>
         <listitem>
-          <para>Use a distinct URI for each resource,
-          typically by using a different file extension in the URI. For
-          example, the URI<literal>
-      http://www.example.com/users/fred.pdf</literal> requests a PDF
+          <para>Use a distinct URI for each resource, typically by using a
+          different file extension in the URI. For example, the URI<literal>
+          http://www.example.com/users/fred.pdf</literal> requests a PDF
           representation of the user fred, and
           <literal>http://www.example.com/users/fred.xml</literal> requests an
           XML representation.</para>
@@ -2115,27 +2114,27 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
           set the <literal>Accept</literal> HTTP request header to list the
           <ulink url="http://en.wikipedia.org/wiki/Internet_media_type">media
           types</ulink> that it understands. For example, an HTTP request for
-      <literal>http://www.example.com/users/fred</literal> with an
-      <literal>Accept</literal> header set to <literal>application/pdf
-      </literal>requests a PDF representation of the user fred, while
-      <literal>http://www.example.com/users/fred</literal> with an
-      <literal>Accept</literal> header set to <literal>text/xml</literal>
-      requests an XML representation. This strategy is known as <ulink
-      url="http://en.wikipedia.org/wiki/Content_negotiation">content
-      negotiation</ulink>.</para>
+          <literal>http://www.example.com/users/fred</literal> with an
+          <literal>Accept</literal> header set to <literal>application/pdf
+          </literal>requests a PDF representation of the user fred, while
+          <literal>http://www.example.com/users/fred</literal> with an
+          <literal>Accept</literal> header set to <literal>text/xml</literal>
+          requests an XML representation. This strategy is known as <ulink
+          url="http://en.wikipedia.org/wiki/Content_negotiation">content
+          negotiation</ulink>.</para>
         </listitem>
       </itemizedlist>
 
       <note>
-        <para>One issue with the <literal>Accept</literal> header is that it is
-        impossible to set it in a web browser within HTML. For example, in Firefox, it is fixed
-        to:
-        <!--So how would you set the Accept header as in second bullet, if you can't do it in html? Indicate?--></para>
+        <para>One issue with the <literal>Accept</literal> header is that it
+        is impossible to set it in a web browser within HTML. For example, in
+        Firefox, it is fixed to:<!--So how would you set the Accept header as in second bullet, if you can't do it in html? Indicate?--></para>
 
         <programlisting>Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</programlisting>
 
         <para>For this reason it is common to see the use of a distinct URI
-        for each representation when developing browser based web applications.</para>
+        for each representation when developing browser based web
+        applications.</para>
       </note>
 
       <para>To support multiple representations of a resource, Spring provides
@@ -2154,20 +2153,21 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <classname>ViewResolvers</classname>. The first
       <classname>View</classname> in the list that has a compatible
       <literal>Content-Type</literal> returns the representation to the
-      client. If a compatible view cannot be supplied by the 
-      <classname>ViewResolver</classname> chain, then the list of views specified 
-      through the <literal>DefaultViews</literal> property will be consulted. This 
-      latter option is appropriate for singleton <classname>Views</classname> that 
-      can render an appropriate representation of the current resource regardless 
-      of the logical view name. The <literal>Accept</literal> header may include 
-      wildcards, for example text/*, in which case a <classname>View</classname> whose
+      client. If a compatible view cannot be supplied by the
+      <classname>ViewResolver</classname> chain, then the list of views
+      specified through the <literal>DefaultViews</literal> property will be
+      consulted. This latter option is appropriate for singleton
+      <classname>Views</classname> that can render an appropriate
+      representation of the current resource regardless of the logical view
+      name. The <literal>Accept</literal> header may include wildcards, for
+      example text/*, in which case a <classname>View</classname> whose
       Context-Type was text/xml is a compatible match.</para>
 
-      <para>To support the resolution of a view based on a file extension,
-      use the <classname>ContentNegotiatingViewResolver </classname>bean
-      property <literal>mediaTypes</literal> to specify a mapping of file
-      extensions to media types. For more information on the algorithm used to
-      determine the request media type, refer to the API documentation for
+      <para>To support the resolution of a view based on a file extension, use
+      the <classname>ContentNegotiatingViewResolver </classname>bean property
+      <literal>mediaTypes</literal> to specify a mapping of file extensions to
+      media types. For more information on the algorithm used to determine the
+      request media type, refer to the API documentation for
       <classname>ContentNegotiatingViewResolver</classname>.</para>
 
       <para>Here is an example configuration of a
@@ -2190,10 +2190,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       &lt;/bean&gt;
     &lt;/list&gt;
   &lt;/property&gt;
-  &lt;property name="defaultViews">
-    &lt;list>
-      &lt;bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
-    &lt;/list>
+  &lt;property name="defaultViews"&gt;
+    &lt;list&gt;
+      &lt;bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" /&gt;
+    &lt;/list&gt;
   &lt;/property&gt;
 &lt;/bean&gt;
 
@@ -2212,25 +2212,29 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       feed. For more information on creating an Atom Feed representation, see
       the section Atom Views.<!--Need a correct link or x-ref re the preceding sentence.I couldn't find an "Atom Views" section.--></para>
 
-      <para>In the above configuration, if a request is made with an <literal>.html</literal>
-      extension, the view resolver looks for a view that matches the <literal>text/html</literal>
-      media type. The <classname>InternalResourceViewResolver</classname>
-      provides the matching view for <literal>text/html</literal>. If the request is made with
-      the file extension <literal>.atom</literal>, the view resolver looks for a view that
-      matches the <literal>application/atom+xml</literal> media type. This view is provided by
-      the <classname>BeanNameViewResolver</classname> that maps to the
-      <classname>SampleContentAtomView</classname> if the view name returned
-      is <classname>content</classname>. If the request is made with the file extension 
-      <literal>.json</literal>, the <classname>MappingJacksonJsonView</classname> instance from 
-      the <literal>DefaultViews</literal> list will be selected regardless of the view name. 
-      Alternatively, client requests can be made without a file extension but with the 
-      <literal>Accept</literal> header set to the preferred media-type, and the same resolution 
-      of request to views would occur.<!--Can you reword preceding sentence? I don't follow it.--></para>
+      <para>In the above configuration, if a request is made with an
+      <literal>.html</literal> extension, the view resolver looks for a view
+      that matches the <literal>text/html</literal> media type. The
+      <classname>InternalResourceViewResolver</classname> provides the
+      matching view for <literal>text/html</literal>. If the request is made
+      with the file extension <literal>.atom</literal>, the view resolver
+      looks for a view that matches the
+      <literal>application/atom+xml</literal> media type. This view is
+      provided by the <classname>BeanNameViewResolver</classname> that maps to
+      the <classname>SampleContentAtomView</classname> if the view name
+      returned is <classname>content</classname>. If the request is made with
+      the file extension <literal>.json</literal>, the
+      <classname>MappingJacksonJsonView</classname> instance from the
+      <literal>DefaultViews</literal> list will be selected regardless of the
+      view name. Alternatively, client requests can be made without a file
+      extension but with the <literal>Accept</literal> header set to the
+      preferred media-type, and the same resolution of request to views would
+      occur.<!--Can you reword preceding sentence? I don't follow it.--></para>
 
       <note>
         <para>If <classname>ContentNegotiatingViewResolver</classname>'s list
-        of ViewResolvers is not configured explicitly, it automatically
-        uses any ViewResolvers defined in the application context.</para>
+        of ViewResolvers is not configured explicitly, it automatically uses
+        any ViewResolvers defined in the application context.</para>
       </note>
 
       <para>The corresponding controller code that returns an Atom RSS feed
@@ -2287,8 +2291,8 @@ public class ContentController {
 
       <para>This locale resolver inspects the
       <literal>accept-language</literal> header in the request that was sent
-      by the client (e.g., a web browser). Usually this header field contains the
-      locale of the client's operating system.</para>
+      by the client (e.g., a web browser). Usually this header field contains
+      the locale of the client's operating system.</para>
     </section>
 
     <section id="mvc-localeresolver-cookie">
@@ -2298,7 +2302,8 @@ public class ContentController {
       might exist on the client to see if a locale is specified. If so, it
       uses the specified locale. Using the properties of this locale resolver,
       you can specify the name of the cookie as well as the maximum age. Find
-      below an example of defining a <classname>CookieLocaleResolver</classname>.</para>
+      below an example of defining a
+      <classname>CookieLocaleResolver</classname>.</para>
 
       <programlisting language="xml">&lt;bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"&gt;
 
@@ -2355,8 +2360,8 @@ public class ContentController {
               <entry>/</entry>
 
               <entry>Limits the visibility of the cookie to a certain part of
-              your site. When cookiePath is specified, the cookie will only
-              be visible to that path and the paths below it.</entry>
+              your site. When cookiePath is specified, the cookie will only be
+              visible to that path and the paths below it.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -2415,21 +2420,22 @@ public class ContentController {
     <section id="mvc-themeresolver-introduction">
       <title>Overview of themes</title>
 
-      <para>You can apply Spring Web MVC framework themes to set the overall look-and-feel
-      of your application, thereby enhancing user experience. A theme is a
-      collection of static resources, typically style sheets and images, that
-      affect the visual style of the application.</para>
+      <para>You can apply Spring Web MVC framework themes to set the overall
+      look-and-feel of your application, thereby enhancing user experience. A
+      theme is a collection of static resources, typically style sheets and
+      images, that affect the visual style of the application.</para>
     </section>
 
     <section id="mvc-themeresolver-defining">
       <title>Defining themes</title>
 
-      <para>To use themes in your web application, you must set up an implementation of the 
-      <interfacename>org.springframework.ui.context.ThemeSource</interfacename> interface.
-      The <interfacename>WebApplicationContext</interfacename> interface extends
-      <interfacename>ThemeSource</interfacename> but delegates its
-      responsibilities to a dedicated implementation. By default the delegate
-      will be an
+      <para>To use themes in your web application, you must set up an
+      implementation of the
+      <interfacename>org.springframework.ui.context.ThemeSource</interfacename>
+      interface. The <interfacename>WebApplicationContext</interfacename>
+      interface extends <interfacename>ThemeSource</interfacename> but
+      delegates its responsibilities to a dedicated implementation. By default
+      the delegate will be an
       <classname>org.springframework.ui.context.support.ResourceBundleThemeSource</classname>
       implementation that loads properties files from the root of the
       classpath. To use a custom <interfacename>ThemeSource</interfacename>
@@ -2525,15 +2531,16 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
             <row>
               <entry><classname>CookieThemeResolver</classname></entry>
 
-              <entry>The selected theme is stored in a cookie on the client.</entry>
+              <entry>The selected theme is stored in a cookie on the
+              client.</entry>
             </row>
           </tbody>
         </tgroup>
       </table>
 
       <para>Spring also provides a
-      <classname>ThemeChangeInterceptor</classname> that allows theme
-      changes on every request with a simple request parameter.<!--Do you need more info or an example re preceding sentence?--></para>
+      <classname>ThemeChangeInterceptor</classname> that allows theme changes
+      on every request with a simple request parameter.<!--Do you need more info or an example re preceding sentence?--></para>
     </section>
   </section>
 
@@ -2546,13 +2553,10 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <para>Spring's built-in multipart support handles file uploads in web
       applications. You enable this multipart support with pluggable
       <interfacename>MultipartResolver</interfacename> objects, defined in the
-      <literal>org.springframework.web.multipart</literal> package. <!--I reworded preceding because next paragraph indicates that *you* have to enable; spring does not do multipart handling by default.--><!--Do you mean *you* use pluggable objects to configure mulitpart? Or Spring has accomplished this already?-->Out
-      of the box, Spring provides a
-      <interfacename>MultipartResolver</interfacename> for use with
-      <emphasis>Commons FileUpload</emphasis> (<ulink
-      url="http://jakarta.apache.org/commons/fileupload"></ulink>). <!--pdf shows link to apache.org but here it looks blank (although tagged as ulink). Is this link ok?-->How
-      uploading files is supported will be described in the rest of this
-      chapter.</para>
+      <literal>org.springframework.web.multipart</literal> package. Spring
+      provides a <interfacename>MultipartResolver</interfacename> for use with
+      <ulink url="http://jakarta.apache.org/commons/fileupload">
+      <emphasis>Commons FileUpload</emphasis></ulink>).</para>
 
       <para>By default, Spring does no multipart handling, because some
       developers want to handle multiparts themselves. You enable Spring
@@ -2590,7 +2594,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       current <classname>HttpServletRequest</classname> into a
       <classname>MultipartHttpServletRequest</classname> that supports
       multipart file uploads. Using the
-      <classname>MultipartHttpServletRequest</classname> you can get
+      <classname>MultipartHttpServletRequest</classname>, you can get
       information about the multiparts contained by this request and actually
       get access to the multipart files themselves in your controllers.</para>
     </section>
@@ -2599,10 +2603,10 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <title>Handling a file upload in a form</title>
 
       <para>After the <classname>MultipartResolver</classname> completes its
-      job, the request is processed like any other. To use it<!--to use what?-->,
-      you create a form with an upload field (see immediately below) that will
-      allow the user to upload a form. Then let Spring bind the file onto your
-      form (backing object). <!--I reworded because it sounded like you refer twice to creating a form. Where in example do you *let* Spring bind the file? Clarify.--><!--Does reader know what a backing object refers to?--></para>
+      job, the request is processed like any other. First, create a form with
+      a file input that will allow the user to upload a form. The encoding
+      attribute (<literal>enctype="multipart/form-data"</literal>) lets the
+      browser know how to encode the form as multipart request:</para>
 
       <programlisting language="xml">&lt;html&gt;
     &lt;head&gt;
@@ -2610,189 +2614,54 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
     &lt;/head&gt;
     &lt;body&gt;
         &lt;h1&gt;Please upload a file&lt;/h1&gt;
-        &lt;form method="post" action="upload.form" enctype="multipart/form-data"&gt;
+        &lt;form method="post" action="/form" enctype="multipart/form-data"&gt;
+            &lt;input type="text" name="name"/&gt;
             &lt;input type="file" name="file"/&gt;
             &lt;input type="submit"/&gt;
         &lt;/form&gt;
     &lt;/body&gt;
 &lt;/html&gt;</programlisting>
 
-      <para>As you can see, we've created a field named after the property of
-      the bean that holds the <literal>byte[]</literal>. <!--Preceding sentence: no, byte [] is not shown in preceding example.-->The
-      encoding attribute (<literal>enctype="multipart/form-data"</literal>)
-      lets the browser know how to encode the multipart fields.</para>
+      <para>The next step is to create a controller that handles the file
+      upload.This controller is very similar to a <link
+      linkend="mvc-ann-controller">normal annotated
+      <interfacename>@Controllers</interfacename></link>, except that we use
+      <classname>MultipartHttpServletRequest</classname> or
+      <filename>MultipartFile</filename> in the method parameters:
+      <programlisting language="java">@Controller
+public class FileUpoadController {
 
-      <para>As with any property that is not automatically <!--changed from *automagically*!-->convertible
-      to a string or primitive type, you must register a custom editor with
-      the <classname>ServletRequestDatabinder</classname> to be able to put
-      binary data in your objects. Two editors can handle files and set the
-      results on an object. A <classname>StringMultipartEditor</classname> can
-      convert files to Strings (using a user-defined character set), and a
-      <classname>ByteArrayMultipartEditor</classname> converts files to byte
-      arrays. They function just as the
-      <classname>CustomDateEditor</classname> does.</para>
+    @RequestMapping(value = "/form", method = RequestMethod.POST)
+    public String handleFormUpload(@RequestParam("name") String name,
+        @RequestParam("file") MultipartFile file) {
 
-      <para>So, to be able to upload files using an HTML form, declare the
-      resolver, a url mapping to a controller that will process the bean, and
-      the controller itself:</para>
+        if (!file.isEmpty()) {
+            byte[] bytes = file.getBytes();
+            <lineannotation>// store the bytes somewhere</lineannotation>
+           return "redirect:uploadSuccess";
+       } else {
+           return "redirect:uploadFailure";
+       }
+    }
+
+}</programlisting></para>
+
+      <para>Note how the <interfacename>@RequestParam</interfacename> method
+      parameters map to the input elements declared in the form. In this
+      example, nothing is done with the <literal>byte[]</literal>, but in
+      practice you can save it in a database, store it on the file system, and
+      so on.</para>
+
+      <para>Finally, you will have to declare the controller and the resolver
+      in the application context:</para>
 
       <programlisting language="xml">&lt;beans&gt;
-  <lineannotation>&lt;!-- lets use the Commons-based implementation of the MultipartResolver interface --&gt;</lineannotation>
     &lt;bean id="multipartResolver"
         class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/&gt;
-
-    &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
-        &lt;property name="mappings"&gt;
-            &lt;value&gt;
-                /upload.form=fileUploadController
-            &lt;/value&gt;
-        &lt;/property&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="fileUploadController" class="examples.FileUploadController"&gt;
-        &lt;property name="commandClass" value="examples.FileUploadBean"/&gt;
-        &lt;property name="formView" value="fileuploadform"/&gt;
-        &lt;property name="successView" value="confirmation"/&gt;
-    &lt;/bean&gt;
+    <lineannotation>&lt;!-- Declare explicitly, or use &lt;context:annotation-config/&gt; --&gt;</lineannotation>
+    &lt;bean id="fileUploadController" class="examples.FileUploadController"/&gt;
 
 &lt;/beans&gt;</programlisting>
-
-      <para>After that, create the controller and the actual class to hold the
-      file property:<!--Indicate which editor you're using (ByteArray etc.) and what it's doing.--></para>
-
-      <programlisting language="java">public class FileUploadController extends SimpleFormController {
-
-    protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
-            Object command, BindException errors) throws ServletException, IOException {
-
-        <lineannotation>// cast the bean</lineannotation>
-        FileUploadBean bean = (FileUploadBean) command;
-
-        <lineannotation>// let's see if there's content there</lineannotation>
-        byte[] file = bean.getFile();
-        if (file == null) {
-            <lineannotation>// hmm, that's strange, the user did not upload anything</lineannotation>
-        }
-
-        <lineannotation>// well, let's do nothing with the bean for now and return</lineannotation>
-        return super.onSubmit(request, response, command, errors);
-    }
-
-    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
-        throws ServletException {
-        <lineannotation>// to actually be able to convert Multipart instance to byte[]</lineannotation>
-        <lineannotation>// we have to register a custom editor</lineannotation>
-        binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
-        <lineannotation>// now Spring knows how to handle multipart objects and convert them</lineannotation>
-    }
-}
-
-public class FileUploadBean {
-
-    private byte[] file;
-
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-}</programlisting>
-
-      <para>As you can see, the <classname>FileUploadBean</classname> has a
-      property typed <literal>byte[]</literal> that holds the file. The
-      controller registers a custom editor to let Spring know how to convert
-      the multipart objects the resolver has found to properties specified by
-      the bean. In this example, nothing is done with the
-      <literal>byte[]</literal> property of the bean itself, but in practice
-      you can do save it in a database, mail it to somebody, and so on.</para>
-
-      <para>The following is an equivalent example in which a file is bound
-      straight to a String-typed property on a (form backing) object:<!--mention editor and its role.--></para>
-
-      <programlisting language="java">public class FileUploadController extends SimpleFormController {
-
-    protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
-            Object command, BindException errors) throws ServletException, IOException {
-
-        <lineannotation>// cast the bean</lineannotation>
-        FileUploadBean bean = (FileUploadBean) command;
-
-        <lineannotation>// let's see if there's content there</lineannotation>
-        String file = bean.getFile();
-        if (file == null) {
-            <lineannotation>// hmm, that's strange, the user did not upload anything</lineannotation>
-        }
-
-        <lineannotation>// well, let's do nothing with the bean for now and return</lineannotation>
-        return super.onSubmit(request, response, command, errors);
-    }
-
-    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
-        throws ServletException {
-        // to actually be able to convert Multipart instance to a String
-        // we have to register a custom editor
-        binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
-        // now Spring knows how to handle multipart object and convert them
-    }
-
-}
-
-public class FileUploadBean {
-
-    private String file;
-
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    public String getFile() {
-        return file;
-    }
-}</programlisting>
-
-      <para>The preceding example only makes (logical) sense in the context of
-      uploading a plain text file. It would not work as well with an image
-      file upload.</para>
-
-      <para>The third (and final) option is where one binds directly to a
-      <interfacename>MultipartFile</interfacename> property declared on the
-      (form backing) object's class. In this case one does not need to
-      register any custom <interfacename>PropertyEditor</interfacename>
-      because there is no type conversion to be performed.</para>
-
-      <programlisting language="java">public class FileUploadController extends SimpleFormController {
-
-    protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response,
-            Object command, BindException errors) throws ServletException, IOException {
-
-        <lineannotation>// cast the bean</lineannotation>
-        FileUploadBean bean = (FileUploadBean) command;
-
-        <lineannotation> let's see if there's content there</lineannotation>
-        MultipartFile file = bean.getFile();
-        if (file == null) {
-            <lineannotation>// hmm, that's strange, the user did not upload anything</lineannotation>
-        }
-
-        <lineannotation>// well, let's do nothing with the bean for now and return</lineannotation>
-        return super.onSubmit(request, response, command, errors);
-    }
-}
-
-public class FileUploadBean {
-
-    private MultipartFile file;
-
-    public void setFile(MultipartFile file) {
-        this.file = file;
-    }
-
-    public MultipartFile getFile() {
-        return file;
-    }
-}</programlisting>
     </section>
   </section>
 
@@ -2806,27 +2675,27 @@ public class FileUploadBean {
       <para>Spring <literal>HandlerExceptionResolvers</literal> ease the pain
       of unexpected exceptions that occur while your request is handled by a
       controller that matched the request.
-    <literal>HandlerExceptionResolvers</literal> somewhat resemble the
-    exception mappings you can define in the web application descriptor
-    <literal>web.xml</literal>. However, they provide a more flexible way to
+      <literal>HandlerExceptionResolvers</literal> somewhat resemble the
+      exception mappings you can define in the web application descriptor
+      <literal>web.xml</literal>. However, they provide a more flexible way to
       handle exceptions. They provide information about which handler was
-    executing when the exception was thrown. Furthermore, a programmatic way
+      executing when the exception was thrown. Furthermore, a programmatic way
       of handling exception gives you more options for responding
       appropriately before the request is forwarded to another URL (the same
       end result as when you use the servlet specific exception
       mappings).</para>
 
-    <para>Besides implementing the
-    <interfacename>HandlerExceptionResolver</interfacename> interface, which
+      <para>Besides implementing the
+      <interfacename>HandlerExceptionResolver</interfacename> interface, which
       is only a matter of implementing the
       <literal>resolveException(Exception, Handler)</literal> method and
       returning a <classname>ModelAndView</classname>, you may also use the
-    <classname>SimpleMappingExceptionResolver</classname>. This resolver
-    enables you to take the class name of any exception that might be thrown
-    and map it to a view name. This is functionally equivalent to the
+      <classname>SimpleMappingExceptionResolver</classname>. This resolver
+      enables you to take the class name of any exception that might be thrown
+      and map it to a view name. This is functionally equivalent to the
       exception mapping feature from the Servlet API, but it is also possible
       to implement more finely grained mappings of exceptions from different
-    handlers.</para>
+      handlers.</para>
     </section>
 
     <section id="mvc-ann-exceptionhandler">
