@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
-import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
+import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
 import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
 
@@ -104,7 +104,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			else if (name.startsWith("oracle")) {
 				return new OC4JLoadTimeWeaver(classLoader);
 			}
-			else if (name.startsWith("com.sun.enterprise")) {
+			else if (name.startsWith("com.sun.enterprise") || name.startsWith("org.glassfish")) {
 				return new GlassFishLoadTimeWeaver(classLoader);
 			}
 			else if (name.startsWith("org.jboss")) {
@@ -137,4 +137,5 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	public ClassLoader getThrowawayClassLoader() {
 		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}
+
 }
