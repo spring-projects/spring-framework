@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts from a single Object to a Map.
@@ -32,7 +32,7 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class ObjectToMapConverter implements GenericConverter {
+final class ObjectToMapConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
@@ -42,6 +42,11 @@ final class ObjectToMapConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, Map.class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.conversionService.canConvert(sourceType, targetType.getMapKeyTypeDescriptor()) &&
+			this.conversionService.canConvert(sourceType, targetType.getMapValueTypeDescriptor());
 	}
 
 	@SuppressWarnings("unchecked")

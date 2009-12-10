@@ -32,7 +32,7 @@ import org.springframework.util.ObjectUtils;
  */
 final class ArrayToArrayConverter implements GenericConverter {
 
-	private final GenericConverter helperConverter;
+	private final CollectionToArrayConverter helperConverter;
 
 	public ArrayToArrayConverter(GenericConversionService conversionService) {
 		this.helperConverter = new CollectionToArrayConverter(conversionService);
@@ -40,6 +40,10 @@ final class ArrayToArrayConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object[].class, Object[].class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.helperConverter.matches(sourceType, targetType);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		

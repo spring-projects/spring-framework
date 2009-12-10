@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -23,8 +25,7 @@ import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
-import static org.springframework.core.convert.support.ConversionUtils.*;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts from a Map to a Collection.
@@ -32,7 +33,7 @@ import static org.springframework.core.convert.support.ConversionUtils.*;
  * @author Keith Donald
  * @since 3.0
  */
-final class MapToCollectionConverter implements GenericConverter {
+final class MapToCollectionConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
@@ -42,6 +43,11 @@ final class MapToCollectionConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Map.class, Collection.class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getElementTypeDescriptor()) && 
+			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getElementTypeDescriptor());
 	}
 
 	@SuppressWarnings("unchecked")
