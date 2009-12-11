@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -40,6 +38,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
+import org.w3c.dom.Element;
 
 /**
  * {@link BeanDefinitionParser} that parses the {@code annotation-driven} element to configure a Spring MVC web
@@ -85,24 +84,28 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 
+		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
+		parserContext.pushContainingComponent(compDefinition);
+		
 		RootBeanDefinition annMappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
 		annMappingDef.setSource(source);
+		annMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		annMappingDef.getPropertyValues().add("order", 0);
 		String annMappingName = parserContext.getReaderContext().registerWithGeneratedName(annMappingDef);
 
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 		bindingDef.setSource(source);
+		bindingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		bindingDef.getPropertyValues().add("conversionService", getConversionService(element, source, parserContext));
 		bindingDef.getPropertyValues().add("validator", getValidator(element, source, parserContext));
 
 		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 		annAdapterDef.setSource(source);
+		annAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		annAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		annAdapterDef.getPropertyValues().add("messageConverters", getMessageConverters(source));
 		String adapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
-
-		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
-		parserContext.pushContainingComponent(compDefinition);
+		
 		parserContext.registerComponent(new BeanComponentDefinition(annMappingDef, annMappingName));
 		parserContext.registerComponent(new BeanComponentDefinition(annAdapterDef, adapterName));
 		parserContext.popAndRegisterContainingComponent();
@@ -118,7 +121,9 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 		else {
 			RootBeanDefinition conversionDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
 			conversionDef.setSource(source);
+			conversionDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String conversionName = parserContext.getReaderContext().registerWithGeneratedName(conversionDef);
+			parserContext.registerComponent(new BeanComponentDefinition(conversionDef, conversionName));
 			return new RuntimeBeanReference(conversionName);
 		}
 	}
@@ -130,7 +135,9 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 		else if (jsr303Present) {
 			RootBeanDefinition validatorDef = new RootBeanDefinition(LocalValidatorFactoryBean.class);
 			validatorDef.setSource(source);
+			validatorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String validatorName = parserContext.getReaderContext().registerWithGeneratedName(validatorDef);
+			parserContext.registerComponent(new BeanComponentDefinition(validatorDef, validatorName));
 			return new RuntimeBeanReference(validatorName);
 		}
 		else {

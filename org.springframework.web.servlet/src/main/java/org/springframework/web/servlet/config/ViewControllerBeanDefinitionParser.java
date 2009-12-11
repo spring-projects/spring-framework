@@ -19,6 +19,7 @@ package org.springframework.web.servlet.config;
 import java.util.Map;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -46,14 +47,18 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		if (this.handlerAdapterBeanName == null) {
 			RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(SimpleControllerHandlerAdapter.class);
 			handlerAdapterDef.setSource(source);
+			handlerAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			this.handlerAdapterBeanName = parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
+			parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, handlerAdapterBeanName));
 		}
 		RootBeanDefinition handlerMappingDef;
 		if (this.handlerMappingBeanName == null) {
 			handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 			handlerMappingDef.setSource(source);
 			handlerMappingDef.getPropertyValues().add("order", "1");
-			this.handlerMappingBeanName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);			
+			handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			this.handlerMappingBeanName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
+			parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingBeanName));
 		} else {
 			handlerMappingDef = (RootBeanDefinition) parserContext.getReaderContext().getRegistry().getBeanDefinition(this.handlerMappingBeanName);
 		}
