@@ -84,7 +84,7 @@ public class TypeDescriptor {
 	 * @param methodParameter the MethodParameter to wrap
 	 * @param type the specific type to expose (may be an array/collection element)
 	 */
-	protected TypeDescriptor(MethodParameter methodParameter, Class type) {
+	protected TypeDescriptor(MethodParameter methodParameter, Class<?> type) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
 		this.type = type;
