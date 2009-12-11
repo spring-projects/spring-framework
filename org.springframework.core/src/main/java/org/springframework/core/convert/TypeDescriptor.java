@@ -26,7 +26,6 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Context about a type to convert to.
@@ -136,7 +135,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
-	 * @return the declared type
+	 * @return the declared type, or null if this is {@link TypeDescriptor#NULL}.
 	 */
 	public Class<?> getType() {
 		if (this.type != null) {
@@ -160,14 +159,6 @@ public class TypeDescriptor {
 	public Class<?> getObjectType() {
 		Class<?> type = getType();
 		return (type != null ? ClassUtils.resolvePrimitiveIfNecessary(type) : type);
-	}
-
-	/**
-	 * Does the underyling declared type equal the type provided?
-	 * @param type the type to test against
-	 */
-	public boolean typeEquals(Class<?> type) {
-		return ObjectUtils.nullSafeEquals(getType(), type);
 	}
 
 	/**
