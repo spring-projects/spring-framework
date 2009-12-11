@@ -29,7 +29,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * Converts from a Collection to a String.
+ * Converts a Collection to a comma-delimited String.
  *
  * @author Keith Donald
  * @since 3.0

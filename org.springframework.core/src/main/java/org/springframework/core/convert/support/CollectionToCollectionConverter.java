@@ -28,7 +28,10 @@ import org.springframework.core.convert.converter.GenericConverter;
 import static org.springframework.core.convert.support.ConversionUtils.*;
 
 /**
- * Converts from a source Collection to target Collection type.
+ * Converts from a Collection to another Collection.
+ * First, creates a new Collection of the requested targetType with a size equal to the size of the source Collection.
+ * Then copies each element in the source collection to the target collection.
+ * Will perform an element conversion from the source collection's parameterized type to the target collection's parameterized type if necessary.
  *
  * @author Keith Donald
  * @since 3.0

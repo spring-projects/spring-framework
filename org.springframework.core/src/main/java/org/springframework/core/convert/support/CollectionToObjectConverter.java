@@ -28,7 +28,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * Converts from a Collection to a single Object.
+ * Converts a Collection to an Object by returning the first collection element after converting it to the desired targetType.
  *
  * @author Keith Donald
  * @since 3.0
