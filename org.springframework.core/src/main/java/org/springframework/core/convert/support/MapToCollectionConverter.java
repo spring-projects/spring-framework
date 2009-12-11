@@ -28,7 +28,12 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts from a Map to a Collection.
+ * Converts a Map to a Collection.
+ * First, creates a new Collection of the requested targetType with a size equal to the size of the source Map.
+ * Then copies each element in the source map to the target collection.
+ * During the copy process, if the target collection's parameterized type is a String, each Map entry is first encoded as a "key=value" property String, then added to the Collection.
+ * If the collection type is another Object type, the value of each Map entry is added to the Collection.
+ * Will perform a conversion from the source maps's parameterized K,V types to the target collection's parameterized type if necessary.
  *
  * @author Keith Donald
  * @since 3.0

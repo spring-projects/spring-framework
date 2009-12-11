@@ -26,10 +26,11 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts from a String to a Map.
+ * Converts a String to a Map by loading the list of properties (name=value pairs) encoded in the String.
  *
  * @author Keith Donald
  * @since 3.0
+ * @see Properties#load(java.io.InputStream)
  */
 final class StringToMapConverter implements ConditionalGenericConverter {
 

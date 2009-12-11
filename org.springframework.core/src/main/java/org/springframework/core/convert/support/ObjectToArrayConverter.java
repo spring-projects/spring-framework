@@ -28,7 +28,8 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * Converts from a single Object to an array.
+ * Converts an Object to a single-element Array containing the Object.
+ * Will convert the Object to the target Array's component type if necessary.
  *
  * @author Keith Donald
  * @since 3.0

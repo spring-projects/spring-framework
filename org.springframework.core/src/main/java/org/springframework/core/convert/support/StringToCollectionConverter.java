@@ -30,7 +30,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.StringUtils;
 
 /**
- * Converts from a String to a Collection.
+ * Converts a comma-delimited String to a Collection.
  *
  * @author Keith Donald
  * @since 3.0

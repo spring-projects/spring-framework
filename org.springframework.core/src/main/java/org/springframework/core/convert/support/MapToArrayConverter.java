@@ -25,7 +25,9 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts from a Map to an array.
+ * Converts a Map to an Array.
+ * First converts the source Map to a Collection, then converts that Collection to an Array.
+ * Delegates to {@link MapToCollectionConverter} and {@link CollectionToArrayConverter} helpers to do this.
  *
  * @author Keith Donald
  * @since 3.0

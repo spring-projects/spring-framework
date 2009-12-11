@@ -29,7 +29,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.StringUtils;
 
 /**
- * Converts from a delimited String to an array.
+ * Converts a comma-delimited String to an Array.
  *
  * @author Keith Donald
  * @since 3.0
