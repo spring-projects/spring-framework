@@ -16,10 +16,8 @@
 
 package org.springframework.core.convert.support;
 
-import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
@@ -45,8 +43,8 @@ final class ObjectToMapConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType, targetType.getMapKeyTypeDescriptor()) &&
-			this.conversionService.canConvert(sourceType, targetType.getMapValueTypeDescriptor());
+		return this.conversionService.canConvert(sourceType, targetType.getMapKeyTypeDescriptor())
+				&& this.conversionService.canConvert(sourceType, targetType.getMapValueTypeDescriptor());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -54,44 +52,27 @@ final class ObjectToMapConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}
-		if (sourceType.typeEquals(String.class)) {
-			String string = (String) source;
-			return this.conversionService.convert(loadProperties(string), TypeDescriptor.valueOf(Properties.class), targetType);
+		Map target = CollectionFactory.createMap(targetType.getType(), 1);
+		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
+		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
+		boolean keysCompatible = false;
+		if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetKeyType)) {
+			keysCompatible = true;
+		}
+		boolean valuesCompatible = false;
+		if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetValueType)) {
+			valuesCompatible = true;
+		}
+		if (keysCompatible && valuesCompatible) {
+			target.put(source, source);
 		} else {
-			Map target = CollectionFactory.createMap(targetType.getType(), 1);
-			TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
-			TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
-			boolean keysCompatible = false;
-			if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetKeyType)) {
-				keysCompatible = true;
-			}
-			boolean valuesCompatible = false;
-			if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetValueType)) {
-				valuesCompatible = true;
-			}
-			if (keysCompatible && valuesCompatible) {
-				target.put(source, source);
-			} else {
-				MapEntryConverter converter = new MapEntryConverter(sourceType, sourceType, targetKeyType,
-						targetValueType, keysCompatible, valuesCompatible, this.conversionService);
-				Object key = converter.convertKey(source);
-				Object value = converter.convertValue(source);
-				target.put(key, value);
-			}
-			return target;
+			MapEntryConverter converter = new MapEntryConverter(sourceType, sourceType, targetKeyType, targetValueType,
+					keysCompatible, valuesCompatible, this.conversionService);
+			Object key = converter.convertKey(source);
+			Object value = converter.convertValue(source);
+			target.put(key, value);
 		}
-	}
-
-	private Properties loadProperties(String string) {
-		try {
-			Properties props = new Properties();
-			// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
-			props.load(new ByteArrayInputStream(string.getBytes("ISO-8859-1")));
-			return props;
-		} catch (Exception e) {
-			// Should never happen.
-			throw new IllegalArgumentException("Failed to parse [" + string + "] into Properties", e);
-		}
+		return target;
 	}
 
 }
