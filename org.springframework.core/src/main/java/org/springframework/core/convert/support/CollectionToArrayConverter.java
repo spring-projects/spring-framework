@@ -31,8 +31,11 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * Converts from a Collection to an array.
- *
+ * Converts a Collection to an Array.
+ * First, creates a new Array of the requested targetType with a length equal to the size of the source Collection.
+ * Then sets collection element into the array.
+ * Will perform an element conversion from the collection's parameterized type to the array's component type if necessary.
+ * 
  * @author Keith Donald
  * @since 3.0
  */

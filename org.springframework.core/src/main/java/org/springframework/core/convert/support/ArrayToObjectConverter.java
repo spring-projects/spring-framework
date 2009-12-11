@@ -25,8 +25,9 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Converts from an array to a single Object.
- *
+ * Converts an Array to an Object by returning the first array element after converting it to the desired targetType.
+ * This implementation first adapts the source Array to a List, then delegates to {@link CollectionToObjectConverter} to perform the target Object conversion.
+ * 
  * @author Keith Donald
  * @since 3.0
  */

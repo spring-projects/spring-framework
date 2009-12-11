@@ -26,8 +26,9 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Converts from an array to a Map.
- *
+ * Converts an Array to a Map.
+ * First adapts the source Array to a List, then delegates to {@link CollectionToMapConverter} to perform the target Map conversion.
+ *  
  * @author Keith Donald
  * @since 3.0
  */

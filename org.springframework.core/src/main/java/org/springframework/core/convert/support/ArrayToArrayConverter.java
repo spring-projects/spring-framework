@@ -25,8 +25,9 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Converts from a source array to a target array type.
- *
+ * Converts an Array to another Array.
+ * First adapts the source array to a List, then delegates to {@link CollectionToArrayConverter} to perform the target array conversion. 
+ * 
  * @author Keith Donald
  * @since 3.0
  */
