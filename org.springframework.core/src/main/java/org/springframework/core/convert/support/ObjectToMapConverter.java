@@ -65,15 +65,11 @@ final class ObjectToMapConverter implements ConditionalGenericConverter {
 		if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetValueType)) {
 			valuesCompatible = true;
 		}
-		if (keysCompatible && valuesCompatible) {
-			target.put(source, source);
-		} else {
-			MapEntryConverter converter = new MapEntryConverter(sourceType, sourceType, targetKeyType, targetValueType,
-					keysCompatible, valuesCompatible, this.conversionService);
-			Object key = converter.convertKey(source);
-			Object value = converter.convertValue(source);
-			target.put(key, value);
-		}
+		MapEntryConverter converter = new MapEntryConverter(sourceType, sourceType, targetKeyType, targetValueType,
+				keysCompatible, valuesCompatible, this.conversionService);
+		Object key = converter.convertKey(source);
+		Object value = converter.convertValue(source);
+		target.put(key, value);
 		return target;
 	}
 

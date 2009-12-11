@@ -51,8 +51,12 @@ final class MapToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getElementTypeDescriptor()) && 
-			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getElementTypeDescriptor());
+		if (String.class.equals(targetType.getType())) {
+			return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getElementTypeDescriptor()) && 
+				this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getElementTypeDescriptor());			
+		} else {
+			return this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getElementTypeDescriptor());			
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -80,7 +84,7 @@ final class MapToCollectionConverter implements ConditionalGenericConverter {
 		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceMap.size());
 		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetElementType,
 				targetElementType, keysCompatible, valuesCompatible, this.conversionService);
-		if (targetElementType.getType().equals(String.class)) {
+		if (String.class.equals(targetElementType.getType())) {
 			for (Object entry : sourceMap.entrySet()) {
 				Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
 				String property = converter.convertKey(mapEntry.getKey()) + "="
