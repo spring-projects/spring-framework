@@ -27,7 +27,6 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
-import org.springframework.util.StringUtils;
 
 /**
  * Converts from a single Object to a Collection.
@@ -52,48 +51,22 @@ final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}
+		Collection target = CollectionFactory.createCollection(targetType.getType(), 1);
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (sourceType.typeEquals(String.class)) {
-			String string = (String) source;
-			String[] fields = StringUtils.commaDelimitedListToStringArray(string);
-			Collection target = CollectionFactory.createCollection(targetType.getType(), fields.length);
-			if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
-				for (int i = 0; i < fields.length; i++) {
-					target.add(fields[i]);				
-				}
+		if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
+			target.add(source);
+		} else {
+			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
+			if (converter == null) {
+				throw new ConverterNotFoundException(sourceType, targetElementType);
 			}
-			else {
-				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-				if (converter == null) {
-					throw new ConverterNotFoundException(sourceType, targetElementType);
-				}
-				for (int i = 0; i < fields.length; i++) {
-					String sourceElement = fields[i];
-					Object targetElement = invokeConverter(converter, sourceElement, sourceType, targetElementType);
-					target.add(targetElement);				
-				}
-			}
-			return target;
-
+			target.add(invokeConverter(converter, source, sourceType, targetElementType));
 		}
-		else {
-			Collection target = CollectionFactory.createCollection(targetType.getType(), 1);			
-			if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
-				target.add(source);
-			}
-			else {
-				GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-				if (converter == null) {
-					throw new ConverterNotFoundException(sourceType, targetElementType);
-				}
-				target.add(invokeConverter(converter, source, sourceType, targetElementType));
-			}
-			return target;
-		}
+		return target;
 	}
 
 }

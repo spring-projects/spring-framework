@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert.support;
 
+import static org.springframework.core.convert.support.ConversionUtils.getElementType;
 import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
 
 import java.util.Collection;
@@ -28,21 +29,23 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * Converts from a Collection to a single Object.
+ * Converts from a Collection to a String.
  *
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToObjectConverter implements ConditionalGenericConverter {
+final class CollectionToStringConverter implements ConditionalGenericConverter {
+
+	private static final String DELIMITER = ",";
 
 	private final GenericConversionService conversionService;
 
-	public CollectionToObjectConverter(GenericConversionService conversionService) {
+	public CollectionToStringConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Collection.class, Object.class));
+		return Collections.singleton(new ConvertiblePair(Collection.class, String.class));
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -55,23 +58,40 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
 		if (sourceCollection.size() == 0) {
-			return null;
+			return "";
 		} else {
-			Object firstElement = sourceCollection.iterator().next();
 			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-			if (sourceElementType == TypeDescriptor.NULL && firstElement != null) {
-				sourceElementType = TypeDescriptor.valueOf(firstElement.getClass());
+			if (sourceElementType == TypeDescriptor.NULL) {
+				sourceElementType = getElementType(sourceCollection);
 			}
 			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
-				return firstElement;
+				StringBuilder string = new StringBuilder();
+				int i = 0;
+				for (Object element : sourceCollection) {
+					if (i > 0) {
+						string.append(DELIMITER);
+					}
+					string.append(element);
+					i++;
+				}
+				return string.toString();
 			} else {
 				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceElementType, targetType);
 				}
-				return invokeConverter(converter, firstElement, sourceElementType, targetType);
+				StringBuilder string = new StringBuilder();
+				int i = 0;
+				for (Object sourceElement : sourceCollection) {
+					if (i > 0) {
+						string.append(DELIMITER);
+					}
+					Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetType);
+					string.append(targetElement);
+					i++;
+				}
+				return string.toString();
 			}
 		}
 	}
-
 }

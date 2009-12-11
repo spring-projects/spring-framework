@@ -16,55 +16,56 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
-import java.lang.reflect.Array;
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
-import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * Converts from a single Object to an array.
+ * Converts from a String to a Map.
  *
  * @author Keith Donald
  * @since 3.0
  */
-final class ObjectToArrayConverter implements ConditionalGenericConverter {
+final class StringToMapConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public ObjectToArrayConverter(GenericConversionService conversionService) {
+	public StringToMapConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Object.class, Object[].class));
+		return Collections.singleton(new ConvertiblePair(String.class, Map.class));
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType, targetType.getElementTypeDescriptor());
+		return this.conversionService.canConvert(sourceType, targetType.getMapKeyTypeDescriptor()) &&
+			this.conversionService.canConvert(sourceType, targetType.getMapValueTypeDescriptor());
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return this.conversionService.convertNullSource(sourceType, targetType);
 		}
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		Object target = Array.newInstance(targetElementType.getType(), 1);
-		if (sourceType.isAssignableTo(targetElementType)) {
-			Array.set(target, 0, source);
-		} else {
-			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetElementType);
-			}
-			Array.set(target, 0, invokeConverter(converter, source, sourceType, targetElementType));
+		String string = (String) source;
+		return this.conversionService.convert(loadProperties(string), TypeDescriptor.valueOf(Properties.class), targetType);
+	}
+
+	private Properties loadProperties(String string) {
+		try {
+			Properties props = new Properties();
+			// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
+			props.load(new ByteArrayInputStream(string.getBytes("ISO-8859-1")));
+			return props;
+		} catch (Exception e) {
+			// Should never happen.
+			throw new IllegalArgumentException("Failed to parse [" + string + "] into Properties", e);
 		}
-		return target;
 	}
 
 }
