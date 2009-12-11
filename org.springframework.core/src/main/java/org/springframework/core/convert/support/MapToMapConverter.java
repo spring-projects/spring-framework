@@ -27,7 +27,10 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts from a source Map to a target Map type.
+ * Converts a Map to another Map.
+ * First, creates a new Map of the requested targetType with a size equal to the size of the source Map.
+ * Then copies each element in the source map to the target map.
+ * Will perform a conversion from the source maps's parameterized K,V types to the target map's parameterized types K,V if necessary.
  *
  * @author Keith Donald
  * @since 3.0

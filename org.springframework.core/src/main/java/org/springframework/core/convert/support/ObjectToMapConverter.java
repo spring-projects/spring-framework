@@ -25,7 +25,9 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts from a single Object to a Map.
+ * Converts an Object to a single-entry Map containing the Object.
+ * The Object is put as both the entry key and value.
+ * Will convert the Object to the target Map's parameterized types K,V if necessary.
  *
  * @author Keith Donald
  * @since 3.0

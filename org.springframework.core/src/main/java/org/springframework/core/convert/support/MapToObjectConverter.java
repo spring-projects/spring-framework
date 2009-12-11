@@ -16,20 +16,15 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Converts from a Map to a single Object.
+ * Converts a Map to an Object by returning the first Map entry value after converting it to the desired targetType.
  *
  * @author Keith Donald
  * @since 3.0
@@ -47,8 +42,8 @@ final class MapToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType) &&
-			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType);
+		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType)
+				&& this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -57,75 +52,24 @@ final class MapToObjectConverter implements ConditionalGenericConverter {
 		}
 		Map<?, ?> sourceMap = (Map<?, ?>) source;
 		if (sourceMap.size() == 0) {
-			if (targetType.typeEquals(String.class)) {
-				return "";
-			} else {
-				return null;
-			}
+			return null;
 		} else {
-			if (targetType.typeEquals(String.class)) {
-				TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
-				TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
-				if (sourceKeyType == TypeDescriptor.NULL || sourceValueType == TypeDescriptor.NULL) {
-					TypeDescriptor[] sourceEntryTypes = getMapEntryTypes(sourceMap);
-					sourceKeyType = sourceEntryTypes[0];
-					sourceValueType = sourceEntryTypes[1];
-				}
-				boolean keysCompatible = false;
-				if (sourceKeyType != TypeDescriptor.NULL && sourceKeyType.isAssignableTo(targetType)) {
-					keysCompatible = true;
-				}
-				boolean valuesCompatible = false;
-				if (sourceValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetType)) {
-					valuesCompatible = true;
-				}
-				Properties props = new Properties();
-				if (keysCompatible && valuesCompatible) {
-					for (Object entry : sourceMap.entrySet()) {
-						Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-						props.setProperty((String) mapEntry.getKey(), (String) mapEntry.getValue());
-					}
-					return store(props);
-				} else {
-					MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetType,
-							targetType, keysCompatible, valuesCompatible, this.conversionService);
-					for (Object entry : sourceMap.entrySet()) {
-						Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-						Object key = converter.convertKey(mapEntry.getKey());
-						Object value = converter.convertValue(mapEntry.getValue());
-						props.setProperty((String) key, (String) value);
-					}
-					return store(props);
-				}
-			} else {
-				Object firstValue = sourceMap.values().iterator().next();
-				TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
-				if (sourceValueType == TypeDescriptor.NULL) {
-					sourceValueType = TypeDescriptor.forObject(firstValue);
-				}
-				boolean valuesCompatible = false;
-				if (sourceValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetType)) {
-					valuesCompatible = true;
-				}
-				if (valuesCompatible) {
-					return firstValue;
-				} else {
-					MapEntryConverter converter = new MapEntryConverter(sourceValueType, sourceValueType, targetType,
-							targetType, true, valuesCompatible, this.conversionService);
-					return converter.convertValue(firstValue);
-				}
+			Object firstValue = sourceMap.values().iterator().next();
+			TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
+			if (sourceValueType == TypeDescriptor.NULL) {
+				sourceValueType = TypeDescriptor.forObject(firstValue);
 			}
-		}
-	}
-
-	private String store(Properties props) {
-		try {
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			props.store(os, null);
-			return os.toString("ISO-8859-1");
-		} catch (IOException e) {
-			// Should never happen.
-			throw new IllegalArgumentException("Failed to store [" + props + "] into String", e);
+			boolean valuesCompatible = false;
+			if (sourceValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetType)) {
+				valuesCompatible = true;
+			}
+			if (valuesCompatible) {
+				return firstValue;
+			} else {
+				MapEntryConverter converter = new MapEntryConverter(sourceValueType, sourceValueType, targetType,
+						targetType, true, valuesCompatible, this.conversionService);
+				return converter.convertValue(firstValue);
+			}
 		}
 	}
 

@@ -20,7 +20,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
 /**
- * A factory for String to enum converters.
+ * Converts from a String to a java.lang.Enum by calling {@link Enum#valueOf(Class, String)}.
  *
  * @author Keith Donald
  * @since 3.0
