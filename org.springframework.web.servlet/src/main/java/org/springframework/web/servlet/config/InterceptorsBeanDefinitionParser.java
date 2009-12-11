@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -37,10 +39,14 @@ import org.w3c.dom.Element;
 class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
+		parserContext.pushContainingComponent(compDefinition);
+		
 		List<Element> interceptors = DomUtils.getChildElementsByTagName(element, new String[] { "bean", "interceptor" });
 		for (Element interceptor : interceptors) {
 			RootBeanDefinition mappedInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
 			mappedInterceptorDef.setSource(parserContext.extractSource(interceptor));
+			mappedInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String[] pathPatterns;
 			BeanDefinitionHolder interceptorDef;
 			if ("interceptor".equals(interceptor.getLocalName())) {
@@ -59,8 +65,11 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, pathPatterns);
 			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, interceptorDef);
-			parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
+			String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
+			parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptorDef, mappedInterceptorName));
 		}
+		
+		parserContext.popAndRegisterContainingComponent();
 		return null;
 	}
 	
