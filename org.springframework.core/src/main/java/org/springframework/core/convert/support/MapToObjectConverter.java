@@ -42,8 +42,7 @@ final class MapToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType)
-				&& this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType);
+		return this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -63,13 +62,9 @@ final class MapToObjectConverter implements ConditionalGenericConverter {
 			if (sourceValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetType)) {
 				valuesCompatible = true;
 			}
-			if (valuesCompatible) {
-				return firstValue;
-			} else {
-				MapEntryConverter converter = new MapEntryConverter(sourceValueType, sourceValueType, targetType,
-						targetType, true, valuesCompatible, this.conversionService);
-				return converter.convertValue(firstValue);
-			}
+			MapEntryConverter converter = new MapEntryConverter(sourceValueType, sourceValueType, targetType,
+					targetType, true, valuesCompatible, this.conversionService);
+			return converter.convertValue(firstValue);
 		}
 	}
 
