@@ -77,7 +77,7 @@ final class CollectionToMapConverter implements ConditionalGenericConverter {
 		}
 		if (keysCompatible && valuesCompatible) {
 			Map target = CollectionFactory.createMap(targetType.getType(), sourceCollection.size());
-			if (sourceElementType.typeEquals(String.class)) {
+			if (String.class.equals(sourceElementType.getType())) {
 				for (Object element : sourceCollection) {
 					String[] property = parseProperty((String) element);
 					target.put(property[0], property[1]);
@@ -94,7 +94,7 @@ final class CollectionToMapConverter implements ConditionalGenericConverter {
 			Map target = CollectionFactory.createMap(targetType.getType(), sourceCollection.size());
 			MapEntryConverter converter = new MapEntryConverter(sourceElementType, sourceElementType, targetKeyType,
 					targetValueType, keysCompatible, valuesCompatible, conversionService);
-			if (sourceElementType.typeEquals(String.class)) {
+			if (String.class.equals(sourceElementType.getType())) {
 				for (Object element : sourceCollection) {
 					String[] property = parseProperty((String) element);
 					Object targetKey = converter.convertKey(property[0]);
