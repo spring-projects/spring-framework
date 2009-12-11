@@ -750,7 +750,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
     </section>
   </section>
 
-	<section id="core.convert">
+	<section id="core-convert">
 		<title>Spring 3 Type Conversion</title>
 		<para>
 			Spring 3 introduces a <filename>core.convert</filename> package that provides a general type conversion system.
@@ -983,7 +983,7 @@ public class MyService {
 	<section id="format">
 		<title>Spring 3 Field Formatting</title>
 		<para>
-			As discussed in the previous section, <link linkend="core.convert"><filename>core.convert</filename></link> is a general-purpose type conversion system.
+			As discussed in the previous section, <link linkend="core-convert"><filename>core.convert</filename></link> is a general-purpose type conversion system.
 			It provides a unified ConversionService API as well as a strongly-typed Converter SPI for implementing conversion logic from one type to another.
 			A Spring Container uses this system to bind bean property values.
 			In addition, both the Spring Expression Language (SpEL) and DataBinder use this system to bind field values.
@@ -1152,7 +1152,7 @@ public class MyModel {
 	
 }]]>
 			</programlisting>
-			<section id="format.annotations.api">
+			<section id="format-annotations-api">
 				<title>Format Annotation API</title>
 				<para>
 					A portable format annotation API exists in the <filename>org.springframework.format.annotation</filename> package.
@@ -1259,7 +1259,7 @@ public interface FormatterRegistry {
 			</para>
 		</section>
 	</section>
-	<section id="validation.beanvalidation">
+	<section id="validation-beanvalidation">
 		<title>Spring 3 Validation</title>
 		<para>
 			Spring 3 introduces several enhancements to its validation support.
@@ -1267,7 +1267,7 @@ public interface FormatterRegistry {
 			Second, when used programatically, Spring's DataBinder can now validate objects as well as bind to them.
 			Third, Spring MVC now has support for declaratively validating @Controller inputs.
 		</para>
-		<section id="validation.beanvalidation.overview">
+		<section id="validation-beanvalidation-overview">
 			<title>Overview of the JSR-303 Bean Validation API</title>
 			<para>
 				JSR-303 standardizes validation constraint declaration and metadata for the Java platform.
@@ -1306,7 +1306,7 @@ public class PersonForm {
 				To learn how to setup a JSR-303 implementation as a Spring bean, keep reading.
 			</para>
 		</section>
-		<section id="validation.beanvalidation.spring">
+		<section id="validation-beanvalidation-spring">
 			<title>Configuring a Bean Validation Implementation</title>
 			<para>
 				Spring provides full support for the JSR-303 Bean Validation API.
@@ -1323,7 +1323,7 @@ public class PersonForm {
 				The basic configuration above will trigger JSR-303 to initialize using its default bootstrap mechanism.
 				A JSR-303 provider, such as Hibernate Validator, is expected to be present in the classpath and will be detected automatically.
 			</para>
-			<section id="validation.beanvalidation.spring.inject">
+			<section id="validation-beanvalidation-spring-inject">
 				<title>Injecting a Validator</title>
 				<para>
 					<classname>LocalValidatorFactoryBean</classname> implements both <code>javax.validation.Validator</code> and <code>org.springframework.validation.Validator</code>.
@@ -1355,7 +1355,7 @@ public class MyService {
 
 }]]></programlisting>
 			</section>
-			<section id="validation.beanvalidation.spring.constraints">
+			<section id="validation-beanvalidation-spring-constraints">
 				<title>Configuring Custom Constraints</title>
 				<para>
 					Each JSR-303 validation constraint consists of two parts.
@@ -1391,7 +1391,7 @@ public class MyConstraintValidator implements ConstraintValidator {
 					As you can see, a ConstraintValidator implementation may have its dependencies @Autowired like any other Spring bean.
 				</para>			
 			</section>
-			<section id="validation.beanvalidation.spring.other">
+			<section id="validation-beanvalidation-spring-other">
 				<title>Additional Configuration Options</title>
 				<para>
 					The default <classname>LocalValidatorFactoryBean</classname> configuration should prove sufficient for most cases.
@@ -1400,7 +1400,7 @@ public class MyConstraintValidator implements ConstraintValidator {
 				</para>
 			</section>
 		</section>
-		<section id="validation.binder">
+		<section id="validation-binder">
 			<title>Configuring a DataBinder</title>
 			<para>
 				Since Spring 3, a DataBinder instance can be configured with a Validator.
@@ -1424,13 +1424,13 @@ binder.validate();
 BindingResult results = binder.getBindingResult();
 </programlisting>
 		</section>
-		<section id="validation.mvc">
+		<section id="validation-mvc">
 			<title>Spring MVC 3 Validation</title>
 			<para>
 				Beginning with Spring 3, Spring MVC has the ability to automatically validate @Controller inputs.
 				In previous versions it was up to the developer to manually invoke validation logic.
 			</para>
-			<section id="validation.mvc.triggering">
+			<section id="validation-mvc-triggering">
 				<title>Triggering @Controller Input Validation</title>
 				<para>
 					To trigger validation of a @Controller input, simply annotate the input argument as @Valid:
@@ -1450,7 +1450,7 @@ public class MyController {
 					</para>
 				</note>
 			</section>
-			<section id="validation.mvc.configuring">
+			<section id="validation-mvc-configuring">
 				<title>Configuring a Validator for use by Spring MVC</title>
 				<para>
 					The Validator instance invoked when a @Valid method argument is encountered may be configured in two ways.
@@ -1492,7 +1492,7 @@ public class MyController {
 ]]>
 				</programlisting>
 			</section>
-			<section id="validation.mvc.jsr303">
+			<section id="validation-mvc-jsr303">
 				<title>Configuring a JSR-303 Validator for use by Spring MVC</title>
 				<para>
 					With JSR-303, a single <code>javax.validation.Validator</code> instance typically validates <emphasis>all</emphasis> model objects that declare validation constraints.

@@ -386,7 +386,7 @@ public class AppConfig {
       <title>General purpose type conversion system and field formatting
       system</title>
 
-      <para>A general purpose <link linkend="core.convert">type conversion
+      <para>A general purpose <link linkend="core-convert">type conversion
       system</link> has been introduced. The system is currently used by SpEL
       for type conversion, and may also be used by a Spring Container and DataBinder when
       binding bean property values.</para>
@@ -456,7 +456,7 @@ public class AppConfig {
     <section id="new-feature-validation">
       <title>Declarative model validation</title>
 
-      <para>Several <link linkend="validation.beanvalidation">validation enhancements</link>,
+      <para>Several <link linkend="validation-beanvalidation">validation enhancements</link>,
       including JSR 303 support that uses Hibernate Validator as the default provider.</para>
     </section>
 
