@@ -121,7 +121,7 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 	public <T> Set<ConstraintViolation<T>> validateValue(
 			Class<T> beanType, String propertyName, Object value, Class<?>... groups) {
 
-		return this.targetValidator.validateValue(beanType, propertyName, groups);
+		return this.targetValidator.validateValue(beanType, propertyName, value, groups);
 	}
 
 	public BeanDescriptor getConstraintsForClass(Class<?> clazz) {
