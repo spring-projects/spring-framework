@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
@@ -216,17 +217,22 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 	}
 
+	/**
+	 * Retrieve all applicable Lifecycle beans: all singletons that have already been created,
+	 * as well as all SmartLifecycle beans (even if they are marked as lazy-init).
+	 */
 	private Map<String, Lifecycle> getLifecycleBeans() {
 		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
-		Map<String, SmartLifecycle> smartLifecycles =
-				this.beanFactory.getBeansOfType(SmartLifecycle.class, false, true);
-		beans.putAll(smartLifecycles);
-		String[] singletonNames = this.beanFactory.getSingletonNames();
-		for (String beanName : singletonNames) {
-			if (!beans.containsKey(beanName)) {
-				Object bean = this.beanFactory.getSingleton(beanName);
-				if (bean instanceof Lifecycle && !this.equals(bean)) {
-					beans.put(beanName, (Lifecycle) bean);
+		String[] beanNames = this.beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
+		for (String beanName : beanNames) {
+			String beanNameToRegister = BeanFactoryUtils.transformedBeanName(beanName);
+			String beanNameToCheck = (this.beanFactory.isFactoryBean(beanNameToRegister) ?
+					BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+			if (this.beanFactory.containsSingleton(beanNameToRegister) ||
+					SmartLifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck))) {
+				Lifecycle bean = this.beanFactory.getBean(beanNameToCheck, Lifecycle.class);
+				if (bean != this) {
+					beans.put(beanNameToRegister, bean);
 				}
 			}
 		}
