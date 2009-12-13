@@ -110,23 +110,25 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 		for (String beanName : beanNames) {
 			try {
 				Class<?> type = this.beanFactory.getType(beanName);
-				WebService wsAnnotation = type.getAnnotation(WebService.class);
-				WebServiceProvider wsProviderAnnotation = type.getAnnotation(WebServiceProvider.class);
-				if (wsAnnotation != null || wsProviderAnnotation != null) {
-					Endpoint endpoint = Endpoint.create(this.beanFactory.getBean(beanName));
-					if (this.endpointProperties != null) {
-						endpoint.setProperties(this.endpointProperties);
+				if (type != null && !type.isInterface()) {
+					WebService wsAnnotation = type.getAnnotation(WebService.class);
+					WebServiceProvider wsProviderAnnotation = type.getAnnotation(WebServiceProvider.class);
+					if (wsAnnotation != null || wsProviderAnnotation != null) {
+						Endpoint endpoint = Endpoint.create(this.beanFactory.getBean(beanName));
+						if (this.endpointProperties != null) {
+							endpoint.setProperties(this.endpointProperties);
+						}
+						if (this.executor != null) {
+							endpoint.setExecutor(this.executor);
+						}
+						if (wsAnnotation != null) {
+							publishEndpoint(endpoint, wsAnnotation);
+						}
+						else {
+							publishEndpoint(endpoint, wsProviderAnnotation);
+						}
+						this.publishedEndpoints.add(endpoint);
 					}
-					if (this.executor != null) {
-						endpoint.setExecutor(this.executor);
-					}
-					if (wsAnnotation != null) {
-						publishEndpoint(endpoint, wsAnnotation);
-					}
-					else {
-						publishEndpoint(endpoint, wsProviderAnnotation);
-					}
-					this.publishedEndpoints.add(endpoint);
 				}
 			}
 			catch (CannotLoadBeanClassException ex) {
