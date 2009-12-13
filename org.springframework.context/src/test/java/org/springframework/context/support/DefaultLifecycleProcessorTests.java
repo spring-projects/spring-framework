@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.Lifecycle;
@@ -80,6 +81,19 @@ public class DefaultLifecycleProcessorTests {
 		context.registerBeanDefinition("bean", bd);
 		context.refresh();
 		DummySmartLifecycleBean bean = context.getBean("bean", DummySmartLifecycleBean.class);
+		assertTrue(bean.isRunning());
+		context.stop();
+		assertFalse(bean.isRunning());
+	}
+
+	@Test
+	public void singleSmartLifecycleAutoStartupWithLazyInitFactoryBean() throws Exception {
+		StaticApplicationContext context = new StaticApplicationContext();
+		RootBeanDefinition bd = new RootBeanDefinition(DummySmartLifecycleFactoryBean.class);
+		bd.setLazyInit(true);
+		context.registerBeanDefinition("bean", bd);
+		context.refresh();
+		DummySmartLifecycleFactoryBean bean = context.getBean("&bean", DummySmartLifecycleFactoryBean.class);
 		assertTrue(bean.isRunning());
 		context.stop();
 		assertFalse(bean.isRunning());
@@ -627,6 +641,51 @@ public class DefaultLifecycleProcessorTests {
 	public static class DummySmartLifecycleBean implements SmartLifecycle {
 
 		public boolean running = false;
+
+		public boolean isAutoStartup() {
+			return true;
+		}
+
+		public void stop(Runnable callback) {
+			this.running = false;
+			callback.run();
+		}
+
+		public void start() {
+			this.running = true;
+		}
+
+		public void stop() {
+			this.running = false;
+		}
+
+		public boolean isRunning() {
+			return this.running;
+		}
+
+		public int getPhase() {
+			return 0;
+		}
+	}
+
+
+	public static class DummySmartLifecycleFactoryBean implements FactoryBean, SmartLifecycle {
+
+		public boolean running = false;
+
+		DummySmartLifecycleBean bean = new DummySmartLifecycleBean();
+
+		public Object getObject() throws Exception {
+			return this.bean;
+		}
+
+		public Class getObjectType() {
+			return DummySmartLifecycleBean.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
 
 		public boolean isAutoStartup() {
 			return true;
