@@ -26,9 +26,11 @@ import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -404,14 +406,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
-		return getBeansWithAnnotation(annotationType, true, true);
-	}
-
-	public Map<String, Object> getBeansWithAnnotation(
-			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit) {
-
+		Set<String> beanNames = new LinkedHashSet<String>(getBeanDefinitionCount());
+		beanNames.addAll(Arrays.asList(getBeanDefinitionNames()));
+		beanNames.addAll(Arrays.asList(getSingletonNames()));
 		Map<String, Object> results = new LinkedHashMap<String, Object>();
-		for (String beanName : getBeanNamesForType(Object.class, includeNonSingletons, allowEagerInit)) {
+		for (String beanName : beanNames) {
 			if (findAnnotationOnBean(beanName, annotationType) != null) {
 				results.put(beanName, getBean(beanName));
 			}
