@@ -27,46 +27,50 @@ import org.springframework.beans.factory.annotation.Autowire;
 /**
  * Indicates that a method produces a bean to be managed by the Spring container. The
  * names and semantics of the attributes to this annotation are intentionally similar
- * to those of the {@literal <bean/>} element in the Spring XML schema. Deviations are
- * as follows:
+ * to those of the {@literal <bean/>} element in the Spring XML schema.
  *
- * <p>The Bean annotation does not provide attributes for scope, primary or lazy. Rather,
- * it should be used in conjunction with {@link Scope &#064;Scope},
- * {@link Primary &#064;Primary}, and {@link Lazy &#064;Lazy} annotations to achieve the
- * same semantics.
+ * <p>Note that the <code>@Bean</code> annotation does not provide attributes for scope,
+ * primary or lazy. Rather, it should be used in conjunction with {@link Scope &#064;Scope},
+ * {@link Primary &#064;Primary}, and {@link Lazy &#064;Lazy} annotations to achieve
+ * those semantics. The same annotations can also be used at the type level, e.g. for
+ * component scanning.
  *
  * <p>While a {@link #name()} attribute is available, the default strategy for determining
  * the name of a bean is to use the name of the Bean method. This is convenient and
  * intuitive, but if explicit naming is desired, the {@link #name()} attribute may be used.
- * Also note that {@link #name()} accepts an array of strings. This is in order to allow
+ * Also note that {@link #name()} accepts an array of Strings. This is in order to allow
  * for specifying multiple names (i.e., aliases) for a single bean.
  *
- * <h3>Constraints</h3>
- * <ul>
- *     <li>Bean methods are valid only when declared within an {@link Configuration &#064;Configuration}-annotated class
- *     <li>Bean methods must be non-void, non-final, non-private
- *     <li>Bean methods may not accept any arguments
- *     <li>Bean methods may throw any exception, which will be caught and handled
- *  by the Spring container on processing of the declaring {@link Configuration &#064;Configuration} class.
- * </ul>
+ * <p>The <code>@Bean</code> annotation may be used on any methods in an <code>@Component</code>
+ * class, in which case they will get processed in a configuration class 'lite' mode where
+ * they will simply be called as plain factory methods from the container (similar to
+ * <code>factory-method</code> declarations in XML). The containing component classes remain
+ * unmodified in this case, and there are no unusual constraints for factory methods.
  *
- * <h3>Usage</h3>
- * <p>Bean methods may reference other Bean methods by calling them directly. This ensures
- * that references between beans are strongly typed and navigable. So called 'inter-bean
- * references' are guaranteed to respect scoping and AOP semantics.
+ * <p>As an advanced mode, <code>@Bean</code> may also be used within <code>@Configuration</code>
+ * component classes. In this case, bean methods may reference other <code>@Bean</code> methods
+ * on the same class by calling them <i>directly</i>. This ensures that references between beans
+ * are strongly typed and navigable. Such so-called 'inter-bean references' are guaranteed to
+ * respect scoping and AOP semantics, just like <code>getBean</code> lookups would. These are
+ * the semantics known from the original 'Spring JavaConfig' project which require CGLIB
+ * subclassing of each such configuration class at runtime. As a consequence, configuration
+ * classes and their factory methods must not be marked as final or private in this mode.
  *
  * @author Rod Johnson
  * @author Costin Leau
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.0
+ * @see org.springframework.stereotype.Component
  * @see Configuration
+ * @see Scope
  * @see DependsOn
  * @see Lazy
  * @see Primary
- * @see Scope
- * @see Value
+ * @see org.springframework.beans.factory.annotation.Autowired
+ * @see org.springframework.beans.factory.annotation.Value
  */
-@Target( { ElementType.METHOD, ElementType.ANNOTATION_TYPE })
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Bean {
