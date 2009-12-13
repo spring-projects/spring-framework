@@ -217,13 +217,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	private Map<String, Lifecycle> getLifecycleBeans() {
-		String[] beanNames = this.beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
-		for (String beanName : beanNames) {
-			if (this.beanFactory.containsSingleton(beanName) ||
-					SmartLifecycle.class.isAssignableFrom(this.beanFactory.getType(beanName))) {
-				Object bean = this.beanFactory.getBean(beanName);
-				if (!this.equals(bean)) {
+		Map<String, SmartLifecycle> smartLifecycles =
+				this.beanFactory.getBeansOfType(SmartLifecycle.class, false, true);
+		beans.putAll(smartLifecycles);
+		String[] singletonNames = this.beanFactory.getSingletonNames();
+		for (String beanName : singletonNames) {
+			if (!beans.containsKey(beanName)) {
+				Object bean = this.beanFactory.getSingleton(beanName);
+				if (bean instanceof Lifecycle && !this.equals(bean)) {
 					beans.put(beanName, (Lifecycle) bean);
 				}
 			}
