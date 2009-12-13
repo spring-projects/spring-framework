@@ -226,9 +226,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		String[] beanNames = this.beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		for (String beanName : beanNames) {
 			String beanNameToRegister = BeanFactoryUtils.transformedBeanName(beanName);
-			String beanNameToCheck = (this.beanFactory.isFactoryBean(beanNameToRegister) ?
-					BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
-			if (this.beanFactory.containsSingleton(beanNameToRegister) ||
+			boolean isFactoryBean = this.beanFactory.isFactoryBean(beanNameToRegister);
+			String beanNameToCheck = (isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+			if ((this.beanFactory.containsSingleton(beanNameToRegister) &&
+					(!isFactoryBean || Lifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck)))) ||
 					SmartLifecycle.class.isAssignableFrom(this.beanFactory.getType(beanNameToCheck))) {
 				Lifecycle bean = this.beanFactory.getBean(beanNameToCheck, Lifecycle.class);
 				if (bean != this) {
