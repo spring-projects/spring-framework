@@ -258,12 +258,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
 
-		return getBeansWithAnnotation(annotationType, true, true);
-	}
-
-	public Map<String, Object> getBeansWithAnnotation(
-			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit) {
-
 		Map<String, Object> results = new LinkedHashMap<String, Object>();
 		for (String beanName : this.beans.keySet()) {
 			if (findAnnotationOnBean(beanName, annotationType) != null) {
