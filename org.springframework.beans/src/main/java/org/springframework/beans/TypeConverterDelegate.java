@@ -202,6 +202,13 @@ class TypeConverterDelegate {
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
+			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
+					convertedValue instanceof String && typeDescriptor.getMethodParameter() != null) {
+				Class elementType = GenericCollectionTypeResolver.getCollectionParameterType(typeDescriptor.getMethodParameter());
+				if (elementType != null && Enum.class.isAssignableFrom(elementType)) {
+					convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+				}
+			}
 			if (editor == null) {
 				editor = findDefaultEditor(requiredType, typeDescriptor);
 			}
@@ -214,6 +221,9 @@ class TypeConverterDelegate {
 			if (convertedValue != null) {
 				if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
+					if (convertedValue instanceof String && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
+						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+					}
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 				}
 				else if (convertedValue instanceof Collection) {

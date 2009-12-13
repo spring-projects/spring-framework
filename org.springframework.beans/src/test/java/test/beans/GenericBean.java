@@ -60,10 +60,13 @@ public class GenericBean<T> {
 
 	private CustomEnum customEnum;
 
+	private CustomEnum[] customEnumArray;
+
+	private Set<CustomEnum> customEnumSet;
+
 	private T genericProperty;
 
 	private List<T> genericListProperty;
-
 
 	public GenericBean() {
 	}
@@ -223,6 +226,22 @@ public class GenericBean<T> {
 
 	public void setCustomEnum(CustomEnum customEnum) {
 		this.customEnum = customEnum;
+	}
+
+	public CustomEnum[] getCustomEnumArray() {
+		return customEnumArray;
+	}
+
+	public void setCustomEnumArray(CustomEnum[] customEnum) {
+		this.customEnumArray = customEnum;
+	}
+
+	public Set<CustomEnum> getCustomEnumSet() {
+		return customEnumSet;
+	}
+
+	public void setCustomEnumSet(Set<CustomEnum> customEnumSet) {
+		this.customEnumSet = customEnumSet;
 	}
 
 	public static GenericBean createInstance(Set<Integer> integerSet) {
