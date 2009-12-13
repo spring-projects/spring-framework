@@ -79,6 +79,7 @@ public abstract class JRubyScriptUtils {
 		Ruby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parseEval(scriptSource, "", null, 0);
+		// keep using the deprecated runNormally variant for JRuby 1.1/1.2 compatibility...
 		IRubyObject rubyObject = ruby.runNormally(scriptRootNode, false);
 
 		if (rubyObject instanceof RubyNil) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link LoadTimeWeaver} implementation for GlassFish's
- * {@link InstrumentableClassLoader}. 
+ * {@link LoadTimeWeaver} implementation for GlassFish's {@link InstrumentableClassLoader}.
  * 
- * <p/>Since Spring 3.0.0, GlassFish V3 is supported as well.
+ * <p>As of Spring 3.0, GlassFish V3 is supported as well.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -35,6 +34,7 @@ import org.springframework.util.ClassUtils;
 public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final GlassFishClassLoaderAdapter classLoader;
+
 
 	/**
 	 * Creates a new instance of the <code>GlassFishLoadTimeWeaver</code> class
@@ -56,6 +56,7 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 		this.classLoader = new GlassFishClassLoaderAdapter(classLoader);
 	}
 
+
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.classLoader.addTransformer(transformer);
 	}
@@ -67,4 +68,5 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	public ClassLoader getThrowawayClassLoader() {
 		return this.classLoader.getThrowawayClassLoader();
 	}
+
 }
