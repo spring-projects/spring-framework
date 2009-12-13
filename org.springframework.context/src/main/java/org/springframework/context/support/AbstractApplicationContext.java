@@ -1081,13 +1081,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBeansWithAnnotation(annotationType);
 	}
 
-	public Map<String, Object> getBeansWithAnnotation(
-			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit)
-			throws BeansException {
-
-		return getBeanFactory().getBeansWithAnnotation(annotationType, includeNonSingletons, allowEagerInit);
-	}
-
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
 		return getBeanFactory().findAnnotationOnBean(beanName, annotationType);
 	}
