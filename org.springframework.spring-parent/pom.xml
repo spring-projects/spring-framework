@@ -22,15 +22,6 @@
     <developerConnection>scm:svn:https://src.springframework.org/svn/spring-framework/trunk</developerConnection>
   </scm>
 
-  <repositories>
-    <repository>
-      <id>org.springframework.repository.maven</id>
-      <name>SpringSource Maven Repository</name>
-      <url>http://repository.springframework.org/maven/</url>
-      <snapshots><enabled>false</enabled></snapshots>
-    </repository>
-  </repositories>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -175,6 +166,17 @@
     </profile>
     <profile>
       <id>build</id>
+	  <repositories>
+		<repository>
+		  <id>org.springframework.repository.maven</id>
+		  <name>SpringSource Maven Repository</name>
+		  <url>http://repository.springframework.org/maven/</url>
+		  <snapshots><enabled>false</enabled></snapshots>
+		</repository>
+	  </repositories>
+    </profile>
+    <profile>
+      <id>legacy-build</id>
       <repositories>
         <repository>
           <id>java.net</id>
