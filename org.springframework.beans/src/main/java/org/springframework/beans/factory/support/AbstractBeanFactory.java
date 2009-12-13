@@ -69,6 +69,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -1212,7 +1213,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 	
 	private Class doResolveBeanClass(RootBeanDefinition mbd, Class... typesToMatch) throws ClassNotFoundException {
-		if (typesToMatch != null) {
+		if (!ObjectUtils.isEmpty(typesToMatch)) {
 			ClassLoader tempClassLoader = getTempClassLoader();
 			if (tempClassLoader != null) {
 				if (tempClassLoader instanceof DecoratingClassLoader) {
