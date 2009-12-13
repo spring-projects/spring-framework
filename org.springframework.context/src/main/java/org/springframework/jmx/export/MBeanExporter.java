@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,11 +44,11 @@ import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Constants;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
@@ -142,7 +143,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/** The autodetect mode to use for this MBeanExporter */
 	private Integer autodetectMode;
 
-	/** Whether to eagerly init candidate beans when autodetecting MBeans */
+	/** Whether to eagerly initialize candidate beans when autodetecting MBeans */
 	private boolean allowEagerInit = false;
 
 	/** Indicates whether Spring should modify generated ObjectNames */
@@ -381,14 +382,13 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * <code>ListableBeanFactory</code> is required).
 	 * @see #setBeans
 	 * @see #setAutodetect
-	 * @throws IllegalArgumentException if the supplied <code>beanFactory</code> is not a {@link ListableBeanFactory}.
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ListableBeanFactory) {
 			this.beanFactory = (ListableBeanFactory) beanFactory;
 		}
 		else {
-			logger.info("MBeanExporter not running in a ListableBeanFactory: Autodetection of MBeans not available.");
+			logger.info("MBeanExporter not running in a ListableBeanFactory: autodetection of MBeans not available.");
 		}
 	}
 
@@ -537,17 +537,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see org.springframework.beans.factory.config.BeanDefinition#isLazyInit
 	 */
 	protected boolean isBeanDefinitionLazyInit(ListableBeanFactory beanFactory, String beanName) {
-		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
-			return false;
-		}
-		try {
-			BeanDefinition bd = ((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(beanName);
-			return bd.isLazyInit();
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Probably a directly registered singleton.
-			return false;
-		}
+		return (beanFactory instanceof ConfigurableListableBeanFactory && beanFactory.containsBeanDefinition(beanName) &&
+				((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(beanName).isLazyInit());
 	}
 
 	/**
@@ -594,7 +585,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				// Plain bean instance -> register it directly.
 				if (this.beanFactory != null) {
 					Map<String, ?> beansOfSameType =
-							this.beanFactory.getBeansOfType(mapValue.getClass(), false, false);
+							this.beanFactory.getBeansOfType(mapValue.getClass(), false, this.allowEagerInit);
 					for (Map.Entry<String, ?> entry : beansOfSameType.entrySet()) {
 						if (entry.getValue() == mapValue) {
 							String beanName = entry.getKey();
@@ -875,26 +866,38 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * whether to include a bean or not
 	 */
 	private void autodetect(AutodetectCallback callback) {
-		String[] beanNames = this.beanFactory.getBeanNamesForType(Object.class, true, this.allowEagerInit);
+		Set<String> beanNames = new LinkedHashSet<String>(this.beanFactory.getBeanDefinitionCount());
+		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
+		}
 		for (String beanName : beanNames) {
 			if (!isExcluded(beanName)) {
-				Class beanClass = this.beanFactory.getType(beanName);
-				if (beanClass != null && callback.include(beanClass, beanName)) {
-					boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
-					Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
-					if (!this.beans.containsValue(beanName) && (beanInstance == null ||
-							!CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
-						// Not already registered for JMX exposure.
-						this.beans.put(beanName, (beanInstance != null ? beanInstance : beanName));
-						if (logger.isInfoEnabled()) {
-							logger.info("Bean with name '" + beanName + "' has been autodetected for JMX exposure");
+				try {
+					Class beanClass = this.beanFactory.getType(beanName);
+					if (beanClass != null && callback.include(beanClass, beanName)) {
+						boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
+						Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
+						if (!this.beans.containsValue(beanName) && (beanInstance == null ||
+								!CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
+							// Not already registered for JMX exposure.
+							this.beans.put(beanName, (beanInstance != null ? beanInstance : beanName));
+							if (logger.isInfoEnabled()) {
+								logger.info("Bean with name '" + beanName + "' has been autodetected for JMX exposure");
+							}
+						}
+						else {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Bean with name '" + beanName + "' is already registered for JMX exposure");
+							}
 						}
 					}
-					else {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Bean with name '" + beanName + "' is already registered for JMX exposure");
-						}
+				}
+				catch (CannotLoadBeanClassException ex) {
+					if (this.allowEagerInit) {
+						throw ex;
 					}
+					// otherwise ignore beans where the class is not resolvable
 				}
 			}
 		}

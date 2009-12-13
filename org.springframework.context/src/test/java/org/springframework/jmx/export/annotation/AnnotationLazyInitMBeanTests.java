@@ -57,6 +57,11 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 			String name = (String) server.getAttribute(oname, "Name");
 			assertEquals("Invalid name returned", "TEST", name);
 
+			oname = ObjectNameManager.getInstance("bean:name=testBean5");
+			assertNotNull(server.getObjectInstance(oname));
+			name = (String) server.getAttribute(oname, "Name");
+			assertEquals("Invalid name returned", "FACTORY", name);
+
 			oname = ObjectNameManager.getInstance("spring:mbean=true");
 			assertNotNull(server.getObjectInstance(oname));
 			name = (String) server.getAttribute(oname, "Name");
