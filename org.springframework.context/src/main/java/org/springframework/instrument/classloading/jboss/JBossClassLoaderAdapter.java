@@ -71,6 +71,9 @@ class JBossClassLoaderAdapter {
 			}
 
 			this.classLoader = clazzLoader;
+			// use the classloader that loaded the classloader to load
+			// the types for reflection purposes
+			classLoader = clazzLoader.getClass().getClassLoader();
 
 			// BaseClassLoader#getPolicy
 			Method method = clazzLoaderType.getDeclaredMethod(GET_POLICY);
