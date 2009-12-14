@@ -18,6 +18,10 @@ Changes in version 3.0.0.GA (2009-12-15)
 * MBeanExporter detects FactoryBean-exported resources independent from declaration order
 * revised GenericConverter's "getConvertibleTypes" signature to return Set of ConvertiblePair
 * GenericConversionService prefers matches against inherited interfaces over superclasses
+* renamed ConverterRegistry's addGenericConverter(GenericConverter) method to addConverter
+* no default converters for Object-to-Map and Map-To-Object anymore
+* default converter for String-to-Properties parsing only applies for actual Properties objects
+* default ObjectToStringConverter only stringifies objects that indicate proper toString behavior
 * added "converters" property to FormattingConversionServiceFactoryBean as well
 * full support for formatters and formatting annotations on array/collection elements
 * no default number formatter (relying on plain java.lang.Number parsing and rendering)
