@@ -29,9 +29,11 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * Extension of Tomcat's default class loader which adds instrumentation
  * to loaded classes without the need to use a VM-wide agent.
  *
- * <p>To be registered using a <code>Loader</code> tag in Tomcat's <code>Context</code>
+ * <p>To be registered using a 
+ * <code><a href="http://tomcat.apache.org/tomcat-5.5-doc/config/loader.html">Loader</a></code> tag 
+ * in Tomcat's <code><a href="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">Context</a></code>
  * definition in the <code>server.xml</code> file, with the Spring-provided
- * "spring-tomcat-weaver.jar" file deployed into Tomcat's "server/lib" directory.
+ * "spring-tomcat-weaver.jar" file deployed into Tomcat's "server/lib" (for Tomcat 5.x) or "lib" (for Tomcat 6.x) directory.
  * The required configuration tag looks as follows:
  *
  * <pre class="code">&lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;</pre>
