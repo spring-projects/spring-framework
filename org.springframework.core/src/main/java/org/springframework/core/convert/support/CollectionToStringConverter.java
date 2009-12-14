@@ -16,9 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getElementType;
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -59,10 +56,11 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 		Collection<?> sourceCollection = (Collection<?>) source;
 		if (sourceCollection.size() == 0) {
 			return "";
-		} else {
+		}
+		else {
 			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 			if (sourceElementType == TypeDescriptor.NULL) {
-				sourceElementType = getElementType(sourceCollection);
+				sourceElementType = ConversionUtils.getElementType(sourceCollection);
 			}
 			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
 				StringBuilder string = new StringBuilder();
@@ -75,7 +73,8 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 					i++;
 				}
 				return string.toString();
-			} else {
+			}
+			else {
 				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceElementType, targetType);
@@ -86,7 +85,8 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 					if (i > 0) {
 						string.append(DELIMITER);
 					}
-					Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetType);
+					Object targetElement = ConversionUtils.invokeConverter(
+							converter, sourceElement, sourceElementType, targetType);
 					string.append(targetElement);
 					i++;
 				}
@@ -94,4 +94,5 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 			}
 		}
 	}
+
 }

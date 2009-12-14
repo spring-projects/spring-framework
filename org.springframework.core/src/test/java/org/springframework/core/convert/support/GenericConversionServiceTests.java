@@ -16,19 +16,14 @@
 
 package org.springframework.core.convert.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -88,7 +83,7 @@ public class GenericConversionServiceTests {
 	}
 
 	public void convertNullTargetClass() {
-		assertNull(conversionService.convert("3", (Class<?>) null));
+		assertNull(conversionService.convert("3", null));
 	}
 
 	@Test
@@ -144,7 +139,7 @@ public class GenericConversionServiceTests {
 	
 	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
-		conversionService.addGenericConverter(new ObjectToArrayConverter(conversionService));
+		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
 		assertFalse(conversionService.canConvert(String.class, Integer[].class));
 	}
 

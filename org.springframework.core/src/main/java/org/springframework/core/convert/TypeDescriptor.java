@@ -381,7 +381,8 @@ public class TypeDescriptor {
 				if (collectionType != null) {
 					stringValue.append("<").append(collectionType.getName()).append(">");
 				}
-			} else if (isMap()) {
+			}
+			else if (isMap()) {
 				Class<?> keyType = getMapKeyType();
 				Class<?> valType = getMapValueType();
 				if (keyType != null && valType != null) {

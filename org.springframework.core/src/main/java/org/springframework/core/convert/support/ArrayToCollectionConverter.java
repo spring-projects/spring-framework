@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,9 +29,11 @@ import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts an Array to a Collection.
- * First, creates a new Collection of the requested targetType.
+ *
+ * <p>First, creates a new Collection of the requested targetType.
  * Then adds each array element to the target collection.
- * Will perform an element conversion from the source component type to the collection's parameterized type if necessary.
+ * Will perform an element conversion from the source component type
+ * to the collection's parameterized type if necessary.
  * 
  * @author Keith Donald
  * @since 3.0
@@ -75,7 +75,8 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 			}
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
-				Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetElementType);
+				Object targetElement = ConversionUtils.invokeConverter(
+						converter, sourceElement, sourceElementType, targetElementType);
 				collection.add(targetElement);
 			}
 		}

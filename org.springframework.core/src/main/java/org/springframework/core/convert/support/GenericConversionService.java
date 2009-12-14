@@ -39,7 +39,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.converter.GenericConverter;
-import static org.springframework.core.convert.support.ConversionUtils.*;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -71,13 +70,20 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	// implementing ConverterRegistry
 
+	public void addConverter(GenericConverter converter) {
+		Set<GenericConverter.ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
+		for (GenericConverter.ConvertiblePair convertibleType : convertibleTypes) {
+			getMatchableConvertersList(convertibleType.getSourceType(), convertibleType.getTargetType()).add(converter);
+		}
+	}
+
 	public void addConverter(Converter<?, ?> converter) {
 		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converter, Converter.class);
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetType <T> which " +
 							"your Converter<S, T> converts between; declare these generic types.");
 		}
-		addGenericConverter(new ConverterAdapter(typeInfo, converter));
+		addConverter(new ConverterAdapter(typeInfo, converter));
 	}
 
 	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
@@ -86,14 +92,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetRangeType R which " +
 					"your ConverterFactory<S, R> converts between; declare these generic types.");
 		}
-		addGenericConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
-	}
-
-	public void addGenericConverter(GenericConverter converter) {
-		Set<GenericConverter.ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
-		for (GenericConverter.ConvertiblePair convertibleType : convertibleTypes) {
-			getMatchableConvertersList(convertibleType.getSourceType(), convertibleType.getTargetType()).add(converter);
-		}
+		addConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
 	}
 
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
@@ -133,7 +132,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (converter == null) {
 			throw new ConverterNotFoundException(sourceType, targetType);
 		}
-		return invokeConverter(converter, source, sourceType, targetType);
+		return ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
 	}
 
 	public String toString() {
@@ -367,7 +366,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 		return (matchable != null ? matchable.matchConverter(sourceFieldType, targetFieldType) : null);
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private final class ConverterAdapter implements GenericConverter {

@@ -18,7 +18,6 @@ package org.springframework.core.convert.support;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -32,16 +31,16 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @since 3.0
  * @see Properties#load(java.io.InputStream)
  */
-final class StringToMapConverter implements ConditionalGenericConverter {
+final class StringToPropertiesConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public StringToMapConverter(GenericConversionService conversionService) {
+	public StringToPropertiesConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(String.class, Map.class));
+		return Collections.singleton(new ConvertiblePair(String.class, Properties.class));
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -63,9 +62,10 @@ final class StringToMapConverter implements ConditionalGenericConverter {
 			// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
 			props.load(new ByteArrayInputStream(string.getBytes("ISO-8859-1")));
 			return props;
-		} catch (Exception e) {
+		}
+		catch (Exception ex) {
 			// Should never happen.
-			throw new IllegalArgumentException("Failed to parse [" + string + "] into Properties", e);
+			throw new IllegalArgumentException("Failed to parse [" + string + "] into Properties", ex);
 		}
 	}
 

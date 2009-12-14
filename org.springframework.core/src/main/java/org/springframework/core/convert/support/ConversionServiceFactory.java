@@ -46,27 +46,21 @@ public abstract class ConversionServiceFactory {
 	 * Populate the given ConversionService instance with all applicable default converters.
 	 */
 	public static void addDefaultConverters(GenericConversionService conversionService) {
-		conversionService.addGenericConverter(new ArrayToArrayConverter(conversionService));
-		conversionService.addGenericConverter(new ArrayToCollectionConverter(conversionService));
-		conversionService.addGenericConverter(new ArrayToMapConverter(conversionService));
-		conversionService.addGenericConverter(new ArrayToStringConverter(conversionService));
-		conversionService.addGenericConverter(new ArrayToObjectConverter(conversionService));
-		conversionService.addGenericConverter(new CollectionToCollectionConverter(conversionService));
-		conversionService.addGenericConverter(new CollectionToArrayConverter(conversionService));
-		conversionService.addGenericConverter(new CollectionToMapConverter(conversionService));
-		conversionService.addGenericConverter(new CollectionToStringConverter(conversionService));
-		conversionService.addGenericConverter(new CollectionToObjectConverter(conversionService));
-		conversionService.addGenericConverter(new MapToMapConverter(conversionService));
-		conversionService.addGenericConverter(new MapToArrayConverter(conversionService));
-		conversionService.addGenericConverter(new MapToCollectionConverter(conversionService));
-		conversionService.addGenericConverter(new MapToStringConverter(conversionService));
-		conversionService.addGenericConverter(new MapToObjectConverter(conversionService));
-		conversionService.addGenericConverter(new StringToArrayConverter(conversionService));
-		conversionService.addGenericConverter(new StringToCollectionConverter(conversionService));
-		conversionService.addGenericConverter(new StringToMapConverter(conversionService));
-		conversionService.addGenericConverter(new ObjectToArrayConverter(conversionService));
-		conversionService.addGenericConverter(new ObjectToCollectionConverter(conversionService));
-		conversionService.addGenericConverter(new ObjectToMapConverter(conversionService));
+		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
+		conversionService.addConverter(new ArrayToCollectionConverter(conversionService));
+		conversionService.addConverter(new ArrayToStringConverter(conversionService));
+		conversionService.addConverter(new ArrayToObjectConverter(conversionService));
+		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
+		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
+		conversionService.addConverter(new CollectionToStringConverter(conversionService));
+		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
+		conversionService.addConverter(new MapToMapConverter(conversionService));
+		conversionService.addConverter(new PropertiesToStringConverter(conversionService));
+		conversionService.addConverter(new StringToArrayConverter(conversionService));
+		conversionService.addConverter(new StringToCollectionConverter(conversionService));
+		conversionService.addConverter(new StringToPropertiesConverter(conversionService));
+		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
+		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new CharacterToNumberFactory());
 		conversionService.addConverter(new NumberToCharacterConverter());
 		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
@@ -76,8 +70,8 @@ public abstract class ConversionServiceFactory {
 		conversionService.addConverter(new StringToLocaleConverter());
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());	
 		conversionService.addConverter(new ObjectToStringConverter());
-		conversionService.addGenericConverter(new ObjectToObjectGenericConverter());
-		conversionService.addGenericConverter(new IdToEntityConverter(conversionService));
+		conversionService.addConverter(new ObjectToObjectConverter());
+		conversionService.addConverter(new IdToEntityConverter(conversionService));
 	}
 
 	/**
@@ -89,14 +83,14 @@ public abstract class ConversionServiceFactory {
 	public static void registerConverters(Set<Object> converters, ConverterRegistry registry) {
 		if (converters != null) {
 			for (Object converter : converters) {
-				if (converter instanceof Converter<?, ?>) {
+				if (converter instanceof GenericConverter) {
+					registry.addConverter((GenericConverter) converter);
+				}
+				else if (converter instanceof Converter<?, ?>) {
 					registry.addConverter((Converter<?, ?>) converter);
 				}
 				else if (converter instanceof ConverterFactory<?, ?>) {
 					registry.addConverterFactory((ConverterFactory<?, ?>) converter);
-				}
-				else if (converter instanceof GenericConverter) {
-					registry.addGenericConverter((GenericConverter) converter);
 				}
 				else {
 					throw new IllegalArgumentException("Each converter object must implement one of the " +

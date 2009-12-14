@@ -16,9 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getElementType;
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,11 +28,13 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
- * Converts a Collection to an Array.
- * First, creates a new Array of the requested targetType with a length equal to the size of the source Collection.
- * Then sets each collection element into the array.
- * Will perform an element conversion from the collection's parameterized type to the array's component type if necessary.
- * 
+ * Converts a Collection to an array.
+ *
+ * <p>First, creates a new array of the requested targetType with a length equal to the
+ * size of the source Collection. Then sets each collection element into the array.
+ * Will perform an element conversion from the collection's parameterized type to the
+ * array's component type if necessary.
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -62,7 +61,7 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 		Collection<?> sourceCollection = (Collection<?>) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 		if (sourceElementType == TypeDescriptor.NULL) {
-			sourceElementType = getElementType(sourceCollection);
+			sourceElementType = ConversionUtils.getElementType(sourceCollection);
 		}
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		Object array = Array.newInstance(targetElementType.getType(), sourceCollection.size());
@@ -79,7 +78,8 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 			}
 			for (Iterator<?> it = sourceCollection.iterator(); it.hasNext(); i++) {
 				Object sourceElement = it.next();
-				Object targetElement = invokeConverter(converter, sourceElement, sourceElementType, targetElementType);
+				Object targetElement = ConversionUtils.invokeConverter(
+						converter, sourceElement, sourceElementType, targetElementType);
 				Array.set(array, i, targetElement);
 			}
 		}

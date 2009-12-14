@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.Set;
@@ -67,7 +65,7 @@ final class StringToArrayConverter implements ConditionalGenericConverter {
 				throw new ConverterNotFoundException(sourceType, targetElementType);
 			}
 			for (int i = 0; i < fields.length; i++) {
-				Array.set(target, i, invokeConverter(converter, fields[i], sourceType, targetElementType));
+				Array.set(target, i, ConversionUtils.invokeConverter(converter, fields[i], sourceType, targetElementType));
 			}
 			return target;
 		}

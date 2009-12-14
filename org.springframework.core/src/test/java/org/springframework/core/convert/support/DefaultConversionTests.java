@@ -16,10 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractList;
@@ -38,14 +34,21 @@ import java.util.Properties;
 import java.util.Set;
 
 import junit.framework.Assert;
-
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 
+/**
+ * @author Keith Donald
+ * @author Juergen Hoeller
+ */
 public class DefaultConversionTests {
 
 	private ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
@@ -336,22 +339,6 @@ public class DefaultConversionTests {
 		conversionService.convert(new String[] { "1", "2", "3" }, AbstractList.class);
 	}
 
-	@Test
-	public void convertArrayToMap() {
-		Map result = conversionService.convert(new String[] { "foo=bar", "bar=baz", "baz=boop" }, Map.class);
-		assertEquals("bar", result.get("foo"));
-		assertEquals("baz", result.get("bar"));
-		assertEquals("boop", result.get("baz"));
-	}
-
-	@Test
-	public void convertArrayToMapWithElementConversion() throws Exception {
-		Map result = (Map) conversionService.convert(new String[] { "1=BAR", "2=BAZ" }, TypeDescriptor
-				.valueOf(String[].class), new TypeDescriptor(getClass().getField("genericMap")));
-		assertEquals(FooEnum.BAR, result.get(1));
-		assertEquals(FooEnum.BAZ, result.get(2));
-	}
-
 	public static enum FooEnum {
 		BAR, BAZ
 	}
@@ -461,29 +448,6 @@ public class DefaultConversionTests {
 	}
 
 	@Test
-	public void convertCollectionToMap() {
-		List<String> list = new ArrayList<String>();
-		list.add("foo=bar");
-		list.add("bar=baz");
-		list.add("baz=boop");
-		Map result = conversionService.convert(list, Map.class);
-		assertEquals("bar", result.get("foo"));
-		assertEquals("baz", result.get("bar"));
-		assertEquals("boop", result.get("baz"));
-	}
-
-	@Test
-	public void convertCollectionToMapWithElementConversion() throws Exception {
-		List<String> list = new ArrayList<String>();
-		list.add("1=BAR");
-		list.add("2=BAZ");
-		Map result = (Map) conversionService.convert(list, TypeDescriptor.valueOf(List.class), new TypeDescriptor(
-				getClass().getField("genericMap")));
-		assertEquals(FooEnum.BAR, result.get(1));
-		assertEquals(FooEnum.BAZ, result.get(2));
-	}
-
-	@Test
 	public void convertCollectionToString() {
 		List<String> list = Arrays.asList(new String[] { "foo", "bar" });
 		String result = conversionService.convert(list, String.class);
@@ -526,66 +490,23 @@ public class DefaultConversionTests {
 	}
 
 	@Test
-	public void convertMapToStringArray() throws Exception {
-		Map<String, String> foo = new LinkedHashMap<String, String>();
-		foo.put("1", "BAR");
-		foo.put("2", "BAZ");
-		String[] result = conversionService.convert(foo, String[].class);
-		assertEquals("1=BAR", result[0]);
-		assertEquals("2=BAZ", result[1]);
-	}
-
-	@Test
-	public void convertMapToStringArrayWithElementConversion() throws Exception {
-		Map<Integer, FooEnum> foo = new LinkedHashMap<Integer, FooEnum>();
-		foo.put(1, FooEnum.BAR);
-		foo.put(2, FooEnum.BAZ);
-		String[] result = (String[]) conversionService.convert(foo, new TypeDescriptor(getClass()
-				.getField("genericMap")), TypeDescriptor.valueOf(String[].class));
-		assertEquals("1=BAR", result[0]);
-		assertEquals("2=BAZ", result[1]);
-	}
-
-	@Test
-	public void convertMapToString() {
-		Map<String, String> foo = new LinkedHashMap<String, String>();
-		foo.put("1", "BAR");
-		foo.put("2", "BAZ");
+	public void convertPropertiesToString() {
+		Properties foo = new Properties();
+		foo.setProperty("1", "BAR");
+		foo.setProperty("2", "BAZ");
 		String result = conversionService.convert(foo, String.class);
 		assertTrue(result.contains("1=BAR"));
 		assertTrue(result.contains("2=BAZ"));
 	}
 
 	@Test
-	public void convertMapToStringWithConversion() throws Exception {
-		Map<Integer, FooEnum> foo = new LinkedHashMap<Integer, FooEnum>();
+	public void convertPropertiesToStringWithConversion() throws Exception {
+		Properties foo = new Properties();
 		foo.put(1, FooEnum.BAR);
 		foo.put(2, FooEnum.BAZ);
-		String result = (String) conversionService.convert(foo, new TypeDescriptor(getClass().getField("genericMap")),
-				TypeDescriptor.valueOf(String.class));
+		String result = conversionService.convert(foo, String.class);
 		assertTrue(result.contains("1=BAR"));
 		assertTrue(result.contains("2=BAZ"));
-	}
-
-	@Test
-	public void convertMapToObject() {
-		Map<Long, Long> foo = new LinkedHashMap<Long, Long>();
-		foo.put(1L, 1L);
-		foo.put(2L, 2L);
-		Long result = conversionService.convert(foo, Long.class);
-		assertEquals(new Long(1), result);
-	}
-
-	public Map<Long, Long> genericMap2 = new HashMap<Long, Long>();
-
-	@Test
-	public void convertMapToObjectWithConversion() throws Exception {
-		Map<Long, Long> foo = new LinkedHashMap<Long, Long>();
-		foo.put(1L, 1L);
-		foo.put(2L, 2L);
-		Integer result = (Integer) conversionService.convert(foo,
-				new TypeDescriptor(getClass().getField("genericMap2")), TypeDescriptor.valueOf(Integer.class));
-		assertEquals(new Integer(1), result);
 	}
 
 	@Test
@@ -622,6 +543,14 @@ public class DefaultConversionTests {
 		assertEquals("b", result.getProperty("a"));
 		assertEquals("2", result.getProperty("c"));
 		assertEquals("", result.getProperty("d"));
+	}
+
+	@Test
+	public void convertStringToPropertiesWithSpaces() {
+		Properties result = conversionService.convert("   foo=bar\n   bar=baz\n    baz=boop", Properties.class);
+		assertEquals("bar", result.get("foo"));
+		assertEquals("baz", result.get("bar"));
+		assertEquals("boop", result.get("baz"));
 	}
 
 	@Test
@@ -684,35 +613,6 @@ public class DefaultConversionTests {
 		assertEquals(new Integer(3), result.get(0));
 	}
 
-	@Test
-	public void convertStringToMap() {
-		Map result = conversionService.convert("   foo=bar\n   bar=baz\n    baz=boop", Map.class);
-		assertEquals("bar", result.get("foo"));
-		assertEquals("baz", result.get("bar"));
-		assertEquals("boop", result.get("baz"));
-	}
-
-	@Test
-	public void convertStringToMapWithElementConversion() throws Exception {
-		Map result = (Map) conversionService.convert("1=BAR\n 2=BAZ", TypeDescriptor.valueOf(String.class),
-				new TypeDescriptor(getClass().getField("genericMap")));
-		assertEquals(FooEnum.BAR, result.get(1));
-		assertEquals(FooEnum.BAZ, result.get(2));
-	}
-
-	@Test
-	public void convertObjectToMap() {
-		Map result = conversionService.convert(new Integer(3), Map.class);
-		assertEquals(new Integer(3), result.get(new Integer(3)));
-	}
-
-	@Test
-	public void convertObjectToMapWithConversion() throws Exception {
-		Map result = (Map) conversionService.convert(1L, TypeDescriptor.valueOf(Integer.class), new TypeDescriptor(
-				getClass().getField("genericMap2")));
-		assertEquals(new Long(1), result.get(1L));
-	}
-	
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testUnmodifiableListConversion() {

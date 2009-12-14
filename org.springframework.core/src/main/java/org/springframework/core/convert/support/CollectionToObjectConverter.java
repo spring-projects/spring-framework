@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -56,7 +54,8 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 		Collection<?> sourceCollection = (Collection<?>) source;
 		if (sourceCollection.size() == 0) {
 			return null;
-		} else {
+		}
+		else {
 			Object firstElement = sourceCollection.iterator().next();
 			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 			if (sourceElementType == TypeDescriptor.NULL && firstElement != null) {
@@ -64,12 +63,13 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 			}
 			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
 				return firstElement;
-			} else {
+			}
+			else {
 				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
 				if (converter == null) {
 					throw new ConverterNotFoundException(sourceElementType, targetType);
 				}
-				return invokeConverter(converter, firstElement, sourceElementType, targetType);
+				return ConversionUtils.invokeConverter(converter, firstElement, sourceElementType, targetType);
 			}
 		}
 	}

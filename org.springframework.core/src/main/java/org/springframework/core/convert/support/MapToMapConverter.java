@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -28,9 +26,11 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts a Map to another Map.
- * First, creates a new Map of the requested targetType with a size equal to the size of the source Map.
- * Then copies each element in the source map to the target map.
- * Will perform a conversion from the source maps's parameterized K,V types to the target map's parameterized types K,V if necessary.
+ *
+ * <p>First, creates a new Map of the requested targetType with a size equal to the
+ * size of the source Map. Then copies each element in the source map to the target map.
+ * Will perform a conversion from the source maps's parameterized K,V types to the target
+ * map's parameterized types K,V if necessary.
  *
  * @author Keith Donald
  * @since 3.0
@@ -66,7 +66,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
 		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
 		if (sourceKeyType == TypeDescriptor.NULL || sourceValueType == TypeDescriptor.NULL) {
-			TypeDescriptor[] sourceEntryTypes = getMapEntryTypes(sourceMap);
+			TypeDescriptor[] sourceEntryTypes = ConversionUtils.getMapEntryTypes(sourceMap);
 			sourceKeyType = sourceEntryTypes[0];
 			sourceValueType = sourceEntryTypes[1];
 		}
@@ -98,9 +98,10 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 
 	@SuppressWarnings("unchecked")
 	private Map<?, ?> compatibleMapWithoutEntryConversion(Map<?, ?> source, TypeDescriptor targetType) {
-		if (targetType.getType().isAssignableFrom(source.getClass())) {
+		if (targetType.getType().isInstance(source)) {
 			return source;
-		} else {
+		}
+		else {
 			Map target = CollectionFactory.createMap(targetType.getType(), source.size());
 			target.putAll(source);
 			return target;

@@ -20,12 +20,18 @@ package org.springframework.core.convert.converter;
  * For registering converters with a type conversion system.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public interface ConverterRegistry {
 	
 	/**
-	 * Add a converter to this registry.
+	 * Add a generic converter to this registry.
+	 */
+	void addConverter(GenericConverter converter);
+
+	/**
+	 * Add a plain converter to this registry.
 	 */
 	void addConverter(Converter<?, ?> converter);
 
@@ -34,11 +40,6 @@ public interface ConverterRegistry {
 	 */
 	void addConverterFactory(ConverterFactory<?, ?> converterFactory);
 
-	/**
-	 * Add a generic converter to this registry.
-	 */
-	void addGenericConverter(GenericConverter converter);
-	
 	/**
 	 * Remove any converters from sourceType to targetType.
 	 * @param sourceType the source type
