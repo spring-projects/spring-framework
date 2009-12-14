@@ -1575,12 +1575,22 @@ public class ServletAnnotationControllerTests {
 		@InitBinder
 		private void initBinder(WebDataBinder binder) {
 			binder.initBeanPropertyAccess();
+			binder.setRequiredFields("sex");
 			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
 			vf.afterPropertiesSet();
 			binder.setValidator(vf);
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+
+		@Override
+		@RequestMapping("/myPath.do")
+		public String myHandle(@ModelAttribute("myCommand") @Valid TestBean tb, BindingResult errors, ModelMap model) {
+			if (!errors.hasFieldErrors("sex")) {
+				throw new IllegalStateException("requiredFields not applied");
+			}
+			return super.myHandle(tb, errors, model);
 		}
 	}
 
