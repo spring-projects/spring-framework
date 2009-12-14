@@ -16,20 +16,41 @@
 
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.converter.Converter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.Set;
+
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
- * Simply calls {@link Object#toString()} to convert any object to a string.
- * Used by the {@link DefaultConversionService} as a fallback if there are
- * no other explicit to string converters registered.
+ * Simply calls {@link Object#toString()} to convert any supported Object to a String.
+ * Supports Number, Boolean, Character, CharSequence, StringWriter, any enum,
+ * and any class with a String constructor or <code>valueOf(String)</code> method.
+ *
+ * <p>Used by the default ConversionService as a fallback if there are no other explicit
+ * to-String converters registered.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-final class ObjectToStringConverter implements Converter<Object, String> {
+final class ObjectToStringConverter implements ConditionalGenericConverter {
 
-	public String convert(Object source) {
-		return source.toString();
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		Class sourceClass = sourceType.getObjectType();
+		return Number.class.isAssignableFrom(sourceClass) || Boolean.class.equals(sourceClass) ||
+				Character.class.equals(sourceClass) || CharSequence.class.isAssignableFrom(sourceClass) ||
+				StringWriter.class.isAssignableFrom(sourceClass) || sourceClass.isEnum() ||
+				ObjectToObjectConverter.hasValueOfMethodOrConstructor(sourceClass, String.class);
+	}
+
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object.class, String.class));
+	}
+
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return (source != null ? source.toString() : null);
 	}
 
 }

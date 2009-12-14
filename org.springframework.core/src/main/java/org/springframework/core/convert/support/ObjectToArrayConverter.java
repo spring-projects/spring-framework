@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.invokeConverter;
-
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.Set;
@@ -58,12 +56,13 @@ final class ObjectToArrayConverter implements ConditionalGenericConverter {
 		Object target = Array.newInstance(targetElementType.getType(), 1);
 		if (sourceType.isAssignableTo(targetElementType)) {
 			Array.set(target, 0, source);
-		} else {
+		}
+		else {
 			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
 			if (converter == null) {
 				throw new ConverterNotFoundException(sourceType, targetElementType);
 			}
-			Array.set(target, 0, invokeConverter(converter, source, sourceType, targetElementType));
+			Array.set(target, 0, ConversionUtils.invokeConverter(converter, source, sourceType, targetElementType));
 		}
 		return target;
 	}

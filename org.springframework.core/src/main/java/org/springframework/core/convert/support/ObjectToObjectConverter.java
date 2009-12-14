@@ -38,15 +38,13 @@ import org.springframework.util.ReflectionUtils;
  * Else throws a ConversionFailedException.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-final class ObjectToObjectGenericConverter implements ConditionalGenericConverter {
+final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class<?> sourceClass = sourceType.getObjectType();
-		Class<?> targetClass = targetType.getObjectType();		
-		return getValueOfMethodOn(targetClass, sourceClass) != null ||
-				getConstructor(targetClass, sourceClass) != null;
+		return hasValueOfMethodOrConstructor(targetType.getObjectType(), sourceType.getObjectType());
 	}
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -91,11 +89,16 @@ final class ObjectToObjectGenericConverter implements ConditionalGenericConverte
 		return target;
 	}
 
-	private Method getValueOfMethodOn(Class<?> targetClass, Class<?> argType) {
-		return ClassUtils.getStaticMethod(targetClass, "valueOf", argType);
+
+	public static boolean hasValueOfMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
+		return (getValueOfMethodOn(targetClass, sourceClass) != null || getConstructor(targetClass, sourceClass) != null);
+	}
+
+	private static Method getValueOfMethodOn(Class<?> targetClass, Class<?> sourceClass) {
+		return ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
 	}
 	
-	private Constructor<?> getConstructor(Class<?> targetClass, Class<?> sourceClass) {
+	private static Constructor<?> getConstructor(Class<?> targetClass, Class<?> sourceClass) {
 		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
 	}
 

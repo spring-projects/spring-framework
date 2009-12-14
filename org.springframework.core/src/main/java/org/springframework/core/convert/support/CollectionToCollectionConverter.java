@@ -25,13 +25,14 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.GenericConverter;
-import static org.springframework.core.convert.support.ConversionUtils.*;
 
 /**
  * Converts from a Collection to another Collection.
- * First, creates a new Collection of the requested targetType with a size equal to the size of the source Collection.
- * Then copies each element in the source collection to the target collection.
- * Will perform an element conversion from the source collection's parameterized type to the target collection's parameterized type if necessary.
+ *
+ * <p>First, creates a new Collection of the requested targetType with a size equal to the
+ * size of the source Collection. Then copies each element in the source collection to the
+ * target collection. Will perform an element conversion from the source collection's
+ * parameterized type to the target collection's parameterized type if necessary.
  *
  * @author Keith Donald
  * @since 3.0
@@ -60,14 +61,15 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		Collection<?> sourceCollection = (Collection<?>) source;
 		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
 		if (sourceElementType == TypeDescriptor.NULL) {
-			sourceElementType = getElementType(sourceCollection);
+			sourceElementType = ConversionUtils.getElementType(sourceCollection);
 		}
 		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
 		if (sourceElementType == TypeDescriptor.NULL || targetElementType == TypeDescriptor.NULL
 				|| sourceElementType.isAssignableTo(targetElementType)) {
 			if (sourceType.isAssignableTo(targetType)) {
 				return sourceCollection;
-			} else {
+			}
+			else {
 				Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 				target.addAll(sourceCollection);
 				return target;
@@ -79,7 +81,7 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 			throw new ConverterNotFoundException(sourceElementType, targetElementType);
 		}
 		for (Object element : sourceCollection) {
-			target.add(invokeConverter(converter, element, sourceElementType, targetElementType));
+			target.add(ConversionUtils.invokeConverter(converter, element, sourceElementType, targetElementType));
 		}
 		return target;
 	}

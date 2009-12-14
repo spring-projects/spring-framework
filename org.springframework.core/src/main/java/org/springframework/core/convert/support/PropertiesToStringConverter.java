@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.springframework.core.convert.support.ConversionUtils.getMapEntryTypes;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -35,16 +33,16 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @since 3.0
  * @see Properties#store(java.io.OutputStream, String)
  */
-final class MapToStringConverter implements ConditionalGenericConverter {
+final class PropertiesToStringConverter implements ConditionalGenericConverter {
 
 	private final GenericConversionService conversionService;
 
-	public MapToStringConverter(GenericConversionService conversionService) {
+	public PropertiesToStringConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Map.class, String.class));
+		return Collections.singleton(new ConvertiblePair(Properties.class, String.class));
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -59,11 +57,12 @@ final class MapToStringConverter implements ConditionalGenericConverter {
 		Map<?, ?> sourceMap = (Map<?, ?>) source;
 		if (sourceMap.size() == 0) {
 			return "";
-		} else {
+		}
+		else {
 			TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
 			TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
 			if (sourceKeyType == TypeDescriptor.NULL || sourceValueType == TypeDescriptor.NULL) {
-				TypeDescriptor[] sourceEntryTypes = getMapEntryTypes(sourceMap);
+				TypeDescriptor[] sourceEntryTypes = ConversionUtils.getMapEntryTypes(sourceMap);
 				sourceKeyType = sourceEntryTypes[0];
 				sourceValueType = sourceEntryTypes[1];
 			}
@@ -82,7 +81,8 @@ final class MapToStringConverter implements ConditionalGenericConverter {
 					props.setProperty((String) mapEntry.getKey(), (String) mapEntry.getValue());
 				}
 				return store(props);
-			} else {
+			}
+			else {
 				MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetType,
 						targetType, keysCompatible, valuesCompatible, this.conversionService);
 				for (Object entry : sourceMap.entrySet()) {
@@ -101,9 +101,10 @@ final class MapToStringConverter implements ConditionalGenericConverter {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			props.store(os, null);
 			return os.toString("ISO-8859-1");
-		} catch (IOException e) {
+		}
+		catch (IOException ex) {
 			// Should never happen.
-			throw new IllegalArgumentException("Failed to store [" + props + "] into String", e);
+			throw new IllegalArgumentException("Failed to store [" + props + "] into String", ex);
 		}
 	}
 

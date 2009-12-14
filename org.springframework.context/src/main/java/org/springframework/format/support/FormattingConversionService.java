@@ -45,13 +45,13 @@ import org.springframework.format.Printer;
 public class FormattingConversionService extends GenericConversionService implements FormatterRegistry {
 
 	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
-		addGenericConverter(new PrinterConverter(fieldType, formatter, this));
-		addGenericConverter(new ParserConverter(fieldType, formatter, this));
+		addConverter(new PrinterConverter(fieldType, formatter, this));
+		addConverter(new ParserConverter(fieldType, formatter, this));
 	}
 
 	public void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser) {
-		addGenericConverter(new PrinterConverter(fieldType, printer, this));
-		addGenericConverter(new ParserConverter(fieldType, parser, this));
+		addConverter(new PrinterConverter(fieldType, printer, this));
+		addConverter(new ParserConverter(fieldType, parser, this));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,7 +67,7 @@ public class FormattingConversionService extends GenericConversionService implem
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 
 		for (final Class<?> fieldType : fieldTypes) {
-			addGenericConverter(new ConditionalGenericConverter() {
+			addConverter(new ConditionalGenericConverter() {
 				public Set<ConvertiblePair> getConvertibleTypes() {
 					return Collections.singleton(new ConvertiblePair(fieldType, String.class));
 				}
@@ -83,7 +83,7 @@ public class FormattingConversionService extends GenericConversionService implem
 							String.class.getName() + ": " + annotationFormatterFactory;
 				}
 			});
-			addGenericConverter(new ConditionalGenericConverter() {
+			addConverter(new ConditionalGenericConverter() {
 				public Set<ConvertiblePair> getConvertibleTypes() {
 					return Collections.singleton(new ConvertiblePair(String.class, fieldType));
 				}
