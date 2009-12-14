@@ -1,3 +1,0 @@
-CREATE DATABASE petclinic;
-
-GRANT ALL PRIVILEGES ON petclinic.* TO pc@localhost IDENTIFIED BY 'pc';
