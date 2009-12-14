@@ -3,13 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.GA (2009-12-14)
+Changes in version 3.0.0.GA (2009-12-15)
 ----------------------------------------
 
+* component scanning autodetects the new EE 6 "javax.annotation.ManagedBean" stereotype
+* updated JPA 2.0 support to the final spec (tested compatibility with EclipseLink 2.0 GA)
+* full support for GlassFish V3 GA (includes component scanning and load-time weaving)
 * upgraded to JRuby 1.4 (while remaining compatible with JRuby 1.1 and above)
 * bean property names are matched leniently ("title" and "Title"; "ISBN" and "iSBN")
+* bean properties of type enum array/collection can be populated with comma-separated String
+* removed getBeansWithAnnotation(Class,boolean,boolean) method from ListableBeanFactory
 * PropertyPlaceholderConfigurer is compatible with Spring 2.5 extensions (again)
 * SmartLifecycle beans will get auto-started on demand even if marked as lazy-init
+* MBeanExporter detects FactoryBean-exported resources independent from declaration order
 * revised GenericConverter's "getConvertibleTypes" signature to return Set of ConvertiblePair
 * GenericConversionService prefers matches against inherited interfaces over superclasses
 * added "converters" property to FormattingConversionServiceFactoryBean as well
