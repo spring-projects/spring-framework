@@ -152,6 +152,16 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalDateTimeAnnotatedLong() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateTimeAnnotatedLong", "October 31, 2009 12:00:00 PM ");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("October 31, 2009 12:00:00 PM ", binder.getBindingResult().getFieldValue(
+				"localDateTimeAnnotatedLong"));
+	}
+
+	@Test
 	public void testBindDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateTime", "10/31/09 12:00 PM");
@@ -287,6 +297,9 @@ public class JodaTimeFormattingTests {
 		@DateTimeFormat(style="FF")
 		private LocalDateTime localDateTimeAnnotated;
 
+		@DateTimeFormat(style="LL")
+		private LocalDateTime localDateTimeAnnotatedLong;
+
 		private DateTime dateTime;
 
 		@DateTimeFormat(style="MS")
@@ -370,6 +383,14 @@ public class JodaTimeFormattingTests {
 
 		public void setLocalDateTimeAnnotated(LocalDateTime localDateTimeAnnotated) {
 			this.localDateTimeAnnotated = localDateTimeAnnotated;
+		}
+		
+		public LocalDateTime getLocalDateTimeAnnotatedLong() {
+			return localDateTimeAnnotatedLong;
+		}
+
+		public void setLocalDateTimeAnnotatedLong(LocalDateTime localDateTimeAnnotatedLong) {
+			this.localDateTimeAnnotatedLong = localDateTimeAnnotatedLong;
 		}
 
 		public DateTime getDateTime() {
