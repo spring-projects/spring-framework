@@ -619,7 +619,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting>&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.release&lt;/id&gt;
-      &lt;url&gt;http://s3.amazonaws.com/maven.springsource.com/release/&lt;/url&gt;
+      &lt;url&gt;http://maven.springframework.org/release/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
@@ -629,7 +629,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting>&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.milestone&lt;/id&gt;
-      &lt;url&gt;http://s3.amazonaws.com/maven.springsource.com/milestone/&lt;/url&gt;
+      &lt;url&gt;http://maven.springframework.org/milestone/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
@@ -639,7 +639,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting>&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.snapshot&lt;/id&gt;
-      &lt;url&gt;http://s3.amazonaws.com/maven.springsource.com/snapshot/&lt;/url&gt;
+      &lt;url&gt;http://maven.springframework.org/snapshot/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;true&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
