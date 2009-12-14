@@ -171,7 +171,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) cl.loadClass("javax.annotation.ManagedBean"))));
+					((Class<? extends Annotation>) cl.loadClass("javax.annotation.ManagedBean")), false));
 			logger.info("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
@@ -179,7 +179,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 		}
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					((Class<? extends Annotation>) cl.loadClass("javax.inject.Named"))));
+					((Class<? extends Annotation>) cl.loadClass("javax.inject.Named")), false));
 			logger.info("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
