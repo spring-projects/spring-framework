@@ -160,10 +160,13 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	/**
 	 * Register the default filter for {@link Component @Component}.
-	 * This will implicitly register all annotations that have the
+	 * <p>This will implicitly register all annotations that have the
 	 * {@link Component @Component} meta-annotation including the
 	 * {@link Repository @Repository}, {@link Service @Service}, and
 	 * {@link Controller @Controller} stereotype annotations.
+	 * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
+	 * JSR-330's {@link javax.inject.Named} annotations, if available.
+	 *
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
