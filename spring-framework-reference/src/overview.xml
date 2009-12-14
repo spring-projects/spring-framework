@@ -765,16 +765,16 @@ TR: OK. Added to diagram.--></para>
         <title>Not Using Commons Logging</title>
 
         <para>Unfortunately, the worst thing about
-        <code>commons-logging</code>, and what has made it unpopular with new
-        tools, is also the runtime discovery algorithm. If we could turn back
+        <code>commons-logging</code> (and what has made it unpopular with new
+        tools) is its runtime discovery algorithm. If we could turn back
         the clock and start Spring now as a new project it would use a
-        different logging dependency. Probably the first choice would be the
+        different logging dependency. The first choice would probably be the
         Simple Logging Facade for Java (<ulink
         url="http://www.slf4j.org">SLF4J</ulink>), which is also used by a lot
         of other tools that people use with Spring inside their
         applications.</para>
 
-        <para>To switch off <code>commons-logging</code> is easy: just make
+        <para>Switching off <code>commons-logging</code> is easy: just make
         sure it isn't on the classpath at runtime. In Maven terms you exclude
         the dependency, and because of the way that the Spring dependencies
         are declared, you only have to do that once.</para>
@@ -889,7 +889,7 @@ TR: OK. Added to diagram.--></para>
         <para>Many people use <ulink
         url="http://logging.apache.org/log4j">Log4j</ulink> as a logging
         framework for configuration and management purposes. It's efficient
-        and well established, and in fact it's what we use at runtime when we
+        and well-established, and in fact it's what we use at runtime when we
         build and test Spring. Spring also provides some utilities for
         configuring and initializing Log4j, so it have an optional compile
         time dependency on Log4j in some modules.</para>
