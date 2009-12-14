@@ -764,12 +764,11 @@ TR: OK. Added to diagram.--></para>
       <section>
         <title>Not Using Commons Logging</title>
 
-        <para>Unfortunately, the worst thing about
-        <code>commons-logging</code> (and what has made it unpopular with new
-        tools) is its runtime discovery algorithm. If we could turn back
-        the clock and start Spring now as a new project it would use a
-        different logging dependency. The first choice would probably be the
-        Simple Logging Facade for Java (<ulink
+        <para>Unfortunately, the runtime discovery algorithm in
+        <code>commons-logging</code>, while convenient for the end-user, is
+        problematic. If we could turn back the clock and start Spring now
+        as a new project it would use a different logging dependency. The
+        first choice would probably be the Simple Logging Facade for Java (<ulink
         url="http://www.slf4j.org">SLF4J</ulink>), which is also used by a lot
         of other tools that people use with Spring inside their
         applications.</para>
