@@ -43,6 +43,9 @@ import org.springframework.util.PatternMatchUtils;
  * {@link org.springframework.stereotype.Service @Service}, or
  * {@link org.springframework.stereotype.Controller @Controller} stereotype.
  *
+ * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
+ * JSR-330's {@link javax.inject.Named} annotations, if available.
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
