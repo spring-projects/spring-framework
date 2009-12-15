@@ -116,9 +116,10 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 		}
 		if (this.conversionService != null) {
 			// Try custom formatter...
-			TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
-			if (td != null) {
-				return this.conversionService.convert(value, td, TypeDescriptor.valueOf(String.class));
+			TypeDescriptor fieldDesc = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
+			TypeDescriptor stringDesc = TypeDescriptor.valueOf(String.class);
+			if (fieldDesc != null && this.conversionService.canConvert(fieldDesc, stringDesc)) {
+				return this.conversionService.convert(value, fieldDesc, stringDesc);
 			}
 		}
 		return value;
