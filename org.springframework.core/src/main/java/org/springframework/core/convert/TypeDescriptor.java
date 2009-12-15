@@ -47,6 +47,8 @@ public class TypeDescriptor {
 	public static final TypeDescriptor STRING = TypeDescriptor.valueOf(String.class);
 
 
+	private Object value;
+
 	private Class<?> type;
 
 	private TypeDescriptor elementType;
@@ -59,9 +61,21 @@ public class TypeDescriptor {
 
 
 	/**
+	 * Create a new descriptor for the type of the given value.
+	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
+	 * Collection, where no additional context is available but elements can be introspected.
+	 * @param type the actual type to wrap
+	 */
+	public TypeDescriptor(Object value) {
+		Assert.notNull(value, "Value must not be null");
+		this.value = value;
+		this.type = value.getClass();
+	}
+
+	/**
 	 * Create a new descriptor for the given type.
-	 * <p>Use this constructor when a conversion point comes from a source such as a Map
-	 * or Collection, where no additional context is available.
+	 * <p>Use this constructor when a conversion point comes from a plain source type,
+	 * where no additional context is available.
 	 * @param type the actual type to wrap
 	 */
 	public TypeDescriptor(Class<?> type) {
@@ -242,12 +256,25 @@ public class TypeDescriptor {
 	 * Determine the generic key type of the wrapped Map parameter/field, if any.
 	 * @return the generic type, or <code>null</code> if none
 	 */
+	@SuppressWarnings("unchecked")
 	public Class<?> getMapKeyType() {
 		if (this.field != null) {
 			return GenericCollectionTypeResolver.getMapKeyFieldType(field);
 		}
 		else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
+		}
+		else if (this.value instanceof Map) {
+			Map map = (Map) this.value;
+			if (!map.isEmpty()) {
+				Object key = map.keySet().iterator().next();
+				if (key != null) {
+					return key.getClass();
+				}
+			}
+		}
+		if (this.type != null) {
+			return GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type);
 		}
 		else {
 			return null;
@@ -258,12 +285,25 @@ public class TypeDescriptor {
 	 * Determine the generic value type of the wrapped Map parameter/field, if any.
 	 * @return the generic type, or <code>null</code> if none
 	 */
+	@SuppressWarnings("unchecked")
 	public Class<?> getMapValueType() {
 		if (this.field != null) {
 			return GenericCollectionTypeResolver.getMapValueFieldType(this.field);
 		}
 		else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
+		}
+		else if (this.value instanceof Map) {
+			Map map = (Map) this.value;
+			if (!map.isEmpty()) {
+				Object val = map.values().iterator().next();
+				if (val != null) {
+					return val.getClass();
+				}
+			}
+		}
+		if (this.type != null) {
+			return GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type);
 		}
 		else {
 			return null;
@@ -349,14 +389,26 @@ public class TypeDescriptor {
 
 	@SuppressWarnings("unchecked")
 	private Class<?> getCollectionElementType() {
+		if (this.field != null) {
+			return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
+		}
+		else if (this.methodParameter != null) {
+			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
+		}
+		else if (this.value instanceof Collection) {
+			Collection coll = (Collection) this.value;
+			if (!coll.isEmpty()) {
+				Object elem = coll.iterator().next();
+				if (elem != null) {
+					return elem.getClass();
+				}
+			}
+		}
 		if (this.type != null) {
 			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type);
 		}
-		else if (this.field != null) {
-			return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
-		}
 		else {
-			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
+			return null;
 		}
 	}
 

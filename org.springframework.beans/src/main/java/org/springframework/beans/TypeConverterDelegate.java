@@ -194,7 +194,7 @@ class TypeConverterDelegate {
 		// No custom editor but custom ConversionService specified?
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && convertedValue != null) {
-			TypeDescriptor sourceTypeDesc = TypeDescriptor.valueOf(convertedValue.getClass());
+			TypeDescriptor sourceTypeDesc = new TypeDescriptor(convertedValue);
 			if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
 				return (T) conversionService.convert(convertedValue, sourceTypeDesc, typeDescriptor);
 			}
