@@ -354,6 +354,32 @@ public class TypeDescriptor {
 		return isTypeAssignableTo(targetType.getType());
 	}
 
+	// static factory methods
+
+	/**
+	 * Creates a new type descriptor for the given class.
+	 * @param type the class
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor valueOf(Class<?> type) {
+		if (type == null) {
+			return TypeDescriptor.NULL;
+		} else if (type.equals(String.class)) {
+			return TypeDescriptor.STRING;
+		} else {
+			return new TypeDescriptor(type);
+		}
+	}
+
+	/**
+	 * Creates a new type descriptor for the class of the given object.
+	 * @param object the object
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor forObject(Object object) {
+		return (object == null ? NULL : valueOf(object.getClass()));
+	}
+
 	// internal helpers
 	
 	private Class<?> getArrayComponentType() {
@@ -438,32 +464,5 @@ public class TypeDescriptor {
 			return builder.toString();
 		}
 	}
-
-
-	// static factory methods
-
-	/**
-	 * Creates a new type descriptor for the given class.
-	 * @param type the class
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor valueOf(Class<?> type) {
-		if (type == null) {
-			return TypeDescriptor.NULL;
-		} else if (type.equals(String.class)) {
-			return TypeDescriptor.STRING;
-		} else {
-			return new TypeDescriptor(type);
-		}
-	}
-
-	/**
-	 * Creates a new type descriptor for the class of the given object.
-	 * @param object the object
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor forObject(Object object) {
-		return (object == null ? NULL : valueOf(object.getClass()));
-	}
-
+	
 }
