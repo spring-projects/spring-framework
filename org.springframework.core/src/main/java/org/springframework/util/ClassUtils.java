@@ -558,7 +558,7 @@ public abstract class ClassUtils {
 
 
 	/**
-	 * Determine whether the given class has a constructor with the given signature.
+	 * Determine whether the given class has a public constructor with the given signature.
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to "false".
 	 * @param clazz	the clazz to analyze
 	 * @param paramTypes the parameter types of the method
@@ -570,7 +570,7 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Determine whether the given class has a constructor with the given signature,
+	 * Determine whether the given class has a public constructor with the given signature,
 	 * and return it if available (else return <code>null</code>).
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>null</code>.
 	 * @param clazz	the clazz to analyze
@@ -717,7 +717,7 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return a static method of a class.
+	 * Return a public static method of a class.
 	 * @param methodName the static method name
 	 * @param clazz	the class which defines the method
 	 * @param args the parameter types to the method
@@ -728,8 +728,8 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
-			Method method = clazz.getDeclaredMethod(methodName, args);
-			return ((method.getModifiers() & Modifier.STATIC) != 0 ? method : null);
+			Method method = clazz.getMethod(methodName, args);
+			return Modifier.isStatic(method.getModifiers()) ? method : null;
 		}
 		catch (NoSuchMethodException ex) {
 			return null;

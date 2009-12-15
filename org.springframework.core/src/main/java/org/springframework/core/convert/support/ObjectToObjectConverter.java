@@ -60,6 +60,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		Object target;
 		Method method = getValueOfMethodOn(targetClass, sourceClass);
 		if (method != null) {
+			ReflectionUtils.makeAccessible(method);
 			target = ReflectionUtils.invokeMethod(method, null, source);
 		}
 		else {

@@ -597,8 +597,7 @@ public class DefaultConversionTests {
 	}
 
 	@Test
-	@Ignore
-	public void convertObjectToObjectValueOFMethod() {
+	public void convertObjectToObjectValueOfMethod() {
 		assertEquals(ISBN.valueOf("123456789"), conversionService.convert("123456789", ISBN.class));
 	}
 
@@ -614,6 +613,7 @@ public class DefaultConversionTests {
 	}
 
 	private static class SSN {
+		
 		private String value;
 		
 		public SSN(String value) {
