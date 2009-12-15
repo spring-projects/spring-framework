@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.request;
 
-import org.springframework.web.multipart.MultipartRequest;
-
 /**
  * Extension of the {@link WebRequest} interface, exposing the
  * native request and response objects in a generic fashion.
@@ -28,7 +26,7 @@ import org.springframework.web.multipart.MultipartRequest;
  * @author Juergen Hoeller
  * @since 2.5.2
  */
-public interface NativeWebRequest extends WebRequest, MultipartRequest {
+public interface NativeWebRequest extends WebRequest {
 
 	/**
 	 * Return the underlying native request object, if available.

@@ -17,9 +17,7 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -27,12 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * {@link WebRequest} adapter for an {@link javax.servlet.http.HttpServletRequest}.
@@ -47,8 +41,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
 
 
-	private MultipartRequest multipartRequest;
-
 	private HttpServletResponse response;
 
 	private boolean notModified = false;
@@ -60,9 +52,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 */
 	public ServletWebRequest(HttpServletRequest request) {
 		super(request);
-		if (request instanceof MultipartRequest) {
-			this.multipartRequest = (MultipartRequest) request;
-		}
 	}
 
 	/**
@@ -189,43 +178,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			}
 		}
 		return sb.toString();
-	}
-
-
-	@SuppressWarnings("unchecked")
-	public Iterator<String> getFileNames() {
-		if (this.multipartRequest == null) {
-			return (Iterator<String>) Collections.EMPTY_SET.iterator();
-		}
-		return this.multipartRequest.getFileNames();
-	}
-
-	public MultipartFile getFile(String name) {
-		if (this.multipartRequest == null) {
-			return null;
-		}
-		return this.multipartRequest.getFile(name);
-	}
-
-	public List<MultipartFile> getFiles(String name) {
-		if (this.multipartRequest == null) {
-			return null;
-		}
-		return this.multipartRequest.getFiles(name);
-	}
-
-	public Map<String, MultipartFile> getFileMap() {
-		if (this.multipartRequest == null) {
-			return Collections.emptyMap();
-		}
-		return this.multipartRequest.getFileMap();
-	}
-
-	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
-		if (this.multipartRequest == null) {
-			return new LinkedMultiValueMap<String, MultipartFile>();
-		}
-		return this.multipartRequest.getMultiFileMap();
 	}
 
 

@@ -72,6 +72,7 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * Support class for invoking an annotated handler method. Operates on the introspection results of a {@link
@@ -415,7 +416,10 @@ public class HandlerMethodInvoker {
 		if (paramName.length() == 0) {
 			paramName = getRequiredParameterName(methodParam);
 		}
-		Object paramValue = webRequest.getFile(paramName);
+		Object paramValue = null;
+		if (webRequest.getNativeRequest() instanceof MultipartRequest) {
+			paramValue = ((MultipartRequest) webRequest.getNativeRequest()).getFile(paramName);
+		}
 		if (paramValue == null) {
 			String[] paramValues = webRequest.getParameterValues(paramName);
 			if (paramValues != null && !paramType.isArray()) {
