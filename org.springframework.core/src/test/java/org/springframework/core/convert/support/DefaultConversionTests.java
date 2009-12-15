@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
@@ -37,7 +38,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -594,6 +594,11 @@ public class DefaultConversionTests {
 	@Test
 	public void convertObjectToStringStringConstructorPresent() {
 		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
+	}
+	
+	@Test
+	public void convertObjectToStringNotSupported() {
+		assertFalse(conversionService.canConvert(TestEntity.class, String.class));
 	}
 
 	@Test
