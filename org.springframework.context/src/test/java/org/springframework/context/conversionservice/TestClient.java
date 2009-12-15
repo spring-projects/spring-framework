@@ -32,6 +32,8 @@ public class TestClient {
 
 	private boolean bool;
 
+	private List<String> stringList;
+
 	private Resource[] resourceArray;
 
 	private List<Resource> resourceList;
@@ -54,6 +56,14 @@ public class TestClient {
 
 	public void setBool(boolean bool) {
 		this.bool = bool;
+	}
+
+	public List<String> getStringList() {
+		return stringList;
+	}
+
+	public void setStringList(List<String> stringList) {
+		this.stringList = stringList;
 	}
 
 	public Resource[] getResourceArray() {
