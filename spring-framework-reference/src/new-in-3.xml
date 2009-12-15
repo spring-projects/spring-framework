@@ -220,6 +220,10 @@
       <para>BeanFactory interface returns typed bean instances as far as
       possible: <itemizedlist>
           <listitem>
+            <para>T getBean(Class&lt;T&gt; requiredType)</para>
+          </listitem>
+
+          <listitem>
             <para>T getBean(String name, Class&lt;T&gt; requiredType)</para>
           </listitem>
 
@@ -266,7 +270,8 @@
       across all the products in the Spring portfolio. Its language features
       are driven by the requirements of the projects in the Spring portfolio,
       including tooling requirements for code completion support within the
-      Eclipse based SpringSource Tool Suite.</para>
+      Eclipse based <ulink url="http://www.springsource.com/products/sts">SpringSource
+      Tool Suite</ulink>.</para>
 
       <para>The following is an example of how the Expression Language can be
       used to configure some properties of a database setup <programlisting
@@ -326,6 +331,10 @@ public class RewardsTestDatabase {
             </listitem>
 
             <listitem>
+              <para>@ImportResource</para>
+            </listitem>
+
+            <listitem>
               <para>@Value</para>
             </listitem>
           </itemizedlist></para>
@@ -368,7 +377,16 @@ public class AppConfig {
         scanning entry in your minimal application context XML file.
         <programlisting language="xml">&lt;context:component-scan base-package="org.example.config"/&gt;
 &lt;util:properties id="jdbcProperties" location="classpath:org/example/config/jdbc.properties"/&gt;
-        </programlisting></para>
+        </programlisting>
+        Or you can bootstrap a <literal>@Configuration</literal> class directly using
+        <literal>AnnotationConfigApplicationContext</literal>:
+        <programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+    FooService fooService = ctx.getBean(FooService.class);
+    fooService.doStuff();
+}</programlisting>
+        See <xref linkend="beans-java-instantiating-container"/> for full information on
+        <literal>AnnotationConfigApplicationContext</literal>.</para>
       </section>
 
       <section>
@@ -441,7 +459,7 @@ public class AppConfig {
       <section>
         <title>@MVC additions</title>
 
-		<para>A <literal>mvc</literal> namespace has been introduced that greatly simplifies Spring MVC configuration.</para>
+        <para>A <literal>mvc</literal> namespace has been introduced that greatly simplifies Spring MVC configuration.</para>
 
         <para>Additional annotations such as
         <classname>@CookieValue</classname> and
