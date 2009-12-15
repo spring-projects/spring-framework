@@ -42,11 +42,11 @@ public class OpDivide extends Operator {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(op1.doubleValue() / op2.doubleValue(), DOUBLE_TYPE_DESCRIPTOR);
+				return new TypedValue(op1.doubleValue() / op2.doubleValue());
 			} else if (op1 instanceof Long || op2 instanceof Long) {
-				return new TypedValue(op1.longValue() / op2.longValue(), LONG_TYPE_DESCRIPTOR);
+				return new TypedValue(op1.longValue() / op2.longValue());
 			} else { // TODO what about non-int result of the division?
-				return new TypedValue(op1.intValue() / op2.intValue(), INTEGER_TYPE_DESCRIPTOR);
+				return new TypedValue(op1.intValue() / op2.intValue());
 			}
 		}
 		Object result = state.operate(Operation.DIVIDE, operandOne, operandTwo);

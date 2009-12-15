@@ -31,7 +31,7 @@ public class StringLiteral extends Literal {
 		super(payload,pos);
 		// TODO should these have been skipped being created by the parser rules? or not?
 		value = value.substring(1, value.length() - 1);
-		this.value = new TypedValue(value.replaceAll("''", "'"),STRING_TYPE_DESCRIPTOR);
+		this.value = new TypedValue(value.replaceAll("''", "'"));
 	}
 
 	@Override

@@ -39,10 +39,10 @@ public class TypeReference extends SpelNodeImpl {
 			TypeCode tc = TypeCode.valueOf(typename.toUpperCase());
 			if (tc != TypeCode.OBJECT) {
 				// it is a primitive type
-				return new TypedValue(tc.getType(),CLASS_TYPE_DESCRIPTOR);
+				return new TypedValue(tc.getType());
 			}
 		}
-		return new TypedValue(state.findType(typename),CLASS_TYPE_DESCRIPTOR);
+		return new TypedValue(state.findType(typename));
 	}
 
 	@Override

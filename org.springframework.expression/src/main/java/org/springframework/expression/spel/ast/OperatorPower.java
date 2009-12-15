@@ -44,16 +44,16 @@ public class OperatorPower extends Operator {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(Math.pow(op1.doubleValue(),op2.doubleValue()),DOUBLE_TYPE_DESCRIPTOR);
+				return new TypedValue(Math.pow(op1.doubleValue(),op2.doubleValue()));
 			} else if (op1 instanceof Long || op2 instanceof Long) {
 				double d= Math.pow(op1.longValue(), op2.longValue());
-				return new TypedValue((long)d, LONG_TYPE_DESCRIPTOR);
+				return new TypedValue((long)d);
 			} else {
 				double d= Math.pow(op1.longValue(), op2.longValue());
 				if (d > Integer.MAX_VALUE) {
-					return new TypedValue((long)d,LONG_TYPE_DESCRIPTOR);
+					return new TypedValue((long)d);
 				} else {
-					return new TypedValue((int)d,INTEGER_TYPE_DESCRIPTOR);
+					return new TypedValue((int)d);
 				}
 			}
 		}

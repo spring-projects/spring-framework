@@ -30,7 +30,7 @@ public class LongLiteral extends Literal {
 
 	LongLiteral(String payload, int pos, long value) {
 		super(payload, pos); 
-		this.value = new TypedValue(value, LONG_TYPE_DESCRIPTOR);
+		this.value = new TypedValue(value);
 	}
 
 	@Override

@@ -51,11 +51,11 @@ public class OpMinus extends Operator {
 			if (operand instanceof Number) {
 				Number n = (Number) operand;
 				if (operand instanceof Double) {
-					return new TypedValue(0 - n.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
+					return new TypedValue(0 - n.doubleValue());
 				} else if (operand instanceof Long) {
-					return new TypedValue(0 - n.longValue(),LONG_TYPE_DESCRIPTOR);
+					return new TypedValue(0 - n.longValue());
 				} else {
-					return new TypedValue(0 - n.intValue(),INTEGER_TYPE_DESCRIPTOR);
+					return new TypedValue(0 - n.intValue());
 				}
 			}
 			return state.operate(Operation.SUBTRACT, operand, null);
@@ -66,17 +66,17 @@ public class OpMinus extends Operator {
 				Number op1 = (Number) left;
 				Number op2 = (Number) right;
 				if (op1 instanceof Double || op2 instanceof Double) {
-					return new TypedValue(op1.doubleValue() - op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
+					return new TypedValue(op1.doubleValue() - op2.doubleValue());
 				} else if (op1 instanceof Long || op2 instanceof Long) {
-					return new TypedValue(op1.longValue() - op2.longValue(),LONG_TYPE_DESCRIPTOR);
+					return new TypedValue(op1.longValue() - op2.longValue());
 				} else {
-					return new TypedValue(op1.intValue() - op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
+					return new TypedValue(op1.intValue() - op2.intValue());
 				}
 			} else if (left instanceof String && right instanceof Integer && ((String)left).length()==1) {
 				String theString = (String) left;
 				Integer theInteger = (Integer) right;
 				// implements character - int (ie. b - 1 = a)
-				return new TypedValue(Character.toString((char) (theString.charAt(0) - theInteger)),STRING_TYPE_DESCRIPTOR);
+				return new TypedValue(Character.toString((char) (theString.charAt(0) - theInteger)));
 			}
 			return state.operate(Operation.SUBTRACT, left, right);
 		}

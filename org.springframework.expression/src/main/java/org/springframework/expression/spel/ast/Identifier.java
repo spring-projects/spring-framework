@@ -29,7 +29,7 @@ public class Identifier extends SpelNodeImpl {
 
 	public Identifier(String payload,int pos) {
 		super(pos);
-		this.id = new TypedValue(payload, STRING_TYPE_DESCRIPTOR);
+		this.id = new TypedValue(payload);
 	}
 
 	@Override

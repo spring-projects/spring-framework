@@ -107,11 +107,11 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) {
-		return TypeDescriptor.STRING;
+		return TypeDescriptor.valueOf(String.class);
 	}
 
 	public TypeDescriptor getValueTypeDescriptor() {
-		return TypeDescriptor.STRING;
+		return TypeDescriptor.valueOf(String.class);
 	}
 
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
@@ -157,11 +157,11 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
-		return TypeDescriptor.STRING;
+		return TypeDescriptor.valueOf(String.class);
 	}
 
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException {
-		return TypeDescriptor.STRING;
+		return TypeDescriptor.valueOf(String.class);
 	}
 
 	public boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException {

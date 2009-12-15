@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
@@ -34,18 +33,6 @@ import org.springframework.util.Assert;
  * @since 3.0
  */
 public abstract class SpelNodeImpl implements SpelNode {
-
-	static TypeDescriptor OBJECT_TYPE_DESCRIPTOR = TypeDescriptor.OBJECT;
-	static TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.STRING;
-	static TypeDescriptor CLASS_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Class.class);
-	static TypeDescriptor BOOLEAN_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Boolean.class);
-	static TypeDescriptor CHARACTER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Character.class);
-	static TypeDescriptor BYTE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Byte.class);
-	static TypeDescriptor SHORT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Short.class);
-	static TypeDescriptor INTEGER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Integer.class);
-	static TypeDescriptor LONG_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Long.class);
-	static TypeDescriptor FLOAT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Float.class);
-	static TypeDescriptor DOUBLE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Double.class);
 
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 	
