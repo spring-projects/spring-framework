@@ -24,10 +24,14 @@
 				exclude-result-prefixes="xslthl"
 				version='1.0'>
 
+	<xsl:param name="chunk.section.depth">'5'</xsl:param>
+	<xsl:param name="use.id.as.filename" select="1"/>
+
 <!-- Extensions -->
 	<xsl:param name="use.extensions">1</xsl:param>
 	<xsl:param name="tablecolumns.extension">0</xsl:param>
 	<xsl:param name="callout.extensions">1</xsl:param>
+
 <!-- Activate Graphics -->
 	<xsl:param name="admon.graphics" select="1"/>
 	<xsl:param name="admon.graphics.path">images/</xsl:param>
@@ -45,7 +49,6 @@
 	<xsl:param name="admonition.title.properties">text-align: left</xsl:param>
 
 <!-- Label Chapters and Sections (numbering) -->
-        <xsl:param name="use.id.as.filename" select="1"/>
 	<xsl:param name="chapter.autolabel" select="1"/>
 	<xsl:param name="section.autolabel" select="1"/>
 	<xsl:param name="section.autolabel.max.depth" select="3"/>
