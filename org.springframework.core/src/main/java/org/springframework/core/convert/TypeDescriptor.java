@@ -18,7 +18,6 @@ package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Map;
 
@@ -41,10 +40,10 @@ public class TypeDescriptor {
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
 	/** Constant defining a TypeDescriptor for <code>java.lang.Object</code> */
-	public static final TypeDescriptor OBJECT = TypeDescriptor.valueOf(Object.class);
+	public static final TypeDescriptor OBJECT = new TypeDescriptor(Object.class);
 
 	/** Constant defining a TypeDescriptor for <code>java.lang.String</code> */
-	public static final TypeDescriptor STRING = TypeDescriptor.valueOf(String.class);
+	public static final TypeDescriptor STRING = new TypeDescriptor(String.class);
 
 
 	private Object value;
@@ -59,18 +58,6 @@ public class TypeDescriptor {
 
 	private Annotation[] cachedFieldAnnotations;
 
-
-	/**
-	 * Create a new descriptor for the type of the given value.
-	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
-	 * Collection, where no additional context is available but elements can be introspected.
-	 * @param type the actual type to wrap
-	 */
-	public TypeDescriptor(Object value) {
-		Assert.notNull(value, "Value must not be null");
-		this.value = value;
-		this.type = value.getClass();
-	}
 
 	/**
 	 * Create a new descriptor for the given type.
@@ -95,6 +82,30 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Create a new type descriptor for a field.
+	 * Use this constructor when a target conversion point originates from a field.
+	 * @param field the field to wrap
+	 */
+	public TypeDescriptor(Field field) {
+		Assert.notNull(field, "Field must not be null");
+		this.field = field;
+	}
+
+	/**
+	 * Create a new descriptor for the type of the given value.
+	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
+	 * Collection, where no additional context is available but elements can be introspected.
+	 * @param type the actual type to wrap
+	 */
+	public TypeDescriptor(Object value) {
+		Assert.notNull(value, "Value must not be null");
+		this.value = value;
+		this.type = value.getClass();
+	}
+	
+	// protected constructors for subclasses
+	
+	/**
 	 * Create a new type descriptor from a method or constructor parameter.
 	 * <p>Use this constructor when a target conversion point originates from a method parameter,
 	 * such as a setter method argument.
@@ -108,30 +119,10 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for a field.
-	 * Use this constructor when a target conversion point originates from a field.
-	 * @param field the field to wrap
-	 */
-	public TypeDescriptor(Field field) {
-		Assert.notNull(field, "Field must not be null");
-		this.field = field;
-	}
-
-	/**
 	 * Internal constructor for a NULL descriptor.
 	 */
 	private TypeDescriptor() {
 	}
-
-	/**
-	 * Internal constructor for a Collection TypeDescriptor.
-	 * @see #collection(Class, TypeDescriptor)
-	 */
-	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementType) {
-		this.type = collectionType;
-		this.elementType = elementType;
-	}
-
 
 	/**
 	 * Return the wrapped MethodParameter, if any.
@@ -355,34 +346,16 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Returns true if this type is an abstract class.
-	 */
-	public boolean isAbstractClass() {
-		Class<?> type = getType();
-		return (type != null && !getType().isInterface() && Modifier.isAbstract(getType().getModifiers()));
-	}
-
-	/**
-	 * Is the obj an instance of this type?
-	 */
-	public boolean isAssignableValue(Object obj) {
-		Class<?> type = getType();
-		return type != null && ClassUtils.isAssignableValue(getType(), obj);
-	}
-
-	/**
-	 * Returns true if an object this type can be assigned to a rereference of given targetType.
+	 * Returns true if an object this type can be assigned to a reference of given targetType.
 	 * @param targetType the target type
 	 * @return true if this type is assignable to the target
 	 */
 	public boolean isAssignableTo(TypeDescriptor targetType) {
-		if (targetType == TypeDescriptor.NULL) {
-			return false;
-		}
-		Class<?> type = getType();
-		return type != null && ClassUtils.isAssignable(targetType.getType(), type);
+		return isTypeAssignableTo(targetType.getType());
 	}
 
+	// internal helpers
+	
 	private Class<?> getArrayComponentType() {
 		return getType().getComponentType();
 	}
@@ -475,7 +448,13 @@ public class TypeDescriptor {
 	 * @return the type descriptor
 	 */
 	public static TypeDescriptor valueOf(Class<?> type) {
-		return (type != null ? new TypeDescriptor(type) : NULL);
+		if (type == null) {
+			return TypeDescriptor.NULL;
+		} else if (type.equals(String.class)) {
+			return TypeDescriptor.STRING;
+		} else {
+			return new TypeDescriptor(type);
+		}
 	}
 
 	/**
@@ -485,16 +464,6 @@ public class TypeDescriptor {
 	 */
 	public static TypeDescriptor forObject(Object object) {
 		return (object == null ? NULL : valueOf(object.getClass()));
-	}
-
-	/**
-	 * Create a TypeDescriptor for a Collection type.
-	 * @param type the collection type
-	 * @param elementType the collection's element type
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor collection(Class<?> type, TypeDescriptor elementType) {
-		return new TypeDescriptor(type, elementType);
 	}
 
 }
