@@ -41,7 +41,7 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
 			TypedValue typedValue = children[0].getValueInternal(state);
-			if (TypedValue.NULL_TYPED_VALUE.equals(typedValue)) {
+			if (TypedValue.NULL.equals(typedValue)) {
 				throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 			}
 			boolean value = (Boolean) state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));

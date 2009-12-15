@@ -63,7 +63,7 @@ public class MethodReference extends SpelNodeImpl {
 		}
 		if (currentContext.getValue() == null) {
 			if (nullSafe) {
-				return TypedValue.NULL_TYPED_VALUE;
+				return TypedValue.NULL;
 			} else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
 						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));

@@ -69,7 +69,7 @@ public class OpOr extends Operator {
 	}
 
 	private void assertTypedValueNotNull(TypedValue typedValue) {
-		if (TypedValue.NULL_TYPED_VALUE.equals(typedValue)) {
+		if (TypedValue.NULL.equals(typedValue)) {
 			throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 		}
 	}

@@ -30,7 +30,7 @@ public class NullLiteral extends Literal {
 
 	@Override
 	public TypedValue getLiteralValue() {
-		return TypedValue.NULL_TYPED_VALUE;
+		return TypedValue.NULL;
 	}
 
 	@Override

@@ -68,7 +68,7 @@ public class ExpressionStateTests extends ExpressionTestCase {
 	public void testVariables() {
 		ExpressionState state = getState();
 		TypedValue typedValue = state.lookupVariable("foo");
-		Assert.assertEquals(TypedValue.NULL_TYPED_VALUE,typedValue);
+		Assert.assertEquals(TypedValue.NULL,typedValue);
 
 		state.setVariable("foo",34);
 		typedValue = state.lookupVariable("foo");
@@ -85,11 +85,11 @@ public class ExpressionStateTests extends ExpressionTestCase {
 	public void testNoVariableInteference() {
 		ExpressionState state = getState();
 		TypedValue typedValue = state.lookupVariable("foo");
-		Assert.assertEquals(TypedValue.NULL_TYPED_VALUE,typedValue);
+		Assert.assertEquals(TypedValue.NULL,typedValue);
 		
 		state.setLocalVariable("foo",34);
 		typedValue = state.lookupVariable("foo");
-		Assert.assertEquals(TypedValue.NULL_TYPED_VALUE,typedValue);
+		Assert.assertEquals(TypedValue.NULL,typedValue);
 
 		state.setVariable("goo","hello");
 		Assert.assertNull(state.lookupLocalVariable("goo"));
@@ -124,7 +124,7 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		// Assert.assertEquals(null, state.getRootContextObject().getValue());
 		
 		state = new ExpressionState(new StandardEvaluationContext());
-		Assert.assertEquals(TypedValue.NULL_TYPED_VALUE,state.getRootContextObject());
+		Assert.assertEquals(TypedValue.NULL,state.getRootContextObject());
 		
 
 		((StandardEvaluationContext)state.getEvaluationContext()).setRootObject(null,TypeDescriptor.NULL);
@@ -156,7 +156,7 @@ public class ExpressionStateTests extends ExpressionTestCase {
 		Assert.assertEquals(state.getRootContextObject().getValue(),state.getActiveContextObject().getValue());
 		
 		state = new ExpressionState(new StandardEvaluationContext());
-		Assert.assertEquals(TypedValue.NULL_TYPED_VALUE,state.getActiveContextObject());
+		Assert.assertEquals(TypedValue.NULL,state.getActiveContextObject());
 	}
 	
 	@Test

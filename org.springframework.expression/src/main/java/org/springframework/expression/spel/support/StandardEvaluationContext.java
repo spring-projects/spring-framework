@@ -76,7 +76,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public void setRootObject(Object rootObject) {
 		if (this.rootObject == null) {
-			this.rootObject = TypedValue.NULL_TYPED_VALUE; 
+			this.rootObject = TypedValue.NULL;
 		} else {
 			this.rootObject = new TypedValue(rootObject);//, TypeDescriptor.forObject(rootObject));
 		}
