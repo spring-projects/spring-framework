@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package org.springframework.expression.spel;
 
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
+package org.springframework.expression.spel;
+
+import org.springframework.expression.spel.SpelParseException;
 
 /**
+ * Wraps a real parse exception. This exception flows to the top parse method and then
+ * the wrapped exception is thrown as the real problem.
+ * 
  * @author Andy Clement
  * @since 3.0
  */
-public class SpelExpressionParserFactory {
+public class InternalParseException extends RuntimeException {
 
-	public static ExpressionParser getParser() {
-		return new SpelExpressionParser();
+	public InternalParseException(SpelParseException cause) {
+		super(cause);
 	}
 	
-	/**
-	 * @param configuration configuration bit flags @see SpelExpressionParserConfiguration
-	 * @return an expression parser instance configured appropriately
-	 */
-	public static ExpressionParser getParser(int configuration) {
-		return new SpelExpressionParser(configuration);
+	public SpelParseException getCause() {
+		return (SpelParseException) super.getCause();
 	}
 	
 }

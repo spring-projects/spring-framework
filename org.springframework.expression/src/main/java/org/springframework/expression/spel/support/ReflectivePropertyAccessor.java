@@ -35,14 +35,14 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Simple PropertyResolver that uses reflection to access properties for reading and writing. A property can be accessed
+ * Simple PropertyAccessor that uses reflection to access properties for reading and writing. A property can be accessed
  * if it is accessible as a field on the object or through a getter (if being read) or a setter (if being written). 
  * 
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class ReflectivePropertyResolver implements PropertyAccessor {
+public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	protected Map<CacheKey, InvokerPair> readerCache;
 

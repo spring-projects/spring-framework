@@ -30,10 +30,11 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.support.ReflectionHelper;
-import org.springframework.expression.spel.support.ReflectivePropertyResolver;
+import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKind;
+import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Tests for any helper code.
@@ -274,7 +275,7 @@ public class HelperTests extends ExpressionTestCase {
 	
 	@Test
 	public void testReflectivePropertyResolver() throws Exception {
-		ReflectivePropertyResolver rpr = new ReflectivePropertyResolver();
+		ReflectivePropertyAccessor rpr = new ReflectivePropertyAccessor();
 		Tester t = new Tester();
 		t.setProperty("hello");
 		EvaluationContext ctx = new StandardEvaluationContext(t);
@@ -313,7 +314,7 @@ public class HelperTests extends ExpressionTestCase {
 	
 	@Test
 	public void testOptimalReflectivePropertyResolver() throws Exception {
-		ReflectivePropertyResolver rpr = new ReflectivePropertyResolver();
+		ReflectivePropertyAccessor rpr = new ReflectivePropertyAccessor();
 		Tester t = new Tester();
 		t.setProperty("hello");
 		EvaluationContext ctx = new StandardEvaluationContext(t);

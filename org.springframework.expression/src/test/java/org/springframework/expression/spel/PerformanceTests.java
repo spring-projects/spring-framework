@@ -17,11 +17,12 @@
 package org.springframework.expression.spel;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 ///CLOVER:OFF
 
@@ -35,7 +36,7 @@ public class PerformanceTests {
 	public static final int ITERATIONS = 10000;
 	public static final boolean report = true;
 
-	private static ExpressionParser parser = SpelExpressionParserFactory.getParser();
+	private static ExpressionParser parser = new SpelExpressionParser();
 	private static EvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	private static final boolean DEBUG = false;

@@ -71,7 +71,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			// Create a parser
 			SpelExpressionParser parser = new SpelExpressionParser();
 			// Parse an expression
-			Expression expr = parser.parseExpression("new String('hello world')");
+			Expression expr = parser.parseRaw("new String('hello world')");
 			// Evaluate it using a 'standard' context
 			Object value = expr.getValue();
 			// They are reusable
@@ -102,16 +102,16 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
 		ctx.setVariable("primes",primes);
 		
-		Expression expr = parser.parseExpression("#favouriteColour");
+		Expression expr = parser.parseRaw("#favouriteColour");
 		Object value = expr.getValue(ctx);
 		Assert.assertEquals("blue", value);
 
-		expr = parser.parseExpression("#primes.get(1)");
+		expr = parser.parseRaw("#primes.get(1)");
 		value = expr.getValue(ctx);
 		Assert.assertEquals(3, value);
 
 		// all prime numbers > 10 from the list (using selection ?{...})
-		expr = parser.parseExpression("#primes.?[#this>10]");
+		expr = parser.parseRaw("#primes.?[#this>10]");
 		value = expr.getValue(ctx);
 		Assert.assertEquals("[11, 13, 17]", value.toString());			
 	}
@@ -140,30 +140,30 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		ctx.setRootObject(tc);
 		
 		// read it, set it, read it again
-		Expression expr = parser.parseExpression("str");
+		Expression expr = parser.parseRaw("str");
 		Object value = expr.getValue(ctx);
 		Assert.assertEquals("wibble", value);			
-		expr = parser.parseExpression("str");
+		expr = parser.parseRaw("str");
 		expr.setValue(ctx, "wobble");
-		expr = parser.parseExpression("str");
+		expr = parser.parseRaw("str");
 		value = expr.getValue(ctx);
 		Assert.assertEquals("wobble", value);
 		// or using assignment within the expression
-		expr = parser.parseExpression("str='wabble'");
+		expr = parser.parseRaw("str='wabble'");
 		value = expr.getValue(ctx);
-		expr = parser.parseExpression("str");
+		expr = parser.parseRaw("str");
 		value = expr.getValue(ctx);
 		Assert.assertEquals("wabble", value);
 		
 		// private property will be accessed through getter()
-		expr = parser.parseExpression("property");
+		expr = parser.parseRaw("property");
 		value = expr.getValue(ctx);
 		Assert.assertEquals(42, value);
 
 		// ... and set through setter
-		expr = parser.parseExpression("property=4");
+		expr = parser.parseRaw("property=4");
 		value = expr.getValue(ctx);
-		expr = parser.parseExpression("property");
+		expr = parser.parseRaw("property");
 		value = expr.getValue(ctx);
 		Assert.assertEquals(4,value);
 	}
@@ -182,7 +182,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			StandardEvaluationContext ctx = new StandardEvaluationContext();
 			ctx.registerFunction("repeat",ExpressionLanguageScenarioTests.class.getDeclaredMethod("repeat",String.class));
 			
-			Expression expr = parser.parseExpression("#repeat('hello')");
+			Expression expr = parser.parseRaw("#repeat('hello')");
 			Object value = expr.getValue(ctx);
 			Assert.assertEquals("hellohello", value);
 
@@ -206,7 +206,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		ctx.addPropertyAccessor(new FruitColourAccessor());
-		Expression expr = parser.parseExpression("orange");
+		Expression expr = parser.parseRaw("orange");
 		Object value = expr.getValue(ctx);
 		Assert.assertEquals(Color.orange, value);
 
@@ -226,7 +226,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		ctx.addPropertyAccessor(new VegetableColourAccessor());
-		Expression expr = parser.parseExpression("pea");
+		Expression expr = parser.parseRaw("pea");
 		Object value = expr.getValue(ctx);
 		Assert.assertEquals(Color.green, value);
 

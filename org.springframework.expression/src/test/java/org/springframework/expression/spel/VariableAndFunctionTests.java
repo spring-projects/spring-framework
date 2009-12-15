@@ -76,7 +76,7 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
 		try {
 			@SuppressWarnings("unused")
-			Object v = parser.parseExpression("#notStatic()").getValue(ctx);
+			Object v = parser.parseRaw("#notStatic()").getValue(ctx);
 			Assert.fail("Should have failed with exception - cannot call non static method that way");
 		} catch (SpelEvaluationException se) {
 			if (se.getMessageCode() != SpelMessage.FUNCTION_MUST_BE_STATIC) {

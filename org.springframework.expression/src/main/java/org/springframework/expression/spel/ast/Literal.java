@@ -21,7 +21,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
-import org.springframework.expression.spel.standard.InternalParseException;
+import org.springframework.expression.spel.InternalParseException;
 
 /**
  * Common superclass for nodes representing literals (boolean, string, number, etc).

@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.expression.spel.standard.internal;
+
+package org.springframework.expression.spel.standard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +23,10 @@ import java.util.Stack;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
-import org.springframework.expression.spel.SpelExpression;
+import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.Assign;
 import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.expression.spel.ast.CompoundExpression;
@@ -62,16 +64,14 @@ import org.springframework.expression.spel.ast.StringLiteral;
 import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.ast.VariableReference;
-import org.springframework.expression.spel.standard.InternalParseException;
-import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 
 /**
- * Hand written SpEL parser.  Instances are reusable but are not thread safe.
+ * Hand written SpEL parser. Instances are reusable but are not thread safe.
  * 
  * @author Andy Clement
  * @since 3.0
  */
-public class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
+class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	// The expression being parsed
 	private String expressionString;	
@@ -88,30 +88,20 @@ public class InternalSpelExpressionParser extends TemplateAwareExpressionParser 
 	// For rules that build nodes, they are stacked here for return
 	private Stack<SpelNodeImpl> constructedNodes = new Stack<SpelNodeImpl>();
 	
-	private int configuration;
+	private SpelParserConfiguration configuration;
+
 
 	/**
-	 * Create a parser.
+	 * Create a parser with some configured behavior.
+	 * @param configuration custom configuration options
 	 */
-	public InternalSpelExpressionParser() {
-		this(0);
-	}
-
-	/**
-	 * Create a parser with some configured behaviour.  Supported configuration
-	 * bit flags can be seen in {@link SpelExpressionParserConfiguration}
-	 * @param configuration bitflags for configuration options
-	 */
-	public InternalSpelExpressionParser(int configuration) {
+	public InternalSpelExpressionParser(SpelParserConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
-	public SpelExpression parse(String expressionString) throws ParseException {
-		return doParseExpression(expressionString, null);
-	}
-	
+
 	@Override
-	public SpelExpression doParseExpression(String expressionString, ParserContext context) throws ParseException {
+	protected SpelExpression doParseExpression(String expressionString, ParserContext context) throws ParseException {
 		try {
 			this.expressionString = expressionString;
 			Tokenizer tokenizer = new Tokenizer(expressionString);
@@ -126,7 +116,8 @@ public class InternalSpelExpressionParser extends TemplateAwareExpressionParser 
 			}
 			assert constructedNodes.isEmpty();
 			return new SpelExpression(expressionString, ast, configuration);	
-		} catch (InternalParseException ipe) {
+		}
+		catch (InternalParseException ipe) {
 			throw ipe.getCause();
 		}
 	}

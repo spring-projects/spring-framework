@@ -137,7 +137,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private void ensurePropertyAccessorsInitialized() {
 		if (this.propertyAccessors == null) {
 			this.propertyAccessors = new ArrayList<PropertyAccessor>();
-			this.propertyAccessors.add(new ReflectivePropertyResolver());
+			this.propertyAccessors.add(new ReflectivePropertyAccessor());
 		}
 	}
 

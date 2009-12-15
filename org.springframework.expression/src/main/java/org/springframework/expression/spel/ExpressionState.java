@@ -29,7 +29,6 @@ import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to it are not seen by other
@@ -52,14 +51,15 @@ public class ExpressionState {
 	
 	private final TypedValue rootObject;
 	
-	private int configuration = 0;
+	private SpelParserConfiguration configuration;
+
 
 	public ExpressionState(EvaluationContext context) {
 		this.relatedContext = context;
 		this.rootObject = context.getRootObject();
 	}
 	
-	public ExpressionState(EvaluationContext context, int configuration) {
+	public ExpressionState(EvaluationContext context, SpelParserConfiguration configuration) {
 		this.relatedContext = context;
 		this.configuration = configuration;
 		this.rootObject = context.getRootObject();
@@ -70,14 +70,15 @@ public class ExpressionState {
 		this.rootObject = rootObject;
 	}
 	
-	public ExpressionState(EvaluationContext context, TypedValue rootObject, int configuration) {
+	public ExpressionState(EvaluationContext context, TypedValue rootObject, SpelParserConfiguration configuration) {
 		this.relatedContext = context;
 		this.configuration = configuration;
 		this.rootObject = rootObject;
 	}
 	
+
 	private void ensureVariableScopesInitialized() {
-		if (variableScopes == null) {
+		if (this.variableScopes == null) {
 			this.variableScopes = new Stack<VariableScope>();
 			// top level empty variable scope
 			this.variableScopes.add(new VariableScope()); 
@@ -198,7 +199,11 @@ public class ExpressionState {
 	public EvaluationContext getEvaluationContext() {
 		return this.relatedContext;
 	}
-	
+
+	public SpelParserConfiguration getConfiguration() {
+		return this.configuration;
+	}
+
 	/**
 	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
 	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst
@@ -231,14 +236,6 @@ public class ExpressionState {
 		public boolean definesVariable(String name) {
 			return this.vars.containsKey(name);
 		}
-	}
-
-	public boolean configuredToGrowCollection() {
-		return (configuration & SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize)!=0;
-	}
-
-	public boolean configuredToDynamicallyCreateNullObjects() {
-		return (configuration & SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull)!=0;
 	}
 
 }

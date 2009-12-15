@@ -20,15 +20,15 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
@@ -43,7 +43,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	@Test
 	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
-		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression expression = parser.parseExpression("list[0]");
 		TestClass testClass = new TestClass();
 		Object o = null;
@@ -67,7 +67,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testCreateMapsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
-		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Object o = null;
 		o = parser.parseExpression("map['a']").getValue(ctx);
 		Assert.assertNull(o);
@@ -87,7 +87,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testCreateObjectsOnAttemptToReferenceNull() throws EvaluationException, ParseException {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
-		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Object o = null;
 		o = parser.parseExpression("wibble.bar").getValue(ctx);
 		Assert.assertEquals("hello",o);
@@ -236,7 +236,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	@Test
 	public void testPropertiesNested03() throws ParseException {
 		try {
-			new SpelExpressionParser().parse("placeOfBirth.23");
+			new SpelExpressionParser().parseRaw("placeOfBirth.23");
 			Assert.fail();
 		} catch (SpelParseException spe) {
 			Assert.assertEquals(spe.getMessageCode(), SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
@@ -507,4 +507,5 @@ public class EvaluationTests extends ExpressionTestCase {
 		Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
 		Assert.assertEquals(String.class,stringClass);
 	}
+
 }

@@ -27,6 +27,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 ///CLOVER:OFF
@@ -104,16 +105,16 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		// names the String class as the type it is interested in so is chosen in preference to
 		// any 'default' ones
 		ctx.addPropertyAccessor(new StringyPropertyAccessor());
-		Expression expr = parser.parseExpression("new String('hello').flibbles");
+		Expression expr = parser.parseRaw("new String('hello').flibbles");
 		Integer i = expr.getValue(ctx, Integer.class);
 		Assert.assertEquals((int) i, 7);
 
 		// The reflection one will be used for other properties...
-		expr = parser.parseExpression("new String('hello').CASE_INSENSITIVE_ORDER");
+		expr = parser.parseRaw("new String('hello').CASE_INSENSITIVE_ORDER");
 		Object o = expr.getValue(ctx);
 		Assert.assertNotNull(o);
 
-		expr = parser.parseExpression("new String('hello').flibbles");
+		expr = parser.parseRaw("new String('hello').flibbles");
 		expr.setValue(ctx, 99);
 		i = expr.getValue(ctx, Integer.class);
 		Assert.assertEquals((int) i, 99);
