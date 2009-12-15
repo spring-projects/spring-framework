@@ -19,6 +19,7 @@ package org.springframework.web.bind.support;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartRequest;
 
@@ -99,8 +100,11 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-		if (request instanceof MultipartRequest) {
-			bindMultipartFiles(((MultipartRequest) request).getFileMap(), mpvs);
+		if (request instanceof NativeWebRequest) {
+			Object nativeRequest = ((NativeWebRequest) request).getNativeRequest();
+			if (nativeRequest instanceof MultipartRequest) {
+				bindMultipartFiles(((MultipartRequest) nativeRequest).getFileMap(), mpvs);
+			}
 		}
 		doBind(mpvs);
 	}
