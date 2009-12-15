@@ -29,7 +29,6 @@ import net.sf.cglib.proxy.NoOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -126,13 +125,10 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Intercepts the invocation of any {@link Bean}-annotated methods in order to ensure proper
 	 * handling of bean semantics such as scoping and AOP proxying.
-	 * @author Chris Beams
 	 * @see Bean
 	 * @see ConfigurationClassEnhancer
 	 */
 	private static class BeanMethodInterceptor implements MethodInterceptor {
-
-		private static final Log logger = LogFactory.getLog(BeanMethodInterceptor.class);
 
 		private final ConfigurableBeanFactory beanFactory;
 
@@ -155,10 +151,9 @@ class ConfigurationClassEnhancer {
 			}
 
 			// determine whether this bean is a scoped-proxy
-			// TODO: remove hard ScopedProxyUtils dependency
 			Scope scope = AnnotationUtils.findAnnotation(method, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
-				String scopedBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
+				String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);
 				if (this.beanFactory.isCurrentlyInCreation(scopedBeanName)) {
 					beanName = scopedBeanName;
 				}
@@ -168,12 +163,7 @@ class ConfigurationClassEnhancer {
 			// container for already cached instances
 			if (factoryContainsBean(beanName)) {
 				// we have an already existing cached instance of this bean -> retrieve it
-				Object cachedBean = this.beanFactory.getBean(beanName);
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Returning cached object [%s] for @Bean method %s.%s",
-							cachedBean, method.getDeclaringClass().getSimpleName(), beanName));
-				}
-				return cachedBean;
+				return this.beanFactory.getBean(beanName);
 			}
 
 			// actually create and return the bean
