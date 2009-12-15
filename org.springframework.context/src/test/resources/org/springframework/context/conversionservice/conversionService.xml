@@ -5,7 +5,7 @@
 				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-	<bean id="conversionService" class="org.springframework.core.convert.support.DefaultConversionService">
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
 		<property name="converters">
 			<bean class="org.springframework.context.conversionservice.StringToBarConverter" />
 		</property>
@@ -13,6 +13,20 @@
 
 	<bean id="testClient" class="org.springframework.context.conversionservice.TestClient">
 		<property name="bool" value="true"/>
+		<property name="resourceArray">
+			<value>classpath:test.xml</value>
+		</property>
+		<property name="resourceList">
+			<list>
+				<value>classpath:test.xml</value>
+			</list>
+		</property>
+		<property name="resourceMap">
+			<map>
+				<entry key="res1" value="classpath:test1.xml"/>
+				<entry key="res2" value="classpath:test2.xml"/>
+			</map>
+		</property>
 	</bean>
 
 	<bean class="org.springframework.context.conversionservice.Bar">
