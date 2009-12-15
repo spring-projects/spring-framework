@@ -46,29 +46,39 @@ public abstract class ConversionServiceFactory {
 	 * Populate the given ConversionService instance with all applicable default converters.
 	 */
 	public static void addDefaultConverters(GenericConversionService conversionService) {
-		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
 		conversionService.addConverter(new ArrayToCollectionConverter(conversionService));
-		conversionService.addConverter(new ArrayToStringConverter(conversionService));
-		conversionService.addConverter(new ArrayToObjectConverter(conversionService));
-		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
-		conversionService.addConverter(new CollectionToStringConverter(conversionService));
-		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
-		conversionService.addConverter(new MapToMapConverter(conversionService));
-		conversionService.addConverter(new PropertiesToStringConverter(conversionService));
+
+		conversionService.addConverter(new ArrayToStringConverter(conversionService));
 		conversionService.addConverter(new StringToArrayConverter(conversionService));
-		conversionService.addConverter(new StringToCollectionConverter(conversionService));
-		conversionService.addConverter(new StringToPropertiesConverter(conversionService));
+
+		conversionService.addConverter(new ArrayToObjectConverter(conversionService));
 		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
+
+		conversionService.addConverter(new CollectionToStringConverter(conversionService));
+		conversionService.addConverter(new StringToCollectionConverter(conversionService));
+
+		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));
-		conversionService.addConverterFactory(new CharacterToNumberFactory());
-		conversionService.addConverter(new NumberToCharacterConverter());
-		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
+		
+		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
+		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
+		conversionService.addConverter(new MapToMapConverter(conversionService));
+
+		conversionService.addConverter(new PropertiesToStringConverter());
+		conversionService.addConverter(new StringToPropertiesConverter());
+
 		conversionService.addConverter(new StringToBooleanConverter());
-		conversionService.addConverter(new StringToCharacterConverter());
-		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverter(new StringToCharacterConverter());		
 		conversionService.addConverter(new StringToLocaleConverter());
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());	
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+
+		conversionService.addConverter(new NumberToCharacterConverter());
+		conversionService.addConverterFactory(new CharacterToNumberFactory());
+
+		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
+		
 		conversionService.addConverter(new ObjectToStringConverter());
 		conversionService.addConverter(new ObjectToObjectConverter());
 		conversionService.addConverter(new IdToEntityConverter(conversionService));
