@@ -354,6 +354,55 @@ public class TypeDescriptor {
 		return isTypeAssignableTo(targetType.getType());
 	}
 
+	/**
+	 * A textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages
+	 */
+	public String asString() {
+		StringBuffer stringValue = new StringBuffer();
+		if (isArray()) {
+			// TODO should properly handle multi dimensional arrays
+			stringValue.append(getArrayComponentType().getName()).append("[]");
+		}
+		else {
+			Class<?> clazz = getType();
+			if (clazz == null) {
+				return "null";
+			}
+			stringValue.append(clazz.getName());
+			if (isCollection()) {
+				Class<?> collectionType = getCollectionElementType();
+				if (collectionType != null) {
+					stringValue.append("<").append(collectionType.getName()).append(">");
+				}
+			}
+			else if (isMap()) {
+				Class<?> keyType = getMapKeyType();
+				Class<?> valType = getMapValueType();
+				if (keyType != null && valType != null) {
+					stringValue.append("<").append(keyType.getName()).append(",");
+					stringValue.append(valType).append(">");
+				}
+			}
+		}
+		return stringValue.toString();
+	}
+
+	public String toString() {
+		if (this == TypeDescriptor.NULL) {
+			return "TypeDescriptor.NULL";
+		}
+		else {
+			StringBuilder builder = new StringBuilder();
+			builder.append("TypeDescriptor ");
+			Annotation[] anns = getAnnotations();
+			for (Annotation ann : anns) {
+				builder.append("@").append(ann.annotationType().getName()).append(' ');
+			}
+			builder.append(ClassUtils.getQualifiedName(getType()));
+			return builder.toString();
+		}
+	}
+	
 	// static factory methods
 
 	/**
@@ -414,55 +463,6 @@ public class TypeDescriptor {
 	private boolean isTypeAssignableTo(Class<?> clazz) {
 		Class<?> type = getType();
 		return (type != null && ClassUtils.isAssignable(clazz, type));
-	}
-
-	/**
-	 * @return a textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages
-	 */
-	public String asString() {
-		StringBuffer stringValue = new StringBuffer();
-		if (isArray()) {
-			// TODO should properly handle multi dimensional arrays
-			stringValue.append(getArrayComponentType().getName()).append("[]");
-		}
-		else {
-			Class<?> clazz = getType();
-			if (clazz == null) {
-				return "null";
-			}
-			stringValue.append(clazz.getName());
-			if (isCollection()) {
-				Class<?> collectionType = getCollectionElementType();
-				if (collectionType != null) {
-					stringValue.append("<").append(collectionType.getName()).append(">");
-				}
-			}
-			else if (isMap()) {
-				Class<?> keyType = getMapKeyType();
-				Class<?> valType = getMapValueType();
-				if (keyType != null && valType != null) {
-					stringValue.append("<").append(keyType.getName()).append(",");
-					stringValue.append(valType).append(">");
-				}
-			}
-		}
-		return stringValue.toString();
-	}
-
-	public String toString() {
-		if (this == TypeDescriptor.NULL) {
-			return "TypeDescriptor.NULL";
-		}
-		else {
-			StringBuilder builder = new StringBuilder();
-			builder.append("TypeDescriptor ");
-			Annotation[] anns = getAnnotations();
-			for (Annotation ann : anns) {
-				builder.append("@").append(ann.annotationType().getName()).append(' ');
-			}
-			builder.append(ClassUtils.getQualifiedName(getType()));
-			return builder.toString();
-		}
 	}
 	
 }
