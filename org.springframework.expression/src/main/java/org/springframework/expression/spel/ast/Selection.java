@@ -133,7 +133,7 @@ public class Selection extends SpelNodeImpl {
 				}
 			}
 			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
-				return TypedValue.NULL_TYPED_VALUE;
+				return TypedValue.NULL;
 			}
 			if (variant == LAST) {
 				return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
@@ -150,7 +150,7 @@ public class Selection extends SpelNodeImpl {
 		} else {
 			if (operand==null) {
 				if (nullSafe) { 
-					return TypedValue.NULL_TYPED_VALUE;
+					return TypedValue.NULL;
 				} else {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 							"null");

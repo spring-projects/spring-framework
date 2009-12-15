@@ -109,7 +109,7 @@ public class Projection extends SpelNodeImpl {
 		} else {
 			if (operand==null) {
 				if (nullSafe) {
-					return TypedValue.NULL_TYPED_VALUE;
+					return TypedValue.NULL;
 				} else {					
 					throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
 				}

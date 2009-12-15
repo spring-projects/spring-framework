@@ -235,7 +235,7 @@ public class SpelExpression implements Expression {
 
 	private TypedValue toTypedValue(Object object) {
 		if (object == null) {
-			return TypedValue.NULL_TYPED_VALUE;
+			return TypedValue.NULL;
 		}
 		else {
 			return new TypedValue(object);

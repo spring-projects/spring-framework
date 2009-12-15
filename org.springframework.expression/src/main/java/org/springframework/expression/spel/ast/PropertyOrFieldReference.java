@@ -136,7 +136,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		Object targetObject = contextObject.getValue();
 
 		if (targetObject == null && nullSafe) {
-			return TypedValue.NULL_TYPED_VALUE;
+			return TypedValue.NULL;
 		}
 
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
