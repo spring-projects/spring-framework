@@ -16,6 +16,7 @@ Changes in version 3.0.0.GA (2009-12-15)
 * PropertyPlaceholderConfigurer is compatible with Spring 2.5 extensions (again)
 * SmartLifecycle beans will get auto-started on demand even if marked as lazy-init
 * MBeanExporter detects FactoryBean-exported resources independent from declaration order
+* refactored SpelExpressionParser to accept SpelParserConfiguration object with boolean flags
 * revised GenericConverter's "getConvertibleTypes" signature to return Set of ConvertiblePair
 * GenericConversionService prefers matches against inherited interfaces over superclasses
 * renamed ConverterRegistry's addGenericConverter(GenericConverter) method to addConverter
@@ -26,6 +27,7 @@ Changes in version 3.0.0.GA (2009-12-15)
 * full support for formatters and formatting annotations on array/collection elements
 * no default number formatter (relying on plain java.lang.Number parsing and rendering)
 * no default formatters for Date/Calendar (requiring explicit use of @DateTimeFormat)
+* removed MultipartRequest mixin interface again (avoiding a package dependency cycle)
 * revised RestTemplate method signatures to accept Object values instead of just Strings
 * revised path variable extraction to properly deal with dots in variable values (again)
 * reintroduced createBinder template method in Servlet/Portlet AnnotationMethodHandlerAdapter
