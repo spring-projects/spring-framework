@@ -26,14 +26,14 @@ package org.springframework.core.convert.converter;
 public interface ConverterRegistry {
 	
 	/**
-	 * Add a generic converter to this registry.
-	 */
-	void addConverter(GenericConverter converter);
-
-	/**
 	 * Add a plain converter to this registry.
 	 */
 	void addConverter(Converter<?, ?> converter);
+
+	/**
+	 * Add a generic converter to this registry.
+	 */
+	void addConverter(GenericConverter converter);
 
 	/**
 	 * Add a ranged converter factory to this registry.

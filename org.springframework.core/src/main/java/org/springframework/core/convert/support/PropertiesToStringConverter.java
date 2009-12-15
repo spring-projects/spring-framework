@@ -18,93 +18,28 @@ package org.springframework.core.convert.support;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.Converter;
 
 /**
- * Converts from a Map to a String by storing each source Map entry into the String as a property (name=value pair). 
+ * Converts from a Properties to a String by calling {@link Properties#store(java.io.OutputStream, String)}.
+ * Decodes with the ISO-8859-1 charset before returning the String.
  *
  * @author Keith Donald
  * @since 3.0
- * @see Properties#store(java.io.OutputStream, String)
  */
-final class PropertiesToStringConverter implements ConditionalGenericConverter {
+final class PropertiesToStringConverter implements Converter<Properties, String> {
 
-	private final GenericConversionService conversionService;
-
-	public PropertiesToStringConverter(GenericConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-
-	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Properties.class, String.class));
-	}
-
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType)
-				&& this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType);
-	}
-
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
-		}
-		Map<?, ?> sourceMap = (Map<?, ?>) source;
-		if (sourceMap.size() == 0) {
-			return "";
-		}
-		else {
-			TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
-			TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
-			if (sourceKeyType == TypeDescriptor.NULL || sourceValueType == TypeDescriptor.NULL) {
-				TypeDescriptor[] sourceEntryTypes = ConversionUtils.getMapEntryTypes(sourceMap);
-				sourceKeyType = sourceEntryTypes[0];
-				sourceValueType = sourceEntryTypes[1];
-			}
-			boolean keysCompatible = false;
-			if (sourceKeyType != TypeDescriptor.NULL && sourceKeyType.isAssignableTo(targetType)) {
-				keysCompatible = true;
-			}
-			boolean valuesCompatible = false;
-			if (sourceValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetType)) {
-				valuesCompatible = true;
-			}
-			Properties props = new Properties();
-			if (keysCompatible && valuesCompatible) {
-				for (Object entry : sourceMap.entrySet()) {
-					Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-					props.setProperty((String) mapEntry.getKey(), (String) mapEntry.getValue());
-				}
-				return store(props);
-			}
-			else {
-				MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetType,
-						targetType, keysCompatible, valuesCompatible, this.conversionService);
-				for (Object entry : sourceMap.entrySet()) {
-					Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-					Object key = converter.convertKey(mapEntry.getKey());
-					Object value = converter.convertValue(mapEntry.getValue());
-					props.setProperty((String) key, (String) value);
-				}
-				return store(props);
-			}
-		}
-	}
-
-	private String store(Properties props) {
+	public String convert(Properties source) {
 		try {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			props.store(os, null);
+			source.store(os, null);
 			return os.toString("ISO-8859-1");
 		}
 		catch (IOException ex) {
 			// Should never happen.
-			throw new IllegalArgumentException("Failed to store [" + props + "] into String", ex);
+			throw new IllegalArgumentException("Failed to store [" + source + "] into String", ex);
 		}
 	}
 
