@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,48 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.standard;
 
-import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
-import org.springframework.expression.spel.SpelExpression;
-import org.springframework.expression.spel.standard.internal.InternalSpelExpressionParser;
+import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.util.Assert;
 
 /**
- * SpEL parser.  Instances are reusable and thread safe.
+ * SpEL parser. Instances are reusable and thread-safe.
  * 
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class SpelExpressionParser extends TemplateAwareExpressionParser {
 
-	private int configuration;
-	
+	private final SpelParserConfiguration configuration;
+
+
 	/**
-	 * Create a parser with some configured behaviour.  Supported configuration
-	 * bit flags can be seen in {@link SpelExpressionParserConfiguration}
-	 * @param configuration bitflags for configuration options
+	 * Create a parser with standard configuration.
 	 */
-	public SpelExpressionParser(int configuration) {
+	public SpelExpressionParser() {
+		this.configuration = new SpelParserConfiguration(false, false);
+	}
+
+	/**
+	 * Create a parser with some configured behavior.
+	 * @param configuration custom configuration options
+	 */
+	public SpelExpressionParser(SpelParserConfiguration configuration) {
+		Assert.notNull(configuration, "SpelParserConfiguration must not be null");
 		this.configuration = configuration;
 	}
 
-	/**
-	 * Create a parser with default behaviour.
-	 */
-	public SpelExpressionParser() {
-		this(0);
-	}
 
 	@Override
-	protected Expression doParseExpression(String expressionString, ParserContext context) throws ParseException {
-		return new InternalSpelExpressionParser(configuration).doParseExpression(expressionString, context);
+	protected SpelExpression doParseExpression(String expressionString, ParserContext context) throws ParseException {
+		return new InternalSpelExpressionParser(this.configuration).doParseExpression(expressionString, context);
 	}
 
-	public SpelExpression parse(String expressionString) throws ParseException {
-		return new InternalSpelExpressionParser(configuration).parse(expressionString);
+	public SpelExpression parseRaw(String expressionString) throws ParseException {
+		return doParseExpression(expressionString, null);
 	}
-	
+
 }

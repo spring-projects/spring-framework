@@ -27,8 +27,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
-// TODO support multidimensional arrays
-// TODO support correct syntax for multidimensional [][][] and not [,,,]
 /**
  * An Indexer can index into some proceeding structure to access a particular piece of it. Supported structures are:
  * strings/collections (lists/sets)/arrays
@@ -36,10 +34,12 @@ import org.springframework.expression.spel.SpelMessage;
  * @author Andy Clement
  * @since 3.0
  */
+// TODO support multidimensional arrays
+// TODO support correct syntax for multidimensional [][][] and not [,,,]
 public class Indexer extends SpelNodeImpl {
 
-	public Indexer(int pos,SpelNodeImpl expr) {
-		super(pos,expr);
+	public Indexer(int pos, SpelNodeImpl expr) {
+		super(pos, expr);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -48,7 +48,7 @@ public class Indexer extends SpelNodeImpl {
 		TypedValue context = state.getActiveContextObject();
 		Object targetObject = context.getValue();
 		TypeDescriptor targetObjectTypeDescriptor = context.getTypeDescriptor();
-		TypedValue indexValue =  null;
+		TypedValue indexValue = null;
 		Object index = null;
 		
 		// This first part of the if clause prevents a 'double dereference' of the property (SPR-5847)
@@ -56,14 +56,16 @@ public class Indexer extends SpelNodeImpl {
 			PropertyOrFieldReference reference = (PropertyOrFieldReference)children[0];
 			index = reference.getName();
 			indexValue = new TypedValue(index, TypeDescriptor.valueOf(String.class));
-		} else {
+		}
+		else {
 			// In case the map key is unqualified, we want it evaluated against the root object so 
 			// temporarily push that on whilst evaluating the key
 			try {
 				state.pushActiveContextObject(state.getRootContextObject());
 				indexValue = children[0].getValueInternal(state);
 				index = indexValue.getValue();
-			} finally {
+			}
+			finally {
 				state.popActiveContextObject();
 			}
 		}
@@ -100,7 +102,7 @@ public class Indexer extends SpelNodeImpl {
 		} else if (targetObject instanceof Collection) {
 			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
-				if (state.configuredToGrowCollection()) {
+				if (state.getConfiguration().isAutoGrowCollections()) {
 					// Grow the collection
 					Object newCollectionElement = null;
 					try {
@@ -114,14 +116,14 @@ public class Indexer extends SpelNodeImpl {
 							newElements--;
 						}
 						newCollectionElement = targetObjectTypeDescriptor.getElementType().newInstance();
-					} catch (InstantiationException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_GROW_COLLECTION);
-					} catch (IllegalAccessException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_GROW_COLLECTION);
+					}
+					catch (Exception ex) {
+						throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW_COLLECTION);
 					}
 					c.add(newCollectionElement);
 					return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
-				} else {
+				}
+				else {
 					throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 				}
 			}
@@ -175,7 +177,8 @@ public class Indexer extends SpelNodeImpl {
 		if (targetObjectTypeDescriptor.isArray()) {
 			int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 			setArrayElement(state, contextObject.getValue(), idx, newValue, targetObjectTypeDescriptor.getElementType());
-		} else if (targetObjectTypeDescriptor.isCollection()) {
+		}
+		else if (targetObjectTypeDescriptor.isCollection()) {
 			int idx = (Integer)state.convertValue(index, INTEGER_TYPE_DESCRIPTOR);
 			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
@@ -185,7 +188,8 @@ public class Indexer extends SpelNodeImpl {
 				List list = (List)targetObject;
 				Object possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
 				list.set(idx,possiblyConvertedValue);
-			} else {
+			}
+			else {
 				throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, contextObject.getClass().getName());
 			}
 		} else {
@@ -247,7 +251,6 @@ public class Indexer extends SpelNodeImpl {
 		}		
 	}
 	
-	
 	private Object accessArrayElement(Object ctx, int idx) throws SpelEvaluationException {
 		Class<?> arrayComponentType = ctx.getClass().getComponentType();
 		if (arrayComponentType == Integer.TYPE) {
@@ -288,7 +291,6 @@ public class Indexer extends SpelNodeImpl {
 			return array[idx];
 		}
 	}
-
 
 	private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
 		if (index > arrayLength) {

@@ -20,6 +20,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date

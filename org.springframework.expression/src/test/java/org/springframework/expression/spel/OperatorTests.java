@@ -20,6 +20,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.spel.ast.Operator;
+import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Tests the evaluation of expressions using relational operators.

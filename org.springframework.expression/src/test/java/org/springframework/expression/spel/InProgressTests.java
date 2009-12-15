@@ -21,6 +21,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * These are tests for language features that are not yet considered 'live'.  Either missing implementation or documentation.

@@ -49,7 +49,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			StandardEvaluationContext ctx = new StandardEvaluationContext();
-			Expression expr = parser.parseExpression("hasAnyRole('MANAGER','TELLER')");
+			Expression expr = parser.parseRaw("hasAnyRole('MANAGER','TELLER')");
 
 			ctx.setRootObject(new Person("Ben"));
 			Boolean value = expr.getValue(ctx,Boolean.class);
@@ -74,7 +74,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		
 		// Multiple options for supporting this expression: "p.name == principal.name"
 		// (1) If the right person is the root context object then "name==principal.name" is good enough
-		Expression expr = parser.parseExpression("name == principal.name");
+		Expression expr = parser.parseRaw("name == principal.name");
 
 		ctx.setRootObject(new Person("Andy"));
 		Boolean value = expr.getValue(ctx,Boolean.class);
@@ -85,7 +85,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		Assert.assertFalse(value);
 
 		// (2) Or register an accessor that can understand 'p' and return the right person
-		expr = parser.parseExpression("p.name == principal.name");
+		expr = parser.parseRaw("p.name == principal.name");
 		
 		PersonAccessor pAccessor = new PersonAccessor();
 		ctx.addPropertyAccessor(pAccessor);
@@ -107,7 +107,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		
 		// Might be better with a as a variable although it would work as a property too...
 		// Variable references using a '#'
-		Expression expr = parser.parseExpression("(hasRole('SUPERVISOR') or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
+		Expression expr = parser.parseRaw("(hasRole('SUPERVISOR') or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
 
 		Boolean value = null;
 		
@@ -134,7 +134,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		// Might be better with a as a variable although it would work as a property too...
 		// Variable references using a '#'
 //		SpelExpression expr = parser.parseExpression("(hasRole('SUPERVISOR') or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
-		Expression expr = parser.parseExpression("(hasRole(3) or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
+		Expression expr = parser.parseRaw("(hasRole(3) or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
 
 		Boolean value = null;
 		

@@ -38,7 +38,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectionWithList() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("integers.?[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof List);
@@ -53,7 +53,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectFirstItemInList() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("integers.^[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
@@ -62,7 +62,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectLastItemInList() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("integers.$[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
@@ -71,7 +71,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectionWithArray() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("integers.?[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
@@ -88,7 +88,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectFirstItemInArray() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("integers.^[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
@@ -97,7 +97,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectLastItemInArray() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("integers.$[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
@@ -106,7 +106,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectionWithPrimitiveArray() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("ints.?[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("ints.?[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
@@ -123,7 +123,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectFirstItemInPrimitiveArray() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("ints.^[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("ints.^[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
@@ -132,7 +132,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void selectLastItemInPrimitiveArray() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("ints.$[#this<5]");
+		Expression expression = new SpelExpressionParser().parseRaw("ints.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ArrayTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
@@ -141,7 +141,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void projectionWithList() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("#testList.![wrapper.value]");
+		Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("testList", IntegerTestBean.createList());
 		Object value = expression.getValue(context);
@@ -155,7 +155,7 @@ public class SelectionAndProjectionTests {
 
 	@Test
 	public void projectionWithArray() throws Exception {
-		Expression expression = new SpelExpressionParser().parse("#testArray.![wrapper.value]");
+		Expression expression = new SpelExpressionParser().parseRaw("#testArray.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("testArray", IntegerTestBean.createArray());
 		Object value = expression.getValue(context);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.expression.spel;
+package org.springframework.expression.spel.standard;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
@@ -22,6 +22,9 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
+import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelNode;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
@@ -38,21 +41,23 @@ public class SpelExpression implements Expression {
 	
 	private final String expression;
 
+	private final SpelNodeImpl ast;
+
+	private final SpelParserConfiguration configuration;
+
 	// the default context is used if no override is supplied by the user
-	private transient EvaluationContext defaultContext;
+	private EvaluationContext defaultContext;
 
-	public final SpelNodeImpl ast;
-
-	public final int configuration;
 
 	/**
 	 * Construct an expression, only used by the parser.
 	 */
-	public SpelExpression(String expression, SpelNodeImpl ast, int configuration) {
+	public SpelExpression(String expression, SpelNodeImpl ast, SpelParserConfiguration configuration) {
 		this.expression = expression;
 		this.ast = ast;
 		this.configuration = configuration;
 	}
+
 
 	// implementing Expression
 	
@@ -203,7 +208,6 @@ public class SpelExpression implements Expression {
 	 * Produce a string representation of the Abstract Syntax Tree for the expression, this should ideally look like the
 	 * input expression, but properly formatted since any unnecessary whitespace will have been discarded during the
 	 * parse of the expression.
-	 * 
 	 * @return the string representation of the AST
 	 */
 	public String toStringAST() {
@@ -215,7 +219,7 @@ public class SpelExpression implements Expression {
      * @return the default evaluation context
      */
 	public EvaluationContext getEvaluationContext() {
-		if (defaultContext==null) {
+		if (defaultContext == null) {
 			defaultContext = new StandardEvaluationContext();
 		}
 		return defaultContext;
@@ -223,7 +227,6 @@ public class SpelExpression implements Expression {
 	
 	/**
      * Set the evaluation context that will be used if none is specified on an evaluation call.
-     *
      * @param context an evaluation context
      */
 	public void setEvaluationContext(EvaluationContext context) {
@@ -231,9 +234,10 @@ public class SpelExpression implements Expression {
 	}
 
 	private TypedValue toTypedValue(Object object) {
-		if (object==null) {
+		if (object == null) {
 			return TypedValue.NULL_TYPED_VALUE;
-		} else {
+		}
+		else {
 			return new TypedValue(object);
 		}
 	}

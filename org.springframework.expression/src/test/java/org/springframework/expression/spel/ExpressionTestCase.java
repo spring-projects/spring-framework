@@ -25,6 +25,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
@@ -39,7 +40,7 @@ public abstract class ExpressionTestCase {
 	protected final static boolean SHOULD_BE_WRITABLE = true;
 	protected final static boolean SHOULD_NOT_BE_WRITABLE = false;
 
-	protected final static ExpressionParser parser = SpelExpressionParserFactory.getParser();
+	protected final static ExpressionParser parser = new SpelExpressionParser();
 	protected final static StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	/**

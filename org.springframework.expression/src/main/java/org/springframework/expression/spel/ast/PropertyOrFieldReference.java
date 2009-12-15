@@ -30,7 +30,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.expression.spel.support.ReflectivePropertyResolver;
+import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 
 /**
  * Represents a simple property or field reference.
@@ -60,7 +60,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		TypedValue result = readProperty(state, this.name);
 		
 		// Dynamically create the objects if the user has requested that optional behaviour
-		if (result.getValue()==null && state.configuredToDynamicallyCreateNullObjects() && nextChildIs(Indexer.class,PropertyOrFieldReference.class)) {
+		if (result.getValue() == null && state.getConfiguration().isAutoGrowNullReferences() &&
+				nextChildIs(Indexer.class, PropertyOrFieldReference.class)) {
 			TypeDescriptor resultDescriptor = result.getTypeDescriptor();
 			// Creating lists and maps
 			if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
@@ -161,8 +162,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			try {
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canRead(eContext, contextObject.getValue(), name)) {
-						if (accessor instanceof ReflectivePropertyResolver) {
-							accessor = ((ReflectivePropertyResolver)accessor).createOptimalAccessor(eContext, contextObject.getValue(), name);
+						if (accessor instanceof ReflectivePropertyAccessor) {
+							accessor = ((ReflectivePropertyAccessor)accessor).createOptimalAccessor(eContext, contextObject.getValue(), name);
 						}
 						this.cachedReadAccessor = accessor;
 						return accessor.read(eContext, contextObject.getValue(), name);

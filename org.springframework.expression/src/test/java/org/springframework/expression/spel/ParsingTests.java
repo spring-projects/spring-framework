@@ -21,6 +21,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
@@ -451,7 +452,7 @@ public class ParsingTests {
 	 */
 	public void parseCheck(String expression, String expectedStringFormOfAST) {
 		try {
-			SpelExpression e = (SpelExpression) parser.parseExpression(expression);
+			SpelExpression e = (SpelExpression) parser.parseRaw(expression);
 			if (e != null && !e.toStringAST().equals(expectedStringFormOfAST)) {
 				SpelUtilities.printAbstractSyntaxTree(System.err, e);
 			}

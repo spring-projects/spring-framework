@@ -16,8 +16,8 @@
 
 package org.springframework.expression.spel.support;
 
-import org.springframework.expression.TypedValue;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.expression.TypedValue;
 
 /**
  * @author Andy Clement
@@ -25,18 +25,23 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 public class BooleanTypedValue extends TypedValue {
 
-	public static final BooleanTypedValue True = new BooleanTypedValue(true);
-	public static final BooleanTypedValue False = new BooleanTypedValue(false);
-	
+	public static final BooleanTypedValue TRUE = new BooleanTypedValue(true);
+
+	public static final BooleanTypedValue FALSE = new BooleanTypedValue(false);
+
+
 	private BooleanTypedValue(boolean b) {
 		super(b, TypeDescriptor.valueOf(Boolean.class));
 	}
 	
+
 	public static BooleanTypedValue forValue(boolean b) {
 		if (b) {
-			return True;
-		} else {
-			return False;
+			return TRUE;
+		}
+		else {
+			return FALSE;
 		}
 	}
+
 }

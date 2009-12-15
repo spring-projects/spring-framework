@@ -23,6 +23,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Test providing operator support

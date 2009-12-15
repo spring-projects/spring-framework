@@ -50,7 +50,7 @@ public class OperatorInstanceof extends Operator {
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
 		if (leftValue == null) {
-			return BooleanTypedValue.False;  // null is not an instanceof anything
+			return BooleanTypedValue.FALSE;  // null is not an instanceof anything
 		}
 		if (rightValue == null || !(rightValue instanceof Class<?>)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),

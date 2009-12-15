@@ -32,7 +32,7 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.ReflectivePropertyResolver;
+import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
@@ -56,12 +56,12 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	@Test
 	public void testSPR5899() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
-		Expression expr = new SpelExpressionParser().parse("tryToInvokeWithNull(12)");
+		Expression expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(12)");
 		Assert.assertEquals(12,expr.getValue(eContext));
-		expr = new SpelExpressionParser().parse("tryToInvokeWithNull(null)");
+		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(null)");
 		Assert.assertEquals(null,expr.getValue(eContext));
 		try {
-			expr = new SpelExpressionParser().parse("tryToInvokeWithNull2(null)");
+			expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull2(null)");
 			expr.getValue();
 			Assert.fail("Should have failed to find a method to which it could pass null");
 		} catch (EvaluationException see) {
@@ -70,26 +70,26 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		eContext.setTypeLocator(new MyTypeLocator());
 		
 		// varargs
-		expr = new SpelExpressionParser().parse("tryToInvokeWithNull3(null,'a','b')");
+		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(null,'a','b')");
 		Assert.assertEquals("ab",expr.getValue(eContext));
 		
 		// varargs 2 - null is packed into the varargs
-		expr = new SpelExpressionParser().parse("tryToInvokeWithNull3(12,'a',null,'c')");
+		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(12,'a',null,'c')");
 		Assert.assertEquals("anullc",expr.getValue(eContext));
 		
 		// check we can find the ctor ok
-		expr = new SpelExpressionParser().parse("new Spr5899Class().toString()");
+		expr = new SpelExpressionParser().parseRaw("new Spr5899Class().toString()");
 		Assert.assertEquals("instance",expr.getValue(eContext));
 
-		expr = new SpelExpressionParser().parse("new Spr5899Class(null).toString()");
+		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null).toString()");
 		Assert.assertEquals("instance",expr.getValue(eContext));
 
 		// ctor varargs
-		expr = new SpelExpressionParser().parse("new Spr5899Class(null,'a','b').toString()");
+		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a','b').toString()");
 		Assert.assertEquals("instance",expr.getValue(eContext));
 
 		// ctor varargs 2
-		expr = new SpelExpressionParser().parse("new Spr5899Class(null,'a', null, 'b').toString()");
+		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a', null, 'b').toString()");
 		Assert.assertEquals("instance",expr.getValue(eContext));
 	}
 	
@@ -133,13 +133,13 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	@Test
 	public void testSPR5905_InnerTypeReferences() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
-		Expression expr = new SpelExpressionParser().parse("T(java.util.Map$Entry)");
+		Expression expr = new SpelExpressionParser().parseRaw("T(java.util.Map$Entry)");
 		Assert.assertEquals(Map.Entry.class,expr.getValue(eContext));
 
-		expr = new SpelExpressionParser().parse("T(org.springframework.expression.spel.SpringEL300Tests$Outer$Inner).run()");
+		expr = new SpelExpressionParser().parseRaw("T(org.springframework.expression.spel.SpringEL300Tests$Outer$Inner).run()");
 		Assert.assertEquals(12,expr.getValue(eContext));
 
-		expr = new SpelExpressionParser().parse("new org.springframework.expression.spel.SpringEL300Tests$Outer$Inner().run2()");
+		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpringEL300Tests$Outer$Inner().run2()");
 		Assert.assertEquals(13,expr.getValue(eContext));
 }
 	
@@ -162,7 +162,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		m.put("foo", "bar");
 		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
 		eContext.addPropertyAccessor(new MapAccessor());
-		Expression expr = new SpelExpressionParser().parseExpression("['foo']");
+		Expression expr = new SpelExpressionParser().parseRaw("['foo']");
 		Assert.assertEquals("bar", expr.getValue(eContext));
 	}
 	
@@ -172,16 +172,16 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		String name = null;
 		Expression expr = null;
 		
-		expr = new SpelExpressionParser().parse("jdbcProperties['username']");
+		expr = new SpelExpressionParser().parseRaw("jdbcProperties['username']");
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
 		
-		expr = new SpelExpressionParser().parse("jdbcProperties[username]");
+		expr = new SpelExpressionParser().parseRaw("jdbcProperties[username]");
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
 
 		// MapAccessor required for this to work
-		expr = new SpelExpressionParser().parse("jdbcProperties.username");
+		expr = new SpelExpressionParser().parseRaw("jdbcProperties.username");
 		eContext.addPropertyAccessor(new MapAccessor());
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
@@ -189,13 +189,13 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		// --- dotted property names
 
 		// lookup foo on the root, then bar on that, then use that as the key into jdbcProperties
-		expr = new SpelExpressionParser().parse("jdbcProperties[foo.bar]"); 
+		expr = new SpelExpressionParser().parseRaw("jdbcProperties[foo.bar]");
 		eContext.addPropertyAccessor(new MapAccessor());
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave2",name);
 
 		// key is foo.bar
-		expr = new SpelExpressionParser().parse("jdbcProperties['foo.bar']");
+		expr = new SpelExpressionParser().parseRaw("jdbcProperties['foo.bar']");
 		eContext.addPropertyAccessor(new MapAccessor());
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Elephant",name);	
@@ -274,7 +274,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	
 	@Test
 	public void testAccessingNullPropertyViaReflection_SPR5663() throws AccessException {
-		PropertyAccessor propertyAccessor = new ReflectivePropertyResolver();
+		PropertyAccessor propertyAccessor = new ReflectivePropertyAccessor();
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		Assert.assertFalse(propertyAccessor.canRead(context, null, "abc"));
 		Assert.assertFalse(propertyAccessor.canWrite(context, null, "abc"));

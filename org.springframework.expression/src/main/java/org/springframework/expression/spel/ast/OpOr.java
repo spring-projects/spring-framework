@@ -51,7 +51,7 @@ public class OpOr extends Operator {
 		}
 
 		if (leftValue == true) {
-			return BooleanTypedValue.True; // no need to evaluate right operand
+			return BooleanTypedValue.TRUE; // no need to evaluate right operand
 		}
 
 		try {
