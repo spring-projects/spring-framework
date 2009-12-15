@@ -58,10 +58,8 @@ public abstract class ReflectionUtils {
 	 * the supplied <code>name</code> and/or {@link Class type}. Searches all
 	 * superclasses up to {@link Object}.
 	 * @param clazz the class to introspect
-	 * @param name the name of the field (may be <code>null</code> if type is
-	 * specified)
-	 * @param type the type of the field (may be <code>null</code> if name is
-	 * specified)
+	 * @param name the name of the field (may be <code>null</code> if type is specified)
+	 * @param type the type of the field (may be <code>null</code> if name is specified)
 	 * @return the corresponding Field object, or <code>null</code> if not found
 	 */
 	public static Field findField(Class<?> clazz, String name, Class<?> type) {
@@ -81,13 +79,11 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Set the field represented by the supplied {@link Field field object} on
-	 * the specified {@link Object target object} to the specified
-	 * <code>value</code>. In accordance with {@link Field#set(Object, Object)}
-	 * semantics, the new value is automatically unwrapped if the underlying
-	 * field has a primitive type.
-	 * <p>Thrown exceptions are handled via a call to
-	 * {@link #handleReflectionException(Exception)}.
+	 * Set the field represented by the supplied {@link Field field object} on the
+	 * specified {@link Object target object} to the specified <code>value</code>.
+	 * In accordance with {@link Field#set(Object, Object)} semantics, the new value
+	 * is automatically unwrapped if the underlying field has a primitive type.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to set
 	 * @param target the target object on which to set the field
 	 * @param value the value to set; may be <code>null</code>
@@ -104,12 +100,11 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Get the field represented by the supplied {@link Field field object} on
-	 * the specified {@link Object target object}. In accordance with
-	 * {@link Field#get(Object)} semantics, the returned value is automatically
-	 * wrapped if the underlying field has a primitive type.
-	 * <p>Thrown exceptions are handled via a call to
-	 * {@link #handleReflectionException(Exception)}.
+	 * Get the field represented by the supplied {@link Field field object} on the
+	 * specified {@link Object target object}. In accordance with {@link Field#get(Object)}
+	 * semantics, the returned value is automatically wrapped if the underlying field
+	 * has a primitive type.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to get
 	 * @param target the target object from which to get the field
 	 * @return the field's current value
@@ -126,9 +121,8 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Attempt to find a {@link Method} on the supplied class with the supplied
-	 * name and no parameters. Searches all superclasses up to
-	 * <code>Object</code>.
+	 * Attempt to find a {@link Method} on the supplied class with the supplied name
+	 * and no parameters. Searches all superclasses up to <code>Object</code>.
 	 * <p>Returns <code>null</code> if no {@link Method} can be found.
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
@@ -139,14 +133,13 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Attempt to find a {@link Method} on the supplied class with the supplied
-	 * name and parameter types. Searches all superclasses up to
-	 * <code>Object</code>.
+	 * Attempt to find a {@link Method} on the supplied class with the supplied name
+	 * and parameter types. Searches all superclasses up to <code>Object</code>.
 	 * <p>Returns <code>null</code> if no {@link Method} can be found.
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
-	 * @param paramTypes the parameter types of the method (may be
-	 * <code>null</code> to indicate any signature)
+	 * @param paramTypes the parameter types of the method
+	 * (may be <code>null</code> to indicate any signature)
 	 * @return the Method object, or <code>null</code> if none found
 	 */
 	public static Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
@@ -167,11 +160,9 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the specified {@link Method} against the supplied target object
-	 * with no arguments. The target object can be <code>null</code> when
-	 * invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to
-	 * {@link #handleReflectionException}.
+	 * Invoke the specified {@link Method} against the supplied target object with no arguments.
+	 * The target object can be <code>null</code> when invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @param method the method to invoke
 	 * @param target the target object to invoke the method on
 	 * @return the invocation result, if any
@@ -182,11 +173,10 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the specified {@link Method} against the supplied target object
-	 * with the supplied arguments. The target object can be <code>null</code>
-	 * when invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to
-	 * {@link #handleReflectionException}.
+	 * Invoke the specified {@link Method} against the supplied target object with the
+	 * supplied arguments. The target object can be <code>null</code> when invoking a
+	 * static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @param method the method to invoke
 	 * @param target the target object to invoke the method on
 	 * @param args the invocation arguments (may be <code>null</code>)
@@ -548,7 +538,6 @@ public abstract class ReflectionUtils {
 					+ "] must be same or subclass as source class [" + src.getClass().getName() + "]");
 		}
 		doWithFields(src.getClass(), new FieldCallback() {
-
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 				makeAccessible(field);
 				Object srcValue = field.get(src);

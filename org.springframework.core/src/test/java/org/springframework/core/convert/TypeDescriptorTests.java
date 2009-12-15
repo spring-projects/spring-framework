@@ -16,12 +16,11 @@
 
 package org.springframework.core.convert;
 
+import java.util.List;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
-
-import java.util.List;
-
 import org.junit.Test;
 
 /**
@@ -53,7 +52,7 @@ public class TypeDescriptorTests {
 
 	@Test
 	public void buildingArrayTypeDescriptors() throws Exception {
-		TypeDescriptor typeDescriptor = new TypeDescriptor(new int[0].getClass());
+		TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(int[].class);
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
 	}
