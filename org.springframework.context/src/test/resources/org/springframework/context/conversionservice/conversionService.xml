@@ -13,6 +13,14 @@
 
 	<bean id="testClient" class="org.springframework.context.conversionservice.TestClient">
 		<property name="bool" value="true"/>
+		<property name="stringList">
+			<list>
+				<value>#{'test-' + strValue + '-end'}</value>
+				<value>#{'test-' + strValue}</value>
+				<value>#{'test-' + numValue+ '-end'}</value>
+				<value>#{'test-' + numValue}</value>
+			</list>
+		</property>
 		<property name="resourceArray">
 			<value>classpath:test.xml</value>
 		</property>
@@ -36,7 +44,15 @@
 	<bean class="org.springframework.context.conversionservice.Bar">
 		<constructor-arg value ="value2" />
 	</bean>
-	
+
+	<bean id="numValue" class="java.lang.Integer">
+		<constructor-arg value="111"/>
+	</bean>
+
+	<bean id="strValue" class="java.lang.String">
+		<constructor-arg value="222"/>
+	</bean>
+
 	<context:annotation-config />
 	
 </beans>

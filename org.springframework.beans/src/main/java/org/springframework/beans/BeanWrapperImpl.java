@@ -42,6 +42,7 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -417,11 +418,17 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
 		}
-		catch (IllegalArgumentException ex) {
+		catch (ConverterNotFoundException ex) {
+			throw new ConversionNotSupportedException(value, requiredType, ex);
+		}
+		catch (ConversionException ex) {
 			throw new TypeMismatchException(value, requiredType, ex);
 		}
 		catch (IllegalStateException ex) {
 			throw new ConversionNotSupportedException(value, requiredType, ex);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new TypeMismatchException(value, requiredType, ex);
 		}
 	}
 
@@ -1105,12 +1112,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					throw new MethodInvocationException(propertyChangeEvent, ex.getTargetException());
 				}
 			}
-			catch (ConversionException ex) {
+			catch (ConverterNotFoundException ex) {
 				PropertyChangeEvent pce =
 						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
-				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
+				throw new ConversionNotSupportedException(pce, pd.getPropertyType(), ex);
 			}
-			catch (IllegalArgumentException ex) {
+			catch (ConversionException ex) {
 				PropertyChangeEvent pce =
 						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
@@ -1119,6 +1126,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				PropertyChangeEvent pce =
 						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 				throw new ConversionNotSupportedException(pce, pd.getPropertyType(), ex);
+			}
+			catch (IllegalArgumentException ex) {
+				PropertyChangeEvent pce =
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
+				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
 			}
 			catch (IllegalAccessException ex) {
 				PropertyChangeEvent pce =
