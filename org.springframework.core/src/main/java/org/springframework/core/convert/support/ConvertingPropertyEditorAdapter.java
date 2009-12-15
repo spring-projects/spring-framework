@@ -31,11 +31,11 @@ import org.springframework.util.Assert;
  */
 public class ConvertingPropertyEditorAdapter extends PropertyEditorSupport {
 
-	private static final TypeDescriptor stringDescriptor = TypeDescriptor.valueOf(String.class);
-
 	private final ConversionService conversionService;
 
 	private final TypeDescriptor targetDescriptor;
+
+	private final boolean canConvertToString;
 
 
 	/**
@@ -50,17 +50,23 @@ public class ConvertingPropertyEditorAdapter extends PropertyEditorSupport {
 		Assert.notNull(targetDescriptor, "TypeDescriptor must not be null");
 		this.conversionService = conversionService;
 		this.targetDescriptor = targetDescriptor;
+		this.canConvertToString = conversionService.canConvert(this.targetDescriptor, TypeDescriptor.STRING);
 	}
 
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(this.conversionService.convert(text, stringDescriptor, this.targetDescriptor));
+		setValue(this.conversionService.convert(text, TypeDescriptor.STRING, this.targetDescriptor));
 	}
 
 	@Override
 	public String getAsText() {
-		return (String) this.conversionService.convert(getValue(), this.targetDescriptor, stringDescriptor);
+		if (this.canConvertToString) {
+			return (String) this.conversionService.convert(getValue(), this.targetDescriptor, TypeDescriptor.STRING);
+		}
+		else {
+			return null;
+		}
 	}
 
 }
