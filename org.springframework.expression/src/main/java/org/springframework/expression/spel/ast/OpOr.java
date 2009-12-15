@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -43,7 +44,7 @@ public class OpOr extends Operator {
 		try {
 			TypedValue typedValue = getLeftOperand().getValueInternal(state);
 			this.assertTypedValueNotNull(typedValue);
-			leftValue = (Boolean)state.convertValue(typedValue, BOOLEAN_TYPE_DESCRIPTOR);
+			leftValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
 		}
 		catch (SpelEvaluationException see) {
 			see.setPosition(getLeftOperand().getStartPosition());
@@ -57,7 +58,7 @@ public class OpOr extends Operator {
 		try {
 			TypedValue typedValue = getRightOperand().getValueInternal(state);
 			this.assertTypedValueNotNull(typedValue);
-			rightValue = (Boolean)state.convertValue(typedValue, BOOLEAN_TYPE_DESCRIPTOR);
+			rightValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
 		}
 		catch (SpelEvaluationException see) {
 			see.setPosition(getRightOperand().getStartPosition()); // TODO end positions here and in similar situations

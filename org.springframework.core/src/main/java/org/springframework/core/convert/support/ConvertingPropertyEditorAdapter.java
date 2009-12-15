@@ -50,19 +50,19 @@ public class ConvertingPropertyEditorAdapter extends PropertyEditorSupport {
 		Assert.notNull(targetDescriptor, "TypeDescriptor must not be null");
 		this.conversionService = conversionService;
 		this.targetDescriptor = targetDescriptor;
-		this.canConvertToString = conversionService.canConvert(this.targetDescriptor, TypeDescriptor.STRING);
+		this.canConvertToString = conversionService.canConvert(this.targetDescriptor, TypeDescriptor.valueOf(String.class));
 	}
 
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(this.conversionService.convert(text, TypeDescriptor.STRING, this.targetDescriptor));
+		setValue(this.conversionService.convert(text, TypeDescriptor.valueOf(String.class), this.targetDescriptor));
 	}
 
 	@Override
 	public String getAsText() {
 		if (this.canConvertToString) {
-			return (String) this.conversionService.convert(getValue(), this.targetDescriptor, TypeDescriptor.STRING);
+			return (String) this.conversionService.convert(getValue(), this.targetDescriptor, TypeDescriptor.valueOf(String.class));
 		}
 		else {
 			return null;

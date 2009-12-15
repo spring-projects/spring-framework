@@ -18,7 +18,6 @@ package org.springframework.context.expression;
 
 import java.util.Map;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.PropertyAccessor;
@@ -39,7 +38,7 @@ public class MapAccessor implements PropertyAccessor {
 	}
 
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		return new TypedValue(((Map) target).get(name), TypeDescriptor.OBJECT);
+		return new TypedValue(((Map) target).get(name));
 	}
 
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -52,7 +51,7 @@ public class MapAccessor implements PropertyAccessor {
 	}
 
 	public Class[] getSpecificTargetClasses() {
-		return new Class[] {Map.class};
+		return new Class[] { Map.class };
 	}
 	
 }

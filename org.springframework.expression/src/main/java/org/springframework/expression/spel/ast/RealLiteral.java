@@ -28,7 +28,7 @@ public class RealLiteral extends Literal {
 
 	public RealLiteral(String payload, int pos, double value) {
 		super(payload, pos); 
-		this.value = new TypedValue(value,DOUBLE_TYPE_DESCRIPTOR);
+		this.value = new TypedValue(value);
 	}
 
 	@Override

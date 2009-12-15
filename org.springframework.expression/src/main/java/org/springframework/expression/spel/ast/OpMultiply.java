@@ -60,11 +60,11 @@ public class OpMultiply extends Operator {
 			Number leftNumber = (Number) operandOne;
 			Number rightNumber = (Number) operandTwo;
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
-				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue(), DOUBLE_TYPE_DESCRIPTOR);
+				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
 			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				return new TypedValue(leftNumber.longValue() * rightNumber.longValue(), LONG_TYPE_DESCRIPTOR);
+				return new TypedValue(leftNumber.longValue() * rightNumber.longValue());
 			} else {
-				return new TypedValue(leftNumber.intValue() * rightNumber.intValue(), INTEGER_TYPE_DESCRIPTOR);
+				return new TypedValue(leftNumber.intValue() * rightNumber.intValue());
 			}
 		} else if (operandOne instanceof String && operandTwo instanceof Integer) {
 			int repeats = (Integer) operandTwo;
@@ -72,7 +72,7 @@ public class OpMultiply extends Operator {
 			for (int i = 0; i < repeats; i++) {
 				result.append(operandOne);
 			}
-			return new TypedValue(result.toString(), STRING_TYPE_DESCRIPTOR);
+			return new TypedValue(result.toString());
 		}
 		return state.operate(Operation.MULTIPLY, operandOne, operandTwo);
 	}

@@ -49,11 +49,11 @@ public class OpPlus extends Operator {
 			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
 				if (operandOne instanceof Double) {
-					return new TypedValue(((Double) operandOne).doubleValue(), DOUBLE_TYPE_DESCRIPTOR);
+					return new TypedValue(((Double) operandOne).doubleValue());
 				} else if (operandOne instanceof Long) {
-					return new TypedValue(((Long) operandOne).longValue(), LONG_TYPE_DESCRIPTOR);
+					return new TypedValue(((Long) operandOne).longValue());
 				} else {
-					return new TypedValue(((Integer) operandOne).intValue(), INTEGER_TYPE_DESCRIPTOR);
+					return new TypedValue(((Integer) operandOne).intValue());
 				}
 			}
 			return state.operate(Operation.ADD, operandOne, null);
@@ -65,22 +65,22 @@ public class OpPlus extends Operator {
 				Number op1 = (Number) operandOne;
 				Number op2 = (Number) operandTwo;
 				if (op1 instanceof Double || op2 instanceof Double) {
-					return new TypedValue(op1.doubleValue() + op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
+					return new TypedValue(op1.doubleValue() + op2.doubleValue());
 				} else if (op1 instanceof Long || op2 instanceof Long) {
-					return new TypedValue(op1.longValue() + op2.longValue(),LONG_TYPE_DESCRIPTOR);
+					return new TypedValue(op1.longValue() + op2.longValue());
 				} else { // TODO what about overflow?
-					return new TypedValue(op1.intValue() + op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
+					return new TypedValue(op1.intValue() + op2.intValue());
 				}
 			} else if (operandOne instanceof String && operandTwo instanceof String) {
-				return new TypedValue(new StringBuilder((String) operandOne).append((String) operandTwo).toString(),STRING_TYPE_DESCRIPTOR);
+				return new TypedValue(new StringBuilder((String) operandOne).append((String) operandTwo).toString());
 			} else if (operandOne instanceof String) {
 				StringBuilder result = new StringBuilder((String)operandOne);
 				result.append((operandTwo==null?"null":operandTwo.toString()));
-				return new TypedValue(result.toString(),STRING_TYPE_DESCRIPTOR);				
+				return new TypedValue(result.toString());				
 			} else if (operandTwo instanceof String) {
 				StringBuilder result = new StringBuilder((operandOne==null?"null":operandOne.toString()));
 				result.append((String)operandTwo);
-				return new TypedValue(result.toString(),STRING_TYPE_DESCRIPTOR);								
+				return new TypedValue(result.toString());								
 			}
 			return state.operate(Operation.ADD, operandOne, operandTwo);
 		}

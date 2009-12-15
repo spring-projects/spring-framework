@@ -17,8 +17,8 @@
 package org.springframework.expression.spel;
 
 import junit.framework.Assert;
-import org.junit.Test;
 
+import org.junit.Test;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -26,8 +26,8 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 ///CLOVER:OFF
@@ -155,7 +155,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
-			return new TypedValue(flibbles, TypeDescriptor.STRING);
+			return new TypedValue(flibbles, TypeDescriptor.valueOf(String.class));
 		}
 
 		public void write(EvaluationContext context, Object target, String name, Object newValue)

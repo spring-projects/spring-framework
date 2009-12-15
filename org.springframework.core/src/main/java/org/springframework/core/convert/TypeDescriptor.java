@@ -19,6 +19,7 @@ package org.springframework.core.convert;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.GenericCollectionTypeResolver;
@@ -39,13 +40,20 @@ public class TypeDescriptor {
 	/** Constant defining an 'unknown' TypeDescriptor */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
-	/** Constant defining a TypeDescriptor for <code>java.lang.Object</code> */
-	public static final TypeDescriptor OBJECT = new TypeDescriptor(Object.class);
+	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
 
-	/** Constant defining a TypeDescriptor for <code>java.lang.String</code> */
-	public static final TypeDescriptor STRING = new TypeDescriptor(String.class);
-
-
+	static {
+		typeDescriptorCache.put(String.class, new TypeDescriptor(String.class));
+		typeDescriptorCache.put(Byte.class, new TypeDescriptor(Byte.class));
+		typeDescriptorCache.put(Character.class, new TypeDescriptor(Character.class));
+		typeDescriptorCache.put(Boolean.class, new TypeDescriptor(Boolean.class));
+		typeDescriptorCache.put(Short.class, new TypeDescriptor(Short.class));
+		typeDescriptorCache.put(Integer.class, new TypeDescriptor(Integer.class));
+		typeDescriptorCache.put(Long.class, new TypeDescriptor(Long.class));
+		typeDescriptorCache.put(Float.class, new TypeDescriptor(Float.class));
+		typeDescriptorCache.put(Double.class, new TypeDescriptor(Double.class));
+	}
+	
 	private Object value;
 
 	private Class<?> type;
@@ -413,11 +421,9 @@ public class TypeDescriptor {
 	public static TypeDescriptor valueOf(Class<?> type) {
 		if (type == null) {
 			return TypeDescriptor.NULL;
-		} else if (type.equals(String.class)) {
-			return TypeDescriptor.STRING;
-		} else {
-			return new TypeDescriptor(type);
 		}
+		TypeDescriptor desc = typeDescriptorCache.get(type);
+		return desc != null ? desc : new TypeDescriptor(type);
 	}
 
 	/**

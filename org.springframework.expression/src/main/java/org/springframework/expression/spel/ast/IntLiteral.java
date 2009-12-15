@@ -14,7 +14,7 @@ public class IntLiteral extends Literal {
 
 	IntLiteral(String payload, int pos, int value) {
 		super(payload, pos); 
-		this.value = new TypedValue(value, INTEGER_TYPE_DESCRIPTOR);
+		this.value = new TypedValue(value);
 	}
 
 	@Override

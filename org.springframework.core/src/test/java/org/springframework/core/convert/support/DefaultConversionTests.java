@@ -414,7 +414,7 @@ public class DefaultConversionTests {
 	public void convertCollectionToStringWithElementConversion() throws Exception {
 		List<Integer> list = Arrays.asList(new Integer[] { 3, 5 });
 		String result = (String) conversionService.convert(list,
-				new TypeDescriptor(getClass().getField("genericList")), TypeDescriptor.STRING);
+				new TypeDescriptor(getClass().getField("genericList")), TypeDescriptor.valueOf(String.class));
 		assertEquals("3,5", result);
 	}
 
@@ -429,7 +429,7 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertStringToCollectionWithElementConversion() throws Exception {
-		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.STRING,
+		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
 				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(3, result.size());
 		assertEquals(new Integer(1), result.get(0));
@@ -679,7 +679,7 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertObjectToObjectFinderMethodWithNull() {
-		TestEntity e = (TestEntity) conversionService.convert(null, TypeDescriptor.STRING, TypeDescriptor.valueOf(TestEntity.class));
+		TestEntity e = (TestEntity) conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(TestEntity.class));
 		assertNull(e);
 	}
 

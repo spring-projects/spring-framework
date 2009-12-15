@@ -21,9 +21,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.Assert;
-import org.junit.Test;
 
-import org.springframework.core.convert.TypeDescriptor;
+import org.junit.Test;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -219,7 +218,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name), TypeDescriptor.OBJECT);
+			return new TypedValue(((Map) target).get(name));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

@@ -49,7 +49,7 @@ public class QualifiedIdentifier extends SpelNodeImpl {
 				}
 				sb.append(value);
 			}
-			this.value = new TypedValue(sb.toString(),STRING_TYPE_DESCRIPTOR);
+			this.value = new TypedValue(sb.toString());
 		}
 		return this.value;
 	}
