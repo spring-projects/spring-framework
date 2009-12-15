@@ -64,6 +64,7 @@ import org.springframework.expression.spel.ast.StringLiteral;
 import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.ast.VariableReference;
+import org.springframework.util.Assert;
 
 /**
  * Hand written SpEL parser. Instances are reusable but are not thread safe.
@@ -114,7 +115,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			if (moreTokens()) {
 				throw new SpelParseException(peekToken().startpos,SpelMessage.MORE_INPUT,toString(nextToken()));
 			}
-			assert constructedNodes.isEmpty();
+			Assert.isTrue(constructedNodes.isEmpty());
 			return new SpelExpression(expressionString, ast, configuration);	
 		}
 		catch (InternalParseException ipe) {
@@ -179,7 +180,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private SpelNodeImpl eatRelationalExpression() {
 		SpelNodeImpl expr = eatSumExpression();
 		Token relationalOperatorToken = maybeEatRelationalOperator();
-		if (relationalOperatorToken!=null) {
+		if (relationalOperatorToken != null) {
 			Token t = nextToken(); //consume relational operator token
 			SpelNodeImpl rhExpr = eatSumExpression();
 			checkRightOperand(t,rhExpr);
@@ -194,10 +195,10 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 					return new OpLE(pos,expr,rhExpr);
 				} else if (tk==TokenKind.GE) {
 					return new OpGE(pos,expr,rhExpr);
-				} else if (tk==TokenKind.EQ) {
+				} else if (tk == TokenKind.EQ) {
 					return new OpEQ(pos,expr,rhExpr);
 				} else {
-					assert tk==TokenKind.NE;
+					Assert.isTrue(tk == TokenKind.NE);
 					return new OpNE(pos,expr,rhExpr);
 				}
 			}
@@ -206,7 +207,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			} else if (tk==TokenKind.MATCHES) {
 				return new OperatorMatches(toPos(t),expr,rhExpr);
 			} else {
-				assert tk==TokenKind.BETWEEN;
+				Assert.isTrue(tk==TokenKind.BETWEEN);
 				return new org.springframework.expression.spel.ast.OperatorBetween(toPos(t),expr,rhExpr);
 			}
 		}
@@ -223,7 +224,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			if (t.kind==TokenKind.PLUS) {
 				expr = new OpPlus(toPos(t),expr,rhExpr);
 			} else {
-				assert t.kind==TokenKind.MINUS;
+				Assert.isTrue(t.kind==TokenKind.MINUS);
 				expr = new OpMinus(toPos(t),expr,rhExpr);
 			}
 		}
@@ -242,7 +243,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			} else if (t.kind==TokenKind.DIV) {
 				expr = new OpDivide(toPos(t),expr,rhExpr);
 			} else {
-				assert t.kind==TokenKind.MOD;
+				Assert.isTrue(t.kind==TokenKind.MOD);
 				expr = new OpModulus(toPos(t),expr,rhExpr);
 			}
 		}
@@ -271,7 +272,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			} else if (t.kind==TokenKind.PLUS) {
 				return new OpPlus(toPos(t),expr);
 			} else {
-				assert t.kind==TokenKind.MINUS;
+				Assert.isTrue(t.kind==TokenKind.MINUS);
 				return new OpMinus(toPos(t),expr);
 			}
 		} else {
@@ -653,7 +654,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	private Token eatToken(TokenKind expectedKind) {
-		assert moreTokens();
+		Assert.isTrue(moreTokens());
 		Token t = nextToken();
 		if (t==null) {
 			raiseInternalException( expressionString.length(), SpelMessage.OOD);

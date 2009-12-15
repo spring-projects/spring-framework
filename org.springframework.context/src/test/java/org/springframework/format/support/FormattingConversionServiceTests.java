@@ -32,8 +32,8 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConversionServiceFactory;
-import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.DateTimeParser;
+import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
 import org.springframework.format.number.NumberFormatter;
 
@@ -95,9 +95,9 @@ public class FormattingConversionServiceTests {
 		});
 		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 		String formatted = (String) formattingService.convert(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime()
-				.toDate(), new TypeDescriptor(Model.class.getField("date")), TypeDescriptor.valueOf(String.class));
+				.toDate(), new TypeDescriptor(Model.class.getField("date")), TypeDescriptor.STRING);
 		assertEquals("10/31/09", formatted);
-		LocalDate date = new LocalDate(formattingService.convert("10/31/09", TypeDescriptor.valueOf(String.class),
+		LocalDate date = new LocalDate(formattingService.convert("10/31/09", TypeDescriptor.STRING,
 				new TypeDescriptor(Model.class.getField("date"))));
 		assertEquals(new LocalDate(2009, 10, 31), date);
 	}
@@ -105,34 +105,34 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testPrintNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		assertEquals("", formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
+		assertEquals("", formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.STRING));
 	}
 
 	@Test
 	public void testParseNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert(null, TypeDescriptor.STRING, TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
 	public void testParseEmptyString() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert("", TypeDescriptor.STRING, TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
 	public void testPrintNullDefault() throws ParseException {
-		assertEquals(null, formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
+		assertEquals(null, formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.STRING));
 	}
 
 	@Test
 	public void testParseNullDefault() throws ParseException {
-		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert(null, TypeDescriptor.STRING, TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
 	public void testParseEmptyStringDefault() throws ParseException {
-		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert("", TypeDescriptor.STRING, TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	private static class Model {

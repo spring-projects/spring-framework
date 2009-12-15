@@ -22,9 +22,10 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 
 /**
- * A very simple hardcoded implementation of the Expression interface that represents a string literal. It is used with
- * CompositeStringExpression when representing a template expression which is made up of pieces - some being real
- * expressions to be handled by an EL implementation like Spel, and some being just textual elements.
+ * A very simple hardcoded implementation of the Expression interface that represents a string literal.
+ * It is used with CompositeStringExpression when representing a template expression which is made up
+ * of pieces - some being real expressions to be handled by an EL implementation like Spel, and some
+ * being just textual elements.
  *
  * @author Andy Clement
  * @since 3.0
@@ -61,11 +62,11 @@ public class LiteralExpression implements Expression {
 	}
 
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) {
-		return TypeDescriptor.valueOf(String.class);
+		return TypeDescriptor.STRING;
 	}
 
 	public TypeDescriptor getValueTypeDescriptor() {
-		return TypeDescriptor.valueOf(String.class);
+		return TypeDescriptor.STRING;
 	}
 
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
@@ -102,8 +103,7 @@ public class LiteralExpression implements Expression {
 	}
 
 
-	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType)
-			throws EvaluationException {
+	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(context, rootObject);
 		return ExpressionUtils.convert(null, value, desiredResultType);
 	}
@@ -120,13 +120,12 @@ public class LiteralExpression implements Expression {
 
 
 	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
-		return TypeDescriptor.valueOf(String.class);
+		return TypeDescriptor.STRING;
 	}
 
 
-	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject)
-			throws EvaluationException {
-		return TypeDescriptor.valueOf(String.class);
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return TypeDescriptor.STRING;
 	}
 
 

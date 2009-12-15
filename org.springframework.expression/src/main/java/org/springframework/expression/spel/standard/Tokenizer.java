@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.util.Assert;
 
 /**
  * Lex some input data into a stream of tokens that can then be parsed.
@@ -395,8 +396,8 @@ class Tokenizer {
 	 * Check if this might be a two character token.
 	 */
 	private boolean isTwoCharToken(TokenKind kind) {
-		assert kind.tokenChars.length==2;
-		assert toProcess[pos] == kind.tokenChars[0];
+		Assert.isTrue(kind.tokenChars.length == 2);
+		Assert.isTrue(toProcess[pos] == kind.tokenChars[0]);
 		return toProcess[pos+1] == kind.tokenChars[1];
 	}
 	

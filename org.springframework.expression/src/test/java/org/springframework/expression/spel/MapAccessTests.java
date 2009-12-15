@@ -78,7 +78,7 @@ public class MapAccessTests extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name), TypeDescriptor.valueOf(Object.class));
+			return new TypedValue(((Map) target).get(name), TypeDescriptor.OBJECT);
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

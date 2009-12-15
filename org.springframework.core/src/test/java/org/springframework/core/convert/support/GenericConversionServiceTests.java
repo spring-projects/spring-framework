@@ -88,7 +88,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void convertNullTypeDescriptor() {
-		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
+		assertNull(conversionService.convert("3", TypeDescriptor.STRING, TypeDescriptor.NULL));
 	}
 
 	@Test
@@ -121,9 +121,9 @@ public class GenericConversionServiceTests {
 		assertTrue(conversionService.canConvert(String.class, boolean.class));
 		Boolean b = conversionService.convert("true", boolean.class);
 		assertEquals(Boolean.TRUE, b);
-		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), TypeDescriptor
+		assertTrue(conversionService.canConvert(TypeDescriptor.STRING, TypeDescriptor
 				.valueOf(boolean.class)));
-		b = (Boolean) conversionService.convert("true", TypeDescriptor.valueOf(String.class), TypeDescriptor
+		b = (Boolean) conversionService.convert("true", TypeDescriptor.STRING, TypeDescriptor
 				.valueOf(boolean.class));
 		assertEquals(Boolean.TRUE, b);
 	}
