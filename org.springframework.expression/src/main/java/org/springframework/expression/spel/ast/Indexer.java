@@ -55,7 +55,7 @@ public class Indexer extends SpelNodeImpl {
 		if (targetObject instanceof Map && (children[0] instanceof PropertyOrFieldReference)) {
 			PropertyOrFieldReference reference = (PropertyOrFieldReference)children[0];
 			index = reference.getName();
-			indexValue = new TypedValue(index, TypeDescriptor.valueOf(String.class));
+			indexValue = new TypedValue(index, TypeDescriptor.STRING);
 		}
 		else {
 			// In case the map key is unqualified, we want it evaluated against the root object so 
@@ -86,8 +86,8 @@ public class Indexer extends SpelNodeImpl {
 				possiblyConvertedKey = state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
 			}
 			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-			TypeDescriptor resultDescriptor = targetObjectTypeDescriptor.isMapEntryTypeKnown()?
-					TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()): TypeDescriptor.valueOf(Object.class);
+			TypeDescriptor resultDescriptor = (targetObjectTypeDescriptor.isMapEntryTypeKnown() ?
+					TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()) : TypeDescriptor.OBJECT);
 			return new TypedValue(o,resultDescriptor);
 		}
 

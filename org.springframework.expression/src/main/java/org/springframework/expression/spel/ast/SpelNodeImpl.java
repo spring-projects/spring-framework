@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.common.ExpressionUtils;
@@ -24,7 +25,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.Assert;
 
 /**
  * The common supertype of all AST nodes in a parsed Spring Expression Language format expression.
@@ -34,17 +35,17 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 public abstract class SpelNodeImpl implements SpelNode {
 
+	static TypeDescriptor OBJECT_TYPE_DESCRIPTOR = TypeDescriptor.OBJECT;
+	static TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.STRING;
+	static TypeDescriptor CLASS_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Class.class);
 	static TypeDescriptor BOOLEAN_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Boolean.class);
-	static TypeDescriptor INTEGER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Integer.class);
 	static TypeDescriptor CHARACTER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Character.class);
-	static TypeDescriptor LONG_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Long.class);
-	static TypeDescriptor SHORT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Short.class);
 	static TypeDescriptor BYTE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Byte.class);
+	static TypeDescriptor SHORT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Short.class);
+	static TypeDescriptor INTEGER_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Integer.class);
+	static TypeDescriptor LONG_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Long.class);
 	static TypeDescriptor FLOAT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Float.class);
 	static TypeDescriptor DOUBLE_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Double.class);
-	static TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
-	static TypeDescriptor CLASS_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Class.class);
-	static TypeDescriptor OBJECT_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(Object.class);
 
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 	
@@ -55,10 +56,10 @@ public abstract class SpelNodeImpl implements SpelNode {
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
 		// pos combines start and end so can never be zero because tokens cannot be zero length
-		assert pos!=0;
-		if (operands!=null && operands.length>0) {
+		Assert.isTrue(pos != 0);
+		if (operands != null && operands.length > 0) {
 			this.children = operands;
-			for (SpelNodeImpl childnode: operands) {
+			for (SpelNodeImpl childnode : operands) {
 				childnode.parent = this;
 			}
 		}
@@ -66,8 +67,8 @@ public abstract class SpelNodeImpl implements SpelNode {
 	
 	protected SpelNodeImpl getPreviousChild() {
 		SpelNodeImpl result = null;
-		if (parent!=null) {
-			for (SpelNodeImpl child: parent.children) {
+		if (parent != null) {
+			for (SpelNodeImpl child : parent.children) {
 				if (this==child) break;
 				result = child;
 			}

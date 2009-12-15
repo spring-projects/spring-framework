@@ -37,10 +37,14 @@ import org.springframework.util.ClassUtils;
  */
 public class TypeDescriptor {
 
-	/**
-	 * Constant defining an 'unknown' TypeDescriptor.
-	 */
+	/** Constant defining an 'unknown' TypeDescriptor */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
+
+	/** Constant defining a TypeDescriptor for <code>java.lang.Object</code> */
+	public static final TypeDescriptor OBJECT = TypeDescriptor.valueOf(Object.class);
+
+	/** Constant defining a TypeDescriptor for <code>java.lang.String</code> */
+	public static final TypeDescriptor STRING = TypeDescriptor.valueOf(String.class);
 
 
 	private Class<?> type;

@@ -155,7 +155,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
-			return new TypedValue(flibbles, TypeDescriptor.valueOf(String.class));
+			return new TypedValue(flibbles, TypeDescriptor.STRING);
 		}
 
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
