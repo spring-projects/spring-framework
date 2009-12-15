@@ -37,16 +37,16 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  */
 final class ObjectToStringConverter implements ConditionalGenericConverter {
 
+	public Set<ConvertiblePair> getConvertibleTypes() {
+		return Collections.singleton(new ConvertiblePair(Object.class, String.class));
+	}
+
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class sourceClass = sourceType.getObjectType();
+		Class<?> sourceClass = sourceType.getObjectType();
 		return Number.class.isAssignableFrom(sourceClass) || Boolean.class.equals(sourceClass) ||
 				Character.class.equals(sourceClass) || CharSequence.class.isAssignableFrom(sourceClass) ||
 				StringWriter.class.isAssignableFrom(sourceClass) || sourceClass.isEnum() ||
 				ObjectToObjectConverter.hasValueOfMethodOrConstructor(sourceClass, String.class);
-	}
-
-	public Set<ConvertiblePair> getConvertibleTypes() {
-		return Collections.singleton(new ConvertiblePair(Object.class, String.class));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
