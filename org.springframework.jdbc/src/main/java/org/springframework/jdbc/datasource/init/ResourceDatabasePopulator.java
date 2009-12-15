@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.StringUtils;
@@ -44,7 +45,10 @@ import org.springframework.util.StringUtils;
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
+	private static String COMMENT_PREFIX = "--";
+
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
+
 
 	private List<Resource> scripts = new ArrayList<Resource>();
 
@@ -54,14 +58,13 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private boolean ignoreFailedDrops = false;
 
-	private static String COMMENT_PREFIX = "--";
 
 	/**
 	 * Add a script to execute to populate the database.
 	 * @param script the path to a SQL script
 	 */
 	public void addScript(Resource script) {
-		scripts.add(script);
+		this.scripts.add(script);
 	}
 
 	/**
@@ -100,7 +103,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
-	
+
+
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
 			executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops);
@@ -110,7 +114,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private EncodedResource applyEncodingIfNecessary(Resource script) {
 		if (script instanceof EncodedResource) {
 			return (EncodedResource) script;
-		} else {
+		}
+		else {
 			return new EncodedResource(script, this.sqlScriptEncoding);
 		}
 	}
@@ -134,8 +139,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		String script;
 		try {
 			script = readScript(resource);
-		} catch (IOException e) {
-			throw new CannotReadScriptException(resource, e);
+		}
+		catch (IOException ex) {
+			throw new CannotReadScriptException(resource, ex);
 		}
 		char delimiter = ';';
 		if (!containsSqlScriptDelimiters(script, delimiter)) {
@@ -152,21 +158,25 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					if (logger.isDebugEnabled()) {
 						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
-				} catch (SQLException ex) {
+				}
+				catch (SQLException ex) {
 					boolean dropStatement = statement.trim().toLowerCase().startsWith("drop");
 					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Line " + lineNumber + " statement failed: " + statement, ex);
 						}
-					} else {
+					}
+					else {
 						throw ex;
 					}
 				}
 			}
-		} finally {
+		}
+		finally {
 			try {
 				stmt.close();
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex) {
 				logger.debug("Could not close JDBC Statement", ex);
 			}
 		}
@@ -237,7 +247,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					statements.add(sb.toString());
 					sb = new StringBuilder();
 				}
-			} else {
+			}
+			else {
 				sb.append(content[i]);
 			}
 		}
