@@ -143,7 +143,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
         </listitem>
 
         <listitem>
-          <para><link linkend="beans-javaconfig">Java-based
+          <para><link linkend="beans-java">Java-based
           configuration</link>: Starting with Spring 3.0, many features
           provided by the <ulink
           url="http://www.springsource.org/javaconfig">Spring JavaConfig
@@ -5571,19 +5571,18 @@ public class CachingMovieCatalog implements MovieCatalog {
     </section>
   </section>
 
-  <section id="beans-javaconfig">
+  <section id="beans-java">
     <title>Java-based container configuration</title>
 
-    <section id="beans-javaconfig-configuration-annotation">
-      <title>Using the <interfacename>@Configuration</interfacename>
-      annotation</title>
+    <section id="beans-java-basic-concepts">
+      <title>Basic concepts: <literal>@Configuration</literal> and <literal>@Bean</literal></title>
 
       <para>The central artifact in Spring's new Java-configuration support is
       the <interfacename>@Configuration</interfacename>-annotated class. These
       classes consist principally of
       <interfacename>@Bean</interfacename>-annotated methods that define
-      instantiation, configuration, and initialization logic for objects that
-      are managed by the Spring IoC container.</para>
+      instantiation, configuration, and initialization logic for objects to
+      be managed by the Spring IoC container.</para>
 
       <para>Annotating a class with the
       <interfacename>@Configuration</interfacename> indicates that the class
@@ -5591,24 +5590,482 @@ public class CachingMovieCatalog implements MovieCatalog {
       The simplest possible <interfacename>@Configuration</interfacename>
       class would read as follows: <programlisting language="java">@Configuration
 public class AppConfig {
+    @Bean
+    public void MyService myService() {
+        return new MyServiceImpl();
+    }
+}</programlisting></para>
 
-}            </programlisting></para>
+      <para>For those more familiar with Spring <literal>&lt;beans/&gt;</literal>
+      XML, the <literal>AppConfig</literal> class above would be equivalent to:
 
-      <para>An application may use one
-      <interfacename>@Configuration</interfacename>-annotated class, or many.
-      <interfacename>@Configuration</interfacename> is meta-annotated as a
-      <interfacename>@Component</interfacename>. Therefore,
-      <interfacename>@Configuration</interfacename>-annotated classes are
-      candidates for component-scanning and can also take advantage of
-      <interfacename>@Autowired</interfacename> annotations at the field and
-      method levels, but not at the constructor level.
-      <interfacename>@Configuration</interfacename>-annotated classes must
-      also have a default constructor. You can wire externalized values into
-      <interfacename>@Configuration</interfacename>-annotated classes with the
-      <interfacename>@Value</interfacename> annotation.</para>
+      <programlisting language="xml">&lt;beans&gt;
+    &lt;bean id="myService" class="com.acme.services.MyServiceImpl"/&gt;
+&lt;/beans&gt;</programlisting>
+
+      As you can see, the <literal>@Bean</literal> annotation plays the same role
+      as the <literal>&lt;bean/&gt;</literal> element.  The <literal>@Bean</literal>
+      annotation will be discussed in depth in the sections below.  First, however,
+      we'll cover the various ways of creating a spring container using Java-based
+      configuration.</para>
     </section>
 
-    <section id="beans-javaconfig-bean-annotation">
+    <section id="beans-java-instantiating-container">
+      <title>Instantiating the Spring container using
+      <literal>AnnotationConfigApplicationContext</literal></title>
+
+      <para>The sections below document Spring's
+      <literal>AnnotationConfigApplicationContext</literal>, new in Spring 3.0.
+      This versatile <literal>ApplicationContext</literal> implementation is
+      capable of accepting not only <literal>@Configuration</literal> classes
+      as input, but also plain <literal>@Component</literal> classes and classes
+      annotated with JSR-330 metadata.</para>
+
+      <para>When <literal>@Configuration</literal> classes are provided as input,
+      the <literal>@Configuration</literal> class itself is registered as a bean
+      definition, and all declared <literal>@Bean</literal> methods within the
+      class are also registered as bean definitions.</para>
+
+      <para>When <literal>@Component</literal> and JSR-330 classes are provided,
+      they are registered as bean definitions, and it is assumed that DI metadata
+      such as <literal>@Autowired</literal> or <literal>@Inject</literal> are used
+      within those classes where necessary.</para>
+
+      <section id="beans-java-instantiating-container-contstructor">
+        <title>Simple construction</title>
+          <para>In much the same way that Spring XML files are used as input when
+          instantiating a <literal>ClassPathXmlApplicationContext</literal>,
+          <literal>@Configuration</literal> classes may be used as input when
+          instantiating an <literal>AnnotationConfigApplicationContext</literal>.
+          This allows for completely XML-free usage of the Spring container:
+          <programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+    MyService myService = ctx.getBean(MyService.class);
+    myService.doStuff();
+}</programlisting>
+
+          As mentioned above, <literal>AnnotationConfigApplicationContext</literal>
+          is not limited to working only with <literal>@Configuration</literal>
+          classes. Any <literal>@Component</literal> or JSR-330 annotated class may
+          be supplied as input to the constructor.  For example:
+          <programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(MyServiceImpl.class, Dependency1.class, Dependency2.class);
+    MyService myService = ctx.getBean(MyService.class);
+    myService.doStuff();
+}</programlisting>
+
+The above assumes that <literal>MyServiceImpl</literal>, <literal>Dependency1</literal> and <literal>Dependency2</literal> use Spring dependency injection annotations such as <literal>@Autowired</literal>.</para>
+      </section>
+
+      <section id="beans-java-instantiating-container-register">
+        <title>Building the container programmatically using <literal>register(Class&lt;?&gt;...)</literal></title>
+        <para>An <literal>AnnotationConfigApplicationContext</literal> may be
+        instantiated using a no-arg constructor and then configured using the
+        <literal>register()</literal> method. This approach is particularly
+        useful when programmatically building an
+        <literal>AnnotationConfigApplicationContext</literal>.
+        <programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext();
+    ctx.register(AppConfig.class, OtherConfig.class);
+    ctx.register(AdditionalConfig.class);
+    ctx.refresh();
+    MyService myService = ctx.getBean(MyService.class);
+    myService.doStuff();
+}</programlisting></para>
+      </section>
+
+      <section id="beans-java-instantiating-container-scan">
+        <title>Enabling component scanning with <literal>scan(String...)</literal></title>
+        <para>Experienced Spring users will be familiar with the following
+        commonly-used XML declaration from Spring's <literal>context:</literal> namespace
+        <programlisting language="xml">&lt;beans&gt;
+    &lt;context:component-scan base-package="com.acme"/&gt;
+&lt;/beans&gt;</programlisting>
+
+        In the example above, the <literal>com.acme</literal> package will
+        be scanned, looking for any <literal>@Component</literal>-annotated
+        classes, and those classes will be registered as Spring bean
+        definitions within the container.
+
+        <literal>AnnotationConfigApplicationContext</literal> exposes the
+        <literal>scan(String...)</literal> method to allow for the same
+        component-scanning functionality:<programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext();
+    ctx.scan("com.acme");
+    ctx.refresh();
+    MyService myService = ctx.getBean(MyService.class);
+}</programlisting></para>
+        <note>
+          <para>Remember that <literal>@Configuration</literal> classes are
+          meta-annotated with <literal>@Component</literal>, so they are
+          candidates for component-scanning! In the example above, assuming
+          that <literal>AppConfig</literal> is declared within the
+          <literal>com.acme</literal> package (or any package underneath),
+          it will be picked up during the call to <literal>scan()</literal>,
+          and upon <literal>refresh()</literal> all its <literal>@Bean</literal>
+          methods will be processed and registered as bean definitions within
+          the container.</para>
+        </note>
+      </section>
+
+      <section id="beans-java-instantiating-container-web">
+        <title>Support for web applications with <literal>AnnotationConfigWebApplicationContext</literal></title>
+        <para>A <literal>WebApplicationContext</literal> variant of <literal>AnnotationConfigApplicationContext</literal> is available with <literal>AnnotationConfigWebApplicationContext</literal>.  This implementation may be used when configuring the Spring <literal>ContextLoaderListener</literal> servlet listener, Spring MVC <literal>DispatcherServlet</literal>, etc.  What follows is a <literal>web.xml</literal> snippet that configures a typical Spring MVC web application.  Note the use of the <literal>contextClass</literal> context-param and init-param:
+        <programlisting language="xml"><![CDATA[
+<web-app>
+    <!-- Configure ContextLoaderListener to use AnnotationConfigWebApplicationContext
+         instead of the default XmlWebApplicationContext -->
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>
+            org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+        </param-value>
+    </context-param>
+
+    <!-- Configuration locations must consist of one or more comma- or space-delimited
+         fully-qualified @Configuration classes -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>com.acme.AppConfig</param-value>
+    </context-param>
+
+    <!-- Bootstrap the root application context as usual using ContextLoaderListener -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!-- Declare a Spring MVC DispatcherServlet as usual -->
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- Configure DispatcherServlet to use JavaConfigWebApplicationContext
+             instead of the default XmlWebApplicationContext -->
+        <init-param>
+            <param-name>contextClass</param-name>
+            <param-value>
+                org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+            </param-value>
+        </init-param>
+        <!-- Again, config locations must consist of one or more comma- or space-delimited
+             and fully-qualified @Configuration classes -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>com.acme.web.MvcConfig</param-value>
+        </init-param>
+    </servlet>
+
+    <!-- map all requests for /main/* to the dispatcher servlet -->
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>/main/*</url-pattern>
+    </servlet-mapping>
+</web-app>]]></programlisting></para>
+      </section>
+    </section>
+
+    <section id="beans-java-composing-configuration-classes">
+      <title>Composing Java-based configurations</title>
+      <section id="beans-java-using-import">
+        <title>Using the <literal>@Import</literal> annotation</title>
+        <para>Much as the <literal>&lt;import/&gt;</literal> element is used within
+        Spring XML files to aid in modularizing configurations, the
+        <literal>@Import</literal> annotation allows for loading <literal>@Bean</literal>
+        definitions from another configuration class:<programlisting language="java">@Configuration
+public class ConfigA {
+    public @Bean A a() { return new A(); }
+}
+
+@Configuration
+@Import(ConfigA.class)
+public class ConfigB {
+    public @Bean B b() { return new B(); }
+}</programlisting>
+
+Now, rather than needing to specify both <literal>ConfigA.class</literal> and
+<literal>ConfigB.class</literal> when instantiating the context, only
+<literal>ConfigB</literal> needs to be supplied explicitly:<programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigB.class);
+
+    // now both beans A and B will be available...
+    A a = ctx.getBean(A.class);
+    B b = ctx.getBean(B.class);
+}</programlisting>
+
+          This approach simplifies container instantiation, as only one class needs to be dealt
+          with, rather than requiring the developer to remember a potentially large number of
+          <literal>@Configuration</literal> classes during construction.
+        </para>
+
+        <section id="beans-java-injecting-imported-beans">
+          <title>Injecting dependencies on imported <literal>@Bean</literal> definitions</title>
+          <para>The example above works, but is simplistic.  In most practical scenarios, beans
+          will have dependencies on one another across configuration classes.  When using XML,
+          this is not an issue, per se, because there is no compiler involved, and one can
+          simply declare <literal>ref="someBean"</literal> and trust that Spring will work
+          it out during container initialization.  Of course, when using
+          <literal>@Configuration</literal> classes, the Java compiler places constraints on
+          the configuration model, in that references to other beans must be valid Java syntax.</para>
+
+          <para>Fortunately, solving this problem is simple. Remember that
+          <literal>@Configuration</literal> classes are ultimately just another bean in the container
+          - this means that they can take advantage of <literal>@Autowired</literal> injection
+          metadata just like any other bean!</para>
+
+          <para>Let's consider a more real-world scenario with several <literal>@Configuration</literal>
+          classes, each depending on beans declared in the others:<programlisting language="java">@Configuration
+public class ServiceConfig {
+    private @Autowired AccountRepository accountRepository;
+
+    public @Bean TransferService transferService() {
+        return new TransferServiceImpl(accountRepository);
+    }
+}
+
+@Configuration
+public class RepositoryConfig {
+    private @Autowired DataSource dataSource;
+
+    public @Bean AccountRepository accountRepository() {
+        return new JdbcAccountRepository(dataSource);
+    }
+}
+
+@Configuration
+@Import({ServiceConfig.class, RepositoryConfig.class})
+public class SystemTestConfig {
+    public @Bean DataSource dataSource() { /* return new DataSource */ }
+}
+
+public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(SystemTestConfig.class);
+    // everything wires up across configuration classes...
+    TransferService transferService = ctx.getBean(TransferService.class);
+    transferService.transfer(100.00, "A123", "C456");
+}</programlisting></para>
+
+          <section id="beans-java-injecting-imported-beans-fq">
+            <title>Fully-qualifying imported beans for ease of navigation</title>
+            <para>In the scenario above, using <literal>@Autowired</literal> works
+            well and provides the desired modularity, but determining exactly where
+            the autowired bean definitions are declared is still somewhat ambiguous.
+            For example, as a developer looking at <literal>ServiceConfig</literal>,
+            how do you know exactly where the <literal>@Autowired AccountRepository</literal>
+            bean is declared?  It's not explicit in the code, and this may be just fine.
+            Remember that the <ulink url="http://www.springsource.com/products/sts">SpringSource
+            Tool Suite</ulink> provides tooling that can render graphs showing how everything
+            is wired up - that may be all you need. Also, your Java IDE can easily find all
+            declarations and uses of the <literal>AccountRepository</literal> type, and will
+            quickly show you the location of <literal>@Bean</literal> methods that return that
+            type.</para>
+
+            <para>In cases where this ambiguity is not acceptable and you wish to have
+            direct navigation from within your IDE from one <literal>@Configuration</literal>
+            class to another, consider autowiring the configuration classes themselves:
+            <programlisting language="java">@Configuration
+public class ServiceConfig {
+    private @Autowired RepositoryConfig repositoryConfig;
+
+    public @Bean TransferService transferService() {
+        // navigate 'through' the config class to the @Bean method!
+        return new TransferServiceImpl(repositoryConfig.accountRepository());
+    }
+}</programlisting>
+
+            In the situation above, it is completely explicit where
+            <literal>AccountRepository</literal> is defined.  However,
+            <literal>ServiceConfig</literal> is now tightly coupled to
+            <literal>RepositoryConfig</literal>; that's the tradeoff.  This tight
+            coupling can be somewhat mitigated by using interface-based or abstract
+            class-based <literal>@Configuration</literal> classes. Consider the following:
+            <programlisting language="java">@Configuration
+public class ServiceConfig {
+    private @Autowired RepositoryConfig repositoryConfig;
+
+    public @Bean TransferService transferService() {
+        return new TransferServiceImpl(repositoryConfig.accountRepository());
+    }
+}
+
+@Configuration
+public interface RepositoryConfig {
+    @Bean AccountRepository accountRepository();
+}
+
+@Configuration
+public class DefaultRepositoryConfig implements RepositoryConfig {
+    public @Bean AccountRepository accountRepository() {
+        return new JdbcAccountRepository(...);
+    }
+}
+
+@Configuration
+@Import({ServiceConfig.class, DefaultRepositoryConfig.class}) // import the concrete config!
+public class SystemTestConfig {
+    public @Bean DataSource dataSource() { /* return DataSource */ }
+}
+
+public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(SystemTestConfig.class);
+    TransferService transferService = ctx.getBean(TransferService.class);
+    transferService.transfer(100.00, "A123", "C456");
+}</programlisting>
+
+            Now <literal>ServiceConfig</literal> is loosely coupled with respect
+            to the concrete <literal>DefaultRepositoryConfig</literal>, and built-in IDE
+            tooling is still useful: it will be easy for the developer to get a type hierarchy
+            of <literal>RepositoryConfig</literal> implementations. In this way, navigating
+            <literal>@Configuration</literal> classes and their dependencies becomes no
+            different that the usual process of navigating interface-based code.</para>
+          </section>
+        </section>
+      </section>
+
+      <section id="beans-java-combining">
+        <title>Combining Java and XML configuration</title>
+        <para>Spring's <literal>@Configuration</literal> class support does not aim to be a 100%
+        complete replacement for Spring XML.  Some facilities such as Spring XML namespaces remain
+        an ideal way to configure the container.  In cases where XML is convenient or necessary,
+        you have a choice: either instantiate the container in an "XML-centric" way using, for
+        example, <literal>ClassPathXmlApplicationContext</literal>, or in a "Java-centric" fashion
+        using <literal>AnnotationConfigApplicationContext</literal> and the
+        <literal>@ImportResource</literal> annotation to import XML as needed.</para>
+
+        <section id="beans-java-combining-xml-centric">
+          <title>XML-centric use of <literal>@Configuration</literal> classes</title>
+          <para>It may be preferable to bootstrap the Spring container from XML and
+          include <literal>@Configuration</literal> classes in an ad-hoc fashion.
+          For example, in a large existing codebase that uses Spring XML, it will be
+          easier to create <literal>@Configuration</literal> classes on an as-needed
+          basis and include them from the existing XML files.  Below you'll find the
+          options for using <literal>@Configuration</literal> classes in this kind
+          of "XML-centric" situation.</para>
+
+          <section id="beans-java-combining-xml-centric-declare-as-bean">
+            <title>Declaring <literal>@Configuration</literal> classes as plain Spring
+            <literal>&lt;bean/&gt;</literal> elements</title>
+            <para>Remember that <literal>@Configuration</literal> classes are ultimately
+            just bean definitions in the container. In this example, we create a
+            <literal>@Configuration</literal> class named <literal>AppConfig</literal>
+            and include it within <literal>system-test-config.xml</literal> as a
+            <literal>&lt;bean/&gt;</literal>definition. Because
+            <literal>&lt;context:annotation-config/&gt;</literal> is switched on, the
+            container will recognize the <literal>@Configuration</literal> annotation,
+            and process the <literal>@Bean</literal> methods declared in
+            <literal>AppConfig</literal> properly.<programlisting language="java">@Configuration
+public class AppConfig {
+    private @Autowired DataSource dataSource;
+
+    public @Bean AccountRepository accountRepository() {
+        return new JdbcAccountRepository(dataSource);
+    }
+
+    public @Bean TransferService transferService() {
+        return new TransferService(accountRepository());
+    }
+}</programlisting>
+            <programlisting language="xml"><lineannotation role="listingtitle">system-test-config.xml</lineannotation>
+&lt;beans&gt;
+    &lt;!-- enable processing of annotations such as @Autowired and @Configuration --&gt;
+    &lt;context:annotation-config/&gt;
+    &lt;context:property-placeholder location="classpath:/com/acme/jdbc.properties"/&gt;
+
+    &lt;bean class="com.acme.AppConfig"/&gt;
+
+    &lt;bean class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+        &lt;property name="url" value="${jdbc.url}"/&gt;
+        &lt;property name="username" value="${jdbc.username}"/&gt;
+        &lt;property name="password" value="${jdbc.password}"/&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt;</programlisting>
+
+            <programlisting><lineannotation role="listingtitle">jdbc.properties</lineannotation>
+jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
+jdbc.username=sa
+jdbc.password=</programlisting> 
+
+            <programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:/com/acme/system-test-config.xml");
+    TransferService transferService = ctx.getBean(TransferService.class);
+    // ...
+}</programlisting></para>
+
+            <note>
+              <para>In <literal>system-test-config.xml</literal> above, the
+              <literal>AppConfig&lt;bean/&gt;</literal> does not declare an
+              <literal>id</literal> element. While it would be acceptable to do
+              so, it is unnecessary given that no other bean will ever refer to it,
+              and it is unlikely that it will be explicitly fetched from the container
+              by name. Likewise with the <literal>DataSource</literal> bean - it is
+              only ever autowired by type, so an explicit bean id is not strictly
+              required.</para>
+            </note>
+          </section>
+
+          <section id="beans-java-combining-xml-centric-component-scan">
+            <title>Using <literal>&lt;context:component-scan/&gt;</literal> to pick up
+            <literal>@Configuration</literal> classes</title>
+            <para>Because <literal>@Configuration</literal> is meta-annotated with
+            <literal>@Component</literal>, <literal>@Configuration</literal>-annotated
+            classes are automatically candidates for component scanning. Using the same
+            scenario as above, we can redefine <literal>system-test-config.xml</literal>
+            to take advantage of component-scanning. Note that in this case, we don't
+            need to explicitly declare <literal>&lt;context:annotation-config/&gt;</literal>,
+            because <literal>&lt;context:component-scan/&gt;</literal> enables all the same
+            functionality.<programlisting language="xml"><lineannotation role="listingtitle">system-test-config.xml</lineannotation>
+&lt;beans&gt;
+    &lt;!-- picks up and registers AppConfig as a bean definition --&gt;
+    &lt;context:component-scan base-package="com.acme"/&gt;
+    &lt;context:property-placeholder location="classpath:/com/acme/jdbc.properties"/&gt;
+
+    &lt;bean class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+        &lt;property name="url" value="${jdbc.url}"/&gt;
+        &lt;property name="username" value="${jdbc.username}"/&gt;
+        &lt;property name="password" value="${jdbc.password}"/&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt;</programlisting>
+            </para>
+          </section>
+        </section>
+
+        <section id="beans-java-combining-java-centric">
+          <title><literal>@Configuration</literal> class-centric use of XML with
+          <literal>@ImportResource</literal></title>
+          <para>In applications where <literal>@Configuration</literal> classes are
+          the primary mechanism for configuring the container, it will still
+          likely be necessary to use at least some XML.  In these scenarios,
+          simply use <literal>@ImportResource</literal> and define only as much
+          XML as is needed.  Doing so achieves a "Java-centric" approach to
+          configuring the container and keeps XML to a bare minimum.
+          <programlisting language="java">@Configuration
+@ImportResource("classpath:/com/acme/properties-config.xml")
+public class AppConfig {
+    private @Value("${jdbcProperties.url}") String url;
+    private @Value("${jdbcProperties.username}") String username;
+    private @Value("${jdbcProperties.password}") String password;
+
+    public @Bean DataSource dataSource() {
+        return new DriverManagerDataSource(url, username, password);
+    }
+}</programlisting>
+
+            <programlisting language="xml"><lineannotation role="listingtitle">properties-config.xml</lineannotation>
+&lt;beans&gt;
+    &lt;context:property-placeholder location="classpath:/com/acme/jdbc.properties"/&gt;
+&lt;/beans&gt;</programlisting>
+        <programlisting><lineannotation role="listingtitle">jdbc.properties</lineannotation>
+jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
+jdbc.username=sa
+jdbc.password=</programlisting>
+        <programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+    TransferService transferService = ctx.getBean(TransferService.class);
+    // ...
+}</programlisting></para>
+        </section>
+      </section>
+    </section>
+
+    <section id="beans-java-bean-annotation">
       <title>Using the <interfacename>@Bean</interfacename> annotation</title>
 
       <para><interfacename>@Bean</interfacename> is a method-level annotation
@@ -5625,7 +6082,7 @@ public class AppConfig {
       a <interfacename>@Configuration</interfacename>-annotated or in a
       <interfacename>@Component</interfacename>-annotated class.</para>
 
-      <section id="beans-javaconfig-declaring-a-bean">
+      <section id="beans-java-declaring-a-bean">
         <title>Declaring a bean</title>
 
         <para>To declare a bean, simply annotate a method with the
@@ -5658,7 +6115,7 @@ transferService -&gt; com.acme.TransferServiceImpl
                 </programlisting></para>
       </section>
 
-      <section id="beans-javaconfig-injecting-dependencies">
+      <section id="beans-java-injecting-dependencies">
         <title>Injecting dependencies</title>
 
         <para>When <interfacename>@Bean</interfacename>s have dependencies on
@@ -5682,7 +6139,7 @@ public class AppConfig {
         reference to <code> bar</code> via constructor injection.</para>
       </section>
 
-      <section id="beans-javaconfig-lifecycle-callbacks">
+      <section id="beans-java-lifecycle-callbacks">
         <title>Receiving lifecycle callbacks</title>
 
         <para>Beans created in a
@@ -5754,15 +6211,15 @@ public class AppConfig {
 
         <tip>
           <para>When you work directly in Java, you can do anything you like
-          with your objects, and do not always need to rely on the
-          container!</para>
+          with your objects and do not always need to rely on the
+          container lifecycle!</para>
         </tip>
       </section>
 
-      <section id="beans-javaconfig-specifying-bean-scope">
+      <section id="beans-java-specifying-bean-scope">
         <title>Specifying bean scope</title>
 
-        <section id="beans-javaconfig-available-scopes">
+        <section id="beans-java-available-scopes">
           <title>Using the <interfacename>@Scope</interfacename>
           annotation</title>
 
@@ -5786,7 +6243,7 @@ public class MyConfiguration {
 }</programlisting></para>
         </section>
 
-        <section id="beans-javaconfig-scoped-proxy">
+        <section id="beans-java-scoped-proxy">
           <title><code>@Scope and scoped-proxy</code></title>
 
           <para>Spring offers a convenient way of working with scoped
@@ -5814,12 +6271,12 @@ public UserPreferences userPreferences() {
 public Service userService() {
    UserService service = new SimpleUserService();
    // a reference to the proxied userPreferences bean
-   service.seUserPreferences(userPreferences());
+   service.setUserPreferences(userPreferences());
    return service;
 }                </programlisting></para>
         </section>
 
-        <section id="beans-javaconfig-method-injection">
+        <section id="beans-java-method-injection">
           <title>Lookup method injection</title>
 
           <para>As noted earlier, <link
@@ -5867,10 +6324,10 @@ public CommandManager commandManager() {
         </section>
       </section>
 
-      <section id="beans-javaconfig-customizing-bean-naming">
+      <section id="beans-java-customizing-bean-naming">
         <title>Customizing bean naming</title>
 
-        <para>By default, Configuration-classes use a
+        <para>By default, Configuration classes use a
         <interfacename>@Bean</interfacename> methods name as the name of the
         resulting bean. This functionality can be overridden, however, with
         the <code>name</code> attribute. <programlisting language="java">@Configuration
@@ -5879,6 +6336,23 @@ public class AppConfig {
     @Bean(name = "myFoo")
     public Foo foo() {
         return new Foo();
+    }
+
+}        </programlisting></para>
+      </section>
+
+      <section id="beans-java-bean-aliasing">
+        <title>Bean aliasing</title>
+
+        <para>As discussed in <xref linkend="beans-beanname"/>, it is sometimes desirable
+        to name a bean multiple names, otherwise known as <emphasis>bean aliasing</emphasis>.
+        The <literal>name</literal> attribute to the <literal>@Bean</literal> annotation accepts
+        a String array for this purpose.  <programlisting language="java">@Configuration
+public class AppConfig {
+
+    @Bean(name = { "dataSource", "subsystemA-dataSource", "subsystemB-dataSource" })
+    public DataSource dataSource() {
+        // instantiate, configure and return DataSource bean...
     }
 
 }        </programlisting></para>
@@ -5893,9 +6367,9 @@ public class AppConfig {
     provides a <literal>load-time-weaver</literal> element.<!--Need to explain purpose of LoadTimeWeaver? Is this section ok here? --></para>
 
     <programlisting language="xml">&lt;beans&gt;
-     
+
      &lt;context:load-time-weaver/&gt;
-     
+
 &lt;/beans&gt;</programlisting>
 
     <para>Adding this element to an XML-based Spring configuration file
