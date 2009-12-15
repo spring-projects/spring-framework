@@ -43,38 +43,37 @@ public class TypeDescriptor {
 	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
 
 	static {
+		typeDescriptorCache.put(boolean.class, new TypeDescriptor(boolean.class));
+		typeDescriptorCache.put(Boolean.class, new TypeDescriptor(Boolean.class));
+
 		typeDescriptorCache.put(byte.class, new TypeDescriptor(byte.class));
 		typeDescriptorCache.put(Byte.class, new TypeDescriptor(Byte.class));
 		
 		typeDescriptorCache.put(char.class, new TypeDescriptor(char.class));
 		typeDescriptorCache.put(Character.class, new TypeDescriptor(Character.class));
 		
-		typeDescriptorCache.put(boolean.class, new TypeDescriptor(boolean.class));
-		typeDescriptorCache.put(Boolean.class, new TypeDescriptor(Boolean.class));
-		
-		typeDescriptorCache.put(short.class, new TypeDescriptor(short.class));
-		typeDescriptorCache.put(Short.class, new TypeDescriptor(Short.class));
-		
+		typeDescriptorCache.put(double.class, new TypeDescriptor(double.class));
+		typeDescriptorCache.put(Double.class, new TypeDescriptor(Double.class));
+
+		typeDescriptorCache.put(float.class, new TypeDescriptor(float.class));
+		typeDescriptorCache.put(Float.class, new TypeDescriptor(Float.class));
+
 		typeDescriptorCache.put(int.class, new TypeDescriptor(int.class));
 		typeDescriptorCache.put(Integer.class, new TypeDescriptor(Integer.class));
 		
 		typeDescriptorCache.put(long.class, new TypeDescriptor(long.class));
 		typeDescriptorCache.put(Long.class, new TypeDescriptor(Long.class));
 		
-		typeDescriptorCache.put(float.class, new TypeDescriptor(float.class));
-		typeDescriptorCache.put(Float.class, new TypeDescriptor(Float.class));
-		
-		typeDescriptorCache.put(double.class, new TypeDescriptor(double.class));
-		typeDescriptorCache.put(Double.class, new TypeDescriptor(Double.class));
-		
+		typeDescriptorCache.put(short.class, new TypeDescriptor(short.class));
+		typeDescriptorCache.put(Short.class, new TypeDescriptor(Short.class));
+
 		typeDescriptorCache.put(String.class, new TypeDescriptor(String.class));
 	}
 	
+
 	private Object value;
 
 	private Class<?> type;
-
-	private TypeDescriptor elementType;
 
 	private MethodParameter methodParameter;
 
@@ -82,17 +81,6 @@ public class TypeDescriptor {
 
 	private Annotation[] cachedFieldAnnotations;
 
-
-	/**
-	 * Create a new descriptor for the given type.
-	 * <p>Use this constructor when a conversion point comes from a plain source type,
-	 * where no additional context is available.
-	 * @param type the actual type to wrap
-	 */
-	public TypeDescriptor(Class<?> type) {
-		Assert.notNull(type, "Type must not be null");
-		this.type = type;
-	}
 
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
@@ -115,18 +103,6 @@ public class TypeDescriptor {
 		this.field = field;
 	}
 
-	/**
-	 * Create a new descriptor for the type of the given value.
-	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
-	 * Collection, where no additional context is available but elements can be introspected.
-	 * @param type the actual type to wrap
-	 */
-	public TypeDescriptor(Object value) {
-		Assert.notNull(value, "Value must not be null");
-		this.value = value;
-		this.type = value.getClass();
-	}
-	
 	// protected constructors for subclasses
 	
 	/**
@@ -147,6 +123,30 @@ public class TypeDescriptor {
 	 */
 	private TypeDescriptor() {
 	}
+
+	/**
+	 * Create a new descriptor for the type of the given value.
+	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
+	 * Collection, where no additional context is available but elements can be introspected.
+	 * @param type the actual type to wrap
+	 */
+	private TypeDescriptor(Object value) {
+		Assert.notNull(value, "Value must not be null");
+		this.value = value;
+		this.type = value.getClass();
+	}
+
+	/**
+	 * Create a new descriptor for the given type.
+	 * <p>Use this constructor when a conversion point comes from a plain source type,
+	 * where no additional context is available.
+	 * @param type the actual type to wrap
+	 */
+	private TypeDescriptor(Class<?> type) {
+		Assert.notNull(type, "Type must not be null");
+		this.type = type;
+	}
+
 
 	/**
 	 * Return the wrapped MethodParameter, if any.
@@ -237,19 +237,14 @@ public class TypeDescriptor {
 	 * Return the element type as a type descriptor.
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
-		if (this.elementType != null) {
-			return this.elementType;
+		if (isArray()) {
+			return TypeDescriptor.valueOf(getArrayComponentType());
+		}
+		else if (isCollection()) {
+			return TypeDescriptor.valueOf(getCollectionElementType());
 		}
 		else {
-			if (isArray()) {
-				return TypeDescriptor.valueOf(getArrayComponentType());
-			}
-			else if (isCollection()) {
-				return TypeDescriptor.valueOf(getCollectionElementType());
-			}
-			else {
-				return TypeDescriptor.NULL;
-			}
+			return TypeDescriptor.NULL;
 		}
 	}
 
@@ -426,30 +421,7 @@ public class TypeDescriptor {
 			return builder.toString();
 		}
 	}
-	
-	// static factory methods
 
-	/**
-	 * Creates a new type descriptor for the given class.
-	 * @param type the class
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor valueOf(Class<?> type) {
-		if (type == null) {
-			return TypeDescriptor.NULL;
-		}
-		TypeDescriptor desc = typeDescriptorCache.get(type);
-		return desc != null ? desc : new TypeDescriptor(type);
-	}
-
-	/**
-	 * Creates a new type descriptor for the class of the given object.
-	 * @param object the object
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor forObject(Object object) {
-		return (object == null ? NULL : valueOf(object.getClass()));
-	}
 
 	// internal helpers
 	
@@ -486,5 +458,38 @@ public class TypeDescriptor {
 		Class<?> type = getType();
 		return (type != null && ClassUtils.isAssignable(clazz, type));
 	}
-	
+
+
+	// static factory methods
+
+	/**
+	 * Create a new type descriptor for the given class.
+	 * @param type the class
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor valueOf(Class<?> type) {
+		if (type == null) {
+			return TypeDescriptor.NULL;
+		}
+		TypeDescriptor desc = typeDescriptorCache.get(type);
+		return (desc != null ? desc : new TypeDescriptor(type));
+	}
+
+	/**
+	 * Create a new type descriptor for the class of the given object.
+	 * @param object the object
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor forObject(Object object) {
+		if (object == null) {
+			return NULL;
+		}
+		else if (object instanceof Collection || object instanceof Map) {
+			return new TypeDescriptor(object);
+		}
+		else {
+			return valueOf(object.getClass());
+		}
+	}
+
 }
