@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,16 +59,16 @@ abstract class ValueFormatter {
 		if (propertyEditor != null && !(value instanceof String)) {
 			try {
 				propertyEditor.setValue(value);
-				return getDisplayString(propertyEditor.getAsText(), htmlEscape);
+				String text = propertyEditor.getAsText();
+				if (text != null) {
+					return getDisplayString(text, htmlEscape);
+				}
 			}
 			catch (Throwable ex) {
 				// The PropertyEditor might not support this value... pass through.
-				return getDisplayString(value, htmlEscape);
 			}
 		}
-		else {
-			return getDisplayString(value, htmlEscape);
-		}
+		return getDisplayString(value, htmlEscape);
 	}
 
 }
