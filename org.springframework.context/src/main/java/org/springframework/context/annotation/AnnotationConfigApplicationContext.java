@@ -112,7 +112,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 
 	/**
 	 * Perform a scan within the specified base packages.
+	 * Note that {@link AnnotationConfigApplicationContext#refresh()} must be
+	 * called in order for the context to fully process the new class.
 	 * @param basePackages the packages to check for annotated classes
+	 * @see #refresh()
 	 */
 	public void scan(String... basePackages) {
 		this.scanner.scan(basePackages);
