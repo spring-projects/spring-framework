@@ -3370,8 +3370,8 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope
         <para>Where existing bean classes already have callback methods that
         are named at variance with the convention, you can override the
         default by specifying (in XML, that is) the method name using the
-        init-method and destroy-method attributes on the &lt;bean/&gt;
-        itself.</para>
+        <literal>init-method</literal> and <literal>destroy-method</literal>
+        attributes of the &lt;bean/&gt; itself.</para>
 
         <para>The Spring container guarantees that a configured initialization
         callback is called immediately after a bean is supplied with all
@@ -5915,7 +5915,7 @@ public static void main(String[] args) {
             tooling is still useful: it will be easy for the developer to get a type hierarchy
             of <literal>RepositoryConfig</literal> implementations. In this way, navigating
             <literal>@Configuration</literal> classes and their dependencies becomes no
-            different that the usual process of navigating interface-based code.</para>
+            different than the usual process of navigating interface-based code.</para>
           </section>
         </section>
       </section>
@@ -6090,9 +6090,8 @@ jdbc.password=</programlisting>
         to register a bean definition within an
         <code>ApplicationContext</code> of the type specified as the method's
         return value. By default, the bean name will be the same as the method
-        name. (See <link linkend="bean-naming"> bean naming</link> for details
-        on how to customize this behavior.) The following is a simple example
-        of a <interfacename>@Bean</interfacename> method declaration:
+        name. The following is a simple example of a
+        <interfacename>@Bean</interfacename> method declaration:
         <programlisting language="java">@Configuration
 public class AppConfig {
 
@@ -6105,7 +6104,7 @@ public class AppConfig {
 
         <para>The preceding configuration is exactly equivalent to the
         following Spring XML: <programlisting language="xml">&lt;beans&gt;
-    &lt;bean name="transferService" class="com.acme.TransferServiceImpl"/&gt;
+    &lt;bean id="transferService" class="com.acme.TransferServiceImpl"/&gt;
 &lt;/beans&gt;                </programlisting></para>
 
         <para>Both declarations make a bean named <code>transferService</code>
@@ -6142,12 +6141,13 @@ public class AppConfig {
       <section id="beans-java-lifecycle-callbacks">
         <title>Receiving lifecycle callbacks</title>
 
-        <para>Beans created in a
-        <interfacename>@Configuration</interfacename>-annotated class supports
-        the regular lifecycle callbacks. Any classes defined with the @Bean
-        annotation can use the @PostConstruct and @PreDestroy annotations from
-        JSR-250, see <link
-        linkend="beans-factory-lifecycle-combined-effects">JSR-250
+        <para>Beans declared in a
+        <interfacename>@Configuration</interfacename>-annotated class support
+        the regular lifecycle callbacks. Any classes defined with the
+        <literal>@Bean</literal> annotation can use the
+        <literal>@PostConstruct</literal> and <literal>@PreDestroy</literal>
+        annotations from JSR-250, see <link
+        linkend="beans-postconstruct-and-predestroy-annotations">JSR-250
         annotations</link> for further details.</para>
 
         <para>The regular Spring <link
@@ -6169,7 +6169,7 @@ public class AppConfig {
         <para>The <interfacename>@Bean</interfacename> annotation supports
         specifying arbitrary initialization and destruction callback methods,
         much like Spring XML's <code>init-method</code> and
-        <code>destroy-method</code> attributes to the <code>bean</code>
+        <code>destroy-method</code> attributes on the <code>bean</code>
         element: <programlisting language="java">public class Foo {
     public void init() {
         // initialization logic
@@ -6316,7 +6316,7 @@ public CommandManager commandManager() {
     // return new anonymous implementation of CommandManager with command() overridden
     // to return a new prototype Command object
     return new CommandManager() {
-        protected Command command() {
+        protected Command createCommand() {
             return asyncCommand();
         }
     }
@@ -6327,8 +6327,8 @@ public CommandManager commandManager() {
       <section id="beans-java-customizing-bean-naming">
         <title>Customizing bean naming</title>
 
-        <para>By default, Configuration classes use a
-        <interfacename>@Bean</interfacename> methods name as the name of the
+        <para>By default, configuration classes use a
+        <interfacename>@Bean</interfacename> method's name as the name of the
         resulting bean. This functionality can be overridden, however, with
         the <code>name</code> attribute. <programlisting language="java">@Configuration
 public class AppConfig {
@@ -6345,8 +6345,8 @@ public class AppConfig {
         <title>Bean aliasing</title>
 
         <para>As discussed in <xref linkend="beans-beanname"/>, it is sometimes desirable
-        to name a bean multiple names, otherwise known as <emphasis>bean aliasing</emphasis>.
-        The <literal>name</literal> attribute to the <literal>@Bean</literal> annotation accepts
+        to give a single bean multiple names, otherwise known as <emphasis>bean aliasing</emphasis>.
+        The <literal>name</literal> attribute of the <literal>@Bean</literal> annotation accepts
         a String array for this purpose.  <programlisting language="java">@Configuration
 public class AppConfig {
 
