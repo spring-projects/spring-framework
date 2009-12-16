@@ -14,7 +14,7 @@
   <artifactId>spring-parent</artifactId>
   <packaging>pom</packaging>
   <name>Spring Framework - Parent</name>
-  <version>3.0.0.BUILD-SNAPSHOT</version>
+  <version>3.0.0.RELEASE</version>
   <description>Spring Framework Parent</description>
   <scm>
     <url>https://fisheye.springframework.org/browse/spring-framework</url>
@@ -137,7 +137,7 @@
         <repository>
           <id>spring-milestone</id>
           <name>Spring Milestone Repository</name>
-          <url>s3://maven.springframework.org/milestone</url>
+          <url>s3://maven.springframework.org/release</url>
         </repository>
         <snapshotRepository>
           <id>spring-snapshot</id>

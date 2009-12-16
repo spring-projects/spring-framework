@@ -4,7 +4,7 @@ http://www.springframework.org
 
 1. INTRODUCTION
 
-Spring Framework 3.0 is the next generation of the Spring: fully Java 5 based,
+Spring Framework 3.0 is the next generation of Spring: fully Java 5 based,
 EL enabled, REST enabled, and with support for JSR-330 (Dependency Injection)
 and JSR-303 (Bean Validation).
 
