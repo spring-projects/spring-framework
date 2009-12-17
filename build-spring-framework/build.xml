@@ -13,11 +13,11 @@
 		<pathelement location="../org.springframework.transaction"/>
 		<pathelement location="../org.springframework.oxm"/>
 		<pathelement location="../org.springframework.jms"/>
-		<pathelement location="../org.springframework.aspects"/>
 		<pathelement location="../org.springframework.jdbc"/>
 		<pathelement location="../org.springframework.web"/>
 		<pathelement location="../org.springframework.orm"/>
 		<pathelement location="../org.springframework.context.support"/>
+		<pathelement location="../org.springframework.aspects"/>
 		<pathelement location="../org.springframework.web.servlet"/>
 		<pathelement location="../org.springframework.web.portlet"/>
 		<pathelement location="../org.springframework.test"/>
