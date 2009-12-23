@@ -17,22 +17,24 @@
 package org.springframework.context.annotation;
 
 import static java.lang.String.format;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import static org.junit.matchers.JUnitMatchers.*;
-import static org.springframework.util.StringUtils.uncapitalize;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
-import org.springframework.util.StringUtils;
+import static org.springframework.util.StringUtils.*;
 
 /**
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class AnnotationConfigApplicationContextTests {
 
@@ -51,6 +53,8 @@ public class AnnotationConfigApplicationContextTests {
 		context.getBean("testBean"); // contributed by ConfigForScanning
 		context.getBean(uncapitalize(ComponentForScanning.class.getSimpleName()));
 		context.getBean(uncapitalize(Jsr330NamedForScanning.class.getSimpleName()));
+		Map<String, Object> beans = context.getBeansWithAnnotation(Configuration.class);
+		assertEquals(1, beans.size());
 	}
 
 	@Test
@@ -60,6 +64,19 @@ public class AnnotationConfigApplicationContextTests {
 		context.refresh();
 		context.getBean("testBean");
 		context.getBean("name");
+		Map<String, Object> beans = context.getBeansWithAnnotation(Configuration.class);
+		assertEquals(2, beans.size());
+	}
+
+	@Test
+	public void getBeansWithAnnotation() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(Config.class, NameConfig.class, UntypedFactoryBean.class);
+		context.refresh();
+		context.getBean("testBean");
+		context.getBean("name");
+		Map<String, Object> beans = context.getBeansWithAnnotation(Configuration.class);
+		assertEquals(2, beans.size());
 	}
 
 	@Test
@@ -186,6 +203,20 @@ public class AnnotationConfigApplicationContextTests {
 		}
 	}
 
+	static class UntypedFactoryBean implements FactoryBean {
+
+		public Object getObject() {
+			return null;
+		}
+
+		public Class getObjectType() {
+			return null;
+		}
+
+		public boolean isSingleton() {
+			return false;
+		}
+	}
 }
 
 class TestBean {
