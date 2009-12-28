@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -66,6 +67,21 @@ public class ApplicationContextEventTests {
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener2);
 		smc.addApplicationListener(listener1);
+
+		smc.multicastEvent(new MyEvent(this));
+		smc.multicastEvent(new MyOtherEvent(this));
+	}
+
+	@Test
+	public void proxiedListeners() {
+		MyOrderedListener1 listener1 = new MyOrderedListener1();
+		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
+		ApplicationListener proxy1 = (ApplicationListener) new ProxyFactory(listener1).getProxy();
+		ApplicationListener proxy2 = (ApplicationListener) new ProxyFactory(listener2).getProxy();
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.addApplicationListener(proxy1);
+		smc.addApplicationListener(proxy2);
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));

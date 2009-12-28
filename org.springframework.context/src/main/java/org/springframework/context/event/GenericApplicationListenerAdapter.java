@@ -16,6 +16,7 @@
 
 package org.springframework.context.event;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.GenericTypeResolver;
@@ -52,6 +53,12 @@ public class GenericApplicationListenerAdapter implements SmartApplicationListen
 
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
 		Class typeArg = GenericTypeResolver.resolveTypeArgument(this.delegate.getClass(), ApplicationListener.class);
+		if (typeArg == null || typeArg.equals(ApplicationEvent.class)) {
+			Class targetClass = AopUtils.getTargetClass(this.delegate);
+			if (targetClass != this.delegate.getClass()) {
+				typeArg = GenericTypeResolver.resolveTypeArgument(targetClass, ApplicationListener.class);
+			}
+		}
 		return (typeArg == null || typeArg.isAssignableFrom(eventType));
 	}
 
