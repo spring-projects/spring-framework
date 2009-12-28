@@ -3,6 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.1 (2010-01-25)
+-------------------------------------
+
+* fixed "getBeansWithAnnotation" to ignore beans with non-determinable type
+* generic ApplicationListener event type gets detected through proxy as well
+* fixed "mvc:view-controller" to work in a fully isolated fashion on Spring DM
+
+
 Changes in version 3.0.0.GA (2009-12-16)
 ----------------------------------------
 
