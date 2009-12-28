@@ -5665,7 +5665,7 @@ The above assumes that <literal>MyServiceImpl</literal>, <literal>Dependency1</l
         useful when programmatically building an
         <literal>AnnotationConfigApplicationContext</literal>.
         <programlisting language="java">public static void main(String[] args) {
-    ApplicationContext ctx = new AnnotationConfigApplicationContext();
+    AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
     ctx.register(AppConfig.class, OtherConfig.class);
     ctx.register(AdditionalConfig.class);
     ctx.refresh();
@@ -5690,7 +5690,7 @@ The above assumes that <literal>MyServiceImpl</literal>, <literal>Dependency1</l
         <literal>AnnotationConfigApplicationContext</literal> exposes the
         <literal>scan(String...)</literal> method to allow for the same
         component-scanning functionality:<programlisting language="java">public static void main(String[] args) {
-    ApplicationContext ctx = new AnnotationConfigApplicationContext();
+    AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
     ctx.scan("com.acme");
     ctx.refresh();
     MyService myService = ctx.getBean(MyService.class);
