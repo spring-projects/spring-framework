@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static java.lang.String.format;
+
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -35,31 +37,36 @@ final class ConfigurationClassMethod {
 
 	private final MethodMetadata metadata;
 
-	private final ConfigurationClass declaringClass;
+	private final ConfigurationClass configurationClass;
 
 
-	public ConfigurationClassMethod(MethodMetadata metadata, ConfigurationClass declaringClass) {
+	public ConfigurationClassMethod(MethodMetadata metadata, ConfigurationClass configurationClass) {
 		this.metadata = metadata;
-		this.declaringClass = declaringClass;
+		this.configurationClass = configurationClass;
 	}
-
 
 	public MethodMetadata getMetadata() {
 		return this.metadata;
 	}
 
-	public ConfigurationClass getDeclaringClass() {
-		return this.declaringClass;
+	public ConfigurationClass getConfigurationClass() {
+		return this.configurationClass;
 	}
 
 	public Location getResourceLocation() {
-		return new Location(this.declaringClass.getResource(), metadata);
+		return new Location(this.configurationClass.getResource(), metadata);
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-		if (this.declaringClass.getMetadata().isAnnotated(Configuration.class.getName()) && !getMetadata().isOverridable()) {
+		if (this.configurationClass.getMetadata().isAnnotated(Configuration.class.getName()) && !getMetadata().isOverridable()) {
 			problemReporter.error(new NonOverridableMethodError());
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return format("[%s:name=%s,declaringClass=%s]",
+				this.getClass().getSimpleName(), this.getMetadata().getMethodName(), this.getMetadata().getDeclaringClassName());
 	}
 
 
@@ -73,5 +80,6 @@ final class ConfigurationClassMethod {
 					getMetadata().getMethodName()), getResourceLocation());
 		}
 	}
+
 
 }

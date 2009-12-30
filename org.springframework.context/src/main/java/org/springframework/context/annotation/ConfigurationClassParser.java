@@ -131,7 +131,7 @@ class ConfigurationClassParser {
 		}
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
 			String[] resources = (String[]) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("value");
-			Class readerClass = (Class) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("reader");
+			Class<?> readerClass = (Class<?>) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("reader");
 			if (readerClass == null) {
 				throw new IllegalStateException("No reader class associated with imported resources: " +
 						StringUtils.arrayToCommaDelimitedString(resources));
@@ -140,8 +140,8 @@ class ConfigurationClassParser {
 				configClass.addImportedResource(resource, readerClass);
 			}
 		}
-		Set<MethodMetadata> methods = metadata.getAnnotatedMethods(Bean.class.getName());
-		for (MethodMetadata methodMetadata : methods) {
+		Set<MethodMetadata> beanMethods = metadata.getAnnotatedMethods(Bean.class.getName());
+		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addMethod(new ConfigurationClassMethod(methodMetadata, configClass));
 		}
 	}

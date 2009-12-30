@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
+ * @author Chris Beams
  * @since 3.0
  */
 public class StandardMethodMetadata implements MethodMetadata {
@@ -53,9 +54,13 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return this.introspectedMethod;
 	}
 
-
+	
 	public String getMethodName() {
 		return this.introspectedMethod.getName();
+	}
+	
+	public String getDeclaringClassName() {
+		return this.introspectedMethod.getDeclaringClass().getName();
 	}
 
 	public boolean isStatic() {
