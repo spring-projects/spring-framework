@@ -119,7 +119,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForModelMethod(ConfigurationClassMethod method) {
-		ConfigurationClass configClass = method.getDeclaringClass();
+		ConfigurationClass configClass = method.getConfigurationClass();
 		MethodMetadata metadata = method.getMetadata();
 
 		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
@@ -213,11 +213,11 @@ class ConfigurationClassBeanDefinitionReader {
 		registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 	
-	private void loadBeanDefinitionsFromImportedResources(Map<String, Class> importedResources) {
-		Map<Class, BeanDefinitionReader> readerInstanceCache = new HashMap<Class, BeanDefinitionReader>();
-		for (Map.Entry<String, Class> entry : importedResources.entrySet()) {
+	private void loadBeanDefinitionsFromImportedResources(Map<String, Class<?>> importedResources) {
+		Map<Class<?>, BeanDefinitionReader> readerInstanceCache = new HashMap<Class<?>, BeanDefinitionReader>();
+		for (Map.Entry<String, Class<?>> entry : importedResources.entrySet()) {
 			String resource = entry.getKey();
-			Class readerClass = entry.getValue();
+			Class<?> readerClass = entry.getValue();
 			if (!readerInstanceCache.containsKey(readerClass)) {
 				try {
 					BeanDefinitionReader readerInstance = (BeanDefinitionReader)

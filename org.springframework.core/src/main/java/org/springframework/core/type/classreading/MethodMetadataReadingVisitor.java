@@ -41,15 +41,18 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	private final int access;
 
+	private String declaringClassName;
+
 	private final ClassLoader classLoader;
 
 	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>();
 
 
-	public MethodMetadataReadingVisitor(String name, int access, ClassLoader classLoader) {
+	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader) {
 		super(new EmptyVisitor());
 		this.name = name;
 		this.access = access;
+		this.declaringClassName = declaringClassName;
 		this.classLoader = classLoader;
 	}
 
@@ -83,6 +86,10 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return this.attributeMap.get(annotationType);
+	}
+
+	public String getDeclaringClassName() {
+		return this.declaringClassName;
 	}
 
 }

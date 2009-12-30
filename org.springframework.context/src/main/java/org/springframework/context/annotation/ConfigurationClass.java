@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -48,11 +49,9 @@ final class ConfigurationClass {
 
 	private final Resource resource;
 
-	private final Map<String, Class> importedResources = new LinkedHashMap<String, Class>();
+	private final Map<String, Class<?>> importedResources = new LinkedHashMap<String, Class<?>>();
 
 	private final Set<ConfigurationClassMethod> methods = new LinkedHashSet<ConfigurationClassMethod>();
-
-	private final Map<String, Integer> overloadedMethodMap = new LinkedHashMap<String, Integer>();
 
 	private String beanName;
 
@@ -90,42 +89,46 @@ final class ConfigurationClass {
 		return this.beanName;
 	}
 
-	public ConfigurationClass addMethod(ConfigurationClassMethod method) {
+	public void addMethod(ConfigurationClassMethod method) {
 		this.methods.add(method);
-		String name = method.getMetadata().getMethodName();
-		Integer count = this.overloadedMethodMap.get(name);
-		if (count != null) {
-			this.overloadedMethodMap.put(name, count + 1);
-		}
-		else {
-			this.overloadedMethodMap.put(name, 1);
-		}
-		return this;
 	}
 
 	public Set<ConfigurationClassMethod> getMethods() {
 		return this.methods;
 	}
 
-	public void addImportedResource(String importedResource, Class readerClass) {
+	public void addImportedResource(String importedResource, Class<?> readerClass) {
 		this.importedResources.put(importedResource, readerClass);
 	}
 
-	public Map<String, Class> getImportedResources() {
+	public Map<String, Class<?>> getImportedResources() {
 		return this.importedResources;
 	}
 
 
 	public void validate(ProblemReporter problemReporter) {
-		// No overloading of factory methods allowed
-		for (Map.Entry<String, Integer> entry : this.overloadedMethodMap.entrySet()) {
-			String methodName = entry.getKey();
-			int count = entry.getValue();
+		
+		// a @Bean method may only be overloaded through inheritance. No single
+		// @Configuration class may declare two @Bean methods with the same name.
+		final char hashDelim = '#';
+		Map<String, Integer> methodNameCounts = new HashMap<String, Integer>();
+		for (ConfigurationClassMethod method : methods) {
+			String dClassName = method.getMetadata().getDeclaringClassName();
+			String methodName = method.getMetadata().getMethodName();
+			String fqMethodName = dClassName + hashDelim + methodName;
+			Integer currentCount = methodNameCounts.get(fqMethodName);
+			int newCount = currentCount != null ? currentCount + 1 : 1;
+			methodNameCounts.put(fqMethodName, newCount);
+		}
+		
+		for (String methodName : methodNameCounts.keySet()) {
+			int count = methodNameCounts.get(methodName);
 			if (count > 1) {
-				problemReporter.error(new OverloadedMethodProblem(methodName, count));
+				String shortMethodName = methodName.substring(methodName.indexOf(hashDelim)+1);
+				problemReporter.error(new BeanMethodOverloadingProblem(shortMethodName, count));
 			}
 		}
-
+		
 		// A configuration class may not be final (CGLIB limitation)
 		if (getMetadata().isAnnotated(Configuration.class.getName())) {
 			if (getMetadata().isFinal()) {
@@ -149,7 +152,6 @@ final class ConfigurationClass {
 		return getMetadata().getClassName().hashCode();
 	}
 
-
 	/** Configuration classes must be non-final to accommodate CGLIB subclassing. */
 	private class FinalConfigurationProblem extends Problem {
 
@@ -159,15 +161,15 @@ final class ConfigurationClass {
 		}
 	}
 
+	/** Bean methods on configuration classes may only be overloaded through inheritance. */
+	private class BeanMethodOverloadingProblem extends Problem {
 
-	/** Factory methods on configuration classes must not be overloaded. */
-	private class OverloadedMethodProblem extends Problem {
-
-		public OverloadedMethodProblem(String methodName, int count) {
-			super(String.format("@Configuration class '%s' has %s overloaded factory methods of name '%s'. " +
-					"Only one factory method of the same name allowed.",
+		public BeanMethodOverloadingProblem(String methodName, int count) {
+			super(String.format("@Configuration class '%s' has %s overloaded @Bean methods named '%s'. " +
+					"Only one @Bean method of a given name is allowed within each @Configuration class.",
 					getSimpleName(), count, methodName), new Location(getResource(), getMetadata()));
 		}
 	}
+	
 
 }

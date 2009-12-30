@@ -24,6 +24,7 @@ import java.util.Map;
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
+ * @author Chris Beams
  * @since 3.0
  * @see StandardMethodMetadata
  * @see AnnotationMetadata#getAnnotatedMethods
@@ -34,6 +35,11 @@ public interface MethodMetadata {
 	 * Return the name of the method.
 	 */
 	String getMethodName();
+
+	/**
+	 * Return the fully-qualified name of the class that declares this method.
+	 */
+	public String getDeclaringClassName();
 
 	/**
 	 * Return whether the underlying method is declared as 'static'.
