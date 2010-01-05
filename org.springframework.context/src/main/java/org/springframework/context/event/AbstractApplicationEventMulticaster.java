@@ -151,9 +151,9 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 							allListeners.add(listener);
 						}
 					}
-					OrderComparator.sort(allListeners);
-					this.retrieverCache.put(cacheKey, retriever);
 				}
+				OrderComparator.sort(allListeners);
+				this.retrieverCache.put(cacheKey, retriever);
 			}
 			return allListeners;
 		}
