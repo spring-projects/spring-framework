@@ -666,7 +666,7 @@ List userList service.getUsernameList();
         <title>Inner class names</title>
 
         <para>If you want to configure a bean definition for a
-        <literal>static</literal> inner class, you have to use the
+        <literal>static</literal> nested class, you have to use the
         <emphasis>binary</emphasis> name of the inner class.</para>
 
         <para>For example, if you have a class called
