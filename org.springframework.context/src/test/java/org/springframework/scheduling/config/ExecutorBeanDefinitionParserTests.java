@@ -19,7 +19,6 @@ package org.springframework.scheduling.config;
 import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import org.junit.Before;
@@ -30,6 +29,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.CustomizableThreadCreator;
 
 /**
  * @author Mark Fisher
@@ -122,6 +122,12 @@ public class ExecutorBeanDefinitionParserTests {
 	@Test(expected = BeanCreationException.class)
 	public void propertyPlaceholderWithInvalidPoolSize() {
 		this.context.getBean("propertyPlaceholderWithInvalidPoolSize");
+	}
+
+	@Test
+	public void threadNamePrefix() {
+		CustomizableThreadCreator executor = this.context.getBean("default", CustomizableThreadCreator.class);
+		assertEquals("default-", executor.getThreadNamePrefix());
 	}
 
 
