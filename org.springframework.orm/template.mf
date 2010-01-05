@@ -11,6 +11,7 @@ Import-Template:
  javax.jdo.*;version="[2.0.0, 3.0.0)";resolution:=optional,
  javax.naming.*;version="0";resolution:=optional,
  javax.persistence.*;version="[1.0.0, 3.0.0)";resolution:=optional,
+ javax.persistence.criteria.*;version="[1.0.0, 3.0.0)";resolution:=optional,
  javax.servlet.*;version="[2.4.0, 4.0.0)";resolution:=optional,
  javax.sql.*;version="0";resolution:=optional,
  javax.transaction.*;version="[1.0.1, 2.0.0)";resolution:=optional,
