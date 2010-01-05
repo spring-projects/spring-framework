@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -70,7 +69,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 	private boolean alwaysInclude = false;
 
-	private Boolean exposeForwardAttributes;
+	private volatile Boolean exposeForwardAttributes;
 
 	private boolean exposeContextBeansAsAttributes = false;
 
@@ -181,7 +180,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Checks whether we need explictly expose the Servlet 2.4 request attributes
+	 * Checks whether we need to explicitly expose the Servlet 2.4 request attributes
 	 * by default.
 	 * @see #setExposeForwardAttributes
 	 * @see #exposeForwardRequestAttributes(javax.servlet.http.HttpServletRequest)
@@ -330,7 +329,13 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
 		if (this.exposeForwardAttributes != null && this.exposeForwardAttributes) {
-			WebUtils.exposeForwardRequestAttributes(request);
+			try {
+				WebUtils.exposeForwardRequestAttributes(request);
+			}
+			catch (Exception ex) {
+				// Servlet container rejected to set internal attributes, e.g. on TriFork.
+				this.exposeForwardAttributes = Boolean.FALSE;
+			}
 		}
 	}
 
