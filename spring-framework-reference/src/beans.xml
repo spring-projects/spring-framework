@@ -5591,7 +5591,7 @@ public class CachingMovieCatalog implements MovieCatalog {
       class would read as follows: <programlisting language="java">@Configuration
 public class AppConfig {
     @Bean
-    public void MyService myService() {
+    public MyService myService() {
         return new MyServiceImpl();
     }
 }</programlisting></para>
