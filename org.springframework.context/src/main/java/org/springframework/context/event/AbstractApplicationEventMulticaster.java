@@ -59,24 +59,39 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 
 
 	public void addApplicationListener(ApplicationListener listener) {
-		this.defaultRetriever.applicationListeners.add(listener);
+		synchronized (this.defaultRetriever) {
+			this.defaultRetriever.applicationListeners.add(listener);
+			this.retrieverCache.clear();
+		}
 	}
 
 	public void addApplicationListenerBean(String listenerBeanName) {
-		this.defaultRetriever.applicationListenerBeans.add(listenerBeanName);
+		synchronized (this.defaultRetriever) {
+			this.defaultRetriever.applicationListenerBeans.add(listenerBeanName);
+			this.retrieverCache.clear();
+		}
 	}
 
 	public void removeApplicationListener(ApplicationListener listener) {
-		this.defaultRetriever.applicationListeners.remove(listener);
+		synchronized (this.defaultRetriever) {
+			this.defaultRetriever.applicationListeners.remove(listener);
+			this.retrieverCache.clear();
+		}
 	}
 
 	public void removeApplicationListenerBean(String listenerBeanName) {
-		this.defaultRetriever.applicationListenerBeans.remove(listenerBeanName);
+		synchronized (this.defaultRetriever) {
+			this.defaultRetriever.applicationListenerBeans.remove(listenerBeanName);
+			this.retrieverCache.clear();
+		}
 	}
 
 	public void removeAllListeners() {
-		this.defaultRetriever.applicationListeners.clear();
-		this.defaultRetriever.applicationListenerBeans.clear();
+		synchronized (this.defaultRetriever) {
+			this.defaultRetriever.applicationListeners.clear();
+			this.defaultRetriever.applicationListenerBeans.clear();
+			this.retrieverCache.clear();
+		}
 	}
 
 	public final void setBeanFactory(BeanFactory beanFactory) {
@@ -120,24 +135,26 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		else {
 			retriever = new ListenerRetriever();
 			LinkedList<ApplicationListener> allListeners = new LinkedList<ApplicationListener>();
-			for (ApplicationListener listener : this.defaultRetriever.applicationListeners) {
-				if (supportsEvent(listener, eventType, sourceType)) {
-					retriever.applicationListeners.add(listener);
-					allListeners.add(listener);
-				}
-			}
-			if (!this.defaultRetriever.applicationListenerBeans.isEmpty()) {
-				BeanFactory beanFactory = getBeanFactory();
-				for (String listenerBeanName : this.defaultRetriever.applicationListenerBeans) {
-					ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+			synchronized (this.defaultRetriever) {
+				for (ApplicationListener listener : this.defaultRetriever.applicationListeners) {
 					if (supportsEvent(listener, eventType, sourceType)) {
-						retriever.applicationListenerBeans.add(listenerBeanName);
+						retriever.applicationListeners.add(listener);
 						allListeners.add(listener);
 					}
 				}
+				if (!this.defaultRetriever.applicationListenerBeans.isEmpty()) {
+					BeanFactory beanFactory = getBeanFactory();
+					for (String listenerBeanName : this.defaultRetriever.applicationListenerBeans) {
+						ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+						if (supportsEvent(listener, eventType, sourceType)) {
+							retriever.applicationListenerBeans.add(listenerBeanName);
+							allListeners.add(listener);
+						}
+					}
+					OrderComparator.sort(allListeners);
+					this.retrieverCache.put(cacheKey, retriever);
+				}
 			}
-			OrderComparator.sort(allListeners);
-			this.retrieverCache.put(cacheKey, retriever);
 			return allListeners;
 		}
 	}
