@@ -108,6 +108,9 @@ public class TaskExecutorFactoryBean implements FactoryBean<TaskExecutor>, BeanN
 				this.setValueIfNotNull("corePoolSize", range[0]);
 				this.setValueIfNotNull("maxPoolSize", range[1]);
 			}
+			if (this.beanName != null) {
+				this.beanWrapper.setPropertyValue("threadNamePrefix", this.beanName + "-");
+			}
 			this.target = (TaskExecutor) this.beanWrapper.getWrappedInstance();
 			if (this.target instanceof InitializingBean) {
 				((InitializingBean)this.target).afterPropertiesSet();
