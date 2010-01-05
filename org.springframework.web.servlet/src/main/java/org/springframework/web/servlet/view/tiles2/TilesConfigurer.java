@@ -17,8 +17,9 @@
 package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +37,6 @@ import org.apache.tiles.servlet.context.ServletUtil;
 import org.apache.tiles.servlet.context.wildcard.WildcardServletTilesApplicationContextFactory;
 import org.apache.tiles.startup.BasicTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
-import org.apache.tiles.web.util.ServletContextAdapter;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -199,8 +199,8 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * @see #createTilesInitializer()
 	 */
 	public void afterPropertiesSet() throws TilesException {
-		ServletContextAdapter adaptedContext = new ServletContextAdapter(new DelegatingServletConfig());
-		createTilesInitializer().initialize(new ServletTilesApplicationContext(adaptedContext));
+		createTilesInitializer().initialize(
+				new PropertyExposingServletTilesApplicationContext(this.servletContext, this.tilesPropertyMap));
 	}
 
 	/**
@@ -221,27 +221,28 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	}
 
 
-	/**
-	 * Internal implementation of the ServletConfig interface, to be passed
-	 * to the wrapped servlet. Delegates to ServletWrappingController fields
-	 * and methods to provide init parameters and other environment info.
-	 */
-	private class DelegatingServletConfig implements ServletConfig {
+	private static class PropertyExposingServletTilesApplicationContext extends ServletTilesApplicationContext {
 
-		public String getServletName() {
-			return "TilesConfigurer";
+		private final Map<String, String> mergedInitParams;
+
+		public PropertyExposingServletTilesApplicationContext(ServletContext servletContext, Properties properties) {
+			super(servletContext);
+			this.mergedInitParams = new LinkedHashMap<String, String>();
+			Enumeration initParamNames = servletContext.getInitParameterNames();
+			while (initParamNames.hasMoreElements()) {
+				String initParamName = (String) initParamNames.nextElement();
+				this.mergedInitParams.put(initParamName, servletContext.getInitParameter(initParamName));
+			}
+			Enumeration propertyNames = properties.propertyNames();
+			while (propertyNames.hasMoreElements()) {
+				String propertyName = (String) propertyNames.nextElement();
+				this.mergedInitParams.put(propertyName, properties.getProperty(propertyName));
+			}
 		}
 
-		public ServletContext getServletContext() {
-			return servletContext;
-		}
-
-		public String getInitParameter(String paramName) {
-			return tilesPropertyMap.getProperty(paramName);
-		}
-
-		public Enumeration getInitParameterNames() {
-			return tilesPropertyMap.keys();
+		@Override
+		public Map<String, String> getInitParams() {
+			return this.mergedInitParams;
 		}
 	}
 
