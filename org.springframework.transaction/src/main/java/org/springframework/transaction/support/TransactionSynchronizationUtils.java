@@ -67,7 +67,7 @@ public abstract class TransactionSynchronizationUtils {
 		}
 		if (aopAvailable) {
 			// now unwrap scoped proxy
-			resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resource);
+			resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resourceRef);
 		}
 		return resourceRef;
 	}
