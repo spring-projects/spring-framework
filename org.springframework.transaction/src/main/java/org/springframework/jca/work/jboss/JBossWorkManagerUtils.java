@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jca.work.jboss;
 
 import java.lang.reflect.Method;
-
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
@@ -37,23 +36,33 @@ public abstract class JBossWorkManagerUtils {
 
 	private static final String MBEAN_SERVER_CONNECTION_JNDI_NAME = "jmx/invoker/RMIAdaptor";
 
-	private static final String WORK_MANAGER_OBJECT_NAME = "jboss.jca:service=WorkManager";
+	private static final String DEFAULT_WORK_MANAGER_MBEAN_NAME = "jboss.jca:service=WorkManager";
 
 
 	/**
 	 * Obtain the default JBoss JCA WorkManager through a JMX lookup
-	 * for the JBossWorkManagerMBean.
+	 * for the default JBossWorkManagerMBean.
 	 * @see org.jboss.resource.work.JBossWorkManagerMBean
 	 */
 	public static WorkManager getWorkManager() {
+		return getWorkManager(DEFAULT_WORK_MANAGER_MBEAN_NAME);
+	}
+
+	/**
+	 * Obtain the default JBoss JCA WorkManager through a JMX lookup
+	 * for the JBossWorkManagerMBean.
+	 * @param workManagerObjectName the JMX object name to use
+	 * @see org.jboss.resource.work.JBossWorkManagerMBean
+	 */
+	public static WorkManager getWorkManager(String mbeanName) {
 		try {
-			Class mbeanClass = JBossWorkManagerUtils.class.getClassLoader().loadClass(JBOSS_WORK_MANAGER_MBEAN_CLASS_NAME);
+			Class<?> mbeanClass = JBossWorkManagerUtils.class.getClassLoader().loadClass(JBOSS_WORK_MANAGER_MBEAN_CLASS_NAME);
 			InitialContext jndiContext = new InitialContext();
 			MBeanServerConnection mconn = (MBeanServerConnection) jndiContext.lookup(MBEAN_SERVER_CONNECTION_JNDI_NAME);
-			ObjectName objectName = ObjectName.getInstance(WORK_MANAGER_OBJECT_NAME);
+			ObjectName objectName = ObjectName.getInstance(mbeanName);
 			Object workManagerMBean = MBeanServerInvocationHandler.newProxyInstance(mconn, objectName, mbeanClass, false);
-			Method getInstanceMethod = workManagerMBean.getClass().getMethod("getInstance", new Class[0]);
-			return (WorkManager) getInstanceMethod.invoke(workManagerMBean, new Object[0]);
+			Method getInstanceMethod = workManagerMBean.getClass().getMethod("getInstance");
+			return (WorkManager) getInstanceMethod.invoke(workManagerMBean);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
