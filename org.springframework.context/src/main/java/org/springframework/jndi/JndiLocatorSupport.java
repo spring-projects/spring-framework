@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 
 	/**
 	 * Perform an actual JNDI lookup for the given name via the JndiTemplate.
-   * <p>If the name doesn't begin with "java:comp/env/", this prefix is added
+	 * <p>If the name doesn't begin with "java:comp/env/", this prefix is added
 	 * if "resourceRef" is set to "true".
 	 * @param jndiName the JNDI name to look up
 	 * @param requiredType the required type of the object
@@ -90,7 +90,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
 		Assert.notNull(jndiName, "'jndiName' must not be null");
 		String convertedName = convertJndiName(jndiName);
-		T jndiObject = null;
+		T jndiObject;
 		try {
 			jndiObject = getJndiTemplate().lookup(convertedName, requiredType);
 		}
