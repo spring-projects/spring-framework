@@ -78,6 +78,9 @@
 		<property name="dataAccessResourceFailureCodes">
 			<value>90046,90100,90117,90121,90126</value>
 		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>50200</value>
+		</property>
 	</bean>
 
 	<bean id="HSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
