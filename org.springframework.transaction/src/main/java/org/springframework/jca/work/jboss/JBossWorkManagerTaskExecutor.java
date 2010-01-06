@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,16 @@ import org.springframework.jca.work.WorkManagerTaskExecutor;
  * @see org.jboss.resource.work.JBossWorkManagerMBean
  */
 public class JBossWorkManagerTaskExecutor extends WorkManagerTaskExecutor {
+
+	/**
+	 * Identify a specific JBossWorkManagerMBean to talk to,
+	 * through its JMX object name.
+	 * <p>The default MBean name is "jboss.jca:service=WorkManager".
+	 * @see JBossWorkManagerUtils#getWorkManager(String)
+	 */
+	public void setWorkManagerMBeanName(String mbeanName) {
+		setWorkManager(JBossWorkManagerUtils.getWorkManager(mbeanName));
+	}
 
 	/**
 	 * Obtains the default JBoss JCA WorkManager through a JMX lookup

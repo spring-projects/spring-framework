@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jca.work.glassfish;
 
 import java.lang.reflect.Method;
-
 import javax.resource.spi.work.WorkManager;
 
 import org.springframework.jca.work.WorkManagerTaskExecutor;
@@ -54,15 +53,13 @@ public class GlassFishWorkManagerTaskExecutor extends WorkManagerTaskExecutor {
 		}
 	}
 
-
 	/**
 	 * Identify a specific GlassFish thread pool to talk to.
 	 * <p>The thread pool name matches the resource adapter name
 	 * in default RAR deployment scenarios.
 	 */
 	public void setThreadPoolName(String threadPoolName) {
-		WorkManager wm = (WorkManager)
-				ReflectionUtils.invokeMethod(this.getWorkManagerMethod, null, new Object[] {threadPoolName});
+		WorkManager wm = (WorkManager) ReflectionUtils.invokeMethod(this.getWorkManagerMethod, null, threadPoolName);
 		if (wm == null) {
 			throw new IllegalArgumentException("Specified thread pool name '" + threadPoolName +
 					"' does not correspond to an actual pool definition in GlassFish. Check your configuration!");
