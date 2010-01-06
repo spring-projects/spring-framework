@@ -217,11 +217,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 	}
 
+
+	// overridable hooks
+
 	/**
 	 * Retrieve all applicable Lifecycle beans: all singletons that have already been created,
 	 * as well as all SmartLifecycle beans (even if they are marked as lazy-init).
+	 * @return the Map of applicable beans, with bean names as keys and bean instances as values
 	 */
-	private Map<String, Lifecycle> getLifecycleBeans() {
+	protected Map<String, Lifecycle> getLifecycleBeans() {
 		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
 		String[] beanNames = this.beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		for (String beanName : beanNames) {
@@ -240,8 +244,17 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		return beans;
 	}
 
-	private static int getPhase(Lifecycle bean) {
-		return (bean instanceof Phased) ? ((Phased) bean).getPhase() : 0;
+	/**
+	 * Determine the lifecycle phase of the given bean.
+	 * <p>The default implementation checks for the {@link Phased} interface.
+	 * Can be overridden to apply other/further policies.
+	 * @param bean the bean to introspect
+	 * @return the phase an an integer value. The suggested default is 0.
+	 * @see Phased
+	 * @see SmartLifecycle
+	 */
+	protected int getPhase(Lifecycle bean) {
+		return (bean instanceof Phased ? ((Phased) bean).getPhase() : 0);
 	}
 
 
@@ -318,7 +331,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 
-	private static class LifecycleGroupMember implements Comparable<LifecycleGroupMember> {
+	/**
+	 * Adapts the Comparable interface onto the lifecycle phase model.
+	 */
+	private class LifecycleGroupMember implements Comparable<LifecycleGroupMember> {
 
 		private final String name;
 
@@ -332,7 +348,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		public int compareTo(LifecycleGroupMember other) {
 			int thisOrder = getPhase(this.bean);
 			int otherOrder = getPhase(other.bean);
-			return (thisOrder == otherOrder) ? 0 : (thisOrder < otherOrder) ? -1 : 1;
+			return (thisOrder == otherOrder ? 0 : (thisOrder < otherOrder) ? -1 : 1);
 		}
 	}
 
