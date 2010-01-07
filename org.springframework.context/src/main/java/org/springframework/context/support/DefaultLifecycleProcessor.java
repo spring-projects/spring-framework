@@ -274,21 +274,20 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		private final long timeout;
 
-
-		LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans) {
+		public LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans) {
 			this.phase = phase;
 			this.timeout = timeout;
 			this.lifecycleBeans = lifecycleBeans;
 		}
 
-		void add(String name, Lifecycle bean) {
+		public void add(String name, Lifecycle bean) {
 			if (bean instanceof SmartLifecycle) {
 				this.smartMemberCount++;
 			}
 			this.members.add(new LifecycleGroupMember(name, bean));
 		}
 
-		void start() {
+		public void start() {
 			if (members.size() == 0) {
 				return;
 			}
@@ -300,7 +299,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		}
 
-		void stop() {
+		public void stop() {
 			if (members.size() == 0) {
 				return;
 			}
