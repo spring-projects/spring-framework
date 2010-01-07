@@ -207,9 +207,7 @@ Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 
 ExpressionParser parser = new SpelExpressionParser();
 Expression exp = parser.parseExpression("<emphasis role="bold">name</emphasis>");
-
-EvaluationContext context = new StandardEvaluationContext();
-context.setRootObject(tesla);
+EvaluationContext context = new StandardEvaluationContext(tesla);
 
 String name = (String) exp.getValue(context);</programlisting>
 <para>In the last
