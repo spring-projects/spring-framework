@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.expression.TypedValue;
 public class BeanExpressionContextAccessor implements PropertyAccessor {
 
 	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-		return (((BeanExpressionContext) target).containsObject(name));
+		return ((BeanExpressionContext) target).containsObject(name);
 	}
 
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
