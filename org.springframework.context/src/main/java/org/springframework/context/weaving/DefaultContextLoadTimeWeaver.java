@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,8 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 						this.loadTimeWeaver.getInstrumentableClassLoader().getClass().getName());
 			}
 			catch (IllegalStateException ex) {
-				throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver " +
-						"or start your Java virtual machine with Spring's agent: -javaagent:spring-agent.jar");
+				throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver or start your " +
+						"Java virtual machine with Spring's agent: -javaagent:org.springframework.instrument.jar");
 			}
 		}
 	}
