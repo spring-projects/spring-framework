@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,14 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Start the JVM specifying the Java agent to be used, like as follows:
  *
- * <p><code class="code">-javaagent:path/to/spring-agent.jar</code>
+ * <p><code class="code">-javaagent:path/to/org.springframework.instrument.jar</code>
  *
- * <p>where <code>spring-agent.jar</code> is a JAR file containing the
- * {@link InstrumentationSavingAgent} class.
+ * <p>where <code>org.springframework.instrument.jar</code> is a JAR file containing
+ * the {@link InstrumentationSavingAgent} class, as shipped with Spring.
  *
- * <p>In Eclipse, for example, set the "Run configuration"'s JVM args
- * to be of the form:
+ * <p>In Eclipse, for example, set the "Run configuration"'s JVM args to be of the form:
  *
- * <p><code class="code">-javaagent:${project_loc}/lib/spring-agent.jar</code>
+ * <p><code class="code">-javaagent:${project_loc}/lib/org.springframework.instrument.jar</code>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
