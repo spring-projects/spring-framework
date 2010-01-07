@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.core.convert;
 
 /**
- * Thrown when an attempt to execute a type conversion fails.
+ * Exception to be thrown when an actual type conversion attempt fails.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -29,12 +29,14 @@ public final class ConversionFailedException extends ConversionException {
 
 	private final TypeDescriptor targetType;
 
+	private final Object value;
+
 
 	/**
 	 * Create a new conversion exception.
-	 * @param value the value we tried to convert
 	 * @param sourceType the value's original type
 	 * @param targetType the value's target type
+	 * @param value the value we tried to convert
 	 * @param cause the cause of the conversion failure
 	 */
 	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
@@ -42,6 +44,7 @@ public final class ConversionFailedException extends ConversionException {
 				"' to type '" + targetType.getName() + "'", cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
+		this.value = value;
 	}
 
 
@@ -53,10 +56,17 @@ public final class ConversionFailedException extends ConversionException {
 	}
 
 	/**
-	 * Returns the target type we tried to convert the value to.
+	 * Return the target type we tried to convert the value to.
 	 */
 	public TypeDescriptor getTargetType() {
 		return this.targetType;
+	}
+
+	/**
+	 * Return the offending value.
+	 */
+	public Object getValue() {
+		return this.value;
 	}
 
 }
