@@ -52,4 +52,12 @@
 		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 
+<lang:bsh id="eventListener" script-interfaces="org.springframework.context.ApplicationListener,org.springframework.scripting.Messenger" >
+<lang:inline-script><![CDATA[
+int count;
+void onApplicationEvent (org.springframework.context.ApplicationEvent event) { count++; System.out.println(event); }
+String getMessage() { return "count=" + count; } 
+]]></lang:inline-script>
+</lang:bsh>
+
 </beans>
