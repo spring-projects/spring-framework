@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 					BeanFactory beanFactory = getBeanFactory();
 					for (String listenerBeanName : this.defaultRetriever.applicationListenerBeans) {
 						ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-						if (supportsEvent(listener, eventType, sourceType)) {
+						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
 							retriever.applicationListenerBeans.add(listenerBeanName);
 							allListeners.add(listener);
 						}

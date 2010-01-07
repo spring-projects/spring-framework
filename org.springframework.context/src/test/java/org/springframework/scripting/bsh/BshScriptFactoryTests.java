@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
@@ -301,6 +302,21 @@ public class BshScriptFactoryTests extends TestCase {
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
+	}
+
+	public void testApplicationEventListener() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
+		Messenger eventListener = (Messenger) ctx.getBean("eventListener");
+		ctx.publishEvent(new MyEvent(ctx));
+		assertEquals("count=2", eventListener.getMessage());
+	}
+
+
+	private static class MyEvent extends ApplicationEvent {
+
+		public MyEvent(Object source) {
+			super(source);
+		}
 	}
 
 }
