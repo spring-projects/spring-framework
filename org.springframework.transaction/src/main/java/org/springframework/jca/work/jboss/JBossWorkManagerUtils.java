@@ -23,6 +23,8 @@ import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.resource.spi.work.WorkManager;
 
+import org.springframework.util.Assert;
+
 /**
  * Utility class for obtaining the JBoss JCA WorkManager,
  * typically for use in web applications.
@@ -55,6 +57,7 @@ public abstract class JBossWorkManagerUtils {
 	 * @see org.jboss.resource.work.JBossWorkManagerMBean
 	 */
 	public static WorkManager getWorkManager(String mbeanName) {
+		Assert.hasLength(mbeanName, "JBossWorkManagerMBean name must not be empty");
 		try {
 			Class<?> mbeanClass = JBossWorkManagerUtils.class.getClassLoader().loadClass(JBOSS_WORK_MANAGER_MBEAN_CLASS_NAME);
 			InitialContext jndiContext = new InitialContext();
