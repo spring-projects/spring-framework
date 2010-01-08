@@ -16,7 +16,7 @@
     wide range of flexible handling methods. With the introduction of Spring
     3.0, the <interfacename>@Controller</interfacename> mechanism also allows
     you to create RESTful Web sites and applications, through the
-    <interfacename>@PathVarariable</interfacename> annotation and other
+    <interfacename>@PathVariable</interfacename> annotation and other
     features.</para>
 
     <sidebar id="mvc-open-for-extension">
