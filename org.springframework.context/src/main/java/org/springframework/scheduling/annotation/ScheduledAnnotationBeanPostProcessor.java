@@ -24,6 +24,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
@@ -35,18 +37,22 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
 
 /**
- * Bean post-processor that registers methods annotated with
- * {@link Scheduled @Scheduled} to be invoked by a TaskScheduler according
- * to the fixedRate, fixedDelay, or cron expression provided via the annotation.
+ * Bean post-processor that registers methods annotated with {@link Scheduled @Scheduled}
+ * to be invoked by a {@link org.springframework.scheduling.TaskScheduler} according
+ * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0
  * @see Scheduled
+ * @see org.springframework.scheduling.TaskScheduler
  */
 public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered,
-		ApplicationListener<ContextRefreshedEvent>, DisposableBean {
+		ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	private Object scheduler;
+
+	private ApplicationContext applicationContext;
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
 
@@ -58,19 +64,22 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 
 	/**
-	 * Set the {@link org.springframework.scheduling.TaskScheduler} that will
-	 * invoke the scheduled methods or a
-	 * {@link java.util.concurrent.ScheduledExecutorService} to be wrapped
-	 * within an instance of
-	 * {@link org.springframework.scheduling.concurrent.ConcurrentTaskScheduler}.
+	 * Set the {@link org.springframework.scheduling.TaskScheduler} that will invoke
+	 * the scheduled methods, or a {@link java.util.concurrent.ScheduledExecutorService}
+	 * to be wrapped as a TaskScheduler.
 	 */
 	public void setScheduler(Object scheduler) {
 		this.scheduler = scheduler;
 	}
 
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
 	public int getOrder() {
 		return LOWEST_PRECEDENCE;
 	}
+
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
@@ -110,13 +119,13 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					if (fixedDelay >= 0) {
 						Assert.isTrue(!processedSchedule, errorMessage);
 						processedSchedule = true;
-						fixedDelayTasks.put(runnable, new Long(fixedDelay));
+						fixedDelayTasks.put(runnable, fixedDelay);
 					}
 					long fixedRate = annotation.fixedRate();
 					if (fixedRate >= 0) {
 						Assert.isTrue(!processedSchedule, errorMessage);
 						processedSchedule = true;
-						fixedRateTasks.put(runnable, new Long(fixedRate));
+						fixedRateTasks.put(runnable, fixedRate);
 					}
 					Assert.isTrue(processedSchedule, errorMessage);
 				}
@@ -126,13 +135,15 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	}
 
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (scheduler != null) {
-			this.registrar.setScheduler(scheduler);
+		if (event.getApplicationContext() == this.applicationContext) {
+			if (this.scheduler != null) {
+				this.registrar.setScheduler(this.scheduler);
+			}
+			this.registrar.setCronTasks(this.cronTasks);
+			this.registrar.setFixedDelayTasks(this.fixedDelayTasks);
+			this.registrar.setFixedRateTasks(this.fixedRateTasks);
+			this.registrar.afterPropertiesSet();
 		}
-		this.registrar.setCronTasks(this.cronTasks);
-		this.registrar.setFixedDelayTasks(this.fixedDelayTasks);
-		this.registrar.setFixedRateTasks(this.fixedRateTasks);
-		this.registrar.afterPropertiesSet();
 	}
 
 	public void destroy() throws Exception {
