@@ -1652,17 +1652,17 @@ code, etc? Or what? If my rewording is wrong, revise to clarify. What does using
           <para>The <emphasis>Spring TestContext Framework</emphasis> offers
           full integration with JUnit 4.5+ through a custom runner (tested on
           JUnit 4.5, 4.6, and 4.7). By annotating test classes with
-          <literal>@Runwith(SpringJUnit4ClassRunner.class)</literal>,
+          <literal>@RunWith(SpringJUnit4ClassRunner.class)</literal>,
           developers can implement standard JUnit 4.5+ unit and integration
           tests and simultaneously reap the benefits of the TestContext
           framework such as support for loading application contexts,
           dependency injection of test instances, transactional test method
-          execution, and so on. The following code listing displays the
-          minimal requirements for configuring a test class to run with the
-          custom Spring Runner. @TestExecutionListeners is configured with an
-          empty list in order to disable the default listeners, which
-          otherwise would require an ApplicationContext to be configured
-          through @ContextConfiguration.</para>
+          execution, and so on. The following code listing displays the minimal
+          requirements for configuring a test class to run with the custom Spring
+          Runner. <interfacename>@TestExecutionListeners</interfacename> is
+          configured with an empty list in order to disable the default listeners,
+          which otherwise would require an ApplicationContext to be configured
+          through <interfacename>@ContextConfiguration</interfacename>.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({})
