@@ -23,12 +23,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -158,6 +160,66 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(target, targetObject);
 		assertEquals("generateReport", targetMethod);
 		assertEquals("0 0 * * * ?", cronTasks.values().iterator().next());
+	}
+
+	@Test
+	public void propertyPlaceholderWithCronExpression() {
+		String businessHoursCronExpression = "0 0 9-17 * * MON-FRI";
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+		Properties properties = new Properties();
+		properties.setProperty("schedules.businessHours", businessHoursCronExpression);
+		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.PropertyPlaceholderTestBean.class);
+		context.registerBeanDefinition("placeholder", placeholderDefinition);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+		Object postProcessor = context.getBean("postProcessor");
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
+				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
+		assertEquals(1, cronTasks.size());
+		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTargetObject();
+		String targetMethod = runnable.getTargetMethod();
+		assertEquals(target, targetObject);
+		assertEquals("x", targetMethod);
+		assertEquals(businessHoursCronExpression, cronTasks.values().iterator().next());
+	}
+
+	@Test
+	public void propertyPlaceholderForMetaAnnotation() {
+		String businessHoursCronExpression = "0 0 9-17 * * MON-FRI";
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+		Properties properties = new Properties();
+		properties.setProperty("schedules.businessHours", businessHoursCronExpression);
+		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.PropertyPlaceholderMetaAnnotationTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("placeholder", placeholderDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+		Object postProcessor = context.getBean("postProcessor");
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
+				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
+		assertEquals(1, cronTasks.size());
+		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTargetObject();
+		String targetMethod = runnable.getTargetMethod();
+		assertEquals(target, targetObject);
+		assertEquals("y", targetMethod);
+		assertEquals(businessHoursCronExpression, cronTasks.values().iterator().next());
 	}
 
 	@Test(expected = BeanCreationException.class)
@@ -293,6 +355,28 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 		@Hourly
 		public void generateReport() {
+		}
+	}
+
+
+	private static class PropertyPlaceholderTestBean {
+
+		@Scheduled(cron = "${schedules.businessHours}")
+		public void x() {
+		}
+	}
+
+
+	@Scheduled(cron = "${schedules.businessHours}")
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)	
+	private static @interface BusinessHours {}
+
+
+	private static class PropertyPlaceholderMetaAnnotationTestBean {
+
+		@BusinessHours
+		public void y() {
 		}
 	}
 
