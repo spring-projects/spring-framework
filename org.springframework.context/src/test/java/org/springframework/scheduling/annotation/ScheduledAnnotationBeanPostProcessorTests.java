@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,10 @@ package org.springframework.scheduling.annotation;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Map;
 
 import org.junit.Test;
@@ -33,7 +37,7 @@ import org.springframework.scheduling.support.MethodInvokingRunnable;
 /**
  * @author Mark Fisher
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "unused"})
 public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
@@ -97,7 +101,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Object target = context.getBean("target");
 		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
 				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
-		Map<Runnable, Long> cronTasks = (Map<Runnable, Long>)
+		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
 				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
 		assertEquals(1, cronTasks.size());
 		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
@@ -106,6 +110,54 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(target, targetObject);
 		assertEquals("cron", targetMethod);
 		assertEquals("*/7 * * * * ?", cronTasks.values().iterator().next());
+	}
+
+	@Test
+	public void metaAnnotationWithFixedRate() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.MetaAnnotationFixedRateTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+		Object postProcessor = context.getBean("postProcessor");
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		Map<Runnable, Long> fixedRateTasks = (Map<Runnable, Long>)
+				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+		assertEquals(1, fixedRateTasks.size());
+		MethodInvokingRunnable runnable = (MethodInvokingRunnable) fixedRateTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTargetObject();
+		String targetMethod = runnable.getTargetMethod();
+		assertEquals(target, targetObject);
+		assertEquals("checkForUpdates", targetMethod);
+		assertEquals(new Long(5000), fixedRateTasks.values().iterator().next());
+	}
+
+	@Test
+	public void metaAnnotationWithCronExpression() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.MetaAnnotationCronTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+		Object postProcessor = context.getBean("postProcessor");
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
+				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
+		assertEquals(1, cronTasks.size());
+		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTargetObject();
+		String targetMethod = runnable.getTargetMethod();
+		assertEquals(target, targetObject);
+		assertEquals("generateReport", targetMethod);
+		assertEquals("0 0 * * * ?", cronTasks.values().iterator().next());
 	}
 
 	@Test(expected = BeanCreationException.class)
@@ -214,6 +266,34 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		public void invalid(String oops) {
 		}
 
+	}
+
+
+	@Scheduled(fixedRate = 5000)
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface EveryFiveSeconds {}
+
+
+	@Scheduled(cron = "0 0 * * * ?")
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface Hourly {}
+
+
+	private static class MetaAnnotationFixedRateTestBean {
+
+		@EveryFiveSeconds
+		public void checkForUpdates() {
+		}
+	}
+
+
+	private static class MetaAnnotationCronTestBean {
+
+		@Hourly
+		public void generateReport() {
+		}
 	}
 
 }
