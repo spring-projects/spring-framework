@@ -308,6 +308,19 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("test-42", response.getContentAsString());
 	}
 
+	/*
+	 * See SPR-6640 
+	 */
+	@Test
+	public void menuTree() throws Exception {
+		initServlet(MenuTreeController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/book/menu/type/M5");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("M5", response.getContentAsString());
+	}
+
 
 	/*
 	 * Controllers
@@ -532,5 +545,15 @@ public class UriTemplateServletAnnotationControllerTests {
 		}
 
 	}
+
+	@RequestMapping("/*/menu/**")
+	public static class MenuTreeController {
+
+		@RequestMapping("type/{var}")
+		public void getFirstLevelFunctionNodes(@PathVariable("var") String var, Writer writer) throws IOException {
+			writer.write(var);
+		}
+	}
+
 
 }
