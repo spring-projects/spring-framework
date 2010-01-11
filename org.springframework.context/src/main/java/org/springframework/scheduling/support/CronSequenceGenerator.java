@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.springframework.util.StringUtils;
 
@@ -66,13 +67,17 @@ class CronSequenceGenerator {
 
 	private final String expression;
 
+	private final TimeZone timeZone;
+
 	/**
 	 * Construct a {@link CronSequenceGenerator} from the pattern provided.
 	 * @param expression a space-separated list of time fields
+	 * @param timeZone the TimeZone to use for generated trigger times
 	 * @throws IllegalArgumentException if the pattern cannot be parsed
 	 */
-	public CronSequenceGenerator(String expression) {
+	public CronSequenceGenerator(String expression, TimeZone timeZone) {
 		this.expression = expression;
+		this.timeZone = timeZone;
 		parse(expression);
 	}
 
@@ -106,6 +111,7 @@ class CronSequenceGenerator {
 		 */
 
 		Calendar calendar = new GregorianCalendar();
+		calendar.setTimeZone(timeZone);
 		calendar.setTime(date);
 
 		// Truncate to the next whole second
@@ -122,13 +128,13 @@ class CronSequenceGenerator {
 
 		int second = calendar.get(Calendar.SECOND);
 		List<Integer> emptyList = Collections.<Integer> emptyList();
-		int updateSecond = findNext(this.seconds, second, 60, calendar, Calendar.SECOND, emptyList);
+		int updateSecond = findNext(this.seconds, second, calendar, Calendar.SECOND, Calendar.MINUTE, emptyList);
 		if (second == updateSecond) {
 			resets.add(Calendar.SECOND);
 		}
 
 		int minute = calendar.get(Calendar.MINUTE);
-		int updateMinute = findNext(this.minutes, minute, 60, calendar, Calendar.MINUTE, resets);
+		int updateMinute = findNext(this.minutes, minute, calendar, Calendar.MINUTE, Calendar.HOUR_OF_DAY, resets);
 		if (minute == updateMinute) {
 			resets.add(Calendar.MINUTE);
 		} else {
@@ -136,7 +142,7 @@ class CronSequenceGenerator {
 		}
 
 		int hour = calendar.get(Calendar.HOUR_OF_DAY);
-		int updateHour = findNext(this.hours, hour, 24, calendar, Calendar.HOUR_OF_DAY, resets);
+		int updateHour = findNext(this.hours, hour, calendar, Calendar.HOUR_OF_DAY, Calendar.DAY_OF_WEEK, resets);
 		if (hour == updateHour) {
 			resets.add(Calendar.HOUR_OF_DAY);
 		} else {
@@ -153,7 +159,7 @@ class CronSequenceGenerator {
 		}
 
 		int month = calendar.get(Calendar.MONTH);
-		int updateMonth = findNext(this.months, month, 12, calendar, Calendar.MONTH, resets);
+		int updateMonth = findNext(this.months, month, calendar, Calendar.MONTH, Calendar.YEAR, resets);
 		if (month != updateMonth) {
 			doNext(calendar);			
 		}
@@ -183,7 +189,6 @@ class CronSequenceGenerator {
 	 * and reset the calendar.
 	 * @param bits a {@link BitSet} representing the allowed values of the field
 	 * @param value the current value of the field
-	 * @param max the largest value that the field can have
 	 * @param calendar the calendar to increment as we move through the bits
 	 * @param field the field to increment in the calendar (@see
 	 * {@link Calendar} for the static constants defining valid fields)
@@ -191,11 +196,12 @@ class CronSequenceGenerator {
 	 * ones of lower significance than the field of interest)
 	 * @return the value of the calendar field that is next in the sequence
 	 */
-	private int findNext(BitSet bits, int value, int max, Calendar calendar, int field, List<Integer> lowerOrders) {
+	private int findNext(BitSet bits, int value, Calendar calendar, int field, int nextField, List<Integer> lowerOrders) {
 		int nextValue = bits.nextSetBit(value);
 		// roll over if needed
 		if (nextValue == -1) {
-			calendar.add(field, max - value);
+			calendar.add(nextField, 1);
+			calendar.set(field, 0);
 			nextValue = bits.nextSetBit(0);
 		}
 		if (nextValue != value) {
