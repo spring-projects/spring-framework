@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,9 @@ package org.springframework.jmx.access;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +39,9 @@ import org.springframework.jmx.JmxException;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
+import org.springframework.aop.framework.ProxyFactory;
+
+import com.sun.management.HotSpotDiagnosticMXBean;
 
 /**
  * @author Rob Harrop
@@ -239,31 +245,30 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
-	// Commented out because of a side effect with the the started platform MBeanServer.
 	/*
 	public void testMXBeanAttributeAccess() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-
 		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
 		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
 		interceptor.setObjectName("java.lang:type=Memory");
 		interceptor.setManagementInterface(MemoryMXBean.class);
-		MemoryMXBean proxy = (MemoryMXBean) ProxyFactory.getProxy(MemoryMXBean.class, interceptor);
+		MemoryMXBean proxy = ProxyFactory.getProxy(MemoryMXBean.class, interceptor);
 		assertTrue(proxy.getHeapMemoryUsage().getMax() > 0);
 	}
 
 	public void testMXBeanOperationAccess() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-
 		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
 		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
 		interceptor.setObjectName("java.lang:type=Threading");
-		ThreadMXBean proxy = (ThreadMXBean) ProxyFactory.getProxy(ThreadMXBean.class, interceptor);
+		ThreadMXBean proxy = ProxyFactory.getProxy(ThreadMXBean.class, interceptor);
 		assertTrue(proxy.getThreadInfo(Thread.currentThread().getId()).getStackTrace() != null);
+	}
+
+	public void testMXBeanAttributeListAccess() throws Exception {
+		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
+		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
+		interceptor.setObjectName("com.sun.management:type=HotSpotDiagnostic");
+		HotSpotDiagnosticMXBean proxy = ProxyFactory.getProxy(HotSpotDiagnosticMXBean.class, interceptor);
+		assertFalse(proxy.getDiagnosticOptions().isEmpty());
 	}
 	*/
 
