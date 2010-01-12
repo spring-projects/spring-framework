@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-
 import javax.persistence.spi.ClassTransformer;
-import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
@@ -41,7 +39,7 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @since 2.0
  */
-public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
+public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private String persistenceUnitName;
 
@@ -64,6 +62,8 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	private boolean excludeUnlistedClasses = false;
 
 	private Properties properties = new Properties();
+
+	private String persistenceXMLSchemaVersion = "1.0";
 
 	private String persistenceProviderPackageName;
 
@@ -167,6 +167,14 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 
 	public Properties getProperties() {
 		return this.properties;
+	}
+
+	public void setPersistenceXMLSchemaVersion(String persistenceXMLSchemaVersion) {
+		this.persistenceXMLSchemaVersion = persistenceXMLSchemaVersion;
+	}
+
+	public String getPersistenceXMLSchemaVersion() {
+		return this.persistenceXMLSchemaVersion;
 	}
 
 	public void setPersistenceProviderPackageName(String persistenceProviderPackageName) {

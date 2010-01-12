@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,10 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
  */
 class PersistenceUnitReader {
 
+	private static final String PERSISTENCE_UNIT = "persistence-unit";
+
+	private static final String UNIT_NAME = "name";
+
 	private static final String MAPPING_FILE_NAME = "mapping-file";
 
 	private static final String JAR_FILE_URL = "jar-file";
@@ -62,17 +66,17 @@ class PersistenceUnitReader {
 
 	private static final String PROVIDER = "provider";
 
-	private static final String EXCLUDE_UNLISTED_CLASSES = "exclude-unlisted-classes";
+	private static final String TRANSACTION_TYPE = "transaction-type";
 
-	private static final String NON_JTA_DATA_SOURCE = "non-jta-data-source";
+	private static final String SHARED_CACHE_MODE = "shared-cache-mode";
+
+	private static final String VALIDATION_MODE = "validation-mode";
 
 	private static final String JTA_DATA_SOURCE = "jta-data-source";
 
-	private static final String TRANSACTION_TYPE = "transaction-type";
+	private static final String NON_JTA_DATA_SOURCE = "non-jta-data-source";
 
-	private static final String PERSISTENCE_UNIT = "persistence-unit";
-
-	private static final String UNIT_NAME = "name";
+	private static final String EXCLUDE_UNLISTED_CLASSES = "exclude-unlisted-classes";
 
 	private static final String META_INF = "META-INF";
 
@@ -272,6 +276,18 @@ class PersistenceUnitReader {
 		String txType = persistenceUnit.getAttribute(TRANSACTION_TYPE).trim();
 		if (StringUtils.hasText(txType)) {
 			unitInfo.setTransactionType(PersistenceUnitTransactionType.valueOf(txType));
+		}
+
+		// set JPA 2.0 shared cache mode
+		String cacheMode = persistenceUnit.getAttribute(SHARED_CACHE_MODE).trim();
+		if (StringUtils.hasText(cacheMode)) {
+			unitInfo.setSharedCacheModeName(cacheMode);
+		}
+
+		// set JPA 2.0 validation mode
+		String validationMode = persistenceUnit.getAttribute(VALIDATION_MODE).trim();
+		if (StringUtils.hasText(validationMode)) {
+			unitInfo.setValidationModeName(validationMode);
 		}
 
 		// data-source
