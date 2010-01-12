@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -527,8 +526,8 @@ public class MimeMessageHelper {
 	 * @see #validateAddress(InternetAddress)
 	 */
 	protected void validateAddresses(InternetAddress[] addresses) throws AddressException {
-		for (int i = 0; i < addresses.length; i++) {
-			validateAddress(addresses[i]);
+		for (InternetAddress address : addresses) {
+			validateAddress(address);
 		}
 	}
 
@@ -541,7 +540,7 @@ public class MimeMessageHelper {
 
 	public void setFrom(String from) throws MessagingException {
 		Assert.notNull(from, "From address must not be null");
-		setFrom(new InternetAddress(from));
+		setFrom(parseAddress(from));
 	}
 
 	public void setFrom(String from, String personal) throws MessagingException, UnsupportedEncodingException {
@@ -558,7 +557,7 @@ public class MimeMessageHelper {
 
 	public void setReplyTo(String replyTo) throws MessagingException {
 		Assert.notNull(replyTo, "Reply-to address must not be null");
-		setReplyTo(new InternetAddress(replyTo));
+		setReplyTo(parseAddress(replyTo));
 	}
 
 	public void setReplyTo(String replyTo, String personal) throws MessagingException, UnsupportedEncodingException {
@@ -583,14 +582,14 @@ public class MimeMessageHelper {
 
 	public void setTo(String to) throws MessagingException {
 		Assert.notNull(to, "To address must not be null");
-		setTo(new InternetAddress(to));
+		setTo(parseAddress(to));
 	}
 
 	public void setTo(String[] to) throws MessagingException {
 		Assert.notNull(to, "To address array must not be null");
 		InternetAddress[] addresses = new InternetAddress[to.length];
 		for (int i = 0; i < to.length; i++) {
-			addresses[i] = new InternetAddress(to[i]);
+			addresses[i] = parseAddress(to[i]);
 		}
 		setTo(addresses);
 	}
@@ -603,7 +602,7 @@ public class MimeMessageHelper {
 
 	public void addTo(String to) throws MessagingException {
 		Assert.notNull(to, "To address must not be null");
-		addTo(new InternetAddress(to));
+		addTo(parseAddress(to));
 	}
 
 	public void addTo(String to, String personal) throws MessagingException, UnsupportedEncodingException {
@@ -628,14 +627,14 @@ public class MimeMessageHelper {
 
 	public void setCc(String cc) throws MessagingException {
 		Assert.notNull(cc, "Cc address must not be null");
-		setCc(new InternetAddress(cc));
+		setCc(parseAddress(cc));
 	}
 
 	public void setCc(String[] cc) throws MessagingException {
 		Assert.notNull(cc, "Cc address array must not be null");
 		InternetAddress[] addresses = new InternetAddress[cc.length];
 		for (int i = 0; i < cc.length; i++) {
-			addresses[i] = new InternetAddress(cc[i]);
+			addresses[i] = parseAddress(cc[i]);
 		}
 		setCc(addresses);
 	}
@@ -648,7 +647,7 @@ public class MimeMessageHelper {
 
 	public void addCc(String cc) throws MessagingException {
 		Assert.notNull(cc, "Cc address must not be null");
-		addCc(new InternetAddress(cc));
+		addCc(parseAddress(cc));
 	}
 
 	public void addCc(String cc, String personal) throws MessagingException, UnsupportedEncodingException {
@@ -673,14 +672,14 @@ public class MimeMessageHelper {
 
 	public void setBcc(String bcc) throws MessagingException {
 		Assert.notNull(bcc, "Bcc address must not be null");
-		setBcc(new InternetAddress(bcc));
+		setBcc(parseAddress(bcc));
 	}
 
 	public void setBcc(String[] bcc) throws MessagingException {
 		Assert.notNull(bcc, "Bcc address array must not be null");
 		InternetAddress[] addresses = new InternetAddress[bcc.length];
 		for (int i = 0; i < bcc.length; i++) {
-			addresses[i] = new InternetAddress(bcc[i]);
+			addresses[i] = parseAddress(bcc[i]);
 		}
 		setBcc(addresses);
 	}
@@ -693,7 +692,7 @@ public class MimeMessageHelper {
 
 	public void addBcc(String bcc) throws MessagingException {
 		Assert.notNull(bcc, "Bcc address must not be null");
-		addBcc(new InternetAddress(bcc));
+		addBcc(parseAddress(bcc));
 	}
 
 	public void addBcc(String bcc, String personal) throws MessagingException, UnsupportedEncodingException {
@@ -701,6 +700,21 @@ public class MimeMessageHelper {
 		addBcc(getEncoding() != null ?
 		    new InternetAddress(bcc, personal, getEncoding()) :
 		    new InternetAddress(bcc, personal));
+	}
+
+	private InternetAddress parseAddress(String address) throws MessagingException {
+		InternetAddress[] parsed = InternetAddress.parse(address);
+		if (parsed.length != 1) {
+			throw new AddressException("Illegal address", address);
+		}
+		InternetAddress raw = parsed[0];
+		try {
+			return (getEncoding() != null ?
+					new InternetAddress(raw.getAddress(), raw.getPersonal(), getEncoding()) : raw);
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new MessagingException("Failed to parse embedded personal name to correct encoding", ex);
+		}
 	}
 
 
@@ -766,7 +780,7 @@ public class MimeMessageHelper {
 	 */
 	public void setText(String text, boolean html) throws MessagingException {
 		Assert.notNull(text, "Text must not be null");
-		MimePart partToUse = null;
+		MimePart partToUse;
 		if (isMultipart()) {
 			partToUse = getMainPart();
 		}
