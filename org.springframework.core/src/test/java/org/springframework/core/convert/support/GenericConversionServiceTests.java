@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -164,7 +165,7 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	public void testMapToObjectConversionBug() {
+	public void testMapToObjectConversion() {
 		GenericConversionService conversionService = new GenericConversionService();
 		Map<Object, Object> raw = new HashMap<Object, Object>();
 		raw.put("key", "value");
@@ -179,6 +180,16 @@ public class GenericConversionServiceTests {
 		conversionService.addConverter(new ObjectToStringConverter());
 		Object converted = conversionService.convert(new MyInterfaceImplementer(), String.class);
 		assertEquals("RESULT", converted);
+	}
+
+	@Test
+	public void testWildcardMap() throws Exception {
+		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		Map<String, String> input = new LinkedHashMap<String, String>();
+		input.put("key", "value");
+		Object converted = conversionService.convert(input, TypeDescriptor.forObject(input),
+				new TypeDescriptor(getClass().getField("wildcardMap")));
+		assertSame(input, converted);
 	}
 
 
@@ -197,12 +208,14 @@ public class GenericConversionServiceTests {
 	}
 
 
-	private class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
+	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
 
 		public String convert(MyBaseInterface source) {
 			return "RESULT";
 		}
 	}
 
+
+	public static Map<String, ?> wildcardMap;
 
 }
