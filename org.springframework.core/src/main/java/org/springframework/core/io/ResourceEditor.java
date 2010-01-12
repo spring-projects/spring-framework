@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,9 @@ import org.springframework.util.SystemPropertyUtils;
  * <code>"classpath:myfile.txt"</code>) to <code>Resource</code>
  * properties instead of using a <code>String</code> location property.
  *
- * <p>The path may contain <code>${...}</code> placeholders, to be resolved
- * as system properties: e.g. <code>${user.dir}</code>.  By default unresolvable
- * placeholders are ignored, but if an exception is preferred set the 
- * {@link #setIgnoreUnresolvablePlaceholders(boolean) ignoreUnresolvablePlaceholders} 
- * flag to false.
+ * <p>The path may contain <code>${...}</code> placeholders,
+ * to be resolved as system properties: e.g. <code>${user.dir}</code>.
+ * Unresolvable placeholder are ignored by default.
  *
  * <p>Delegates to a {@link ResourceLoader} to do the heavy lifting,
  * by default using a {@link DefaultResourceLoader}.
@@ -51,8 +49,9 @@ import org.springframework.util.SystemPropertyUtils;
 public class ResourceEditor extends PropertyEditorSupport {
 
 	private final ResourceLoader resourceLoader;
-	
-	private boolean ignoreUnresolvablePlaceholders = true;
+
+	private final boolean ignoreUnresolvablePlaceholders;
+
 
 	/**
 	 * Create a new instance of the {@link ResourceEditor} class
@@ -68,17 +67,22 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @param resourceLoader the <code>ResourceLoader</code> to use
 	 */
 	public ResourceEditor(ResourceLoader resourceLoader) {
+		this(resourceLoader, true);
+	}
+
+	/**
+	 * Create a new instance of the {@link ResourceEditor} class
+	 * using the given {@link ResourceLoader}.
+	 * @param resourceLoader the <code>ResourceLoader</code> to use
+	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
+	 * if no corresponding system property could be found
+	 */
+	public ResourceEditor(ResourceLoader resourceLoader, boolean ignoreUnresolvablePlaceholders) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
-	}
-	
-	/**
-	 * Flag to determine if unresolvable placeholders in System properties
-	 * @param ignoreUnresolvablePlaceholders
-	 */
-	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
+
 
 	@Override
 	public void setAsText(String text) {
@@ -99,7 +103,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
 	 */
 	protected String resolvePath(String path) {
-		return SystemPropertyUtils.resolvePlaceholders(path, ignoreUnresolvablePlaceholders);
+		return SystemPropertyUtils.resolvePlaceholders(path, this.ignoreUnresolvablePlaceholders);
 	}
 
 
