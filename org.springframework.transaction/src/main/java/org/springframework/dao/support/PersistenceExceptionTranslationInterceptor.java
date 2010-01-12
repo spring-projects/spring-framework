@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ public class PersistenceExceptionTranslationInterceptor
 
 	private PersistenceExceptionTranslator persistenceExceptionTranslator;
 
+	private boolean alwaysTranslate = false;
+
 
 	/**
 	 * Create a new PersistenceExceptionTranslationInterceptor.
@@ -87,6 +89,22 @@ public class PersistenceExceptionTranslationInterceptor
 	public void setPersistenceExceptionTranslator(PersistenceExceptionTranslator pet) {
 		Assert.notNull(pet, "PersistenceExceptionTranslator must not be null");
 		this.persistenceExceptionTranslator = pet;
+	}
+
+	/**
+	 * Specify whether to always translate the exception ("true"), or whether throw the
+	 * raw exception when declared, i.e. when the originating method signature's exception
+	 * declarations allow for the raw exception to be thrown ("false").
+	 * <p>Default is "false". Switch this flag to "true" in order to always translate
+	 * applicable exceptions, independent from the originating method signature.
+	 * <p>Note that the originating method does not have to declare the specific exception.
+	 * Any base class will do as well, even <code>throws Exception</code>: As long as the
+	 * originating method does explicitly declare compatible exceptions, the raw exception
+	 * will be rethrown. If you would like to avoid throwing raw exceptions in any case,
+	 * switch this flag to "true".
+	 */
+	public void setAlwaysTranslate(boolean alwaysTranslate) {
+		this.alwaysTranslate = alwaysTranslate;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -138,7 +156,7 @@ public class PersistenceExceptionTranslationInterceptor
 		}
 		catch (RuntimeException ex) {
 			// Let it throw raw if the type of the exception is on the throws clause of the method.
-			if (ReflectionUtils.declaresException(mi.getMethod(), ex.getClass())) {
+			if (!this.alwaysTranslate && ReflectionUtils.declaresException(mi.getMethod(), ex.getClass())) {
 				throw ex;
 			}
 			else {
