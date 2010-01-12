@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,9 @@ import org.springframework.util.SystemPropertyUtils;
  * to <code>Resource</code> array properties. Can also translate a collection
  * or array of location patterns into a merged Resource array.
  *
- * <p>The path may contain <code>${...}</code> placeholders, to be resolved
- * as system properties: e.g. <code>${user.dir}</code>.
+ * <p>The path may contain <code>${...}</code> placeholders,
+ * to be resolved as system properties: e.g. <code>${user.dir}</code>.
+ * Unresolvable placeholder are ignored by default.
  *
  * <p>Delegates to a {@link ResourcePatternResolver},
  * by default using a {@link PathMatchingResourcePatternResolver}.
@@ -51,6 +52,8 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
+	private final boolean ignoreUnresolvablePlaceholders;
+
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with a default
@@ -58,7 +61,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * @see PathMatchingResourcePatternResolver
 	 */
 	public ResourceArrayPropertyEditor() {
-		this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
+		this(new PathMatchingResourcePatternResolver());
 	}
 
 	/**
@@ -66,7 +69,18 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 */
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver) {
+		this(resourcePatternResolver, true);
+	}
+
+	/**
+	 * Create a new ResourceArrayPropertyEditor with the given ResourcePatternResolver.
+	 * @param resourcePatternResolver the ResourcePatternResolver to use
+	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
+	 * if no corresponding system property could be found
+	 */
+	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, boolean ignoreUnresolvablePlaceholders) {
 		this.resourcePatternResolver = resourcePatternResolver;
+		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
 
 
@@ -81,7 +95,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException(
-			    "Could not resolve resource location pattern [" + pattern + "]: " + ex.getMessage());
+					"Could not resolve resource location pattern [" + pattern + "]: " + ex.getMessage());
 		}
 	}
 
@@ -142,7 +156,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
 	 */
 	protected String resolvePath(String path) {
-		return SystemPropertyUtils.resolvePlaceholders(path);
+		return SystemPropertyUtils.resolvePlaceholders(path, this.ignoreUnresolvablePlaceholders);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.io.support;
 
+import java.beans.PropertyEditor;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -23,13 +25,13 @@ import org.springframework.core.io.Resource;
 
 /**
  * @author Dave Syer
+ * @author Juergen Hoeller
  */
 public class ResourceArrayPropertyEditorTests {
 
-	private ResourceArrayPropertyEditor editor = new ResourceArrayPropertyEditor();
-
 	@Test
 	public void testVanillaResource() throws Exception {
+		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath:org/springframework/core/io/support/ResourceArrayPropertyEditor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
 		assertNotNull(resources);
@@ -42,10 +44,39 @@ public class ResourceArrayPropertyEditorTests {
 		// The result depends on the classpath - if test-classes are segregated from classes
 		// and they come first on the classpath (like in Maven) then it breaks, if classes
 		// comes first (like in Spring Build) then it is OK.
+		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath*:org/springframework/core/io/support/Resource*Editor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
 		assertNotNull(resources);
 		assertTrue(resources[0].exists());
+	}
+
+	@Test
+	public void testSystemPropertyReplacement() {
+		PropertyEditor editor = new ResourceArrayPropertyEditor();
+		System.setProperty("test.prop", "foo");
+		try {
+			editor.setAsText("${test.prop}-${bar}");
+			Resource[] resources = (Resource[]) editor.getValue();
+			assertEquals("foo-${bar}", resources[0].getFilename());
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testStrictSystemPropertyReplacement() {
+		PropertyEditor editor = new ResourceArrayPropertyEditor(new PathMatchingResourcePatternResolver(), false);
+		System.setProperty("test.prop", "foo");
+		try {
+			editor.setAsText("${test.prop}-${bar}");
+			Resource[] resources = (Resource[]) editor.getValue();
+			assertEquals("foo-${bar}", resources[0].getFilename());
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
 	}
 
 }

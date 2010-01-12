@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class SystemPropertyUtils {
 	 * @see #PLACEHOLDER_SUFFIX
 	 * @throws IllegalArgumentException if there is an unresolvable placeholder
 	 */
-	public static String resolvePlaceholders(final String text) {
+	public static String resolvePlaceholders(String text) {
 		return resolvePlaceholders(text, false);
 	}
 
@@ -75,7 +75,7 @@ public abstract class SystemPropertyUtils {
 	 * @see #PLACEHOLDER_SUFFIX
 	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
 	 */
-	public static String resolvePlaceholders(final String text, boolean ignoreUnresolvablePlaceholders) {
+	public static String resolvePlaceholders(String text, boolean ignoreUnresolvablePlaceholders) {
 		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
 		return helper.replacePlaceholders(text, new SystemPropertyPlaceholderResolver(text));
 	}
