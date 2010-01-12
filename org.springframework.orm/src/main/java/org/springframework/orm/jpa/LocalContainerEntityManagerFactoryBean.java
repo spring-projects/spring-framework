@@ -29,9 +29,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.jdbc.datasource.lookup.SingleDataSourceLookup;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
-import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
+import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -195,8 +195,8 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 		this.persistenceUnitInfo = determinePersistenceUnitInfo(managerToUse);
 		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();
-		if (jpaVendorAdapter != null && this.persistenceUnitInfo instanceof MutablePersistenceUnitInfo) {
-			((MutablePersistenceUnitInfo) this.persistenceUnitInfo).setPersistenceProviderPackageName(
+		if (jpaVendorAdapter != null && this.persistenceUnitInfo instanceof SmartPersistenceUnitInfo) {
+			((SmartPersistenceUnitInfo) this.persistenceUnitInfo).setPersistenceProviderPackageName(
 					jpaVendorAdapter.getPersistenceProviderRootPackage());
 		}
 
