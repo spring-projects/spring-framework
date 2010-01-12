@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,12 @@ import org.springframework.util.StringUtils;
  *
  * @author Keith Donald
  * @author Dave Syer
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
-	private static String COMMENT_PREFIX = "--";
+	private static String DEFAULT_COMMENT_PREFIX = "--";
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
@@ -53,7 +54,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private List<Resource> scripts = new ArrayList<Resource>();
 
 	private String sqlScriptEncoding;
-	
+
+	private String commentPrefix = DEFAULT_COMMENT_PREFIX;
+
 	private boolean continueOnError = false;
 
 	private boolean ignoreFailedDrops = false;
@@ -86,9 +89,16 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
+	 * Set the line prefix that identifies comments in the SQL script.
+	 * Default is "--".
+	 */
+	public void setCommentPrefix(String commentPrefix) {
+		this.commentPrefix = commentPrefix;
+	}
+
+	/**
 	 * Flag to indicate that all failures in SQL should be logged but not cause a failure.
 	 * Defaults to false.
-	 * @param continueOnError the flag value to set
 	 */
 	public void setContinueOnError(boolean continueOnError) {
 		this.continueOnError = continueOnError;
@@ -96,9 +106,9 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Flag to indicate that a failed SQL <code>DROP</code> statement can be ignored.  
-	 * This is useful for non-embedded databases whose SQL dialect does not support an <code>IF EXISTS</code> clause in a <code>DROP</code>.
-	 * The default is false so that if it the populator runs accidentally, it will failfast when the script starts with a <code>DROP</code>.
-	 * @param ignoreFailedDrops the flag value to set
+	 * <p>This is useful for non-embedded databases whose SQL dialect does not support an
+	 * <code>IF EXISTS</code> clause in a <code>DROP</code>. The default is false so that if the
+	 * populator runs accidentally, it will fail fast when the script starts with a <code>DROP</code>.
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;
@@ -123,7 +133,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Execute the given SQL script. <p>The script will normally be loaded by classpath. There should be one statement
 	 * per line. Any semicolons will be removed. <b>Do not use this method to execute DDL if you expect rollback.</b>
-	 * @param template the SimpleJdbcTemplate with which to perform JDBC operations
+	 * @param connection the JDBC Connection with which to perform JDBC operations
 	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from.
 	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error.
 	 * @param ignoreFailedDrops whether of not to continue in thw event of specifically an error on a <code>DROP</code>.
@@ -187,17 +197,18 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Read a script from the LineNumberReader and build a String containing the lines.
-	 * @param lineNumberReader the <code>LineNumberReader</> containing the script to be processed
+	 * Read a script from the given resource and build a String containing the lines.
+	 * @param resource the resource to be read
 	 * @return <code>String</code> containing the script lines
-	 * @throws IOException
+	 * @throws IOException in case of I/O errors
 	 */
-	private static String readScript(EncodedResource resource) throws IOException {
+	private String readScript(EncodedResource resource) throws IOException {
 		LineNumberReader lnr = new LineNumberReader(resource.getReader());
 		String currentStatement = lnr.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement) && !currentStatement.startsWith(COMMENT_PREFIX)) {
+			if (StringUtils.hasText(currentStatement) &&
+					(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
@@ -213,7 +224,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement - typically a ';' character
 	 */
-	private static boolean containsSqlScriptDelimiters(String script, char delim) {
+	private boolean containsSqlScriptDelimiters(String script, char delim) {
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
@@ -234,7 +245,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param delim character delimiting each statement - typically a ';' character
 	 * @param statements the List that will contain the individual statements
 	 */
-	private static void splitSqlScript(String script, char delim, List<String> statements) {
+	private void splitSqlScript(String script, char delim, List<String> statements) {
 		StringBuilder sb = new StringBuilder();
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
