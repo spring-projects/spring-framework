@@ -24,6 +24,18 @@ public class JdbcNamespaceIntegrationTest {
 	}
 
 	@Test
+	public void testCreateEmbeddedDatabaseAgain() throws Exception {
+		// If Derby isn't cleaned up properly this will fail...
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/jdbc/config/jdbc-config.xml");
+		try {
+			assertCorrectSetup(context.getBean("derbyDataSource", DataSource.class));
+		} finally {
+			context.close();
+		}
+	}
+
+	@Test
 	public void testCreateWithResourcePattern() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/jdbc/config/jdbc-config-pattern.xml");
