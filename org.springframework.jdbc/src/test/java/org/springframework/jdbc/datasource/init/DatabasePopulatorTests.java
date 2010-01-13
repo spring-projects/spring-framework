@@ -2,6 +2,9 @@ package org.springframework.jdbc.datasource.init;
 
 import static org.junit.Assert.assertEquals;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.junit.Test;
@@ -21,7 +24,12 @@ public class DatabasePopulatorTests {
 		databasePopulator.addScript(resourceLoader.getResource("db-schema-failed-drop-comments.sql"));
 		databasePopulator.addScript(resourceLoader.getResource("db-test-data.sql"));
 		databasePopulator.setIgnoreFailedDrops(true);
-		databasePopulator.populate(db.getConnection());
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
 		assertDatabaseCreated(db);
 		db.shutdown();
 	}

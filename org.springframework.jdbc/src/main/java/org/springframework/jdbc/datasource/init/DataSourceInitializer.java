@@ -15,9 +15,13 @@
  */
 package org.springframework.jdbc.datasource.init;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.util.Assert;
 
 /**
@@ -66,7 +70,23 @@ public class DataSourceInitializer implements InitializingBean {
 		if (enabled) {
 			Assert.state(dataSource != null, "DataSource must be provided");
 			Assert.state(databasePopulator != null, "DatabasePopulator must be provided");
-			databasePopulator.populate(dataSource.getConnection());
+			try {
+				Connection connection = this.dataSource.getConnection();
+				try {
+					this.databasePopulator.populate(connection);
+				}
+				finally {
+					try {
+						connection.close();
+					}
+					catch (SQLException ex) {
+						// ignore
+					}
+				}
+			}
+			catch (SQLException ex) {
+				throw new DataAccessResourceFailureException("Failed to populate database", ex);
+			}
 		}
 	}
 }
