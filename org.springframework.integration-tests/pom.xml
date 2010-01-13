@@ -4,7 +4,7 @@
   <groupId>org.springframework</groupId>
   <artifactId>spring-integration-tests</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.0.BUILD-SNAPSHOT</version>
+  <version>3.0.1.BUILD-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>com.caucho</groupId>
