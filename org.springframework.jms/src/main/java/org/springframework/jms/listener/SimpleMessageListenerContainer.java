@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,33 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	protected boolean isPubSubNoLocal() {
 		return this.pubSubNoLocal;
+	}
+
+	/**
+	 * Specify concurrency limits via a "lower-upper" String, e.g. "5-10", or a simple
+	 * upper limit String, e.g. "10".
+	 * <p>This listener container will always hold on to the maximum number of
+	 * consumers {@link #setConcurrentConsumers} since it is unable to scale.
+	 * <p>This property is primarily supported for configuration compatibility with
+	 * {@link DefaultMessageListenerContainer}. For this local listener container,
+	 * generally use {@link #setConcurrentConsumers} instead.
+	 */
+	public void setConcurrency(String concurrency) {
+		try {
+			int separatorIndex = concurrency.indexOf('-');
+			if (separatorIndex != -1) {
+				setConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1, concurrency.length())));
+			}
+			else {
+				setConcurrentConsumers(Integer.parseInt(concurrency));
+			}
+		}
+		catch (NumberFormatException ex) {
+			throw new IllegalArgumentException("Invalid concurrency value [" + concurrency + "]: only " +
+					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported. " +
+					"Note that SimpleMessageListenerContainer will effectively ignore the minimum value and " +
+					"always keep a fixed number of consumers according to the maximum value.");
+		}
 	}
 
 	/**

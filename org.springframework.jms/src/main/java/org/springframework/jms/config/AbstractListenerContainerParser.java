@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,30 +268,6 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 	protected boolean indicatesPubSubConfig(BeanDefinition configDef) {
 		return (Boolean) configDef.getPropertyValues().getPropertyValue("pubSubDomain").getValue();
-	}
-
-	protected int[] parseConcurrency(Element ele, ParserContext parserContext) {
-		String concurrency = ele.getAttribute(CONCURRENCY_ATTRIBUTE);
-		if (!StringUtils.hasText(concurrency)) {
-			return null;
-		}
-		try {
-			int separatorIndex = concurrency.indexOf('-');
-			if (separatorIndex != -1) {
-				int[] result = new int[2];
-				result[0] = Integer.parseInt(concurrency.substring(0, separatorIndex));
-				result[1] = Integer.parseInt(concurrency.substring(separatorIndex + 1, concurrency.length()));
-				return result;
-			}
-			else {
-				return new int[] {1, Integer.parseInt(concurrency)};
-			}
-		}
-		catch (NumberFormatException ex) {
-			parserContext.getReaderContext().error("Invalid concurrency value [" + concurrency + "]: only " +
-					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported.", ele, ex);
-			return null;
-		}
 	}
 
 }

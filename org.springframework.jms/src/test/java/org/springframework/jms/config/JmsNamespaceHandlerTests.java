@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,9 +86,13 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		for (DefaultMessageListenerContainer container : containers.values()) {
 			if (container.getConnectionFactory().equals(defaultConnectionFactory)) {
 				defaultConnectionFactoryCount++;
+				assertEquals(2, container.getConcurrentConsumers());
+				assertEquals(3, container.getMaxConcurrentConsumers());
 			}
 			else if (container.getConnectionFactory().equals(explicitConnectionFactory)) {
 				explicitConnectionFactoryCount++;
+				assertEquals(1, container.getConcurrentConsumers());
+				assertEquals(2, container.getMaxConcurrentConsumers());
 			}
 		}
 

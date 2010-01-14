@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,6 +256,31 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		return this.cacheLevel;
 	}
 
+
+	/**
+	 * Specify concurrency limits via a "lower-upper" String, e.g. "5-10", or a simple
+	 * upper limit String, e.g. "10" (the lower limit will be 1 in this case).
+	 * <p>This listener container will always hold on to the minimum number of consumers
+	 * ({@link #setConcurrentConsumers}) and will slowly scale up to the maximum number
+	 * of consumers {@link #setMaxConcurrentConsumers} in case of increasing load.
+	 */
+	public void setConcurrency(String concurrency) {
+		try {
+			int separatorIndex = concurrency.indexOf('-');
+			if (separatorIndex != -1) {
+				setConcurrentConsumers(Integer.parseInt(concurrency.substring(0, separatorIndex)));
+				setMaxConcurrentConsumers(Integer.parseInt(concurrency.substring(separatorIndex + 1, concurrency.length())));
+			}
+			else {
+				setConcurrentConsumers(1);
+				setMaxConcurrentConsumers(Integer.parseInt(concurrency));
+			}
+		}
+		catch (NumberFormatException ex) {
+			throw new IllegalArgumentException("Invalid concurrency value [" + concurrency + "]: only " +
+					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported.");
+		}
+	}
 
 	/**
 	 * Specify the number of concurrent consumers to create. Default is 1.
