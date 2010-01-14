@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.jms.config;
 
 import javax.jms.Session;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
 
 /**
  * Parser for the JMS <code>&lt;listener-container&gt;</code> element.
@@ -107,11 +108,6 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 					new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
-		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
-		if (StringUtils.hasText(phase)) {
-			containerDef.getPropertyValues().add("phase", phase);
-		}
-
 		String cache = containerEle.getAttribute(CACHE_ATTRIBUTE);
 		if (StringUtils.hasText(cache)) {
 			if (containerType.startsWith("simple")) {
@@ -148,15 +144,9 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 			}
 		}
 
-		int[] concurrency = parseConcurrency(containerEle, parserContext);
-		if (concurrency != null) {
-			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().add("concurrentConsumers", concurrency[0]);
-				containerDef.getPropertyValues().add("maxConcurrentConsumers", concurrency[1]);
-			}
-			else {
-				containerDef.getPropertyValues().add("concurrentConsumers", concurrency[1]);
-			}
+		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (StringUtils.hasText(concurrency)) {
+			containerDef.getPropertyValues().add("concurrency", concurrency);
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
@@ -164,6 +154,11 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 			if (containerType.startsWith("default")) {
 				containerDef.getPropertyValues().add("maxMessagesPerTask", new Integer(prefetch));
 			}
+		}
+
+		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
+		if (StringUtils.hasText(phase)) {
+			containerDef.getPropertyValues().add("phase", phase);
 		}
 
 		return containerDef;

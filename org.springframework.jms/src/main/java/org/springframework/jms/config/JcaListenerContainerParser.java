@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.jms.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
 
 /**
  * Parser for the JMS <code>&lt;jca-listener-container&gt;</code> element.
@@ -41,9 +42,8 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 		containerDef.setSource(parserContext.extractSource(containerEle));
 		containerDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsMessageEndpointManager");
 		
-		String resourceAdapterBeanName = "resourceAdapter";
 		if (containerEle.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
-			resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
+			String resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
 			if (!StringUtils.hasText(resourceAdapterBeanName)) {
 				parserContext.getReaderContext().error(
 						"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
@@ -88,19 +88,19 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 					new RuntimeBeanReference(transactionManagerBeanName));
 		}
 
-		int[] concurrency = parseConcurrency(containerEle, parserContext);
-		if (concurrency != null) {
-			configDef.getPropertyValues().add("maxConcurrency", concurrency[1]);
-		}
-
-		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
-		if (StringUtils.hasText(phase)) {
-			containerDef.getPropertyValues().add("phase", phase);
+		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (StringUtils.hasText(concurrency)) {
+			configDef.getPropertyValues().add("concurrency", concurrency);
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
 		if (StringUtils.hasText(prefetch)) {
 			configDef.getPropertyValues().add("prefetchSize", new Integer(prefetch));
+		}
+
+		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
+		if (StringUtils.hasText(phase)) {
+			containerDef.getPropertyValues().add("phase", phase);
 		}
 
 		containerDef.getPropertyValues().add("activationSpecConfig", configDef);
