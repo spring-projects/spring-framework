@@ -264,7 +264,7 @@
     of code was executed against a
     <classname>ClassPathXmlApplicationContext</classname> instance:</para>
 
-    <programlisting language="java">Resource template = ctx.getResource("some/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("some/resource/path/myTemplate.txt");</programlisting>
 
     <para>What would be returned would be a
     <classname>ClassPathResource</classname>; if the same method was executed
@@ -281,15 +281,15 @@
     application context type, by specifying the special
     <literal>classpath:</literal> prefix:</para>
 
-    <programlisting language="java">Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt");</programlisting>
 
     <para>Similarly, one can force a <classname>UrlResource</classname> to be
     used by specifying any of the standard <classname>java.net.URL</classname>
     prefixes:</para>
 
-    <programlisting language="java">Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt");</programlisting>
 
-    <programlisting language="java">Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt);</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");</programlisting>
 
     <para>The following table summarizes the strategy for converting
     <classname>String</classname>s to
