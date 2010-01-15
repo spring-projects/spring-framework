@@ -31,6 +31,7 @@ import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.OrderComparator;
@@ -114,6 +115,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private boolean favorParameter = false;
 
 	private String parameterName = "format";
+	
+	private boolean useNotAcceptableStatusCode = false;
 
 	private boolean ignoreAcceptHeader = false;
 
@@ -124,7 +127,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private MediaType defaultContentType;
 
 	private List<ViewResolver> viewResolvers;
-
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -172,6 +174,20 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 */
 	public void setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
 		this.ignoreAcceptHeader = ignoreAcceptHeader;
+	}
+
+	/**
+	 * Indicates whether a {@link HttpServletResponse#SC_NOT_ACCEPTABLE 406 Not Acceptable} status code should be
+	 * returned if no suitable view can be found.
+	 *
+	 * <p>Default is {@code false}, meaning that this view resolver returns {@code null} for
+	 * {@link #resolveViewName(String, Locale)} when an acceptable view cannot be found. This will allow for view
+	 * resolvers chaining. When this property is set to {@code true}, 
+	 * {@link #resolveViewName(String, Locale)} will respond with a view that sets the response status to
+	 * {@code 406 Not Acceptable} instead.
+	 */
+	public void setUseNotAcceptableStatusCode(boolean useNotAcceptableStatusCode) {
+		this.useNotAcceptableStatusCode = useNotAcceptableStatusCode;
 	}
 
 	/**
@@ -337,7 +353,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			Collections.sort(requestedMediaTypes);
 		}
 
-		SortedMap<MediaType, View> views = new TreeMap<MediaType, View>();
 		List<View> candidateViews = new ArrayList<View>();
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
@@ -349,6 +364,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			candidateViews.addAll(this.defaultViews);
 		}
 
+		SortedMap<MediaType, View> views = new TreeMap<MediaType, View>();
 		for (View candidateView : candidateViews) {
 			String contentType = candidateView.getContentType();
 			if (StringUtils.hasText(contentType)) {
@@ -373,10 +389,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			return view;
 		}
 		else {
-			return null;
+			return useNotAcceptableStatusCode ? new NotAcceptableView() : null;
 		}
 	}
-
 
 	/**
 	 * Inner class to avoid hard-coded JAF dependency.
@@ -421,4 +436,15 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 	}
 
+	private static class NotAcceptableView implements View {
+
+		public String getContentType() {
+			return null;
+		}
+
+		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
+				throws Exception {
+			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+		}
+	}
 }

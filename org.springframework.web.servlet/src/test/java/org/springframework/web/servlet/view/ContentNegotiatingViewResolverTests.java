@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.View;
@@ -301,6 +302,60 @@ public class ContentNegotiatingViewResolverTests {
 
 		View result = viewResolver.resolveViewName(viewName, locale);
 		assertNull("Invalid view", result);
+
+		verify(viewResolverMock, viewMock);
+	}
+
+	@Test
+	public void resolveViewNoMatch() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+		ViewResolver viewResolverMock = createMock(ViewResolver.class);
+		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
+
+		View viewMock = createMock("application_xml", View.class);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(viewResolverMock.resolveViewName(viewName, locale)).andReturn(viewMock);
+		expect(viewMock.getContentType()).andReturn("application/pdf");
+
+		replay(viewResolverMock, viewMock);
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertNull("Invalid view", result);
+
+		verify(viewResolverMock, viewMock);
+	}
+
+	@Test
+	public void resolveViewNoMatchUseUnacceptableStatus() throws Exception {
+		viewResolver.setUseNotAcceptableStatusCode(true);
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test");
+		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+		ViewResolver viewResolverMock = createMock(ViewResolver.class);
+		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
+
+		View viewMock = createMock("application_xml", View.class);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(viewResolverMock.resolveViewName(viewName, locale)).andReturn(viewMock);
+		expect(viewMock.getContentType()).andReturn("application/pdf");
+
+		replay(viewResolverMock, viewMock);
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertNotNull("Invalid view", result);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		result.render(null, request, response);
+		assertEquals("Invalid status code set", 406, response.getStatus());
 
 		verify(viewResolverMock, viewMock);
 	}
