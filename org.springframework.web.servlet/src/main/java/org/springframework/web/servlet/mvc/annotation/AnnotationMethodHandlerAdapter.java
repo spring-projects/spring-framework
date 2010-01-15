@@ -864,6 +864,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
+			else {
+				Collections.sort(acceptedMediaTypes);
+			}
 			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
 			Class<?> returnValueType = returnValue.getClass();
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
@@ -872,7 +875,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 					allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
 					for (MediaType acceptedMediaType : acceptedMediaTypes) {
 						if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
-							messageConverter.write(returnValue, null, outputMessage);
+							messageConverter.write(returnValue, acceptedMediaType, outputMessage);
 							this.responseArgumentUsed = true;
 							return;
 						}

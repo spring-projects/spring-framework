@@ -92,7 +92,26 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * type.
 	 */
 	public boolean canRead(Class<? extends T> clazz, MediaType mediaType) {
-		return supports(clazz) && isSupported(mediaType);
+		return supports(clazz) && canRead(mediaType);
+	}
+
+	/**
+	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List) supported media types} include the given media
+	 * type.
+	 *
+	 * @param mediaType the media type
+	 * @return true if the supported media types include the media type, or if the media type is {@code null}
+	 */
+	protected boolean canRead(MediaType mediaType) {
+		if (mediaType == null) {
+			return true;
+		}
+		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
+			if (supportedMediaType.includes(mediaType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -103,22 +122,22 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * type.
 	 */
 	public boolean canWrite(Class<? extends T> clazz, MediaType mediaType) {
-		return supports(clazz) && isSupported(mediaType);
+		return supports(clazz) && canWrite(mediaType);
 	}
 
 	/**
-	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List) supported media types} include the given media
-	 * type.
+	 * Returns true if the given media type includes any of the
+	 * {@linkplain #setSupportedMediaTypes(List) supported media types}.
 	 *
 	 * @param mediaType the media type
 	 * @return true if the supported media types include the media type, or if the media type is {@code null}
 	 */
-	protected boolean isSupported(MediaType mediaType) {
+	protected boolean canWrite(MediaType mediaType) {
 		if (mediaType == null) {
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			if (supportedMediaType.includes(mediaType)) {
+			if (mediaType.includes(supportedMediaType)) {
 				return true;
 			}
 		}
@@ -165,7 +184,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	public final void write(T t, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 		HttpHeaders headers = outputMessage.getHeaders();
-		if (contentType == null) {
+		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 			contentType = getDefaultContentType(t);
 		}
 		if (contentType != null) {

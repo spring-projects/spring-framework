@@ -37,6 +37,17 @@ public class ByteArrayHttpMessageConverterTests {
 	}
 
 	@Test
+	public void canRead() {
+		assertTrue(converter.canRead(byte[].class, new MediaType("application", "octet-stream")));
+	}
+
+	@Test
+	public void canWrite() {
+		assertTrue(converter.canWrite(byte[].class, new MediaType("application", "octet-stream")));
+		assertTrue(converter.canWrite(byte[].class, MediaType.ALL));
+	}
+
+	@Test
 	public void read() throws IOException {
 		byte[] body = new byte[]{0x1, 0x2};
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);

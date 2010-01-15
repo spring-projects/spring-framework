@@ -89,12 +89,12 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		JavaType javaType = TypeFactory.fromClass(clazz);
-		return objectMapper.canDeserialize(javaType) && isSupported(mediaType);
+		return objectMapper.canDeserialize(javaType) && canRead(mediaType);
 	}
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return objectMapper.canSerialize(clazz) && isSupported(mediaType);
+		return objectMapper.canSerialize(clazz) && canWrite(mediaType);
 	}
 
 	@Override

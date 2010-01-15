@@ -38,6 +38,17 @@ public class StringHttpMessageConverterTests {
 	}
 
 	@Test
+	public void canRead() {
+		assertTrue(converter.canRead(String.class, new MediaType("text", "plain")));
+	}
+
+	@Test
+	public void canWrite() {
+		assertTrue(converter.canWrite(String.class, new MediaType("text", "plain")));
+		assertTrue(converter.canWrite(String.class, MediaType.ALL));
+	}
+
+	@Test
 	public void read() throws IOException {
 		String body = "Hello World";
 		Charset charset = Charset.forName("UTF-8");

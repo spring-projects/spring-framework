@@ -52,12 +52,12 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return (clazz.isAnnotationPresent(XmlRootElement.class) || clazz.isAnnotationPresent(XmlType.class)) &&
-				isSupported(mediaType);
+				canRead(mediaType);
 	}
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null && isSupported(mediaType);
+		return AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null && canWrite(mediaType);
 	}
 
 	@Override
