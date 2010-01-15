@@ -488,6 +488,16 @@ public class AntPathMatcherTests {
 		assertEquals("/hotels/new.*", paths.get(0));
 		assertEquals("/hotels/{hotel}", paths.get(1));
 		paths.clear();
+
+		comparator = pathMatcher.getPatternComparator("/web/endUser/action/login.html");
+		paths.add("/**/login.*");
+		paths.add("/**/endUser/action/login.*");
+		Collections.sort(paths, comparator);
+		assertEquals("/**/endUser/action/login.*", paths.get(0));
+		assertEquals("/**/login.*", paths.get(1));
+		paths.clear();
 	}
+
+
 
 }
