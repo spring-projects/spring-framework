@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1151,17 +1151,17 @@ public class DispatcherServlet extends FrameworkServlet {
 		// or removing the attribute, respectively, if appropriate.
 		for (String attrName : attrsToCheck) {
 			Object attrValue = attributesSnapshot.get(attrName);
-			if (attrValue != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Restoring original value of attribute [" + attrName + "] after include");
-				}
-				request.setAttribute(attrName, attrValue);
-			}
-			else {
+			if (attrValue == null){
 				if (logger.isDebugEnabled()) {
 					logger.debug("Removing attribute [" + attrName + "] after include");
 				}
 				request.removeAttribute(attrName);
+			}
+			else if (attrValue != request.getAttribute(attrName)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Restoring original value of attribute [" + attrName + "] after include");
+				}
+				request.setAttribute(attrName, attrValue);
 			}
 		}
 	}
