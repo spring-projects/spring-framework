@@ -26,9 +26,10 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -120,6 +121,24 @@ class ConfigurationClassEnhancer {
 		Enhancer.registerStaticCallbacks(subclass, this.callbackInstances.toArray(new Callback[this.callbackInstances.size()]));
 		return subclass;
 	}
+	
+	
+	private static class GetObjectMethodInterceptor implements MethodInterceptor {
+		
+		private final ConfigurableBeanFactory beanFactory;
+		private final String beanName;
+
+		public GetObjectMethodInterceptor(ConfigurableBeanFactory beanFactory, String beanName) {
+			this.beanFactory = beanFactory;
+			this.beanName = beanName;
+		}
+
+		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+			System.out.println("intercepting request for getObject()");
+			return beanFactory.getBean(beanName);
+		}
+		
+	}
 
 
 	/**
@@ -161,12 +180,29 @@ class ConfigurationClassEnhancer {
 
 			// to handle the case of an inter-bean method reference, we must explicitly check the
 			// container for already cached instances
+			
+			// first, check to see if the requested bean is a FactoryBean. If so, create a subclass
+			// proxy that intercepts calls to getObject() and returns any cached bean instance.
+			// this ensures that the semantics of calling a FactoryBean from within @Bean methods
+			// is the same as that of referring to a FactoryBean within XML. See SPR-6602.
+			if (factoryContainsBean('&'+beanName) && factoryContainsBean(beanName)) {
+				Object factoryBean = this.beanFactory.getBean('&'+beanName);
+			    if (factoryBean instanceof ScopedProxyFactoryBean) {
+			    	// pass through - scoped proxy factory beans are a special case and should not
+			    	// be further proxied
+			    } else {
+			    	// it is a candidate FactoryBean - go ahead with enhancement
+			    	return enhanceFactoryBean(factoryBean.getClass(), beanName);
+			    }
+			}
+			
+			// the bean is not a FactoryBean - check to see if it has been cached
 			if (factoryContainsBean(beanName)) {
 				// we have an already existing cached instance of this bean -> retrieve it
 				return this.beanFactory.getBean(beanName);
 			}
 
-			// actually create and return the bean
+			// no cached instance of the bean exists - actually create and return the bean
 			return proxy.invokeSuper(obj, args);
 		}
 
@@ -185,6 +221,39 @@ class ConfigurationClassEnhancer {
 		 */
 		private boolean factoryContainsBean(String beanName) {
 			return (this.beanFactory.containsBean(beanName) && !this.beanFactory.isCurrentlyInCreation(beanName));
+		}
+
+		/**
+		 * Create a subclass proxy that intercepts calls to getObject(), delegating to the current BeanFactory
+		 * instead of creating a new instance. These proxies are created only when calling a FactoryBean from
+		 * within a Bean method, allowing for proper scoping semantics even when working against the FactoryBean
+		 * instance directly. If a FactoryBean instance is fetched through the container via &-dereferencing,
+		 * it will not be proxied. This too is aligned with the way XML configuration works.
+		 */
+		private Object enhanceFactoryBean(Class<?> fbClass, String beanName) throws InstantiationException, IllegalAccessException {
+			Enhancer enhancer = new Enhancer();
+			enhancer.setUseCache(false);
+			enhancer.setSuperclass(fbClass);
+			enhancer.setUseFactory(false);
+			enhancer.setCallbackFilter(new CallbackFilter() {
+				public int accept(Method method) {
+					return method.getName().equals("getObject") ? 0 : 1;
+				}
+			});
+			List<Callback> callbackInstances = new ArrayList<Callback>();
+			callbackInstances.add(new GetObjectMethodInterceptor(this.beanFactory, beanName));
+			callbackInstances.add(NoOp.INSTANCE);
+			
+			List<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
+
+			for (Callback callback : callbackInstances) {
+				callbackTypes.add(callback.getClass());
+			}
+			
+			enhancer.setCallbackTypes(callbackTypes.toArray(new Class[callbackTypes.size()]));
+			Class<?> fbSubclass = enhancer.createClass();
+			Enhancer.registerCallbacks(fbSubclass, callbackInstances.toArray(new Callback[callbackInstances.size()]));
+			return fbSubclass.newInstance();
 		}
 
 	}
