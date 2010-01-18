@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import net.sf.cglib.proxy.NoOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -83,7 +85,7 @@ class ConfigurationClassEnhancer {
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
 	 * @return fully-qualified name of the enhanced subclass
 	 */
-	public Class enhance(Class configClass) {
+	public Class<?> enhance(Class<?> configClass) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Enhancing " + configClass.getName());
 		}
@@ -123,6 +125,12 @@ class ConfigurationClassEnhancer {
 	}
 	
 	
+	/**
+	 * Intercepts calls to {@link FactoryBean#getObject()}, delegating to calling
+	 * {@link BeanFactory#getBean(String)} in order to respect caching / scoping.
+	 * @see BeanMethodInterceptor#intercept(Object, Method, Object[], MethodProxy)
+	 * @see BeanMethodInterceptor#enhanceFactoryBean(Class, String)
+	 */
 	private static class GetObjectMethodInterceptor implements MethodInterceptor {
 		
 		private final ConfigurableBeanFactory beanFactory;
@@ -134,7 +142,6 @@ class ConfigurationClassEnhancer {
 		}
 
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			System.out.println("intercepting request for getObject()");
 			return beanFactory.getBean(beanName);
 		}
 		
@@ -245,7 +252,6 @@ class ConfigurationClassEnhancer {
 			callbackInstances.add(NoOp.INSTANCE);
 			
 			List<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
-
 			for (Callback callback : callbackInstances) {
 				callbackTypes.add(callback.getClass());
 			}
