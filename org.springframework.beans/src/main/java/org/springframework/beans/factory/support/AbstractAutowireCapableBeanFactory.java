@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -509,7 +509,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object exposedObject = bean;
 		try {
 			populateBean(beanName, mbd, instanceWrapper);
-			exposedObject = initializeBean(beanName, exposedObject, mbd);
+			if (exposedObject != null) {
+				exposedObject = initializeBean(beanName, exposedObject, mbd);
+			}
 		}
 		catch (Throwable ex) {
 			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
@@ -928,7 +930,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			final BeanFactory parent = this;
 			if (System.getSecurityManager() != null) {
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-	
 					public Object run() {
 						return getInstantiationStrategy().instantiate(mbd, beanName, parent);
 					}
@@ -937,7 +938,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else {
 				beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);
 			}
-			
 			BeanWrapper bw = new BeanWrapperImpl(beanInstance);
 			initBeanWrapper(bw);
 			return bw;
@@ -1376,7 +1376,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
 	protected Object initializeBean(final String beanName, final Object bean, RootBeanDefinition mbd) {
-		
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
@@ -1413,11 +1412,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (bean instanceof BeanNameAware) {
 			((BeanNameAware) bean).setBeanName(beanName);
 		}
-
 		if (bean instanceof BeanClassLoaderAware) {
 			((BeanClassLoaderAware) bean).setBeanClassLoader(getBeanClassLoader());
 		}
-
 		if (bean instanceof BeanFactoryAware) {
 			((BeanFactoryAware) bean).setBeanFactory(AbstractAutowireCapableBeanFactory.this);
 		}
@@ -1443,7 +1440,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking afterPropertiesSet() on bean with name '" + beanName + "'");
 			}
-			
 			if (System.getSecurityManager() != null) {
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
@@ -1451,8 +1447,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 							((InitializingBean) bean).afterPropertiesSet();
 							return null;
 						}
-					},getAccessControlContext());
-				} catch (PrivilegedActionException pae) {
+					}, getAccessControlContext());
+				}
+				catch (PrivilegedActionException pae) {
 					throw pae.getException();
 				}
 			}				
@@ -1508,12 +1505,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					return null;
 				}
 			});
-			
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-					
 					public Object run() throws Exception {
-						initMethod.invoke(bean, (Object[]) null);
+						initMethod.invoke(bean);
 						return null;
 					}
 				}, getAccessControlContext());
@@ -1526,7 +1521,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else {
 			try {
 				ReflectionUtils.makeAccessible(initMethod);
-				initMethod.invoke(bean, (Object[]) null);
+				initMethod.invoke(bean);
 			} 
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,18 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertTrue(bean.initCalled);
 		bf.destroySingletons();
 		assertTrue(bean.destroyCalled);
+	}
+
+	@Test
+	public void testPostProcessorWithNullBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		RootBeanDefinition rbd = new RootBeanDefinition(NullFactory.class);
+		rbd.setFactoryMethodName("create");
+		bf.registerBeanDefinition("bean", rbd);
+
+		assertNull(bf.getBean("bean"));
+		bf.destroySingletons();
 	}
 
 	@Test
@@ -576,6 +588,14 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@Resource(name="testBean9")
 		private INestedTestBean testBean;
+	}
+
+
+	private static class NullFactory {
+
+		public static Object create() {
+			return null;
+		}
 	}
 
 }
