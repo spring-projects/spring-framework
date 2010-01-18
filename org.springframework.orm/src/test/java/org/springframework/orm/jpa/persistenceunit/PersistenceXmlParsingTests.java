@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
+import static org.junit.Assert.*;
 import org.junit.Ignore;
+import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -42,8 +42,9 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
  * 
  * @author Costin Leau
  */
-public class PersistenceXmlParsingTests extends TestCase {
+public class PersistenceXmlParsingTests {
 
+	@Test
 	public void testExample1() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -55,6 +56,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertEquals("OrderManagement", info[0].getPersistenceUnitName());
 	}
 
+	@Test
 	public void testExample2() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -71,6 +73,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertEquals(0, info[0].getProperties().keySet().size());
 	}
 
+	@Test
 	public void testExample3() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -89,6 +92,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertNull(info[0].getNonJtaDataSource());
 	}
 
+	@Test
 	public void testExample4() throws Exception {
 		SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 		DataSource ds = new DriverManagerDataSource();
@@ -125,6 +129,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		builder.clear();
 	}
 
+	@Test
 	public void testExample5() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -147,6 +152,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertEquals(0, info[0].getProperties().keySet().size());
 	}
 
+	@Test
 	public void testExampleComplex() throws Exception {
 		DataSource ds = new DriverManagerDataSource();
 
@@ -210,6 +216,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		*/
 	}
 
+	@Test
 	public void testExample6() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -220,6 +227,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertEquals(0, info[0].getProperties().keySet().size());
 	}
 
+	@Ignore  // not doing schema parsing anymore for JPA 2.0 compatibility
+	@Test
 	public void testInvalidPersistence() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -232,6 +241,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 		}
 	}
 
+	@Ignore  // not doing schema parsing anymore for JPA 2.0 compatibility
+	@Test
 	public void testNoSchemaPersistence() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -244,6 +255,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPersistenceUnitRootUrl() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
@@ -256,6 +268,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertTrue("the containing folder should have been returned", url.toString().endsWith("/org/springframework/orm/jpa/"));
 	}
 	
+	@Test
 	public void testPersistenceUnitRootUrlWithJar() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
