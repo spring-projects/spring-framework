@@ -67,6 +67,7 @@
 			<list>
 				<value>classpath:/org/springframework/web/context/WEB-INF/myplace*.properties</value>
 				<value>classpath:/org/springframework/web/context/WEB-INF/myover*.properties</value>
+				<value>${myDir}/myover*.properties</value>
 			</list>
 		</property>
 	</bean>
