@@ -23,6 +23,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.util.SystemPropertyUtils;
 
@@ -49,6 +52,8 @@ import org.springframework.util.SystemPropertyUtils;
  * @see System#getProperty(String)
  */
 public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
+
+	private static final Log logger = LogFactory.getLog(ResourceArrayPropertyEditor.class);
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
@@ -122,8 +127,10 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 						}
 					}
 					catch (IOException ex) {
-						throw new IllegalArgumentException(
-								"Could not resolve resource location pattern [" + pattern + "]: " + ex.getMessage());
+						// ignore - might be an unresolved placeholder or non-existing base directory
+						if (logger.isDebugEnabled()) {
+							logger.debug("Could not retrieve resources for pattern '" + pattern + "': " + ex);
+						}
 					}
 				}
 				else if (element instanceof Resource) {
