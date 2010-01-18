@@ -22,7 +22,6 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.spi.PersistenceUnitTransactionType;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -68,28 +67,17 @@ class PersistenceUnitReader {
 
 	private static final String TRANSACTION_TYPE = "transaction-type";
 
-	private static final String SHARED_CACHE_MODE = "shared-cache-mode";
-
-	private static final String VALIDATION_MODE = "validation-mode";
-
 	private static final String JTA_DATA_SOURCE = "jta-data-source";
 
 	private static final String NON_JTA_DATA_SOURCE = "non-jta-data-source";
 
 	private static final String EXCLUDE_UNLISTED_CLASSES = "exclude-unlisted-classes";
 
+	private static final String SHARED_CACHE_MODE = "shared-cache-mode";
+
+	private static final String VALIDATION_MODE = "validation-mode";
+
 	private static final String META_INF = "META-INF";
-
-	private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
-
-	private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
-
-	private static final String SCHEMA_NAME = "persistence_1_0.xsd";
-
-	private static final String[] SCHEMA_RESOURCE_LOCATIONS = {
-			"classpath:persistence_1_0.xsd",
-			"classpath:org/hibernate/ejb/persistence_1_0.xsd",
-			"classpath:org/jpox/jpa/persistence_1_0.xsd"};
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -138,7 +126,7 @@ class PersistenceUnitReader {
 					resourceLocation = resource.toString();
 					InputStream stream = resource.getInputStream();
 					try {
-						Document document = validateResource(handler, stream);
+						Document document = buildDocument(handler, stream);
 						parseDocument(resource, document, infos);
 					}
 					finally {
@@ -164,44 +152,14 @@ class PersistenceUnitReader {
 	/**
 	 * Validate the given stream and return a valid DOM document for parsing.
 	 */
-	protected Document validateResource(ErrorHandler handler, InputStream stream)
+	protected Document buildDocument(ErrorHandler handler, InputStream stream)
 			throws ParserConfigurationException, SAXException, IOException {
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
-
-		// Set schema location only if we found one inside the classpath.
-		Resource schemaLocation = findSchemaResource();
-		if (schemaLocation != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found schema resource: " + schemaLocation.getURL());
-			}
-			dbf.setValidating(true);
-			dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-			dbf.setAttribute(JAXP_SCHEMA_SOURCE, schemaLocation.getURL().toString());
-		}
-		else {
-			logger.debug("Schema resource [" + SCHEMA_NAME +
-					"] not found - falling back to XML parsing without schema validation");
-		}
-
 		DocumentBuilder parser = dbf.newDocumentBuilder();
 		parser.setErrorHandler(handler);
 		return parser.parse(stream);
-	}
-
-	/**
-	 * Try to locate the schema first in the class path before using the URL specified inside the XML.
-	 * @return an existing resource, or <code>null</code> if none found
-	 */
-	protected Resource findSchemaResource() {
-		for (String location : SCHEMA_RESOURCE_LOCATIONS) {
-			Resource schemaLocation = this.resourcePatternResolver.getResource(location);
-			if (schemaLocation.exists()) {
-				return schemaLocation;
-			}
-		}
-		return null;
 	}
 
 
@@ -278,18 +236,6 @@ class PersistenceUnitReader {
 			unitInfo.setTransactionType(PersistenceUnitTransactionType.valueOf(txType));
 		}
 
-		// set JPA 2.0 shared cache mode
-		String cacheMode = persistenceUnit.getAttribute(SHARED_CACHE_MODE).trim();
-		if (StringUtils.hasText(cacheMode)) {
-			unitInfo.setSharedCacheModeName(cacheMode);
-		}
-
-		// set JPA 2.0 validation mode
-		String validationMode = persistenceUnit.getAttribute(VALIDATION_MODE).trim();
-		if (StringUtils.hasText(validationMode)) {
-			unitInfo.setValidationModeName(validationMode);
-		}
-
 		// data-source
 		String jtaDataSource = DomUtils.getChildElementValueByTagName(persistenceUnit, JTA_DATA_SOURCE);
 		if (StringUtils.hasText(jtaDataSource)) {
@@ -311,6 +257,18 @@ class PersistenceUnitReader {
 		Element excludeUnlistedClasses = DomUtils.getChildElementByTagName(persistenceUnit, EXCLUDE_UNLISTED_CLASSES);
 		if (excludeUnlistedClasses != null) {
 			unitInfo.setExcludeUnlistedClasses(true);
+		}
+
+		// set JPA 2.0 shared cache mode
+		String cacheMode = DomUtils.getChildElementValueByTagName(persistenceUnit, SHARED_CACHE_MODE);
+		if (StringUtils.hasText(cacheMode)) {
+			unitInfo.setSharedCacheModeName(cacheMode);
+		}
+
+		// set JPA 2.0 validation mode
+		String validationMode = DomUtils.getChildElementValueByTagName(persistenceUnit, VALIDATION_MODE);
+		if (StringUtils.hasText(validationMode)) {
+			unitInfo.setValidationModeName(validationMode);
 		}
 
 		parseMappingFiles(persistenceUnit, unitInfo);
