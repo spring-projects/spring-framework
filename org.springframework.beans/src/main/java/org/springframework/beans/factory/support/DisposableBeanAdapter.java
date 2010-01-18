@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Adapter that implements the {@link DisposableBean} interface
+ * Adapter that implements the {@link DisposableBean} and {@link Runnable} interfaces
  * performing various destruction steps on a given bean instance:
  * <ul>
- * <li>DestructionAwareBeanPostProcessors
- * <li>the bean implementing DisposableBean itself
- * <li>a custom destroy method specified on the bean definition
+ * <li>DestructionAwareBeanPostProcessors;
+ * <li>the bean implementing DisposableBean itself;
+ * <li>a custom destroy method specified on the bean definition.
  * </ul>
  *
  * @author Juergen Hoeller
@@ -83,10 +83,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param postProcessors the List of BeanPostProcessors
 	 * (potentially DestructionAwareBeanPostProcessor), if any
 	 */
-	public DisposableBeanAdapter(final Object bean, String beanName, RootBeanDefinition beanDefinition,
+	public DisposableBeanAdapter(Object bean, String beanName, RootBeanDefinition beanDefinition,
 			List<BeanPostProcessor> postProcessors, AccessControlContext acc) {
 
-		Assert.notNull(bean, "Bean must not be null");
+		Assert.notNull(bean, "Disposable bean must not be null");
 		this.bean = bean;
 		this.beanName = beanName;
 		this.invokeDisposableBean =

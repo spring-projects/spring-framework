@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1410,8 +1410,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
 	 */
 	protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
-		return (bean instanceof DisposableBean || mbd.getDestroyMethodName() != null ||
-				hasDestructionAwareBeanPostProcessors());
+		return (bean != null &&
+				(bean instanceof DisposableBean || mbd.getDestroyMethodName() != null ||
+						hasDestructionAwareBeanPostProcessors()));
 	}
 
 	/**
