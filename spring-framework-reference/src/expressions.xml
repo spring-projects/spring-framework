@@ -476,7 +476,7 @@ Boolean b = simple.booleanList.get(0);
       <para>The types of literal expressions supported are strings, dates,
       numeric values (int, real, and hex), boolean and null. Strings are
       delimited by single quotes. To put a single quote itself in a string use
-      the backslash character. The following listing shows simple usage of
+      two single quote characters. The following listing shows simple usage of
       literals. Typically they would not be used in isolation like this, but
       as part of a more complex expression, for example using a literal on one
       side of a logical comparison operator.</para>
