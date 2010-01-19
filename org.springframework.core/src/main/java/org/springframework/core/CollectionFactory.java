@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
- * Factory for collections, being aware of Commons Collection 3.x's extended
- * collections as well as of JDK 1.5+ concurrent collections.
+ * Factory for collections, being aware of Java 5 and Java 6 collections.
  * Mainly for internal use within the framework.
  *
- * <p>The goal of this class is to avoid runtime dependencies on JDK 1.5+ and
- * Commons Collections 3.x, simply using the best collection implementation
+ * <p>The goal of this class is to avoid runtime dependencies on a specific
+ * Java version, while nevertheless using the best collection implementation
  * that is available at runtime.
  *
  * @author Juergen Hoeller
