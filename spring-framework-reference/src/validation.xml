@@ -851,7 +851,7 @@ package org.springframework.core.convert.converter;
 
 public interface GenericConverter {
 
-    public Class<?>[][] getConvertibleTypes();
+    public Set<ConvertiblePair> getConvertibleTypes();
 
     Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
