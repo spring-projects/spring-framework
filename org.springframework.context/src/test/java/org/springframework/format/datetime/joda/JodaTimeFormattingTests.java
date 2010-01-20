@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.format.datetime.joda;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.joda.time.DateTime;
@@ -55,7 +57,9 @@ public class JodaTimeFormattingTests {
 		JodaTimeFormattingConfigurer configurer = new JodaTimeFormattingConfigurer();
 		configurer.installJodaTimeFormatting(conversionService);
 
-		binder = new DataBinder(new JodaTimeBean());
+		JodaTimeBean bean = new JodaTimeBean();
+		bean.getChildren().add(new JodaTimeBean());
+		binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
 
 		LocaleContextHolder.setLocale(Locale.US);
@@ -90,7 +94,7 @@ public class JodaTimeFormattingTests {
 	@Test
 	public void testBindLocalDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDate", new String[] { "10/31/09" });
+		propertyValues.add("localDate", new String[] {"10/31/09"});
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 	}
@@ -102,6 +106,15 @@ public class JodaTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("Oct 31, 2009", binder.getBindingResult().getFieldValue("localDateAnnotated"));
+	}
+
+	@Test
+	public void testBindNestedLocalDateAnnotated() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("children[0].localDateAnnotated", "Oct 31, 2009");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("Oct 31, 2009", binder.getBindingResult().getFieldValue("children[0].localDateAnnotated"));
 	}
 
 	@Test
@@ -337,6 +350,8 @@ public class JodaTimeFormattingTests {
 		@DateTimeFormat(iso=ISO.DATE_TIME)
 		private DateTime isoDateTime;
 
+		private final List<JodaTimeBean> children = new ArrayList<JodaTimeBean>();
+
 		public LocalDate getLocalDate() {
 			return localDate;
 		}
@@ -496,6 +511,10 @@ public class JodaTimeFormattingTests {
 		public void setIsoDateTime(DateTime isoDateTime) {
 			this.isoDateTime = isoDateTime;
 		}
-		
+
+		public List<JodaTimeBean> getChildren() {
+			return children;
+		}
 	}
+
 }
