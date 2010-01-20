@@ -355,7 +355,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			String actualPropertyName = PropertyAccessorUtils.getPropertyName(propertyName);
+			PropertyDescriptor pd = getPropertyDescriptorInternal(actualPropertyName);
 			if (pd != null) {
 				Class type = getPropertyType(propertyName);
 				if (pd.getReadMethod() != null) {

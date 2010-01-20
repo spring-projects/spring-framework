@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ public abstract class PropertyAccessorUtils {
 	 * @return the actual property name, without any key elements
 	 */
 	public static String getPropertyName(String propertyPath) {
-		int separatorIndex = propertyPath.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR);
+		int separatorIndex = (propertyPath.endsWith(PropertyAccessor.PROPERTY_KEY_SUFFIX) ?
+				propertyPath.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR) : -1);
 		return (separatorIndex != -1 ? propertyPath.substring(0, separatorIndex) : propertyPath);
 	}
 
