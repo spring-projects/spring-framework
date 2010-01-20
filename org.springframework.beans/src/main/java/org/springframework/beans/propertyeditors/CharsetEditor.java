@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import java.nio.charset.Charset;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for {@link Charset}, to directly populate a Charset property.
+ * Editor for <code>java.nio.charset.Charset<code>, translating charset
+ * String representations into Charset objects and back.
  *
  * <p>Expects the same syntax as Charset's {@link java.nio.charset.Charset#name()},
  * e.g. <code>UTF-8</code>, <code>ISO-8859-16</code>, etc.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
@@ -61,6 +62,7 @@ import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.TimeZoneEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.beans.propertyeditors.UUIDEditor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
@@ -174,6 +176,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(TimeZone.class, new TimeZoneEditor());
 		this.defaultEditors.put(URI.class, new URIEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
+		this.defaultEditors.put(UUID.class, new UUIDEditor());
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
