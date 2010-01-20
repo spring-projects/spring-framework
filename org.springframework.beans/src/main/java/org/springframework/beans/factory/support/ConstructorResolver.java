@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,7 @@ class ConstructorResolver {
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor> ambiguousConstructors = null;
+			List<Exception> causes = null;
 
 			for (int i = 0; i < candidates.length; i++) {
 				Constructor<?> candidate = candidates[i];
@@ -175,8 +176,6 @@ class ConstructorResolver {
 				}
 
 				ArgumentsHolder args;
-				List<Exception> causes = null;
-
 				if (resolvedValues != null) {
 					try {
 						String[] paramNames = null;
@@ -215,7 +214,6 @@ class ConstructorResolver {
 						}
 					}
 				}
-
 				else {
 					// Explicit arguments given -> arguments length must match exactly.
 					if (paramTypes.length != explicitArgs.length) {
@@ -383,7 +381,7 @@ class ConstructorResolver {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
-			Method[] rawCandidates = null; 
+			Method[] rawCandidates;
 
 			final Class factoryClazz = factoryClass;
 			if (System.getSecurityManager() != null) {
