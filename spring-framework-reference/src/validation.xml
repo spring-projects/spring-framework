@@ -1297,7 +1297,8 @@ public class PersonForm {
 			<para>
 				Spring provides full support for the JSR-303 Bean Validation API.
 				This includes convenient support for bootstrapping a JSR-303 implementation as a Spring bean.
-				This allows a <code>javax.validation.Validator</code> to be injected wherever validation is needed in your application.
+				This allows for a <code>javax.validation.ValidatorFactory</code> or <code>javax.validation.Validator</code>
+				to be injected wherever validation is needed in your application.
 			</para>
 			<para>
 				Use the <classname>LocalValidatorFactoryBean</classname> to configure a default JSR-303 Validator as a Spring bean:					
@@ -1312,8 +1313,9 @@ public class PersonForm {
 			<section id="validation-beanvalidation-spring-inject">
 				<title>Injecting a Validator</title>
 				<para>
-					<classname>LocalValidatorFactoryBean</classname> implements both <code>javax.validation.Validator</code> and <code>org.springframework.validation.Validator</code>.
-					You may inject a reference to one of these two interfaces into beans that need to invoke validation logic.
+					<classname>LocalValidatorFactoryBean</classname> implements both <code>javax.validation.ValidatorFactory</code>
+					and <code>javax.validation.Validator</code>, as well as Spring's <code>org.springframework.validation.Validator</code>.
+					You may inject a reference to either of these interfaces into beans that need to invoke validation logic.
 				</para>
 				<para>
 					Inject a reference to <code>javax.validation.Validator</code> if you prefer to work with the JSR-303 API directly:
