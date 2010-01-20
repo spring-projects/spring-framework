@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,9 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.SessionScope;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * Convenience methods for retrieving the root
@@ -153,6 +155,7 @@ public abstract class WebApplicationContextUtils {
 
 		beanFactory.registerResolvableDependency(ServletRequest.class, new RequestObjectFactory());
 		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
+		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
 		if (jsfPresent) {
 			FacesDependencyRegistrar.registerFacesDependencies(beanFactory);
 		}
@@ -220,6 +223,18 @@ public abstract class WebApplicationContextUtils {
 		}
 	}
 
+	/**
+	 * Return the current RequestAttributes instance as ServletRequestAttributes.
+	 * @see RequestContextHolder#currentRequestAttributes()
+	 */
+	private static ServletRequestAttributes currentRequestAttributes() {
+		RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
+		if (!(requestAttr instanceof ServletRequestAttributes)) {
+			throw new IllegalStateException("Current request is not a servlet request");
+		}
+		return (ServletRequestAttributes) requestAttr;
+	}
+
 
 	/**
 	 * Factory that exposes the current request object on demand.
@@ -227,11 +242,7 @@ public abstract class WebApplicationContextUtils {
 	private static class RequestObjectFactory implements ObjectFactory<ServletRequest>, Serializable {
 
 		public ServletRequest getObject() {
-			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-			if (!(requestAttr instanceof ServletRequestAttributes)) {
-				throw new IllegalStateException("Current request is not a servlet request");
-			}
-			return ((ServletRequestAttributes) requestAttr).getRequest();
+			return currentRequestAttributes().getRequest();
 		}
 
 		@Override
@@ -247,16 +258,28 @@ public abstract class WebApplicationContextUtils {
 	private static class SessionObjectFactory implements ObjectFactory<HttpSession>, Serializable {
 
 		public HttpSession getObject() {
-			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-			if (!(requestAttr instanceof ServletRequestAttributes)) {
-				throw new IllegalStateException("Current request is not a servlet request");
-			}
-			return ((ServletRequestAttributes) requestAttr).getRequest().getSession();
+			return currentRequestAttributes().getRequest().getSession();
 		}
 
 		@Override
 		public String toString() {
 			return "Current HttpSession";
+		}
+	}
+
+
+	/**
+	 * Factory that exposes the current WebRequest object on demand.
+	 */
+	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
+
+		public WebRequest getObject() {
+			return new ServletWebRequest(currentRequestAttributes().getRequest());
+		}
+
+		@Override
+		public String toString() {
+			return "Current ServletWebRequest";
 		}
 	}
 
@@ -271,10 +294,18 @@ public abstract class WebApplicationContextUtils {
 				public FacesContext getObject() {
 					return FacesContext.getCurrentInstance();
 				}
+				@Override
+				public String toString() {
+					return "Current JSF FacesContext";
+				}
 			});
 			beanFactory.registerResolvableDependency(ExternalContext.class, new ObjectFactory<ExternalContext>() {
 				public ExternalContext getObject() {
 					return FacesContext.getCurrentInstance().getExternalContext();
+				}
+				@Override
+				public String toString() {
+					return "Current JSF ExternalContext";
 				}
 			});
 		}

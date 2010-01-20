@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.SessionScope;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * Convenience methods for retrieving the root WebApplicationContext for a given
@@ -123,6 +124,7 @@ public abstract class PortletApplicationContextUtils {
 
 		beanFactory.registerResolvableDependency(PortletRequest.class, new RequestObjectFactory());
 		beanFactory.registerResolvableDependency(PortletSession.class, new SessionObjectFactory());
+		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
 	}
 
 	/**
@@ -182,6 +184,18 @@ public abstract class PortletApplicationContextUtils {
 		}
 	}
 
+	/**
+	 * Return the current RequestAttributes instance as PortletRequestAttributes.
+	 * @see RequestContextHolder#currentRequestAttributes()
+	 */
+	private static PortletRequestAttributes currentRequestAttributes() {
+		RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
+		if (!(requestAttr instanceof PortletRequestAttributes)) {
+			throw new IllegalStateException("Current request is not a portlet request");
+		}
+		return (PortletRequestAttributes) requestAttr;
+	}
+
 
 	/**
 	 * Factory that exposes the current request object on demand.
@@ -189,11 +203,7 @@ public abstract class PortletApplicationContextUtils {
 	private static class RequestObjectFactory implements ObjectFactory<PortletRequest>, Serializable {
 
 		public PortletRequest getObject() {
-			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-			if (!(requestAttr instanceof PortletRequestAttributes)) {
-				throw new IllegalStateException("Current request is not a portlet request");
-			}
-			return ((PortletRequestAttributes) requestAttr).getRequest();
+			return currentRequestAttributes().getRequest();
 		}
 
 		@Override
@@ -209,16 +219,28 @@ public abstract class PortletApplicationContextUtils {
 	private static class SessionObjectFactory implements ObjectFactory<PortletSession>, Serializable {
 
 		public PortletSession getObject() {
-			RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-			if (!(requestAttr instanceof PortletRequestAttributes)) {
-				throw new IllegalStateException("Current request is not a portlet request");
-			}
-			return ((PortletRequestAttributes) requestAttr).getRequest().getPortletSession();
+			return currentRequestAttributes().getRequest().getPortletSession();
 		}
 
 		@Override
 		public String toString() {
 			return "Current PortletSession";
+		}
+	}
+
+
+	/**
+	 * Factory that exposes the current WebRequest object on demand.
+	 */
+	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
+
+		public WebRequest getObject() {
+			return new PortletWebRequest(currentRequestAttributes().getRequest());
+		}
+
+		@Override
+		public String toString() {
+			return "Current PortletWebRequest";
 		}
 	}
 
