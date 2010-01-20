@@ -160,14 +160,11 @@
           <para>One obvious way to specify static pointcuts is regular
           expressions. Several AOP frameworks besides Spring make this
           possible.
-          <literal>org.springframework.aop.support.Perl5RegexpMethodPointcut</literal>
-          is a generic regular expression pointcut, using Perl 5 regular
-          expression syntax. The <literal>Perl5RegexpMethodPointcut</literal>
-          class depends on Jakarta ORO for regular expression matching. Spring
-          also provides the <literal>JdkRegexpMethodPointcut</literal> class
-          that uses the regular expression support in JDK 1.4+.</para>
+          <literal>org.springframework.aop.support.JdkRegexpMethodPointcut</literal>
+          is a generic regular expression pointcut, using the regular
+          expression support in JDK 1.4+.</para>
 
-          <para>Using the <literal>Perl5RegexpMethodPointcut</literal> class,
+          <para>Using the <literal>JdkRegexpMethodPointcut</literal> class,
           you can provide a list of pattern Strings. If any of these is a
           match, the pointcut will evaluate to true. (So the result is
           effectively the union of these pointcuts.)</para>
@@ -175,7 +172,7 @@
           <para>The usage is shown below:</para>
 
           <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulatePointcut" 
-    class="org.springframework.aop.support.Perl5RegexpMethodPointcut"&gt;
+    class="org.springframework.aop.support.JdkRegexpMethodPointcut"&gt;
     &lt;property name="patterns"&gt;
         &lt;list&gt;
             &lt;value&gt;.*set.*&lt;/value&gt;
