@@ -636,18 +636,8 @@ package example;
 
 public class ExoticTypeEditor extends PropertyEditorSupport {
 
-    private String format;
-
-    public void setFormat(String format) {
-        this.format = format;
-    }
-    
     public void setAsText(String text) {
-        if (format != null && format.equals("upperCase")) {
-            text = text.toUpperCase();
-        }
-        ExoticType type = new ExoticType(text);
-        setValue(type);
+        setValue(new ExoticType(text.toUpperCase()));
     }
 }]]></programlisting>
 			<para>Finally, we use <classname>CustomEditorConfigurer</classname> to register the new
@@ -656,11 +646,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 			<programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
   <property name="customEditors">
     <map>
-      <entry key="example.ExoticType">
-        <bean class="example.ExoticTypeEditor">
-          <property name="format" value="upperCase"/>
-        </bean>
-      </entry>
+      <entry key="example.ExoticType" value="example.ExoticTypeEditor"/>
     </map>
   </property>
 </bean>]]></programlisting>
