@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,7 +283,8 @@ public abstract class SharedEntityManagerCreator {
 
 			// Invoke method on actual Query object.
 			try {
-				return method.invoke(this.target, args);
+				Object retVal = method.invoke(this.target, args);
+				return (retVal == this.target ? proxy : retVal);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
