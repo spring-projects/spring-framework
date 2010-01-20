@@ -904,16 +904,6 @@ public interface IntroductionInfo {
           <literal>true</literal>, the target can use the
           <methodname>AopContext.currentProxy()</methodname> method.</para>
         </listitem>
-
-        <listitem>
-          <para><literal>aopProxyFactory</literal>: the implementation of
-          <interfacename>AopProxyFactory</interfacename> to use. Offers a way
-          of customizing whether to use dynamic proxies, CGLIB or any other
-          proxy strategy. The default implementation will choose dynamic
-          proxies or CGLIB appropriately. There should be no need to use this
-          property; it is intended to allow the addition of new proxy types in
-          Spring 1.1.</para>
-        </listitem>
       </itemizedlist>
 
       <para>Other properties specific to
@@ -1293,7 +1283,7 @@ public interface IntroductionInfo {
     target object will automatically be proxied:</para>
 
     <para><programlisting language="java">ProxyFactory factory = new ProxyFactory(myBusinessInterfaceImpl);
-factory.addInterceptor(myMethodInterceptor);
+factory.addAdvice(myMethodInterceptor);
 factory.addAdvisor(myAdvisor);
 MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisting></para>
 
@@ -1302,10 +1292,10 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
     create this with a target object, as in the above example, or specify the
     interfaces to be proxied in an alternate constructor.</para>
 
-    <para>You can add interceptors or advisors, and manipulate them for the
-    life of the ProxyFactory. If you add an
-    IntroductionInterceptionAroundAdvisor you can cause the proxy to implement
-    additional interfaces.</para>
+    <para>You can add advices (with interceptors as a specialized kind of advice)
+    and/or advisors, and manipulate them for the life of the ProxyFactory.
+    If you add an IntroductionInterceptionAroundAdvisor, you can cause the proxy
+    to implement additional interfaces.</para>
 
     <para>There are also convenience methods on ProxyFactory (inherited from
     <classname>AdvisedSupport</classname>) which allow you to add other advice
