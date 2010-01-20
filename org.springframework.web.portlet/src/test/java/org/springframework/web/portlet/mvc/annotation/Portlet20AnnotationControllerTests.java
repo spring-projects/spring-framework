@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -902,9 +902,12 @@ public class Portlet20AnnotationControllerTests {
 		@Autowired
 		private PortletRequest request;
 
+		@Autowired
+		private WebRequest webRequest;
+
 		@RenderMapping
 		public void myHandle(RenderResponse response) throws IOException {
-			if (this.portletContext == null || this.session == null || this.request == null) {
+			if (this.portletContext == null || this.session == null || this.request == null || this.webRequest == null) {
 				throw new IllegalStateException();
 			}
 			response.getWriter().write("myView");

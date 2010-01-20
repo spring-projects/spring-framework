@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -612,6 +612,7 @@ public class ServletAnnotationControllerTests {
 		assertSame(servletConfig, request.getAttribute("servletConfig"));
 		assertSame(session.getId(), request.getAttribute("sessionId"));
 		assertSame(request.getRequestURI(), request.getAttribute("requestUri"));
+		assertSame(request.getLocale(), request.getAttribute("locale"));
 
 		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		response = new MockHttpServletResponse();
@@ -1652,10 +1653,13 @@ public class ServletAnnotationControllerTests {
 		@Autowired
 		private HttpServletRequest request;
 
+		@Autowired
+		private WebRequest webRequest;
+
 		@RequestMapping
 		public void myHandle(HttpServletResponse response, HttpServletRequest request) throws IOException {
 			if (this.servletContext == null || this.servletConfig == null || this.session == null ||
-					this.request == null) {
+					this.request == null || this.webRequest == null) {
 				throw new IllegalStateException();
 			}
 			response.getWriter().write("myView");
@@ -1663,6 +1667,7 @@ public class ServletAnnotationControllerTests {
 			request.setAttribute("servletConfig", this.servletConfig);
 			request.setAttribute("sessionId", this.session.getId());
 			request.setAttribute("requestUri", this.request.getRequestURI());
+			request.setAttribute("locale", this.webRequest.getLocale());
 		}
 
 		@RequestMapping(params = {"view", "!lang"})
