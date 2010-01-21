@@ -3115,8 +3115,8 @@ public class Account {
       <emphasis>without making any modifications to the application server's
       launch script</emphasis> that will be needed to add
       <literal>-javaagent:path/to/aspectjweaver.jar</literal> or (as we describe later in this
-      section) <literal>-javaagent:path/to/spring-instrument.jar</literal> (previously named
-      <literal>spring-agent.jar</literal>). Developers simply modify
+      section) <literal>-javaagent:path/to/org.springframework.instrument-{version}.jar</literal> 
+      (previously named <literal>spring-agent.jar</literal>). Developers simply modify
       one or more files that form the application context to enable load-time
       weaving instead of relying on administrators who typically are in charge
       of the deployment configuration such as the launch script.</para>

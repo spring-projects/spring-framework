@@ -1631,7 +1631,8 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*.--></para>
           a JDK agent can be the only solution. For such cases, Spring
           provides <classname>InstrumentationLoadTimeWeaver,</classname> which
           requires a Spring-specific (but very general) VM agent, <filename
-          class="libraryfile">spring-agent.jar</filename>:</para>
+          class="libraryfile">org.springframework.instrument-{version}.jar</filename> (previously named <filename
+          class="libraryfile">spring-agent.jar</filename>):</para>
 
           <programlisting language="xml">&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;
@@ -1642,15 +1643,16 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*.--></para>
           <para>You must start the virtual machine with the Spring agent, by
           supplying the following JVM options:</para>
 
-          <programlisting>-javaagent:/path/to/spring-agent.jar</programlisting>
+          <programlisting>-javaagent:/path/to/org.springframework.instrument-{version}.jar</programlisting>
         </section>
 
         <section id="orm-jpa-setup-lcemfb-weaver">
           <title>Context-wide load-time weaver setup</title>
 
-          <para>In Spring 2.5 and later, you can configure a context-wide
+          <para>You can configure a context-wide
           <interfacename>LoadTimeWeaver</interfacename> using the
-          <literal>context:load-time-weaver</literal> configuration element.
+          <literal>context:load-time-weaver</literal> configuration element. (This 
+          has been available since Spring 2.5.)  
           Such a global weaver is picked up by all JPA
           <classname>LocalContainerEntityManagerFactoryBeans</classname>
           automatically.</para>
