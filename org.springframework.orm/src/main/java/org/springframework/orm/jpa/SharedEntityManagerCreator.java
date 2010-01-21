@@ -28,6 +28,7 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -130,9 +131,17 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Map properties;
 
+		private final ClassLoader proxyClassLoader;
+
 		public SharedEntityManagerInvocationHandler(EntityManagerFactory target, Map properties) {
 			this.targetFactory = target;
 			this.properties = properties;
+			if (this.targetFactory instanceof EntityManagerFactoryInfo) {
+				this.proxyClassLoader = ((EntityManagerFactoryInfo) this.targetFactory).getBeanClassLoader();
+			}
+			else {
+				this.proxyClassLoader = EntityManagerFactory.class.getClassLoader();
+			}
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -225,7 +234,8 @@ public abstract class SharedEntityManagerCreator {
 				if (result instanceof Query) {
 					Query query = (Query) result;
 					if (isNewEm) {
-						result = Proxy.newProxyInstance(Query.class.getClassLoader(), new Class[] {Query.class},
+						Class[] ifcs = ClassUtils.getAllInterfacesForClass(query.getClass(), this.proxyClassLoader);
+						result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs,
 								new DeferredQueryInvocationHandler(query, target));
 						isNewEm = false;
 					}
@@ -257,7 +267,7 @@ public abstract class SharedEntityManagerCreator {
 
 		private final EntityManager em;
 
-		private DeferredQueryInvocationHandler(Query target, EntityManager em) {
+		public DeferredQueryInvocationHandler(Query target, EntityManager em) {
 			this.target = target;
 			this.em = em;
 		}
