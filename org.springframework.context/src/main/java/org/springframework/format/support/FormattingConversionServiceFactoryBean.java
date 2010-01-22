@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class FormattingConversionServiceFactoryBean
 	private static final boolean jodaTimePresent = ClassUtils.isPresent(
 			"org.joda.time.DateTime", FormattingConversionService.class.getClassLoader());
 
-	private Set<Object> converters;
+	private Set<?> converters;
 
 	private FormattingConversionService conversionService;
 
@@ -62,7 +62,7 @@ public class FormattingConversionServiceFactoryBean
 	 * {@link org.springframework.core.convert.converter.ConverterFactory},
 	 * or {@link org.springframework.core.convert.converter.GenericConverter}.
 	 */
-	public void setConverters(Set<Object> converters) {
+	public void setConverters(Set<?> converters) {
 		this.converters = converters;
 	}
 
