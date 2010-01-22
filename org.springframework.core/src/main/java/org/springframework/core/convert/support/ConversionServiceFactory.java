@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public abstract class ConversionServiceFactory {
 	 * {@link ConverterFactory}, or {@link GenericConverter}
 	 * @param registry the target registry to register with
 	 */
-	public static void registerConverters(Set<Object> converters, ConverterRegistry registry) {
+	public static void registerConverters(Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
 			for (Object converter : converters) {
 				if (converter instanceof GenericConverter) {
