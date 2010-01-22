@@ -14,8 +14,6 @@
 	</configurations>
 
 	<publications>
-		<artifact name="${ant.project.name}"/>
-		<artifact name="${ant.project.name}-sources" type="src" ext="jar"/>
 	</publications>
 
 </ivy-module>

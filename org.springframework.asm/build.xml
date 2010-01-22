@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="org.springframework.asm" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="org.springframework.asm" xmlns:ivy="antlib:org.apache.ivy.ant"
+		xmlns:bundlor="antlib:com.springsource.bundlor.ant">
 	<property file="${basedir}/../build.properties"/>
 	<import file="${basedir}/../build-spring-framework/package-bundle.xml"/>
 	<import file="${basedir}/../spring-build/standard/default.xml"/>
@@ -45,4 +46,14 @@
 		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="jarjar.classpath"/>
 	</target>
 
+	<target name="bundlor" depends="bundlor.init" unless="disable.bundlor">
+		<bundlor:bundlor inputPath="${jar.output.file}" outputPath="${jar.output.file}"
+				bundleVersion="${bundle.version}" manifestTemplatePath="${manifest.template.file}"
+				failOnWarnings="${fail.on.warnings}">
+			<propertyset refid="bundlor.properties"/>
+			<propertyset>
+				<propertyref builtin="all"/>
+			</propertyset>
+		</bundlor:bundlor>
+	</target>
 </project>
