@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="package-bundle">
 
-        <import file="publish-maven.xml"/>
-
 	<target name="package" depends="ivy.init">
 		<dist-jar/>
 		<src-jar/>

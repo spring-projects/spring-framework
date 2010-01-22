@@ -254,4 +254,15 @@
     </plugins>
   </build>
 
+	<distributionManagement>
+		<repository>
+			<id>staging</id>
+			<url>file:///${user.dir}/target/staging</url>
+		</repository>
+		<snapshotRepository>
+			<id>staging</id>
+			<url>file:///${user.dir}/target/staging</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>

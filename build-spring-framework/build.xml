@@ -2,6 +2,7 @@
 <project name="build-spring-framework" default="precommit">
 
 	<path id="bundles">
+		<pathelement location="../org.springframework.spring-parent"/>
 		<pathelement location="../org.springframework.instrument"/>
 		<pathelement location="../org.springframework.instrument.tomcat"/>
 		<pathelement location="../org.springframework.asm"/>
