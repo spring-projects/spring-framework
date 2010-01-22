@@ -1497,8 +1497,8 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
 
             <orderedlist>
               <listitem>
-                <para>Copy <literal>spring-tomcat-weaver.jar</literal> into
-                <emphasis>$CATALINA_HOME</emphasis>/server/lib,where
+                <para>Copy <literal>org.springframework.instrument.tomcat.jar</literal>
+                into <emphasis>$CATALINA_HOME</emphasis>/server/lib,where
                 <emphasis>$CATALINA_HOME</emphasis> represents the root of the
                 Tomcat installation.</para>
               </listitem>
@@ -1558,8 +1558,8 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
 
             <orderedlist>
               <listitem>
-                <para>Copy <literal>spring-tomcat-weaver.jar</literal> into
-                <emphasis>$CATALINA_HOME</emphasis>/lib, where
+                <para>Copy <literal>org.springframework.instrument.tomcat.jar</literal>
+                into <emphasis>$CATALINA_HOME</emphasis>/lib, where
                 <emphasis>$CATALINA_HOME</emphasis> represents the root of the
                 Tomcat installation)</para>
               </listitem>
@@ -1629,10 +1629,10 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*.--></para>
           not supported by the existing <classname>LoadTimeWeaver</classname>
           implementations<!--OK? If you mean environments that are not supported by existing impl, revise as shown. If you mean class instrumentation is not supp--><!--orted, say *For environments that require class instrumentation that is not supported...*-->,
           a JDK agent can be the only solution. For such cases, Spring
-          provides <classname>InstrumentationLoadTimeWeaver,</classname> which
-          requires a Spring-specific (but very general) VM agent, <filename
-          class="libraryfile">org.springframework.instrument-{version}.jar</filename> (previously named <filename
-          class="libraryfile">spring-agent.jar</filename>):</para>
+          provides <classname>InstrumentationLoadTimeWeaver</classname>,
+          which requires a Spring-specific (but very general) VM agent,
+          <filename class="libraryfile">org.springframework.instrument-{version}.jar</filename>
+          (previously named <filename class="libraryfile">spring-agent.jar</filename>):</para>
 
           <programlisting language="xml">&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;

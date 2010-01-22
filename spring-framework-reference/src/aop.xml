@@ -3637,7 +3637,7 @@ http://www.springframework.org/schema/context
           looks as follows, to be included either in Tomcat's central
           <literal>server.xml</literal> file or in an application-specific
           <literal>META-INF/context.xml</literal> file within the WAR root.
-          Spring's <literal>spring-instrument-tomcat.jar</literal> needs to be
+          Spring's <literal>org.springframework.instrument.tomcat.jar</literal> needs to be
           included in Tomcat's common lib directory in order to make this
           setup work.</para>
 
