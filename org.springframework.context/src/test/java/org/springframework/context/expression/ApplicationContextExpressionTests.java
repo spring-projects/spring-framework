@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,6 +143,12 @@ public class ApplicationContextExpressionTests {
 			ValueTestBean tb3 = ac.getBean("tb3", ValueTestBean.class);
 			assertEquals("XXXmyNameYYY42ZZZ", tb3.name);
 			assertEquals(42, tb3.age);
+			assertEquals("123 UK", tb3.country);
+			assertEquals("123 UK", tb3.countryFactory.getObject());
+			System.getProperties().put("country", "US");
+			assertEquals("123 UK", tb3.country);
+			assertEquals("123 US", tb3.countryFactory.getObject());
+			System.getProperties().put("country", "UK");
 			assertEquals("123 UK", tb3.country);
 			assertEquals("123 UK", tb3.countryFactory.getObject());
 			assertSame(tb0, tb3.tb);
