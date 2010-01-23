@@ -37,7 +37,7 @@
 	<import file="${basedir}/publish-documentation.xml"/>
 	<import file="${basedir}/../spring-build/multi-bundle/default.xml"/>
 
-	<target name="precommit" depends="clean,clean-integration,test"/>
+	<target name="precommit" depends="clean, clean-integration, test"/>
 
 	<presetdef name="javadoc.links">
 		<javadoc>
