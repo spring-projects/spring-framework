@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="build-spring-framework" default="precommit">
 
-	<path id="bundles">
-		<pathelement location="../org.springframework.spring-parent"/>
+	<path id="unit.test.bundles">
 		<pathelement location="../org.springframework.instrument"/>
 		<pathelement location="../org.springframework.instrument.tomcat"/>
-		<pathelement location="../org.springframework.asm"/>
 		<pathelement location="../org.springframework.core"/>
 		<pathelement location="../org.springframework.expression"/>
 		<pathelement location="../org.springframework.beans"/>
@@ -23,8 +21,14 @@
 		<pathelement location="../org.springframework.web.portlet"/>
 		<pathelement location="../org.springframework.test"/>
 		<pathelement location="../org.springframework.web.struts"/>
-		<pathelement location="../org.springframework.spring-library"/>
+	</path>
+
+	<path id="bundles">
+		<pathelement location="../org.springframework.spring-parent"/>
+		<pathelement location="../org.springframework.asm"/>
+		<path refid="unit.test.bundles" />
 		<pathelement location="../org.springframework.integration-tests"/>
+		<pathelement location="../org.springframework.spring-library"/>
 	</path>
 
 	<property file="${basedir}/../build.properties"/>
