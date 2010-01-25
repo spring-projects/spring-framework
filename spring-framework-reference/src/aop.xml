@@ -3505,6 +3505,11 @@ http://www.springframework.org/schema/context
               </row>
 
               <row>
+                <entry><para>Running in <ulink url="http://www.jboss.org/jbossas/">JBoss AS</ulink></para></entry>
+                <entry><para><classname>JBossLoadTimeWeaver</classname></para></entry>
+              </row>
+
+              <row>
                 <entry><para>JVM started with Spring
                 <classname>InstrumentationSavingAgent</classname></para>
                 <para><emphasis><literal>(java
@@ -3514,7 +3519,8 @@ http://www.springframework.org/schema/context
 
               <row>
                 <entry><para>Fallback, expecting the underlying ClassLoader to follow common conventions
-                (e.g. applicable to <classname>TomcatInstrumentableClassLoader</classname> and to Resin)</para></entry>
+                (e.g. applicable to <classname>TomcatInstrumentableClassLoader</classname> and 
+                <ulink url="http://www.caucho.com/">Resin</ulink>)</para></entry>
                 <entry><para><classname>ReflectiveLoadTimeWeaver</classname></para></entry>
               </row>
             </tbody>
@@ -3615,60 +3621,130 @@ http://www.springframework.org/schema/context
         configuration that you will need when using Spring's LTW support in
         environments such as application servers and web containers.</para>
 
-        <section id="aop-aj-ltw-environment-generic">
-          <title>Generic Java applications</title>
-
-          <para>You may enable Spring's support for LTW in any Java application
-          (standalone as well as application server based) through the use of
-          the Spring-provided instrumentation agent. To do so, start
-          the VM by by specifying the
-          <literal>-javaagent:path/to/spring-instrument.jar</literal> option.
-          Note that this requires modification of the VM launch script
-          which may prevent you from using this in application server
-          environments (depending on your operation policies).</para>
-        </section>
-
         <section id="aop-aj-ltw-environment-tomcat">
           <title>Tomcat</title>
 
-          <para>For web applications deployed onto Apache Tomcat 5.0 and above,
-          Spring provides a <classname>TomcatInstrumentableClassLoader</classname>
-          to be registered as the web app class loader. The required Tomcat setup
-          looks as follows, to be included either in Tomcat's central
-          <literal>server.xml</literal> file or in an application-specific
-          <literal>META-INF/context.xml</literal> file within the WAR root.
-          Spring's <literal>org.springframework.instrument.tomcat.jar</literal> needs to be
-          included in Tomcat's common lib directory in order to make this
-          setup work.</para>
+		  <para><ulink url="http://tomcat.apache.org/">Apache Tomcat's</ulink> default class loader 
+		  does not support class transformation which is why Spring provides an enhanced implementation that
+		  addresses this need. Named <classname>TomcatInstrumentableClassLoader</classname>, the loader works
+		  on Tomcat 5.0 and above and can be registered individually for <emphasis>each</emphasis> web application
+		  as follows:</para>
+		  
+          <itemizedlist>
+            <listitem>
+              <para>Tomcat 6.0.x or higher</para>
+            </listitem>
 
-          <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+            <orderedlist>
+              <listitem>
+                <para>Copy <literal>org.springframework.instrument.tomcat.jar</literal>
+                into <emphasis>$CATALINA_HOME</emphasis>/lib, where
+                <emphasis>$CATALINA_HOME</emphasis> represents the root of the
+                Tomcat installation)</para>
+              </listitem>
+
+              <listitem>
+                <para>Instruct Tomcat to use the custom class loader (instead
+                of the default) by editing the web application context
+                file:</para>
+
+                <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+&lt;/Context&gt;</programlisting>
+
+                <para>Apache Tomcat 6.0.x (similar to 5.0.x/5.5.x) series
+                supports several context locations: <!--same as before; I can't tell what the different context locations are. It seems like there are only two, not *several*. 
+TR: OK AS IS. See below.-->server configuration file
+                (<emphasis>$CATALINA_HOME/conf/server.xml</emphasis>), the
+                default context configuration
+                (<emphasis>$CATALINA_HOME/conf/context.xml</emphasis>) that
+                affects all deployed web applications and per-web application
+                configurations, <!--change to per-web application? TR: OK.-->deployed
+                on the server side 
+                <emphasis>($CATALINA_HOME/conf/[enginename]/[hostname]/my-webapp-context.xml</emphasis>)
+                or inside the web application
+                (<emphasis>your-webapp.war/META-INF/context.xml</emphasis>).
+                For efficiency, inside the web-app configuration style <!--Which one is inside the web-app config style? Reword. TR: REVISED, PLS REVIEW. Same change as for 5.0/5.5-->is
+                recommended because it will impact only applications that use
+                the custom class loader. See the Tomcat 6.0.x <ulink
+                url="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</ulink>
+                for more details about available context locations.</para>
+              </listitem>
+            </orderedlist>
+          
+            <listitem>
+              <para>Tomcat 5.0.x/5.5.x</para>
+            </listitem>
+
+            <orderedlist>
+              <listitem>
+                <para>Copy <literal>org.springframework.instrument.tomcat.jar</literal>
+                into <emphasis>$CATALINA_HOME</emphasis>/server/lib, where
+                <emphasis>$CATALINA_HOME</emphasis> represents the root of the
+                Tomcat installation.</para>
+              </listitem>
+
+              <listitem>
+                <para>Instruct Tomcat to use the custom class loader instead
+                of the default one by editing the web application context
+                file:</para>
+
+                <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+&lt;/Context&gt;</programlisting>
+
+                <para>Tomcat 5.0.x and 5.5.x series support several context
+                locations: <!--Revise following sentences so it's clear what the context locations are. As written, it's hard to distinguish how many --><!--locations there are.Seems like only two, not *several*. TR: OK AS IS. There are four locations mentioned.-->server
+                configuration file
+                (<emphasis>$CATALINA_HOME/conf/server.xml</emphasis>), the
+                default context configuration
+                (<emphasis>$CATALINA_HOME/conf/context.xml</emphasis>) that
+                affects all deployed web applications and per-web application
+                configurations, <!--CHanged per-webapp to per-web application. If that's not right, what does it mean?-->deployed
+                on the server side
+                <emphasis>($CATALINA_HOME/conf/[enginename]/[hostname]/my-webapp-context.xml</emphasis>)
+                or inside the web application
+                (<emphasis>your-webapp.war/META-INF/context.xml</emphasis>).
+                For efficiency, inside the web-app configuration style<!--Which of the preceding is *inside the web-app config style*? Two paths contain webapp. 
+TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
+                recommended because it will impact only applications that use the class loader. See the Tomcat 5.x <ulink
+                url="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</ulink>
+                for more details about available context locations.</para>
+
+                <para>Tomcat versions prior to 5.5.20 contained a bug in the
+                XML configuration parsing that prevented usage of the
+                <literal>Loader</literal> tag inside
+                <emphasis>server.xml</emphasis>, regardless of whether a class
+                loader is specified or whether it is the official or a custom
+                one. See Tomcat's bugzilla for <ulink
+                url="http://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
+                details</ulink>.<!--Will reader know what Tomcat's bugzilla is and where to find it? TR: OK AS IS. They just need to click on the hyerlink.--></para>
+
+                <para>In Tomcat 5.5.20 or later, you should set
+                <emphasis>useSystemClassLoaderAsParent</emphasis> to
+                <literal>false</literal> to fix this problem: <programlisting
+                language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
     &lt;Loader
         loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
-&lt;/Context&gt;
-</programlisting>
-
-          <para><emphasis>Note: We generally recommend Tomcat 5.5.20 or above
-          when enabling load-time weaving.</emphasis> Prior versions have known
-          issues with custom <classname>ClassLoader</classname> setup.</para>
+&lt;/Context&gt;</programlisting></para>
+              </listitem>
+            </orderedlist>
+          </itemizedlist>
 
           <para>Alternatively, consider the use of the Spring-provided generic
           VM agent, to be specified in Tomcat's launch script (see above).
           This will make instrumentation available to all deployed web
-          applications, no matter which ClassLoader they happen to run on.</para>
-
-          <para>For a more detailed discussion of Tomcat-based weaving setup,
-          check out the <xref linkend="orm-jpa-setup-lcemfb-tomcat"/> section
-          which discusses specifics of various Tomcat versions. While the primary
-          focus of that section is on JPA persistence provider setup, the Tomcat
-          setup characteristics apply to general load-time weaving as well.</para>
+          applications, no matter what ClassLoader they happen to run on.</para>
         </section>
 
-        <section id="aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish">
-          <title>WebLogic, OC4J, Resin, GlassFish</title>
+        <section id="aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss">
+          <title>WebLogic, OC4J, Resin, GlassFish, JBoss</title>
 
           <para>Recent versions of BEA WebLogic (version 10 and above), Oracle
-          Containers for Java EE (OC4J 10.1.3.1 and above) and Resin (3.1 and above)
+          Containers for Java EE (OC4J 10.1.3.1 and above), Resin (3.1 and above) and JBoss (5.x or above)
           provide a ClassLoader that is capable of local instrumentation.
           Spring's native LTW leverages such ClassLoaders to enable AspectJ weaving.
           You can enable LTW by simply activating <literal>context:load-time-weaver</literal>
@@ -3676,10 +3752,34 @@ http://www.springframework.org/schema/context
           need to modify the launch script to add
           <literal>-javaagent:path/to/spring-instrument.jar</literal>.</para>
 
-          <para>GlassFish provides an instrumentation-capable ClassLoader as well,
-          but only in its EAR environment. For GlassFish web applications,
-          follow the Tomcat setup instructions as outlined above.</para>
+          <para>Note that GlassFish instrumentation-capable ClassLoader is available only in its EAR environment. 
+          For GlassFish web applications, follow the Tomcat setup instructions as outlined above.</para>
         </section>
+        
+        <section id="aop-aj-ltw-environment-generic">
+          <title>Generic Java applications</title>
+
+          <para>When class instrumentation is required in environments that do not support or
+          are not supported by the existing <classname>LoadTimeWeaver</classname>
+          implementations<!--OK? If you mean environments that are not supported by existing impl, revise as shown. If you mean class instrumentation is not supp--><!--orted, say *For environments that require class instrumentation that is not supported...*-->,
+          a JDK agent can be the only solution. For such cases, Spring
+          provides <classname>InstrumentationLoadTimeWeaver</classname>,
+          which requires a Spring-specific (but very general) VM agent,
+          <filename class="libraryfile">org.springframework.instrument-{version}.jar</filename>
+          (previously named <filename class="libraryfile">spring-agent.jar</filename>).</para>
+          
+          <para>To use it, you must start the virtual machine with the Spring agent, by
+          supplying the following JVM options:</para>
+          <programlisting>-javaagent:/path/to/org.springframework.instrument-{version}.jar</programlisting>
+          
+		  <para>         
+          Note that this requires modification of the VM launch script which may prevent you from using this in application server
+          environments (depending on your operation policies). Additionally, the JDK agent will instrument the <emphasis>entire</emphasis>
+          VM which can prove expensive.</para>
+          <para>For performance reasons, it is recommended to use this configuration only if your target environment 
+          (such as <ulink url="http://www.eclipse.org/jetty/">Jetty</ulink>) does not have (or does not support) a dedicated LTW.</para>
+        </section>
+        
       </section>
     </section>
   </section>
