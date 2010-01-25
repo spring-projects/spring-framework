@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -34,7 +35,9 @@ import java.util.Set;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
+public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializable {
+
+	private static final long serialVersionUID = 3801124242820219131L;
 
 	private final Map<K, List<V>> targetMap;
 
@@ -63,6 +66,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 	public LinkedMultiValueMap(Map<K, List<V>> otherMap) {
 		this.targetMap = new LinkedHashMap<K, List<V>>(otherMap);
 	}
+
 
 	// MultiValueMap implementation
 
@@ -99,6 +103,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V> {
 		}
 		return singleValueMap;
 	}
+
 
 	// Map implementation
 
