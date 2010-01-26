@@ -3624,7 +3624,7 @@ http://www.springframework.org/schema/context
         <section id="aop-aj-ltw-environment-tomcat">
           <title>Tomcat</title>
 
-		  <para><ulink url="http://tomcat.apache.org/">Apache Tomcat's</ulink> default class loader 
+		  <para><ulink url="http://tomcat.apache.org/">Apache Tomcat</ulink>'s default class loader 
 		  does not support class transformation which is why Spring provides an enhanced implementation that
 		  addresses this need. Named <classname>TomcatInstrumentableClassLoader</classname>, the loader works
 		  on Tomcat 5.0 and above and can be registered individually for <emphasis>each</emphasis> web application
@@ -3653,22 +3653,19 @@ http://www.springframework.org/schema/context
         loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
-                <para>Apache Tomcat 6.0.x (similar to 5.0.x/5.5.x) series
-                supports several context locations: <!--same as before; I can't tell what the different context locations are. It seems like there are only two, not *several*. 
-TR: OK AS IS. See below.-->server configuration file
-                (<emphasis>$CATALINA_HOME/conf/server.xml</emphasis>), the
-                default context configuration
-                (<emphasis>$CATALINA_HOME/conf/context.xml</emphasis>) that
-                affects all deployed web applications and per-web application
-                configurations, <!--change to per-web application? TR: OK.-->deployed
-                on the server side 
-                <emphasis>($CATALINA_HOME/conf/[enginename]/[hostname]/my-webapp-context.xml</emphasis>)
-                or inside the web application
-                (<emphasis>your-webapp.war/META-INF/context.xml</emphasis>).
-                For efficiency, inside the web-app configuration style <!--Which one is inside the web-app config style? Reword. TR: REVISED, PLS REVIEW. Same change as for 5.0/5.5-->is
+                <para>Apache Tomcat 6.0.x (similar to 5.0.x/5.5.x) series supports several context locations:</para>
+					<itemizedlist>
+						<listitem>server configuration file - <emphasis>$CATALINA_HOME/conf/server.xml</emphasis> </listitem>
+						<listitem>default context configuration - <emphasis>$CATALINA_HOME/conf/context.xml</emphasis> - that
+						affects all deployed web applications</listitem>
+						<listitem>per-web application configuration which can be deployed either on the server-side at
+						<emphasis>$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml</emphasis> or embedded inside
+						the web-app archive at <emphasis>META-INF/context.xml</emphasis></listitem>
+					</itemizedlist>
+                <para>For efficiency, the embedded per-web-app configuration style <!--Which one is inside the web-app config style? Reword. TR: REVISED, PLS REVIEW. Same change as for 5.0/5.5-->is
                 recommended because it will impact only applications that use
-                the custom class loader. See the Tomcat 6.0.x <ulink
-                url="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</ulink>
+                the custom class loader and does not require any changes to the server configuration.
+                See the Tomcat 6.0.x <ulink url="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</ulink>
                 for more details about available context locations.</para>
               </listitem>
             </orderedlist>
@@ -3695,19 +3692,16 @@ TR: OK AS IS. See below.-->server configuration file
         loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
-                <para>Tomcat 5.0.x and 5.5.x series support several context
-                locations: <!--Revise following sentences so it's clear what the context locations are. As written, it's hard to distinguish how many --><!--locations there are.Seems like only two, not *several*. TR: OK AS IS. There are four locations mentioned.-->server
-                configuration file
-                (<emphasis>$CATALINA_HOME/conf/server.xml</emphasis>), the
-                default context configuration
-                (<emphasis>$CATALINA_HOME/conf/context.xml</emphasis>) that
-                affects all deployed web applications and per-web application
-                configurations, <!--CHanged per-webapp to per-web application. If that's not right, what does it mean?-->deployed
-                on the server side
-                <emphasis>($CATALINA_HOME/conf/[enginename]/[hostname]/my-webapp-context.xml</emphasis>)
-                or inside the web application
-                (<emphasis>your-webapp.war/META-INF/context.xml</emphasis>).
-                For efficiency, inside the web-app configuration style<!--Which of the preceding is *inside the web-app config style*? Two paths contain webapp. 
+                <para>Tomcat 5.0.x and 5.5.x series supports several context locations:</para>
+                	<itemizedlist>
+						<listitem>server configuration file - <emphasis>$CATALINA_HOME/conf/server.xml</emphasis> </listitem>
+						<listitem>default context configuration - <emphasis>$CATALINA_HOME/conf/context.xml</emphasis> - that
+						affects all deployed web applications</listitem>
+						<listitem>per-web application configuration which can be deployed either on the server-side at
+						<emphasis>$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml</emphasis> or embedded inside
+						the web-app archive at <emphasis>META-INF/context.xml</emphasis></listitem>
+					</itemizedlist>
+                <para>For efficiency, the embedded web-app configuration style<!--Which of the preceding is *inside the web-app config style*? Two paths contain webapp. 
 TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 recommended because it will impact only applications that use the class loader. See the Tomcat 5.x <ulink
                 url="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</ulink>
@@ -3716,20 +3710,22 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 <para>Tomcat versions prior to 5.5.20 contained a bug in the
                 XML configuration parsing that prevented usage of the
                 <literal>Loader</literal> tag inside
-                <emphasis>server.xml</emphasis>, regardless of whether a class
+                <emphasis>server.xml</emphasis> configuration, regardless of whether a class
                 loader is specified or whether it is the official or a custom
                 one. See Tomcat's bugzilla for <ulink
                 url="http://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
-                details</ulink>.<!--Will reader know what Tomcat's bugzilla is and where to find it? TR: OK AS IS. They just need to click on the hyerlink.--></para>
+                details</ulink>.</para><!--Will reader know what Tomcat's bugzilla is and where to find it? TR: OK AS IS. They just need to click on the hyerlink.-->
 
-                <para>In Tomcat 5.5.20 or later, you should set
+                <para>In Tomcat 5.5.x, versions 5.5.20 or later, you should set
                 <emphasis>useSystemClassLoaderAsParent</emphasis> to
-                <literal>false</literal> to fix this problem: <programlisting
+                <literal>false</literal> to fix this problem:
+                </para>
+                <programlisting
                 language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
     &lt;Loader
         loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
-            useSystemClassLoaderAsParent="false"/&gt;
-&lt;/Context&gt;</programlisting></para>
+            <emphasis role="bold">useSystemClassLoaderAsParent="false"</emphasis>/&gt;
+&lt;/Context&gt;</programlisting><para>This setting is not needed if using Tomcat 6 or higher.</para>
               </listitem>
             </orderedlist>
           </itemizedlist>
