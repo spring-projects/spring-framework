@@ -596,7 +596,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				return null;
 			}
 			String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-			if (StringUtils.hasText(bestMatchingPattern)) {
+			if (StringUtils.hasText(bestMatchingPattern) && bestMatchingPattern.endsWith("*")) {
 				String combinedPattern = pathMatcher.combine(bestMatchingPattern, methodLevelPattern);
 				if (!combinedPattern.equals(bestMatchingPattern) &&
 						(isPathMatchInternal(combinedPattern, lookupPath))) {
