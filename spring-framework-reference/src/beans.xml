@@ -3667,6 +3667,115 @@ public final class Boot {
       <interfacename>InitializingBean</interfacename>s
       <emphasis>afterPropertiesSet</emphasis> or a custom init-method.</para>
     </section>
+    
+    <section id="aware-list">
+      <title>Other <interfacename>Aware</interfacename> interfaces</title>
+      
+      <para>Besides <interfacename>ApplicationContextAware</interfacename> and
+      <interfacename>BeanNameAware</interfacename> discussed above, Spring offers a range
+      of <emphasis><interfacename>Aware</interfacename></emphasis> interfaces that allow beans
+      to indicate to the container that they require a certain <emphasis>infrastructure</emphasis> dependency.
+      The most important <interfacename>Aware</interfacename> interfaces are summarized below - as a general rule, 
+      the name is a good indication of the dependency type:</para>
+      
+      <table id="beans-factory-nature-aware-list" pgwide="1">
+        <title><interfacename>Aware</interfacename> interfaces</title>
+          
+        <tgroup cols="3">
+          <colspec align="left" />
+
+          <thead>
+            <row>
+              <entry>Name</entry>
+              <entry>Injected Dependency</entry>
+              <entry>Explained in...</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><para><classname>ApplicationContextAware</classname></para></entry>
+              <entry><para>Declaring <interfacename>ApplicationContext</interfacename></para></entry>
+              <entry><para><xref linkend="beans-factory-aware"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>ApplicationEventPublisherAware</classname></para></entry>
+              <entry><para>Event publisher of the enclosing <interfacename>ApplicationContext</interfacename></para></entry>
+              <entry><para><xref linkend="context-introduction"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>BeanClassLoaderAware</classname></para></entry>
+              <entry><para>Class loader used to load the bean classes.</para></entry>
+              <entry><para><xref linkend="beans-factory-class"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>BeanFactoryAware</classname></para></entry>
+              <entry><para>Declaring <interfacename>BeanFactory</interfacename></para></entry>
+              <entry><para><xref linkend="beans-factory-aware"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>BeanNameAware</classname></para></entry>
+              <entry><para>Name of the declaring bean</para></entry>
+              <entry><para><xref linkend="beans-factory-aware"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>BootstrapContextAware</classname></para></entry>
+              <entry><para>Resource adapter <interfacename>BootstrapContext</interfacename> the container runs in. Typically available only
+              in JCA aware <interfacename>ApplicationContext</interfacename>s</para></entry>
+              <entry><para><xref linkend="cci"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>LoadTimeWeaverAware</classname></para></entry>
+              <entry><para>Defined <emphasis>weaver</emphasis> for processing class definition at load time</para></entry>
+              <entry><para><xref linkend="aop-aj-ltw"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>MessageSourceAware</classname></para></entry>
+              <entry><para>Configured strategy for resolving messages (with support for parametrization and internationalization)</para></entry>
+              <entry><para><xref linkend="context-introduction"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>NotificationPublisherAware</classname></para></entry>
+              <entry><para>Spring JMX notification publisher</para></entry>
+              <entry><para><xref linkend="jmx-notifications"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>PortletConfigAware</classname></para></entry>
+              <entry><para>Current <interfacename>PortletConfig</interfacename> the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+              <entry><para><xref linkend="portlet"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>PortletContextAware</classname></para></entry>
+              <entry><para>Current <interfacename>PortletContext</interfacename> the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+              <entry><para><xref linkend="portlet"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>ResourceLoaderAware</classname></para></entry>
+              <entry><para>Configured loader for low-level access to resources</para></entry>
+              <entry><para><xref linkend="resources"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>ServletConfigAware</classname></para></entry>
+              <entry><para>Current <interfacename>ServletConfig</interfacename> the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+              <entry><para><xref linkend="mvc"/></para></entry>
+            </row>
+            <row>
+              <entry><para><classname>ServletContextAware</classname></para></entry>
+              <entry><para>Current <interfacename>ServletContext</interfacename> the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+              <entry><para><xref linkend="mvc"/></para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>      
+      
+      <para>Note again that usage of these interfaces ties your code to the Spring API and does not follow the Inversion of Control
+      style. As such, they are recommended for infrastructure beans that require programmatic access to the container.</para>
+      
+    </section>
   </section>
 
   <section id="beans-child-bean-definitions">
