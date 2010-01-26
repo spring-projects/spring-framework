@@ -46,7 +46,7 @@
 
       <para>You cannot add advice to final methods when you use Spring MVC.
       For example, you cannot add advice to the
-      <literal>AbstractController.handleRequest()</literal> method. Refer to
+      <literal>AbstractController.setSynchronizeOnSession()</literal> method. Refer to
       <xref linkend="aop-understanding-aop-proxies" /> for more information on
       AOP proxies and why you cannot add advice to final methods.</para>
     </sidebar>
