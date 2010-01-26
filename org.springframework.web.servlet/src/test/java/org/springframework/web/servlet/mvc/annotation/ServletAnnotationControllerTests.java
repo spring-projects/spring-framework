@@ -204,8 +204,20 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void defaultExpressionParameters() throws Exception {
-		initServlet(DefaultExpressionValueParamController.class);
-
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(DefaultExpressionValueParamController.class));
+				RootBeanDefinition ppc = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+				ppc.getPropertyValues().add("properties", "myKey=foo");
+				wac.registerBeanDefinition("ppc", ppc);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+		
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myPath.do");
 		request.setContextPath("/myApp");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -344,9 +356,6 @@ public class ServletAnnotationControllerTests {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
-				RootBeanDefinition ppc = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
-				ppc.getPropertyValues().add("properties", "myKey=foo");
-				wac.registerBeanDefinition("ppc", ppc);
 				wac.refresh();
 				return wac;
 			}
@@ -1279,6 +1288,16 @@ public class ServletAnnotationControllerTests {
 		assertEquals("handle", response.getContentAsString());
 
 	}
+	
+	@Test
+	public void trailingSlash() throws Exception {
+		initServlet(TrailingSlashController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("templatePath", response.getContentAsString());
+	}
 
 	/*
 		 * Controllers
@@ -2203,6 +2222,20 @@ public class ServletAnnotationControllerTests {
 		@Override
 		public void handle(Writer writer) throws IOException {
 			writer.write("handle");
+		}
+	}
+
+	@Controller
+	public static class TrailingSlashController  {
+
+		@RequestMapping(value = "/", method = RequestMethod.GET)
+		public void root(Writer writer) throws IOException {
+			writer.write("root");
+		}
+		
+		@RequestMapping(value = "/{templatePath}/", method = RequestMethod.GET)
+		public void templatePath(Writer writer) throws IOException {
+			writer.write("templatePath");
 		}
 	}
 
