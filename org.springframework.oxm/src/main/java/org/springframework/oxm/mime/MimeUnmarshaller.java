@@ -23,7 +23,7 @@ import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
 
 /**
- * Subinterface of {@link org.springframework.oxm.Marshaller} that can use MIME attachments
+ * Subinterface of {@link org.springframework.oxm.Unmarshaller} that can use MIME attachments
  * to optimize storage of binary data. Attachments can be added as MTOM, XOP, or SwA.
  *
  * @author Arjen Poutsma

@@ -18,12 +18,16 @@ package org.springframework.oxm.jaxb;
 
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.transform.Result;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.JAXBElement;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.easymock.EasyMock.*;
@@ -35,10 +39,12 @@ import org.xml.sax.Locator;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.XmlMappingException;
+import org.springframework.oxm.GenericMarshaller;
 import org.springframework.oxm.jaxb.test.FlightType;
 import org.springframework.oxm.jaxb.test.Flights;
 import org.springframework.oxm.jaxb.test.ObjectFactory;
@@ -142,11 +148,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void supportsContextPath() throws Exception {
-		Method createFlights = ObjectFactory.class.getDeclaredMethod("createFlights");
-		assertTrue("Jaxb2Marshaller does not support Flights", marshaller.supports(createFlights.getReturnType()));
-		Method createFlight = ObjectFactory.class.getDeclaredMethod("createFlight", FlightType.class);
-		assertTrue("Jaxb2Marshaller does not support JAXBElement<FlightsType>",
-				marshaller.supports(createFlight.getReturnType()));
+		testSupports(marshaller);
+
 	}
 
 	@Test
@@ -154,11 +157,30 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(new Class[]{Flights.class, FlightType.class});
 		marshaller.afterPropertiesSet();
-		Method createFlights = ObjectFactory.class.getDeclaredMethod("createFlights");
-		assertTrue("Jaxb2Marshaller does not support Flights", marshaller.supports(createFlights.getReturnType()));
-		Method createFlight = ObjectFactory.class.getDeclaredMethod("createFlight", FlightType.class);
+		testSupports(marshaller);
+	}
+
+	private void testSupports(Jaxb2Marshaller marshaller) throws Exception {
+		assertTrue("Jaxb2Marshaller does not support Flights class", marshaller.supports(Flights.class));
+		assertTrue("Jaxb2Marshaller does not support Flights generic type", marshaller.supports((Type)Flights.class));
+
+		assertFalse("Jaxb2Marshaller supports FlightType class", marshaller.supports(FlightType.class));
+
+		Method method = ObjectFactory.class.getDeclaredMethod("createFlight", FlightType.class);
 		assertTrue("Jaxb2Marshaller does not support JAXBElement<FlightsType>",
-				marshaller.supports(createFlight.getReturnType()));
+				marshaller.supports(method.getGenericReturnType()));
+
+		assertFalse("Jaxb2Marshaller supports class not in context path", marshaller.supports(DummyRootElement.class));
+		assertFalse("Jaxb2Marshaller supports type not in context path", marshaller.supports((Type)DummyRootElement.class));
+		method = getClass().getDeclaredMethod("createDummyRootElement");
+		assertFalse("Jaxb2Marshaller supports JAXBElement not in context path",
+				marshaller.supports(method.getGenericReturnType()));
+
+		assertFalse("Jaxb2Marshaller supports class not in context path", marshaller.supports(DummyType.class));
+		assertFalse("Jaxb2Marshaller supports type not in context path", marshaller.supports((Type)DummyType.class));
+		method = getClass().getDeclaredMethod("createDummyType");
+		assertFalse("Jaxb2Marshaller supports JAXBElement not in context path",
+				marshaller.supports(method.getGenericReturnType()));
 	}
 
 	@Test
@@ -185,19 +207,24 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		assertTrue("No XML written", writer.toString().length() > 0);
 	}
 
-	@Test
-	public void subclass() throws Exception {
-		assertTrue("Flights subclass is not supported", marshaller.supports(FlightsSubclass.class));
-		FlightType flight = new FlightType();
-		flight.setNumber(42L);
-		FlightsSubclass flights = new FlightsSubclass();
-		flights.getFlight().add(flight);
-		StringWriter writer = new StringWriter();
-		marshaller.marshal(flights, new StreamResult(writer));
-		assertXMLEqual("Marshaller writes invalid StreamResult", EXPECTED_STRING, writer.toString());
+	@XmlRootElement
+	public static class DummyRootElement {
+
+		private DummyType t = new DummyType();
+
 	}
 
-	private static class FlightsSubclass extends Flights {
+	@XmlType
+	public static class DummyType {
 
+		private String s = "Hello";
+	}
+
+	public JAXBElement<DummyRootElement> createDummyRootElement() {
+		return null;
+	}
+
+	public JAXBElement<DummyType> createDummyType() {
+		return null;
 	}
 }
