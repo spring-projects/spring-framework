@@ -57,24 +57,59 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, responseWrapper);
 
 		byte[] body = responseWrapper.toByteArray();
-		String responseETag = generateETagHeaderValue(body);
-		response.setHeader(HEADER_ETAG, responseETag);
+		int statusCode = responseWrapper.getStatusCode();
 
-		String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
-		if (responseETag.equals(requestETag)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
+		if (isEligibleForEtag(request, responseWrapper, statusCode, body)) {
+			String responseETag = generateETagHeaderValue(body);
+			response.setHeader(HEADER_ETAG, responseETag);
+
+			String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
+			if (responseETag.equals(requestETag)) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
+				}
+				response.setContentLength(0);
+				response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
-			response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+			else {
+				if (logger.isTraceEnabled()) {
+					logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
+							"], sending normal response");
+				}
+				copyBodyToResponse(body, response);
+			}
 		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
-						"], sending normal response");
+				logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
 			}
-			response.setContentLength(body.length);
+			copyBodyToResponse(body, response);
+		}
+	}
+
+	private void copyBodyToResponse(byte[] body, HttpServletResponse response) throws IOException {
+		response.setContentLength(body.length);
+		if (body.length > 0) {
 			FileCopyUtils.copy(body, response.getOutputStream());
 		}
+	}
+
+	/**
+	 * Indicates whether the given request and response are eligible for ETag generation.
+	 *
+	 * <p>Default implementation returns {@code true} for response status codes in the {@code 2xx} series.
+	 *
+	 * @param request the HTTP request
+	 * @param response the HTTP response
+	 * @param responseStatusCode the HTTP response status code
+	 * @param responseBody the response body
+	 * @return {@code true} if eligible for ETag generation; {@code false} otherwise
+	 */
+	protected boolean isEligibleForEtag(HttpServletRequest request,
+			HttpServletResponse response,
+			int responseStatusCode,
+			byte[] responseBody) {
+		return (responseStatusCode >= 200 && responseStatusCode < 300);
 	}
 
 	/**
@@ -105,8 +140,34 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		private PrintWriter writer;
 
+		private int statusCode = -1;
+
 		private ShallowEtagResponseWrapper(HttpServletResponse response) {
 			super(response);
+		}
+
+		@Override
+		public void setStatus(int sc) {
+			super.setStatus(sc);
+			this.statusCode = sc;
+		}
+
+		@Override
+		public void setStatus(int sc, String sm) {
+			super.setStatus(sc, sm);
+			this.statusCode = sc;
+		}
+
+		@Override
+		public void sendError(int sc) throws IOException {
+			super.sendError(sc);
+			this.statusCode = sc;
+		}
+
+		@Override
+		public void sendError(int sc, String msg) throws IOException {
+			super.sendError(sc, msg);
+			this.statusCode = sc;
 		}
 
 		@Override
@@ -133,6 +194,10 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		public void reset() {
 			super.reset();
 			resetBuffer();
+		}
+
+		private int getStatusCode() {
+			return statusCode;
 		}
 
 		private byte[] toByteArray() {
