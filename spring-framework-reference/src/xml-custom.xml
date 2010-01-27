@@ -297,7 +297,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
 
    ]]><lineannotation><![CDATA[<foo:component id="bionic-family" name="Bionic-1">
-      <foo:component name="Sport-1"/>
+      <foo:component name="Mother-1">
+        <foo:component name="Karate-1"/>
+        <foo:component name="Sport-1"/>
+      </foo:component>
       <foo:component name="Rock-1"/>
    </foo:component>]]></lineannotation><![CDATA[
 
@@ -317,14 +320,14 @@ import java.util.List;
 public class Component {
 
    private String name;
-   private List components = new ArrayList();
+   private List<Component> components = new ArrayList<Component> ();
 
    ]]><lineannotation>// mmm, there is no setter method for the <literal>'components'</literal></lineannotation><![CDATA[
    public void addComponent(Component component) {
       this.components.add(component);
    }
 
-   public List getComponents() {
+   public List<Component> getComponents() {
       return components;
    }
 
@@ -342,33 +345,31 @@ public class Component {
 
 import org.springframework.beans.factory.FactoryBean;
 
-import java.util.Iterator;
 import java.util.List;
 
-public class ComponentFactoryBean implements FactoryBean {
+public class ComponentFactoryBean implements FactoryBean<Component> {
 
    private Component parent;
-   private List children;
+   private List<Component> children;
 
    public void setParent(Component parent) {
       this.parent = parent;
    }
 
-   public void setChildren(List children) {
+   public void setChildren(List<Component> children) {
       this.children = children;
    }
 
-   public Object getObject() throws Exception {
+   public Component getObject() throws Exception {
       if (this.children != null && this.children.size() > 0) {
-         for (Iterator it = children.iterator(); it.hasNext();) {
-            Component childComponent = (Component) it.next();
-            this.parent.addComponent(childComponent);
+         for (Component child : children) {
+            this.parent.addComponent(child);
          }
       }
       return this.parent;
    }
 
-   public Class getObjectType() {
+   public Class<Component> getObjectType() {
       return Component.class;
    }
 
@@ -417,6 +418,7 @@ public class ComponentNamespaceHandler extends NamespaceHandlerSupport {
             a <classname>ComponentFactoryBean</classname>.</para>
             <programlisting language="java"><![CDATA[package com.foo;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
@@ -430,30 +432,34 @@ import java.util.List;
 public class ComponentBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
    protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+      return parseComponentElement(element);
+   }
+   
+   private static AbstractBeanDefinition parseComponentElement(Element element) {
       BeanDefinitionBuilder factory = BeanDefinitionBuilder.rootBeanDefinition(ComponentFactoryBean.class);
-      BeanDefinitionBuilder parent = parseComponent(element);
-      factory.addPropertyValue("parent", parent.getBeanDefinition());
-
-      List childElements = DomUtils.getChildElementsByTagName(element, "component");
+      factory.addPropertyValue("parent", parseComponent(element));
+      
+      List<Element> childElements = DomUtils.getChildElementsByTagName(element, "component");
       if (childElements != null && childElements.size() > 0) {
          parseChildComponents(childElements, factory);
       }
+
       return factory.getBeanDefinition();
    }
 
-   private static BeanDefinitionBuilder parseComponent(Element element) {
+   private static BeanDefinition parseComponent(Element element) {
       BeanDefinitionBuilder component = BeanDefinitionBuilder.rootBeanDefinition(Component.class);
       component.addPropertyValue("name", element.getAttribute("name"));
-      return component;
+      return component.getBeanDefinition();
    }
-
-   private static void parseChildComponents(List childElements, BeanDefinitionBuilder factory) {
-      ManagedList children = new ManagedList(childElements.size());
-      for (int i = 0; i < childElements.size(); ++i) {
-         Element childElement = (Element) childElements.get(i);
-         BeanDefinitionBuilder child = parseComponent(childElement);
-         children.add(child.getBeanDefinition());
+   
+   private static void parseChildComponents(List<Element> childElements, BeanDefinitionBuilder factory) {
+      ManagedList<BeanDefinition> children = new ManagedList<BeanDefinition>(childElements.size());
+     
+      for (Element element : childElements) {
+         children.add(parseComponentElement(element));
       }
+     
       factory.addPropertyValue("children", children);
    }
 }]]></programlisting>
