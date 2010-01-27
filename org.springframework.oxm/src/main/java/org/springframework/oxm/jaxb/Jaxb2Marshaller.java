@@ -28,6 +28,8 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.lang.reflect.Type;
+import java.lang.reflect.ParameterizedType;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.xml.XMLConstants;
@@ -41,6 +43,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.ValidationException;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.attachment.AttachmentMarshaller;
 import javax.xml.bind.attachment.AttachmentUnmarshaller;
@@ -70,6 +73,8 @@ import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.ValidationFailureException;
 import org.springframework.oxm.XmlMappingException;
+import org.springframework.oxm.GenericMarshaller;
+import org.springframework.oxm.GenericUnmarshaller;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.oxm.mime.MimeMarshaller;
 import org.springframework.oxm.mime.MimeUnmarshaller;
@@ -101,7 +106,9 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setAdapters(XmlAdapter[])
  * @since 3.0
  */
-public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanClassLoaderAware, InitializingBean {
+public class Jaxb2Marshaller
+		implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller, BeanClassLoaderAware,
+		InitializingBean {
 
 	private static final String CID = "cid:";
 
@@ -143,6 +150,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 
 	private boolean lazyInit = false;
 
+	/**
+	 * Returns the JAXB context path.
+	 */
+	public String getContextPath() {
+		return contextPath;
+	}
 
 	/**
 	 * Set a JAXB context path.
@@ -159,6 +172,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	public void setContextPaths(String[] contextPaths) {
 		Assert.notEmpty(contextPaths, "'contextPaths' must not be empty");
 		this.contextPath = StringUtils.arrayToDelimitedString(contextPaths, ":");
+	}
+
+	/**
+	 * Returns the list of Java classes to be recognized by a newly created JAXBContext.
+	 */
+	public Class[] getClassesToBeBound() {
+		return classesToBeBound;
 	}
 
 	/**
@@ -280,10 +300,10 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 
 
 	public final void afterPropertiesSet() throws Exception {
-		if (StringUtils.hasLength(this.contextPath) && !ObjectUtils.isEmpty(this.classesToBeBound)) {
+		if (StringUtils.hasLength(getContextPath()) && !ObjectUtils.isEmpty(getClassesToBeBound())) {
 			throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound property'; not both");
 		}
-		else if (!StringUtils.hasLength(this.contextPath) && ObjectUtils.isEmpty(this.classesToBeBound)) {
+		else if (!StringUtils.hasLength(getContextPath()) && ObjectUtils.isEmpty(getClassesToBeBound())) {
 			throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' is required");
 		}
 		if (!lazyInit) {
@@ -297,10 +317,10 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	protected synchronized JAXBContext getJaxbContext() {
 		if (this.jaxbContext == null) {
 			try {
-				if (StringUtils.hasLength(this.contextPath)) {
+				if (StringUtils.hasLength(getContextPath())) {
 					this.jaxbContext = createJaxbContextFromContextPath();
 				}
-				else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
+				else if (!ObjectUtils.isEmpty(getClassesToBeBound())) {
 					this.jaxbContext = createJaxbContextFromClasses();
 				}
 			}
@@ -313,22 +333,22 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 
 	private JAXBContext createJaxbContextFromContextPath() throws JAXBException {
 		if (logger.isInfoEnabled()) {
-			logger.info("Creating JAXBContext with context path [" + this.contextPath + "]");
+			logger.info("Creating JAXBContext with context path [" + getContextPath() + "]");
 		}
 		if (this.jaxbContextProperties != null) {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader, this.jaxbContextProperties);
+				return JAXBContext.newInstance(getContextPath(), this.beanClassLoader, this.jaxbContextProperties);
 			}
 			else {
-				return JAXBContext.newInstance(this.contextPath, ClassUtils.getDefaultClassLoader(), this.jaxbContextProperties);
+				return JAXBContext.newInstance(getContextPath(), ClassUtils.getDefaultClassLoader(), this.jaxbContextProperties);
 			}
 		}
 		else {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader);
+				return JAXBContext.newInstance(getContextPath(), this.beanClassLoader);
 			}
 			else {
-				return JAXBContext.newInstance(this.contextPath);
+				return JAXBContext.newInstance(getContextPath());
 			}
 		}
 	}
@@ -336,13 +356,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 	private JAXBContext createJaxbContextFromClasses() throws JAXBException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Creating JAXBContext with classes to be bound [" +
-					StringUtils.arrayToCommaDelimitedString(this.classesToBeBound) + "]");
+					StringUtils.arrayToCommaDelimitedString(getClassesToBeBound()) + "]");
 		}
 		if (this.jaxbContextProperties != null) {
-			return JAXBContext.newInstance(this.classesToBeBound, this.jaxbContextProperties);
+			return JAXBContext.newInstance(getClassesToBeBound(), this.jaxbContextProperties);
 		}
 		else {
-			return JAXBContext.newInstance(this.classesToBeBound);
+			return JAXBContext.newInstance(getClassesToBeBound());
 		}
 	}
 
@@ -367,15 +387,35 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 
 
 	public boolean supports(Class<?> clazz) {
-		if (JAXBElement.class.isAssignableFrom(clazz)) {
-			return true;
+		return supportsInternal(clazz, true);
+	}
+
+	public boolean supports(Type genericType) {
+		if (genericType instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) genericType;
+			if (JAXBElement.class.equals(parameterizedType.getRawType()) &&
+					parameterizedType.getActualTypeArguments().length == 1 &&
+					parameterizedType.getActualTypeArguments()[0] instanceof Class) {
+				Class typeArgument = (Class) parameterizedType.getActualTypeArguments()[0];
+				return supportsInternal(typeArgument, false);
+			}
+		} else if (genericType instanceof Class) {
+			Class clazz = (Class) genericType;
+			return supportsInternal(clazz, true);
 		}
-		else if (AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null) {
-			return true;
+		return false;
+	}
+
+	private boolean supportsInternal(Class<?> clazz, boolean checkForXmlRootElement) {
+		if (checkForXmlRootElement && AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) == null) {
+			return false;
 		}
-		if (StringUtils.hasLength(this.contextPath)) {
+		if (AnnotationUtils.findAnnotation(clazz, XmlType.class) == null) {
+			return false;
+		}
+		if (StringUtils.hasLength(getContextPath())) {
 			String packageName = ClassUtils.getPackageName(clazz);
-			String[] contextPaths = StringUtils.tokenizeToStringArray(this.contextPath, ":");
+			String[] contextPaths = StringUtils.tokenizeToStringArray(getContextPath(), ":");
 			for (String contextPath : contextPaths) {
 				if (contextPath.equals(packageName)) {
 					return true;
@@ -383,8 +423,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, BeanCl
 			}
 			return false;
 		}
-		else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
-			return Arrays.asList(this.classesToBeBound).contains(clazz);
+		else if (!ObjectUtils.isEmpty(getClassesToBeBound())) {
+			return Arrays.asList(getClassesToBeBound()).contains(clazz);
 		}
 		return false;
 	}
