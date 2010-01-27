@@ -498,7 +498,7 @@ public class TaskExecutorExample {
 			example.</para>
 			<programlisting language="xml"><![CDATA[<task:scheduled-tasks scheduler="myScheduler">
     <task:scheduled ref="someObject" method="someMethod" fixed-delay="5000"/>
-<task:scheduled-tasks/>
+</task:scheduled-tasks>
 
 <task:scheduler id="myScheduler" pool-size="10"/>]]></programlisting>
 
@@ -511,7 +511,7 @@ public class TaskExecutorExample {
 			<programlisting language="xml"><![CDATA[<task:scheduled-tasks scheduler="myScheduler">
     <task:scheduled ref="someObject" method="someMethod" fixed-rate="5000"/>
     <task:scheduled ref="anotherObject" method="anotherMethod" cron="*/5 * * * * MON-FRI"/>
-<task:scheduled-tasks/>
+</task:scheduled-tasks>
 
 <task:scheduler id="myScheduler" pool-size="10"/>]]></programlisting>
 		</section>
