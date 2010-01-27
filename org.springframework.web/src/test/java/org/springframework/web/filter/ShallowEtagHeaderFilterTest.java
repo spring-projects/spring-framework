@@ -41,6 +41,15 @@ public class ShallowEtagHeaderFilterTest {
 	}
 
 	@Test
+	public void isEligibleForEtag() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		assertTrue(filter.isEligibleForEtag(request, response, 200, new byte[0]));
+		assertFalse(filter.isEligibleForEtag(request, response, 300, new byte[0]));
+	}
+
+	@Test
 	public void filterNoMatch() throws Exception {
 		final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
