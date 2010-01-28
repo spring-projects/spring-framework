@@ -39,7 +39,7 @@ public class HttpMessageConverterTests {
 	public void canRead() {
 		AbstractHttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(MEDIA_TYPE) {
 			@Override
-			protected boolean supports(Class<? extends MyType> clazz) {
+			protected boolean supports(Class<?> clazz) {
 				return MyType.class.equals(clazz);
 			}
 
@@ -54,7 +54,7 @@ public class HttpMessageConverterTests {
 	public void canWrite() {
 		AbstractHttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(MEDIA_TYPE) {
 			@Override
-			protected boolean supports(Class<? extends MyType> clazz) {
+			protected boolean supports(Class<?> clazz) {
 				return MyType.class.equals(clazz);
 			}
 
@@ -73,7 +73,7 @@ public class HttpMessageConverterTests {
 		}
 
 		@Override
-		protected boolean supports(Class<? extends T> clazz) {
+		protected boolean supports(Class<?> clazz) {
 			fail("Not expected");
 			return false;
 		}

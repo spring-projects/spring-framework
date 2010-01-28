@@ -43,15 +43,12 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 
 	private RootElement rootElement;
 
-	private Type type;
-
 	private RootElement rootElementCglib;
 
 	@Before
 	public void setUp() {
 		converter = new Jaxb2RootElementHttpMessageConverter();
 		rootElement = new RootElement();
-		type = new Type();
 		DefaultAopProxyFactory proxyFactory = new DefaultAopProxyFactory();
 		AdvisedSupport advisedSupport = new AdvisedSupport();
 		advisedSupport.setTarget(rootElement);
