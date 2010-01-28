@@ -30,11 +30,12 @@ import org.springframework.core.io.ResourceLoader;
  * (i.e. per ".class" file).
  *
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.5
  */
 public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
-	private static final int MAX_ENTRIES = 50;
+	private static final int MAX_ENTRIES = 256;
 
 	@SuppressWarnings("serial")
 	private static final <K, V> Map<K, V> createLRUCache() {
