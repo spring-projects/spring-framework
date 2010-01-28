@@ -17,8 +17,9 @@
 package org.springframework.core.type.classreading;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -33,8 +34,20 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
-	private final Map<Resource, MetadataReader> classReaderCache = new HashMap<Resource, MetadataReader>();
+	private static final int MAX_ENTRIES = 50;
 
+	@SuppressWarnings("serial")
+	private static final <K, V> Map<K, V> createLRUCache() {
+		return new LinkedHashMap<K, V>(MAX_ENTRIES, 0.75f, true) {
+
+			@Override
+			protected boolean removeEldestEntry(Entry<K, V> eldest) {
+				return size() > MAX_ENTRIES;
+			}
+		};
+	}
+
+	private final Map<Resource, MetadataReader> classReaderCache = createLRUCache();
 
 	/**
 	 * Create a new CachingMetadataReaderFactory for the default class loader.
@@ -60,7 +73,6 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 		super(classLoader);
 	}
 
-
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		synchronized (this.classReaderCache) {
@@ -72,5 +84,4 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 			return metadataReader;
 		}
 	}
-
 }
