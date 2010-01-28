@@ -91,7 +91,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * #getSupportedMediaTypes() supported media types} {@linkplain MediaType#includes(MediaType) include} the given media
 	 * type.
 	 */
-	public boolean canRead(Class<? extends T> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return supports(clazz) && canRead(mediaType);
 	}
 
@@ -121,7 +121,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * #getSupportedMediaTypes() supported media types} {@linkplain MediaType#includes(MediaType) include} the given media
 	 * type.
 	 */
-	public boolean canWrite(Class<? extends T> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return supports(clazz) && canWrite(mediaType);
 	}
 
@@ -150,7 +150,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @param clazz the class to test for support
 	 * @return <code>true</code> if supported; <code>false</code> otherwise
 	 */
-	protected abstract boolean supports(Class<? extends T> clazz);
+	protected abstract boolean supports(Class<?> clazz);
 
 	/**
 	 * {@inheritDoc}

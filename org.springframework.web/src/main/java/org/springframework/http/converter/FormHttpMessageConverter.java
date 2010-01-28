@@ -56,7 +56,7 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 	}
 
 	@Override
-	public boolean supports(Class<? extends MultiValueMap<String, String>> clazz) {
+	public boolean supports(Class<?> clazz) {
 		return MultiValueMap.class.isAssignableFrom(clazz);
 	}
 

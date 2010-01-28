@@ -97,6 +97,7 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 		this.unmarshaller = unmarshaller;
 	}
 
+	@Override
 	public boolean supports(Class<?> clazz) {
 		return unmarshaller.supports(clazz);
 	}

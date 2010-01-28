@@ -45,7 +45,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 public class SourceHttpMessageConverter<T extends Source> extends AbstractXmlHttpMessageConverter<T> {
 
 	@Override
-	public boolean supports(Class<? extends T> clazz) {
+	public boolean supports(Class<?> clazz) {
 		return DOMSource.class.equals(clazz) || SAXSource.class.equals(clazz) || StreamSource.class.equals(clazz) ||
 				Source.class.equals(clazz);
 	}

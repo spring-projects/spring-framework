@@ -43,14 +43,14 @@ public class FormHttpMessageConverterTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void canRead() {
-		assertTrue(converter.canRead((Class<? extends MultiValueMap<String, String>>) MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
+		assertTrue(converter.canRead(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void canWrite() {
-		assertTrue(converter.canWrite((Class<? extends MultiValueMap<String, String>>) MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
-		assertTrue(converter.canWrite((Class<? extends MultiValueMap<String, String>>) MultiValueMap.class, MediaType.ALL));
+		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
+		assertTrue(converter.canWrite(MultiValueMap.class, MediaType.ALL));
 	}
 
 	@SuppressWarnings("unchecked")

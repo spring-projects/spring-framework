@@ -37,7 +37,7 @@ public interface HttpMessageConverter<T> {
 	 * @param mediaType the media type to read, can be {@code null} if not specified
 	 * @return <code>true</code> if readable; <code>false</code> otherwise
 	 */
-	boolean canRead(Class<? extends T> clazz, MediaType mediaType);
+	boolean canRead(Class<?> clazz, MediaType mediaType);
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
@@ -45,7 +45,7 @@ public interface HttpMessageConverter<T> {
 	 * @param mediaType the media type to write, can be {@code null} if not specified
 	 * @return <code>true</code> if writable; <code>false</code> otherwise
 	 */
-	boolean canWrite(Class<? extends T> clazz, MediaType mediaType);
+	boolean canWrite(Class<?> clazz, MediaType mediaType);
 
 	/**
 	 * Return the list of {@link MediaType} objects supported by this converter.

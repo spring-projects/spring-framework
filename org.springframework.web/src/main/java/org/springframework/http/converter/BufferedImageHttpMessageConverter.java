@@ -113,7 +113,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		this.cacheDir = cacheDir;
 	}
 
-	public boolean canRead(Class<? extends BufferedImage> clazz, MediaType mediaType) {
+	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		if (BufferedImage.class.equals(clazz)) {
 			return isReadable(mediaType);
 		}
@@ -130,7 +130,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		return imageReaders.hasNext();
 	}
 
-	public boolean canWrite(Class<? extends BufferedImage> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		if (BufferedImage.class.equals(clazz)) {
 			return isWritable(mediaType);
 		}
