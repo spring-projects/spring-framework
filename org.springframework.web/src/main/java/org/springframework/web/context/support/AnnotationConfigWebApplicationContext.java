@@ -43,7 +43,8 @@ import org.springframework.context.annotation.ScopeMetadataResolver;
  * <p>Unlike {@link XmlWebApplicationContext}, no default configuration class locations
  * are assumed. Rather, it is a requirement to set the "contextConfigLocation"
  * context-param for ContextLoader and/or "contextConfigLocation" init-param for
- * FrameworkServlet.
+ * FrameworkServlet.  The param-value may contain both fully-qualified
+ * class names and base packages to scan for components.
  *
  * <p>Note: In case of multiple {@literal @Configuration} classes, later {@literal @Bean}
  * definitions will override ones defined in earlier loaded files. This can be leveraged
