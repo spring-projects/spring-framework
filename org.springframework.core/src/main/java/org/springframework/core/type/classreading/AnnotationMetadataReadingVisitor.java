@@ -19,6 +19,7 @@ package org.springframework.core.type.classreading;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +28,9 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * ASM class visitor which looks for the class name and implemented types as
@@ -35,6 +39,7 @@ import org.springframework.core.type.MethodMetadata;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Costin Leau
  * @since 2.5
  */
 final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
@@ -43,12 +48,11 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	private final Set<String> annotationSet = new LinkedHashSet<String>();
 
-	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>();
+	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>(4);
 
-	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>();
+	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>(4);
 
-	private final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>();
-
+	private final MultiValueMap<String, MethodMetadata> methodMetadataMap = new LinkedMultiValueMap<String, MethodMetadata>();
 
 	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -57,9 +61,7 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		MethodMetadataReadingVisitor mm = new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader);
-		this.methodMetadataSet.add(mm);
-		return mm;
+		return new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, methodMetadataMap);
 	}
 
 	@Override
@@ -132,22 +134,16 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 	}
 
 	public boolean hasAnnotatedMethods(String annotationType) {
-		for (MethodMetadata method : this.methodMetadataSet) {
-			if (method.isAnnotated(annotationType)) {
-				return true;
-			}
-		}
-		return false;
+		return methodMetadataMap.containsKey(annotationType);
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
-		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
-		for (MethodMetadata method : this.methodMetadataSet) {
-			if (method.isAnnotated(annotationType)) {
-				annotatedMethods.add(method);
-			}
+		List<MethodMetadata> list = methodMetadataMap.get(annotationType);
+		if (CollectionUtils.isEmpty(list)) {
+			return new LinkedHashSet<MethodMetadata>(0);
 		}
+		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(list.size());
+		annotatedMethods.addAll(list);
 		return annotatedMethods;
 	}
-
 }
