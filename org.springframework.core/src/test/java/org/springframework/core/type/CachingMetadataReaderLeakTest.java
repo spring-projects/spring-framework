@@ -48,7 +48,8 @@ public class CachingMetadataReaderLeakTest {
 
 	@Test
 	public void testSignificantLoad() throws Exception {
-		URL url = getClass().getResource("/org/springframework/beans/TestBean.class");
+		// the biggest public class in the JDK (>60k)
+		URL url = getClass().getResource("/java/awt/Component.class");
 		assertThat(url, notNullValue());
 
 		// look at a LOT of items
@@ -71,5 +72,8 @@ public class CachingMetadataReaderLeakTest {
 			MetadataReader reader = mrf.getMetadataReader(resource);
 			assertThat(reader, notNullValue());
 		}
+
+		// useful for profiling to take snapshots
+		//System.in.read();
 	}
 }

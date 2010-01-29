@@ -32,55 +32,42 @@ import org.springframework.core.type.ClassMetadata;
  * without effect on users of the <code>core.type</code> package.
  *
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.5
  */
 final class SimpleMetadataReader implements MetadataReader {
 
 	private final Resource resource;
-
-	private final ClassReader classReader;
-
-	private final ClassLoader classLoader;
-
-	private ClassMetadata classMetadata;
-
-	private AnnotationMetadata annotationMetadata;
-
+	private final ClassMetadata classMetadata;
+	private final AnnotationMetadata annotationMetadata;
 
 	SimpleMetadataReader(Resource resource, ClassLoader classLoader) throws IOException {
-		this.resource = resource;
-		InputStream is = this.resource.getInputStream();
+		InputStream is = resource.getInputStream();
+		ClassReader classReader = null;
 		try {
-			this.classReader = new ClassReader(is);
-		}
-		finally {
+			classReader = new ClassReader(is);
+		} finally {
 			is.close();
 		}
-		this.classLoader = classLoader;
-	}
 
+		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader);
+		classReader.accept(visitor, true);
+		
+		this.annotationMetadata = visitor;
+		// (since AnnotationMetadataReader extends ClassMetadataReadingVisitor)
+		this.classMetadata = visitor;
+		this.resource = resource;
+	}
 
 	public Resource getResource() {
 		return this.resource;
 	}
 
 	public ClassMetadata getClassMetadata() {
-		if (this.classMetadata == null) {
-			ClassMetadataReadingVisitor visitor = new ClassMetadataReadingVisitor();
-			this.classReader.accept(visitor, true);
-			this.classMetadata = visitor;
-		}
 		return this.classMetadata;
 	}
 
 	public AnnotationMetadata getAnnotationMetadata() {
-		if (this.annotationMetadata == null) {
-			AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(this.classLoader);
-			this.classReader.accept(visitor, true);
-			this.annotationMetadata = visitor;
-			this.classMetadata = visitor;
-		}
 		return this.annotationMetadata;
 	}
-
 }

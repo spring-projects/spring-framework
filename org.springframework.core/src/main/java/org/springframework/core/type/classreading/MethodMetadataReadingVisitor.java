@@ -25,6 +25,7 @@ import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.MultiValueMap;
 
 /**
  * ASM method visitor which looks for the annotations defined on the method,
@@ -33,6 +34,7 @@ import org.springframework.core.type.MethodMetadata;
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
+ * @author Costin Leau
  * @since 3.0
  */
 final class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
@@ -45,24 +47,26 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	private final ClassLoader classLoader;
 
-	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>();
+	private final MultiValueMap<String, MethodMetadata> methodMetadataMap;
 
+	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>(2);
 
-	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader) {
+	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
+			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
 		super(new EmptyVisitor());
 		this.name = name;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
 		this.classLoader = classLoader;
+		this.methodMetadataMap = methodMetadataMap;
 	}
-
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
+		methodMetadataMap.add(className, this);
 		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
 	}
-
 
 	public String getMethodName() {
 		return this.name;
@@ -91,5 +95,4 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 	public String getDeclaringClassName() {
 		return this.declaringClassName;
 	}
-
 }
