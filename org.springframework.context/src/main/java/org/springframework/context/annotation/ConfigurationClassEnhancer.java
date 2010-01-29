@@ -90,8 +90,8 @@ class ConfigurationClassEnhancer {
 			logger.debug("Enhancing " + configClass.getName());
 		}
 		Class<?> enhancedClass = createClass(newEnhancer(configClass));
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Successfully enhanced %s; enhanced class name is: %s",
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",
 					configClass.getName(), enhancedClass.getName()));
 		}
 		return enhancedClass;

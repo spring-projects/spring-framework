@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,9 @@ import test.beans.TestBean;
 public class ImportedConfigurationClassEnhancementTests {
 
 	
-	@Ignore @Test
+	@Test
 	public void autowiredConfigClassIsEnhancedWhenImported() {
-		autowiredConfigClassIsEnhanced(ConfigThatImports.class);
+		autowiredConfigClassIsEnhanced(ConfigThatDoesImport.class);
 	}
 
 	@Test
@@ -37,13 +36,14 @@ public class ImportedConfigurationClassEnhancementTests {
 	private void autowiredConfigClassIsEnhanced(Class<?>... configClasses) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);
-		assertTrue(AopUtils.isCglibProxyClass(config.autowiredConfig.getClass()));
+		assertTrue("autowired config class has not been enhanced",
+				AopUtils.isCglibProxyClass(config.autowiredConfig.getClass()));
 	}
 	
 	
-	@Ignore @Test
+	@Test
 	public void autowiredConfigClassBeanMethodsRespectScopingWhenImported() {
-		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatImports.class);
+		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesImport.class);
 	}
 	
 	@Test
@@ -56,7 +56,8 @@ public class ImportedConfigurationClassEnhancementTests {
 		Config config = ctx.getBean(Config.class);
 		TestBean testBean1 = config.autowiredConfig.testBean();
 		TestBean testBean2 = config.autowiredConfig.testBean();
-		assertThat(testBean1, sameInstance(testBean2));
+		assertThat("got two distinct instances of testBean when singleton scoping was expected",
+				testBean1, sameInstance(testBean2));
 	}
 	
 }
@@ -68,14 +69,13 @@ class ConfigToBeAutowired {
 	}
 }
 
-
 class Config {
 	@Autowired ConfigToBeAutowired autowiredConfig;
 }
 
 @Import(ConfigToBeAutowired.class)
 @Configuration
-class ConfigThatImports extends Config { }
+class ConfigThatDoesImport extends Config { }
 
 @Configuration
 class ConfigThatDoesNotImport extends Config { }
