@@ -86,9 +86,6 @@ class ConfigurationClassEnhancer {
 	 * @return fully-qualified name of the enhanced subclass
 	 */
 	public Class<?> enhance(Class<?> configClass) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Enhancing " + configClass.getName());
-		}
 		Class<?> enhancedClass = createClass(newEnhancer(configClass));
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",

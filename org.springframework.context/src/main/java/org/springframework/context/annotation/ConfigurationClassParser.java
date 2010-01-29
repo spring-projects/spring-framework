@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
@@ -43,7 +41,7 @@ import org.springframework.util.StringUtils;
  * another using the {@link Import} annotation).
  *
  * <p>This class helps separate the concern of parsing the structure of a Configuration
- * class from the concern of registering {@link BeanDefinition} objects based on the
+ * class from the concern of registering BeanDefinition objects based on the
  * content of that model.
  *
  * <p>This ASM-based implementation avoids reflection and eager class loading in order to
@@ -153,21 +151,10 @@ class ConfigurationClassParser {
 		else {
 			this.importStack.push(configClass);
 			for (String classToImport : classesToImport) {
-				processClassToImport(classToImport);
+				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(classToImport);
+				processConfigurationClass(new ConfigurationClass(reader, null));
 			}
 			this.importStack.pop();
-		}
-	}
-
-	private void processClassToImport(String classToImport) throws IOException {
-		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(classToImport);
-		AnnotationMetadata metadata = reader.getAnnotationMetadata();
-		if (!metadata.isAnnotated(Configuration.class.getName())) {
-			this.problemReporter.error(
-					new NonAnnotatedConfigurationProblem(metadata.getClassName(), reader.getResource(), metadata));
-		}
-		else {
-			processConfigurationClass(new ConfigurationClass(reader, null));
 		}
 	}
 
@@ -226,20 +213,6 @@ class ConfigurationClassParser {
 			}
 			return builder.toString();
 		}
-	}
-
-
-	/**
-	 * Configuration classes must be annotated with {@link Configuration @Configuration}.
-	 */
-	private static class NonAnnotatedConfigurationProblem extends Problem {
-
-		public NonAnnotatedConfigurationProblem(String className, Resource resource, AnnotationMetadata metadata) {
-			super(String.format("%s was imported as a @Configuration class but was not actually annotated " +
-					"with @Configuration. Annotate the class or do not attempt to process it.", className),
-					new Location(resource, metadata));
-		}
-
 	}
 
 
