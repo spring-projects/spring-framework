@@ -106,6 +106,7 @@ class ConfigurationClassBeanDefinitionReader {
 		if (configClass.getBeanName() == null) {
 			GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
 			configBeanDef.setBeanClassName(configClass.getMetadata().getClassName());
+			new ConfigurationClassPostProcessor().checkConfigurationClassCandidate(configBeanDef);
 			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef, this.registry);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
