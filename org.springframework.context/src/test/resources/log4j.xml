@@ -11,9 +11,9 @@
 		</layout>
 	</appender>
 
-	<logger name="org.springframework.context">
-		<level value="debug" />
-	</logger>
+<!--	<logger name="org.springframework.mapping">-->
+<!--		<level value="debug" />-->
+<!--	</logger>-->
 
 	<!-- Root Logger -->
 	<root>

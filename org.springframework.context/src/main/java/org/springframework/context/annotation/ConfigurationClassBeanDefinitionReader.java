@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,22 +27,31 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.Conventions;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.core.type.StandardAnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,20 +68,37 @@ import org.springframework.util.StringUtils;
  */
 class ConfigurationClassBeanDefinitionReader {
 
-	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
+	static final String CONFIGURATION_CLASS_FULL = "full";
 
+	static final String CONFIGURATION_CLASS_LITE = "lite";
+
+	static final String CONFIGURATION_CLASS_ATTRIBUTE =
+		Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
+
+	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
+	
 	private final BeanDefinitionRegistry registry;
 
 	private final SourceExtractor sourceExtractor;
+
+	private final ProblemReporter problemReporter;
+
+	private final MetadataReaderFactory metadataReaderFactory;
+
 
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
+	 * @param problemReporter 
+	 * @param metadataReaderFactory 
 	 */
-	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor) {
+	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
+			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory) {
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
+		this.problemReporter = problemReporter;
+		this.metadataReaderFactory = metadataReaderFactory;
 	}
 
 
@@ -90,7 +117,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * class itself, all its {@link Bean} methods
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
-		doLoadBeanDefinitionForConfigurationClass(configClass);
+		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
 		
 		for (ConfigurationClassMethod method : configClass.getMethods()) {
 			loadBeanDefinitionsForModelMethod(method);
@@ -102,15 +129,30 @@ class ConfigurationClassBeanDefinitionReader {
 	/**
 	 * Registers the {@link Configuration} class itself as a bean definition.
 	 */
-	private void doLoadBeanDefinitionForConfigurationClass(ConfigurationClass configClass) {
-		if (configClass.getBeanName() == null) {
-			GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
-			configBeanDef.setBeanClassName(configClass.getMetadata().getClassName());
-			new ConfigurationClassPostProcessor().checkConfigurationClassCandidate(configBeanDef);
+	private void doLoadBeanDefinitionForConfigurationClassIfNecessary(ConfigurationClass configClass) {
+		if (configClass.getBeanName() != null) {
+			// a bean definition already exists for this configuration class -> nothing to do
+			return;
+		}
+
+		// no bean definition exists yet -> this must be an imported configuration class (@Import).
+		GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
+		String className = configClass.getMetadata().getClassName();
+		configBeanDef.setBeanClassName(className);
+		if(checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
 			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef, this.registry);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
+			}
+		} else {
+			try {
+				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
+				AnnotationMetadata metadata = reader.getAnnotationMetadata();
+				this.problemReporter.error(
+						new InvalidConfigurationImportProblem(className, reader.getResource(), metadata));
+			} catch (IOException ex) {
+				throw new IllegalStateException("Could not create MetadataReader for class " + className);
 			}
 		}
 	}
@@ -236,6 +278,51 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
+	 * Check whether the given bean definition is a candidate for a configuration class,
+	 * and mark it accordingly.
+	 * @param beanDef the bean definition to check
+	 * @param metadataReaderFactory the current factory in use by the caller
+	 * @return whether the candidate qualifies as (any kind of) configuration class
+	 */
+	static boolean checkConfigurationClassCandidate(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
+		AnnotationMetadata metadata = null;
+	
+		// Check already loaded Class if present...
+		// since we possibly can't even load the class file for this Class.
+		if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
+			metadata = new StandardAnnotationMetadata(((AbstractBeanDefinition) beanDef).getBeanClass());
+		}
+		else {
+			String className = beanDef.getBeanClassName();
+			if (className != null) {
+				try {
+					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
+					metadata = metadataReader.getAnnotationMetadata();
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not find class file for introspecting factory methods: " + className, ex);
+					}
+					return false;
+				}
+			}
+		}
+	
+		if (metadata != null) {
+			if (metadata.isAnnotated(Configuration.class.getName())) {
+				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
+				return true;
+			}
+			else if (metadata.isAnnotated(Component.class.getName()) ||
+					metadata.hasAnnotatedMethods(Bean.class.getName())) {
+				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
 	 * created from a configuration class as opposed to any other configuration source.
 	 * Used in bean overriding cases where it's necessary to determine whether the bean
@@ -268,6 +355,22 @@ class ConfigurationClassBeanDefinitionReader {
 		public ConfigurationClassBeanDefinition cloneBeanDefinition() {
 			return new ConfigurationClassBeanDefinition(this);
 		}
+	}
+
+	
+	/**
+	 * Configuration classes must be annotated with {@link Configuration @Configuration} or
+	 * declare at least one {@link Bean @Bean} method.
+	 */
+	private static class InvalidConfigurationImportProblem extends Problem {
+	
+		public InvalidConfigurationImportProblem(String className, Resource resource, AnnotationMetadata metadata) {
+			super(String.format("%s was imported as a Configuration class but is not annotated " +
+					"with @Configuration nor does it declare any @Bean methods. Update the class to " +
+					"meet either of these requirements or do not attempt to import it.", className),
+					new Location(resource, metadata));
+		}
+	
 	}
 
 }
