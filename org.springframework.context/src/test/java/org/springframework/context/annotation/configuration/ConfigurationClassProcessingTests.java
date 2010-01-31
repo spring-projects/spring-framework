@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,13 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,6 +62,7 @@ public class ConfigurationClassProcessingTests {
 			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
 		}
 		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
+		ccpp.postProcessBeanDefinitionRegistry(factory);
 		ccpp.postProcessBeanFactory(factory);
 		RequiredAnnotationBeanPostProcessor rapp = new RequiredAnnotationBeanPostProcessor();
 		rapp.setBeanFactory(factory);
@@ -123,6 +128,19 @@ public class ConfigurationClassProcessingTests {
 		assertNotSame(bar.getSpouse(), baz);
 	}
 
+	@Test
+	public void configurationWithPostProcessor() {
+		BeanFactory factory = new AnnotationConfigApplicationContext(ConfigWithPostProcessor.class);
+
+		TestBean foo = factory.getBean("foo", TestBean.class);
+		ITestBean bar = factory.getBean("bar", ITestBean.class);
+		ITestBean baz = factory.getBean("baz", ITestBean.class);
+
+		assertEquals("foo-processed", foo.getName());
+		assertEquals("bar-processed", bar.getName());
+		assertEquals("baz-processed", baz.getName());
+	}
+
 
 	@Configuration
 	static class ConfigWithBeanWithCustomName {
@@ -152,7 +170,9 @@ public class ConfigurationClassProcessingTests {
 
 	@Configuration
 	static class ConfigWithBeanWithAliases {
+
 		static TestBean testBean = new TestBean();
+
 		@Bean(name={"name1", "alias1", "alias2", "alias3"})
 		public TestBean methodName() {
 			return testBean;
@@ -177,7 +197,40 @@ public class ConfigurationClassProcessingTests {
 
 		@Bean @Scope("prototype")
 		public TestBean baz() {
-			return new TestBean("bar");
+			return new TestBean("baz");
+		}
+	}
+
+
+	static class ConfigWithPostProcessor extends ConfigWithPrototypeBean {
+
+		@Bean
+		public BeanPostProcessor beanPostProcessor() {
+			return new BeanPostProcessor() {
+				String nameSuffix;
+				public void setNameSuffix(String nameSuffix) {
+					this.nameSuffix = nameSuffix;
+				}
+				public Object postProcessBeforeInitialization(Object bean, String beanName) {
+					if (bean instanceof ITestBean) {
+						((ITestBean) bean).setName(((ITestBean) bean).getName() + nameSuffix);
+					}
+					return bean;
+				}
+				public Object postProcessAfterInitialization(Object bean, String beanName) {
+					return bean;
+				}
+			};
+		}
+
+		@Bean
+		public BeanFactoryPostProcessor beanFactoryPostProcessor() {
+			return new BeanFactoryPostProcessor() {
+				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+					BeanDefinition bd = beanFactory.getBeanDefinition("beanPostProcessor");
+					bd.getPropertyValues().addPropertyValue("nameSuffix", "-processed");
+				}
+			};
 		}
 	}
 
