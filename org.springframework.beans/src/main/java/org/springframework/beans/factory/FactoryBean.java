@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public interface FactoryBean<T> {
 	 * or <code>null</code> if not known at the time of the call
 	 * @see ListableBeanFactory#getBeansOfType
 	 */
-	Class<? extends T> getObjectType();
+	Class<?> getObjectType();
 
 	/**
 	 * Is the object managed by this factory a singleton? That is,
