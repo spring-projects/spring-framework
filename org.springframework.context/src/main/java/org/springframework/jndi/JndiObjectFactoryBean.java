@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.jndi;
 
 import java.lang.reflect.Method;
-
+import java.lang.reflect.Modifier;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
@@ -295,7 +295,12 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 					throw new IllegalStateException(
 							"Cannot deactivate 'lookupOnStartup' without specifying a 'proxyInterface' or 'expectedType'");
 				}
-				proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, jof.beanClassLoader));
+				Class[] ifcs = ClassUtils.getAllInterfacesForClass(targetClass, jof.beanClassLoader);
+				for (Class ifc : ifcs) {
+					if (Modifier.isPublic(ifc.getModifiers())) {
+						proxyFactory.addInterface(ifc);
+					}
+				}
 			}
 			if (jof.exposeAccessContext) {
 				proxyFactory.addAdvice(new JndiContextExposingInterceptor(jof.getJndiTemplate()));
