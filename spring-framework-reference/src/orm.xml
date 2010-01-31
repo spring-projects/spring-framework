@@ -1523,7 +1523,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
         files.)</para>
 
         <programlisting language="xml">&lt;bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager"&gt;
-  &lt;property name="persistenceXmlLocation"&gt;
+  &lt;property name="persistenceXmlLocations"&gt;
     &lt;list&gt;
      &lt;value&gt;org/springframework/orm/jpa/domain/persistence-multi.xml&lt;/value&gt;
      &lt;value&gt;classpath:/my/package/**/custom-persistence.xml&lt;/value&gt;
@@ -1542,6 +1542,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
 
 &lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="persistenceUnitManager" ref="pum"/&gt;
+  &lt;property name="persistenceUnitName" value="myCustomUnit"/&gt;
 &lt;/bean&gt;</programlisting>
 
         <para>The default implementation allows customization of the
