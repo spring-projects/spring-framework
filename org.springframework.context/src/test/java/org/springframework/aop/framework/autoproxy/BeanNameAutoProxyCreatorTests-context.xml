@@ -92,11 +92,13 @@
 		<property name="name"><value>jdk1</value></property>
 	</bean>
 
-	<bean id="frozenBean" class="org.springframework.beans.TestBean">
+	<bean id="frozen" class="org.springframework.beans.TestBean">
 		<property name="name" value="frozenBean"/>
 	</bean>
 
-	<bean id="cglib1" class="org.springframework.beans.TestBean">	
+	<alias name="frozen" alias="frozenBean"/>
+
+	<bean id="cglib1" class="org.springframework.beans.TestBean">
 		<property name="name"><value>cglib1</value></property>
 	</bean>
 
