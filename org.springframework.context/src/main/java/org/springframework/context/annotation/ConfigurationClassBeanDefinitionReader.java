@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
@@ -48,7 +49,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Component;
@@ -68,11 +68,11 @@ import org.springframework.util.StringUtils;
  */
 class ConfigurationClassBeanDefinitionReader {
 
-	static final String CONFIGURATION_CLASS_FULL = "full";
+	private static final String CONFIGURATION_CLASS_FULL = "full";
 
-	static final String CONFIGURATION_CLASS_LITE = "lite";
+	private static final String CONFIGURATION_CLASS_LITE = "lite";
 
-	static final String CONFIGURATION_CLASS_ATTRIBUTE =
+	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
 		Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
@@ -86,7 +86,6 @@ class ConfigurationClassBeanDefinitionReader {
 	private final MetadataReaderFactory metadataReaderFactory;
 
 
-
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
@@ -95,6 +94,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory) {
+
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
@@ -145,13 +145,15 @@ class ConfigurationClassBeanDefinitionReader {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
 			}
-		} else {
+		}
+		else {
 			try {
 				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
 				AnnotationMetadata metadata = reader.getAnnotationMetadata();
 				this.problemReporter.error(
 						new InvalidConfigurationImportProblem(className, reader.getResource(), metadata));
-			} catch (IOException ex) {
+			}
+			catch (IOException ex) {
 				throw new IllegalStateException("Could not create MetadataReader for class " + className);
 			}
 		}
@@ -181,7 +183,7 @@ class ConfigurationClassBeanDefinitionReader {
 			this.registry.registerAlias(beanName, alias);
 		}
 
-		// has this already been overriden (i.e.: via XML)?
+		// has this already been overridden (e.g. via XML)?
 		if (this.registry.containsBeanDefinition(beanName)) {
 			BeanDefinition existingBeanDef = registry.getBeanDefinition(beanName);
 			// is the existing bean definition one that was created from a configuration class?
@@ -277,6 +279,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 	}
 
+
 	/**
 	 * Check whether the given bean definition is a candidate for a configuration class,
 	 * and mark it accordingly.
@@ -284,7 +287,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * @param metadataReaderFactory the current factory in use by the caller
 	 * @return whether the candidate qualifies as (any kind of) configuration class
 	 */
-	static boolean checkConfigurationClassCandidate(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
+	public static boolean checkConfigurationClassCandidate(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
 		AnnotationMetadata metadata = null;
 	
 		// Check already loaded Class if present...
@@ -323,13 +326,21 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
+	 * Determine whether the given bean definition indicates a full @Configuration class.
+	 */
+	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
+		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
+	}
+
+
+	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
 	 * created from a configuration class as opposed to any other configuration source.
 	 * Used in bean overriding cases where it's necessary to determine whether the bean
 	 * definition was created externally.
 	 */
 	@SuppressWarnings("serial")
-	private class ConfigurationClassBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
+	private static class ConfigurationClassBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
 
 		private AnnotationMetadata annotationMetadata;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package org.springframework.context.annotation.configuration;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.Test;
+import test.beans.TestBean;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
@@ -34,12 +35,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
-import test.beans.TestBean;
-
 /**
  * Integration tests for {@link ImportResource} support.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ImportResourceTests {
     @Test
@@ -47,13 +47,17 @@ public class ImportResourceTests {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlConfig.class);
         assertTrue("did not contain java-declared bean", ctx.containsBean("javaDeclaredBean"));
         assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
+		TestBean tb = ctx.getBean("javaDeclaredBean", TestBean.class);
+		assertEquals("myName", tb.getName());
     }
 
     @Configuration
     @ImportResource("classpath:org/springframework/context/annotation/configuration/ImportXmlConfig-context.xml")
     static class ImportXmlConfig {
+		@Value("${name}")
+		private String name;
         public @Bean TestBean javaDeclaredBean() {
-            return new TestBean("java.declared");
+            return new TestBean(this.name);
         }
     }
 
@@ -63,6 +67,8 @@ public class ImportResourceTests {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithRelativePathConfig.class);
         assertTrue("did not contain java-declared bean", ctx.containsBean("javaDeclaredBean"));
         assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
+		TestBean tb = ctx.getBean("javaDeclaredBean", TestBean.class);
+		assertEquals("myName", tb.getName());
     }
 
     @Configuration

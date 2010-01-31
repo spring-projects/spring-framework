@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
@@ -569,6 +571,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
+		if (beanFactory instanceof BeanDefinitionRegistry) {
+			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			for (BeanFactoryPostProcessor postProcessor : getBeanFactoryPostProcessors()) {
+				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
+					((BeanDefinitionRegistryPostProcessor) postProcessor).postProcessBeanDefinitionRegistry(registry);
+				}
+			}
+			Collection<BeanDefinitionRegistryPostProcessor> registryPostProcessors =
+					beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false).values();
+			for (BeanDefinitionRegistryPostProcessor postProcessor : registryPostProcessors) {
+				postProcessor.postProcessBeanDefinitionRegistry(registry);
+			}
+		}
+
 		// Invoke factory processors registered with the context instance.
 		invokeBeanFactoryPostProcessors(getBeanFactoryPostProcessors(), beanFactory);
 

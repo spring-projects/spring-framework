@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.CONFIGURATION_CLASS_ATTRIBUTE;
-import static org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader.CONFIGURATION_CLASS_FULL;
-
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -40,6 +37,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -63,7 +61,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor, BeanClassLoaderAware {
+public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor, BeanClassLoaderAware {
 
 	/** Whether the CGLIB2 library is present on the classpath */
 	private static final boolean cglibAvailable = ClassUtils.isPresent(
@@ -125,15 +123,17 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 
 
 	/**
+	 * Derive further bean definitions from the configuration classes in the registry.
+	 */
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+		processConfigBeanDefinitions(registry);
+	}
+
+	/**
 	 * Prepare the Configuration classes for servicing bean requests at runtime
 	 * by replacing them with CGLIB-enhanced subclasses.
 	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		if (!(beanFactory instanceof BeanDefinitionRegistry)) {
-			throw new IllegalStateException(
-					"ConfigurationClassPostProcessor expects a BeanFactory that implements BeanDefinitionRegistry");
-		}
-		processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		enhanceConfigurationClasses(beanFactory);
 	}
 
@@ -174,8 +174,8 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		parser.validate();
 
 		// Read the model and create bean definitions based on its content
-		ConfigurationClassBeanDefinitionReader reader =
-			new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory);
+		ConfigurationClassBeanDefinitionReader reader = new ConfigurationClassBeanDefinitionReader(
+				registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory);
 		reader.loadBeanDefinitions(parser.getConfigurationClasses());
 	}
 
@@ -189,7 +189,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<String, AbstractBeanDefinition>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
-			if (CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE))) {
+			if (ConfigurationClassBeanDefinitionReader.isFullConfigurationClass(beanDef)) {
 				if (!(beanDef instanceof AbstractBeanDefinition)) {
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
