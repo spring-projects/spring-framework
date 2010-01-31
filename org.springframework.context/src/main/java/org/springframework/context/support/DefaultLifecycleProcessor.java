@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +49,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
 
-	private final Log logger = LogFactory.getLog(this.getClass());
+	private final Log logger = LogFactory.getLog(getClass());
 
 	private volatile long timeoutPerShutdownPhase = 30000;
 
@@ -156,7 +158,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				doStart(lifecycleBeans, dependency);
 			}
 			if (!bean.isRunning()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Starting bean '" + beanName + "' of type [" + bean.getClass() + "]");
+				}
 				bean.start();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Successfully started bean '" + beanName + "'");
+				}
 			}
 			lifecycleBeans.remove(beanName);
 		}
@@ -190,28 +198,51 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to stop
 	 */
-	private void doStop(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName, final CountDownLatch latch) {
+	private void doStop(Map<String, ? extends Lifecycle> lifecycleBeans, final String beanName,
+			final CountDownLatch latch, final Set<String> countDownBeanNames) {
+
 		Lifecycle bean = lifecycleBeans.get(beanName);
 		if (bean != null) {
 			String[] dependentBeans = this.beanFactory.getDependentBeans(beanName);
 			for (String dependentBean : dependentBeans) {
-				doStop(lifecycleBeans, dependentBean, latch);
+				doStop(lifecycleBeans, dependentBean, latch, countDownBeanNames);
 			}
-			if (bean.isRunning()) {
-				if (bean instanceof SmartLifecycle) {
-					((SmartLifecycle) bean).stop(new Runnable() {
-						public void run() {
-							latch.countDown();
+			try {
+				if (bean.isRunning()) {
+					if (bean instanceof SmartLifecycle) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Asking bean '" + beanName + "' of type [" + bean.getClass() + "] to stop");
 						}
-					});
+						countDownBeanNames.add(beanName);
+						((SmartLifecycle) bean).stop(new Runnable() {
+							public void run() {
+								latch.countDown();
+								countDownBeanNames.remove(beanName);
+								if (logger.isDebugEnabled()) {
+									logger.debug("Bean '" + beanName + "' completed its stop procedure");
+								}
+							}
+						});
+					}
+					else {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Stopping bean '" + beanName + "' of type [" + bean.getClass() + "]");
+						}
+						bean.stop();
+						if (logger.isDebugEnabled()) {
+							logger.debug("Successfully stopped bean '" + beanName + "'");
+						}
+					}
 				}
-				else {
-					bean.stop();
+				else if (bean instanceof SmartLifecycle) {
+					// don't wait for beans that aren't running
+					latch.countDown();
 				}
 			}
-			else if (bean instanceof SmartLifecycle) {
-				// don't wait for beans that aren't running
-				latch.countDown();
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to stop bean '" + beanName + "'", ex);
+				}
 			}
 			lifecycleBeans.remove(beanName);
 		}
@@ -288,26 +319,33 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		}
 
 		public void start() {
-			if (members.size() == 0) {
+			if (this.members.isEmpty()) {
 				return;
 			}
-			Collections.sort(members);
-			for (LifecycleGroupMember member : members) {
-				if (lifecycleBeans.containsKey(member.name)) {
-					doStart(lifecycleBeans, member.name);
+			if (logger.isInfoEnabled()) {
+				logger.info("Starting beans in phase " + this.phase);
+			}
+			Collections.sort(this.members);
+			for (LifecycleGroupMember member : this.members) {
+				if (this.lifecycleBeans.containsKey(member.name)) {
+					doStart(this.lifecycleBeans, member.name);
 				}
 			}
 		}
 
 		public void stop() {
-			if (members.size() == 0) {
+			if (this.members.isEmpty()) {
 				return;
 			}
-			Collections.sort(members, Collections.reverseOrder());
-			final CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
-			for (LifecycleGroupMember member : members) {
-				if (lifecycleBeans.containsKey(member.name)) {
-					doStop(lifecycleBeans, member.name, latch);
+			if (logger.isInfoEnabled()) {
+				logger.info("Stopping beans in phase " + this.phase);
+			}
+			Collections.sort(this.members, Collections.reverseOrder());
+			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
+			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<String>());
+			for (LifecycleGroupMember member : this.members) {
+				if (this.lifecycleBeans.containsKey(member.name)) {
+					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);
 				}
 				else if (member.bean instanceof SmartLifecycle) {
 					// already removed, must have been a dependent
@@ -316,14 +354,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			try {
 				latch.await(this.timeout, TimeUnit.MILLISECONDS);
-				if (latch.getCount() != 0) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("failed to shutdown beans with phase value " +
-							this.phase + " within timeout of " + this.timeout);
-					}
+				if (latch.getCount() > 0 && !countDownBeanNames.isEmpty() && logger.isWarnEnabled()) {
+					logger.warn("Failed to shut down " + countDownBeanNames.size() + " bean" +
+							(countDownBeanNames.size() > 1 ? "s" : "") + " with phase value " +
+							this.phase + " within timeout of " + this.timeout + ": " + countDownBeanNames);
 				}
 			}
-			catch (InterruptedException e) {
+			catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 		}
