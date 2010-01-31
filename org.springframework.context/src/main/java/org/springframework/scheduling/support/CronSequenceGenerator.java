@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,19 @@ import java.util.TimeZone;
 import org.springframework.util.StringUtils;
 
 /**
- * Date sequence generator for a <a
- * href="http://www.manpagez.com/man/5/crontab/">Crontab pattern</a> allowing
- * client to specify a pattern that the sequence matches. The pattern is a list
- * of 6 single space separated fields representing (second, minute, hour, day,
- * month, weekday). Month and weekday names can be given as the first three
- * letters of the English names.<br/>
- * <br/>
+ * Date sequence generator for a <a href="http://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
+ * allowing clients to specify a pattern that the sequence matches.
  *
- * Example patterns
+ * <p>The pattern is a list of six single space-separated fields: representing
+ * second, minute, hour, day, month, weekday. Month and weekday names can be
+ * given as the first three letters of the English names.
+ *
+ * <p>Example patterns:
  * <ul>
  * <li>"0 0 * * * *" = the top of every hour of every day.</li>
  * <li>"*&#47;10 * * * * *" = every ten seconds.</li>
  * <li>"0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
- * <li>"0 0 8-10/30 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.</li>
+ * <li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.</li>
  * <li>"0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays</li>
  * <li>"0 0 0 25 12 ?" = every Christmas Day at midnight</li>
  * </ul>
@@ -69,6 +68,7 @@ class CronSequenceGenerator {
 
 	private final TimeZone timeZone;
 
+
 	/**
 	 * Construct a {@link CronSequenceGenerator} from the pattern provided.
 	 * @param expression a space-separated list of time fields
@@ -80,6 +80,7 @@ class CronSequenceGenerator {
 		this.timeZone = timeZone;
 		parse(expression);
 	}
+
 
 	/**
 	 * Get the next {@link Date} in the sequence matching the Cron pattern and
@@ -127,7 +128,7 @@ class CronSequenceGenerator {
 		List<Integer> resets = new ArrayList<Integer>();
 
 		int second = calendar.get(Calendar.SECOND);
-		List<Integer> emptyList = Collections.<Integer> emptyList();
+		List<Integer> emptyList = Collections.emptyList();
 		int updateSecond = findNext(this.seconds, second, calendar, Calendar.SECOND, Calendar.MINUTE, emptyList);
 		if (second == updateSecond) {
 			resets.add(Calendar.SECOND);
