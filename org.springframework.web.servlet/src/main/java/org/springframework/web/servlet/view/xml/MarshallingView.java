@@ -122,6 +122,9 @@ public class MarshallingView extends AbstractView {
 	protected Object locateToBeMarshalled(Map model) throws ServletException {
 		if (this.modelKey != null) {
 			Object o = model.get(this.modelKey);
+			if (o == null) {
+				throw new ServletException("Model contains no object with key [" + modelKey + "]");
+			}
 			if (!this.marshaller.supports(o.getClass())) {
 				throw new ServletException("Model object [" + o + "] retrieved via key [" + modelKey +
 						"] is not supported by the Marshaller");
