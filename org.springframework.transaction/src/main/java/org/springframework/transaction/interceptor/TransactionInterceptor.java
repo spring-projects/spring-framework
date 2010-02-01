@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
@@ -173,8 +174,10 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		oos.defaultWriteObject();
 
 		// Deserialize superclass fields.
+		oos.writeObject(getTransactionManagerBeanName());
 		oos.writeObject(getTransactionManager());
 		oos.writeObject(getTransactionAttributeSource());
+		oos.writeObject(getBeanFactory());
 	}
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -184,8 +187,10 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		// Serialize all relevant superclass fields.
 		// Superclass can't implement Serializable because it also serves as base class
 		// for AspectJ aspects (which are not allowed to implement Serializable)!
+		setTransactionManagerBeanName((String) ois.readObject());
 		setTransactionManager((PlatformTransactionManager) ois.readObject());
 		setTransactionAttributeSource((TransactionAttributeSource) ois.readObject());
+		setBeanFactory((BeanFactory) ois.readObject());
 	}
 
 
