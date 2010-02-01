@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ import javax.persistence.FlushModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * Integration tests for LocalContainerEntityManagerFactoryBean.
@@ -250,6 +252,14 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		catch (NoResultException ex) {
 			// expected
 		}
+	}
+
+	public void testCanSerializeProxies() throws Exception {
+		// just necessary because of AbstractJpaTests magically cloning the BeanFactory
+		((DefaultListableBeanFactory) getApplicationContext().getBeanFactory()).setSerializationId("emf-it");
+
+		assertNotNull(SerializationTestUtils.serializeAndDeserialize(entityManagerFactory));
+		assertNotNull(SerializationTestUtils.serializeAndDeserialize(sharedEntityManager));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import org.springframework.util.SerializationTestUtils;
  */
 public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanTests {
 
-	public void testPrivatePersistenceContextField() {
+	public void testPrivatePersistenceContextField() throws Exception {
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
 		gac.registerBeanDefinition("annotationProcessor",
@@ -73,6 +73,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				"&" + FactoryBeanWithPersistenceContextField.class.getName());
 		assertNotNull(bean.em);
 		assertNotNull(bean2.em);
+
+		assertNotNull(SerializationTestUtils.serializeAndDeserialize(bean.em));
+		assertNotNull(SerializationTestUtils.serializeAndDeserialize(bean2.em));
 	}
 
 	public void testPrivateVendorSpecificPersistenceContextField() {
@@ -111,8 +114,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 	public void testPublicExtendedPersistenceContextSetterWithSerialization() throws Exception {
 		DummyInvocationHandler ih = new DummyInvocationHandler();
-		Object mockEm = (EntityManager) Proxy.newProxyInstance(
-				getClass().getClassLoader(), new Class[] {EntityManager.class}, ih);
+		Object mockEm = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {EntityManager.class}, ih);
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
@@ -141,7 +143,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	public void testPublicExtendedPersistenceContextSetterWithEntityManagerInfoAndSerialization() throws Exception {
-		Object mockEm = (EntityManager) Proxy.newProxyInstance(
+		Object mockEm = Proxy.newProxyInstance(
 				getClass().getClassLoader(), new Class[] {EntityManager.class}, new DummyInvocationHandler());
 		MockControl emfMc = MockControl.createControl(EntityManagerFactoryWithInfo.class);
 		EntityManagerFactoryWithInfo mockEmf = (EntityManagerFactoryWithInfo) emfMc.getMock();
@@ -175,7 +177,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	public void testPublicExtendedPersistenceContextSetterWithOverriding() {
-		EntityManager mockEm2 = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+		EntityManager mockEm2 = MockControl.createControl(EntityManager.class).getMock();
 
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);

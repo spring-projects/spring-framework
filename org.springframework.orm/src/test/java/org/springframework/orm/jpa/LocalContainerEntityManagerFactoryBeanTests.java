@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -30,12 +29,14 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.easymock.MockControl;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
@@ -74,6 +75,13 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		assertNotSame("EMF must be proxied", mockEmf, emf);
 		assertTrue(emf.equals(emf));
+
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setSerializationId("emf-bf");
+		bf.registerSingleton("emf", cefb);
+		cefb.setBeanFactory(bf);
+		cefb.setBeanName("emf");
+		assertNotNull(SerializationTestUtils.serializeAndDeserialize(emf));
 	}
 
 	public void testApplicationManagedEntityManagerWithoutTransaction() throws Exception {
