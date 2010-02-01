@@ -106,9 +106,13 @@ public class ConstructorReference extends SpelNodeImpl {
 				Throwable rootCause = (causeOfAccessException==null?null:causeOfAccessException.getCause());
 				if (rootCause!=null) {
 					// User exception was the root cause - exit now
-					String typename = (String) children[0].getValueInternal(state).getValue();
-					throw new SpelEvaluationException(getStartPosition(), rootCause, SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,
-							typename,FormatHelper.formatMethodForMessage("", argumentTypes));
+					if (rootCause instanceof RuntimeException) {
+						throw (RuntimeException)rootCause;
+					} else {
+						String typename = (String) children[0].getValueInternal(state).getValue();
+						throw new SpelEvaluationException(getStartPosition(), rootCause, SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,
+								typename,FormatHelper.formatMethodForMessage("", argumentTypes));
+					}
 				}
 				
 				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found

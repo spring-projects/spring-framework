@@ -116,13 +116,32 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		eContext.setVariable("bar",1);
 		try {
 			o = expr.getValue(eContext);
+			Assert.fail();
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (e instanceof SpelEvaluationException) {
+				e.printStackTrace();
+				Assert.fail("Should not be a SpelEvaluationException");
+			}
 			// normal
 		}
 		// If counter is 4 then the method got called twice!
 		Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
-	}
+
+		eContext.setVariable("bar",4);
+		try {
+			o = expr.getValue(eContext);
+			Assert.fail();
+		} catch (Exception e) {
+			// 4 means it will throw a checked exception - this will be wrapped
+			if (!(e instanceof SpelEvaluationException)) {
+				e.printStackTrace();
+				Assert.fail("Should have been wrapped");
+			}
+			// normal
+		}
+		// If counter is 5 then the method got called twice!
+		Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
+}
 
 	@Test
 	public void testVarargsInvocation01() {
