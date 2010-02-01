@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,16 +78,13 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
 			Map<String, Object> attributes =
 					annDef.getMetadata().getAnnotationAttributes(this.scopeAnnotationType.getName());
-			ScopedProxyMode annMode = null;
 			if (attributes != null) {
 				metadata.setScopeName((String) attributes.get("value"));
-				annMode = (ScopedProxyMode) attributes.get("proxyMode");
-			}
-			if (annMode != null && annMode != ScopedProxyMode.DEFAULT) {
-				metadata.setScopedProxyMode(annMode);
-			}
-			else if (!metadata.getScopeName().equals(BeanDefinition.SCOPE_SINGLETON)) {
-				metadata.setScopedProxyMode(this.defaultProxyMode);
+				ScopedProxyMode proxyMode = (ScopedProxyMode) attributes.get("proxyMode");
+				if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
+					proxyMode = this.defaultProxyMode;
+				}
+				metadata.setScopedProxyMode(proxyMode);
 			}
 		}
 		return metadata;
