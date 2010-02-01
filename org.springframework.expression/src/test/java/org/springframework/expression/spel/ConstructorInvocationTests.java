@@ -41,19 +41,26 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		evaluateAndCheckError("new FooBar()",SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
 	}
 	
+	static class TestException extends Exception {
+		
+	}
+	
 	static class Tester {
 		public static int counter;
 		public int i;
 		
 		public Tester() {}
 		
-		public Tester(int i) {
+		public Tester(int i) throws Exception {
 			counter++;
 			if (i==1) {
 				throw new IllegalArgumentException("IllegalArgumentException for 1");
 			}
 			if (i==2) {
 				throw new RuntimeException("RuntimeException for 2");
+			}
+			if (i==4) {
+				throw new TestException();
 			}
 			this.i = i;
 		}
@@ -100,11 +107,11 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		Assert.assertEquals(3, o);
 		Assert.assertEquals(2,parser.parseExpression("counter").getValue(eContext));
 
-		
-		// Now cause it to throw an exception:
-		eContext.setVariable("bar",1);
+		// 4 will make it throw a checked exception - this will be wrapped by spel on the way out
+		eContext.setVariable("bar",4);
 		try {
 			o = expr.getValue(eContext);
+			Assert.fail("Should have failed");
 		} catch (Exception e) {
 			// A problem occurred whilst attempting to construct an object of type 'org.springframework.expression.spel.ConstructorInvocationTests$Tester' using arguments '(java.lang.Integer)'
 			int idx = e.getMessage().indexOf("Tester");
@@ -115,6 +122,22 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		}
 		// If counter is 4 then the method got called twice!
 		Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
+		
+		
+		// 1 will make it throw a RuntimeException - SpEL will let this through
+		eContext.setVariable("bar",1);
+		try {
+			o = expr.getValue(eContext);
+			Assert.fail("Should have failed");
+		} catch (Exception e) {
+			// A problem occurred whilst attempting to construct an object of type 'org.springframework.expression.spel.ConstructorInvocationTests$Tester' using arguments '(java.lang.Integer)'
+			if (e instanceof SpelEvaluationException) {
+				e.printStackTrace();
+				Assert.fail("Should not have been wrapped");
+			}
+		}
+		// If counter is 5 then the method got called twice!
+		Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
 	}
 	
 	@Test

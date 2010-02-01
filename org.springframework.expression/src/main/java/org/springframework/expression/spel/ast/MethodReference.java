@@ -93,8 +93,12 @@ public class MethodReference extends SpelNodeImpl {
 				Throwable rootCause = (causeOfAccessException==null?null:causeOfAccessException.getCause());
 				if (rootCause!=null) {
 					// User exception was the root cause - exit now
-					throw new SpelEvaluationException( getStartPosition(), rootCause, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
+					if (rootCause instanceof RuntimeException) {
+						throw (RuntimeException)rootCause;
+					} else {
+						throw new SpelEvaluationException( getStartPosition(), rootCause, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
 							this.name, state.getActiveContextObject().getValue().getClass().getName(), rootCause.getMessage());
+					}
 				}
 				
 				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
