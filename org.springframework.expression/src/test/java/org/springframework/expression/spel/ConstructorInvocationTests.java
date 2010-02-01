@@ -16,8 +16,13 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 /**
  * Tests invocation of constructors.
@@ -34,6 +39,82 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 	@Test
 	public void testNonExistentType() {
 		evaluateAndCheckError("new FooBar()",SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
+	}
+	
+	static class Tester {
+		public static int counter;
+		public int i;
+		
+		public Tester() {}
+		
+		public Tester(int i) {
+			counter++;
+			if (i==1) {
+				throw new IllegalArgumentException("IllegalArgumentException for 1");
+			}
+			if (i==2) {
+				throw new RuntimeException("RuntimeException for 2");
+			}
+			this.i = i;
+		}
+		
+		public Tester(PlaceOfBirth pob) {
+			
+		}
+		
+	}
+	@Test
+	public void testConstructorThrowingException_SPR6760() {
+		// Test ctor on inventor:
+		// On 1 it will throw an IllegalArgumentException
+		// On 2 it will throw a RuntimeException
+		// On 3 it will exit normally
+		// In each case it increments the Tester field 'counter' when invoked
+		
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expr = parser.parseExpression("new org.springframework.expression.spel.ConstructorInvocationTests$Tester(#bar).i");
+
+		// Normal exit
+		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+		eContext.setRootObject(new Tester());
+		eContext.setVariable("bar",3);
+		Object o = expr.getValue(eContext);
+		Assert.assertEquals(o,3);
+		Assert.assertEquals(1,parser.parseExpression("counter").getValue(eContext));
+
+		// Now the expression has cached that throwException(int) is the right thing to call
+		// Let's change 'bar' to be a PlaceOfBirth which indicates the cached reference is
+		// out of date.
+		eContext.setVariable("bar",new PlaceOfBirth("London"));
+		o = expr.getValue(eContext);
+		Assert.assertEquals(0, o);
+		// That confirms the logic to mark the cached reference stale and retry is working
+		
+		
+		// Now let's cause the method to exit via exception and ensure it doesn't cause
+		// a retry.
+		
+		// First, switch back to throwException(int)
+		eContext.setVariable("bar",3);
+		o = expr.getValue(eContext);
+		Assert.assertEquals(3, o);
+		Assert.assertEquals(2,parser.parseExpression("counter").getValue(eContext));
+
+		
+		// Now cause it to throw an exception:
+		eContext.setVariable("bar",1);
+		try {
+			o = expr.getValue(eContext);
+		} catch (Exception e) {
+			// A problem occurred whilst attempting to construct an object of type 'org.springframework.expression.spel.ConstructorInvocationTests$Tester' using arguments '(java.lang.Integer)'
+			int idx = e.getMessage().indexOf("Tester");
+			if (idx==-1) {
+				Assert.fail("Expected reference to Tester in :"+e.getMessage());
+			}
+			// normal
+		}
+		// If counter is 4 then the method got called twice!
+		Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
 	}
 	
 	@Test
