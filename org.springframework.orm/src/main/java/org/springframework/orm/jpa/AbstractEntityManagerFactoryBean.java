@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.orm.jpa;
 
+import java.io.NotSerializableException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,6 +40,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -73,8 +79,8 @@ import org.springframework.util.CollectionUtils;
  * @see LocalContainerEntityManagerFactoryBean
  */
 public abstract class AbstractEntityManagerFactoryBean implements
-		FactoryBean<EntityManagerFactory>, BeanClassLoaderAware, InitializingBean, DisposableBean,
-		EntityManagerFactoryInfo, PersistenceExceptionTranslator {
+		FactoryBean<EntityManagerFactory>, BeanClassLoaderAware, BeanFactoryAware, BeanNameAware,
+		InitializingBean, DisposableBean, EntityManagerFactoryInfo, PersistenceExceptionTranslator, Serializable {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -95,8 +101,14 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	private ClassLoader beanClassLoader = getClass().getClassLoader();
 
+	private BeanFactory beanFactory;
+
+	private String beanName;
+
 	/** Raw EntityManagerFactory as returned by the PersistenceProvider */
 	public EntityManagerFactory nativeEntityManagerFactory;
+
+	private EntityManagerFactoryPlusOperations plusOperations;
 
 	private EntityManagerFactory entityManagerFactory;
 
@@ -254,6 +266,14 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		return this.beanClassLoader;
 	}
 
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
 
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {
@@ -317,14 +337,13 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(), this.beanClassLoader));
 		}
 		ifcs.add(EntityManagerFactoryInfo.class);
-		EntityManagerFactoryPlusOperations plusOperations = null;
 		if (getJpaDialect() != null && getJpaDialect().supportsEntityManagerFactoryPlusOperations()) {
-			plusOperations = getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
+			this.plusOperations = getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
 			ifcs.add(EntityManagerFactoryPlusOperations.class);
 		}
 		return (EntityManagerFactory) Proxy.newProxyInstance(
 				this.beanClassLoader, ifcs.toArray(new Class[ifcs.size()]),
-				new ManagedEntityManagerFactoryInvocationHandler(emf, this, plusOperations));
+				new ManagedEntityManagerFactoryInvocationHandler(this));
 	}
 
 	/**
@@ -390,25 +409,67 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
+		if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
+			return method.invoke(this, args);
+		}
+		else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
+			return method.invoke(this.plusOperations, args);
+		}
+		Object retVal = method.invoke(this.nativeEntityManagerFactory, args);
+		if (retVal instanceof EntityManager) {
+			EntityManager rawEntityManager = (EntityManager) retVal;
+			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this);
+		}
+		return retVal;
+	}
+
+	protected Object writeReplace() throws ObjectStreamException {
+		if (this.beanFactory != null && this.beanName != null) {
+			return new SerializedEntityManagerFactoryBeanReference(this.beanFactory, this.beanName);
+		}
+		else {
+			throw new NotSerializableException("EntityManagerFactoryBean does not run within a BeanFactory");
+		}
+	}
+
+
+	/**
+	 * Minimal bean reference to the surrounding AbstractEntityManagerFactoryBean.
+	 * Resolved to the actual AbstractEntityManagerFactoryBean instance on deserialization.
+	 */
+	private static class SerializedEntityManagerFactoryBeanReference implements Serializable {
+
+		private final BeanFactory beanFactory;
+
+		private final String lookupName;
+
+		public SerializedEntityManagerFactoryBeanReference(BeanFactory beanFactory, String beanName) {
+			this.beanFactory = beanFactory;
+			this.lookupName = BeanFactory.FACTORY_BEAN_PREFIX + beanName;
+		}
+
+		private Object readResolve() {
+			return this.beanFactory.getBean(this.lookupName, AbstractEntityManagerFactoryBean.class);
+		}
+	}
+
+
 	/**
 	 * Dynamic proxy invocation handler proxying an EntityManagerFactory to
 	 * return a proxy EntityManager if necessary from createEntityManager()
 	 * methods.
 	 */
-	private static class ManagedEntityManagerFactoryInvocationHandler implements InvocationHandler {
+	private static class ManagedEntityManagerFactoryInvocationHandler implements InvocationHandler, Serializable {
 
-		private final EntityManagerFactory targetEntityManagerFactory;
+		private final AbstractEntityManagerFactoryBean entityManagerFactoryBean;
 
-		private final EntityManagerFactoryInfo entityManagerFactoryInfo;
-
-		private final EntityManagerFactoryPlusOperations entityManagerFactoryPlusOperations;
-
-		public ManagedEntityManagerFactoryInvocationHandler(EntityManagerFactory targetEmf,
-				EntityManagerFactoryInfo emfInfo, EntityManagerFactoryPlusOperations entityManagerFactoryPlusOperations) {
-
-			this.targetEntityManagerFactory = targetEmf;
-			this.entityManagerFactoryInfo = emfInfo;
-			this.entityManagerFactoryPlusOperations = entityManagerFactoryPlusOperations;
+		public ManagedEntityManagerFactoryInvocationHandler(AbstractEntityManagerFactoryBean emfb) {
+			this.entityManagerFactoryBean = emfb;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -421,20 +482,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					// Use hashCode of EntityManagerFactory proxy.
 					return System.identityHashCode(proxy);
 				}
-				else if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
-					return method.invoke(this.entityManagerFactoryInfo, args);
-				}
-				else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
-					return method.invoke(this.entityManagerFactoryPlusOperations, args);
-				}
-
-				Object retVal = method.invoke(this.targetEntityManagerFactory, args);
-				if (retVal instanceof EntityManager) {
-					EntityManager rawEntityManager = (EntityManager) retVal;
-					retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(
-							rawEntityManager, this.entityManagerFactoryInfo);
-				}
-				return retVal;
+				return this.entityManagerFactoryBean.invokeProxyMethod(method, args);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();

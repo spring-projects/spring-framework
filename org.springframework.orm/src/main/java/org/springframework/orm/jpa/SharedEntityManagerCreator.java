@@ -16,6 +16,9 @@
 
 package org.springframework.orm.jpa;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -123,7 +126,7 @@ public abstract class SharedEntityManagerCreator {
 	 * transactional EntityManager, if any; else, it will fall back
 	 * to a newly created EntityManager per operation.
 	 */
-	private static class SharedEntityManagerInvocationHandler implements InvocationHandler {
+	private static class SharedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
 
 		private final Log logger = LogFactory.getLog(getClass());
 
@@ -131,11 +134,15 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Map properties;
 
-		private final ClassLoader proxyClassLoader;
+		private transient volatile ClassLoader proxyClassLoader;
 
 		public SharedEntityManagerInvocationHandler(EntityManagerFactory target, Map properties) {
 			this.targetFactory = target;
 			this.properties = properties;
+			initProxyClassLoader();
+		}
+
+		private void initProxyClassLoader() {
 			if (this.targetFactory instanceof EntityManagerFactoryInfo) {
 				this.proxyClassLoader = ((EntityManagerFactoryInfo) this.targetFactory).getBeanClassLoader();
 			}
@@ -253,6 +260,13 @@ public abstract class SharedEntityManagerCreator {
 					EntityManagerFactoryUtils.closeEntityManager(target);
 				}
 			}
+		}
+
+		private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+			// Rely on default serialization, just initialize state after deserialization.
+			ois.defaultReadObject();
+			// Initialize transient fields.
+			initProxyClassLoader();
 		}
 	}
 
