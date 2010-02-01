@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,9 @@ public interface EntityManagerFactoryInfo {
 
 	/**
 	 * Return the name of the persistence unit used to create this 
-	 * EntityManagerFactory, or <code>null</code> if
-	 * it is an unnamed default. If <code>getPersistenceUnitInfo()</code>
-	 * returns non-null, the return type of <code>getPersistenceUnitName()</code>
-	 * must be equal to the value returned by
+	 * EntityManagerFactory, or <code>null</code> if it is an unnamed default.
+	 * <p>If <code>getPersistenceUnitInfo()</code> returns non-null, the result of
+	 * <code>getPersistenceUnitName()</code> must be equal to the value returned by
 	 * <code>PersistenceUnitInfo.getPersistenceUnitName()</code>.
 	 * @see #getPersistenceUnitInfo()
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceUnitName()
