@@ -32,6 +32,7 @@ public class Inventor {
 	public List<Integer> listOneFive = new ArrayList<Integer>();
 	public String[] stringArrayOfThreeItems = new String[]{"1","2","3"};
 	private String foo;
+	public int counter;
 	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
@@ -88,6 +89,21 @@ public class Inventor {
 
 	public PlaceOfBirth getPlaceOfBirth() {
 		return placeOfBirth;
+	}
+	
+	public int throwException(int valueIn) {
+		counter++;
+		if (valueIn==1) {
+			throw new IllegalArgumentException("IllegalArgumentException for 1");
+		}
+		if (valueIn==2) {
+			throw new RuntimeException("RuntimeException for 2");
+		}
+		return valueIn;
+	}
+	
+	public String throwException(PlaceOfBirth pob) {
+		return pob.getCity();
 	}
 
 	public String getName() {

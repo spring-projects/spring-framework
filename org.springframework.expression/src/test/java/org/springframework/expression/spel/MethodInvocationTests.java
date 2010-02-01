@@ -16,7 +16,12 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 /**
  * Tests invocation of methods.
@@ -68,6 +73,55 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		// Rely on Double>String conversion for calling startsWith()
 		evaluate("new String('hello 2.0 to you').startsWith(7.0d)", false, Boolean.class);
 		evaluate("new String('7.0 foobar').startsWith(7.0d)", true, Boolean.class);
+	}
+	
+	@Test
+	public void testMethodThrowingException_SPR6760() {
+		// Test method on inventor: throwException()
+		// On 1 it will throw an IllegalArgumentException
+		// On 2 it will throw a RuntimeException
+		// On 3 it will exit normally
+		// In each case it increments the Inventor field 'counter' when invoked
+		
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expr = parser.parseExpression("throwException(#bar)");
+
+		// Normal exit
+		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+		eContext.setVariable("bar",3);
+		Object o = expr.getValue(eContext);
+		Assert.assertEquals(o,3);
+		Assert.assertEquals(1,parser.parseExpression("counter").getValue(eContext));
+
+		// Now the expression has cached that throwException(int) is the right thing to call
+		// Let's change 'bar' to be a PlaceOfBirth which indicates the cached reference is
+		// out of date.
+		eContext.setVariable("bar",new PlaceOfBirth("London"));
+		o = expr.getValue(eContext);
+		Assert.assertEquals("London", o);
+		// That confirms the logic to mark the cached reference stale and retry is working
+		
+		
+		// Now let's cause the method to exit via exception and ensure it doesn't cause
+		// a retry.
+		
+		// First, switch back to throwException(int)
+		eContext.setVariable("bar",3);
+		o = expr.getValue(eContext);
+		Assert.assertEquals(3, o);
+		Assert.assertEquals(2,parser.parseExpression("counter").getValue(eContext));
+
+		
+		// Now cause it to throw an exception:
+		eContext.setVariable("bar",1);
+		try {
+			o = expr.getValue(eContext);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// normal
+		}
+		// If counter is 4 then the method got called twice!
+		Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
 	}
 
 	@Test
