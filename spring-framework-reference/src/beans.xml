@@ -4392,8 +4392,33 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
   <section id="beans-annotation-config">
     <title>Annotation-based container configuration</title>
 
-    <para>As mentioned in <xref
-    linkend="beans-factory-extension-bpp-examples-rabpp" />, using a
+    <sidebar>
+    	<title>Are annotations better then XML for configuring Spring?</title>
+    	
+    	<para>The introduction of annotation based configurations raised the question of whether
+    	this approach is better or not then XML. The short answer is <emphasis>it depends.</emphasis>.
+    	The long answer is that each approach has it's pros and cons and usually it's up to the developer
+    	to decide which strategy suits her better.
+    	Due to the way they are defined, annotations provide a lot of context in their declaration leading
+    	to shorter, more concise configurations. However XML excels at wiring up components without touching
+    	their source code or recompile them. Some prefer having the wiring close to the source while
+    	others argue that annotated classes are no longer POJOs and further more that the configuration becomes
+    	decentralized and harder to control.</para>
+    	<para>    	
+    	No matter the choice, Spring can accomodate both styles and even mix them together. It's worth pointing
+    	out that through its <link linkend="beans-java">JavaConfig</link> option, Spring allows annotations to 
+    	be used in a non-invasive way, without touching the target components source code and that
+    	in terms of tooling, all configuration styles are supported by the <ulink url="http://www.springsource.com/products/sts">SpringSource Tool Suite</ulink>. 
+    	</para>
+    </sidebar>
+    
+    <para>
+    An alternative to XML setups is provided by annotation-based configuration which rely 
+    on the bytecode metadata for wiring up components instead on angle-bracket declarations.
+    Instead of using XML to describe a bean wiring, the developers moves the configuration into
+    the component class itself by using annotations on relevant class, method or field declaration.
+    
+    As mentioned in <xref linkend="beans-factory-extension-bpp-examples-rabpp" />, using a
     <interfacename>BeanPostProcessor</interfacename> in conjunction with
     annotations is a common means of extending the Spring IoC container. For
     example, Spring 2.0 introduced the possibility of enforcing required
@@ -5307,7 +5332,7 @@ public class JpaMovieFinder implements MovieFinder {
         by including the <emphasis>annotation-config</emphasis> attribute with
         a value of false.</para>
       </note>
-
+	  <!-- 
       <note>
         <para>In Spring 3.0 RC1 you can use JSR 330's
         <interfacename>@Named</interfacename> annotation in place of
@@ -5319,6 +5344,7 @@ public class JpaMovieFinder implements MovieFinder {
         299 scopes is planned for Spring 3.0 GA assuming the JSRs are stable
         at that time.</para>
       </note>
+       -->
     </section>
 
     <section id="beans-scanning-filters">
