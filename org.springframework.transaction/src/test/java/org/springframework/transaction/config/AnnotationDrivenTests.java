@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.config;
 
+import java.io.Serializable;
+
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -24,6 +26,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rob Harrop
@@ -51,14 +54,31 @@ public class AnnotationDrivenTests extends TestCase {
 		assertEquals(2, tm2.commits);
 	}
 
+	public void testSerializableWithPreviousUsage() throws Exception {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
+		TransactionalService service = context.getBean("service", TransactionalService.class);
+		service.setSomething("someName");
+		service = (TransactionalService) SerializationTestUtils.serializeAndDeserialize(service);
+		service.setSomething("someName");
+	}
 
-	public static class TransactionCheckingInterceptor implements MethodInterceptor {
+	public void testSerializableWithoutPreviousUsage() throws Exception {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
+		TransactionalService service = context.getBean("service", TransactionalService.class);
+		service = (TransactionalService) SerializationTestUtils.serializeAndDeserialize(service);
+		service.setSomething("someName");
+	}
+
+
+	public static class TransactionCheckingInterceptor implements MethodInterceptor, Serializable {
 
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			if (methodInvocation.getMethod().getName().equals("setSomething")) {
+				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 			}
 			else {
+				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 			}
 			return methodInvocation.proceed();
