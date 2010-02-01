@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,15 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.util.ClassUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Mark Fisher
@@ -320,7 +318,6 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 
 	@Component
-	@Scope("singleton")
 	public static class SingletonScopedTestBean extends ScopedTestBean {
 	}
 
