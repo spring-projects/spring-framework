@@ -16,6 +16,8 @@
 
 package org.springframework.aop.aspectj;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Map;
@@ -75,27 +77,29 @@ import org.springframework.util.StringUtils;
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
-	private static final Set<PointcutPrimitive> DEFAULT_SUPPORTED_PRIMITIVES = new HashSet<PointcutPrimitive>();
+	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<PointcutPrimitive>();
 
 	static {
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.ARGS);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.REFERENCE);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.THIS);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.WITHIN);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ANNOTATION);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_WITHIN);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
-		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.ARGS);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.REFERENCE);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.THIS);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.WITHIN);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ANNOTATION);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_WITHIN);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
+		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
 	}
 
 
 	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
-	private final Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<Method, ShadowMatch>(32);
+	private transient PointcutParser pointcutParser;
 
-	private PointcutParser pointcutParser;
+	private transient PointcutExpression pointcutExpression;
+
+	private transient Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<Method, ShadowMatch>(32);
 
 	private Class pointcutDeclarationScope;
 
@@ -105,26 +109,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private BeanFactory beanFactory;
 
-	private PointcutExpression pointcutExpression;
-
 
 	/**
 	 * Create a new default AspectJExpressionPointcut.
 	 */
 	public AspectJExpressionPointcut() {
-		this(DEFAULT_SUPPORTED_PRIMITIVES);
-	}
-
-	/**
-	 * Create a new AspectJExpressionPointcut with the given supported primitives.
-	 * @param supportedPrimitives Set of {@link org.aspectj.weaver.tools.PointcutPrimitive}
-	 * instances
-	 */
-	public AspectJExpressionPointcut(Set supportedPrimitives) {
-		this.pointcutParser =
-				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
-						supportedPrimitives);
-		this.pointcutParser.registerPointcutDesignatorHandler(new BeanNamePointcutDesignatorHandler());
+		initializePointcutParser();
 	}
 
 	/**
@@ -134,7 +124,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 * @param paramTypes the parameter types for the pointcut
 	 */
 	public AspectJExpressionPointcut(Class declarationScope, String[] paramNames, Class[] paramTypes) {
-		this(DEFAULT_SUPPORTED_PRIMITIVES);
+		initializePointcutParser();
 		this.pointcutDeclarationScope = declarationScope;
 		if (paramNames.length != paramTypes.length) {
 			throw new IllegalStateException(
@@ -142,6 +132,13 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		this.pointcutParameterNames = paramNames;
 		this.pointcutParameterTypes = paramTypes;
+	}
+
+	private void initializePointcutParser() {
+		this.pointcutParser =
+				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
+						SUPPORTED_PRIMITIVES);
+		this.pointcutParser.registerPointcutDesignatorHandler(new BeanNamePointcutDesignatorHandler());
 	}
 
 
@@ -526,6 +523,20 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			}
 			return false;
 		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		initializePointcutParser();
+		this.shadowMatchCache = new ConcurrentHashMap<Method, ShadowMatch>(32);
 	}
 
 }

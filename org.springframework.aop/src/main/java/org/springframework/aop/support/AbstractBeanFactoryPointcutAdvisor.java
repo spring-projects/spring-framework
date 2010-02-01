@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.aop.support;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import org.aopalliance.aop.Advice;
 
@@ -41,9 +44,9 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 
 	private BeanFactory beanFactory;
 
-	private Advice advice;
+	private transient Advice advice;
 
-	private final Object adviceMonitor = new Object();
+	private transient volatile Object adviceMonitor = new Object();
 
 
 	/**
@@ -74,7 +77,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		synchronized (this.adviceMonitor) {
 			if (this.advice == null && this.adviceBeanName != null) {
 				Assert.state(this.beanFactory != null, "BeanFactory must be set to resolve 'adviceBeanName'");
-				this.advice = (Advice) this.beanFactory.getBean(this.adviceBeanName, Advice.class);
+				this.advice = this.beanFactory.getBean(this.adviceBeanName, Advice.class);
 			}
 			return this.advice;
 		}
@@ -83,6 +86,19 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	@Override
 	public String toString() {
 		return getClass().getName() + ": advice bean '" + getAdviceBeanName() + "'";
+	}
+
+
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		this.adviceMonitor = new Object();
 	}
 
 }
