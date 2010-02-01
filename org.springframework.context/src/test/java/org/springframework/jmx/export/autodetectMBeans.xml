@@ -23,4 +23,6 @@
 		</property>
 	</bean>
 
+	<bean id="toBeIgnored" class="javax.management.DynamicMBean" abstract="true"/>
+
 </beans>
