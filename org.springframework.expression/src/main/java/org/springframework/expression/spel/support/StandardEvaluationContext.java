@@ -97,10 +97,19 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensureConstructorResolversInitialized();
 		this.constructorResolvers.add(this.constructorResolvers.size() - 1, resolver);
 	}
+
+	public boolean removeConstructorResolver(ConstructorResolver resolver) {
+		ensureConstructorResolversInitialized();
+		return this.constructorResolvers.remove(resolver);
+	}
 	
 	public List<ConstructorResolver> getConstructorResolvers() {
 		ensureConstructorResolversInitialized();
 		return this.constructorResolvers;
+	}
+	
+	public void setConstructorResolvers(List<ConstructorResolver> constructorResolvers) {
+		this.constructorResolvers = constructorResolvers;
 	}
 
 	private void ensureConstructorResolversInitialized() {
@@ -114,10 +123,19 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensureMethodResolversInitialized();
 		this.methodResolvers.add(this.methodResolvers.size() - 1, resolver);
 	}
+	
+	public boolean removeMethodResolver(MethodResolver methodResolver) {
+		ensureMethodResolversInitialized();
+		return this.methodResolvers.remove(methodResolver);
+	}
 
 	public List<MethodResolver> getMethodResolvers() {
 		ensureMethodResolversInitialized();
 		return this.methodResolvers;
+	}
+
+	public void setMethodResolvers(List<MethodResolver> methodResolvers) {
+		this.methodResolvers = methodResolvers;
 	}
 	
 	private void ensureMethodResolversInitialized() {
@@ -131,10 +149,18 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensurePropertyAccessorsInitialized();
 		this.propertyAccessors.add(this.propertyAccessors.size() - 1, accessor);
 	}
+	
+	public boolean removePropertyAccessor(PropertyAccessor accessor) {
+		return this.propertyAccessors.remove(accessor);
+	}
 
 	public List<PropertyAccessor> getPropertyAccessors() {
 		ensurePropertyAccessorsInitialized();
 		return this.propertyAccessors;
+	}
+	
+	public void setPropertyAccessors(List<PropertyAccessor> propertyAccessors) {
+		this.propertyAccessors = propertyAccessors;
 	}
 
 	private void ensurePropertyAccessorsInitialized() {
