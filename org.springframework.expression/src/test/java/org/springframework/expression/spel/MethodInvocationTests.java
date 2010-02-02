@@ -16,9 +16,18 @@
 
 package org.springframework.expression.spel;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.expression.Expression;
+import org.springframework.expression.MethodFilter;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
@@ -141,7 +150,99 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		}
 		// If counter is 5 then the method got called twice!
 		Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
-}
+	}
+	
+	@Test
+	public void testMethodFiltering_SPR6764() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setRootObject(new TestObject());
+		LocalFilter filter = new LocalFilter();
+		context.registerMethodFilter(TestObject.class,filter);
+		
+		// Filter will be called but not do anything, so first doit() will be invoked
+		SpelExpression expr = (SpelExpression) parser.parseExpression("doit(1)");
+		String result = expr.getValue(context,String.class);
+		Assert.assertEquals("1",result);
+		Assert.assertTrue(filter.filterCalled);
+		
+		// Filter will now remove non @Anno annotated methods
+		filter.removeIfNotAnnotated = true;
+		filter.filterCalled = false;
+		expr = (SpelExpression) parser.parseExpression("doit(1)");
+		result = expr.getValue(context,String.class);
+		Assert.assertEquals("double 1.0",result);
+		Assert.assertTrue(filter.filterCalled);
+		
+		// check not called for other types
+		filter.filterCalled=false;
+		context.setRootObject(new String("abc"));
+		expr = (SpelExpression) parser.parseExpression("charAt(0)");
+		result = expr.getValue(context,String.class);
+		Assert.assertEquals("a",result);
+		Assert.assertFalse(filter.filterCalled);
+		
+		// check de-registration works
+		filter.filterCalled = false;
+		context.registerMethodFilter(TestObject.class,null);//clear filter
+		context.setRootObject(new TestObject());
+		expr = (SpelExpression) parser.parseExpression("doit(1)");
+		result = expr.getValue(context,String.class);
+		Assert.assertEquals("1",result);
+		Assert.assertFalse(filter.filterCalled);
+	}
+	
+	// Simple filter
+	static class LocalFilter implements MethodFilter {
+		
+		public boolean removeIfNotAnnotated = false;
+		
+		public boolean filterCalled = false;
+		
+		private boolean isAnnotated(Method m) {
+			Annotation[] annos = m.getAnnotations();
+			if (annos==null) {
+				return false;
+			}
+			for (Annotation anno: annos) {
+				String s = anno.annotationType().getName();
+				if (s.endsWith("Anno")) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public List<Method> filter(List<Method> methods) {
+			filterCalled = true;
+			List<Method> forRemoval = new ArrayList<Method>();
+			for (Method m: methods) {
+				if (removeIfNotAnnotated && !isAnnotated(m)) {
+					forRemoval.add(m);
+				}
+			}
+			for (Method m: forRemoval) {
+				methods.remove(m);
+			}
+			return methods;
+		}
+		
+	}
+	
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Anno {}
+	
+	class TestObject {
+		public int doit(int i) {
+			return i;
+		}
+		
+		@Anno
+		public String doit(double d) {
+			return "double "+d;
+		}
+		
+	}
 
 	@Test
 	public void testVarargsInvocation01() {

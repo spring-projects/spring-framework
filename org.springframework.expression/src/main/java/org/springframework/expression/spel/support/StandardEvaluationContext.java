@@ -25,6 +25,7 @@ import java.util.Map;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.MethodFilter;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
@@ -50,6 +51,8 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private List<ConstructorResolver> constructorResolvers;
 
 	private List<MethodResolver> methodResolvers;
+	
+	private ReflectiveMethodResolver reflectiveMethodResolver;
 
 	private List<PropertyAccessor> propertyAccessors;
 
@@ -120,7 +123,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private void ensureMethodResolversInitialized() {
 		if (this.methodResolvers == null) {
 			this.methodResolvers = new ArrayList<MethodResolver>();
-			this.methodResolvers.add(new ReflectiveMethodResolver());
+			this.methodResolvers.add(reflectiveMethodResolver=new ReflectiveMethodResolver());
 		}
 	}
 
@@ -197,6 +200,19 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public Object lookupVariable(String name) {
 		return this.variables.get(name);
+	}
+
+	/**
+	 * Register a MethodFilter which will be called during method resolution for the
+	 * specified type.  The MethodFilter may remove methods and/or sort the methods
+	 * which will then be used by SpEL as the candidates to look through for a match.
+	 * 
+	 * @param type the type for which the filter should be called
+	 * @param filter a MethodFilter, or NULL to deregister a filter for the type
+	 */
+	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
+		ensureMethodResolversInitialized();
+		reflectiveMethodResolver.registerMethodFilter(type,filter);
 	}
 
 }

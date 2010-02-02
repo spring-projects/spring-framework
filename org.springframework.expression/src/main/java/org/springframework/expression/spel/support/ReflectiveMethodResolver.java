@@ -17,15 +17,22 @@
 package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.MethodFilter;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+
+
 
 /**
  * A method resolver that uses reflection to locate the method that should be invoked
@@ -35,6 +42,11 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class ReflectiveMethodResolver implements MethodResolver {
 
+	private static Method[] NO_METHODS = new Method[0];
+
+	private Map<Class<?>,MethodFilter> filters = null;
+
+	
 	/**
 	 * Locate a method on a type. There are three kinds of match that might occur:
 	 * <ol>
@@ -49,6 +61,23 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
 			Method[] methods = type.getMethods();
+			
+			// If a filter is registered for this type, call it
+			MethodFilter methodfilter = (filters==null?null:filters.get(type));
+			if (methodfilter!=null) {
+			    List<Method> methodsForFiltering = new ArrayList<Method>();
+			    for (Method method: methods) {
+			    	methodsForFiltering.add(method);
+			    }
+				List<Method> methodsFiltered = methodfilter.filter(methodsForFiltering);
+				if (methodsFiltered == null || methodsFiltered.size()==0) {
+					methods = NO_METHODS;
+				}
+				else {
+					methods = methodsFiltered.toArray(new Method[methodsFiltered.size()]);
+				}
+			}
+			
 			Method closeMatch = null;
 			int[] argsToConvert = null;
 			boolean multipleOptions = false;
@@ -98,6 +127,18 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		}
 		catch (EvaluationException ex) {
 			throw new AccessException("Failed to resolve method", ex);
+		}
+	}
+
+	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
+		if (filters==null) {
+			filters = new HashMap<Class<?>,MethodFilter>();
+		}
+		if (filter==null) {
+			filters.remove(type);
+		}
+		else {
+			filters.put(type,filter);
 		}
 	}
 
