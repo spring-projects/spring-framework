@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.OrderComparator;
@@ -99,6 +102,8 @@ import org.springframework.web.util.WebUtils;
  * @see BeanNameViewResolver
  */
 public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport implements ViewResolver, Ordered {
+
+	private static final Log logger = LogFactory.getLog(ContentNegotiatingViewResolver.class);
 
 	private static final String ACCEPT_HEADER = "Accept";
 
@@ -267,9 +272,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				if (logger.isDebugEnabled()) {
 					logger.debug("Requested media type is '" + mediaType + "' (based on filename '" + filename + "')");
 				}
-				List<MediaType> mediaTypes = new ArrayList<MediaType>();
-				mediaTypes.add(mediaType);
-				return mediaTypes;
+				return Collections.singletonList(mediaType);
 			}
 		}
 		if (this.favorParameter) {
@@ -281,9 +284,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 						logger.debug("Requested media type is '" + mediaType + "' (based on parameter '" +
 								this.parameterName + "'='" + parameterValue + "')");
 					}
-					List<MediaType> mediaTypes = new ArrayList<MediaType>();
-					mediaTypes.add(mediaType);
-					return mediaTypes;
+					return Collections.singletonList(mediaType);
 				}
 			}
 		}
@@ -291,6 +292,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			String acceptHeader = request.getHeader(ACCEPT_HEADER);
 			if (StringUtils.hasText(acceptHeader)) {
 				List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
+				MediaType.sortBySpecificity(mediaTypes);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Requested media types are " + mediaTypes + " (based on Accept header)");
 				}
@@ -298,6 +300,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			}
 		}
 		if (this.defaultContentType != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Requested media types is " + defaultContentType + " (based on defaultContentType property)");
+			}
 			return Collections.singletonList(this.defaultContentType);
 		}
 		else {
@@ -348,10 +353,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		ServletRequestAttributes servletAttrs = (ServletRequestAttributes) attrs;
 
 		List<MediaType> requestedMediaTypes = getMediaTypes(servletAttrs.getRequest());
-		if (requestedMediaTypes.size() > 1) {
-			// avoid sorting attempt for empty list and singleton list
-			Collections.sort(requestedMediaTypes);
-		}
 
 		List<View> candidateViews = new ArrayList<View>();
 		for (ViewResolver viewResolver : this.viewResolvers) {
@@ -364,32 +365,44 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			candidateViews.addAll(this.defaultViews);
 		}
 
-		SortedMap<MediaType, View> views = new TreeMap<MediaType, View>();
-		for (View candidateView : candidateViews) {
-			String contentType = candidateView.getContentType();
-			if (StringUtils.hasText(contentType)) {
-				MediaType viewMediaType = MediaType.parseMediaType(contentType);
-				for (MediaType requestedMediaType : requestedMediaTypes) {
-					if (requestedMediaType.includes(viewMediaType)) {
-						if (!views.containsKey(requestedMediaType)) {
-							views.put(requestedMediaType, candidateView);
-							break;
-						}
+		MediaType bestRequestedMediaType = null;
+		View bestView = null;
+		for (MediaType requestedMediaType : requestedMediaTypes) {
+			for (View candidateView : candidateViews) {
+				if (StringUtils.hasText(candidateView.getContentType())) {
+					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
+					if (requestedMediaType.includes(candidateContentType)) {
+						bestRequestedMediaType = requestedMediaType;
+						bestView = candidateView;
+						break;
 					}
 				}
 			}
+			if (bestView != null) {
+				break;
+			}
 		}
 
-		if (!views.isEmpty()) {
-			MediaType mediaType = views.firstKey();
-			View view = views.get(mediaType);
+		if (bestView != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Returning [" + view + "] based on requested media type '" + mediaType + "'");
+				logger.debug("Returning [" + bestView + "] based on requested media type '" +
+						bestRequestedMediaType + "'");
 			}
-			return view;
+			return bestView;
 		}
 		else {
-			return useNotAcceptableStatusCode ? new NotAcceptableView() : null;
+			if (useNotAcceptableStatusCode) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("No acceptable view found; returning 406 (Not Acceptable) status code");
+				}
+				return NOT_ACCEPTABLE_VIEW;
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("No acceptable view found; returning null");
+				}
+				return null;
+			}
 		}
 	}
 
@@ -408,6 +421,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			// see if we can find the extended mime.types from the context-support module
 			Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
 			if (mappingLocation.exists()) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Loading Java Activation Framework FileTypeMap from " + mappingLocation);
+				}
 				InputStream inputStream = null;
 				try {
 					inputStream = mappingLocation.getInputStream();
@@ -427,6 +443,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 					}
 				}
 			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("Loading default Java Activation Framework FileTypeMap");
+			}
 			return FileTypeMap.getDefaultFileTypeMap();
 		}
 
@@ -436,7 +455,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 	}
 
-	private static class NotAcceptableView implements View {
+	private static final View NOT_ACCEPTABLE_VIEW = new View() {
 
 		public String getContentType() {
 			return null;
@@ -446,5 +465,5 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				throws Exception {
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		}
-	}
+	};
 }
