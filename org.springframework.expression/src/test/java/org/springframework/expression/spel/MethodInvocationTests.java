@@ -25,8 +25,12 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.expression.AccessException;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodFilter;
+import org.springframework.expression.MethodResolver;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -243,6 +247,38 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		}
 		
 	}
+	
+	@Test
+	public void testAddingMethodResolvers() {
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		
+		// reflective method accessor is the only one by default
+		List<MethodResolver> methodResolvers = ctx.getMethodResolvers();
+		Assert.assertEquals(1,methodResolvers.size());
+		
+		MethodResolver dummy = new DummyMethodResolver();
+		ctx.addMethodResolver(dummy);
+		Assert.assertEquals(2,ctx.getMethodResolvers().size());
+		
+		List<MethodResolver> copy = new ArrayList<MethodResolver>();
+		copy.addAll(ctx.getMethodResolvers());
+		Assert.assertTrue(ctx.removeMethodResolver(dummy));
+		Assert.assertFalse(ctx.removeMethodResolver(dummy));
+		Assert.assertEquals(1,ctx.getMethodResolvers().size());
+		
+		ctx.setMethodResolvers(copy);
+		Assert.assertEquals(2,ctx.getMethodResolvers().size());
+	}
+	
+	static class DummyMethodResolver implements MethodResolver {
+
+		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
+				Class<?>[] argumentTypes) throws AccessException {
+			throw new UnsupportedOperationException("Auto-generated method stub");
+		}
+		
+	}
+
 
 	@Test
 	public void testVarargsInvocation01() {

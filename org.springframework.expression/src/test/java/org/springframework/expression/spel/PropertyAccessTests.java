@@ -16,6 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -128,6 +131,28 @@ public class PropertyAccessTests extends ExpressionTestCase {
 			// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''
 			// System.out.println(e.getMessage());
 		}
+	}
+	
+	@Test
+	public void testAddingRemovingAccessors() {
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		
+		// reflective property accessor is the only one by default
+		List<PropertyAccessor> propertyAccessors = ctx.getPropertyAccessors();
+		Assert.assertEquals(1,propertyAccessors.size());
+		
+		StringyPropertyAccessor spa = new StringyPropertyAccessor();
+		ctx.addPropertyAccessor(spa);
+		Assert.assertEquals(2,ctx.getPropertyAccessors().size());
+		
+		List<PropertyAccessor> copy = new ArrayList<PropertyAccessor>();
+		copy.addAll(ctx.getPropertyAccessors());
+		Assert.assertTrue(ctx.removePropertyAccessor(spa));
+		Assert.assertFalse(ctx.removePropertyAccessor(spa));
+		Assert.assertEquals(1,ctx.getPropertyAccessors().size());
+		
+		ctx.setPropertyAccessors(copy);
+		Assert.assertEquals(2,ctx.getPropertyAccessors().size());
 	}
 
 

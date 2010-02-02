@@ -16,9 +16,16 @@
 
 package org.springframework.expression.spel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.expression.AccessException;
+import org.springframework.expression.ConstructorExecutor;
+import org.springframework.expression.ConstructorResolver;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -138,6 +145,37 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		}
 		// If counter is 5 then the method got called twice!
 		Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
+	}
+	
+	@Test
+	public void testAddingConstructorResolvers() {
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		
+		// reflective constructor accessor is the only one by default
+		List<ConstructorResolver> constructorResolvers = ctx.getConstructorResolvers();
+		Assert.assertEquals(1,constructorResolvers.size());
+		
+		ConstructorResolver dummy = new DummyConstructorResolver();
+		ctx.addConstructorResolver(dummy);
+		Assert.assertEquals(2,ctx.getConstructorResolvers().size());
+		
+		List<ConstructorResolver> copy = new ArrayList<ConstructorResolver>();
+		copy.addAll(ctx.getConstructorResolvers());
+		Assert.assertTrue(ctx.removeConstructorResolver(dummy));
+		Assert.assertFalse(ctx.removeConstructorResolver(dummy));
+		Assert.assertEquals(1,ctx.getConstructorResolvers().size());
+		
+		ctx.setConstructorResolvers(copy);
+		Assert.assertEquals(2,ctx.getConstructorResolvers().size());
+	}
+	
+	static class DummyConstructorResolver implements ConstructorResolver {
+
+		public ConstructorExecutor resolve(EvaluationContext context, String typeName, Class<?>[] argumentTypes)
+				throws AccessException {
+			throw new UnsupportedOperationException("Auto-generated method stub");
+		}
+		
 	}
 	
 	@Test
