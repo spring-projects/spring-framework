@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,8 +128,8 @@ public class ContentNegotiatingViewResolverTests {
 
 		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
 		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
-		expect(viewMock1.getContentType()).andReturn("application/xml");
-		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
+		expect(viewMock1.getContentType()).andReturn("application/xml").anyTimes();
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1").anyTimes();
 
 		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
 
@@ -160,8 +160,8 @@ public class ContentNegotiatingViewResolverTests {
 
 		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
 		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
-		expect(viewMock1.getContentType()).andReturn("application/xml");
-		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
+		expect(viewMock1.getContentType()).andReturn("application/xml").anyTimes();
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1").anyTimes();
 
 		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
 
@@ -197,9 +197,9 @@ public class ContentNegotiatingViewResolverTests {
 
 		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
 		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
-		expect(viewMock1.getContentType()).andReturn("application/xml");
-		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
-		expect(viewMock3.getContentType()).andReturn("application/json");
+		expect(viewMock1.getContentType()).andReturn("application/xml").anyTimes();
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1").anyTimes();
+		expect(viewMock3.getContentType()).andReturn("application/json").anyTimes();
 
 		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2, viewMock3);
 
@@ -229,8 +229,8 @@ public class ContentNegotiatingViewResolverTests {
 
 		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
 		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
-		expect(viewMock1.getContentType()).andReturn("application/xml");
-		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
+		expect(viewMock1.getContentType()).andReturn("application/xml").anyTimes();
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1").anyTimes();
 
 		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
 
@@ -269,9 +269,9 @@ public class ContentNegotiatingViewResolverTests {
 
 		expect(viewResolverMock1.resolveViewName(viewName, locale)).andReturn(viewMock1);
 		expect(viewResolverMock2.resolveViewName(viewName, locale)).andReturn(viewMock2);
-		expect(viewMock1.getContentType()).andReturn("application/xml");
-		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1");
-		expect(viewMock3.getContentType()).andReturn("application/json");
+		expect(viewMock1.getContentType()).andReturn("application/xml").anyTimes();
+		expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1").anyTimes();
+		expect(viewMock3.getContentType()).andReturn("application/json").anyTimes();
 
 		replay(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2, viewMock3);
 
@@ -296,7 +296,7 @@ public class ContentNegotiatingViewResolverTests {
 		Locale locale = Locale.ENGLISH;
 
 		expect(viewResolverMock.resolveViewName(viewName, locale)).andReturn(viewMock);
-		expect(viewMock.getContentType()).andReturn(null);
+		expect(viewMock.getContentType()).andReturn(null).anyTimes();
 
 		replay(viewResolverMock, viewMock);
 
@@ -321,7 +321,7 @@ public class ContentNegotiatingViewResolverTests {
 		Locale locale = Locale.ENGLISH;
 
 		expect(viewResolverMock.resolveViewName(viewName, locale)).andReturn(viewMock);
-		expect(viewMock.getContentType()).andReturn("application/pdf");
+		expect(viewMock.getContentType()).andReturn("application/pdf").anyTimes();
 
 		replay(viewResolverMock, viewMock);
 
@@ -347,7 +347,7 @@ public class ContentNegotiatingViewResolverTests {
 		Locale locale = Locale.ENGLISH;
 
 		expect(viewResolverMock.resolveViewName(viewName, locale)).andReturn(viewMock);
-		expect(viewMock.getContentType()).andReturn("application/pdf");
+		expect(viewMock.getContentType()).andReturn("application/pdf").anyTimes();
 
 		replay(viewResolverMock, viewMock);
 

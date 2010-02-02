@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Comparator;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -49,9 +51,25 @@ public class MediaTypeTests {
 
 	@Test
 	public void testToString() throws Exception {
-		MediaType mediaType = new MediaType("text", "plain", Collections.singletonMap("q", "0.7"));
+		MediaType mediaType = new MediaType("text", "plain", 0.7);
 		String result = mediaType.toString();
 		assertEquals("Invalid toString() returned", "text/plain;q=0.7", result);
+	}
+
+	@Test(expected= IllegalArgumentException.class)
+	public void slashInType() {
+		new MediaType("text/plain");
+	}
+
+	@Test(expected= IllegalArgumentException.class)
+	public void slashInSubtype() {
+		new MediaType("text", "/");
+	}
+	
+	@Test
+	public void getDefaultQualityValue() {
+		MediaType mediaType = new MediaType("text", "plain");
+		assertEquals("Invalid quality value", 1, mediaType.getQualityValue(), 0D);
 	}
 
 	@Test
@@ -94,50 +112,104 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	public void compareTo() throws Exception {
+	public void specificityComparator() throws Exception {
 		MediaType audioBasic = new MediaType("audio", "basic");
+		MediaType audioWave = new MediaType("audio", "wave");
 		MediaType audio = new MediaType("audio");
-		MediaType audio03 = new MediaType("audio", "*", Collections.singletonMap("q", "0.3"));
-		MediaType audio07 = new MediaType("audio", "*", Collections.singletonMap("q", "0.7"));
+		MediaType audio03 = new MediaType("audio", "*", 0.3);
+		MediaType audio07 = new MediaType("audio", "*", 0.7);
+		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
+		MediaType textHtml = new MediaType("text", "html");
 		MediaType all = MediaType.ALL;
 
+		Comparator<MediaType> comp = MediaType.SPECIFICITY_COMPARATOR;
+
 		// equal
-		assertEquals("Invalid comparison result", 0, audioBasic.compareTo(audioBasic));
-		assertEquals("Invalid comparison result", 0, audio.compareTo(audio));
-		assertEquals("Invalid comparison result", 0, audio07.compareTo(audio07));
+		assertEquals("Invalid comparison result", 0, comp.compare(audioBasic,audioBasic));
+		assertEquals("Invalid comparison result", 0, comp.compare(audio, audio));
+		assertEquals("Invalid comparison result", 0, comp.compare(audio07, audio07));
+		assertEquals("Invalid comparison result", 0, comp.compare(audio03, audio03));
+		assertEquals("Invalid comparison result", 0, comp.compare(audioBasicLevel, audioBasicLevel));
 
 		// specific to unspecific
-		assertTrue("Invalid comparison result", audioBasic.compareTo(audio) < 0);
-		assertTrue("Invalid comparison result", audioBasic.compareTo(all) < 0);
-		assertTrue("Invalid comparison result", audio.compareTo(all) < 0);
+		assertTrue("Invalid comparison result", comp.compare(audioBasic, audio) < 0);
+		assertTrue("Invalid comparison result", comp.compare(audioBasic, all) < 0);
+		assertTrue("Invalid comparison result", comp.compare(audio, all) < 0);
 
 		// unspecific to specific
-		assertTrue("Invalid comparison result", audio.compareTo(audioBasic) > 0);
-		assertTrue("Invalid comparison result", all.compareTo(audioBasic) > 0);
-		assertTrue("Invalid comparison result", all.compareTo(audio) > 0);
+		assertTrue("Invalid comparison result", comp.compare(audio, audioBasic) > 0);
+		assertTrue("Invalid comparison result", comp.compare(all, audioBasic) > 0);
+		assertTrue("Invalid comparison result", comp.compare(all, audio) > 0);
 
 		// qualifiers
-		assertTrue("Invalid comparison result", audio.compareTo(audio07) < 0);
-		assertTrue("Invalid comparison result", audio07.compareTo(audio03) < 0);
-		assertTrue("Invalid comparison result", audio03.compareTo(all) > 0);
+		assertTrue("Invalid comparison result", comp.compare(audio, audio07) < 0);
+		assertTrue("Invalid comparison result", comp.compare(audio07, audio) > 0);
+		assertTrue("Invalid comparison result", comp.compare(audio07, audio03) < 0);
+		assertTrue("Invalid comparison result", comp.compare(audio03, audio07) > 0);
+		assertTrue("Invalid comparison result", comp.compare(audio03, all) < 0);
+		assertTrue("Invalid comparison result", comp.compare(all, audio03) > 0);
 
-		// sort
+		// other parameters
+		assertTrue("Invalid comparison result", comp.compare(audioBasic, audioBasicLevel) > 0);
+		assertTrue("Invalid comparison result", comp.compare(audioBasicLevel, audioBasic) < 0);
+
+		// different types
+		assertEquals("Invalid comparison result", 0, comp.compare(audioBasic, textHtml));
+		assertEquals("Invalid comparison result", 0, comp.compare(textHtml, audioBasic));
+
+		// different subtypes
+		assertEquals("Invalid comparison result", 0, comp.compare(audioBasic, audioWave));
+		assertEquals("Invalid comparison result", 0, comp.compare(audioWave, audioBasic));
+	}
+
+	@Test
+	public void sortBySpecificityRelated() {
+		MediaType audioBasic = new MediaType("audio", "basic");
+		MediaType audio = new MediaType("audio");
+		MediaType audio03 = new MediaType("audio", "*", 0.3);
+		MediaType audio07 = new MediaType("audio", "*", 0.7);
+		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
+		MediaType all = MediaType.ALL;
+
 		List<MediaType> expected = new ArrayList<MediaType>();
+		expected.add(audioBasicLevel);
 		expected.add(audioBasic);
 		expected.add(audio);
-		expected.add(all);
 		expected.add(audio07);
 		expected.add(audio03);
+		expected.add(all);
 
 		List<MediaType> result = new ArrayList<MediaType>(expected);
+		Random rnd = new Random();
+		// shuffle & sort 10 times
 		for (int i = 0; i < 10; i++) {
-			Collections.shuffle(result);
-			Collections.sort(result);
+			Collections.shuffle(result, rnd);
+			MediaType.sortBySpecificity(result);
 
 			for (int j = 0; j < result.size(); j++) {
-				assertEquals("Invalid media type at " + j, expected.get(j), result.get(j));
+				assertSame("Invalid media type at " + j, expected.get(j), result.get(j));
 			}
 		}
+	}
+
+	@Test
+	public void sortBySpecificityUnrelated() {
+		MediaType audioBasic = new MediaType("audio", "basic");
+		MediaType audioWave = new MediaType("audio", "wave");
+		MediaType textHtml = new MediaType("text", "html");
+
+		List<MediaType> expected = new ArrayList<MediaType>();
+		expected.add(textHtml);
+		expected.add(audioBasic);
+		expected.add(audioWave);
+
+		List<MediaType> result = new ArrayList<MediaType>(expected);
+		MediaType.sortBySpecificity(result);
+
+		for (int i = 0; i < result.size(); i++) {
+			assertSame("Invalid media type at " + i, expected.get(i), result.get(i));
+		}
+
 	}
 
 }

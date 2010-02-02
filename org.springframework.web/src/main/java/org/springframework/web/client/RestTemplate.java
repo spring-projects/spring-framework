@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -412,7 +412,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			if (responseType != null) {
 				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-				for (HttpMessageConverter messageConverter : getMessageConverters()) {
+				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
 					if (messageConverter.canRead(responseType, null)) {
 						List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
 						for (MediaType supportedMediaType : supportedMediaTypes) {
@@ -425,7 +425,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 					}
 				}
 				if (!allSupportedMediaTypes.isEmpty()) {
-					Collections.sort(allSupportedMediaTypes);
+					MediaType.sortBySpecificity(allSupportedMediaTypes);
 					request.getHeaders().setAccept(allSupportedMediaTypes);
 				}
 			}
@@ -458,7 +458,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
 			super.doWithRequest(httpRequest);
 			if (requestBody != null) {
-				Class requestType = requestBody.getClass();
+				Class<?> requestType = requestBody.getClass();
 				for (HttpMessageConverter messageConverter : getMessageConverters()) {
 					if (messageConverter.canWrite(requestType, requestContentType)) {
 						messageConverter.write(requestBody, requestContentType, httpRequest);

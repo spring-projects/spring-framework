@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Comparator;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -40,10 +41,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7">HTTP 1.1</a>
+ * @see <a href="http://tools.ietf.org/html/rfc2616#section-3.7">HTTP 1.1, section 3.7</a>
  * @since 3.0
  */
-public class MediaType implements Comparable<MediaType> {
+public class MediaType {
 
 	public static final MediaType ALL = new MediaType("*", "*");
 
@@ -60,8 +61,9 @@ public class MediaType implements Comparable<MediaType> {
 	private final Map<String, String> parameters;
 
 	/**
-	 * Create a new {@link MediaType} for the given primary type. <p>The {@linkplain #getSubtype() subtype} is set to
-	 * <code>&#42;</code>, parameters empty.
+	 * Create a new {@link MediaType} for the given primary type.
+	 *
+	 * <p>The {@linkplain #getSubtype() subtype} is set to <code>&#42;</code>, parameters empty.
 	 *
 	 * @param type the primary type
 	 */
@@ -91,6 +93,17 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
+	 * Create a new {@link MediaType} for the given type, subtype, and quality value.
+	 *
+	 * @param type the primary type
+	 * @param subtype the subtype
+	 * @param qualityValue the quality value
+	 */
+	public MediaType(String type, String subtype, double qualityValue) {
+		this(type, subtype, Collections.singletonMap(PARAM_QUALITY_FACTORY, Double.toString(qualityValue)));
+	}
+
+	/**
 	 * Create a new {@link MediaType} for the given type, subtype, and parameters.
 	 *
 	 * @param type the primary type
@@ -100,10 +113,12 @@ public class MediaType implements Comparable<MediaType> {
 	public MediaType(String type, String subtype, Map<String, String> parameters) {
 		Assert.hasText(type, "'type' must not be empty");
 		Assert.hasText(subtype, "'subtype' must not be empty");
+		Assert.doesNotContain(type, "/", "'type' must not contain /");
+		Assert.doesNotContain(subtype, "/", "'subtype' must not contain /");
 		this.type = type.toLowerCase(Locale.ENGLISH);
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
-			this.parameters = new LinkedCaseInsensitiveMap<String>(parameters.size());
+			this.parameters = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
 			this.parameters.putAll(parameters);
 		}
 		else {
@@ -141,7 +156,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @return the character set; or <code>null</code> if not available
 	 */
 	public Charset getCharSet() {
-		String charSet = this.parameters.get(PARAM_CHARSET);
+		String charSet = getParameter(PARAM_CHARSET);
 		return (charSet != null ? Charset.forName(charSet) : null);
 	}
 
@@ -151,7 +166,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @return the quality factory
 	 */
 	public double getQualityValue() {
-		String qualityFactory = this.parameters.get(PARAM_QUALITY_FACTORY);
+		String qualityFactory = getParameter(PARAM_QUALITY_FACTORY);
 		return (qualityFactory != null ? Double.parseDouble(qualityFactory) : 1D);
 	}
 
@@ -166,8 +181,10 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Indicate whether this {@link MediaType} includes the given media type. <p>For instance, {@code text/*} includes
-	 * {@code text/plain}, {@code text/html}, and {@code application/*+xml} includes {@code application/soap+xml}, etc.
+	 * Indicate whether this {@link MediaType} includes the given media type.
+	 *
+	 * <p>For instance, {@code text/*} includes {@code text/plain}, {@code text/html}, and {@code application/*+xml}
+	 * includes {@code application/soap+xml}, etc.
 	 *
 	 * @param other the reference media type with which to compare
 	 * @return <code>true</code> if this media type includes the given media type; <code>false</code> otherwise
@@ -194,51 +211,6 @@ public class MediaType implements Comparable<MediaType> {
 			}
 		}
 		return isWildcardType();
-	}
-
-	/**
-	 * Compare this {@link MediaType} to another. Sorting with this comparator follows the general rule: <blockquote>
-	 * audio/basic &lt; audio/* &lt; *&#047;* </blockquote>. That is, an explicit media type is sorted before an unspecific
-	 * media type. Quality parameters are also considered, so that <blockquote> audio/* &lt; audio/*;q=0.7;
-	 * audio/*;q=0.3</blockquote>.
-	 *
-	 * @param other the media type to compare to
-	 * @return a negative integer, zero, or a positive integer as this media type is less than, equal to, or greater than
-	 *         the specified media type
-	 */
-	public int compareTo(MediaType other) {
-		double qVal1 = this.getQualityValue();
-		double qVal2 = other.getQualityValue();
-		int qComp = Double.compare(qVal2, qVal1);
-		if (qComp != 0) {
-			return qComp;
-		}
-		else if (this.isWildcardType() && !other.isWildcardType()) {
-			return 1;
-		}
-		else if (other.isWildcardType() && !this.isWildcardType()) {
-			return -1;
-		}
-		else if (!this.getType().equals(other.getType())) {
-			return this.getType().compareTo(other.getType());
-		}
-		else { // mediaType1.getType().equals(mediaType2.getType())
-			if (this.isWildcardSubtype() && !other.isWildcardSubtype()) {
-				return 1;
-			}
-			else if (other.isWildcardSubtype() && !this.isWildcardSubtype()) {
-				return -1;
-			}
-			else if (!this.getSubtype().equals(other.getSubtype())) {
-				return this.getSubtype().compareTo(other.getSubtype());
-			}
-			else { // mediaType2.getSubtype().equals(mediaType2.getSubtype())
-				double quality1 = this.getQualityValue();
-				double quality2 = other.getQualityValue();
-				return Double.compare(quality2, quality1);
-			}
-		}
-
 	}
 
 	@Override
@@ -339,8 +311,9 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Return a string representation of the given list of {@link MediaType} objects. <p>This method can be used to for an
-	 * Accept or Content-Type header.
+	 * Return a string representation of the given list of {@link MediaType} objects.
+	 *
+	 * <p>This method can be used to for an {@code Accept} or {@code Content-Type} header.
 	 *
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
@@ -357,5 +330,79 @@ public class MediaType implements Comparable<MediaType> {
 		}
 		return builder.toString();
 	}
+
+	/**
+	 * Sorts the given list of {@link MediaType} objects by specificity.
+	 *
+	 * <p>Given two media types:
+	 * <ol>
+	 *   <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
+	 *   wildcard is ordered before the other.</li>
+	 *   <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
+	 *   remain their current order.</li>
+	 *   <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
+	 *   the wildcard is sorted before the other.</li>
+	 *   <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
+	 *   and remain their current order.</li>
+	 *   <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
+	 *   with the highest quality value is ordered before the other.</li>
+	 *   <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
+	 *   media type with the most parameters is ordered before the other.</li>
+	 * </ol>
+	 *
+	 * <p>For example:
+	 * <blockquote>audio/basic &lt; audio/* &lt; *&#047;*</blockquote>
+	 * <blockquote>audio/* &lt; audio/*;q=0.7; audio/*;q=0.3</blockquote>
+	 * <blockquote>audio/basic;level=1 &lt; audio/basic</blockquote>
+	 * <blockquote>audio/basic == text/html</blockquote>
+	 * <blockquote>audio/basic == audio/wave</blockquote>
+	 *
+	 * @param mediaTypes the list of media types to be sorted
+	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-14.1">HTTP 1.1, section 14.1</a>
+	 */
+	public static void sortBySpecificity(List<MediaType> mediaTypes) {
+		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
+		if (mediaTypes.size() > 1) {
+			Collections.sort(mediaTypes, SPECIFICITY_COMPARATOR);
+		}
+	}
+
+	static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new Comparator<MediaType>() {
+
+		public int compare(MediaType mediaType1, MediaType mediaType2) {
+			if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
+				return 1;
+			}
+			else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) { // audio/* > */*
+				return -1;
+			}
+			else if (!mediaType1.getType().equals(mediaType2.getType())) { // audio/basic == text/html
+				return 0;
+			}
+			else { // mediaType1.getType().equals(mediaType2.getType())
+				if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) { // audio/* < audio/basic
+					return 1;
+				}
+				else if (mediaType2.isWildcardSubtype() && !mediaType1.isWildcardSubtype()) { // audio/basic > audio/*
+					return -1;
+				}
+				else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) { // audio/basic == audio/wave
+					return 0;
+				}
+				else { // mediaType2.getSubtype().equals(mediaType2.getSubtype())
+					double quality1 = mediaType1.getQualityValue();
+					double quality2 = mediaType2.getQualityValue();
+					int qualityComparison = Double.compare(quality2, quality1);
+					if (qualityComparison != 0) {
+						return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
+					} else {
+						int paramsSize1 = mediaType1.parameters.size();
+						int paramsSize2 = mediaType2.parameters.size();
+						return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
+					}
+				}
+			}
+		}
+	};
 
 }

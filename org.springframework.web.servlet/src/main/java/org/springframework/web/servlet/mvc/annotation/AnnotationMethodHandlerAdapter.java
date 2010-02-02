@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -864,9 +864,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
-			else {
-				Collections.sort(acceptedMediaTypes);
-			}
+			MediaType.sortBySpecificity(acceptedMediaTypes);
 			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
 			Class<?> returnValueType = returnValue.getClass();
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
