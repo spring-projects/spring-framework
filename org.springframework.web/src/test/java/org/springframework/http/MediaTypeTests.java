@@ -102,10 +102,15 @@ public class MediaTypeTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeEmptyParameterAttribute() {
+		MediaType.parseMediaType("audio/*;=value");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
 	public void parseMediaTypeEmptyParameterValue() {
 		MediaType.parseMediaType("audio/*;attr=");
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void parseMediaTypeIllegalParameterAttribute() {
 		MediaType.parseMediaType("audio/*;attr<=value");
