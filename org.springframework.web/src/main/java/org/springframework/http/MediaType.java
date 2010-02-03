@@ -20,12 +20,12 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Comparator;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
  * @see <a href="http://tools.ietf.org/html/rfc2616#section-3.7">HTTP 1.1, section 3.7</a>
  * @since 3.0
  */
-public class MediaType {
+public class MediaType implements Comparable<MediaType> {
 
 	public static final MediaType ALL = new MediaType("*", "*");
 
@@ -211,6 +211,18 @@ public class MediaType {
 			}
 		}
 		return isWildcardType();
+	}
+
+	/**
+	 * Compares this {@link MediaType} to another alphabetically.
+	 *
+	 * @param other media type to compare to
+	 * @see #sortBySpecificity(List)
+	 */
+	public int compareTo(MediaType other) {
+		String s1 = this.toString();
+		String s2 = other.toString();
+		return s1.compareToIgnoreCase(s2);
 	}
 
 	@Override
