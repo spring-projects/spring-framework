@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -708,6 +710,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Finally, re-register all internal BeanPostProcessors.
 		OrderComparator.sort(internalPostProcessors);
 		registerBeanPostProcessors(beanFactory, internalPostProcessors);
+
+		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector());
 	}
 
 	/**
@@ -1282,6 +1286,48 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				if (logger.isInfoEnabled()) {
 					logger.info("Bean '" + beanName + "' is not eligible for getting processed by all " +
 							"BeanPostProcessors (for example: not eligible for auto-proxying)");
+				}
+			}
+			return bean;
+		}
+	}
+
+
+	/**
+	 * BeanPostProcessor that detects beans which implement the ApplicationListener interface.
+	 * This catches beans that can't reliably be detected by getBeanNamesForType.
+	 */
+	private class ApplicationListenerDetector implements MergedBeanDefinitionPostProcessor {
+
+		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>();
+
+		public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+			if (beanDefinition.isSingleton()) {
+				this.singletonNames.put(beanName, Boolean.TRUE);
+			}
+		}
+
+		public Object postProcessBeforeInitialization(Object bean, String beanName) {
+			return bean;
+		}
+
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
+			if (bean instanceof ApplicationListener) {
+				// potentially not detected as a listener by getBeanNamesForType retrieval
+				Boolean flag = this.singletonNames.get(beanName);
+				if (Boolean.TRUE.equals(flag)) {
+					// singleton bean (top-level or inner): register on the fly
+					addApplicationListener((ApplicationListener) bean);
+				}
+				else if (flag == null) {
+					if (logger.isWarnEnabled() && !containsBean(beanName)) {
+						// inner bean with other scope - can't reliably process events
+						logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface " +
+								"but is not reachable for event multicasting by its containing ApplicationContext " +
+								"because it does not have singleton scope. Only top-level listener beans are allowed " +
+								"to be of non-singleton scope.");
+					}
+					this.singletonNames.put(beanName, Boolean.FALSE);
 				}
 			}
 			return bean;
