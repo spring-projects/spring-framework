@@ -365,8 +365,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	public void addApplicationListener(ApplicationListener listener) {
-		if (isActive()) {
-			addListener(listener);
+		if (this.applicationEventMulticaster != null) {
+			this.applicationEventMulticaster.addApplicationListener(listener);
 		}
 		else {
 			this.applicationListeners.add(listener);
@@ -838,8 +838,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Subclasses can invoke this method to register a listener.
 	 * Any beans in the context that are listeners are automatically added.
+	 * <p>Note: This method only works within an active application context,
+	 * i.e. when an ApplicationEventMulticaster is already available. Generally
+	 * prefer the use of {@link #addApplicationListener} which is more flexible.
 	 * @param listener the listener to register
+	 * @deprecated as of Spring 3.0, in favor of {@link #addApplicationListener}
 	 */
+	@Deprecated
 	protected void addListener(ApplicationListener listener) {
 		getApplicationEventMulticaster().addApplicationListener(listener);
 	}
