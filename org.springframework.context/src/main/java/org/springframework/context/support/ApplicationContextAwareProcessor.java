@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,12 @@ class ApplicationContextAwareProcessor implements MergedBeanDefinitionPostProces
 
 
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
-		if (!this.applicationContext.containsBean(beanName) && beanDefinition.isSingleton()) {
+		if (beanDefinition.isSingleton()) {
 			this.singletonNames.put(beanName, Boolean.TRUE);
 		}
 	}
 
-	public Object postProcessBeforeInitialization(final Object bean, final String beanName) throws BeansException {
+	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
 		AccessControlContext acc = null;
 
 		if (System.getSecurityManager() != null &&
@@ -90,19 +90,19 @@ class ApplicationContextAwareProcessor implements MergedBeanDefinitionPostProces
 		if (acc != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
-					doProcess(bean, beanName);
+					invokeAwareInterfaces(bean);
 					return null;
 				}
 			}, acc);
 		}
 		else {
-			doProcess(bean, beanName);
+			invokeAwareInterfaces(bean);
 		}
 		
 		return bean;
 	}
 	
-	private void doProcess(Object bean, String beanName) {
+	private void invokeAwareInterfaces(Object bean) {
 		if (bean instanceof ResourceLoaderAware) {
 			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
 		}
@@ -115,30 +115,27 @@ class ApplicationContextAwareProcessor implements MergedBeanDefinitionPostProces
 		if (bean instanceof ApplicationContextAware) {
 			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 		}
-
-		if (bean instanceof ApplicationListener) {
-			if (!this.applicationContext.containsBean(beanName)) {
-				// not a top-level bean - not detected as a listener by getBeanNamesForType retrieval
-				Boolean flag = this.singletonNames.get(beanName);
-				if (Boolean.TRUE.equals(flag)) {
-					// inner singleton bean: register on the fly
-					this.applicationContext.addApplicationListener((ApplicationListener) bean);
-				}
-				else if (flag == null) {
-					// inner bean with other scope - can't reliably process events
-					if (logger.isWarnEnabled()) {
-						logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface " +
-								"but is not reachable for event multicasting by its containing ApplicationContext " +
-								"because it does not have singleton scope. Only top-level listener beans are allowed " +
-								"to be of non-singleton scope.");
-					}
-					this.singletonNames.put(beanName, Boolean.FALSE);
-				}
-			}
-		}
 	}
 
-	public Object postProcessAfterInitialization(Object bean, String name) {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
+		if (bean instanceof ApplicationListener) {
+			// potentially not detected as a listener by getBeanNamesForType retrieval
+			Boolean flag = this.singletonNames.get(beanName);
+			if (Boolean.TRUE.equals(flag)) {
+				// singleton bean (top-level or inner): register on the fly
+				this.applicationContext.addApplicationListener((ApplicationListener) bean);
+			}
+			else if (flag == null) {
+				if (logger.isWarnEnabled() && !this.applicationContext.containsBean(beanName)) {
+					// inner bean with other scope - can't reliably process events
+					logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface " +
+							"but is not reachable for event multicasting by its containing ApplicationContext " +
+							"because it does not have singleton scope. Only top-level listener beans are allowed " +
+							"to be of non-singleton scope.");
+				}
+				this.singletonNames.put(beanName, Boolean.FALSE);
+			}
+		}
 		return bean;
 	}
 

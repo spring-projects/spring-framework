@@ -32,12 +32,14 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -45,6 +47,7 @@ import org.springframework.context.support.GenericApplicationContext;
  * handling within {@link Configuration} class definitions.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ConfigurationClassProcessingTests {
 
@@ -139,6 +142,9 @@ public class ConfigurationClassProcessingTests {
 		assertEquals("foo-processed", foo.getName());
 		assertEquals("bar-processed", bar.getName());
 		assertEquals("baz-processed", baz.getName());
+
+		SpousyTestBean listener = factory.getBean("listenerTestBean", SpousyTestBean.class);
+		assertTrue(listener.refreshed);
 	}
 
 
@@ -232,10 +238,17 @@ public class ConfigurationClassProcessingTests {
 				}
 			};
 		}
+
+		@Bean
+		public ITestBean listenerTestBean() {
+			return new SpousyTestBean("listener");
+		}
 	}
 
 
-	private static class SpousyTestBean extends TestBean {
+	private static class SpousyTestBean extends TestBean implements ApplicationListener<ContextRefreshedEvent> {
+
+		public boolean refreshed = false;
 
 		public SpousyTestBean(String name) {
 			super(name);
@@ -245,6 +258,10 @@ public class ConfigurationClassProcessingTests {
 		@Required
 		public void setSpouse(ITestBean spouse) {
 			super.setSpouse(spouse);
+		}
+
+		public void onApplicationEvent(ContextRefreshedEvent event) {
+			this.refreshed = true;
 		}
 	}
 
