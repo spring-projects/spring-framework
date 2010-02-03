@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
-
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
@@ -53,6 +52,18 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 		else {
 			return value;
 		}
+	}
+
+	/**
+	 * Evaluate the supplied value for the supplied attribute name. If the supplied value
+	 * is <code>null</code> then <code>false</code> is returned, otherwise evaluation is
+	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)},
+	 * with subsequent matching against <code>Boolean.TRUE</code> and <code>Boolean.valueOf</code>.
+	 */
+	protected boolean evaluateBoolean(String attributeName, String value) throws JspException {
+		Object evaluated = ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
+		return (Boolean.TRUE.equals(evaluated) ||
+				(evaluated instanceof String && Boolean.valueOf((String) evaluated)));
 	}
 
 	/**

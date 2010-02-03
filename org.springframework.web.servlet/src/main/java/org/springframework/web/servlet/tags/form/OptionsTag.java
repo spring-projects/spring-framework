@@ -138,8 +138,8 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Is the current HTML tag disabled?
 	 * @return <code>true</code> if this tag is disabled
 	 */
-	protected boolean isDisabled() {
-		return "true".equals(getDisabled());
+	protected boolean isDisabled() throws JspException {
+		return evaluateBoolean("disabled", getDisabled());
 	}
 
 
@@ -149,7 +149,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		Object items = getItems();
 		Object itemsObject = null;
 		if (items != null) {
-			itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+			itemsObject = (items instanceof String ? evaluate("items", items) : items);
 		} else {
 			Class<?> selectTagBoundType = ((SelectTag) findAncestorWithClass(this, SelectTag.class))
 				.getBindStatus().getValueType();
@@ -204,7 +204,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		}
 
 		@Override
-		protected boolean isOptionDisabled() {
+		protected boolean isOptionDisabled() throws JspException {
 			return isDisabled();
 		}
 

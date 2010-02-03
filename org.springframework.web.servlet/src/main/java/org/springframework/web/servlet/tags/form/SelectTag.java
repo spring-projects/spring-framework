@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import java.util.Collection;
 import java.util.Map;
-
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
@@ -247,12 +246,11 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	private boolean isMultiple() throws JspException {
 		Object multiple = getMultiple();
-		if (Boolean.TRUE.equals(multiple) || "true".equals(multiple) || "multiple".equals(multiple)) {
+		if (Boolean.TRUE.equals(multiple) || "multiple".equals(multiple)) {
 			return true;
 		}
 		else if (this.multiple instanceof String) {
-			Object evaluatedValue = evaluate("multiple", multiple);
-			return Boolean.TRUE.equals(evaluatedValue);
+			return evaluateBoolean("multiple", (String) multiple);
 		}
 		return forceMultiple();
 	}
