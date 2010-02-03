@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.BitSet;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -46,7 +47,12 @@ import org.springframework.util.StringUtils;
  */
 public class MediaType implements Comparable<MediaType> {
 
-	public static final MediaType ALL = new MediaType("*", "*");
+	/**
+	 * Public constant that includes all media ranges (i.e. <code>&#42;/&#42;</code>).
+	 */
+	public static final MediaType ALL;
+
+	private static final BitSet TOKEN;
 
 	private static final String WILDCARD_TYPE = "*";
 
@@ -54,11 +60,50 @@ public class MediaType implements Comparable<MediaType> {
 
 	private static final String PARAM_CHARSET = "charset";
 
+
 	private final String type;
 
 	private final String subtype;
 
 	private final Map<String, String> parameters;
+
+
+	static {
+		// variable names refer to RFC 2616, section 2.2
+		BitSet ctl = new BitSet(128);
+		for (int i=0; i <= 31; i++) {
+			ctl.set(i);
+		}
+		ctl.set(127);
+
+		BitSet separators = new BitSet(128);
+		separators.set('(');
+		separators.set(')');
+		separators.set('<');
+		separators.set('>');
+		separators.set('@');
+		separators.set(',');
+		separators.set(';');
+		separators.set(':');
+		separators.set('\\');
+		separators.set('\"');
+		separators.set('/');
+		separators.set('[');
+		separators.set(']');
+		separators.set('?');
+		separators.set('=');
+		separators.set('{');
+		separators.set('}');
+		separators.set(' ');
+		separators.set('\t');
+
+		TOKEN = new BitSet(128);
+		TOKEN.set(0, 128);
+		TOKEN.andNot(ctl);
+		TOKEN.andNot(separators);
+
+		ALL = new MediaType("*", "*");
+	}
 
 	/**
 	 * Create a new {@link MediaType} for the given primary type.
@@ -66,6 +111,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * <p>The {@linkplain #getSubtype() subtype} is set to <code>&#42;</code>, parameters empty.
 	 *
 	 * @param type the primary type
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type) {
 		this(type, WILDCARD_TYPE);
@@ -76,6 +122,7 @@ public class MediaType implements Comparable<MediaType> {
 	 *
 	 * @param type the primary type
 	 * @param subtype the subtype
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype) {
 		this(type, subtype, Collections.<String, String>emptyMap());
@@ -87,6 +134,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param charSet the character set
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, Charset charSet) {
 		this(type, subtype, Collections.singletonMap(PARAM_CHARSET, charSet.toString()));
@@ -98,6 +146,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param qualityValue the quality value
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, double qualityValue) {
 		this(type, subtype, Collections.singletonMap(PARAM_QUALITY_FACTORY, Double.toString(qualityValue)));
@@ -109,20 +158,51 @@ public class MediaType implements Comparable<MediaType> {
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param parameters the parameters, mat be <code>null</code>
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, Map<String, String> parameters) {
-		Assert.hasText(type, "'type' must not be empty");
-		Assert.hasText(subtype, "'subtype' must not be empty");
-		Assert.doesNotContain(type, "/", "'type' must not contain /");
-		Assert.doesNotContain(subtype, "/", "'subtype' must not contain /");
+		Assert.hasLength(type, "'type' must not be empty");
+		Assert.hasLength(subtype, "'subtype' must not be empty");
+		checkToken(type);
+		checkToken(subtype);
 		this.type = type.toLowerCase(Locale.ENGLISH);
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
-			this.parameters = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
-			this.parameters.putAll(parameters);
+			Map<String, String> m = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
+			for (Map.Entry<String, String> entry : parameters.entrySet()) {
+				String attribute = entry.getKey();
+				String value = entry.getValue();
+				Assert.hasLength(attribute, "pameter attribute must not be empty");
+				Assert.hasLength(value, "pameter value must not be empty");
+				checkToken(attribute);
+				checkTokenOrQuotedString(value);
+				m.put(attribute, value);
+			}
+			this.parameters = Collections.unmodifiableMap(m);
 		}
 		else {
 			this.parameters = Collections.emptyMap();
+		}
+	}
+
+	/**
+	 * Checks the given token string for illegal characters, as defined in RFC 2616, section 2.2.
+	 *
+	 * @throws IllegalArgumentException in case of illegal characters
+	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
+	 */
+	private void checkToken(String s) {
+		for (int i=0; i < s.length(); i++ ) {
+			char ch = s.charAt(i);
+			if (!TOKEN.get(ch)) {
+				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + s + "\"");
+			}
+		}
+	}
+
+	private void checkTokenOrQuotedString(String s) {
+		if (!(s.startsWith("\"") && s.endsWith("\""))) {
+			checkToken(s);
 		}
 	}
 
@@ -282,6 +362,12 @@ public class MediaType implements Comparable<MediaType> {
 			fullType = "*/*";
 		}
 		int subIndex = fullType.indexOf('/');
+		if (subIndex == -1) {
+			throw new IllegalArgumentException("\"" + mediaType + "\" does not contain '/'");
+		}
+		if (subIndex == fullType.length() - 1) {
+			throw new IllegalArgumentException("\"" + mediaType + "\" does not contain subtype after '/'");
+		}
 		String type = fullType.substring(0, subIndex);
 		String subtype = fullType.substring(subIndex + 1, fullType.length());
 
@@ -289,18 +375,19 @@ public class MediaType implements Comparable<MediaType> {
 		if (parts.length > 1) {
 			parameters = new LinkedHashMap<String, String>(parts.length - 1);
 			for (int i = 1; i < parts.length; i++) {
-				String part = parts[i];
-				int eqIndex = part.indexOf('=');
+				String parameter = parts[i];
+				int eqIndex = parameter.indexOf('=');
 				if (eqIndex != -1) {
-					String name = part.substring(0, eqIndex);
-					String value = part.substring(eqIndex + 1, part.length());
-					parameters.put(name, value);
+					String attribute = parameter.substring(0, eqIndex);
+					String value = parameter.substring(eqIndex + 1, parameter.length());
+					parameters.put(attribute, value);
 				}
 			}
 		}
 
 		return new MediaType(type, subtype, parameters);
 	}
+
 
 	/**
 	 * Parse the given, comma-seperated string into a list of {@link MediaType} objects. <p>This method can be used to
