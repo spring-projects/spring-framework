@@ -394,7 +394,7 @@ public class JmsQueueSender {
     private Queue queue;
 
     public void setConnectionFactory(ConnectionFactory cf) {
-        this.jmsTemplate = new JmsTemplate(cf, false);
+        this.jmsTemplate = new JmsTemplate(cf);
     }
 
     public void setQueue(Queue queue) {
@@ -412,15 +412,13 @@ public class JmsQueueSender {
 
     <para>This example uses the <classname>MessageCreator</classname> callback
     to create a text message from the supplied <classname>Session</classname>
-    object and the <classname>JmsTemplate</classname> is constructed by
-    passing a reference to a <classname>ConnectionFactory</classname> and a
-    boolean specifying the messaging domain. A zero argument constructor and
-    <property>connectionFactory</property> / <property>queue</property> bean
-    properties are provided and can be used for constructing the instance
+    object. The <classname>JmsTemplate</classname> is constructed by passing a
+    reference to a <classname>ConnectionFactory</classname>. As an alternative,
+    a zero argument constructor and <property>connectionFactory</property> /
+    is provided and can be used for constructing the instance in JavaBean style
     (using a BeanFactory or plain Java code). Alternatively, consider deriving
-    from Spring's <classname>JmsGatewaySupport</classname> convenience base
-    class, which provides pre-built bean properties for JMS
-    configuration.</para>
+    from Spring's <classname>JmsGatewaySupport</classname> convenience base class,
+    which provides pre-built bean properties for JMS configuration.</para>
 
     <para>The method <methodname>send(String destinationName, MessageCreator
     creator)</methodname> lets you send to a message using the string name of
