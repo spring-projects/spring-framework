@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.jsp.JspException;
 
 import org.springframework.beans.BeanWrapper;
@@ -258,7 +257,7 @@ class OptionWriter {
 	/**
 	 * Determine whether the option fields should be disabled.
 	 */
-	protected boolean isOptionDisabled() {
+	protected boolean isOptionDisabled() throws JspException {
 		return false;
 	}
 
