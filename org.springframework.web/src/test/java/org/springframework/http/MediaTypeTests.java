@@ -81,6 +81,46 @@ public class MediaTypeTests {
 		assertEquals("Invalid quality factor", 0.2D, mediaType.getQualityValue(), 0D);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeNoSubtype() {
+		MediaType.parseMediaType("audio");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeNoSubtypeSlash() {
+		MediaType.parseMediaType("audio/");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeIllegalType() {
+		MediaType.parseMediaType("audio(/basic");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeIllegalSubtype() {
+		MediaType.parseMediaType("audio/basic)");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeEmptyParameterValue() {
+		MediaType.parseMediaType("audio/*;attr=");
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeIllegalParameterAttribute() {
+		MediaType.parseMediaType("audio/*;attr<=value");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeIllegalParameterValue() {
+		MediaType.parseMediaType("audio/*;attr=v>alue");
+	}
+
+	@Test
+	public void parseMediaTypeQuotedParameterValue() {
+		MediaType.parseMediaType("audio/*;attr=\"v>alue\"");
+	}
+
 	@Test
 	public void parseCharset() throws Exception {
 		String s = "text/html; charset=iso-8859-1";
