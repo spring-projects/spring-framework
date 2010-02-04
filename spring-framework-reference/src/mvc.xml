@@ -1390,6 +1390,15 @@ public class EditPetForm {
 public class EditPetForm {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
+
+        <note>
+          <para>When using controller interfaces (e.g. for AOP proxying), make sure to
+          consistently put <emphasis>all</emphasis> your mapping annotations - such as
+          <interfacename>@RequestMapping</interfacename> and
+          <interfacename>@SessionAttributes</interfacename> - on the controller
+          <emphasis>interface</emphasis> rather than on the implementation class.
+          </para>
+        </note>
       </section>
 
       <section id="mvc-ann-cookievalue">
