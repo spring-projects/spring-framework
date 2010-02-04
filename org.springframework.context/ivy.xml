@@ -58,7 +58,7 @@
 		<dependency org="javax.inject" name="com.springsource.org.atinject.tck" rev="1.0.0" conf="provided->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="test->compile"/>
 		<dependency org="javax.xml.rpc" name="com.springsource.javax.xml.rpc" rev="1.1.0" conf="test->compile"/>
-		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.pool" rev="1.4.0" conf="test->compile"/>
+		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.pool" rev="1.5.3" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" conf="test->runtime"/>
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
