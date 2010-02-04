@@ -27,8 +27,8 @@
     </dependency>
     <dependency>
       <groupId>javax.inject</groupId>
-      <artifactId>com.springsource.javax.inject</artifactId>
-      <version>0.9.0.PFD</version>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
       <scope>test</scope> 
     </dependency>
     <dependency>

@@ -183,6 +183,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.5.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<scope>test</scope>
