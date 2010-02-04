@@ -199,7 +199,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("foo-bar", response.getContentAsString());
+		assertEquals("foo-null-bar", response.getContentAsString());
 	}
 
 	@Test
@@ -262,8 +262,7 @@ public class ServletAnnotationControllerTests {
 				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
 				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-				wac.getBeanFactory()
-						.registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -310,6 +309,43 @@ public class ServletAnnotationControllerTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySessionAttributesController.class));
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(ModelExposingViewResolver.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPage");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		HttpSession session = request.getSession();
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+
+		request = new MockHttpServletRequest("POST", "/myPage");
+		request.setSession(session);
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+	}
+
+	@Test
+	public void sessionAttributeExposureWithInterface() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySessionAttributesControllerImpl.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(ModelExposingViewResolver.class));
+				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
+				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
+				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 				wac.refresh();
 				return wac;
 			}
@@ -1474,6 +1510,31 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@RequestMapping("/myPage")
+	@SessionAttributes({"object1", "object2"})
+	public interface MySessionAttributesControllerIfc {
+
+		@RequestMapping(method = RequestMethod.GET)
+		String get(Model model);
+
+		@RequestMapping(method = RequestMethod.POST)
+		String post(@ModelAttribute("object1") Object object1);
+	}
+
+	@Controller
+	public static class MySessionAttributesControllerImpl implements MySessionAttributesControllerIfc {
+
+		public String get(Model model) {
+			model.addAttribute("object1", new Object());
+			model.addAttribute("object2", new Object());
+			return "myPage";
+		}
+
+		public String post(@ModelAttribute("object1") Object object1) {
+			//do something with object1
+			return "myPage";
+		}
+	}
 	@Controller
 	public static class MyFormController {
 
@@ -1909,9 +1970,10 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(@RequestParam(value = "id", defaultValue = "foo") String id,
+				@RequestParam(value = "otherId", required = false) String id2,
 				@RequestHeader(defaultValue = "bar") String header,
 				HttpServletResponse response) throws IOException {
-			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(header));
+			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(id2) + "-" + String.valueOf(header));
 		}
 	}
 
