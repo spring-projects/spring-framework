@@ -25,12 +25,12 @@
 	<dependencies>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile, commons-logging->compile"/>
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15" conf="optional, log4j->compile"/>
-		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="optional, aspectj->compile"/>
+		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="${aspectj.version}" conf="optional, aspectj->compile"/>
 		<dependency org="org.jboss.vfs" name="com.springsource.org.jboss.virtual" rev="2.1.0.GA" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="optional->compile"/>
 		<!-- test dependencies -->
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="test->compile"/>
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.codehaus.woodstox" name="com.springsource.com.ctc.wstx" rev="3.2.7" conf="test->compile"/>

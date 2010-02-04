@@ -38,7 +38,7 @@
 		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="latest.integration"
                     conf="optional, tiles->compile"/>
 		<!-- test dependencies -->
- 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
+ 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.test" rev="latest.integration"
                     conf="test->compile"/>

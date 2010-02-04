@@ -72,7 +72,7 @@
         <!-- test dependencies -->
         <dependency org="org.apache.taglibs" name="com.springsource.org.apache.taglibs.standard" rev="1.1.2"
                     conf="test->runtime"/>
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->runtime"/>
 		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.2.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.mortbay.jetty" name="com.springsource.org.mortbay.jetty.server" rev="6.1.9"

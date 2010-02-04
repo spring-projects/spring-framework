@@ -22,15 +22,13 @@
 		<dependency org="com.caucho" name="com.springsource.com.caucho" rev="3.2.1" conf="test->compile"/>
 		<dependency org="com.ibm.websphere" name="com.springsource.com.ibm.websphere.uow" rev="6.0.2.17" conf="test->compile"/>
 		<dependency org="com.opensymphony.quartz" name="com.springsource.org.quartz" rev="1.6.2" conf="test->compile"/>
-		<dependency org="com.oracle.oc4j" name="com.springsource.oracle.classloader" rev="10.1.3.1" conf="provided->compile"/>
 		<dependency org="com.oracle.toplink.essentials" name="com.springsource.oracle.toplink.essentials" rev="2.0.0.b41-beta2" conf="test->compile"/>
-		<dependency org="com.sun.enterprise" name="com.springsource.com.sun.enterprise.loader" rev="1.0.0" conf="test->compile"/>
 		<dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="1.0.0" conf="test->compile"/>
 		<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.0.0" conf="test->compile"/>
 		<dependency org="javax.ejb" name="com.springsource.javax.ejb" rev="3.0.0" conf="test->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="test->compile"/>
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08" conf="test->compile"/>
-		<dependency org="javax.inject" name="com.springsource.javax.inject" rev="0.9.0.PFD" conf="test->compile"/>
+		<dependency org="javax.inject" name="com.springsource.javax.inject" rev="1.0.0" conf="test->compile"/>
 		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.1.0" conf="test->compile"/>
 		<dependency org="javax.jms" name="com.springsource.javax.jms" rev="1.1.0" conf="test->compile"/>
 		<dependency org="javax.mail" name="com.springsource.javax.mail" rev="1.4.0" conf="test->compile"/>
@@ -63,7 +61,7 @@
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.jsp" rev="2.0.5" conf="test->compile"/>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity" rev="1.5.0" conf="test->compile"/>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity.tools.view" rev="1.4.0" conf="test->compile"/>
-		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="test->compile"/>
+		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="${aspectj.version}" conf="test->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.5" conf="test->compile"/>
 		<dependency org="org.dom4j" name="com.springsource.org.dom4j" rev="1.6.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
@@ -74,7 +72,7 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations.common" rev="3.3.0.ga" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.4.0.GA" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
-		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.2.0" conf="optional, runtime->compile"/>
+		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.4.0" conf="optional, runtime->compile"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="test->compile"/>
@@ -94,7 +92,7 @@
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock.classextension" rev="2.3.0" conf="test->compile"/>
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->runtime"/>
 		<dependency org="org.testng" name="com.springsource.org.testng" rev="5.9.0" conf="test->compile"/>
 	</dependencies>
 

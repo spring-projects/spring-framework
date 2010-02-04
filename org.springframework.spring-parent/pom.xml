@@ -38,7 +38,7 @@
       <dependency>
 		<groupId>javax.inject</groupId>
 		<artifactId>com.springsource.javax.inject</artifactId>
-		<version>0.9.0.PFD</version>
+		<version>1.0.0</version>
 		<scope>provided</scope> 
       </dependency>
       <dependency>
@@ -50,7 +50,7 @@
       <dependency>
 		<groupId>org.aspectj</groupId>
 		<artifactId>aspectjweaver</artifactId>
-		<version>1.6.5</version>
+		<version>1.6.8</version>
 		<optional>true</optional>
       </dependency>
       <dependency>
@@ -62,12 +62,12 @@
       <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
-		<version>1.5.8</version>
+		<version>1.5.10</version>
       </dependency>
       <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-log4j12</artifactId>
-		<version>1.5.8</version>
+		<version>1.5.10</version>
       </dependency>
       <dependency>
 		<groupId>log4j</groupId>

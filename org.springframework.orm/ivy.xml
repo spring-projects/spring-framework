@@ -53,7 +53,7 @@
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="optional, web->compile"/>
 		<!-- test dependencies -->
-		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="1.6.5.RELEASE" conf="test->compile"/>
+		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="${aspectj.version}" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" conf="test->runtime"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.pool" rev="1.5.3" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>

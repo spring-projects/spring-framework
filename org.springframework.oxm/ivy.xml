@@ -48,7 +48,7 @@
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration"
 					conf="compile->compile"/>
 		<!-- test dependencies -->
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.codehaus.jettison" name="com.springsource.org.codehaus.jettison" rev="1.0.1"
 					conf="test->compile"/>
