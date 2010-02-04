@@ -90,7 +90,7 @@ public class HandlerMethodResolver {
 			}, ReflectionUtils.NON_BRIDGED_METHODS);
 		}
 		this.typeLevelMapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
-		SessionAttributes sessionAttributes = handlerType.getAnnotation(SessionAttributes.class);
+		SessionAttributes sessionAttributes = AnnotationUtils.findAnnotation(handlerType, SessionAttributes.class);
 		this.sessionAttributesFound = (sessionAttributes != null);
 		if (this.sessionAttributesFound) {
 			this.sessionAttributeNames.addAll(Arrays.asList(sessionAttributes.value()));
