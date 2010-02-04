@@ -214,6 +214,12 @@ public class MediaTypeTests {
 		assertEquals("Media types not equal", m1, m2);
 		assertEquals("compareTo() not consistent with equals", 0, m1.compareTo(m2));
 		assertEquals("compareTo() not consistent with equals", 0, m2.compareTo(m1));
+
+		m1 = MediaType.parseMediaType("text/html; q=0.7; charset=iso-8859-1");
+		m2 = MediaType.parseMediaType("text/html; Q=0.7; charset=iso-8859-1");
+		assertEquals("Media types not equal", m1, m2);
+		assertEquals("compareTo() not consistent with equals", 0, m1.compareTo(m2));
+		assertEquals("compareTo() not consistent with equals", 0, m2.compareTo(m1));
 	}
 
 	@Test
@@ -232,6 +238,8 @@ public class MediaTypeTests {
 		m2 = new MediaType("audio", "basic", Collections.singletonMap("foo", "Bar"));
 		assertTrue("Invalid comparison result", m1.compareTo(m2) != 0);
 		assertTrue("Invalid comparison result", m2.compareTo(m1) != 0);
+
+
 	}
 
 	@Test
