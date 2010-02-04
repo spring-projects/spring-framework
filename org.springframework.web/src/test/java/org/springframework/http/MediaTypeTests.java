@@ -177,6 +177,7 @@ public class MediaTypeTests {
 		MediaType audio = new MediaType("audio");
 		MediaType audioWave = new MediaType("audio", "wave");
 		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
+		MediaType audioBasic07 = new MediaType("audio", "basic", 0.7);
 
 		// equal
 		assertEquals("Invalid comparison result", 0, audioBasic.compareTo(audioBasic));
@@ -189,6 +190,7 @@ public class MediaTypeTests {
 		expected.add(audio);
 		expected.add(audioBasic);
 		expected.add(audioBasicLevel);
+		expected.add(audioBasic07);
 		expected.add(audioWave);
 
 		List<MediaType> result = new ArrayList<MediaType>(expected);
@@ -199,10 +201,37 @@ public class MediaTypeTests {
 			Collections.sort(result);
 
 			for (int j = 0; j < result.size(); j++) {
-				assertSame("Invalid media type at " + j, expected.get(j), result.get(j));
+				assertSame("Invalid media type at " + j + ", run " + i, expected.get(j), result.get(j));
 			}
 		}
+	}
 
+	@Test
+	public void compareToConsistentWithEquals() {
+		MediaType m1 = MediaType.parseMediaType("text/html; q=0.7; charset=iso-8859-1");
+		MediaType m2 = MediaType.parseMediaType("text/html; charset=iso-8859-1; q=0.7");
+
+		assertEquals("Media types not equal", m1, m2);
+		assertEquals("compareTo() not consistent with equals", 0, m1.compareTo(m2));
+		assertEquals("compareTo() not consistent with equals", 0, m2.compareTo(m1));
+	}
+
+	@Test
+	public void compareToCaseSensitivity() {
+		MediaType m1 = new MediaType("audio", "basic");
+		MediaType m2 = new MediaType("Audio", "Basic");
+		assertEquals("Invalid comparison result", 0, m1.compareTo(m2));
+		assertEquals("Invalid comparison result", 0, m2.compareTo(m1));
+
+		m1 = new MediaType("audio", "basic", Collections.singletonMap("foo", "bar"));
+		m2 = new MediaType("audio", "basic", Collections.singletonMap("Foo", "bar"));
+		assertEquals("Invalid comparison result", 0, m1.compareTo(m2));
+		assertEquals("Invalid comparison result", 0, m2.compareTo(m1));
+
+		m1 = new MediaType("audio", "basic", Collections.singletonMap("foo", "bar"));
+		m2 = new MediaType("audio", "basic", Collections.singletonMap("foo", "Bar"));
+		assertTrue("Invalid comparison result", m1.compareTo(m2) != 0);
+		assertTrue("Invalid comparison result", m2.compareTo(m1) != 0);
 	}
 
 	@Test

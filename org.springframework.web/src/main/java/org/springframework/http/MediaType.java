@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -311,9 +312,38 @@ public class MediaType implements Comparable<MediaType> {
 	 * @see #sortBySpecificity(List)
 	 */
 	public int compareTo(MediaType other) {
-		String s1 = this.toString();
-		String s2 = other.toString();
-		return s1.compareToIgnoreCase(s2);
+		int comp = this.type.compareToIgnoreCase(other.type);
+		if (comp != 0) {
+			return comp;
+		}
+		comp = this.subtype.compareToIgnoreCase(other.subtype);
+		if (comp != 0) {
+			return comp;
+		}
+		comp = this.parameters.size() - other.parameters.size();
+		if (comp != 0) {
+			return comp;
+		}
+		Iterator<String> thisAttributes = new TreeSet<String>(this.parameters.keySet()).iterator();
+		Iterator<String> otherAttributes = new TreeSet<String>(other.parameters.keySet()).iterator();
+		while (thisAttributes.hasNext()) {
+			String thisAttribute = thisAttributes.next();
+			String otherAttribute = otherAttributes.next();
+			comp = thisAttribute.compareToIgnoreCase(otherAttribute);
+			if (comp != 0) {
+				return comp;
+			}
+			String thisValue = this.parameters.get(thisAttribute);
+			String otherValue = other.parameters.get(otherAttribute);
+			if (otherValue == null) {
+				otherValue = "";
+			}
+			comp = thisValue.compareTo(otherValue);
+			if (comp != 0) {
+				return comp;
+			}
+		}
+		return 0;
 	}
 
 	@Override
@@ -348,7 +378,11 @@ public class MediaType implements Comparable<MediaType> {
 		builder.append(this.type);
 		builder.append('/');
 		builder.append(this.subtype);
-		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+		appendTo(this.parameters, builder);
+	}
+
+	private static void appendTo(Map<String, String> map, StringBuilder builder) {
+		for (Map.Entry<String, String> entry : map.entrySet()) {
 			builder.append(';');
 			builder.append(entry.getKey());
 			builder.append('=');
