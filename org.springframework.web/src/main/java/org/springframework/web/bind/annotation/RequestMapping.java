@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,6 +167,11 @@ import java.lang.annotation.Target;
  * corresponding custom <code>DefaultAnnotationHandlerMapping</code>
  * and/or <code>AnnotationMethodHandlerAdapter</code> is defined as well
  * - provided that you intend to use <code>@RequestMapping</code>.
+ *
+ * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * make sure to consistently put <i>all</i> your mapping annotations - such as
+ * <code>@RequestMapping</code> and <code>@SessionAttributes</code> - on
+ * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
