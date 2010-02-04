@@ -3,7 +3,7 @@ Bundle-Name: Spring Web
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Template: 
- com.caucho.*;version="[3.2.0, 4.0.0)";resolution:=optional,
+ com.caucho.*;version="[3.2.0, 5.0.0)";resolution:=optional,
  org.codehaus.jackson.*;version="[1.0.0, 1.1.0)";resolution:=optional,
  com.sun.net.*;version="0";resolution:=optional,
  javax.el.*;version="[1.0.0, 3.0.0)";resolution:=optional,
