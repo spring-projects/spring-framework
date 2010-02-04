@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * TransactionConfiguration defines class-level metadata for configuring
  * transactional tests.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see ContextConfiguration
@@ -46,6 +46,11 @@ public @interface TransactionConfiguration {
 	 * used to drive transactions. This attribute is not required and only needs
 	 * to be specified explicitly if the bean name of the desired
 	 * PlatformTransactionManager is not &quot;transactionManager&quot;.
+	 * <p><b>NOTE:</b> The XML <code>&lt;tx:annotation-driven&gt;</code> element
+	 * also refers to a bean named "transactionManager" by default. If you are
+	 * using both features in combination, make sure to point to the same
+	 * transaction manager bean - here in <code>@TransactionConfiguration</code> and
+	 * also in <code>&lt;tx:annotation-driven transaction-manager="..."&gt;</code>.
 	 */
 	String transactionManager() default "transactionManager";
 
