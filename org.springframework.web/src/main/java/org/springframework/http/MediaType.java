@@ -324,11 +324,15 @@ public class MediaType implements Comparable<MediaType> {
 		if (comp != 0) {
 			return comp;
 		}
-		Iterator<String> thisAttributes = new TreeSet<String>(this.parameters.keySet()).iterator();
-		Iterator<String> otherAttributes = new TreeSet<String>(other.parameters.keySet()).iterator();
-		while (thisAttributes.hasNext()) {
-			String thisAttribute = thisAttributes.next();
-			String otherAttribute = otherAttributes.next();
+		TreeSet<String> thisAttributes = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		thisAttributes.addAll(this.parameters.keySet());
+		TreeSet<String> otherAttributes = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		otherAttributes.addAll(other.parameters.keySet());
+		Iterator<String> thisAttributesIterator = thisAttributes.iterator();
+		Iterator<String> otherAttributesIterator = otherAttributes.iterator();
+		while (thisAttributesIterator.hasNext()) {
+			String thisAttribute = thisAttributesIterator.next();
+			String otherAttribute = otherAttributesIterator.next();
 			comp = thisAttribute.compareToIgnoreCase(otherAttribute);
 			if (comp != 0) {
 				return comp;
@@ -355,7 +359,7 @@ public class MediaType implements Comparable<MediaType> {
 			return false;
 		}
 		MediaType otherType = (MediaType) other;
-		return (this.type.equals(otherType.type) && this.subtype.equals(otherType.subtype) &&
+		return (this.type.equalsIgnoreCase(otherType.type) && this.subtype.equalsIgnoreCase(otherType.subtype) &&
 				this.parameters.equals(otherType.parameters));
 	}
 
