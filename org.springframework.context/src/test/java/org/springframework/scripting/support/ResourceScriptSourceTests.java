@@ -71,8 +71,8 @@ public class ResourceScriptSourceTests extends TestCase {
 		resource.lastModified();
 		mock.setReturnValue(100, 2);
 		// does not support File-based reading; delegates to InputStream-style reading...
-		resource.getFile();
-		mock.setThrowable(new FileNotFoundException());
+		//resource.getFile();
+		//mock.setThrowable(new FileNotFoundException());
 		resource.getInputStream();
 		mock.setReturnValue(new ByteArrayInputStream(new byte[0]));
 		// And then mock the file changing; i.e. the File says it has been modified
