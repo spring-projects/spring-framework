@@ -79,20 +79,9 @@ public class ResourceScriptSource implements ScriptSource {
 		synchronized (this.lastModifiedMonitor) {
 			this.lastModified = retrieveLastModifiedTime();
 		}
-		Reader reader = null;
-		try {
-			// Try to get a FileReader first: generally more reliable.
-			reader = new FileReader(getResource().getFile());
-		}
-		catch (IOException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not open FileReader for " + this.resource +
-						" - falling back to InputStreamReader", ex);
-			}
-		}
-		if (reader == null) {
-			reader = new InputStreamReader(this.resource.getInputStream());
-		}
+		
+		Reader reader = new InputStreamReader(this.resource.getInputStream(), "UTF-8");
+		
 		return FileCopyUtils.copyToString(reader);
 	}
 
@@ -128,5 +117,4 @@ public class ResourceScriptSource implements ScriptSource {
 	public String toString() {
 		return this.resource.toString();
 	}
-
 }
