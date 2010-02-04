@@ -18,6 +18,7 @@ package org.springframework.http;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,7 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.BitSet;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -56,7 +56,7 @@ public class MediaType implements Comparable<MediaType> {
 
 	private static final String WILDCARD_TYPE = "*";
 
-	private static final String PARAM_QUALITY_FACTORY = "q";
+	private static final String PARAM_QUALITY_FACTOR = "q";
 
 	private static final String PARAM_CHARSET = "charset";
 
@@ -149,7 +149,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, double qualityValue) {
-		this(type, subtype, Collections.singletonMap(PARAM_QUALITY_FACTORY, Double.toString(qualityValue)));
+		this(type, subtype, Collections.singletonMap(PARAM_QUALITY_FACTOR, Double.toString(qualityValue)));
 	}
 
 	/**
@@ -172,10 +172,7 @@ public class MediaType implements Comparable<MediaType> {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
 				String attribute = entry.getKey();
 				String value = entry.getValue();
-				Assert.hasLength(attribute, "pameter attribute must not be empty");
-				Assert.hasLength(value, "pameter value must not be empty");
-				checkToken(attribute);
-				checkTokenOrQuotedString(value);
+				checkParameters(attribute, value);
 				m.put(attribute, value);
 			}
 			this.parameters = Collections.unmodifiableMap(m);
@@ -200,10 +197,24 @@ public class MediaType implements Comparable<MediaType> {
 		}
 	}
 
-	private void checkTokenOrQuotedString(String s) {
-		if (!(s.startsWith("\"") && s.endsWith("\""))) {
-			checkToken(s);
+	private void checkParameters(String attribute, String value) {
+		Assert.hasLength(attribute, "parameter attribute must not be empty");
+		Assert.hasLength(value, "parameter value must not be empty");
+		checkToken(attribute);
+		if (PARAM_QUALITY_FACTOR.equals(attribute)) {
+			double d = Double.parseDouble(value);
+			Assert.isTrue(d >= 0D && d <= 1D, "Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
 		}
+		else if (PARAM_CHARSET.equals(attribute)) {
+			Charset.forName(value);
+		}
+		else if (!isQuotedString(value)) {
+			checkToken(value);
+		}
+	}
+
+	private boolean isQuotedString(String s) {
+		return s.length() > 1 && s.startsWith("\"") && s.endsWith("\"") ;
 	}
 
 	/** Return the primary type. */
@@ -246,7 +257,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @return the quality factory
 	 */
 	public double getQualityValue() {
-		String qualityFactory = getParameter(PARAM_QUALITY_FACTORY);
+		String qualityFactory = getParameter(PARAM_QUALITY_FACTOR);
 		return (qualityFactory != null ? Double.parseDouble(qualityFactory) : 1D);
 	}
 

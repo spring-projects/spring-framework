@@ -121,9 +121,24 @@ public class MediaTypeTests {
 		MediaType.parseMediaType("audio/*;attr=v>alue");
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeIllegalQualityFactor() {
+		MediaType.parseMediaType("audio/basic;q=1.1");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeIllegalCharset() {
+		MediaType.parseMediaType("text/html; charset=foo-bar");
+	}
+
 	@Test
 	public void parseMediaTypeQuotedParameterValue() {
 		MediaType.parseMediaType("audio/*;attr=\"v>alue\"");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeIllegalQuotedParameterValue() {
+		MediaType.parseMediaType("audio/*;attr=\"");
 	}
 
 	@Test
