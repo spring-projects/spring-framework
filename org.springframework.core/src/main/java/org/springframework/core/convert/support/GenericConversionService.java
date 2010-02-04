@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -450,19 +450,19 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				for (ConditionalGenericConverter conditional : this.conditionalConverters) {
 					if (conditional.matches(sourceType, targetType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Converter lookup [MATCHED] " + conditional);
+							logger.debug("Conditional converter lookup [MATCHED] " + conditional);
 						}
 						return conditional;
 					}
 					else {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Converter lookup [DID NOT MATCH] " + conditional);
+							logger.debug("Conditional converter lookup [DID NOT MATCH] " + conditional);
 						}
 					}
 				}
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Converter lookup [MATCHED] " + this.defaultConverter);
+			if (this.defaultConverter != null && logger.isDebugEnabled()) {
+				logger.debug("Default converter lookup [MATCHED] " + this.defaultConverter);
 			}			
 			return this.defaultConverter;
 		}
