@@ -16,14 +16,13 @@
 
 package org.springframework.scripting.support;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.Resource;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
@@ -56,6 +55,7 @@ public class ResourceScriptSource implements ScriptSource {
 
 	private final Object lastModifiedMonitor = new Object();
 
+	private String encoding = "UTF-8";
 
 	/**
 	 * Create a new ResourceScriptSource for the given resource.
@@ -74,14 +74,15 @@ public class ResourceScriptSource implements ScriptSource {
 		return this.resource;
 	}
 
-
 	public String getScriptAsString() throws IOException {
 		synchronized (this.lastModifiedMonitor) {
 			this.lastModified = retrieveLastModifiedTime();
 		}
-		
-		Reader reader = new InputStreamReader(this.resource.getInputStream(), "UTF-8");
-		
+
+		InputStream stream = this.resource.getInputStream();
+		Reader reader = (StringUtils.hasText(encoding) ? new InputStreamReader(stream, encoding)
+				: new InputStreamReader(stream));
+
 		return FileCopyUtils.copyToString(reader);
 	}
 
@@ -98,11 +99,10 @@ public class ResourceScriptSource implements ScriptSource {
 	protected long retrieveLastModifiedTime() {
 		try {
 			return getResource().lastModified();
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(getResource() + " could not be resolved in the file system - " +
-						"current timestamp not available for script modification check", ex);
+				logger.debug(getResource() + " could not be resolved in the file system - "
+						+ "current timestamp not available for script modification check", ex);
 			}
 			return 0;
 		}
@@ -112,6 +112,15 @@ public class ResourceScriptSource implements ScriptSource {
 		return StringUtils.stripFilenameExtension(getResource().getFilename());
 	}
 
+	/**
+	 * Sets the encoding used for reading the script resource. The default value is "UTF-8".
+	 * A null value, implies the platform default.
+	 * 
+	 * @param encoding charset encoding used for reading the script.
+	 */
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
 
 	@Override
 	public String toString() {
