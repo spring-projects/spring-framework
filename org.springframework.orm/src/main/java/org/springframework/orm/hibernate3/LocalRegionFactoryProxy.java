@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate3;
 
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.hibernate.cache.CacheDataDescription;
@@ -25,12 +26,18 @@ import org.hibernate.cache.EntityRegion;
 import org.hibernate.cache.QueryResultsRegion;
 import org.hibernate.cache.RegionFactory;
 import org.hibernate.cache.TimestampsRegion;
+import org.hibernate.cache.access.AccessType;
 import org.hibernate.cfg.Settings;
+
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Proxy for a Hibernate RegionFactory, delegating to a Spring-managed
  * RegionFactory instance, determined by LocalSessionFactoryBean's
  * "cacheRegionFactory" property.
+ *
+ * <p>Compatible with Hibernate 3.3 as well as Hibernate 3.5's version
+ * of the RegionFactory SPI.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -41,6 +48,9 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 	private final RegionFactory regionFactory;
 
 
+	/**
+	 * Standard constructor.
+	 */
 	public LocalRegionFactoryProxy() {
 		RegionFactory rf = (RegionFactory) LocalSessionFactoryBean.getConfigTimeRegionFactory();
 		// absolutely needs thread-bound RegionFactory to initialize
@@ -49,6 +59,14 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 			    "'cacheRegionFactory' property must be set on LocalSessionFactoryBean");
 		}
 		this.regionFactory = rf;
+	}
+
+	/**
+	 * Properties constructor: not used by this class or formally required,
+	 * but enforced by Hibernate when reflectively instantiating a RegionFactory.
+	 */
+	public LocalRegionFactoryProxy(Properties properties) {
+		this();
 	}
 
 
@@ -62,6 +80,16 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 
 	public boolean isMinimalPutsEnabledByDefault() {
 		return this.regionFactory.isMinimalPutsEnabledByDefault();
+	}
+
+	public AccessType getDefaultAccessType() {
+		try {
+			Method method = RegionFactory.class.getMethod("getDefaultAccessType");
+			return (AccessType) ReflectionUtils.invokeMethod(method, this.regionFactory);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("getDefaultAccessType requires Hibernate 3.5+");
+		}
 	}
 
 	public long nextTimestamp() {
