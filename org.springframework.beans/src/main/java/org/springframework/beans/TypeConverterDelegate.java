@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -576,7 +576,16 @@ class TypeConverterDelegate {
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}
-			convertedCopy.add(convertedElement);
+			try {
+				convertedCopy.add(convertedElement);
+			}
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Collection type [" + original.getClass().getName() +
+							"] seems to be read-only - injecting original Collection as-is", ex);
+				}
+				return original;
+			}
 			originalAllowed = originalAllowed && (element == convertedElement);
 		}
 		return (originalAllowed ? original : convertedCopy);
@@ -650,7 +659,16 @@ class TypeConverterDelegate {
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}
-			convertedCopy.put(convertedKey, convertedValue);
+			try {
+				convertedCopy.put(convertedKey, convertedValue);
+			}
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Map type [" + original.getClass().getName() +
+							"] seems to be read-only - injecting original Map as-is", ex);
+				}
+				return original;
+			}
 			originalAllowed = originalAllowed && (key == convertedKey) && (value == convertedValue);
 		}
 		return (originalAllowed ? original : convertedCopy);
