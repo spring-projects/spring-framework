@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.beans;
-
-import static org.junit.Assert.*;
 
 import java.beans.PropertyEditorSupport;
 import java.math.BigDecimal;
@@ -38,7 +36,14 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
+import static org.junit.Assert.*;
 import org.junit.Test;
+import test.beans.BooleanTestBean;
+import test.beans.ITestBean;
+import test.beans.IndexedTestBean;
+import test.beans.NumberTestBean;
+import test.beans.TestBean;
+
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
@@ -46,12 +51,6 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
-
-import test.beans.BooleanTestBean;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NumberTestBean;
-import test.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -1057,6 +1056,14 @@ public final class BeanWrapperTests {
 	}
 
 	@Test
+	public void testTypedMapReadOnlyMap() {
+		TypedReadOnlyMap map = new TypedReadOnlyMap(Collections.singletonMap("key", new TestBean()));
+		TypedReadOnlyMapClient bean = new TypedReadOnlyMapClient();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.setPropertyValue("map", map);
+	}
+
+	@Test
 	public void testPrimitiveArray() {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1717,7 +1724,7 @@ public final class BeanWrapperTests {
 
 
 	@SuppressWarnings("serial")
-	public static class ReadOnlyMap extends HashMap<Object, Object> {
+	public static class ReadOnlyMap<K, V> extends HashMap<K, V> {
 
 		private boolean frozen = false;
 
@@ -1727,12 +1734,12 @@ public final class BeanWrapperTests {
 			this.frozen = true;
 		}
 
-		public ReadOnlyMap(Map<Object, Object> map) {
+		public ReadOnlyMap(Map<? extends K, ? extends V> map) {
 			super(map);
 			this.frozen = true;
 		}
 
-		public Object put(Object key, Object value) {
+		public V put(K key, V value) {
 			if (this.frozen) {
 				throw new UnsupportedOperationException();
 			}
@@ -1741,12 +1748,12 @@ public final class BeanWrapperTests {
 			}
 		}
 
-		public Set<Map.Entry<Object, Object>> entrySet() {
+		public Set<Map.Entry<K, V>> entrySet() {
 			this.accessed = true;
 			return super.entrySet();
 		}
 
-		public Set<Object> keySet() {
+		public Set<K> keySet() {
 			this.accessed = true;
 			return super.keySet();
 		}
@@ -1761,7 +1768,27 @@ public final class BeanWrapperTests {
 		}
 	}
 
+
+	public static class TypedReadOnlyMap extends ReadOnlyMap<String, TestBean> {
+
+		public TypedReadOnlyMap() {
+		}
+
+		public TypedReadOnlyMap(Map<? extends String, ? extends TestBean> map) {
+			super(map);
+		}
+	}
+
+
+	public static class TypedReadOnlyMapClient {
+
+		public void setMap(TypedReadOnlyMap map) {
+		}
+	}
+
+
 	public static class EnumConsumer {
+
 		private Enum<TestEnum> enumValue;
 
 		public Enum<TestEnum> getEnumValue() {
@@ -1773,7 +1800,9 @@ public final class BeanWrapperTests {
 		}
 	}
 
+
 	public static class WildcardEnumConsumer {
+
 		private Enum<?> enumValue;
 
 		public Enum<?> getEnumValue() {
@@ -1785,7 +1814,9 @@ public final class BeanWrapperTests {
 		}
 	}
 
+
 	public enum TestEnum {
+
 		TEST_VALUE
 	}
 
