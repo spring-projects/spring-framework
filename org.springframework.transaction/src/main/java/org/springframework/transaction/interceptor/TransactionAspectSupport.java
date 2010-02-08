@@ -247,7 +247,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (this.transactionManager != null || this.beanFactory == null) {
 			return this.transactionManager;
 		}
-		PlatformTransactionManager chosen = null;
 		String qualifier = txAttr.getQualifier();
 		if (StringUtils.hasLength(qualifier)) {
 			if (!(this.beanFactory instanceof ConfigurableListableBeanFactory)) {
@@ -257,6 +256,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			ConfigurableListableBeanFactory bf = (ConfigurableListableBeanFactory) this.beanFactory;
 			Map<String, PlatformTransactionManager> tms =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, PlatformTransactionManager.class);
+			PlatformTransactionManager chosen = null;
 			for (String beanName : tms.keySet()) {
 				if (bf.containsBeanDefinition(beanName)) {
 					BeanDefinition bd = bf.getBeanDefinition(beanName);
@@ -274,9 +274,13 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					}
 				}
 			}
-		}
-		if (chosen != null) {
-			return chosen;
+			if (chosen != null) {
+				return chosen;
+			}
+			else {
+				throw new IllegalStateException(
+						"No matching PlatformTransactionManager bean found for qualifier '" + qualifier + "'");
+			}
 		}
 		else if (this.transactionManagerBeanName != null) {
 			return this.beanFactory.getBean(this.transactionManagerBeanName, PlatformTransactionManager.class);
