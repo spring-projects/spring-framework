@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Adding transactional method [" + method.getName() + "] with attribute [" + txAtt + "]");
+					logger.debug("Adding transactional method '" + method.getName() + "' with attribute: " + txAtt);
 				}
 				this.attributeCache.put(cacheKey, txAtt);
 			}
