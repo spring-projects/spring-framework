@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.springframework.web.servlet.view.tiles2;
 
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tiles.TilesApplicationContext;
 import org.apache.tiles.TilesException;
 import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
 import org.apache.tiles.definition.DefinitionsFactory;
@@ -32,9 +32,7 @@ import org.apache.tiles.evaluator.el.ELAttributeEvaluator;
 import org.apache.tiles.evaluator.impl.DirectAttributeEvaluator;
 import org.apache.tiles.factory.TilesContainerFactory;
 import org.apache.tiles.preparer.BasicPreparerFactory;
-import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
 import org.apache.tiles.servlet.context.ServletUtil;
-import org.apache.tiles.servlet.context.wildcard.WildcardServletTilesApplicationContextFactory;
 import org.apache.tiles.startup.BasicTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
 
@@ -91,14 +89,14 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Properties tilesPropertyMap = new Properties();
+	private final Map<String, String> tilesPropertyMap = new HashMap<String, String>();
 
 	private ServletContext servletContext;
 
 
 	public TilesConfigurer() {
 		this.tilesPropertyMap.put(AbstractTilesApplicationContextFactory.APPLICATION_CONTEXT_FACTORY_INIT_PARAM,
-				WildcardServletTilesApplicationContextFactory.class.getName());
+				SpringTilesApplicationContextFactory.class.getName());
 		this.tilesPropertyMap.put(TilesContainerFactory.PREPARER_FACTORY_INIT_PARAM,
 				BasicPreparerFactory.class.getName());
 		this.tilesPropertyMap.put(TilesContainerFactory.CONTAINER_FACTORY_MUTABLE_INIT_PARAM,
@@ -199,13 +197,15 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * @see #createTilesInitializer()
 	 */
 	public void afterPropertiesSet() throws TilesException {
-		createTilesInitializer().initialize(
-				new PropertyExposingServletTilesApplicationContext(this.servletContext, this.tilesPropertyMap));
+		SpringTilesApplicationContextFactory factory = new SpringTilesApplicationContextFactory();
+		factory.init(this.tilesPropertyMap);
+		TilesApplicationContext preliminaryContext = factory.createApplicationContext(this.servletContext);
+		createTilesInitializer().initialize(preliminaryContext);
 	}
 
 	/**
 	 * Creates a new instance of {@link org.apache.tiles.startup.BasicTilesInitializer}.
-	 * Override it to use a different initializer.
+	 * <p>Override it to use a different initializer.
 	 * @see org.apache.tiles.web.startup.TilesListener#createTilesInitializer()
 	 */
 	protected TilesInitializer createTilesInitializer() {
@@ -218,32 +218,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 */
 	public void destroy() throws TilesException {
 		ServletUtil.setContainer(this.servletContext, null);
-	}
-
-
-	private static class PropertyExposingServletTilesApplicationContext extends ServletTilesApplicationContext {
-
-		private final Map<String, String> mergedInitParams;
-
-		public PropertyExposingServletTilesApplicationContext(ServletContext servletContext, Properties properties) {
-			super(servletContext);
-			this.mergedInitParams = new LinkedHashMap<String, String>();
-			Enumeration initParamNames = servletContext.getInitParameterNames();
-			while (initParamNames.hasMoreElements()) {
-				String initParamName = (String) initParamNames.nextElement();
-				this.mergedInitParams.put(initParamName, servletContext.getInitParameter(initParamName));
-			}
-			Enumeration propertyNames = properties.propertyNames();
-			while (propertyNames.hasMoreElements()) {
-				String propertyName = (String) propertyNames.nextElement();
-				this.mergedInitParams.put(propertyName, properties.getProperty(propertyName));
-			}
-		}
-
-		@Override
-		public Map<String, String> getInitParams() {
-			return this.mergedInitParams;
-		}
 	}
 
 }
