@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,13 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 
 	private Object defaultTargetDataSource;
 
+	private boolean lenientFallback = true;
+
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
 	private Map<Object, DataSource> resolvedDataSources;
 
 	private DataSource resolvedDefaultDataSource;
-
 
 	/**
 	 * Specify the map of target DataSources, with the lookup key as key.
@@ -66,7 +67,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 
 	/**
 	 * Specify the default target DataSource, if any.
-	 * The mapped value can either be a corresponding {@link javax.sql.DataSource}
+	 * <p>The mapped value can either be a corresponding {@link javax.sql.DataSource}
 	 * instance or a data source name String (to be resolved via a
 	 * {@link #setDataSourceLookup DataSourceLookup}).
 	 * <p>This DataSource will be used as target if none of the keyed
@@ -75,6 +76,23 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 */
 	public void setDefaultTargetDataSource(Object defaultTargetDataSource) {
 		this.defaultTargetDataSource = defaultTargetDataSource;
+	}
+
+	/**
+	 * Specify whether to apply a lenient fallback to the default DataSource
+	 * if no specific DataSource could be found for the current lookup key.
+	 * <p>Default is "true", accepting lookup keys without a corresponding entry
+	 * in the target DataSource map - simply falling back to the default DataSource
+	 * in that case.
+	 * <p>Switch this flag to "false" if you would prefer the fallback to only apply
+	 * if the lookup key was <code>null</code>. Lookup keys without a DataSource
+	 * entry will then lead to an IllegalStateException.
+	 * @see #setTargetDataSources
+	 * @see #setDefaultTargetDataSource
+	 * @see #determineCurrentLookupKey()
+	 */
+	public void setLenientFallback(boolean lenientFallback) {
+		this.lenientFallback = lenientFallback;
 	}
 
 	/**
@@ -146,7 +164,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 		Assert.notNull(this.resolvedDataSources, "DataSource router not initialized");
 		Object lookupKey = determineCurrentLookupKey();
 		DataSource dataSource = this.resolvedDataSources.get(lookupKey);
-		if (dataSource == null) {
+		if (dataSource == null && (this.lenientFallback || lookupKey == null)) {
 			dataSource = this.resolvedDefaultDataSource;
 		}
 		if (dataSource == null) {
