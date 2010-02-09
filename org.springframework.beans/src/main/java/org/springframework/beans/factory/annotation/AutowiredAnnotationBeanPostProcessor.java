@@ -90,7 +90,10 @@ import org.springframework.util.ReflectionUtils;
  * by the "context:annotation-config" and "context:component-scan" XML tags.
  * Remove or turn off the default annotation configuration there if you intend
  * to specify a custom AutowiredAnnotationBeanPostProcessor bean definition.
- *
+ * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection; thus
+ * the latter configuration will override the former for properties wired through
+ * both approaches. 
+ * 
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
