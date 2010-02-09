@@ -4438,7 +4438,14 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     <literal>@Qualifier, @Named, and @Provider</literal> if the JSR330 jar is
     present on the classpath. Use of these annotations also requires that
     certain <interfacename>BeanPostProcessors</interfacename> be registered
-    within the Spring container. As always, you can register them as
+    within the Spring container. 
+    
+    <note>Annotation injection is performed <emphasis>before</emphasis> XML injection, thus 
+    the latter configuration will override the former for properties wired
+    through both approaches. 
+    </note>
+    
+    As always, you can register them as
     individual bean definitions, but they can also be implicitly registered by
     including the following tag in an XML-based Spring configuration (notice
     the inclusion of the <literal>context</literal> namespace):</para>
