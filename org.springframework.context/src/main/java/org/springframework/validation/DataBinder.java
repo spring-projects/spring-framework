@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,13 +177,36 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Set whether this binder should attempt to "auto-grow" a nested path that contains a null value.
+	 * <p>If "true", a null path location will be populated with a default object value and traversed
+	 * instead of resulting in an exception. This flag also enables auto-growth of collection elements
+	 * when accessing an out-of-bounds index.
+	 * <p>Default is "true" on a standard DataBinder. Note that this feature is only supported
+	 * for bean property access (DataBinder's default mode), not for field access.
+	 * @see #initBeanPropertyAccess()
+	 * @see org.springframework.beans.BeanWrapper#setAutoGrowNestedPaths
+	 */
+	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
+		Assert.state(this.bindingResult == null,
+				"DataBinder is already initialized - call setAutoGrowNestedPaths before other configuration methods");
+		this.autoGrowNestedPaths = autoGrowNestedPaths;
+	}
+
+	/**
+	 * Return whether "auto-growing" of nested paths has been activated.
+	 */
+	public boolean isAutoGrowNestedPaths() {
+		return this.autoGrowNestedPaths;
+	}
+
+	/**
 	 * Initialize standard JavaBean property access for this DataBinder.
 	 * <p>This is the default; an explicit call just leads to eager initialization.
 	 * @see #initDirectFieldAccess()
 	 */
 	public void initBeanPropertyAccess() {
-		Assert.isNull(this.bindingResult,
-				"DataBinder is already initialized - call initBeanPropertyAccess before any other configuration methods");
+		Assert.state(this.bindingResult == null,
+				"DataBinder is already initialized - call initBeanPropertyAccess before other configuration methods");
 		this.bindingResult = new BeanPropertyBindingResult(getTarget(), getObjectName(), isAutoGrowNestedPaths());
 		if (this.conversionService != null) {
 			this.bindingResult.initConversion(this.conversionService);
@@ -196,8 +219,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #initBeanPropertyAccess()
 	 */
 	public void initDirectFieldAccess() {
-		Assert.isNull(this.bindingResult,
-				"DataBinder is already initialized - call initDirectFieldAccess before any other configuration methods");
+		Assert.state(this.bindingResult == null,
+				"DataBinder is already initialized - call initDirectFieldAccess before other configuration methods");
 		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName());
 		if (this.conversionService != null) {
 			this.bindingResult.initConversion(this.conversionService);
@@ -330,25 +353,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public boolean isIgnoreInvalidFields() {
 		return this.ignoreInvalidFields;
-	}
-
-	/**
-	 * Set whether this binder should attempt to "auto-grow" a nested path that contains a null value.
-	 * <p>If "true", a null path location will be populated with a default object value and traversed
-	 * instead of resulting in an exception. This flag also enables auto-growth of collection elements
-	 * when accessing an out-of-bounds index.
-	 * <p>Default is "true" on a standard DataBinder.
-	 * @see org.springframework.beans.BeanWrapper#setAutoGrowNestedPaths
-	 */
-	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
-		this.autoGrowNestedPaths = autoGrowNestedPaths;
-	}
-
-	/**
-	 * Return whether "auto-growing" of nested paths has been activated.
-	 */
-	public boolean isAutoGrowNestedPaths() {
-		return this.autoGrowNestedPaths;
 	}
 
 	/**
