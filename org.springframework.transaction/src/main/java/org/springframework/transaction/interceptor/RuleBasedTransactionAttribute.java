@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * both positive and negative. If no rules are relevant to the exception, it
  * behaves like DefaultTransactionAttribute (rolling back on runtime exceptions).
  *
- * <p>TransactionAttributeEditor creates objects of this class.
+ * <p>{@link TransactionAttributeEditor} creates objects of this class.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -159,7 +159,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 
 	@Override
 	public String toString() {
-		StringBuilder result = getDefinitionDescription();
+		StringBuilder result = getAttributeDescription();
 		if (this.rollbackRules != null) {
 			for (RollbackRuleAttribute rule : this.rollbackRules) {
 				String sign = (rule instanceof NoRollbackRuleAttribute ? PREFIX_COMMIT_RULE : PREFIX_ROLLBACK_RULE);
