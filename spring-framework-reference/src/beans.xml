@@ -2136,7 +2136,10 @@ support=support@example.co.uk</programlisting>
         Spring's XML format, set the <literal>autowire-candidate</literal>
         attribute of the <literal>&lt;bean/&gt;</literal> element to
         <literal>false</literal>; the container makes that specific bean
-        definition unavailable to the autowiring infrastructure.</para>
+        definition unavailable to the autowiring infrastructure (including 
+        annotation style configurations such as 
+        <link linkend="beans-autowired-annotation"><interfacename>@Autowired</interfacename></link>).
+        </para>
 
         <para>You can also limit autowire candidates based on pattern-matching
         against bean names. The top-level <literal>&lt;beans/&gt;</literal>
