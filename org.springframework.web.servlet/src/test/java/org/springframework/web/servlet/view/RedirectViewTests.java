@@ -21,21 +21,18 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import org.easymock.MockControl;
-import static org.easymock.EasyMock.*;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.beans.TestBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.View;
 
 /**
