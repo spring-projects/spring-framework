@@ -5632,7 +5632,7 @@ public class MovieFinderImpl implements MovieFinder {
       <interfacename>@Scope</interfacename> annotation. Simply provide the
       name of the scope within the annotation:</para>
 
-      <programlisting language="java">@Scope(StandardScopes.PROTOTYPE)
+      <programlisting language="java">@Scope("prototype")
 @Repository
 public class MovieFinderImpl implements MovieFinder {
     <lineannotation>// ...</lineannotation>
