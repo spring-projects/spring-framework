@@ -42,7 +42,7 @@ public class TilesConfigurerTests {
 	public void simpleBootstrap() {
 		MockServletContext sc = new MockServletContext();
 		TilesConfigurer tc = new TilesConfigurer();
-		tc.setDefinitions(new String[] {"/org/springframework/web/servlet/view/tiles2/tiles-definitions.xml"});
+		tc.setDefinitions(new String[] {"/org/springframework/web/servlet/**/tiles-definitions.xml"});
 		Properties props = new Properties();
 		props.setProperty(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM, DirectAttributeEvaluator.class.getName());
 		tc.setTilesProperties(props);
@@ -54,6 +54,8 @@ public class TilesConfigurerTests {
 		TilesRequestContext requestContext = new ServletTilesRequestContext(appContext,
 				new MockHttpServletRequest(), new MockHttpServletResponse());
 		assertNotNull(container.getDefinitionsFactory().getDefinition("test", requestContext));
+
+		tc.destroy();
 	}
 
 }
