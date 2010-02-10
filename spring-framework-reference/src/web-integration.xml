@@ -556,13 +556,9 @@
         </quote>
     </para>
 
-    <para>WebWork is (in the opinion of this author) a very clean, elegant web
-    framework. Its architecture and key concepts are very easy to
-    understand, and the framework also has a rich tag library as well as
-    nicely decoupled validation. It
-    is (again, in the opinion of this author) quite easy to be productive in
-    next to no time at all (the documentation and tutorials are pretty good
-    too).</para>
+    <para>Web work's architecture and concepts are easy to
+    understand, and the framework also has an extensive tag library as well as
+    nicely decoupled validation.</para>
 
     <para>One of the key enablers in WebWork's technology stack is <ulink
     url="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an

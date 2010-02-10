@@ -57,13 +57,12 @@
   </section>
 
   <section id="new-in-3-new-tutorial">
-    <title>New getting started tutorial</title>
+    <title>New articles and tutorials</title>
 
-    <para>There is now a new getting started tutorial for developing a basic
-    Spring 3.0 MVC web application. This tutorial is a separate document that
-    can be found at the <ulink
-    url="http://www.springsource.org/documentation"> Spring
-    Documentation</ulink> page.</para>
+    <para>
+		There are many excellent articles and tutorials that show how to get started with Spring 3 features.
+		Read them at the <ulink url="http://www.springsource.org/documentation">Spring Documentation</ulink> page.
+	</para>
 
   </section>
 

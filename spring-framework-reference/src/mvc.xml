@@ -3128,13 +3128,10 @@ public class SimpleController {
 
     <itemizedlist>
       <listitem>
-        <para>The Spring distribution ships with a Spring Web MVC tutorial
-        that guides the reader through building a complete Spring Web
-        MVC-based application using a step-by-step approach. This tutorial is
-        available in the <literal>docs</literal> directory of the Spring
-        distribution. An online version can also be found on the <ulink
-        url="http://springframework.org/">Spring Framework
-        website</ulink>.</para>
+        <para>
+			There are many excellent articles and tutorials that show how to build web applications with Spring MVC. 
+			Read them at the <ulink url="http://www.springsource.org/documentation">Spring Documentation</ulink> page.
+		</para>
       </listitem>
 
       <listitem>
