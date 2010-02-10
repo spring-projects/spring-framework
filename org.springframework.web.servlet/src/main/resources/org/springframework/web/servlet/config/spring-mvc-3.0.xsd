@@ -13,6 +13,7 @@
 			<xsd:documentation
 				source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
 	Configures the annotation-driven Spring MVC Controller programming model.
+	Note that, with Spring 3.0, this tag works in Servlet MVC only!
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -53,7 +54,8 @@
 			<xsd:documentation><![CDATA[
 	The ordered set of interceptors that intercept HTTP Servlet Requests handled by Controllers.
 	Interceptors allow requests to be pre/post processed before/after handling.
-	Each inteceptor must implement the org.springframework.web.servlet.HandlerInterceptor or org.springframework.web.context.request.WebRequestInterceptor interface.
+	Each inteceptor must implement the org.springframework.web.servlet.HandlerInterceptor or
+	org.springframework.web.context.request.WebRequestInterceptor interface.
 	The interceptors in this set are automatically configured on each registered HandlerMapping.
 	The URI paths each interceptor applies to are configurable.
 			]]></xsd:documentation>
@@ -81,7 +83,7 @@
 										<xsd:annotation>
 											<xsd:documentation><![CDATA[
 	A path into the application intercepted by this interceptor.
-	Exact path mapping URIås (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
+	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
 											]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>								
@@ -119,8 +121,9 @@
 			<xsd:attribute name="view-name" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The name of the view to render.  Optional.
-	If not specified, the view name will be determined from the current HttpServletRequest by the DispatcherServlet's RequestToViewNameTranslator.
+	The name of the view to render. Optional.
+	If not specified, the view name will be determined from the current HttpServletRequest
+	by the DispatcherServlet's RequestToViewNameTranslator.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

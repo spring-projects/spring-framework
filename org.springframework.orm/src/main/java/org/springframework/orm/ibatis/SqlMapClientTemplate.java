@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		Assert.notNull(action, "Callback object must not be null");
 		Assert.notNull(this.sqlMapClient, "No SqlMapClient specified");
 
-		// We always needs to use a SqlMapSession, as we need to pass a Spring-managed
+		// We always need to use a SqlMapSession, as we need to pass a Spring-managed
 		// Connection (potentially transactional) in. This shouldn't be necessary if
 		// we run against a TransactionAwareDataSourceProxy underneath, but unfortunately
 		// we still need it to make iBATIS batch execution work properly: If iBATIS
