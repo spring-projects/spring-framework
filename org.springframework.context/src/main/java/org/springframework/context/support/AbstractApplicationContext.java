@@ -176,6 +176,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Flag that indicates whether this context is currently active */
 	private boolean active = false;
 
+	/** Flag that indicates whether this context has been closed already */
+	private boolean closed = false;
+
 	/** Synchronization monitor for the "active" flag */
 	private final Object activeMonitor = new Object();
 
@@ -964,7 +967,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #registerShutdownHook()
 	 */
 	protected void doClose() {
-		if (isActive()) {
+		boolean actuallyClose;
+		synchronized (this.activeMonitor) {
+			actuallyClose = this.active && !this.closed;
+			this.closed = true;
+		}
+
+		if (actuallyClose) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Closing " + this);
 			}
