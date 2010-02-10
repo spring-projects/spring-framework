@@ -18,12 +18,10 @@ package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Properties;
 
-import org.apache.tiles.TilesApplicationContext;
 import org.apache.tiles.context.TilesRequestContext;
 import org.apache.tiles.evaluator.impl.DirectAttributeEvaluator;
 import org.apache.tiles.factory.TilesContainerFactory;
 import org.apache.tiles.impl.BasicTilesContainer;
-import org.apache.tiles.servlet.context.ServletTilesApplicationContext;
 import org.apache.tiles.servlet.context.ServletTilesRequestContext;
 import org.apache.tiles.servlet.context.ServletUtil;
 import static org.junit.Assert.*;
@@ -42,7 +40,7 @@ public class TilesConfigurerTests {
 	public void simpleBootstrap() {
 		MockServletContext sc = new MockServletContext();
 		TilesConfigurer tc = new TilesConfigurer();
-		tc.setDefinitions(new String[] {"/org/springframework/web/servlet/**/tiles-definitions.xml"});
+		tc.setDefinitions(new String[] {"/org/springframework/web/servlet/view/tiles2/tiles-definitions.xml"});
 		Properties props = new Properties();
 		props.setProperty(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM, DirectAttributeEvaluator.class.getName());
 		tc.setTilesProperties(props);
@@ -50,9 +48,8 @@ public class TilesConfigurerTests {
 		tc.afterPropertiesSet();
 
 		BasicTilesContainer container = (BasicTilesContainer) ServletUtil.getContainer(sc);
-		TilesApplicationContext appContext = new ServletTilesApplicationContext(sc);
-		TilesRequestContext requestContext = new ServletTilesRequestContext(appContext,
-				new MockHttpServletRequest(), new MockHttpServletResponse());
+		TilesRequestContext requestContext = new ServletTilesRequestContext(
+				container.getApplicationContext(), new MockHttpServletRequest(), new MockHttpServletResponse());
 		assertNotNull(container.getDefinitionsFactory().getDefinition("test", requestContext));
 
 		tc.destroy();
