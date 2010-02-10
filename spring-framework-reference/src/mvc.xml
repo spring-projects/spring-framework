@@ -3119,7 +3119,117 @@ public class SimpleController {
   &lt;servlet-name&gt;petclinic&lt;/servlet-name&gt;
 &lt;/filter-mapping&gt;</programlisting>
   </section>
+  <section id="mvc-config">
+  	<title>Configuring Spring MVC</title>
+  	<para>
+  		Spring 3 introduces a <literal>mvc</literal> XML configuration namespace that simplifies the setup of Spring MVC inside your web application.
+  		Instead of registering low-level beans such as AnnotationMethodHandlerAdapter, you can simply use the namespace and its higher-level constructs.
+  		This is generally preferred unless you require finer-grained control of the configuration at the bean level.
+  	</para>
+  	<para>
+  		The mvc namespace consists of three tags: mvc:annotation-driven, mvc:interceptors, and mvc:view-controller.
+  		Each of these tags is documented below and in the <ulink url="http://static.springsource.org/schema/mvc/spring-mvc-3.0.xsd">XML schema</ulink>.
+  	</para>
+  	<section id="mvc-annotation-driven">
+  		<title>mvc:annotation-driven</title>
+  		<para>
+			This tag registers the DefaultAnnotationHandlerMapping and AnnotationMethodHandlerAdapter beans that are required for Spring MVC to dispatch requests to @Controllers.
+			The tag configures those two beans with sensible defaults based on what is present in your classpath.
+			The defaults are:
+    		<orderedlist>
+    			<listitem>
+    				<para>
+			    		Support for Spring 3's Type <link linkend="core-convert">ConversionService</link> in addition to JavaBeans PropertyEditors during Data Binding.
+			    		A ConversionService instance produced by the <classname>org.springframework.format.support.FormattingConversionServiceFactoryBean</classname> is used by default.
+			    		This can be overriden by setting the <literal>conversion-service</literal> attribute. 
+    				</para>
+    			</listitem>
+    			<listitem>
+    				<para>
+    					Support for <link linkend="format">formatting</link> Number fields using the @NumberFormat annotation
+    				</para>
+    			</listitem>
+    			<listitem>
+    				<para>
+					    Support for <link linkend="format">formatting</link> Date, Calendar, Long, and Joda Time fields using the @DateTimeFormat annotation, if Joda Time is present on the classpath.
+    				</para>
+    			</listitem>
+    			<listitem>
+    				<para>
+    					Support for <link linkend="validation-mvc-jsr303">validating</link> @Controller inputs with @Valid, if a JSR-303 Provider is present on the classpath.
+    					The validation system can be explicitly configured by setting the <literal>validator</literal> attribute.
+    				</para>
+    			</listitem>
+    			<listitem>
+    				<para>
+    					Support for reading and writing XML, if JAXB is present on the classpath.
+    				</para>
+    			</listitem>
+    			<listitem>
+    				<para>
+    					Support for reading and writing JSON, if Jackson is present on the classpath.
+    				</para>
+    			</listitem>
+    		</orderedlist>
+    		A typical usage is shown below:
+			<programlisting language="xml"><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
+    <!-- JSR-303 support will be detected on classpath and enabled automatically -->
+    <mvc:annotation-driven/>
+    
+</beans>]]>
+			</programlisting>   		
+  		</para>
+  	</section>
+  	<section id="mvc-interceptors">
+  		<title>mvc:interceptors</title>
+  		<para>
+  			This tag allows you to register custom HandlerInterceptors or WebRequestInterceptors that should be applied to all HandlerMapping beans.
+  			You can also restrict the URL paths specifc interceptors apply to.
+  		</para>
+  		<para>
+  			An example of registering an interceptor applied to all URL paths:
+  		</para>
+		<programlisting language="xml"><![CDATA[
+<mvc:interceptors>
+    <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+</mvc:interceptors>]]>
+		</programlisting>  
+		<para>
+			An example of registering an interceptor limited to a specific URL path:
+		</para> 		
+		<programlisting language="xml"><![CDATA[
+<mvc:interceptors>
+    <mvc:interceptor>
+        <mapping path="/secure/*"/>
+        <bean class="org.example.SecurityInterceptor" />
+    </mvc:interceptor>
+</mvc:interceptors>]]>
+		</programlisting>
+  	</section>
+  	<section id="mvc-view-controller">
+  		<title>mvc:view-controller</title>
+  		<para>
+  			This tag is a shorcut for defining a <classname>ParameterizableViewController</classname> that immediately forwards to a view when invoked.
+  			Use it in static cases when there is no Java Controller logic to execute before the view generates the response.
+  		</para>
+  		<para>
+  			An example of view-controller that forwards to a home page is shown below:
+  		</para>
+		<programlisting language="xml"><![CDATA[
+<mvc:view-controller path="/" view-name="home"/>]]>
+		</programlisting>  		
+  	</section>
+  </section>
   <section id="mvc-resources">
     <title>More Spring Web MVC Resources</title>
 
