@@ -3,12 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.1 (2010-02-08)
+Changes in version 3.0.1 (2010-02-15)
 -------------------------------------
 
 * upgraded to AspectJ 1.6.8
-* support for Hibernate 3.5 beta 3
 * full support for JPA 2.0 persistence schema and PersistenceUnitInfo SPI
+* support for Hibernate 3.5 beta 4 (in particular for its JPA 2.0 provider)
+* support for Tiles 2.2 (preserving compatibility with Tiles 2.1.2 and above)
 * consistent treatment of unresolvable placeholders for Resource and Resource array properties
 * ConversionFailedException exposes offending value through public "getValue()" method
 * fixed BeanFactory's "getBeansWithAnnotation" to ignore beans with non-determinable type
@@ -28,6 +29,7 @@ Changes in version 3.0.1 (2010-02-08)
 * SharedEntityManagerCreator's EntityManager proxies are fully serializable now
 * Query call chaining works with shared EntityManager proxy outside of transaction as well
 * TransactionInterceptor is able to serialize "transactionManagerBeanName" as well
+* non-matching @Transactional qualifier value will lead to IllegalStateException
 * fixed WebSphereUowTransactionManager regression: correctly roll back in case of exception
 * JndiObjectFactoryBean explicitly only chooses public interfaces as default proxy interfaces
 * MBeanClientInterceptor/MBeanProxyFactoryBean understands CompositeData/TabularData arrays
