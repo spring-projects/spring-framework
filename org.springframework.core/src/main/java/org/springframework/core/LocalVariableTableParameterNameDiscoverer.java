@@ -57,21 +57,19 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
 	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache = new ConcurrentHashMap<Class<?>, Map<Member, String[]>>();
 
-	// marker object for members that have been visited yet no params have been discovered for it
-	private static final String[] EMPTY_NAMES_ARRAY = new String[0];
 	// marker object for classes that do not have any debug info
-	private static final Map<Member, String[]> EMPTY_MAP = Collections.emptyMap();
+	private static final Map<Member, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();
 
 	public String[] getParameterNames(Method method) {
 		Class<?> declaringClass = method.getDeclaringClass();
 		Map<Member, String[]> map = parameterNamesCache.get(declaringClass);
 		if (map == null) {
 			// initialize cache
-			map = cacheClass(declaringClass);
+			map = inspectClass(declaringClass);
+			parameterNamesCache.put(declaringClass, map);
 		}
-		if (map != EMPTY_MAP) {
-			String[] paramNames = map.get(method);
-			return (paramNames == EMPTY_NAMES_ARRAY ? null : paramNames);
+		if (map != NO_DEBUG_INFO_MAP) {
+			return map.get(method);
 		}
 		return null;
 	}
@@ -82,20 +80,23 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		Map<Member, String[]> map = parameterNamesCache.get(declaringClass);
 		if (map == null) {
 			// initialize cache
-			map = cacheClass(declaringClass);
+			map = inspectClass(declaringClass);
+			parameterNamesCache.put(declaringClass, map);
 		}
-		String[] paramNames = map.get(ctor);
-		return (paramNames == EMPTY_NAMES_ARRAY ? null : paramNames);
+		if (map != NO_DEBUG_INFO_MAP) {
+			return map.get(ctor);
+		}
+
+		return null;
 	}
 
 	/**
-	 * Caches the results of the introspected class. Exceptions will be logged and swallowed.
-	 * 
-	 * @param declaringClass class about to be inspected
-	 * @return cached value
+	 * Inspects the target class. Exceptions will be logged and a maker map returned to indicate the lack of debug information.
+	 *  
+	 * @param clazz
+	 * @return
 	 */
-	private Map<Member, String[]> cacheClass(Class<?> clazz) {
-
+	private Map<Member, String[]> inspectClass(Class<?> clazz) {
 		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
 		if (is == null) {
 			// We couldn't load the class file, which is not fatal as it
@@ -104,7 +105,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 				logger.debug("Cannot find '.class' file for class [" + clazz
 						+ "] - unable to determine constructors/methods parameter names");
 			}
-			return Collections.emptyMap();
+
+			return NO_DEBUG_INFO_MAP;
 		}
 
 		try {
@@ -125,7 +127,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			}
 		}
 
-		return Collections.emptyMap();
+		return NO_DEBUG_INFO_MAP;
 	}
 
 	/**

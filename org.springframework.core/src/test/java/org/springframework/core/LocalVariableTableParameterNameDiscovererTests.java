@@ -188,6 +188,8 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		m = clazz.getMethod("getDate", null);
 		names = discoverer.getParameterNames(m);
 		assertEquals(0, names.length);
+		
+		//System.in.read();
 	}
 
 	public void testMemUsage() throws Exception {
@@ -207,7 +209,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		names = discoverer.getParameterNames(m);
 		assertNull(names);
 
-		//System.in.read()
+		//System.in.read();
 	}
 
 	public static void staticMethodNoLocalVars() {
