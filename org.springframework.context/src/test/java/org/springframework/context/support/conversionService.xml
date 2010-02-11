@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		<property name="customEditors">
+			<map key-type="java.lang.String" value-type="java.lang.Class">
+				<entry key="org.springframework.core.io.Resource[]" value="org.springframework.core.io.support.ResourceArrayPropertyEditor"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean"/>
+
+	<bean id="resourceTestBean" class="org.springframework.beans.ResourceTestBean">
+		<property name="resource" value="org/springframework/context/support/conversionService.xml"/>
+		<property name="resourceArray" value="org/springframework/context/support/*.xml"/>
+		<property name="resourceMap">
+			<map>
+				<entry key="key1" value="org/springframework/context/support/conversionService.xml"/>
+			</map>
+		</property>
+		<property name="resourceArrayMap">
+			<map>
+				<entry key="key1" value="org/springframework/context/support/*.xml"/>
+			</map>
+		</property>
+	</bean>
+
+</beans>

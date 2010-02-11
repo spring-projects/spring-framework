@@ -269,7 +269,7 @@ public class TypeDescriptor {
 	@SuppressWarnings("unchecked")
 	public Class<?> getMapKeyType() {
 		if (this.field != null) {
-			return GenericCollectionTypeResolver.getMapKeyFieldType(field);
+			return GenericCollectionTypeResolver.getMapKeyFieldType(this.field);
 		}
 		else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
@@ -370,7 +370,38 @@ public class TypeDescriptor {
 	 * @return true if this type is assignable to the target
 	 */
 	public boolean isAssignableTo(TypeDescriptor targetType) {
-		return isTypeAssignableTo(targetType.getType());
+		Class targetClass = targetType.getType();
+		if (!isTypeAssignableTo(targetClass)) {
+			return false;
+		}
+		if (targetClass != null) {
+			if (Collection.class.isAssignableFrom(targetClass)) {
+				Class<?> elementType = targetType.getCollectionElementType();
+				if (elementType != null) {
+					Class<?> sourceElementType = getCollectionElementType();
+					if (sourceElementType == null || !elementType.isAssignableFrom(sourceElementType)) {
+						return false;
+					}
+				}
+			}
+			else if (Map.class.isAssignableFrom(targetClass)) {
+				Class<?> keyType = targetType.getMapKeyType();
+				if (keyType != null) {
+					Class<?> sourceKeyType = getMapKeyType();
+					if (sourceKeyType == null || !keyType.isAssignableFrom(sourceKeyType)) {
+						return false;
+					}
+				}
+				Class<?> valueType = targetType.getMapValueType();
+				if (valueType != null) {
+					Class<?> sourceValueType = getMapValueType();
+					if (sourceValueType == null || !valueType.isAssignableFrom(sourceValueType)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
