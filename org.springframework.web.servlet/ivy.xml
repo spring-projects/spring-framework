@@ -72,6 +72,8 @@
                     conf="optional, velocity, freemarker, jasper-reports->compile"/>
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration"
                     conf="compile->compile"/>
+		<dependency org="org.springframework" name="org.springframework.expression" rev="latest.integration"
+                    conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.oxm" rev="latest.integration"
                     conf="optional, oxm->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration"

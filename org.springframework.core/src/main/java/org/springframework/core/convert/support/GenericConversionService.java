@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -39,6 +38,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -121,9 +121,12 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		assertNotNull(sourceType, targetType);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Converting value " + StylerUtils.style(source) +" of " + sourceType + " to " + targetType);
+		}
 		if (sourceType == TypeDescriptor.NULL) {
 			Assert.isTrue(source == null, "The source must be null if sourceType == TypeDescriptor.NULL");
-			return convertNullSource(sourceType, targetType);
+			return convertNullSource(sourceType, targetType);			
 		}
 		if (targetType == TypeDescriptor.NULL) {
 			return null;

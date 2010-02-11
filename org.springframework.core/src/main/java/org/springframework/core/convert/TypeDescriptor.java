@@ -439,16 +439,17 @@ public class TypeDescriptor {
 
 	public String toString() {
 		if (this == TypeDescriptor.NULL) {
-			return "TypeDescriptor.NULL";
+			return "[TypeDescriptor.NULL]";
 		}
 		else {
 			StringBuilder builder = new StringBuilder();
-			builder.append("TypeDescriptor ");
+			builder.append("[TypeDescriptor ");
 			Annotation[] anns = getAnnotations();
 			for (Annotation ann : anns) {
 				builder.append("@").append(ann.annotationType().getName()).append(' ');
 			}
 			builder.append(ClassUtils.getQualifiedName(getType()));
+			builder.append("]");
 			return builder.toString();
 		}
 	}

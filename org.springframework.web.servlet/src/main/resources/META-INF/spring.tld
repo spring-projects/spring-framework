@@ -358,8 +358,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Specifies a remote application context.  The default is the 
-			current application context.</description>
+			<description>Specifies a remote application context path.  The default is the 
+			current application context path.</description>
 			<name>context</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -409,6 +409,46 @@
 		<attribute>
 			<description>The value of the parameter.</description>
 			<name>value</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<description>Evaluates a Spring expression (SpEL) and either prints the result or assigns it to a variable.</description>
+		<name>eval</name>
+		<tag-class>org.springframework.web.servlet.tags.EvalTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<description>The expression to evaluate.</description>
+			<name>expression</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>The name of the variable to export the evaluation result to.</description>
+			<name>var</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>The scope for the var.  'application', 'session', 'request' and 
+			'page' scopes are supported.  Defaults to page scope.  This attribute has no 
+			effect unless the var attribute is also defined.</description>
+			<name>scope</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Set HTML escaping for this tag, as boolean value. Overrides the
+			default HTML escaping setting for the current page.</description>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Set JavaScript escaping for this tag, as boolean value.  Default is false.</description>
+			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
