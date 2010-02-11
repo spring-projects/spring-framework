@@ -50,5 +50,6 @@
 	<classpathentry kind="var" path="IVY_CACHE/javax.validation/com.springsource.javax.validation/1.0.0.GA/com.springsource.javax.validation-1.0.0.GA.jar" sourcepath="/IVY_CACHE/javax.validation/com.springsource.javax.validation/1.0.0/com.springsource.javax.validation-sources-1.0.0.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-1.5.3.jar" sourcepath="/IVY_CACHE/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-sources-1.5.3.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.slf4j/com.springsource.slf4j.api/1.5.3/com.springsource.slf4j.api-1.5.3.jar" sourcepath="/IVY_CACHE/org.slf4j/com.springsource.slf4j.api/1.5.3/com.springsource.slf4j.api-sources-1.5.3.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.expression"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

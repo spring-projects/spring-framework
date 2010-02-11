@@ -16,17 +16,13 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.io.StringWriter;
-
-import javax.servlet.jsp.JspWriter;
-
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockBodyContent;
+import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
@@ -48,6 +44,8 @@ public abstract class AbstractTagTests extends TestCase {
 		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();
 		wac.setServletContext(sc);
 		wac.setNamespace("test");
+		// TODO this name index leads to brittle lookup by EvalTag
+		wac.registerSingleton("conversionService", FormattingConversionServiceFactoryBean.class);
 		wac.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
