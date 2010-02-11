@@ -16,8 +16,12 @@
 
 package org.springframework.core;
 
+import java.awt.Component;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Date;
 
 import junit.framework.TestCase;
 
@@ -30,7 +34,6 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 
 	private LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
-
 	public void testMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
 		Method getName = TestBean.class.getMethod("getName", new Class[0]);
 		String[] names = discoverer.getParameterNames(getName);
@@ -39,7 +42,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testMethodParameterNameDiscoveryWithArgs() throws NoSuchMethodException {
-		Method setName = TestBean.class.getMethod("setName", new Class[]{String.class});
+		Method setName = TestBean.class.getMethod("setName", new Class[] { String.class });
 		String[] names = discoverer.getParameterNames(setName);
 		assertNotNull("should find method info", names);
 		assertEquals("one argument", 1, names.length);
@@ -54,7 +57,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testConsParameterNameDiscoveryArgs() throws NoSuchMethodException {
-		Constructor twoArgCons = TestBean.class.getConstructor(new Class[]{String.class, int.class});
+		Constructor twoArgCons = TestBean.class.getConstructor(new Class[] { String.class, int.class });
 		String[] names = discoverer.getParameterNames(twoArgCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("one argument", 2, names.length);
@@ -72,14 +75,14 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	public void testOverloadedStaticMethod() throws Exception {
 		Class clazz = this.getClass();
 
-		Method m1 = clazz.getMethod("staticMethod", new Class[]{Long.TYPE, Long.TYPE});
+		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE });
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
 		assertEquals("x", names[0]);
 		assertEquals("y", names[1]);
 
-		Method m2 = clazz.getMethod("staticMethod", new Class[]{Long.TYPE, Long.TYPE, Long.TYPE});
+		Method m2 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE, Long.TYPE });
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("three arguments", 3, names.length);
@@ -91,13 +94,13 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	public void testOverloadedStaticMethodInInnerClass() throws Exception {
 		Class clazz = InnerClass.class;
 
-		Method m1 = clazz.getMethod("staticMethod", new Class[]{Long.TYPE});
+		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE });
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("one argument", 1, names.length);
 		assertEquals("x", names[0]);
 
-		Method m2 = clazz.getMethod("staticMethod", new Class[]{Long.TYPE, Long.TYPE});
+		Method m2 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE });
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
@@ -108,14 +111,14 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	public void testOverloadedMethod() throws Exception {
 		Class clazz = this.getClass();
 
-		Method m1 = clazz.getMethod("instanceMethod", new Class[]{Double.TYPE, Double.TYPE});
+		Method m1 = clazz.getMethod("instanceMethod", new Class[] { Double.TYPE, Double.TYPE });
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
 		assertEquals("x", names[0]);
 		assertEquals("y", names[1]);
 
-		Method m2 = clazz.getMethod("instanceMethod", new Class[]{Double.TYPE, Double.TYPE, Double.TYPE});
+		Method m2 = clazz.getMethod("instanceMethod", new Class[] { Double.TYPE, Double.TYPE, Double.TYPE });
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("three arguments", 3, names.length);
@@ -127,13 +130,13 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	public void testOverloadedMethodInInnerClass() throws Exception {
 		Class clazz = InnerClass.class;
 
-		Method m1 = clazz.getMethod("instanceMethod", new Class[]{String.class});
+		Method m1 = clazz.getMethod("instanceMethod", new Class[] { String.class });
 		String[] names = discoverer.getParameterNames(m1);
 		assertNotNull("should find method info", names);
 		assertEquals("one argument", 1, names.length);
 		assertEquals("aa", names[0]);
 
-		Method m2 = clazz.getMethod("instanceMethod", new Class[]{String.class, String.class});
+		Method m2 = clazz.getMethod("instanceMethod", new Class[] { String.class, String.class });
 		names = discoverer.getParameterNames(m2);
 		assertNotNull("should find method info", names);
 		assertEquals("two arguments", 2, names.length);
@@ -141,6 +144,71 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("bb", names[1]);
 	}
 
+	public void testGenerifiedClass() throws Exception {
+		Class clazz = GenerifiedClass.class;
+
+		Constructor ctor = clazz.getDeclaredConstructor(Object.class);
+		String[] names = discoverer.getParameterNames(ctor);
+		assertEquals(1, names.length);
+		assertEquals("key", names[0]);
+
+		ctor = clazz.getDeclaredConstructor(Object.class, Object.class);
+		names = discoverer.getParameterNames(ctor);
+		assertEquals(2, names.length);
+		assertEquals("key", names[0]);
+		assertEquals("value", names[1]);
+
+		Method m = clazz.getMethod("generifiedStaticMethod", Object.class);
+		names = discoverer.getParameterNames(m);
+		assertEquals(1, names.length);
+		assertEquals("param", names[0]);
+
+		m = clazz.getMethod("generifiedMethod", Object.class, long.class, Object.class, Object.class);
+		names = discoverer.getParameterNames(m);
+		assertEquals(4, names.length);
+		assertEquals("param", names[0]);
+		assertEquals("x", names[1]);
+		assertEquals("key", names[2]);
+		assertEquals("value", names[3]);
+
+		m = clazz.getMethod("voidStaticMethod", Object.class, long.class, int.class);
+		names = discoverer.getParameterNames(m);
+		assertEquals(3, names.length);
+		assertEquals("obj", names[0]);
+		assertEquals("x", names[1]);
+		assertEquals("i", names[2]);
+
+		m = clazz.getMethod("nonVoidStaticMethod", Object.class, long.class, int.class);
+		names = discoverer.getParameterNames(m);
+		assertEquals(3, names.length);
+		assertEquals("obj", names[0]);
+		assertEquals("x", names[1]);
+		assertEquals("i", names[2]);
+
+		m = clazz.getMethod("getDate", null);
+		names = discoverer.getParameterNames(m);
+		assertEquals(0, names.length);
+	}
+
+	public void testMemUsage() throws Exception {
+		// JDK classes don't have debug information (usually)
+		Class clazz = Component.class;
+		String methodName = "list";
+
+		Method m = clazz.getMethod(methodName, null);
+		String[] names = discoverer.getParameterNames(m);
+		assertNull(names);
+
+		m = clazz.getMethod(methodName, PrintStream.class);
+		names = discoverer.getParameterNames(m);
+		assertNull(names);
+
+		m = clazz.getMethod(methodName, PrintStream.class, int.class);
+		names = discoverer.getParameterNames(m);
+		assertNull(names);
+
+		//System.in.read()
+	}
 
 	public static void staticMethodNoLocalVars() {
 	}
@@ -164,7 +232,6 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		double u = x * y * z;
 		return u;
 	}
-
 
 	public static class InnerClass {
 
@@ -198,4 +265,48 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		}
 	}
 
+	public static class GenerifiedClass<K, V> {
+		private static long date;
+
+		private K key;
+		private V value;
+
+		static {
+			// some custom static bloc or <clinit>
+			date = new Date().getTime();
+		}
+
+		public GenerifiedClass() {
+			this(null, null);
+		}
+
+		public GenerifiedClass(K key) {
+			this(key, null);
+		}
+
+		public GenerifiedClass(K key, V value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		public static <P> long generifiedStaticMethod(P param) {
+			return date;
+		}
+
+		public <P> void generifiedMethod(P param, long x, K key, V value) {
+			// nothing
+		}
+
+		public static void voidStaticMethod(Object obj, long x, int i) {
+			// nothing
+		}
+
+		public static long nonVoidStaticMethod(Object obj, long x, int i) {
+			return date;
+		}
+
+		public static long getDate() {
+			return date;
+		}
+	}
 }
