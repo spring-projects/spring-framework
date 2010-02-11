@@ -183,6 +183,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>		
+		<dependency>
+			<groupId>org.springframework</groupId>
 			<artifactId>spring-oxm</artifactId>
 			<version>${project.version}</version>
 			<optional>true</optional>
