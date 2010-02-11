@@ -62,14 +62,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * Helper class to configure Tiles2 for the Spring Framework. See
+ * Helper class to configure Tiles 2.x for the Spring Framework. See
  * <a href="http://tiles.apache.org">http://tiles.apache.org</a>
  * for more information about Tiles, which basically is a templating
  * mechanism for JSP-based web applications.
  *
  * <b>Note: Spring 3.0 requires Tiles 2.1.2 or above, with explicit support for Tiles 2.2.</b>
- * Tiles 2.1's EL support will be activated by default when running on JSP 2.1 or above.
- * Note that EL support is <i>not</> active by default when running against Tiles 2.2.
+ * Tiles 2.1's EL support will be activated by default when running on JSP 2.1 or above
+ * and when the Tiles EL module is present in the classpath.
  *
  * <p>The TilesConfigurer simply configures a TilesContainer using a set of files
  * containing definitions, to be accessed by {@link TilesView} instances. This is a
@@ -103,8 +103,11 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
 
-	private static final boolean jsp21Present = ClassUtils.isPresent(
-			"javax.servlet.jsp.JspApplicationContext", TilesConfigurer.class.getClassLoader());
+	private static final boolean tilesElPresent =  // requires JSP 2.1 as well as Tiles EL module
+			ClassUtils.isPresent(
+			"javax.servlet.jsp.JspApplicationContext", TilesConfigurer.class.getClassLoader()) &&
+			ClassUtils.isPresent(
+			"org.apache.tiles.evaluator.el.ELAttributeEvaluator", TilesConfigurer.class.getClassLoader());
 
 	private static final boolean tiles22Present = ClassUtils.isPresent(
 			"org.apache.tiles.evaluator.AttributeEvaluatorFactory", TilesConfigurer.class.getClassLoader());
@@ -140,8 +143,8 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				Boolean.toString(false));
 		this.tilesPropertyMap.put(DefinitionsFactory.LOCALE_RESOLVER_IMPL_PROPERTY,
 				SpringLocaleResolver.class.getName());
-		this.tilesPropertyMap.put(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM,
-				jsp21Present ? ELAttributeEvaluator.class.getName() : DirectAttributeEvaluator.class.getName());
+		this.tilesPropertyMap.put(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM, tilesElPresent ?
+				"org.apache.tiles.evaluator.el.ELAttributeEvaluator" : DirectAttributeEvaluator.class.getName());
 	}
 
 
@@ -308,25 +311,12 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			}
 		}
 
-		if (jsp21Present && this.tilesInitializer instanceof SpringTilesInitializer) {
+		if (tilesElPresent && this.tilesInitializer instanceof SpringTilesInitializer) {
 			// Again, we need to do this after initialization since SpringTilesContainerFactory
 			// cannot override template methods that refer to Tiles 2.2 classes: in this case,
 			// AttributeEvaluatorFactory as createAttributeEvaluatorFactory return type.
-			try {
-				BasicTilesContainer container = (BasicTilesContainer) ServletUtil.getContainer(this.servletContext);
-				Class aef = getClass().getClassLoader().loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
-				Class baef = getClass().getClassLoader().loadClass("org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory");
-				Constructor baefCtor = baef.getConstructor(AttributeEvaluator.class);
-				ELAttributeEvaluator evaluator = new ELAttributeEvaluator();
-				evaluator.setApplicationContext(container.getApplicationContext());
-				evaluator.init(new HashMap<String, String>());
-				Object baefValue = baefCtor.newInstance(evaluator);
-				Method setter = container.getClass().getMethod("setAttributeEvaluatorFactory", aef);
-				setter.invoke(container, baefValue);
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Cannot activate ELAttributeEvaluator", ex);
-			}
+			BasicTilesContainer container = (BasicTilesContainer) ServletUtil.getContainer(this.servletContext);
+			TilesElActivator.registerEvaluator(container);
 		}
 	}
 
@@ -428,6 +418,28 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			}
 			else {
 				return super.createPreparerFactory(applicationContext, contextFactory);
+			}
+		}
+	}
+
+
+	private static class TilesElActivator {
+
+		public static void registerEvaluator(BasicTilesContainer container) {
+			try {
+				ClassLoader cl = TilesElActivator.class.getClassLoader();
+				Class aef = cl.loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
+				Class baef = cl.loadClass("org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory");
+				Constructor baefCtor = baef.getConstructor(AttributeEvaluator.class);
+				ELAttributeEvaluator evaluator = new ELAttributeEvaluator();
+				evaluator.setApplicationContext(container.getApplicationContext());
+				evaluator.init(new HashMap<String, String>());
+				Object baefValue = baefCtor.newInstance(evaluator);
+				Method setter = container.getClass().getMethod("setAttributeEvaluatorFactory", aef);
+				setter.invoke(container, baefValue);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Cannot activate ELAttributeEvaluator", ex);
 			}
 		}
 	}
