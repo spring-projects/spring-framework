@@ -16,14 +16,12 @@
 
 package org.springframework.core;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,225 +41,163 @@ import org.springframework.util.ClassUtils;
  * <code>null</code> if the class file was compiled without debug information.
  *
  * <p>Uses ObjectWeb's ASM library for analyzing class files. Each discoverer
- * instance caches the ASM ClassReader for each introspected Class, in a
+ * instance caches the ASM discovered information for each introspected Class, in a
  * thread-safe manner. It is recommended to reuse discoverer instances
  * as far as possible.
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  */
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 	private static Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
-	private final Map<Member, String[]> parameterNamesCache = new ConcurrentHashMap<Member, String[]>();
+	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
+	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache = new ConcurrentHashMap<Class<?>, Map<Member, String[]>>();
 
-	private final Map<Class, ClassReader> classReaderCache = new HashMap<Class, ClassReader>();
-
+	// marker object for members that have been visited yet no params have been discovered for it
+	private static final String[] EMPTY_NAMES_ARRAY = new String[0];
+	// marker object for classes that do not have any debug info
+	private static final Map<Member, String[]> EMPTY_MAP = Collections.emptyMap();
 
 	public String[] getParameterNames(Method method) {
-		String[] paramNames = this.parameterNamesCache.get(method);
-		if (paramNames == null) {
-			try {
-				paramNames = visitMethod(method).getParameterNames();
-				if (paramNames != null) {
-					this.parameterNamesCache.put(method, paramNames);
-				}
-			}
-			catch (IOException ex) {
-				// We couldn't load the class file, which is not fatal as it
-				// simply means this method of discovering parameter names won't work.
-				if (logger.isDebugEnabled()) {
-					logger.debug("IOException whilst attempting to read '.class' file for class [" +
-							method.getDeclaringClass().getName() +
-							"] - unable to determine parameter names for method: " + method, ex);
-				}
-			}
+		Class<?> declaringClass = method.getDeclaringClass();
+		Map<Member, String[]> map = parameterNamesCache.get(declaringClass);
+		if (map == null) {
+			// initialize cache
+			map = cacheClass(declaringClass);
 		}
-		return paramNames;
+		if (map != EMPTY_MAP) {
+			String[] paramNames = map.get(method);
+			return (paramNames == EMPTY_NAMES_ARRAY ? null : paramNames);
+		}
+		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public String[] getParameterNames(Constructor ctor) {
-		String[] paramNames = this.parameterNamesCache.get(ctor);
-		if (paramNames == null) {
+		Class<?> declaringClass = ctor.getDeclaringClass();
+		Map<Member, String[]> map = parameterNamesCache.get(declaringClass);
+		if (map == null) {
+			// initialize cache
+			map = cacheClass(declaringClass);
+		}
+		String[] paramNames = map.get(ctor);
+		return (paramNames == EMPTY_NAMES_ARRAY ? null : paramNames);
+	}
+
+	/**
+	 * Caches the results of the introspected class. Exceptions will be logged and swallowed.
+	 * 
+	 * @param declaringClass class about to be inspected
+	 * @return cached value
+	 */
+	private Map<Member, String[]> cacheClass(Class<?> clazz) {
+
+		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
+		if (is == null) {
+			// We couldn't load the class file, which is not fatal as it
+			// simply means this method of discovering parameter names won't work.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot find '.class' file for class [" + clazz
+						+ "] - unable to determine constructors/methods parameter names");
+			}
+			return Collections.emptyMap();
+		}
+
+		try {
+			ClassReader classReader = new ClassReader(is);
+			Map<Member, String[]> map = new ConcurrentHashMap<Member, String[]>();
+			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), false);
+			return map;
+		} catch (IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Exception thrown while reading '.class' file for class [" + clazz
+						+ "] - unable to determine constructors/methods parameter names", ex);
+			}
+		} finally {
 			try {
-				paramNames = visitConstructor(ctor).getParameterNames();
-				if (paramNames != null) {
-					this.parameterNamesCache.put(ctor, paramNames);
-				}
-			}
-			catch (IOException ex) {
-				// We couldn't load the class file, which is not fatal as it
-				// simply means this method of discovering parameter names won't work.
-				if (logger.isDebugEnabled()) {
-					logger.debug("IOException whilst attempting to read '.class' file for class [" +
-							ctor.getDeclaringClass().getName() +
-							"] - unable to determine parameter names for constructor: " + ctor, ex);
-				}
+				is.close();
+			} catch (IOException ex) {
+				// ignore
 			}
 		}
-		return paramNames;
+
+		return Collections.emptyMap();
 	}
 
 	/**
-	 * Visit the given method and discover its parameter names.
-	 */
-	private ParameterNameDiscoveringVisitor visitMethod(Method method) throws IOException {
-		ClassReader classReader = getClassReader(method.getDeclaringClass());
-		FindMethodParameterNamesClassVisitor classVisitor = new FindMethodParameterNamesClassVisitor(method);
-		classReader.accept(classVisitor, false);
-		return classVisitor;
-	}
-
-	/**
-	 * Visit the given constructor and discover its parameter names.
-	 */
-	private ParameterNameDiscoveringVisitor visitConstructor(Constructor ctor) throws IOException {
-		ClassReader classReader = getClassReader(ctor.getDeclaringClass());
-		FindConstructorParameterNamesClassVisitor classVisitor = new FindConstructorParameterNamesClassVisitor(ctor);
-		classReader.accept(classVisitor, false);
-		return classVisitor;
-	}
-
-	/**
-	 * Obtain a (cached) ClassReader for the given class.
-	 */
-	private ClassReader getClassReader(Class clazz) throws IOException {
-		synchronized (this.classReaderCache) {
-			ClassReader classReader = (ClassReader) this.classReaderCache.get(clazz);
-			if (classReader == null) {
-				InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
-				if (is == null) {
-					throw new FileNotFoundException("Class file for class [" + clazz.getName() + "] not found");
-				}
-				try {
-					classReader = new ClassReader(is);
-					this.classReaderCache.put(clazz, classReader);
-				}
-				finally {
-					is.close();
-				}
-			}
-			return classReader;
-		}
-	}
-
-
-	/**
-	 * Helper class that looks for a given member name and descriptor, and then
+	 * Helper class that inspects all methods (constructor included) and then
 	 * attempts to find the parameter names for that member.
 	 */
-	private static abstract class ParameterNameDiscoveringVisitor extends EmptyVisitor {
+	private static class ParameterNameDiscoveringVisitor extends EmptyVisitor {
 
-		private String methodNameToMatch;
+		private final Class<?> clazz;
+		private final Map<Member, String[]> memberMap;
+		private static final String STATIC_CLASS_INIT = "<clinit>";
 
-		private String descriptorToMatch;
-
-		private int numParamsExpected;
-		
-		/*
-		 * The nth entry contains the slot index of the LVT table entry holding the
-		 * argument name for the nth parameter.
-		 */
-		private int[] lvtSlotIndex;
-
-		private String[] parameterNames;
-		
-		public ParameterNameDiscoveringVisitor(String name, boolean isStatic, Class[] paramTypes) {
-			this.methodNameToMatch = name;
-			this.numParamsExpected = paramTypes.length;
-			computeLvtSlotIndices(isStatic, paramTypes);
-		}
-		
-		public void setDescriptorToMatch(String descriptor) {
-			this.descriptorToMatch = descriptor;			
+		public ParameterNameDiscoveringVisitor(Class<?> clazz, Map<Member, String[]> memberMap) {
+			this.clazz = clazz;
+			this.memberMap = memberMap;
 		}
 
 		@Override
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-			if (name.equals(this.methodNameToMatch) && desc.equals(this.descriptorToMatch)) {
-				return new LocalVariableTableVisitor(this, isStatic(access));
-			} 
-			else {
-				// Not interested in this method...
-				return null;
+			// exclude synthetic + bridged && static class initialization
+			if (!isSyntheticOrBridged(access) && !STATIC_CLASS_INIT.equals(name)) {
+				return new LocalVariableTableVisitor(clazz, memberMap, name, desc, isStatic(access));
 			}
+			return null;
 		}
-		
-		private boolean isStatic(int access) {
+
+		private static boolean isSyntheticOrBridged(int access) {
+			return (((access & Opcodes.ACC_SYNTHETIC) | (access & Opcodes.ACC_BRIDGE)) > 0);
+		}
+
+		private static boolean isStatic(int access) {
 			return ((access & Opcodes.ACC_STATIC) > 0);
 		}
-
-		public String[] getParameterNames() {
-			return this.parameterNames;
-		}
-
-		private void computeLvtSlotIndices(boolean isStatic, Class[] paramTypes) {
-			this.lvtSlotIndex = new int[paramTypes.length];
-			int nextIndex = (isStatic ? 0 : 1);
-			for (int i = 0; i < paramTypes.length; i++) {
-				this.lvtSlotIndex[i] = nextIndex;
-				if (isWideType(paramTypes[i])) {
-					nextIndex += 2;
-				}
-				else {
-					nextIndex++;
-				}
-			}
-		}
-		
-		private boolean isWideType(Class aType) {
-			return (aType == Long.TYPE || aType == Double.TYPE);
-		}
 	}
-
-
-	private static class FindMethodParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
-		
-		public FindMethodParameterNamesClassVisitor(Method method) {
-			super(method.getName(), Modifier.isStatic(method.getModifiers()), method.getParameterTypes());
-			setDescriptorToMatch(Type.getMethodDescriptor(method));
-		}
-	}
-
-
-	private static class FindConstructorParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
-		
-		public FindConstructorParameterNamesClassVisitor(Constructor ctor) {
-			super("<init>", false, ctor.getParameterTypes());
-			Type[] pTypes = new Type[ctor.getParameterTypes().length];
-			for (int i = 0; i < pTypes.length; i++) {
-				pTypes[i] = Type.getType(ctor.getParameterTypes()[i]);
-			}
-			setDescriptorToMatch(Type.getMethodDescriptor(Type.VOID_TYPE, pTypes));
-		}
-	}
-
 
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
 
-		private final ParameterNameDiscoveringVisitor memberVisitor;
+		private static final String CONSTRUCTOR = "<init>";
 
+		private final Class<?> clazz;
+		private final Map<Member, String[]> memberMap;
+		private final String name;
+		private final Type[] args;
 		private final boolean isStatic;
 
 		private String[] parameterNames;
-
 		private boolean hasLvtInfo = false;
 
-		public LocalVariableTableVisitor(ParameterNameDiscoveringVisitor memberVisitor, boolean isStatic) {
-			this.memberVisitor = memberVisitor;
+		/*
+		 * The nth entry contains the slot index of the LVT table entry holding the
+		 * argument name for the nth parameter.
+		 */
+		private final int[] lvtSlotIndex;
+
+		public LocalVariableTableVisitor(Class<?> clazz, Map<Member, String[]> map, String name, String desc,
+				boolean isStatic) {
+			this.clazz = clazz;
+			this.memberMap = map;
+			this.name = name;
+			// determine args
+			args = Type.getArgumentTypes(desc);
+			this.parameterNames = new String[args.length];
 			this.isStatic = isStatic;
-			this.parameterNames = new String[memberVisitor.numParamsExpected];
+			this.lvtSlotIndex = computeLvtSlotIndices(isStatic, args);
 		}
 
 		@Override
-		public void visitLocalVariable(
-				String name, String description, String signature, Label start, Label end, int index) {
+		public void visitLocalVariable(String name, String description, String signature, Label start, Label end,
+				int index) {
 			this.hasLvtInfo = true;
-			int[] lvtSlotIndices = this.memberVisitor.lvtSlotIndex;
-			for (int i = 0; i < lvtSlotIndices.length; i++) {
-				if (lvtSlotIndices[i] == index) {
+			for (int i = 0; i < lvtSlotIndex.length; i++) {
+				if (lvtSlotIndex[i] == index) {
 					this.parameterNames[i] = name;
 				}
 			}
@@ -270,13 +206,51 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		@Override
 		public void visitEnd() {
 			if (this.hasLvtInfo || (this.isStatic && this.parameterNames.length == 0)) {
-				 // visitLocalVariable will never be called for static no args methods
-				 // which doesn't use any local variables.
-				 // This means that hasLvtInfo could be false for that kind of methods
-				 // even if the class has local variable info.
-				this.memberVisitor.parameterNames = this.parameterNames;
+				// visitLocalVariable will never be called for static no args methods
+				// which doesn't use any local variables.
+				// This means that hasLvtInfo could be false for that kind of methods
+				// even if the class has local variable info.
+				memberMap.put(resolveMember(), parameterNames);
 			}
 		}
-	}
 
+		private Member resolveMember() {
+			ClassLoader loader = clazz.getClassLoader();
+			Class<?>[] classes = new Class<?>[args.length];
+
+			// resolve args
+			for (int i = 0; i < args.length; i++) {
+				classes[i] = ClassUtils.resolveClassName(args[i].getClassName(), loader);
+			}
+			try {
+				if (CONSTRUCTOR.equals(name)) {
+					return clazz.getDeclaredConstructor(classes);
+				}
+
+				return clazz.getDeclaredMethod(name, classes);
+			} catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("Method [" + name
+						+ "] was discovered in the .class file but cannot be resolved in the class object", ex);
+			}
+		}
+
+		private static int[] computeLvtSlotIndices(boolean isStatic, Type[] paramTypes) {
+			int[] lvtIndex = new int[paramTypes.length];
+			int nextIndex = (isStatic ? 0 : 1);
+			for (int i = 0; i < paramTypes.length; i++) {
+				lvtIndex[i] = nextIndex;
+				if (isWideType(paramTypes[i])) {
+					nextIndex += 2;
+				} else {
+					nextIndex++;
+				}
+			}
+			return lvtIndex;
+		}
+
+		private static boolean isWideType(Type aType) {
+			// float is not a wide type
+			return (aType == Type.LONG_TYPE || aType == Type.DOUBLE_TYPE);
+		}
+	}
 }
