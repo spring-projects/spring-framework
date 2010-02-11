@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -52,7 +51,8 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.jndi.JndiLocatorDelegate;
+import org.springframework.jndi.JndiTemplate;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerProxy;
@@ -159,9 +159,13 @@ import org.springframework.util.ObjectUtils;
  * @see javax.persistence.PersistenceUnit
  * @see javax.persistence.PersistenceContext
  */
-public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
+public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
+
+	private Object jndiEnvironment;
+
+	private boolean resourceRef = true;
 
 	private transient Map<String, String> persistenceUnits;
 
@@ -182,10 +186,31 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			new ConcurrentHashMap<Object, EntityManager>();
 
 
-	public PersistenceAnnotationBeanPostProcessor() {
-		setResourceRef(true);
+	/**
+	 * Set the JNDI template to use for JNDI lookups.
+	 * @see org.springframework.jndi.JndiAccessor#setJndiTemplate
+	 */
+	public void setJndiTemplate(Object jndiTemplate) {
+		this.jndiEnvironment = jndiTemplate;
 	}
 
+	/**
+	 * Set the JNDI environment to use for JNDI lookups.
+	 * @see org.springframework.jndi.JndiAccessor#setJndiEnvironment
+	 */
+	public void setJndiEnvironment(Properties jndiEnvironment) {
+		this.jndiEnvironment = jndiEnvironment;
+	}
+
+	/**
+	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
+	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
+	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
+	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef
+	 */
+	public void setResourceRef(boolean resourceRef) {
+		this.resourceRef = resourceRef;
+	}
 
 	/**
 	 * Specify the persistence units for EntityManagerFactory lookups,
@@ -404,7 +429,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				try {
 					return lookup(jndiName, EntityManagerFactory.class);
 				}
-				catch (NamingException ex) {
+				catch (Exception ex) {
 					throw new IllegalStateException("Could not obtain EntityManagerFactory [" + jndiName + "] from JNDI", ex);
 				}
 			}
@@ -436,7 +461,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				try {
 					return lookup(jndiName, EntityManager.class);
 				}
-				catch (NamingException ex) {
+				catch (Exception ex) {
 					throw new IllegalStateException("Could not obtain EntityManager [" + jndiName + "] from JNDI", ex);
 				}
 			}
@@ -510,6 +535,42 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		else {
 			throw new NoSuchBeanDefinitionException(
 					EntityManagerFactory.class, "expected single bean but found " + beanNames.length);
+		}
+	}
+
+	/**
+	 * Perform a JNDI lookup for the given resource by name.
+	 * <p>Called for EntityManagerFactory and EntityManager lookup
+	 * when JNDI names are mapped for specific persistence units.
+	 * @param jndiName the JNDI name to look up
+	 * @param requiredType the required type of the object
+	 * @return the obtained object
+	 * @throws Exception if the JNDI lookup failed
+	 */
+	protected <T> T lookup(String jndiName, Class<T> requiredType) throws Exception {
+		return new LocatorDelegate().lookup(jndiName, requiredType);
+	}
+
+
+	/**
+	 * Separate inner class to isolate the JNDI API dependency
+	 * (for compatibility with Google App Engine's API white list).
+	 */
+	private class LocatorDelegate {
+
+		public <T> T lookup(String jndiName, Class<T> requiredType) throws Exception {
+			JndiLocatorDelegate locator = new JndiLocatorDelegate();
+			if (jndiEnvironment instanceof JndiTemplate) {
+				locator.setJndiTemplate((JndiTemplate) jndiEnvironment);
+			}
+			else if (jndiEnvironment instanceof Properties) {
+				locator.setJndiEnvironment((Properties) jndiEnvironment);
+			}
+			else if (jndiEnvironment != null) {
+				throw new IllegalStateException("Illegal 'jndiEnvironment' type: " + jndiEnvironment.getClass());
+			}
+			locator.setResourceRef(resourceRef);
+			return locator.lookup(jndiName, requiredType);
 		}
 	}
 
