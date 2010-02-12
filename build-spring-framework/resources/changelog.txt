@@ -10,6 +10,7 @@ Changes in version 3.0.1 (2010-02-15)
 * full support for JPA 2.0 persistence schema and PersistenceUnitInfo SPI
 * support for Hibernate 3.5 beta 4 (in particular for its JPA 2.0 provider)
 * support for Tiles 2.2 (preserving compatibility with Tiles 2.1.2 and above)
+* added new spring:eval tag for evaluating SpEL expressions from JSP pages
 * consistent treatment of unresolvable placeholders for Resource and Resource array properties
 * ConversionFailedException exposes offending value through public "getValue()" method
 * fixed BeanFactory's "getBeansWithAnnotation" to ignore beans with non-determinable type
