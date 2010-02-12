@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 
 /**
  * Represents a node in the Ast for a parsed expression.
@@ -32,6 +33,13 @@ public interface SpelNode {
 	 * @return the value of this node evaluated against the specified state
 	 */
 	Object getValue(ExpressionState expressionState) throws EvaluationException;
+
+	/**
+	 * Evaluate the expression node in the context of the supplied expression state and return the typed value.
+	 * @param expressionState the current expression state (includes the context)
+	 * @return the type value of this node evaluated against the specified state
+	 */
+	TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException;
 
 	/**
 	 * Determine if this expression node will support a setValue() call.

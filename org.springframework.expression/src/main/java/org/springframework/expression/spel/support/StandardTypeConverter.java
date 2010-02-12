@@ -21,7 +21,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.ConversionServiceFactory;
-import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -62,17 +61,21 @@ public class StandardTypeConverter implements TypeConverter {
 		return this.conversionService.canConvert(sourceType, targetType);
 	}
 
-	public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
+	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.conversionService.canConvert(sourceType, targetType);
+	}
+
+	public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		try {
-			return this.conversionService.convert(value, TypeDescriptor.forObject(value), typeDescriptor);
+			return this.conversionService.convert(value, sourceType, targetType);
 		}
 		catch (ConverterNotFoundException cenfe) {
 			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR,
-					(value != null ? value.getClass() : null), typeDescriptor.asString());
+					sourceType.toString(), targetType.asString());
 		}
 		catch (ConversionException ce) {
 			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR,
-					(value != null ? value.getClass() : null), typeDescriptor.asString());
+					sourceType.toString(), targetType.asString());
 		}
 	}
 

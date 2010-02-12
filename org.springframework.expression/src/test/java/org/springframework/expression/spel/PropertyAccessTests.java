@@ -188,7 +188,7 @@ public class PropertyAccessTests extends ExpressionTestCase {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
 			try {
-				flibbles = (Integer) context.getTypeConverter().convertValue(newValue, TypeDescriptor.valueOf(Integer.class));
+				flibbles = (Integer) context.getTypeConverter().convertValue(newValue, TypeDescriptor.forObject(newValue), TypeDescriptor.valueOf(Integer.class));
 			}catch (EvaluationException e) {
 				throw new AccessException("Cannot set flibbles to an object of type '" + newValue.getClass() + "'");
 			}

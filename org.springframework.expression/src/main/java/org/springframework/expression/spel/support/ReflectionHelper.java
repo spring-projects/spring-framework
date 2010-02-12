@@ -243,7 +243,7 @@ public class ReflectionHelper {
 			else {
 				targetType = requiredParameterTypes[argPosition];
 			}
-			arguments[argPosition] = converter.convertValue(arguments[argPosition], TypeDescriptor.valueOf(targetType));
+			arguments[argPosition] = converter.convertValue(arguments[argPosition], TypeDescriptor.forObject(arguments[argPosition]), TypeDescriptor.valueOf(targetType));
 		}
 	}
 
@@ -283,7 +283,7 @@ public class ReflectionHelper {
 					if (converter == null) {
 						throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, arguments[i].getClass().getName(),targetType);
 					}
-					arguments[i] = converter.convertValue(arguments[i], TypeDescriptor.valueOf(targetType));
+					arguments[i] = converter.convertValue(arguments[i], TypeDescriptor.forObject(arguments[i]), TypeDescriptor.valueOf(targetType));
 				}
 			}
 			catch (EvaluationException ex) {

@@ -72,7 +72,7 @@ public class StandardComponentsTests {
 	@Test
 	public void testStandardTypeConverter() throws EvaluationException {
 		TypeConverter tc = new StandardTypeConverter();
-		tc.convertValue(3, TypeDescriptor.valueOf(Double.class));
+		tc.convertValue(3, TypeDescriptor.forObject(3), TypeDescriptor.valueOf(Double.class));
 	}
 
 }

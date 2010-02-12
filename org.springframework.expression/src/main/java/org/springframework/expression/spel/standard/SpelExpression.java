@@ -73,14 +73,14 @@ public class SpelExpression implements Expression {
 
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), configuration);
-		Object result = ast.getValue(expressionState);
-		return ExpressionUtils.convert(expressionState.getEvaluationContext(), result, expectedResultType);
+		TypedValue typedResultValue = ast.getTypedValue(expressionState);
+		return ExpressionUtils.convertTypedValue(expressionState.getEvaluationContext(), typedResultValue, expectedResultType);
 	}
 
 	public <T> T getValue(Object rootObject, Class<T> expectedResultType) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), configuration);
-		Object result = ast.getValue(expressionState);
-		return ExpressionUtils.convert(expressionState.getEvaluationContext(), result, expectedResultType);
+		TypedValue typedResultValue = ast.getTypedValue(expressionState);
+		return ExpressionUtils.convertTypedValue(expressionState.getEvaluationContext(), typedResultValue, expectedResultType);
 	}
 
 	public Object getValue(EvaluationContext context) throws EvaluationException {
@@ -93,30 +93,14 @@ public class SpelExpression implements Expression {
 		return ast.getValue(new ExpressionState(context, toTypedValue(rootObject), configuration));
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
-		Object result = ast.getValue(new ExpressionState(context, configuration));
-		if (result != null && expectedResultType != null) {
-			Class<?> resultType = result.getClass();
-			if (!expectedResultType.isAssignableFrom(resultType)) {
-				// Attempt conversion to the requested type, may throw an exception
-				result = context.getTypeConverter().convertValue(result, TypeDescriptor.valueOf(expectedResultType));
-			}
-		}
-		return (T) result;
+		TypedValue typedResultValue = ast.getTypedValue(new ExpressionState(context, configuration));
+		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> expectedResultType) throws EvaluationException {
-		Object result = ast.getValue(new ExpressionState(context, toTypedValue(rootObject), configuration));
-		if (result != null && expectedResultType != null) {
-			Class<?> resultType = result.getClass();
-			if (!expectedResultType.isAssignableFrom(resultType)) {
-				// Attempt conversion to the requested type, may throw an exception
-				result = context.getTypeConverter().convertValue(result, TypeDescriptor.valueOf(expectedResultType));
-			}
-		}
-		return (T) result;
+		TypedValue typedResultValue = ast.getTypedValue(new ExpressionState(context, toTypedValue(rootObject), configuration));
+		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 
 

@@ -39,14 +39,23 @@ public interface TypeConverter {
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 
 	/**
+	 * Return true if the type converter can convert the specified type to the desired target type.
+	 * @param sourceType a type descriptor that describes the source type
+	 * @param targetType a type descriptor that describes the requested result type
+	 * @return true if that conversion can be performed
+	 */
+	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	/**
 	 * Convert (may coerce) a value from one type to another, for example from a boolean to a string.
 	 * The typeDescriptor parameter enables support for typed collections - if the caller really wishes they
 	 * can have a List<Integer> for example, rather than simply a List.
 	 * @param value the value to be converted
-	 * @param typeDescriptor a type descriptor that supplies extra information about the requested result type
+	 * @param sourceType a type descriptor that supplies extra information about the source object
+	 * @param targetType a type descriptor that supplies extra information about the requested result type
 	 * @return the converted value
 	 * @throws EvaluationException if conversion is not possible
 	 */
-	Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException;
-
+	Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType);
+	
 }
