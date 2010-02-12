@@ -853,7 +853,7 @@
                      <para>true</para>
                   </entry>
                   <entry>
-                     <para>Set JavaScript escaping for this tag, as boolean value.
+                     <para>Set JavaScript escaping for this tag, as a boolean value.
 			Default is false.</para>
                   </entry>
                </row>
@@ -953,7 +953,7 @@
                      <para>true</para>
                   </entry>
                   <entry>
-                     <para>Set JavaScript escaping for this tag, as boolean value.
+                     <para>Set JavaScript escaping for this tag, as a boolean value.
 			Default is false.</para>
                   </entry>
                </row>
