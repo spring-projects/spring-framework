@@ -15,7 +15,7 @@
 
 	<bean id="resourceTestBean" class="org.springframework.beans.ResourceTestBean">
 		<property name="resource" value="org/springframework/context/support/conversionService.xml"/>
-		<property name="resourceArray" value="org/springframework/context/support/*.xml"/>
+		<property name="resourceArray" value="org/springframework/context/support/conversionService.xml"/>
 		<property name="resourceMap">
 			<map>
 				<entry key="key1" value="org/springframework/context/support/conversionService.xml"/>
@@ -23,7 +23,7 @@
 		</property>
 		<property name="resourceArrayMap">
 			<map>
-				<entry key="key1" value="org/springframework/context/support/*.xml"/>
+				<entry key="key1" value="org/springframework/context/support/conversionService.xml"/>
 			</map>
 		</property>
 	</bean>
