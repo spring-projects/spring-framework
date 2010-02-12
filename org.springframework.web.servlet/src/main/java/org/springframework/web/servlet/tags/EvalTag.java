@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.el.ELException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.convert.ConversionService;
@@ -110,7 +111,8 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			}
 		}
 		else {
-			pageContext.setAttribute(var, expression.getValue(context), scope);
+			Object result = expression.getValue(context);
+			pageContext.setAttribute(var, result, scope);
 		}
 		return EVAL_PAGE;
 	}
@@ -127,7 +129,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 	
 	private ConversionService getConversionService() {
 		try {
-			return (ConversionService) this.pageContext.getRequest().getAttribute("org.springframework.core.convert.ConversionService");
+			return (ConversionService) this.pageContext.getRequest().getAttribute(ConversionService.class.getName());
 		} catch (BeansException e) {
 			return null;
 		}
@@ -147,19 +149,19 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 		public boolean canRead(EvaluationContext context, Object target,
 				String name) throws AccessException {
-			if (name.equals("pageContext")) {
+			Object implicitVar = resolveImplicitVariable(name);
+			if (implicitVar != null) {
 				return true;
 			}
-			// TODO support all other JSP implicit variables defined at http://java.sun.com/javaee/6/docs/api/javax/servlet/jsp/el/ImplicitObjectELResolver.html
 			return this.pageContext.findAttribute(name) != null;
 		}
 
 		public TypedValue read(EvaluationContext context, Object target,
 				String name) throws AccessException {
-			if (name.equals("pageContext")) {
-				return new TypedValue(this.pageContext);
+			Object implicitVar = resolveImplicitVariable(name);
+			if (implicitVar != null) {
+				return new TypedValue(implicitVar);
 			}
-			// TODO support all other JSP implicit variables defined at http://java.sun.com/javaee/6/docs/api/javax/servlet/jsp/el/ImplicitObjectELResolver.html
 			return new TypedValue(this.pageContext.findAttribute(name));
 		}
 
@@ -171,6 +173,14 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		public void write(EvaluationContext context, Object target,
 				String name, Object newValue) throws AccessException {
 			throw new UnsupportedOperationException();
+		}
+		
+		private Object resolveImplicitVariable(String name) throws AccessException {
+			try {
+				return this.pageContext.getVariableResolver().resolveVariable(name);
+			} catch (ELException e) {
+				throw new AccessException("Unexpected exception occurred accessing '" + name + "' as an implicit variable", e);
+			}
 		}
 		
 	}

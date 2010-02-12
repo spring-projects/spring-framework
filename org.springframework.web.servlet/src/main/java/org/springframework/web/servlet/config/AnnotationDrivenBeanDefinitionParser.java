@@ -38,6 +38,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.servlet.handler.ConversionServiceHandlerInterceptor;
+import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 
@@ -94,28 +96,42 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		annMappingDef.getPropertyValues().add("order", 0);
 		String annMappingName = parserContext.getReaderContext().registerWithGeneratedName(annMappingDef);
 
+		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
+		RuntimeBeanReference validator = getValidator(element, source, parserContext);
+		
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 		bindingDef.setSource(source);
 		bindingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		bindingDef.getPropertyValues().add("conversionService", getConversionService(element, source, parserContext));
-		bindingDef.getPropertyValues().add("validator", getValidator(element, source, parserContext));
+		bindingDef.getPropertyValues().add("conversionService", conversionService);
+		bindingDef.getPropertyValues().add("validator", validator);
 
 		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 		annAdapterDef.setSource(source);
 		annAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		annAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		annAdapterDef.getPropertyValues().add("messageConverters", getMessageConverters(source));
-		String adapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
+		String annAdapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
+
+		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceHandlerInterceptor.class);
+		csInterceptorDef.setSource(source);
+		csInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, conversionService);		
+		RootBeanDefinition mappedCsInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
+		mappedCsInterceptorDef.setSource(source);
+		mappedCsInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
+		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, csInterceptorDef);
+		String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedCsInterceptorDef);
 		
 		parserContext.registerComponent(new BeanComponentDefinition(annMappingDef, annMappingName));
-		parserContext.registerComponent(new BeanComponentDefinition(annAdapterDef, adapterName));
+		parserContext.registerComponent(new BeanComponentDefinition(annAdapterDef, annAdapterName));
+		parserContext.registerComponent(new BeanComponentDefinition(mappedCsInterceptorDef, mappedInterceptorName));
 		parserContext.popAndRegisterContainingComponent();
 		
 		return null;
 	}
 	
 
-	private Object getConversionService(Element element, Object source, ParserContext parserContext) {
+	private RuntimeBeanReference getConversionService(Element element, Object source, ParserContext parserContext) {
 		if (element.hasAttribute("conversion-service")) {
 			return new RuntimeBeanReference(element.getAttribute("conversion-service"));
 		}
@@ -129,7 +145,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private Object getValidator(Element element, Object source, ParserContext parserContext) {
+	private RuntimeBeanReference getValidator(Element element, Object source, ParserContext parserContext) {
 		if (element.hasAttribute("validator")) {
 			return new RuntimeBeanReference(element.getAttribute("validator"));
 		}

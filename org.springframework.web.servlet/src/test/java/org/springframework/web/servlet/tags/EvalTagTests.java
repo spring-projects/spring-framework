@@ -42,7 +42,7 @@ public class EvalTagTests extends AbstractTagTests {
 		tag.setPageContext(context);
 	}
 
-	public void testEndTagPrintScopedAttributeResult() throws Exception {
+	public void testPrintScopedAttributeResult() throws Exception {
 		tag.setExpression("bean.method()");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
@@ -51,14 +51,43 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("foo", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
 	}
 	
-	public void testEndTagPrintFormattedScopedAttributeResult() throws Exception {
+	public void testPrintFormattedScopedAttributeResult() throws Exception {
 		tag.setExpression("bean.formattable");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("25%", ((MockHttpServletResponse) context.getResponse())
-				.getContentAsString());
+		assertEquals("25%", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
+	}
+	
+	public void testPrintHtmlEscapedAttributeResult() throws Exception {
+		tag.setExpression("bean.html()");
+		tag.setHtmlEscape("true");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("&lt;p&gt;", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
+	}
+
+	public void testPrintJavaScriptEscapedAttributeResult() throws Exception {
+		tag.setExpression("bean.js()");
+		tag.setJavaScriptEscape("true");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("function foo() { alert(\\\"hi\\\") }", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
+	}
+
+	public void testSetFormattedScopedAttributeResult() throws Exception {
+		tag.setExpression("bean.formattable");
+		tag.setVar("foo");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals(new BigDecimal(".25"), context.getAttribute("foo"));
 	}
 
 	public static class Bean {
@@ -70,6 +99,14 @@ public class EvalTagTests extends AbstractTagTests {
 		@NumberFormat(style=Style.PERCENT)
 		public BigDecimal getFormattable() {
 			return new BigDecimal(".25");
+		}
+		
+		public String html() {
+			return "<p>";
+		}
+		
+		public String js() {
+			return "function foo() { alert(\"hi\") }";
 		}
 	}
 }
