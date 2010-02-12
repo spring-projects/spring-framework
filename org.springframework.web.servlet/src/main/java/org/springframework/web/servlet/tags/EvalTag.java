@@ -120,7 +120,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		context.addPropertyAccessor(new JspPropertyAccessor(this.pageContext));
 		ConversionService conversionService = getConversionService();
 		if (conversionService != null) {
-			context.setTypeConverter(new StandardTypeConverter());
+			context.setTypeConverter(new StandardTypeConverter(conversionService));
 		}
 		return context;
 	}
