@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.support;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -77,7 +79,15 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 		Method method = findGetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
-			TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(method,-1));
+			// Treat it like a property
+			PropertyDescriptor propertyDescriptor = null;
+			try {
+				// The readerCache will only contain gettable properties (let's not worry about setters for now)
+				propertyDescriptor = new PropertyDescriptor(name,method,null);
+			} catch (IntrospectionException ex) {
+				throw new AccessException("Unable to access property '" + name + "' through getter "+method, ex);
+			}
+			TypeDescriptor typeDescriptor = new BeanTypeDescriptor(propertyDescriptor, new MethodParameter(method,-1), method.getReturnType());
 			this.readerCache.put(cacheKey, new InvokerPair(method,typeDescriptor));
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -118,7 +128,17 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (method == null) {
 				method = findGetterForProperty(name, type, target instanceof Class);
 				if (method != null) {
-					invoker = new InvokerPair(method,new TypeDescriptor(new MethodParameter(method,-1)));
+					// TODO remove the duplication here between canRead and read
+					// Treat it like a property
+					PropertyDescriptor propertyDescriptor = null;
+					try {
+						// The readerCache will only contain gettable properties (let's not worry about setters for now)
+						propertyDescriptor = new PropertyDescriptor(name,method,null);
+					} catch (IntrospectionException ex) {
+						throw new AccessException("Unable to access property '" + name + "' through getter "+method, ex);
+					}
+					TypeDescriptor typeDescriptor = new BeanTypeDescriptor(propertyDescriptor, new MethodParameter(method,-1), method.getReturnType());
+					invoker = new InvokerPair(method,typeDescriptor);
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -173,8 +193,17 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 		Method method = findSetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
+			// Treat it like a property
+			PropertyDescriptor propertyDescriptor = null;
+			try {
+				propertyDescriptor = new PropertyDescriptor(name,null,method);
+			} catch (IntrospectionException ex) {
+				throw new AccessException("Unable to access property '" + name + "' through setter "+method, ex);
+			}
+			MethodParameter mp = new MethodParameter(method,0);
+			TypeDescriptor typeDescriptor = new BeanTypeDescriptor(propertyDescriptor,mp,mp.getParameterType());
 			this.writerCache.put(cacheKey, method);
-			this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(new MethodParameter(method,0)));
+			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
 		}
 		else {
@@ -198,7 +227,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		TypeDescriptor typeDescriptor = getTypeDescriptor(context, target, name);
 		if (typeDescriptor != null) {
 			try {
-				possiblyConvertedNewValue = context.getTypeConverter().convertValue(newValue, typeDescriptor);
+				possiblyConvertedNewValue = context.getTypeConverter().convertValue(newValue, TypeDescriptor.forObject(newValue), typeDescriptor);
 			} catch (EvaluationException evaluationException) {
 				throw new AccessException("Type conversion failure",evaluationException);
 			}

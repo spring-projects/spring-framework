@@ -108,6 +108,14 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
 			return this.service.convert(value, TypeDescriptor.forObject(value), typeDescriptor);
 		}
+		
+		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return this.service.canConvert(sourceType, targetType);
+		}
+
+		public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) throws EvaluationException {
+			return this.service.convert(value, sourceType, targetType);
+		}
 	}
 
 }

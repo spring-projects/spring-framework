@@ -96,6 +96,15 @@ public abstract class SpelNodeImpl implements SpelNode {
 			return getValue(new ExpressionState(new StandardEvaluationContext()));
 		}
 	}
+	
+	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
+		if (expressionState != null) {
+			return getValueInternal(expressionState);
+		} else {
+			// configuration not set - does that matter?
+			return getTypedValue(new ExpressionState(new StandardEvaluationContext()));
+		}
+	}
 
 	// by default Ast nodes are not writable
 	public boolean isWritable(ExpressionState expressionState) throws EvaluationException {

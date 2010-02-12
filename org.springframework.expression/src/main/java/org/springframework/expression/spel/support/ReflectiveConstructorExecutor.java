@@ -58,7 +58,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 			}
 			ReflectionUtils.makeAccessible(this.ctor);
 			return new TypedValue(this.ctor.newInstance(arguments),
-					TypeDescriptor.valueOf(this.ctor.getClass()));
+					TypeDescriptor.valueOf(this.ctor.getDeclaringClass()));
 		}
 		catch (Exception ex) {
 			throw new AccessException("Problem invoking constructor: " + this.ctor, ex);

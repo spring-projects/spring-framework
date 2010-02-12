@@ -57,7 +57,8 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		//assertEquals("25%", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
+		assertEquals("25%", ((MockHttpServletResponse) context.getResponse())
+				.getContentAsString());
 	}
 
 	public static class Bean {
