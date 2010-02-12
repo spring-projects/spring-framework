@@ -53,6 +53,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.ConversionServiceHandlerInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -80,17 +81,19 @@ public class MvcNamespaceTests {
 	public void testDefaultConfig() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml", getClass()));
-		assertEquals(4, appContext.getBeanDefinitionCount());
+		assertEquals(5, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
-
+		TestController handler = new TestController();
+		mapping.setDefaultHandler(handler);
+		
 		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
 		assertNotNull(adapter);
-
-		HttpMessageConverter[] messageConverters = adapter.getMessageConverters();
+		
+		HttpMessageConverter<?>[] messageConverters = adapter.getMessageConverters();
 		assertNotNull(messageConverters);
 		assertEquals(6, messageConverters.length);
 		assertTrue(ByteArrayHttpMessageConverter.class.equals(messageConverters[0].getClass()));
@@ -105,12 +108,18 @@ public class MvcNamespaceTests {
 		assertNotNull(appContext.getBean(LocalValidatorFactoryBean.class));
 		assertNotNull(appContext.getBean(Validator.class));
 
-		TestController handler = new TestController();
-
 		// default web binding initializer behavior test
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("date", "2009-10-31");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertEquals(2, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		ConversionServiceHandlerInterceptor interceptor = (ConversionServiceHandlerInterceptor) chain.getInterceptors()[1];
+		interceptor.preHandle(request, response, handler);
+		assertSame(appContext.getBean(ConversionService.class), request.getAttribute(ConversionService.class.getName()));
+		
 		adapter.handle(request, response, handler);
 		assertTrue(handler.recordedValidationError);
 	}
@@ -119,18 +128,29 @@ public class MvcNamespaceTests {
 	public void testCustomConversionService() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml", getClass()));
-		assertEquals(4, appContext.getBeanDefinitionCount());
+		assertEquals(5, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
-		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
-		assertNotNull(adapter);
-
+		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
+		assertNotNull(mapping);
 		TestController handler = new TestController();
-
+		mapping.setDefaultHandler(handler);
+		
 		// default web binding initializer behavior test
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/accounts/12345");
 		request.addParameter("date", "2009-10-31");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertEquals(2, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		ConversionServiceHandlerInterceptor interceptor = (ConversionServiceHandlerInterceptor) chain.getInterceptors()[1];
+		interceptor.preHandle(request, response, handler);
+		assertSame(appContext.getBean("conversionService"), request.getAttribute(ConversionService.class.getName()));
+	
+		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
+		assertNotNull(adapter);
 		adapter.handle(request, response, handler);
 	}
 
@@ -138,7 +158,7 @@ public class MvcNamespaceTests {
 	public void testCustomValidator() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-validator.xml", getClass()));
-		assertEquals(4, appContext.getBeanDefinitionCount());
+		assertEquals(5, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
@@ -160,7 +180,7 @@ public class MvcNamespaceTests {
 	public void testInterceptors() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml", getClass()));
-		assertEquals(7, appContext.getBeanDefinitionCount());
+		assertEquals(8, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -173,19 +193,20 @@ public class MvcNamespaceTests {
 		request.addParameter("theme", "green");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
-		assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 
 		request.setRequestURI("/logged/accounts/12345");
 		chain = mapping.getHandler(request);
-		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+		assertEquals(5, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
 
 		request.setRequestURI("/foo/logged");
 		chain = mapping.getHandler(request);
-		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+		assertEquals(5, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
 
 	}
 
@@ -193,7 +214,7 @@ public class MvcNamespaceTests {
 	public void testBeanDecoration() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-bean-decoration.xml", getClass()));
-		assertEquals(6, appContext.getBeanDefinitionCount());
+		assertEquals(7, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -203,11 +224,13 @@ public class MvcNamespaceTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
-		LocaleChangeInterceptor interceptor = (LocaleChangeInterceptor) chain.getInterceptors()[1];
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);		
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);	
+		LocaleChangeInterceptor interceptor = (LocaleChangeInterceptor) chain.getInterceptors()[2];
 		assertEquals("lang", interceptor.getParamName());
-		ThemeChangeInterceptor interceptor2 = (ThemeChangeInterceptor) chain.getInterceptors()[2];
+		ThemeChangeInterceptor interceptor2 = (ThemeChangeInterceptor) chain.getInterceptors()[3];
 		assertEquals("style", interceptor2.getParamName());
 	}
 
@@ -215,7 +238,7 @@ public class MvcNamespaceTests {
 	public void testViewControllers() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml", getClass()));
-		assertEquals(8, appContext.getBeanDefinitionCount());
+		assertEquals(9, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -225,8 +248,10 @@ public class MvcNamespaceTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping2);
@@ -237,15 +262,19 @@ public class MvcNamespaceTests {
 		request.setRequestURI("/foo");
 		request.setMethod("GET");
 		chain = mapping2.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 		ModelAndView mv = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
 		assertNull(mv.getViewName());
 
 		request.setRequestURI("/bar");
 		chain = mapping2.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 		ModelAndView mv2 = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
 		assertEquals("baz", mv2.getViewName());
 	}

@@ -294,7 +294,15 @@ public class MockPageContext extends PageContext {
 	}
 
 	public VariableResolver getVariableResolver() {
-		return null;
+		return new VariableResolver() {
+			public Object resolveVariable(String pName) throws ELException {
+				if (pName.equals("pageContext")) {
+					return this;
+				} else {
+					return null;
+				}
+			}
+		};
 	}
 
 	public HttpSession getSession() {
