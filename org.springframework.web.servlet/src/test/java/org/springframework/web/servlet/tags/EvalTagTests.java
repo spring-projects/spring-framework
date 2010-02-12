@@ -22,6 +22,7 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
+import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockPageContext;
 
@@ -33,6 +34,9 @@ public class EvalTagTests extends AbstractTagTests {
 
 	protected void setUp() throws Exception {
 		context = createPageContext();
+		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
+		factory.afterPropertiesSet();
+		context.getRequest().setAttribute("org.springframework.core.convert.ConversionService", factory.getObject());
 		context.getRequest().setAttribute("bean", new Bean());
 		tag = new EvalTag();
 		tag.setPageContext(context);
@@ -53,7 +57,6 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		// TODO - fails because EL does not consider annotations on getter/setter method or field for properties (just annotations on method parameters)
 		//assertEquals("25%", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
 	}
 

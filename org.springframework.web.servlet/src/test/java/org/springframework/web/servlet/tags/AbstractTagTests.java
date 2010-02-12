@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags;
 
 import junit.framework.TestCase;
 
-import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockPageContext;
@@ -44,8 +43,6 @@ public abstract class AbstractTagTests extends TestCase {
 		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();
 		wac.setServletContext(sc);
 		wac.setNamespace("test");
-		// TODO this name index leads to brittle lookup by EvalTag
-		wac.registerSingleton("conversionService", FormattingConversionServiceFactoryBean.class);
 		wac.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
