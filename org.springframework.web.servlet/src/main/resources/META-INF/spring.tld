@@ -386,7 +386,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set JavaScript escaping for this tag, as boolean value.
+			<description>Set JavaScript escaping for this tag, as a boolean value.
 			Default is false.</description>
 			<name>javaScriptEscape</name>
 			<required>false</required>
@@ -440,14 +440,14 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set HTML escaping for this tag, as boolean value. Overrides the
+			<description>Set HTML escaping for this tag, as a boolean value. Overrides the
 			default HTML escaping setting for the current page.</description>
 			<name>htmlEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Set JavaScript escaping for this tag, as boolean value.  Default is false.</description>
+			<description>Set JavaScript escaping for this tag, as a boolean value.  Default is false.</description>
 			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
