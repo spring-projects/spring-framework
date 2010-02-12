@@ -39,6 +39,12 @@
       <listitem>
          <xref linkend="spring.tld.transform"/>
       </listitem>
+      <listitem>
+         <xref linkend="spring.tld.url"/>
+      </listitem>      
+      <listitem>
+         <xref linkend="spring.tld.eval"/>
+      </listitem>      
    </itemizedlist>
    <section id="spring.tld.bind">
       <title>The <literal>bind</literal> tag</title>
@@ -734,6 +740,224 @@
                   </entry>
                </row>
             </tbody>
+         </tgroup>
+      </table>
+   </section>
+   <section id="spring.tld.url">
+      <title>The <literal>url</literal> tag</title>
+      <para>
+			Creates URLs with support for URI template variables, HTML/XML escaping, and Javascript escaping.
+			Modeled after the JSTL c:url tag with backwards compatibility in mind.
+		</para>
+      <table id="spring.tld.url.table">
+         <title>Attributes</title>
+         <tgroup cols="3">
+            <colspec align="center" colname="Attribute"/>
+            <colspec align="center" colname="Required"/>
+            <colspec align="center" colname="Runtime.Expression"/>
+            <colspec align="left" colname="Description"/>
+            <thead>
+               <row>
+                  <entry align="center">Attribute</entry>
+                  <entry align="center">Required?</entry>
+                  <entry align="center">Runtime Expression?</entry>
+                  <entry align="left">Description</entry>
+               </row>
+            </thead>
+            <tbody>
+               <row>
+                  <entry>
+                     <para>url</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>The URL to build. This value can include template {placeholders} 
+			that are replaced with the URL encoded value of the named parameter.  Parameters 
+			must be defined using the param tag inside the body of this tag.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>context</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>Specifies a remote application context path.  The default is the 
+			current application context path.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>var</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>The name of the variable to export the URL value to.
+                     If not specified the URL is written as output.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>scope</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>The scope for the var.  'application', 'session', 'request' and 
+			'page' scopes are supported.  Defaults to page scope.  This attribute has no 
+			effect unless the var attribute is also defined.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>htmlEncoding</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>Set HTML escaping for this tag, as a boolean value. Overrides the
+			default HTML escaping setting for the current page.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>javascriptEncoding</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>Set JavaScript escaping for this tag, as boolean value.
+			Default is false.</para>
+                  </entry>
+               </row>
+            </tbody>                                                                    
+         </tgroup>
+      </table>
+   </section>   
+   <section id="spring.tld.eval">
+      <title>The <literal>eval</literal> tag</title>
+      <para>
+			Evaluates a Spring expression (SpEL) and either prints the result or assigns it to a variable.
+		</para>
+      <table id="spring.tld.eval.table">
+         <title>Attributes</title>
+         <tgroup cols="3">
+            <colspec align="center" colname="Attribute"/>
+            <colspec align="center" colname="Required"/>
+            <colspec align="center" colname="Runtime.Expression"/>
+            <colspec align="left" colname="Description"/>
+            <thead>
+               <row>
+                  <entry align="center">Attribute</entry>
+                  <entry align="center">Required?</entry>
+                  <entry align="center">Runtime Expression?</entry>
+                  <entry align="left">Description</entry>
+               </row>
+            </thead>
+            <tbody>
+               <row>
+                  <entry>
+                     <para>expression</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>The expression to evaluate.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>var</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>The name of the variable to export the evaluation result to.
+                     If not specified the evaluation result is converted to a String and written as output.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>scope</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>The scope for the var.  'application', 'session', 'request' and 
+			'page' scopes are supported.  Defaults to page scope.  This attribute has no 
+			effect unless the var attribute is also defined.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>htmlEncoding</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>Set HTML escaping for this tag, as a boolean value. Overrides the
+			default HTML escaping setting for the current page.</para>
+                  </entry>
+               </row>
+               <row>
+                  <entry>
+                     <para>javascriptEncoding</para>
+                  </entry>
+                  <entry>
+                     <para>false</para>
+                  </entry>
+                  <entry>
+                     <para>true</para>
+                  </entry>
+                  <entry>
+                     <para>Set JavaScript escaping for this tag, as boolean value.
+			Default is false.</para>
+                  </entry>
+               </row>
+            </tbody>                                                          
          </tgroup>
       </table>
    </section>
