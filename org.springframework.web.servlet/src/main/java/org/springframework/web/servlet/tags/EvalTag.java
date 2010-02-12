@@ -99,7 +99,6 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		Expression expression = this.expressionParser.parseExpression(this.expression);
 		EvaluationContext context = createEvaluationContext();
 		if (this.var == null) {
-			// print the url to the writer
 			try {
 				String result = expression.getValue(context, String.class);
 				result = isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result;
@@ -111,7 +110,6 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			}
 		}
 		else {
-			// store the url as a variable
 			pageContext.setAttribute(var, expression.getValue(context), scope);
 		}
 		return EVAL_PAGE;
@@ -129,8 +127,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 	
 	private ConversionService getConversionService() {
 		try {
-			// TODO replace this with a call to RequestContext that is not brittle
-			return getRequestContext().getWebApplicationContext().getBean("conversionService", ConversionService.class);
+			return (ConversionService) this.pageContext.getRequest().getAttribute("org.springframework.core.convert.ConversionService");
 		} catch (BeansException e) {
 			return null;
 		}
