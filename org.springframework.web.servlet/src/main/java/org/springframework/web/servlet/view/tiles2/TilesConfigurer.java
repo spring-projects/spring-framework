@@ -178,7 +178,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				this.tilesInitializer = (TilesInitializer) clazz.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Tiles 2.2 not available", ex);
+				throw new IllegalStateException("Tiles-Extras 2.2 not available", ex);
 			}
 		}
 		else {
