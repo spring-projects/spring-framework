@@ -484,14 +484,14 @@ class ConstructorResolver {
 						factoryMethodToUse = candidate;
 						argsToUse = args.arguments;
 						minTypeDiffWeight = typeDiffWeight;
-							ambiguousFactoryMethods = null;
+						ambiguousFactoryMethods = null;
 					}
 					else if (factoryMethodToUse != null && typeDiffWeight == minTypeDiffWeight) {
-						if (	ambiguousFactoryMethods == null) {
-								ambiguousFactoryMethods = new LinkedHashSet<Method>();
-								ambiguousFactoryMethods.add(factoryMethodToUse);
+						if (ambiguousFactoryMethods == null) {
+							ambiguousFactoryMethods = new LinkedHashSet<Method>();
+							ambiguousFactoryMethods.add(factoryMethodToUse);
 						}
-							ambiguousFactoryMethods.add(candidate);
+						ambiguousFactoryMethods.add(candidate);
 					}
 				}
 			}
@@ -501,7 +501,9 @@ class ConstructorResolver {
 						"No matching factory method found: " +
 						(mbd.getFactoryBeanName() != null ?
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
-						"factory method '" + mbd.getFactoryMethodName() + "'");
+						"factory method '" + mbd.getFactoryMethodName() + "'. " +
+						"Check that a method of the specified name exists and that it is " +
+						(isStatic ? "static" : "non-static") + ".");
 			}
 			else if (void.class.equals(factoryMethodToUse.getReturnType())) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
