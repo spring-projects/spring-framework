@@ -8,9 +8,9 @@ Changes in version 3.0.1 (2010-02-15)
 
 * upgraded to AspectJ 1.6.8
 * full support for JPA 2.0 persistence schema and PersistenceUnitInfo SPI
-* support for Hibernate 3.5 beta 4 (in particular for its JPA 2.0 provider)
-* support for Tiles 2.2 (preserving compatibility with Tiles 2.1.2 and above)
-* added new spring:eval tag for evaluating SpEL expressions from JSP pages
+* support for JPA PersistenceContext/Unit injection on Google App Engine
+* support for Hibernate 3.5 (as native Hibernate API and as JPA 2.0 provider)
+* support for Tiles 2.2.1 (preserving compatibility with Tiles 2.1.2 and above)
 * consistent treatment of unresolvable placeholders for Resource and Resource array properties
 * ConversionFailedException exposes offending value through public "getValue()" method
 * fixed BeanFactory's "getBeansWithAnnotation" to ignore beans with non-determinable type
@@ -23,6 +23,7 @@ Changes in version 3.0.1 (2010-02-15)
 * ApplicationListeners will get detected lazily as well (e.g. on @Bean's concrete result)
 * inner bean ApplicationListeners will be invoked through their proxy (if any)
 * fixed SimpleApplicationEventMulticaster's retriever caching to allow for proper removal
+* context-specific "conversionService" bean may refer to annotation-configured converter beans
 * refined DefaultLifecycleProcessor's start/stop logging and stop exception handling
 * DefaultLifecycleProcessor allows for overriding specific hooks in subclasses
 * BeanNameAutoProxyCreator detects alias matches for specified bean names
@@ -42,9 +43,10 @@ Changes in version 3.0.1 (2010-02-15)
 * MimeMessageHelper encodes from, to, cc, bcc String addresses with given encoding as well
 * fixed "mvc:view-controller" to work in a fully isolated fashion on Spring Dynamic Modules
 * @SessionAttributes works when used on an annotated controller interface with AOP proxying
+* WebRequest is a resolvable dependency in Servlet/Portlet web application contexts
 * revised JSP-based views to never fail when trying to set Servlet API forward attributes
 * lenient evaluation of boolean 'true' attribute expressions in JSP form tag library
-* WebRequest is a resolvable dependency in Servlet/Portlet web application contexts
+* added new spring:eval tag for evaluating SpEL expressions from JSP pages
 
 
 Changes in version 3.0.0.GA (2009-12-16)
