@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
@@ -145,7 +144,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * deleting invalid characters (such as "[" or "]").
 	 */
 	protected String autogenerateId() throws JspException {
-		return StringUtils.deleteAny(getName(), "[]");
+		return getName();
 	}
 
 	/**
@@ -158,7 +157,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
-		return getPropertyPath();
+		return StringUtils.deleteAny(getPropertyPath(), "[]");
 	}
 
 	/**
