@@ -25,4 +25,12 @@
 
 	<bean class="example.scannable.StubFooDao"/>
 
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<bean class="org.springframework.context.annotation.FooServiceDependentConverter">
+				<property name="fooService" ref="fooServiceImpl"/>
+			</bean>
+		</property>
+	</bean>
+
 </beans>

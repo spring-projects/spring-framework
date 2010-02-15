@@ -191,11 +191,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** ResourcePatternResolver used by this context */
 	private ResourcePatternResolver resourcePatternResolver;
 
-	/** MessageSource we delegate our implementation of this interface to */
-	private MessageSource messageSource;
-
 	/** LifecycleProcessor for managing the lifecycle of beans within this context */
 	private LifecycleProcessor lifecycleProcessor;
+
+	/** MessageSource we delegate our implementation of this interface to */
+	private MessageSource messageSource;
 
 	/** Helper class used in event publishing */
 	private ApplicationEventMulticaster applicationEventMulticaster;
@@ -494,12 +494,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
 		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
-
-		// Initialize conversion service for this context.
-		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
-			beanFactory.setConversionService(
-					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
-		}
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
 		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
@@ -861,6 +855,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * initializing all remaining singleton beans.
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+		// Initialize conversion service for this context.
+		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
+			beanFactory.setConversionService(
+					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
+		}
+
 		// Stop using the temporary ClassLoader for type matching.
 		beanFactory.setTempClassLoader(null);
 
