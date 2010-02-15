@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,14 +145,22 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	public PropertyEditor findEditor(String field, Class valueType) {
-		if (valueType == null) {
-			valueType = getFieldType(field);
+		Class valueTypeForLookup = valueType;
+		if (valueTypeForLookup == null) {
+			valueTypeForLookup = getFieldType(field);
 		}
-		PropertyEditor editor = super.findEditor(field, valueType);
+		PropertyEditor editor = super.findEditor(field, valueTypeForLookup);
 		if (editor == null && this.conversionService != null) {
-			TypeDescriptor td = (field != null ?
-					getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) :
-					TypeDescriptor.valueOf(valueType));
+			TypeDescriptor td = null;
+			if (field != null) {
+				TypeDescriptor ptd = getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field));
+				if (valueType == null || valueType.isAssignableFrom(ptd.getType())) {
+					td = ptd;
+				}
+			}
+			if (td == null) {
+				td = TypeDescriptor.valueOf(valueTypeForLookup);
+			}
 			if (this.conversionService.canConvert(TypeDescriptor.valueOf(String.class), td)) {
 				editor = new ConvertingPropertyEditorAdapter(this.conversionService, td);
 			}
