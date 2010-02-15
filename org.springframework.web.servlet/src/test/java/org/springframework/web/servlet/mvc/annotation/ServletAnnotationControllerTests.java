@@ -138,6 +138,30 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void emptyRequestMapping() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(ControllerWithEmptyMapping.class));
+				RootBeanDefinition mbd = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
+				mbd.getPropertyValues().add("excludedPackages", null);
+				mbd.getPropertyValues().add("order", 0);
+				wac.registerBeanDefinition("mapping", mbd);
+				wac.registerBeanDefinition("mapping2", new RootBeanDefinition(DefaultAnnotationHandlerMapping.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/servletannotationcontrollertests.controllerwithemptymapping");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test", response.getContentAsString());
+	}
+
+	@Test
 	public void customAnnotationController() throws Exception {
 		initServlet(CustomAnnotationController.class);
 
@@ -1350,10 +1374,10 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-	/** @noinspection UnusedDeclaration */
-	private static class BaseController {
+	@Controller
+	private static class ControllerWithEmptyMapping {
 
-		@RequestMapping(method = RequestMethod.GET)
+		@RequestMapping
 		public void myPath2(HttpServletResponse response) throws IOException {
 			response.getWriter().write("test");
 		}
