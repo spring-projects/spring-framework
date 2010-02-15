@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -63,6 +62,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
@@ -200,14 +200,14 @@ public class HandlerMethodInvoker {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
 					required = requestParam.required();
-					defaultValue = requestParam.defaultValue();
+					defaultValue = parseDefaultValueAttribute(requestParam.defaultValue());
 					found++;
 				}
 				else if (RequestHeader.class.isInstance(paramAnn)) {
 					RequestHeader requestHeader = (RequestHeader) paramAnn;
 					headerName = requestHeader.value();
 					required = requestHeader.required();
-					defaultValue = requestHeader.defaultValue();
+					defaultValue = parseDefaultValueAttribute(requestHeader.defaultValue());
 					found++;
 				}
 				else if (RequestBody.class.isInstance(paramAnn)) {
@@ -218,7 +218,7 @@ public class HandlerMethodInvoker {
 					CookieValue cookieValue = (CookieValue) paramAnn;
 					cookieName = cookieValue.value();
 					required = cookieValue.required();
-					defaultValue = cookieValue.defaultValue();
+					defaultValue = parseDefaultValueAttribute(cookieValue.defaultValue());
 					found++;
 				}
 				else if (PathVariable.class.isInstance(paramAnn)) {
@@ -430,7 +430,7 @@ public class HandlerMethodInvoker {
 			}
 		}
 		if (paramValue == null) {
-			if (StringUtils.hasText(defaultValue)) {
+			if (defaultValue != null) {
 				paramValue = resolveDefaultValue(defaultValue);
 			}
 			else if (required) {
@@ -483,7 +483,7 @@ public class HandlerMethodInvoker {
 			headerValue = (headerValues.length == 1 ? headerValues[0] : headerValues);
 		}
 		if (headerValue == null) {
-			if (StringUtils.hasText(defaultValue)) {
+			if (defaultValue != null) {
 				headerValue = resolveDefaultValue(defaultValue);
 			}
 			else if (required) {
@@ -566,7 +566,7 @@ public class HandlerMethodInvoker {
 		}
 		Object cookieValue = resolveCookieValue(cookieName, paramType, webRequest);
 		if (cookieValue == null) {
-			if (StringUtils.hasText(defaultValue)) {
+			if (defaultValue != null) {
 				cookieValue = resolveDefaultValue(defaultValue);
 			}
 			else if (required) {
@@ -760,6 +760,10 @@ public class HandlerMethodInvoker {
 	 */
 	protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
 		throw new UnsupportedOperationException("@RequestBody not supported");
+	}
+
+	protected String parseDefaultValueAttribute(String value) {
+		return (ValueConstants.DEFAULT_NONE.equals(value) ? null : value);
 	}
 
 	protected Object resolveDefaultValue(String value) {
