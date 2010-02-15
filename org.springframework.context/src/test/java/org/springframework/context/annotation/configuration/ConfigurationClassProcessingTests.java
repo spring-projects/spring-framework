@@ -25,10 +25,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -41,6 +43,7 @@ import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.PriorityOrdered;
 
 /**
  * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and error
@@ -133,15 +136,20 @@ public class ConfigurationClassProcessingTests {
 
 	@Test
 	public void configurationWithPostProcessor() {
-		BeanFactory factory = new AnnotationConfigApplicationContext(ConfigWithPostProcessor.class);
+		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
+		factory.register(ConfigWithPostProcessor.class);
+		RootBeanDefinition placeholderConfigurer = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+		placeholderConfigurer.getPropertyValues().add("properties", "myProp=myValue");
+		factory.registerBeanDefinition("placeholderConfigurer", placeholderConfigurer);
+		factory.refresh();
 
 		TestBean foo = factory.getBean("foo", TestBean.class);
 		ITestBean bar = factory.getBean("bar", ITestBean.class);
 		ITestBean baz = factory.getBean("baz", ITestBean.class);
 
-		assertEquals("foo-processed", foo.getName());
-		assertEquals("bar-processed", bar.getName());
-		assertEquals("baz-processed", baz.getName());
+		assertEquals("foo-processed-myValue", foo.getName());
+		assertEquals("bar-processed-myValue", bar.getName());
+		assertEquals("baz-processed-myValue", baz.getName());
 
 		SpousyTestBean listener = factory.getBean("listenerTestBean", SpousyTestBean.class);
 		assertTrue(listener.refreshed);
@@ -210,10 +218,13 @@ public class ConfigurationClassProcessingTests {
 
 	static class ConfigWithPostProcessor extends ConfigWithPrototypeBean {
 
+		@Value("${myProp}")
+		private String myProp;
+
 		@Bean
-		public BeanPostProcessor beanPostProcessor() {
-			return new BeanPostProcessor() {
-				String nameSuffix;
+		public POBPP beanPostProcessor() {
+			return new POBPP() {
+				String nameSuffix = "-processed-" + myProp;
 				public void setNameSuffix(String nameSuffix) {
 					this.nameSuffix = nameSuffix;
 				}
@@ -226,15 +237,18 @@ public class ConfigurationClassProcessingTests {
 				public Object postProcessAfterInitialization(Object bean, String beanName) {
 					return bean;
 				}
+				public int getOrder() {
+					return 0;
+				}
 			};
 		}
 
-		@Bean
+		//@Bean
 		public BeanFactoryPostProcessor beanFactoryPostProcessor() {
 			return new BeanFactoryPostProcessor() {
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 					BeanDefinition bd = beanFactory.getBeanDefinition("beanPostProcessor");
-					bd.getPropertyValues().addPropertyValue("nameSuffix", "-processed");
+					bd.getPropertyValues().addPropertyValue("nameSuffix", "-processed-" + myProp);
 				}
 			};
 		}
@@ -243,6 +257,10 @@ public class ConfigurationClassProcessingTests {
 		public ITestBean listenerTestBean() {
 			return new SpousyTestBean("listener");
 		}
+	}
+
+
+	public interface POBPP extends BeanPostProcessor {
 	}
 
 
