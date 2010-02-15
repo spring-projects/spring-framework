@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,16 @@ package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.jsp.tagext.Tag;
 
 import org.dom4j.Document;
@@ -37,6 +38,8 @@ import org.springframework.beans.Colour;
 import org.springframework.beans.Pet;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.format.Formatter;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -412,6 +415,55 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
 		assertEquals("BAZ", checkboxElement3.attribute("value").getValue());
+	}
+
+	public void testWithMultiValueWithFormatter() throws Exception {
+		this.tag.setPath("stringArray");
+		this.tag.setItems(new Object[] {"   foo", "   bar", "   baz"});
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		FormattingConversionService cs = new FormattingConversionService();
+		cs.addFormatterForFieldType(String.class, new Formatter<String>() {
+			public String print(String object, Locale locale) {
+				return object;
+			}
+			public String parse(String text, Locale locale) throws ParseException {
+				return text.trim();
+			}
+		});
+		bindingResult.initConversion(cs);
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
+		assertEquals("input", checkboxElement1.getName());
+		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
+		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
+		assertEquals("   foo", checkboxElement1.attribute("value").getValue());
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
+		assertEquals("input", checkboxElement2.getName());
+		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
+		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
+		assertEquals("   bar", checkboxElement2.attribute("value").getValue());
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
+		assertEquals("input", checkboxElement3.getName());
+		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
+		assertNull("not checked", checkboxElement3.attribute("checked"));
+		assertEquals("   baz", checkboxElement3.attribute("value").getValue());
 	}
 
 	public void testCollectionOfPets() throws Exception {

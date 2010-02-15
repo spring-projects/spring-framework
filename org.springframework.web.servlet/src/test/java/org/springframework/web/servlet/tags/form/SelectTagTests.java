@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -463,7 +463,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("Austria(AT)", e.getText());
 	}
 
-	public void testWithElementConverter() throws Exception {
+	public void testWithElementFormatter() throws Exception {
 		this.bean.setRealCountry(Country.COUNTRY_UK);
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -505,7 +505,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("United Kingdom", e.getText());
 	}
 
-	public void testWithMultiListAndElementConverter() throws Exception {
+	public void testWithMultiListAndElementFormatter() throws Exception {
 		List list = new ArrayList();
 		list.add(Country.COUNTRY_UK);
 		list.add(Country.COUNTRY_AT);
