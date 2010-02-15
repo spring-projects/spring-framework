@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ public final class ContextLoaderTests {
 		listener.contextInitialized(event);
 		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", context instanceof XmlWebApplicationContext);
+		assertTrue(ContextLoader.getCurrentWebApplicationContext() instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
 		assertTrue("Has father", context.containsBean("father"));
 		assertTrue("Has rod", context.containsBean("rod"));
@@ -70,6 +71,8 @@ public final class ContextLoaderTests {
 		assertFalse(context.containsBean("beans1.bean2"));
 		listener.contextDestroyed(event);
 		assertTrue("Destroyed", lb.isDestroyed());
+		assertNull(sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertNull(ContextLoader.getCurrentWebApplicationContext());
 	}
 
 	/**
