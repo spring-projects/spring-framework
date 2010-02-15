@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,12 +141,16 @@ public class ContextLoader {
 
 
 	/**
-	 * Map from (thread context) ClassLoader to WebApplicationContext.
-	 * Often just holding one reference - if the ContextLoader class is
-	 * deployed in the web app ClassLoader itself!
+	 * Map from (thread context) ClassLoader to corresponding 'current' WebApplicationContext.
 	 */
 	private static final Map<ClassLoader, WebApplicationContext> currentContextPerThread =
 			new ConcurrentHashMap<ClassLoader, WebApplicationContext>(1);
+
+	/**
+	 * The 'current' WebApplicationContext, if the ContextLoader class is
+	 * deployed in the web app ClassLoader itself.
+	 */
+	private static volatile WebApplicationContext currentContext;
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
@@ -191,7 +195,14 @@ public class ContextLoader {
 			// it is available on ServletContext shutdown.
 			this.context = createWebApplicationContext(servletContext, parent);
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
-			currentContextPerThread.put(Thread.currentThread().getContextClassLoader(), this.context);
+
+			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+			if (ccl == ContextLoader.class.getClassLoader()) {
+				currentContext = this.context;
+			}
+			else if (ccl != null) {
+				currentContextPerThread.put(ccl, this.context);
+			}
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
@@ -364,7 +375,13 @@ public class ContextLoader {
 			}
 		}
 		finally {
-			currentContextPerThread.remove(Thread.currentThread().getContextClassLoader());
+			ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+			if (ccl == ContextLoader.class.getClassLoader()) {
+				currentContext = null;
+			}
+			else if (ccl != null) {
+				currentContextPerThread.remove(ccl);
+			}
 			servletContext.removeAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 			if (this.parentContextRef != null) {
 				this.parentContextRef.release();
@@ -382,7 +399,14 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
 	 */
 	public static WebApplicationContext getCurrentWebApplicationContext() {
-		return currentContextPerThread.get(Thread.currentThread().getContextClassLoader());
+		ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+		if (ccl != null) {
+			WebApplicationContext ccpt = currentContextPerThread.get(ccl);
+			if (ccpt != null) {
+				return ccpt;
+			}
+		}
+		return currentContext;
 	}
 
 }
