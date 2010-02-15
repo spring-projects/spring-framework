@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.beans.PropertyEditor;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import javax.servlet.jsp.JspException;
 
@@ -158,17 +158,16 @@ class OptionWriter {
 	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
 	private void renderFromMap(final TagWriter tagWriter) throws JspException {
-		Map optionMap = (Map) this.optionSource;
-		for (Iterator iterator = optionMap.entrySet().iterator(); iterator.hasNext();) {
-			Map.Entry entry = (Map.Entry) iterator.next();
+		Map<?, ?> optionMap = (Map) this.optionSource;
+		for (Map.Entry entry : optionMap.entrySet()) {
 			Object mapKey = entry.getKey();
 			Object mapValue = entry.getValue();
 			BeanWrapper mapKeyWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapKey);
 			BeanWrapper mapValueWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapValue);
-			Object renderValue = (this.valueProperty != null ?
-					mapKeyWrapper.getPropertyValue(this.valueProperty) : mapKey.toString());
-			Object renderLabel = (this.labelProperty != null ?
-					mapValueWrapper.getPropertyValue(this.labelProperty) : mapValue.toString());
+			Object renderValue = (this.valueProperty != null ? mapKeyWrapper.getPropertyValue(this.valueProperty) :
+					mapKey.toString());
+			Object renderLabel = (this.labelProperty != null ? mapValueWrapper.getPropertyValue(this.labelProperty) :
+					mapValue.toString());
 			renderOption(tagWriter, mapKey, renderValue, renderLabel);
 		}
 	}
@@ -196,16 +195,15 @@ class OptionWriter {
 	 * {@link #labelProperty} property is used when rendering the label.
 	 */
 	private void doRenderFromCollection(Collection optionCollection, TagWriter tagWriter) throws JspException {
-		for (Iterator it = optionCollection.iterator(); it.hasNext();) {
-			Object item = it.next();
+		for (Object item : optionCollection) {
 			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
 			Object value;
 			if (this.valueProperty != null) {
 				value = wrapper.getPropertyValue(this.valueProperty);
-			} 
+			}
 			else if (item instanceof Enum) {
 				value = ((Enum<?>) item).name();
-			} 
+			}
 			else {
 				value = item;
 			}
@@ -243,7 +241,8 @@ class OptionWriter {
 	 * HTML-escaped as required.
 	 */
 	private String getDisplayString(Object value) {
-		return ValueFormatter.getDisplayString(value, this.bindStatus.getEditor(), this.htmlEscape);
+		PropertyEditor editor = (value != null ? this.bindStatus.findEditor(value.getClass()) : null);
+		return ValueFormatter.getDisplayString(value, editor, this.htmlEscape);
 	}
 
 	/**

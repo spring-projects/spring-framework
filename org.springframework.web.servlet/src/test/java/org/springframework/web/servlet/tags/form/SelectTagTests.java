@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
@@ -40,6 +40,8 @@ import org.dom4j.io.SAXReader;
 
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
+import org.springframework.format.Formatter;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -59,7 +61,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	private SelectTag tag;
 
-	private TestBean bean;
+	private TestBeanWithRealCountry bean;
 
 
 	protected void onSetUp() {
@@ -454,9 +456,102 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
 		assertEquals("UK node not selected", "selected", e.attribute("selected").getValue());
+		assertEquals("United Kingdom(UK)", e.getText());
 
 		e = (Element) selectElement.selectSingleNode("option[@value = 'AT']");
 		assertEquals("AT node not selected", "selected", e.attribute("selected").getValue());
+		assertEquals("Austria(AT)", e.getText());
+	}
+
+	public void testWithElementConverter() throws Exception {
+		this.bean.setRealCountry(Country.COUNTRY_UK);
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		FormattingConversionService cs = new FormattingConversionService();
+		cs.addFormatterForFieldType(Country.class, new Formatter<Country>() {
+			public String print(Country object, Locale locale) {
+				return object.getName();
+			}
+			public Country parse(String text, Locale locale) throws ParseException {
+				return new Country(text, text);
+			}
+		});
+		errors.initConversion(cs);
+		exposeBindingResult(errors);
+
+		this.tag.setPath("realCountry");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(1, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("realCountry", selectElement.attribute("name").getValue());
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
+		assertEquals("UK node not selected", "selected", e.attribute("selected").getValue());
+		assertEquals("United Kingdom", e.getText());
+	}
+
+	public void testWithMultiListAndElementConverter() throws Exception {
+		List list = new ArrayList();
+		list.add(Country.COUNTRY_UK);
+		list.add(Country.COUNTRY_AT);
+		this.bean.setSomeList(list);
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		FormattingConversionService cs = new FormattingConversionService();
+		cs.addFormatterForFieldType(Country.class, new Formatter<Country>() {
+			public String print(Country object, Locale locale) {
+				return object.getName();
+			}
+			public Country parse(String text, Locale locale) throws ParseException {
+				return new Country(text, text);
+			}
+		});
+		errors.initConversion(cs);
+		exposeBindingResult(errors);
+
+		this.tag.setPath("someList");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.SKIP_BODY, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(2, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("someList", selectElement.attribute("name").getValue());
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
+		assertEquals("UK node not selected", "selected", e.attribute("selected").getValue());
+		assertEquals("United Kingdom", e.getText());
+
+		e = (Element) selectElement.selectSingleNode("option[@value = 'AT']");
+		assertEquals("AT node not selected", "selected", e.attribute("selected").getValue());
+		assertEquals("Austria", e.getText());
 	}
 
 	public void testWithMultiListAndCustomEditor() throws Exception {

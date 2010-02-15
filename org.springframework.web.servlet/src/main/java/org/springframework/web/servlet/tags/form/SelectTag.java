@@ -205,7 +205,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		if (items != null) {
 			// Items specified, but might still be empty...
 			if (items != EMPTY) {
-				Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+				Object itemsObject = evaluate("items", items);
 				if (itemsObject != null) {
 					String valueProperty = (getItemValue() != null ?
 							ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())) : null);
