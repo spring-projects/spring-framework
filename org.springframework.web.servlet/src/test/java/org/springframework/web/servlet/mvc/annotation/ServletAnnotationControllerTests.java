@@ -199,7 +199,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("foo-null-bar", response.getContentAsString());
+		assertEquals("foo--bar", response.getContentAsString());
 	}
 
 	@Test
@@ -1970,7 +1970,7 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(@RequestParam(value = "id", defaultValue = "foo") String id,
-				@RequestParam(value = "otherId", required = false) String id2,
+				@RequestParam(value = "otherId", defaultValue = "") String id2,
 				@RequestHeader(defaultValue = "bar") String header,
 				HttpServletResponse response) throws IOException {
 			response.getWriter().write(String.valueOf(id) + "-" + String.valueOf(id2) + "-" + String.valueOf(header));
