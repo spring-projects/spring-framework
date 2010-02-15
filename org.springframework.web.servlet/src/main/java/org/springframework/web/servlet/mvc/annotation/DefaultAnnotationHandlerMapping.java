@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,37 +37,47 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMapping;
 
 /**
- * Implementation of the {@link org.springframework.web.servlet.HandlerMapping} interface that maps handlers based on
- * HTTP paths expressed through the {@link RequestMapping} annotation at the type or method level.
+ * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
+ * interface that maps handlers based on HTTP paths expressed through the
+ * {@link RequestMapping} annotation at the type or method level.
  *
- * <p>Registered by default in {@link org.springframework.web.servlet.DispatcherServlet} on Java 5+. <b>NOTE:</b> If you
- * define custom HandlerMapping beans in your DispatcherServlet context, you need to add a
- * DefaultAnnotationHandlerMapping bean explicitly, since custom HandlerMapping beans replace the default mapping
- * strategies. Defining a DefaultAnnotationHandlerMapping also allows for registering custom interceptors:
+ * <p>Registered by default in {@link org.springframework.web.servlet.DispatcherServlet}
+ * on Java 5+. <b>NOTE:</b> If you define custom HandlerMapping beans in your
+ * DispatcherServlet context, you need to add a DefaultAnnotationHandlerMapping bean
+ * explicitly, since custom HandlerMapping beans replace the default mapping strategies.
+ * Defining a DefaultAnnotationHandlerMapping also allows for registering custom
+ * interceptors:
  *
- * <pre class="code"> &lt;bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"&gt;
- * &lt;property name="interceptors"&gt; ... &lt;/property&gt; &lt;/bean&gt;</pre>
+ * <pre class="code">
+ * &lt;bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"&gt;
+ *   &lt;property name="interceptors"&gt;
+ *     ...
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
- * Annotated controllers are usually marked with the {@link Controller} stereotype at the type level. This is not
- * strictly necessary when {@link RequestMapping} is applied at the type level (since such a handler usually implements
- * the {@link org.springframework.web.servlet.mvc.Controller} interface). However, {@link Controller} is required for
- * detecting {@link RequestMapping} annotations at the method level if {@link RequestMapping} is not present at the type
- * level.
+ * Annotated controllers are usually marked with the {@link Controller} stereotype
+ * at the type level. This is not strictly necessary when {@link RequestMapping} is
+ * applied at the type level (since such a handler usually implements the
+ * {@link org.springframework.web.servlet.mvc.Controller} interface). However,
+ * {@link Controller} is required for detecting {@link RequestMapping} annotations
+ * at the method level if {@link RequestMapping} is not present at the type level.
  *
- * <p><b>NOTE:</b> Method-level mappings are only allowed to narrow the mapping expressed at the class level (if any).
- * HTTP paths need to uniquely map onto specific handler beans, with any given HTTP path only allowed to be mapped onto
- * one specific handler bean (not spread across multiple handler beans). It is strongly recommended to co-locate related
- * handler methods into the same bean.
+ * <p><b>NOTE:</b> Method-level mappings are only allowed to narrow the mapping
+ * expressed at the class level (if any). HTTP paths need to uniquely map onto
+ * specific handler beans, with any given HTTP path only allowed to be mapped
+ * onto one specific handler bean (not spread across multiple handler beans).
+ * It is strongly recommended to co-locate related handler methods into the same bean.
  *
- * <p>The {@link AnnotationMethodHandlerAdapter} is responsible for processing annotated handler methods, as mapped by
- * this HandlerMapping. For {@link RequestMapping} at the type level, specific HandlerAdapters such as {@link
- * org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter} apply.
+ * <p>The {@link AnnotationMethodHandlerAdapter} is responsible for processing
+ * annotated handler methods, as mapped by this HandlerMapping. For
+ * {@link RequestMapping} at the type level, specific HandlerAdapters such as
+ * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter} apply.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @since 2.5
  * @see RequestMapping
  * @see AnnotationMethodHandlerAdapter
- * @since 2.5
  */
 public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 
@@ -75,19 +85,23 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 
 	private final Map<Class, RequestMapping> cachedMappings = new HashMap<Class, RequestMapping>();
 
+
 	/**
-	 * Set whether to register paths using the default suffix pattern as well: i.e. whether "/users" should be registered
-	 * as "/users.*" and "/users/" too. <p>Default is "true". Turn this convention off if you intend to interpret your
-	 * <code>@RequestMapping</code> paths strictly. <p>Note that paths which include a ".xxx" suffix or end with "/"
-	 * already will not be transformed using the default suffix pattern in any case.
+	 * Set whether to register paths using the default suffix pattern as well:
+	 * i.e. whether "/users" should be registered as "/users.*" and "/users/" too.
+	 * <p>Default is "true". Turn this convention off if you intend to interpret
+	 * your <code>@RequestMapping</code> paths strictly.
+	 * <p>Note that paths which include a ".xxx" suffix or end with "/" already will not be
+	 * transformed using the default suffix pattern in any case.
 	 */
 	public void setUseDefaultSuffixPattern(boolean useDefaultSuffixPattern) {
 		this.useDefaultSuffixPattern = useDefaultSuffixPattern;
 	}
 
+
 	/**
-	 * Checks for presence of the {@link org.springframework.web.bind.annotation.RequestMapping} annotation on the handler
-	 * class and on any of its methods.
+	 * Checks for presence of the {@link org.springframework.web.bind.annotation.RequestMapping}
+	 * annotation on the handler class and on any of its methods.
 	 */
 	@Override
 	protected String[] determineUrlsForHandler(String beanName) {
@@ -101,7 +115,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 			String[] typeLevelPatterns = mapping.value();
 			if (typeLevelPatterns.length > 0) {
 				// @RequestMapping specifies paths at type level
-				String[] methodLevelPatterns = determineUrlsForHandlerMethods(handlerType);
+				String[] methodLevelPatterns = determineUrlsForHandlerMethods(handlerType, true);
 				for (String typeLevelPattern : typeLevelPatterns) {
 					if (!typeLevelPattern.startsWith("/")) {
 						typeLevelPattern = "/" + typeLevelPattern;
@@ -110,7 +124,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 					for (String methodLevelPattern : methodLevelPatterns) {
 						if (methodLevelPattern == null) {
 							hasEmptyMethodLevelMappings = true;
-						} else {
+						}
+						else {
 							String combinedPattern = getPathMatcher().combine(typeLevelPattern, methodLevelPattern);
 							addUrlsForPath(urls, combinedPattern);
 						}
@@ -124,12 +139,12 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 			}
 			else {
 				// actual paths specified by @RequestMapping at method level
-				return determineUrlsForHandlerMethods(handlerType);
+				return determineUrlsForHandlerMethods(handlerType, false);
 			}
 		}
 		else if (AnnotationUtils.findAnnotation(handlerType, Controller.class) != null) {
 			// @RequestMapping to be introspected at method level
-			return determineUrlsForHandlerMethods(handlerType);
+			return determineUrlsForHandlerMethods(handlerType, false);
 		}
 		else {
 			return null;
@@ -138,13 +153,17 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 
 	/**
 	 * Derive URL mappings from the handler's method-level mappings.
-	 *
-	 * <p>The returned array may contain {@code null}, indicating an empty {@link RequestMapping} value.
-	 *
 	 * @param handlerType the handler type to introspect
+	 * @param indicateEmpty whether the returned array should contain
+	 * <code>null</code> in case of an empty {@link RequestMapping} value.
 	 * @return the array of mapped URLs
 	 */
-	protected String[] determineUrlsForHandlerMethods(Class<?> handlerType) {
+	protected String[] determineUrlsForHandlerMethods(Class<?> handlerType, final boolean indicateEmpty) {
+		String[] subclassResult = determineUrlsForHandlerMethods(handlerType);
+		if (subclassResult != null) {
+			return subclassResult;
+		}
+
 		final Set<String> urls = new LinkedHashSet<String>();
 		Class<?>[] handlerTypes =
 				Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[]{handlerType};
@@ -158,7 +177,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 							for (String mappedPattern : mappedPatterns) {
 								addUrlsForPath(urls, mappedPattern);
 							}
-						} else {
+						}
+						else if (indicateEmpty) {
 							// empty method-level RequestMapping
 							urls.add(null);
 						}
@@ -170,8 +190,16 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	}
 
 	/**
+	 * Derive URL mappings from the handler's method-level mappings.
+	 * @param handlerType the handler type to introspect
+	 * @return the array of mapped URLs
+	 */
+	protected String[] determineUrlsForHandlerMethods(Class<?> handlerType) {
+		return null;
+	}
+
+	/**
 	 * Add URLs and/or URL patterns for the given path.
-	 *
 	 * @param urls the Set of URLs for the current bean
 	 * @param path the currently introspected path
 	 */
@@ -183,9 +211,9 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		}
 	}
 
+
 	/**
 	 * Validate the given annotated handler against the current request.
-	 *
 	 * @see #validateMapping
 	 */
 	@Override
@@ -200,9 +228,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	}
 
 	/**
-	 * Validate the given type-level mapping metadata against the current request, checking HTTP request method and
-	 * parameter conditions.
-	 *
+	 * Validate the given type-level mapping metadata against the current request,
+	 * checking HTTP request method and parameter conditions.
 	 * @param mapping the mapping metadata to validate
 	 * @param request current HTTP request
 	 * @throws Exception if validation failed
@@ -224,9 +251,9 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 
 		String[] mappedHeaders = mapping.headers();
 		if (!ServletAnnotationMappingUtils.checkHeaders(mappedHeaders, request)) {
-			throw new ServletRequestBindingException(
-					"Header conditions \"" + StringUtils.arrayToDelimitedString(mappedHeaders, ", ") +
-							"\" not met for actual request");
+			throw new ServletRequestBindingException("Header conditions \"" +
+					StringUtils.arrayToDelimitedString(mappedHeaders, ", ") +
+					"\" not met for actual request");
 		}
 	}
 
