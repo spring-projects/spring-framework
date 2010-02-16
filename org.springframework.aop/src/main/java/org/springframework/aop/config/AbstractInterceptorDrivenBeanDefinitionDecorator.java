@@ -65,7 +65,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 		String existingBeanName = definitionHolder.getBeanName();
 		BeanDefinition existingDefinition = definitionHolder.getBeanDefinition();
 
-		// delegate to subclass for interceptor def
+		// delegate to subclass for interceptor definition
 		BeanDefinition interceptorDefinition = createInterceptorDefinition(node);
 
 		// generate name and register the interceptor
@@ -75,9 +75,9 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 		BeanDefinitionHolder result = definitionHolder;
 
 		if (!isProxyFactoryBeanDefinition(existingDefinition)) {
-			// create the proxy definitionHolder
+			// create the proxy definition
 			RootBeanDefinition proxyDefinition = new RootBeanDefinition();
-			// create proxy factory bean definitionHolder
+			// create proxy factory bean definition
 			proxyDefinition.setBeanClass(ProxyFactoryBean.class);
 
 			// set up property values
@@ -88,8 +88,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 			mpvs.add("target", existingDefinition);
 
 			// create the interceptor names list
-			ManagedList interceptorList = new ManagedList();
-			mpvs.add("interceptorNames", interceptorList);
+			mpvs.add("interceptorNames", new ManagedList<String>());
 
 			result = new BeanDefinitionHolder(proxyDefinition, existingBeanName);
 		}
