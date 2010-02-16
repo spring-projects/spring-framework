@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.1 (2010-02-15)
+Changes in version 3.0.1 (2010-02-17)
 -------------------------------------
 
 * upgraded to AspectJ 1.6.8
@@ -15,6 +15,7 @@ Changes in version 3.0.1 (2010-02-15)
 * ConversionFailedException exposes offending value through public "getValue()" method
 * fixed BeanFactory's "getBeansWithAnnotation" to ignore beans with non-determinable type
 * widened FactoryBean's "getObjectType" signature to return any Class (Class<?>)
+* BeanDefinitionReader and ClassPath/FileSystemXmlApplicationContext use varargs where possible
 * introduced BeanDefinitionRegistryPostProcessor extension to BeanFactoryPostProcessor
 * @Configuration classes support definition of BeanFactoryPostProcessor beans
 * component-scan's scoped-proxy attribute applies to scope-annotated singleton beans as well
@@ -41,12 +42,15 @@ Changes in version 3.0.1 (2010-02-15)
 * fixed MediaType's Comparable behavior to do a full comparison, aligned with equals behavior
 * added "sortBySpecificity" method to MediaType, for typical use with accept header matching
 * MimeMessageHelper encodes from, to, cc, bcc String addresses with given encoding as well
+* relaxed generic Class declaration in HttpMessageConverter's canRead/canWrite/read signatures
 * fixed "mvc:view-controller" to work in a fully isolated fashion on Spring Dynamic Modules
+* @RequestParam/RequestHeader/CookieValue's defaultValue allows for declaring empty String
 * @SessionAttributes works when used on an annotated controller interface with AOP proxying
 * WebRequest is a resolvable dependency in Servlet/Portlet web application contexts
 * revised JSP-based views to never fail when trying to set Servlet API forward attributes
 * lenient evaluation of boolean 'true' attribute expressions in JSP form tag library
 * added new spring:eval tag for evaluating SpEL expressions from JSP pages
+* SpringBeanAutowiringSupport works in extra ClassLoaders as well (e.g. WebLogic JAX-WS)
 
 
 Changes in version 3.0.0.GA (2009-12-16)
