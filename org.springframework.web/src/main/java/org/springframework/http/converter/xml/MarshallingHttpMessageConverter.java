@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 
 	private Unmarshaller unmarshaller;
 
+
 	/**
 	 * Construct a new {@code MarshallingHttpMessageConverter} with no {@link Marshaller} or {@link Unmarshaller} set. The
 	 * marshaller and unmarshaller must be set after construction by invoking {@link #setMarshaller(Marshaller)} and {@link
@@ -62,7 +63,6 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	 * Marshaller} also implements the {@link Unmarshaller} interface, it is used for both marshalling and unmarshalling.
 	 * Otherwise, an exception is thrown. <p>Note that all {@code Marshaller} implementations in Spring also implement the
 	 * {@code Unmarshaller} interface, so that you can safely use this constructor.
-	 *
 	 * @param marshaller object used as marshaller and unmarshaller
 	 */
 	public MarshallingHttpMessageConverter(Marshaller marshaller) {
@@ -76,7 +76,6 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	/**
 	 * Construct a new <code>MarshallingMessageConverter</code> with the given {@code Marshaller} and {@code
 	 * Unmarshaller}.
-	 *
 	 * @param marshaller the Marshaller to use
 	 * @param unmarshaller the Unmarshaller to use
 	 */
@@ -87,26 +86,31 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 		this.unmarshaller = unmarshaller;
 	}
 
-	/** Set the {@link Marshaller} to be used by this message converter. */
+	/**
+	 * Set the {@link Marshaller} to be used by this message converter.
+	 */
 	public void setMarshaller(Marshaller marshaller) {
 		this.marshaller = marshaller;
 	}
 
-	/** Set the {@link Unmarshaller} to be used by this message converter. */
+	/**
+	 * Set the {@link Unmarshaller} to be used by this message converter.
+	 */
 	public void setUnmarshaller(Unmarshaller unmarshaller) {
 		this.unmarshaller = unmarshaller;
 	}
 
+
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return unmarshaller.supports(clazz);
+		return this.unmarshaller.supports(clazz);
 	}
 
 	@Override
-	protected Object readFromSource(Class<Object> clazz, HttpHeaders headers, Source source) throws IOException {
+	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws IOException {
 		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
 		try {
-			return unmarshaller.unmarshal(source);
+			return this.unmarshaller.unmarshal(source);
 		}
 		catch (UnmarshallingFailureException ex) {
 			throw new HttpMessageNotReadableException("Could not read [" + clazz + "]", ex);
@@ -117,10 +121,11 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws IOException {
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
-			marshaller.marshal(o, result);
+			this.marshaller.marshal(o, result);
 		}
 		catch (MarshallingFailureException ex) {
 			throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
 		}
 	}
+
 }

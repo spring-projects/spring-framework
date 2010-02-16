@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,37 +62,27 @@ import org.springframework.util.Assert;
  */
 public class BufferedImageHttpMessageConverter implements HttpMessageConverter<BufferedImage> {
 
-	private List<MediaType> readableMediaTypes = new ArrayList<MediaType>();
+	private final List<MediaType> readableMediaTypes = new ArrayList<MediaType>();
 
 	private MediaType defaultContentType;
 
 	private File cacheDir;
 
+
 	public BufferedImageHttpMessageConverter() {
 		String[] readerMediaTypes = ImageIO.getReaderMIMETypes();
 		for (String mediaType : readerMediaTypes) {
-			readableMediaTypes.add(MediaType.parseMediaType(mediaType));
+			this.readableMediaTypes.add(MediaType.parseMediaType(mediaType));
 		}
 
 		String[] writerMediaTypes = ImageIO.getWriterMIMETypes();
 		if (writerMediaTypes.length > 0) {
-			defaultContentType = MediaType.parseMediaType(writerMediaTypes[0]);
+			this.defaultContentType = MediaType.parseMediaType(writerMediaTypes[0]);
 		}
 	}
 
 	/**
-	 * Returns the default {@code Content-Type} to be used for writing. Called when {@link #write} is invoked without a
-	 * specified content type parameter.
-	 *
-	 * @return the default content type
-	 */
-	public MediaType getDefaultContentType() {
-		return defaultContentType;
-	}
-
-	/**
 	 * Sets the default {@code Content-Type} to be used for writing.
-	 *
 	 * @throws IllegalArgumentException if the given content type is not supported by the Java Image I/O API
 	 */
 	public void setDefaultContentType(MediaType defaultContentType) {
@@ -106,20 +96,27 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		this.defaultContentType = defaultContentType;
 	}
 
-	/** Sets the cache directory. If this property is set to an existing directory, this converter will cache image data. */
+	/**
+	 * Returns the default {@code Content-Type} to be used for writing.
+	 * Called when {@link #write} is invoked without a specified content type parameter.
+	 */
+	public MediaType getDefaultContentType() {
+		return this.defaultContentType;
+	}
+
+	/**
+	 * Sets the cache directory. If this property is set to an existing directory,
+	 * this converter will cache image data.
+	 */
 	public void setCacheDir(File cacheDir) {
 		Assert.notNull(cacheDir, "'cacheDir' must not be null");
 		Assert.isTrue(cacheDir.isDirectory(), "'cacheDir' is not a directory");
 		this.cacheDir = cacheDir;
 	}
 
+
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		if (BufferedImage.class.equals(clazz)) {
-			return isReadable(mediaType);
-		}
-		else {
-			return false;
-		}
+		return (BufferedImage.class.equals(clazz) && isReadable(mediaType));
 	}
 
 	private boolean isReadable(MediaType mediaType) {
@@ -131,12 +128,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		if (BufferedImage.class.equals(clazz)) {
-			return isWritable(mediaType);
-		}
-		else {
-			return false;
-		}
+		return (BufferedImage.class.equals(clazz) && isWritable(mediaType));
 	}
 
 	private boolean isWritable(MediaType mediaType) {
@@ -148,11 +140,12 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	public List<MediaType> getSupportedMediaTypes() {
-		return Collections.unmodifiableList(readableMediaTypes);
+		return Collections.unmodifiableList(this.readableMediaTypes);
 	}
 
-	public BufferedImage read(Class<BufferedImage> clazz, HttpInputMessage inputMessage)
+	public BufferedImage read(Class<? extends BufferedImage> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
+
 		ImageInputStream imageInputStream = null;
 		ImageReader imageReader = null;
 		try {
@@ -187,7 +180,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	private ImageInputStream createImageInputStream(InputStream is) throws IOException {
-		if (cacheDir != null) {
+		if (this.cacheDir != null) {
 			return new FileCacheImageInputStream(is, cacheDir);
 		}
 		else {
@@ -197,6 +190,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	public void write(BufferedImage image, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		if (contentType == null) {
 			contentType = getDefaultContentType();
 		}
@@ -236,17 +230,17 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	private ImageOutputStream createImageOutputStream(OutputStream os) throws IOException {
-		if (cacheDir != null) {
-			return new FileCacheImageOutputStream(os, cacheDir);
+		if (this.cacheDir != null) {
+			return new FileCacheImageOutputStream(os, this.cacheDir);
 		}
 		else {
 			return new MemoryCacheImageOutputStream(os);
 		}
 	}
 
+
 	/**
 	 * Template method that allows for manipulating the {@link ImageReadParam} before it is used to read an image.
-	 *
 	 * <p>Default implementation is empty.
 	 */
 	protected void process(ImageReadParam irp) {
@@ -254,9 +248,9 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	/**
 	 * Template method that allows for manipulating the {@link ImageWriteParam} before it is used to write an image.
-	 *
 	 * <p>Default implementation is empty.
 	 */
 	protected void process(ImageWriteParam iwp) {
 	}
+
 }

@@ -17,10 +17,17 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 
-import org.junit.Before;
-import org.junit.Test;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.namespace.QName;
+
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -79,7 +86,7 @@ public class HttpMessageConverterTests {
 		}
 
 		@Override
-		protected T readInternal(Class<T> clazz, HttpInputMessage inputMessage)
+		protected T readInternal(Class clazz, HttpInputMessage inputMessage)
 				throws IOException, HttpMessageNotReadableException {
 			fail("Not expected");
 			return null;
@@ -95,4 +102,5 @@ public class HttpMessageConverterTests {
 	private static class MyType {
 
 	}
+
 }
