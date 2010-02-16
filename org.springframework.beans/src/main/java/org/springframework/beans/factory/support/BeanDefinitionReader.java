@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public interface BeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	int loadBeanDefinitions(Resource[] resources) throws BeanDefinitionStoreException;
+	int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException;
 
 	/**
 	 * Load bean definitions from the specified resource location.
@@ -116,6 +116,6 @@ public interface BeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	int loadBeanDefinitions(String[] locations) throws BeanDefinitionStoreException;
+	int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException;
 
 }
