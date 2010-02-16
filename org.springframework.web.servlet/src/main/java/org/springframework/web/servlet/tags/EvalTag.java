@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,9 @@
 package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ELException;
 
-import org.springframework.beans.BeansException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -41,15 +38,17 @@ import org.springframework.web.util.TagUtils;
 /**
  * JSP tag for evaluating expressions with the Spring Expression Language (SpEL).
  * Supports the standard JSP evaluation context consisting of implicit variables and scoped attributes.
- * 
+ *
  * @author Keith Donald
  * @since 3.0.1
  */
 public class EvalTag extends HtmlEscapingAwareTag {
 
-	private ExpressionParser expressionParser;
-	
-	private String expression;
+	private final ExpressionParser expressionParser = new SpelExpressionParser();
+
+	private EvaluationContext evaluationContext;
+
+	private Expression expression;
 
 	private String var;
 
@@ -57,11 +56,18 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	private boolean javaScriptEscape = false;
 
+
+	@Override
+	public void setPageContext(PageContext pageContext) {
+		super.setPageContext(pageContext);
+		this.evaluationContext = createEvaluationContext(pageContext);
+	}
+
 	/**
 	 * Set the expression to evaluate.
 	 */
 	public void setExpression(String expression) {
-		this.expression = expression;
+		this.expression = this.expressionParser.parseExpression(expression);
 	}
 
 	/**
@@ -89,55 +95,51 @@ public class EvalTag extends HtmlEscapingAwareTag {
 				ExpressionEvaluationUtils.evaluateBoolean("javaScriptEscape", javaScriptEscape, this.pageContext);
 	}
 
+
 	@Override
 	public int doStartTagInternal() throws JspException {
-		this.expressionParser = new SpelExpressionParser();
 		return EVAL_BODY_INCLUDE;
 	}
 
 	@Override
 	public int doEndTag() throws JspException {
-		Expression expression = this.expressionParser.parseExpression(this.expression);
-		EvaluationContext context = createEvaluationContext();
 		if (this.var == null) {
 			try {
-				String result = expression.getValue(context, String.class);
+				String result = this.expression.getValue(this.evaluationContext, String.class);
 				result = isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result;
 				result = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result;
 				pageContext.getOut().print(result);
 			}
-			catch (IOException e) {
-				throw new JspException(e);
+			catch (IOException ex) {
+				throw new JspException(ex);
 			}
 		}
 		else {
-			Object result = expression.getValue(context);
-			pageContext.setAttribute(var, result, scope);
+			Object result = this.expression.getValue(this.evaluationContext);
+			pageContext.setAttribute(this.var, result, this.scope);
 		}
 		return EVAL_PAGE;
 	}
-	
-	private EvaluationContext createEvaluationContext() {
+
+
+	private EvaluationContext createEvaluationContext(PageContext pageContext) {
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.addPropertyAccessor(new JspPropertyAccessor(this.pageContext));
-		ConversionService conversionService = getConversionService();
+		context.addPropertyAccessor(new JspPropertyAccessor(pageContext));
+		ConversionService conversionService = getConversionService(pageContext);
 		if (conversionService != null) {
 			context.setTypeConverter(new StandardTypeConverter(conversionService));
 		}
 		return context;
 	}
 	
-	private ConversionService getConversionService() {
-		try {
-			return (ConversionService) this.pageContext.getRequest().getAttribute(ConversionService.class.getName());
-		} catch (BeansException e) {
-			return null;
-		}
+	private ConversionService getConversionService(PageContext pageContext) {
+		return (ConversionService) pageContext.getRequest().getAttribute(ConversionService.class.getName());
 	}
-	
+
+
 	private static class JspPropertyAccessor implements PropertyAccessor {
 
-		private PageContext pageContext;
+		private final PageContext pageContext;
 		
 		public JspPropertyAccessor(PageContext pageContext) {
 			this.pageContext = pageContext;
@@ -147,17 +149,11 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			return null;
 		}
 
-		public boolean canRead(EvaluationContext context, Object target,
-				String name) throws AccessException {
-			Object implicitVar = resolveImplicitVariable(name);
-			if (implicitVar != null) {
-				return true;
-			}
-			return this.pageContext.findAttribute(name) != null;
+		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+			return (resolveImplicitVariable(name) != null || this.pageContext.findAttribute(name) != null);
 		}
 
-		public TypedValue read(EvaluationContext context, Object target,
-				String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			Object implicitVar = resolveImplicitVariable(name);
 			if (implicitVar != null) {
 				return new TypedValue(implicitVar);
@@ -165,24 +161,23 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			return new TypedValue(this.pageContext.findAttribute(name));
 		}
 
-		public boolean canWrite(EvaluationContext context, Object target,
-				String name) throws AccessException {
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return false;
 		}
 
-		public void write(EvaluationContext context, Object target,
-				String name, Object newValue) throws AccessException {
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			throw new UnsupportedOperationException();
 		}
 		
 		private Object resolveImplicitVariable(String name) throws AccessException {
 			try {
 				return this.pageContext.getVariableResolver().resolveVariable(name);
-			} catch (ELException e) {
-				throw new AccessException("Unexpected exception occurred accessing '" + name + "' as an implicit variable", e);
+			}
+			catch (Exception ex) {
+				throw new AccessException(
+						"Unexpected exception occurred accessing '" + name + "' as an implicit variable", ex);
 			}
 		}
-		
 	}
 
 }

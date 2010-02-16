@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
-import org.springframework.web.servlet.handler.ConversionServiceHandlerInterceptor;
+import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
@@ -112,7 +112,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		annAdapterDef.getPropertyValues().add("messageConverters", getMessageConverters(source));
 		String annAdapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
 
-		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceHandlerInterceptor.class);
+		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
 		csInterceptorDef.setSource(source);
 		csInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, conversionService);		
 		RootBeanDefinition mappedCsInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);

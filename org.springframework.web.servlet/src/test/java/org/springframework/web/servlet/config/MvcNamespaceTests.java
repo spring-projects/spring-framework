@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.ConversionServiceHandlerInterceptor;
+import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -115,8 +115,8 @@ public class MvcNamespaceTests {
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		assertEquals(2, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
-		ConversionServiceHandlerInterceptor interceptor = (ConversionServiceHandlerInterceptor) chain.getInterceptors()[1];
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
+		ConversionServiceExposingInterceptor interceptor = (ConversionServiceExposingInterceptor) chain.getInterceptors()[1];
 		interceptor.preHandle(request, response, handler);
 		assertSame(appContext.getBean(ConversionService.class), request.getAttribute(ConversionService.class.getName()));
 		
@@ -144,8 +144,8 @@ public class MvcNamespaceTests {
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		assertEquals(2, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
-		ConversionServiceHandlerInterceptor interceptor = (ConversionServiceHandlerInterceptor) chain.getInterceptors()[1];
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
+		ConversionServiceExposingInterceptor interceptor = (ConversionServiceExposingInterceptor) chain.getInterceptors()[1];
 		interceptor.preHandle(request, response, handler);
 		assertSame(appContext.getBean("conversionService"), request.getAttribute(ConversionService.class.getName()));
 	
@@ -194,7 +194,7 @@ public class MvcNamespaceTests {
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 
@@ -225,7 +225,7 @@ public class MvcNamespaceTests {
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);		
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);	
 		LocaleChangeInterceptor interceptor = (LocaleChangeInterceptor) chain.getInterceptors()[2];
@@ -249,7 +249,7 @@ public class MvcNamespaceTests {
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 
@@ -263,7 +263,7 @@ public class MvcNamespaceTests {
 		request.setMethod("GET");
 		chain = mapping2.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 		ModelAndView mv = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
@@ -272,7 +272,7 @@ public class MvcNamespaceTests {
 		request.setRequestURI("/bar");
 		chain = mapping2.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
 		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 		ModelAndView mv2 = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
