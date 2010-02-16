@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
@@ -46,27 +47,29 @@ import org.springframework.util.ClassUtils;
  * as far as possible.
  *
  * @author Adrian Colyer
- * @author Juergen Hoeller
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 	private static Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
-	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
-	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache = new ConcurrentHashMap<Class<?>, Map<Member, String[]>>();
-
 	// marker object for classes that do not have any debug info
 	private static final Map<Member, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();
 
+	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
+	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache =
+			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>();
+
+
 	public String[] getParameterNames(Method method) {
 		Class<?> declaringClass = method.getDeclaringClass();
-		Map<Member, String[]> map = parameterNamesCache.get(declaringClass);
+		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
 			// initialize cache
 			map = inspectClass(declaringClass);
-			parameterNamesCache.put(declaringClass, map);
+			this.parameterNamesCache.put(declaringClass, map);
 		}
 		if (map != NO_DEBUG_INFO_MAP) {
 			return map.get(method);
@@ -77,11 +80,11 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	@SuppressWarnings("unchecked")
 	public String[] getParameterNames(Constructor ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
-		Map<Member, String[]> map = parameterNamesCache.get(declaringClass);
+		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
 			// initialize cache
 			map = inspectClass(declaringClass);
-			parameterNamesCache.put(declaringClass, map);
+			this.parameterNamesCache.put(declaringClass, map);
 		}
 		if (map != NO_DEBUG_INFO_MAP) {
 			return map.get(ctor);
@@ -91,10 +94,8 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	}
 
 	/**
-	 * Inspects the target class. Exceptions will be logged and a maker map returned to indicate the lack of debug information.
-	 *  
-	 * @param clazz
-	 * @return
+	 * Inspects the target class. Exceptions will be logged and a maker map returned
+	 * to indicate the lack of debug information.
 	 */
 	private Map<Member, String[]> inspectClass(Class<?> clazz) {
 		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
@@ -105,30 +106,31 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 				logger.debug("Cannot find '.class' file for class [" + clazz
 						+ "] - unable to determine constructors/methods parameter names");
 			}
-
 			return NO_DEBUG_INFO_MAP;
 		}
-
 		try {
 			ClassReader classReader = new ClassReader(is);
 			Map<Member, String[]> map = new ConcurrentHashMap<Member, String[]>();
 			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), false);
 			return map;
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Exception thrown while reading '.class' file for class [" + clazz
 						+ "] - unable to determine constructors/methods parameter names", ex);
 			}
-		} finally {
+		}
+		finally {
 			try {
 				is.close();
-			} catch (IOException ex) {
+			}
+			catch (IOException ex) {
 				// ignore
 			}
 		}
-
 		return NO_DEBUG_INFO_MAP;
 	}
+
 
 	/**
 	 * Helper class that inspects all methods (constructor included) and then
@@ -136,9 +138,10 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 */
 	private static class ParameterNameDiscoveringVisitor extends EmptyVisitor {
 
+		private static final String STATIC_CLASS_INIT = "<clinit>";
+
 		private final Class<?> clazz;
 		private final Map<Member, String[]> memberMap;
-		private static final String STATIC_CLASS_INIT = "<clinit>";
 
 		public ParameterNameDiscoveringVisitor(Class<?> clazz, Map<Member, String[]> memberMap) {
 			this.clazz = clazz;
@@ -162,6 +165,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			return ((access & Opcodes.ACC_STATIC) > 0);
 		}
 	}
+
 
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
 
@@ -255,4 +259,5 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			return (aType == Type.LONG_TYPE || aType == Type.DOUBLE_TYPE);
 		}
 	}
+
 }
