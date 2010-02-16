@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,12 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName(WebUtils.DEFAULT_CHARACTER_ENCODING);
 
+
 	/** Creates a new instance of the {@code FormHttpMessageConverter}. */
 	public FormHttpMessageConverter() {
 		super(new MediaType("application", "x-www-form-urlencoded"));
 	}
+
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -61,8 +63,7 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 	}
 
 	@Override
-	public MultiValueMap<String, String> readInternal(Class<MultiValueMap<String, String>> clazz,
-			HttpInputMessage inputMessage) throws IOException {
+	public MultiValueMap<String, String> readInternal(Class clazz, HttpInputMessage inputMessage) throws IOException {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
 		String body = FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
@@ -112,4 +113,5 @@ public class FormHttpMessageConverter extends AbstractHttpMessageConverter<Multi
 		}
 		FileCopyUtils.copy(builder.toString(), new OutputStreamWriter(outputMessage.getBody(), charset));
 	}
+
 }

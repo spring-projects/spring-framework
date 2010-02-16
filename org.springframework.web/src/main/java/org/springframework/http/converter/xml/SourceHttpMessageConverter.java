@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and write {@link
- * Source} objects.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
+ * that can read and write {@link Source} objects.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -52,7 +52,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractXmlHtt
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected T readFromSource(Class<T> clazz, HttpHeaders headers, Source source) throws IOException {
+	protected T readFromSource(Class clazz, HttpHeaders headers, Source source) throws IOException {
 		try {
 			if (DOMSource.class.equals(clazz)) {
 				DOMResult domResult = new DOMResult();
@@ -93,4 +93,5 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractXmlHtt
 			throw new HttpMessageNotWritableException("Could not transform [" + t + "] to [" + result + "]", ex);
 		}
 	}
+
 }

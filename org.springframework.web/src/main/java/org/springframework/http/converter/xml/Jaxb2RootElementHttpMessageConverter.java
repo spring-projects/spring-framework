@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,14 +67,14 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	@Override
-	protected Object readFromSource(Class<Object> clazz, HttpHeaders headers, Source source) throws IOException {
+	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws IOException {
 		try {
 			Unmarshaller unmarshaller = createUnmarshaller(clazz);
 			if (clazz.isAnnotationPresent(XmlRootElement.class)) {
 				return unmarshaller.unmarshal(source);
 			}
 			else {
-				JAXBElement<Object> jaxbElement = unmarshaller.unmarshal(source, clazz);
+				JAXBElement jaxbElement = unmarshaller.unmarshal(source, clazz);
 				return jaxbElement.getValue();
 			}
 		}
