@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,26 @@
 
 package org.springframework.oxm.jaxb;
 
+import java.awt.Image;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
-import java.lang.reflect.Type;
-import java.lang.reflect.ParameterizedType;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.xml.XMLConstants;
@@ -43,10 +49,12 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.ValidationException;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.attachment.AttachmentMarshaller;
 import javax.xml.bind.attachment.AttachmentUnmarshaller;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
@@ -68,13 +76,13 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.oxm.GenericMarshaller;
+import org.springframework.oxm.GenericUnmarshaller;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.ValidationFailureException;
 import org.springframework.oxm.XmlMappingException;
-import org.springframework.oxm.GenericMarshaller;
-import org.springframework.oxm.GenericUnmarshaller;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.oxm.mime.MimeMarshaller;
 import org.springframework.oxm.mime.MimeUnmarshaller;
@@ -120,7 +128,7 @@ public class Jaxb2Marshaller
 
 	private String contextPath;
 
-	private Class[] classesToBeBound;
+	private Class<?>[] classesToBeBound;
 
 	private Map<String, ?> jaxbContextProperties;
 
@@ -134,7 +142,7 @@ public class Jaxb2Marshaller
 
 	private ValidationEventHandler validationEventHandler;
 
-	private XmlAdapter[] adapters;
+	private XmlAdapter<?, ?>[] adapters;
 
 	private Resource[] schemaResources;
 
@@ -177,7 +185,7 @@ public class Jaxb2Marshaller
 	/**
 	 * Returns the list of Java classes to be recognized by a newly created JAXBContext.
 	 */
-	public Class[] getClassesToBeBound() {
+	public Class<?>[] getClassesToBeBound() {
 		return classesToBeBound;
 	}
 
@@ -185,7 +193,7 @@ public class Jaxb2Marshaller
 	 * Set the list of Java classes to be recognized by a newly created JAXBContext.
 	 * Setting this property or {@link #setContextPath "contextPath"} is required.
 	 */
-	public void setClassesToBeBound(Class[] classesToBeBound) {
+	public void setClassesToBeBound(Class<?>[] classesToBeBound) {
 		this.classesToBeBound = classesToBeBound;
 	}
 
@@ -247,7 +255,7 @@ public class Jaxb2Marshaller
 	 * Specify the <code>XmlAdapter</code>s to be registered with the JAXB <code>Marshaller</code>
 	 * and <code>Unmarshaller</code>
 	 */
-	public void setAdapters(XmlAdapter[] adapters) {
+	public void setAdapters(XmlAdapter<?, ?>[] adapters) {
 		this.adapters = adapters;
 	}
 
@@ -394,13 +402,21 @@ public class Jaxb2Marshaller
 		if (genericType instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
 			if (JAXBElement.class.equals(parameterizedType.getRawType()) &&
-					parameterizedType.getActualTypeArguments().length == 1 &&
-					parameterizedType.getActualTypeArguments()[0] instanceof Class) {
-				Class typeArgument = (Class) parameterizedType.getActualTypeArguments()[0];
-				return supportsInternal(typeArgument, false);
+					parameterizedType.getActualTypeArguments().length == 1) {
+				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
+				if (typeArgument instanceof Class) {
+					Class<?> classArgument = (Class<?>) typeArgument;
+					if (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument)) {
+						return true;
+					}
+					return supportsInternal(classArgument, false);
+				} else if (typeArgument instanceof GenericArrayType) {
+					GenericArrayType arrayType = (GenericArrayType) typeArgument;
+					return arrayType.getGenericComponentType().equals(Byte.TYPE);
+				}
 			}
 		} else if (genericType instanceof Class) {
-			Class clazz = (Class) genericType;
+			Class<?> clazz = (Class<?>) genericType;
 			return supportsInternal(clazz, true);
 		}
 		return false;
@@ -408,9 +424,6 @@ public class Jaxb2Marshaller
 
 	private boolean supportsInternal(Class<?> clazz, boolean checkForXmlRootElement) {
 		if (checkForXmlRootElement && AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) == null) {
-			return false;
-		}
-		if (AnnotationUtils.findAnnotation(clazz, XmlType.class) == null) {
 			return false;
 		}
 		if (StringUtils.hasLength(getContextPath())) {
@@ -427,6 +440,44 @@ public class Jaxb2Marshaller
 			return Arrays.asList(getClassesToBeBound()).contains(clazz);
 		}
 		return false;
+	}
+
+	/**
+	 * Checks whether the given type is a primitive wrapper type.
+	 *
+	 * @see section 8.5.1 of the JAXB2 spec
+	 */
+	private boolean isPrimitiveWrapper(Class<?> clazz) {
+		return Boolean.class.equals(clazz) ||
+			Byte.class.equals(clazz) ||
+				Short.class.equals(clazz) ||
+				Integer.class.equals(clazz) ||
+				Long.class.equals(clazz) ||
+				Float.class.equals(clazz) ||
+				Double.class.equals(clazz);
+	}
+
+	/**
+	 * Checks whether the given type is a standard class.
+
+	 * @see section 8.5.2 of the JAXB2 spec
+	 */
+	private boolean isStandardClass(Class<?> clazz) {
+		return String.class.equals(clazz) ||
+				BigInteger.class.isAssignableFrom(clazz) ||
+				BigDecimal.class.isAssignableFrom(clazz) ||
+				Calendar.class.isAssignableFrom(clazz) ||
+				Date.class.isAssignableFrom(clazz) ||
+				QName.class.isAssignableFrom(clazz) ||
+				URI.class.equals(clazz) ||
+				XMLGregorianCalendar.class.isAssignableFrom(clazz) ||
+				Duration.class.isAssignableFrom(clazz) ||
+				Image.class.equals(clazz) ||
+				DataHandler.class.equals(clazz) ||
+				// Source and subclasses should be supported according to the JAXB2 spec, but aren't in the RI
+				// Source.class.isAssignableFrom(clazz) ||
+				UUID.class.equals(clazz);
+
 	}
 
 	// Marshalling
@@ -504,7 +555,7 @@ public class Jaxb2Marshaller
 			marshaller.setEventHandler(this.validationEventHandler);
 		}
 		if (this.adapters != null) {
-			for (XmlAdapter adapter : this.adapters) {
+			for (XmlAdapter<?, ?> adapter : this.adapters) {
 				marshaller.setAdapter(adapter);
 			}
 		}
@@ -589,7 +640,7 @@ public class Jaxb2Marshaller
 			unmarshaller.setEventHandler(this.validationEventHandler);
 		}
 		if (this.adapters != null) {
-			for (XmlAdapter adapter : this.adapters) {
+			for (XmlAdapter<?, ?> adapter : this.adapters) {
 				unmarshaller.setAdapter(adapter);
 			}
 		}
