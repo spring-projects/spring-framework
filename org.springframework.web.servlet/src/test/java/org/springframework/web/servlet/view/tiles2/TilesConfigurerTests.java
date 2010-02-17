@@ -16,11 +16,7 @@
 
 package org.springframework.web.servlet.view.tiles2;
 
-import java.util.Properties;
-
 import org.apache.tiles.context.TilesRequestContext;
-import org.apache.tiles.evaluator.impl.DirectAttributeEvaluator;
-import org.apache.tiles.factory.TilesContainerFactory;
 import org.apache.tiles.impl.BasicTilesContainer;
 import org.apache.tiles.servlet.context.ServletTilesRequestContext;
 import org.apache.tiles.servlet.context.ServletUtil;
@@ -41,9 +37,6 @@ public class TilesConfigurerTests {
 		MockServletContext sc = new MockServletContext();
 		TilesConfigurer tc = new TilesConfigurer();
 		tc.setDefinitions(new String[] {"/org/springframework/web/servlet/view/tiles2/tiles-definitions.xml"});
-		Properties props = new Properties();
-		props.setProperty(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM, DirectAttributeEvaluator.class.getName());
-		tc.setTilesProperties(props);
 		tc.setServletContext(sc);
 		tc.afterPropertiesSet();
 
