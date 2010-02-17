@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -673,6 +673,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
+	public <T> T query(String sql, ResultSetExtractor<T> rse, Object... args) throws DataAccessException {
+		return query(sql, newArgPreparedStatementSetter(args), rse);
+	}
+
 	public void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {
 		query(psc, new RowCallbackHandlerResultSetExtractor(rch));
 	}
@@ -686,6 +690,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException {
+		query(sql, newArgPreparedStatementSetter(args), rch);
+	}
+
+	public void query(String sql, RowCallbackHandler rch, Object... args) throws DataAccessException {
 		query(sql, newArgPreparedStatementSetter(args), rch);
 	}
 
@@ -705,6 +713,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, new RowMapperResultSetExtractor<T>(rowMapper));
 	}
 
+	public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
+		return query(sql, args, new RowMapperResultSetExtractor<T>(rowMapper));
+	}
+
 	public <T> T queryForObject(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
@@ -717,6 +729,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
+	public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
+		List<T> results = query(sql, args, new RowMapperResultSetExtractor<T>(rowMapper, 1));
+		return DataAccessUtils.requiredSingleResult(results);
+	}
+
 	public <T> T queryForObject(String sql, Object[] args, int[] argTypes, Class<T> requiredType)
 			throws DataAccessException {
 
@@ -724,6 +741,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public <T> T queryForObject(String sql, Object[] args, Class<T> requiredType) throws DataAccessException {
+		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
+	}
+
+	public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
 	}
 
@@ -760,6 +781,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public <T> List<T> queryForList(String sql, Object[] args, Class<T> elementType) throws DataAccessException {
+		return query(sql, args, getSingleColumnRowMapper(elementType));
+	}
+
+	public <T> List<T> queryForList(String sql, Class<T> elementType, Object... args) throws DataAccessException {
 		return query(sql, args, getSingleColumnRowMapper(elementType));
 	}
 
