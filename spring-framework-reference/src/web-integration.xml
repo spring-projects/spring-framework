@@ -287,10 +287,11 @@
   <section id="struts">
     <title>Apache Struts 1.x and 2.x</title>
 
-    <para><ulink url="http://struts.apache.org">Struts</ulink> is the
+    <para><ulink url="http://struts.apache.org">Struts</ulink> used to be the
     <emphasis>de facto</emphasis> web framework for Java applications, mainly
-    because it was one of the first to be released (June 2001). Invented by
-    Craig McClanahan, Struts is an open source project hosted by the Apache
+    because it was one of the first to be released (June 2001). It has now been renamed to <emphasis>Struts 1</emphasis> 
+	(as opposed to Struts 2). Many applications still use it. 
+	Invented by Craig McClanahan, Struts is an open source project hosted by the Apache
     Software Foundation. At the time, it greatly simplified the JSP/Servlet
     programming paradigm and won over many developers who were using
     proprietary frameworks. It simplified the programming model, it was open
