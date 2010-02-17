@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,10 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ */
 public class UriTemplateTests {
 
 	@Test
@@ -141,4 +144,12 @@ public class UriTemplateTests {
 		template = new UriTemplate("/search?query={query}#{fragment}");
 		assertTrue(template.matches("/search?query=foo#bar"));
 	}
+
+	@Test
+	public void expandWithDollar() {
+		UriTemplate template = new UriTemplate("/{a}");
+		URI uri = template.expand("$replacement");
+		assertEquals("/$replacement", uri.toString());
+	}
+
 }
