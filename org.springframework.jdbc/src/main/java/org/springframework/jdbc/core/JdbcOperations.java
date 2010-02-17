@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -381,6 +381,21 @@ public interface JdbcOperations {
 	<T> T query(String sql, Object[] args, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, reading the ResultSet with a
+	 * ResultSetExtractor.
+	 * @param sql SQL query to execute
+	 * @param rse object that will extract results
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
+	 * @throws DataAccessException if the query fails
+	 */
+	<T> T query(String sql, ResultSetExtractor<T> rse, Object... args) throws DataAccessException;
+
+	/**
 	 * Query using a prepared statement, reading the ResultSet on a per-row
 	 * basis with a RowCallbackHandler.
 	 * <p>A PreparedStatementCreator can either be implemented directly or
@@ -436,6 +451,20 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 */
 	void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, reading the ResultSet on a per-row basis
+	 * with a RowCallbackHandler.
+	 * @param sql SQL query to execute
+	 * @param rch object that will extract results, one row at a time
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @throws DataAccessException if the query fails
+	 */
+	void query(String sql, RowCallbackHandler rch, Object... args) throws DataAccessException;
 
 	/**
 	 * Query using a prepared statement, mapping each row to a Java object
@@ -499,6 +528,21 @@ public interface JdbcOperations {
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping each row to a Java object
+	 * via a RowMapper.
+	 * @param sql SQL query to execute
+	 * @param rowMapper object that will map one object per row
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @return the result List, containing mapped objects
+	 * @throws DataAccessException if the query fails
+	 */
+	<T> List<T> query(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
 	 * of arguments to bind to the query, mapping a single result row to a
 	 * Java object via a RowMapper.
 	 * @param sql SQL query to execute
@@ -531,6 +575,24 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 */
 	<T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper)
+			throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, mapping a single result row to a
+	 * Java object via a RowMapper.
+	 * @param sql SQL query to execute
+	 * @param rowMapper object that will map one object per row
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @return the single mapped object
+	 * @throws IncorrectResultSizeDataAccessException if the query does not
+	 * return exactly one row
+	 * @throws DataAccessException if the query fails
+	 */
+	<T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args)
 			throws DataAccessException;
 
 	/**
@@ -571,6 +633,25 @@ public interface JdbcOperations {
 	 * @see #queryForObject(String, Class)
 	 */
 	<T> T queryForObject(String sql, Object[] args, Class<T> requiredType) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result object.
+	 * <p>The query is expected to be a single row/single column query; the returned
+	 * result will be directly mapped to the corresponding object type.
+	 * @param sql SQL query to execute
+	 * @param requiredType the type that the result object is expected to match
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
+	 * @throws IncorrectResultSizeDataAccessException if the query does not return
+	 * exactly one row, or does not return exactly one column in that row
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForObject(String, Class)
+	 */
+	<T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -724,6 +805,25 @@ public interface JdbcOperations {
 	 * @see SingleColumnRowMapper
 	 */
 	<T> List<T> queryForList(String sql, Object[] args, Class<T> elementType) throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a
+	 * list of arguments to bind to the query, expecting a result list.
+	 * <p>The results will be mapped to a List (one entry for each row) of
+	 * result objects, each of them matching the specified element type.
+	 * @param sql SQL query to execute
+	 * @param elementType the required type of element in the result list
+	 * (for example, <code>Integer.class</code>)
+	 * @param args arguments to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
+	 * @return a List of objects that match the specified element type
+	 * @throws DataAccessException if the query fails
+	 * @see #queryForList(String, Class)
+	 * @see SingleColumnRowMapper
+	 */
+	<T> List<T> queryForList(String sql, Class<T> elementType, Object... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
