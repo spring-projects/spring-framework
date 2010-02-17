@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.ServletContext;
+import javax.servlet.jsp.JspFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -143,8 +144,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				Boolean.toString(false));
 		this.tilesPropertyMap.put(DefinitionsFactory.LOCALE_RESOLVER_IMPL_PROPERTY,
 				SpringLocaleResolver.class.getName());
-		this.tilesPropertyMap.put(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM, tilesElPresent ?
-				"org.apache.tiles.evaluator.el.ELAttributeEvaluator" : DirectAttributeEvaluator.class.getName());
 	}
 
 
@@ -288,6 +287,15 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * @see #createTilesInitializer()
 	 */
 	public void afterPropertiesSet() throws TilesException {
+		boolean activateEl = false;
+		if (tilesElPresent) {
+			activateEl = new JspExpressionChecker().isExpressionFactoryAvailable();
+			if (!this.tilesPropertyMap.containsKey(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM)) {
+				this.tilesPropertyMap.put(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM, activateEl ?
+						"org.apache.tiles.evaluator.el.ELAttributeEvaluator" : DirectAttributeEvaluator.class.getName());
+			}
+		}
+
 		SpringTilesApplicationContextFactory factory = new SpringTilesApplicationContextFactory();
 		factory.init(this.tilesPropertyMap);
 		TilesApplicationContext preliminaryContext = factory.createApplicationContext(this.servletContext);
@@ -300,6 +308,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			// We need to do this after initialization simply because we're reusing the
 			// original CompleteAutoloadTilesInitializer above. We cannot subclass
 			// CompleteAutoloadTilesInitializer when compiling against Tiles 2.1...
+			logger.debug("Registering Tiles 2.2 LocaleResolver for complete-autoload setup");
 			try {
 				BasicTilesContainer container = (BasicTilesContainer) ServletUtil.getContainer(this.servletContext);
 				DefinitionsFactory definitionsFactory = container.getDefinitionsFactory();
@@ -311,12 +320,12 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			}
 		}
 
-		if (tilesElPresent && this.tilesInitializer instanceof SpringTilesInitializer) {
+		if (activateEl && this.tilesInitializer instanceof SpringTilesInitializer) {
 			// Again, we need to do this after initialization since SpringTilesContainerFactory
 			// cannot override template methods that refer to Tiles 2.2 classes: in this case,
 			// AttributeEvaluatorFactory as createAttributeEvaluatorFactory return type.
 			BasicTilesContainer container = (BasicTilesContainer) ServletUtil.getContainer(this.servletContext);
-			TilesElActivator.registerEvaluator(container);
+			new TilesElActivator().registerEvaluator(container);
 		}
 	}
 
@@ -423,9 +432,29 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	}
 
 
-	private static class TilesElActivator {
+	private class JspExpressionChecker {
 
-		public static void registerEvaluator(BasicTilesContainer container) {
+		public boolean isExpressionFactoryAvailable() {
+			try {
+				JspFactory factory = JspFactory.getDefaultFactory();
+				if (factory != null &&
+						factory.getJspApplicationContext(servletContext).getExpressionFactory() != null) {
+					logger.info("Found JSP 2.1 ExpressionFactory");
+					return true;
+				}
+			}
+			catch (Throwable ex) {
+				logger.warn("Could not obtain JSP 2.1 ExpressionFactory", ex);
+			}
+			return false;
+		}
+	}
+
+
+	private class TilesElActivator {
+
+		public void registerEvaluator(BasicTilesContainer container) {
+			logger.debug("Registering Tiles 2.2 AttributeEvaluatorFactory for JSP 2.1");
 			try {
 				ClassLoader cl = TilesElActivator.class.getClassLoader();
 				Class aef = cl.loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
