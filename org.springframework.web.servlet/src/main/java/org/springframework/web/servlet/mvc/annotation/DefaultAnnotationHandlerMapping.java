@@ -154,11 +154,11 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	/**
 	 * Derive URL mappings from the handler's method-level mappings.
 	 * @param handlerType the handler type to introspect
-	 * @param indicateEmpty whether the returned array should contain
-	 * <code>null</code> in case of an empty {@link RequestMapping} value.
+	 * @param hasTypeLevelMapping whether the method-level mappings are nested
+	 * within a type-level mapping
 	 * @return the array of mapped URLs
 	 */
-	protected String[] determineUrlsForHandlerMethods(Class<?> handlerType, final boolean indicateEmpty) {
+	protected String[] determineUrlsForHandlerMethods(Class<?> handlerType, final boolean hasTypeLevelMapping) {
 		String[] subclassResult = determineUrlsForHandlerMethods(handlerType);
 		if (subclassResult != null) {
 			return subclassResult;
@@ -175,10 +175,13 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 						String[] mappedPatterns = mapping.value();
 						if (mappedPatterns.length > 0) {
 							for (String mappedPattern : mappedPatterns) {
+								if (!hasTypeLevelMapping && !mappedPattern.startsWith("/")) {
+									mappedPattern = "/" + mappedPattern;
+								}
 								addUrlsForPath(urls, mappedPattern);
 							}
 						}
-						else if (indicateEmpty) {
+						else if (hasTypeLevelMapping) {
 							// empty method-level RequestMapping
 							urls.add(null);
 						}

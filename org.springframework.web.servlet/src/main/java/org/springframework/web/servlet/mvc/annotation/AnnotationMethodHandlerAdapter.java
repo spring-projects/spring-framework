@@ -487,8 +487,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				boolean match = false;
 				if (mappingInfo.paths.length > 0) {
 					List<String> matchedPaths = new ArrayList<String>(mappingInfo.paths.length);
-					for (String methodLevelPattern : mappingInfo.paths) {
-						String matchedPattern = getMatchedPattern(methodLevelPattern, lookupPath, request);
+					for (String mappedPattern : mappingInfo.paths) {
+						if (!hasTypeLevelMapping() && !mappedPattern.startsWith("/")) {
+							mappedPattern = "/" + mappedPattern;
+						}
+						String matchedPattern = getMatchedPattern(mappedPattern, lookupPath, request);
 						if (matchedPattern != null) {
 							if (mappingInfo.matches(request)) {
 								match = true;
