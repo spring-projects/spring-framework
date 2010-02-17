@@ -44,7 +44,7 @@
 		<dependency org="org.springframework" name="org.springframework.oxm" rev="latest.integration"
 					conf="optional, oxm->compile"/>
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration"
-					conf="optional, jca->compile"/>
+					conf="compile->compile"/>
 	</dependencies>
 
 </ivy-module>

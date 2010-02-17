@@ -88,7 +88,7 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-tx</artifactId>
       <version>${project.version}</version>
-      <optional>true</optional>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
   <build>
