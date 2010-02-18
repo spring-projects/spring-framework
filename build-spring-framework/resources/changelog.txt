@@ -6,6 +6,7 @@ http://www.springsource.org
 Changes in version 3.0.1 (2010-02-18)
 -------------------------------------
 
+* changed HttpStatus.REQUEST_TOO_LONG constant to REQUEST_ENTITY_TOO_LARGE
 * upgraded to AspectJ 1.6.8
 * full support for JPA 2.0 persistence schema and PersistenceUnitInfo SPI
 * support for JPA PersistenceContext/Unit injection on Google App Engine
