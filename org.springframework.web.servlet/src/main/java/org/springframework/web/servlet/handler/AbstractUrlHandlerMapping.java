@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,10 +303,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @param uriTemplateVariables the URI template variables, can be <code>null</code> if no variables found
 	 * @return the final handler object
 	 */
-	protected Object buildPathExposingHandler(Object rawHandler,
-			String bestMatchingPattern,
-			String pathWithinMapping,
-			Map<String, String> uriTemplateVariables) {
+	protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,
+			String pathWithinMapping, Map<String, String> uriTemplateVariables) {
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
