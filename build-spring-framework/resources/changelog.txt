@@ -6,7 +6,6 @@ http://www.springsource.org
 Changes in version 3.0.1 (2010-02-18)
 -------------------------------------
 
-* changed HttpStatus.REQUEST_TOO_LONG constant to REQUEST_ENTITY_TOO_LARGE
 * upgraded to AspectJ 1.6.8
 * full support for JPA 2.0 persistence schema and PersistenceUnitInfo SPI
 * support for JPA PersistenceContext/Unit injection on Google App Engine
@@ -45,8 +44,10 @@ Changes in version 3.0.1 (2010-02-18)
 * fixed MediaType's Comparable behavior to do a full comparison, aligned with equals behavior
 * added "sortBySpecificity" method to MediaType, for typical use with accept header matching
 * MimeMessageHelper encodes from, to, cc, bcc String addresses with given encoding as well
+* changed HttpStatus.REQUEST_TOO_LONG constant to REQUEST_ENTITY_TOO_LARGE
 * relaxed generic Class declaration in HttpMessageConverter's canRead/canWrite/read signatures
 * fixed "mvc:view-controller" to work in a fully isolated fashion on Spring Dynamic Modules
+* DefaultRequestToViewNameTranslator strips trailing slashes as well (can also be turned off)
 * @RequestParam/RequestHeader/CookieValue's defaultValue allows for declaring empty String
 * @SessionAttributes works when used on an annotated controller interface with AOP proxying
 * WebRequest is a resolvable dependency in Servlet/Portlet web application contexts
