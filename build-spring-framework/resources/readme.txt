@@ -1,4 +1,4 @@
-SPRING FRAMEWORK 3.0 (December 2009)
+SPRING FRAMEWORK 3.0.1 (February 2010)
 ------------------------------------
 http://www.springframework.org
 
