@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.1 (2010-02-17)
+Changes in version 3.0.1 (2010-02-18)
 -------------------------------------
 
 * upgraded to AspectJ 1.6.8
@@ -15,6 +15,7 @@ Changes in version 3.0.1 (2010-02-17)
 * ConversionFailedException exposes offending value through public "getValue()" method
 * fixed BeanFactory's "getBeansWithAnnotation" to ignore beans with non-determinable type
 * widened FactoryBean's "getObjectType" signature to return any Class (Class<?>)
+* do not ever consider Object as a candidate type for autowiring by type (autowire="byType") 
 * BeanDefinitionReader and ClassPath/FileSystemXmlApplicationContext use varargs where possible
 * introduced BeanDefinitionRegistryPostProcessor extension to BeanFactoryPostProcessor
 * @Configuration classes support definition of BeanFactoryPostProcessor beans
@@ -35,6 +36,7 @@ Changes in version 3.0.1 (2010-02-17)
 * non-matching @Transactional qualifier value will lead to IllegalStateException
 * fixed WebSphereUowTransactionManager regression: correctly roll back in case of exception
 * JndiObjectFactoryBean explicitly only chooses public interfaces as default proxy interfaces
+* added vararg variants of query methods to JdbcTemplate (as known from SimpleJdbcTemplate)
 * MBeanClientInterceptor/MBeanProxyFactoryBean understands CompositeData/TabularData arrays
 * added "workManagerMBeanName" property to JBossWorkManagerTaskExecutor
 * task:executor's id value is now used as thread name prefix of ThreadPoolTaskExecutor
