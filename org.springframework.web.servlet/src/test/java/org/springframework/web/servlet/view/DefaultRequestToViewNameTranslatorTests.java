@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,17 @@
 
 package org.springframework.web.servlet.view;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
- * Unit tests for the DefaultRequestToViewNameTranslator class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class DefaultRequestToViewNameTranslatorTests extends TestCase {
+public final class DefaultRequestToViewNameTranslatorTests {
 
 	private static final String VIEW_NAME = "apple";
 	private static final String EXTENSION = ".html";
@@ -34,68 +36,86 @@ public final class DefaultRequestToViewNameTranslatorTests extends TestCase {
 	private MockHttpServletRequest request;
 
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() {
 		this.translator = new DefaultRequestToViewNameTranslator();
 		this.request = new MockHttpServletRequest();
 		this.request.setContextPath(CONTEXT_PATH);
 	}
 
 
-	public void TODO_testGetViewNameLeavesLeadingSlashIfSoConfigured() throws Exception {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
+	@Test
+	public void testGetViewNameLeavesLeadingSlashIfSoConfigured() {
+		request.setRequestURI(CONTEXT_PATH + "/" + VIEW_NAME + "/");
 		this.translator.setStripLeadingSlash(false);
 		assertViewName("/" + VIEW_NAME);
 	}
 
-	public void testGetViewNameLeavesExtensionIfSoConfigured() throws Exception {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + EXTENSION);
+	@Test
+	public void testGetViewNameLeavesTrailingSlashIfSoConfigured() {
+		request.setRequestURI(CONTEXT_PATH + "/" + VIEW_NAME + "/");
+		this.translator.setStripTrailingSlash(false);
+		assertViewName(VIEW_NAME + "/");
+	}
+
+	@Test
+	public void testGetViewNameLeavesExtensionIfSoConfigured() {
+		request.setRequestURI(CONTEXT_PATH + "/" + VIEW_NAME + EXTENSION);
 		this.translator.setStripExtension(false);
 		assertViewName(VIEW_NAME + EXTENSION);
 	}
 
-	public void testGetViewNameWithDefaultConfiguration() throws Exception {
+	@Test
+	public void testGetViewNameWithDefaultConfiguration() {
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + EXTENSION);
 		assertViewName(VIEW_NAME);
 	}
 
-	public void testGetViewNameWithCustomSeparator() throws Exception {
+	@Test
+	public void testGetViewNameWithCustomSeparator() {
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + "/fiona" + EXTENSION);
 		this.translator.setSeparator("_");
 		assertViewName(VIEW_NAME + "_fiona");
 	}
 
-	public void testGetViewNameWithNoExtension() throws Exception {
+	@Test
+	public void testGetViewNameWithNoExtension() {
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
 		assertViewName(VIEW_NAME);
 	}
 
-	public void testGetViewNameWithPrefix() throws Exception {
+	@Test
+	public void testGetViewNameWithPrefix() {
 		final String prefix = "fiona_";
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
 		this.translator.setPrefix(prefix);
 		assertViewName(prefix + VIEW_NAME);
 	}
 
-	public void testGetViewNameWithNullPrefix() throws Exception {
+	@Test
+	public void testGetViewNameWithNullPrefix() {
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
 		this.translator.setPrefix(null);
 		assertViewName(VIEW_NAME);
 	}
 
-	public void testGetViewNameWithSuffix() throws Exception {
+	@Test
+	public void testGetViewNameWithSuffix() {
 		final String suffix = ".fiona";
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
 		this.translator.setSuffix(suffix);
 		assertViewName(VIEW_NAME + suffix);
 	}
 
-	public void testGetViewNameWithNullSuffix() throws Exception {
+	@Test
+	public void testGetViewNameWithNullSuffix() {
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
 		this.translator.setSuffix(null);
 		assertViewName(VIEW_NAME);
 	}
 
-	public void testTrySetUrlPathHelperToNull() throws Exception {
+	@Test
+	public void testTrySetUrlPathHelperToNull() {
 		try {
 			this.translator.setUrlPathHelper(null);
 		}

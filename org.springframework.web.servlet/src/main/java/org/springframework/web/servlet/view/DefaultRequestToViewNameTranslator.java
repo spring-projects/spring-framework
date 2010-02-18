@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,8 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	private boolean stripLeadingSlash = true;
 
+	private boolean stripTrailingSlash = true;
+
 	private boolean stripExtension = true;
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
@@ -91,7 +93,6 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * Set the value that will replace '<code>/</code>' as the separator
 	 * in the view name. The default behavior simply leaves '<code>/</code>'
 	 * as the separator.
-	 * @param separator the desired separator value
 	 */
 	public void setSeparator(String separator) {
 		this.separator = separator;
@@ -100,16 +101,22 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	/**
 	 * Set whether or not leading slashes should be stripped from the URI when
 	 * generating the view name. Default is "true".
-	 * @param stripLeadingSlash <code>true</code> if leading slashes are to be stripped
 	 */
 	public void setStripLeadingSlash(boolean stripLeadingSlash) {
 		this.stripLeadingSlash = stripLeadingSlash;
 	}
 
 	/**
+	 * Set whether or not trailing slashes should be stripped from the URI when
+	 * generating the view name. Default is "true".
+	 */
+	public void setStripTrailingSlash(boolean stripTrailingSlash) {
+		this.stripTrailingSlash = stripTrailingSlash;
+	}
+
+	/**
 	 * Set whether or not file extensions should be stripped from the URI when
 	 * generating the view name. Default is "true".
-	 * @param stripExtension <code>true</code> if file extensions should be stripped
 	 */
 	public void setStripExtension(boolean stripExtension) {
 		this.stripExtension = stripExtension;
@@ -120,7 +127,6 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * context. Else, the path within the current servlet mapping is used
 	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
 	 * Default is "false".
-	 * @param alwaysUseFullPath <code>true</code> if URL lookup should always use the full path
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
@@ -144,8 +150,6 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * the resolution of lookup paths.
 	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
 	 * or to share common UrlPathHelper settings across multiple web components.
-	 * @param urlPathHelper the desired helper
-	 * @throws IllegalArgumentException if the supplied UrlPathHelper is <code>null</code>
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
@@ -176,6 +180,9 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 		String path = lookupPath;
 		if (this.stripLeadingSlash && path.startsWith(SLASH)) {
 			path = path.substring(1);
+		}
+		if (this.stripTrailingSlash && path.endsWith(SLASH)) {
+			path = path.substring(0, path.length() - 1);
 		}
 		if (this.stripExtension) {
 			path = StringUtils.stripFilenameExtension(path);
