@@ -21,12 +21,12 @@ Import-Template:
  org.hsqldb.*;version="[1.8.0, 2.0.0)";resolution:=optional,
  org.apache.derby.*;version="[10.5.0, 11.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
- org.springframework.beans.*;version="[3.0.0, 3.0.1)",
- org.springframework.core.*;version="[3.0.0, 3.0.1)",
- org.springframework.dao.*;version="[3.0.0, 3.0.1)",
- org.springframework.jndi.*;version="[3.0.0, 3.0.1)";resolution:=optional,
- org.springframework.transaction.*;version="[3.0.0, 3.0.1)",
- org.springframework.util.*;version="[3.0.0, 3.0.1)",
+ org.springframework.beans.*;version=${spring.osgi.range},
+ org.springframework.core.*;version=${spring.osgi.range},
+ org.springframework.dao.*;version=${spring.osgi.range},
+ org.springframework.jndi.*;version=${spring.osgi.range};resolution:=optional,
+ org.springframework.transaction.*;version=${spring.osgi.range},
+ org.springframework.util.*;version=${spring.osgi.range},
  org.w3c.dom.*;version="0";resolution:=optional
 Ignored-Existing-Headers: 
  Bnd-LastModified,

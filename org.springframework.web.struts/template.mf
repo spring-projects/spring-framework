@@ -13,11 +13,11 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.0.4, 2.0.0)",
  org.apache.commons.validator.*;version="[1.1.4, 2.0.0)",
  org.apache.struts.*;version="[1.2.9, 2.0.0)",
- org.springframework.beans.*;version="[3.0.0, 3.0.1)",
- org.springframework.context.*;version="[3.0.0, 3.0.1)",
- org.springframework.util.*;version="[3.0.0, 3.0.1)",
- org.springframework.validation.*;version="[3.0.0, 3.0.1)",
- org.springframework.web.*;version="[3.0.0, 3.0.1)",
+ org.springframework.beans.*;version=${spring.osgi.range},
+ org.springframework.context.*;version=${spring.osgi.range},
+ org.springframework.util.*;version=${spring.osgi.range},
+ org.springframework.validation.*;version=${spring.osgi.range},
+ org.springframework.web.*;version=${spring.osgi.range},
  org.xml.sax.*;version="0"
 Ignored-Existing-Headers: 
  Bnd-LastModified,
