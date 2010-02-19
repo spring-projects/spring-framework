@@ -7,9 +7,9 @@ Import-Package:
 Import-Template: 
  javax.xml.*;version="0";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
- org.springframework.asm.*;version="[3.0.0, 3.0.1)";resolution:=optional,
+ org.springframework.asm.*;version=${spring.osgi.range};resolution:=optional,
  org.apache.log4j.*;version="[1.2.15, 2.0.0)";resolution:=optional,
- org.aspectj.*;version="[1.5.4, 2.0.0)";resolution:=optional,
+ org.aspectj.*;version=${aj.osgi.range};resolution:=optional,
  org.jboss.virtual.*;version="[2.1.0.GA, 3.0.0)";resolution:=optional,
  org.xml.sax.*;version="0";resolution:=optional,
  org.w3c.dom.*;version="0";resolution:=optional
