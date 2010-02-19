@@ -16,13 +16,13 @@ Import-Template:
  org.apache.velocity.*;version="[1.5.0, 2.0.0)";resolution:=optional,
  org.quartz.*;version="[1.6.0, 2.0.0)";resolution:=optional,
  org.springframework.beans.*;version="[3.0.0, 3.0.1)";resolution:=optional,
- org.springframework.context.*;version="[3.0.0, 3.0.1)",
- org.springframework.core.*;version="[3.0.0, 3.0.1)",
- org.springframework.jdbc.*;version="[3.0.0, 3.0.1)";resolution:=optional,
- org.springframework.jndi.*;version="[3.0.0, 3.0.1)";resolution:=optional,
- org.springframework.scheduling.*;version="[3.0.0, 3.0.1)";resolution:=optional,
- org.springframework.transaction.*;version="[3.0.0, 3.0.1)";resolution:=optional,
- org.springframework.util.*;version="[3.0.0, 3.0.1)"
+ org.springframework.context.*;version=${spring.osgi.range},
+ org.springframework.core.*;version=${spring.osgi.range},
+ org.springframework.jdbc.*;version=${spring.osgi.range};resolution:=optional,
+ org.springframework.jndi.*;version=${spring.osgi.range};resolution:=optional,
+ org.springframework.scheduling.*;version=${spring.osgi.range};resolution:=optional,
+ org.springframework.transaction.*;version=${spring.osgi.range};resolution:=optional,
+ org.springframework.util.*;version=${spring.osgi.range}
 Ignored-Existing-Headers: 
  Bnd-LastModified,
  Import-Package,
