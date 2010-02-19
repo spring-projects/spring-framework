@@ -62,7 +62,7 @@
                     conf="optional, velocity->compile"/>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity.tools.view" rev="1.4.0"
                     conf="optional, velocity->compile"/>
-		<dependency org="org.codehaus.jackson" name="com.springsource.org.codehaus.jackson.mapper" rev="1.0.0"
+		<dependency org="org.codehaus.jackson" name="com.springsource.org.codehaus.jackson.mapper" rev="1.4.2"
                     conf="optional, jackson->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration"
                     conf="compile->compile"/>
@@ -100,7 +100,7 @@
 		            conf="test->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
 		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" conf="test->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.0.GA" conf="test->runtime"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.2.GA" conf="test->runtime"/>
 		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->runtime"/>
 		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="test->runtime"/>
 	</dependencies>
