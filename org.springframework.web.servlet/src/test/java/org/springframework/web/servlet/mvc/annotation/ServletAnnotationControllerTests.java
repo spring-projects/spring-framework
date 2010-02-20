@@ -1479,11 +1479,13 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@InitBinder
-		public void initBinder(@RequestParam("param1") T p1, int param2) {
+		public void initBinder(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+			assertNull(px);
 		}
 
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1") T p1, int param2) {
+		public void modelAttribute(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+			assertNull(px);
 		}
 	}
 
@@ -1516,12 +1518,14 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@InitBinder
-		public void initBinder(@RequestParam("param1") String p1, int param2) {
+		public void initBinder(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+			assertNull(px);
 		}
 
 		@Override
 		@ModelAttribute
-		public void modelAttribute(@RequestParam("param1") String p1, int param2) {
+		public void modelAttribute(@RequestParam("param1") String p1, @RequestParam(value="paramX", required=false) String px, int param2) {
+			assertNull(px);
 		}
 	}
 

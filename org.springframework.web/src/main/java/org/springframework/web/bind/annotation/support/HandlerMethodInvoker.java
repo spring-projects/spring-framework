@@ -358,7 +358,7 @@ public class HandlerMethodInvoker {
 					RequestParam requestParam = (RequestParam) paramAnn;
 					paramName = requestParam.value();
 					paramRequired = requestParam.required();
-					paramDefaultValue = requestParam.defaultValue();
+					paramDefaultValue = parseDefaultValueAttribute(requestParam.defaultValue());
 					break;
 				}
 				else if (ModelAttribute.class.isInstance(paramAnn)) {
