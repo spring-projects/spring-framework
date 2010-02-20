@@ -96,7 +96,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("someMapkey1", checkboxElement.attribute("id").getValue());
-		assertEquals("someMapkey", checkboxElement.attribute("name").getValue());
+		assertEquals("someMap[key]", checkboxElement.attribute("name").getValue());
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("true", checkboxElement.attribute("value").getValue());
 	}
