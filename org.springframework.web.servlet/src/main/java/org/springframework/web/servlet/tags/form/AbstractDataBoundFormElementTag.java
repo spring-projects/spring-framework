@@ -144,7 +144,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * deleting invalid characters (such as "[" or "]").
 	 */
 	protected String autogenerateId() throws JspException {
-		return getName();
+		return StringUtils.deleteAny(getName(), "[]");
 	}
 
 	/**
@@ -152,12 +152,12 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * <p>The default implementation simply delegates to
 	 * {@link #getPropertyPath()} to use the property path as the name.
 	 * For the most part this is desirable as it links with the server-side
-	 * expectation for databinding. However, some subclasses may wish to change
+	 * expectation for data binding. However, some subclasses may wish to change
 	 * the value of the '<code>name</code>' attribute without changing the bind path.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
-		return StringUtils.deleteAny(getPropertyPath(), "[]");
+		return getPropertyPath();
 	}
 
 	/**
