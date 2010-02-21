@@ -821,7 +821,7 @@ TR: REVISED, PLS REVIEW. It's not very clear. I've revised it. It refers to non-
           <interfacename>PlatformTransactionManager</interfacename>
           instance<!--Replace *this* with exactly what *this* refes to--> as
           the value of the <property>jtaTransactionManager</property> property
-          for <classname>LocalSessionFactoryBea.</classname> Spring then makes
+          for <classname>LocalSessionFactoryBean.</classname> Spring then makes
           the object available to Hibernate.</para>
         </listitem>
 
@@ -860,7 +860,7 @@ TR: OK AS IS. This is very container dependent, and either case is possible.-->T
         </listitem>
 
         <listitem>
-          <para>Among other activities, this synchronization<!--Identify *this*. TR: REVISED, PLS REVIEW. Added "synchronization"-->can
+          <para>Among other activities, this synchronization<!--Identify *this*. TR: REVISED, PLS REVIEW. Added "synchronization"--> can
           trigger a callback by Spring to Hibernate, through Hibernate's
           <literal>afterTransactionCompletion</literal> callback <!--Preceding line, is *afterTransactionCompletion* callback the same as *afterCompletion* callback in step 2? If so, revise so --><!--there is no redundancy, or at least refer to the two callbacks in the same way. 
 TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletion*) and the other is Hibernate's (*afterTransactionCompletion*)-->(used
