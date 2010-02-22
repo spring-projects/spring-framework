@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.servlet.jsp.tagext.BodyTag;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Form tag for displaying errors for a particular field or object.
@@ -101,16 +102,6 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
-	 * Get the value for the HTML '<code>name</code>' attribute.
-	 * <p>Simply returns <code>null</code> because the '<code>name</code>' attribute
-	 * is not a validate attribute for the '<code>span</code>' element.
-	 */
-	@Override
-	protected String getName() throws JspException {
-		return null;
-	}
-
-	/**
 	 * Get the value for the HTML '<code>id</code>' attribute.
 	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPropertyPath()}
 	 * or to the model attribute name if the <code>&lt;form:errors/&gt;</code> tag's
@@ -125,7 +116,17 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 			path = (String) this.pageContext.getAttribute(
 					FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
-		return path + ".errors";
+		return StringUtils.deleteAny(path, "[]") + ".errors";
+	}
+
+	/**
+	 * Get the value for the HTML '<code>name</code>' attribute.
+	 * <p>Simply returns <code>null</code> because the '<code>name</code>' attribute
+	 * is not a validate attribute for the '<code>span</code>' element.
+	 */
+	@Override
+	protected String getName() throws JspException {
+		return null;
 	}
 
 	/**
