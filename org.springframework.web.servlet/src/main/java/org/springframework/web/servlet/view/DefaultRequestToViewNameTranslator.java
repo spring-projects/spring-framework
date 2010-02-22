@@ -31,10 +31,10 @@ import org.springframework.web.util.UrlPathHelper;
  * {@link org.springframework.web.servlet.DispatcherServlet} context.
  * Otherwise, a plain default instance will be used.
  *
- * <p>The default transformation simply strips the leading slash and file
- * extension of the URI and returns the result as the view name with the
- * configured {@link #setPrefix(String) "prefix"} and a
- * {@link #setSuffix(String) "suffix"} added as appropriate.
+ * <p>The default transformation simply strips leading and trailing slashes
+ * as well as the file extension of the URI, and returns the result as the
+ * view name with the configured {@link #setPrefix "prefix"} and a
+ * {@link #setSuffix "suffix"} added as appropriate.
  *
  * <p>The stripping of the leading slash and file extension can be disabled
  * using the {@link #setStripLeadingSlash "stripLeadingSlash"} and
