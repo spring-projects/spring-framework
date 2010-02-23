@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.hibernate.ejb.HibernateEntityManager;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
-import org.springframework.jdbc.datasource.SimpleConnectionHandle;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
@@ -88,8 +88,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			throws PersistenceException, SQLException {
 
 		Session session = getSession(entityManager);
-		Connection con = session.connection();
-		return (con != null ? new SimpleConnectionHandle(con) : null);
+		return new HibernateConnectionHandle(session);
 	}
 
 	@Override
@@ -135,6 +134,24 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			if (this.previousFlushMode != null) {
 				this.session.setFlushMode(this.previousFlushMode);
 			}
+		}
+	}
+
+
+	private static class HibernateConnectionHandle implements ConnectionHandle {
+
+		private final Session session;
+
+		public HibernateConnectionHandle(Session session) {
+			this.session = session;
+		}
+
+		public Connection getConnection() {
+			return this.session.connection();
+		}
+
+		public void releaseConnection(Connection con) {
+			JdbcUtils.closeConnection(con);
 		}
 	}
 
