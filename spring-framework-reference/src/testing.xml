@@ -812,12 +812,6 @@ public void testProcessRepeatedly() {
 
         <listitem>
           <para><emphasis
-          role="bold"><interfacename>@Qualifier</interfacename></emphasis>
-          (javax.inject) <emphasis>if JSR-330 is present</emphasis></para>
-        </listitem>
-
-        <listitem>
-          <para><emphasis
           role="bold"><interfacename>@Named</interfacename></emphasis>
           (javax.inject) <emphasis>if JSR-330 is present</emphasis></para>
         </listitem>
