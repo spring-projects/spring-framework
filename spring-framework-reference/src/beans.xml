@@ -6681,7 +6681,7 @@ public class AppConfig {
       </section>
     </section>
 	
-	<section id="further-information-java-bean-annotation">
+	<section id="beans-java-further-information-java-config">
 		<title>Further information about how Java-based configuration works internally</title>
 	  
 		<para>The following example shows a <literal>@Bean</literal> annotated method being called twice:</para>
@@ -6727,7 +6727,12 @@ public class AppConfig {
 		</note>
 		 <note>
 		<para>
-			There are a few restrictions due to the use of CGLIB to dynamically add features startup-time:
+			Beware that, in order for JavaConfig to work, you must include the CGLIB jar in your list of dependencies.
+		</para>
+		</note>
+		<note>
+		<para>
+			There are a few restrictions due to the fact that CGLIB dynamically adds features at startup-time:
 			<itemizedlist>
 					<listitem>
 					  <para>Configuration classes should not be final</para>
