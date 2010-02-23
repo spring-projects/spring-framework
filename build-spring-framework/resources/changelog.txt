@@ -10,6 +10,7 @@ Changes in version 3.0.2 (2010-03-11)
 * upgraded to Hibernate Validator 4.0.2 and Jackson 1.4.2
 * fixed @RequestParam(required=false) regression for @InitBinder methods
 * fixed indexed property binding regression in form tag library
+* @DirtiesContext is now inherited for class-level usage
 
 
 Changes in version 3.0.1 (2010-02-18)
