@@ -103,48 +103,69 @@ public class ClassLevelDirtiesContextTests {
 	@Test
 	public void verifyDirtiesContextBehavior() throws Exception {
 
-		runTestClassAndAssertStats(CleanTestCase.class, 1);
-		assertCacheStats("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
+		assertBehaviorForCleanTestCase();
 
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase.class, 1);
 		assertCacheStats("after class-level @DirtiesContext with clean test method and default class mode", 0,
 			cacheHits.incrementAndGet(), cacheMisses.get());
+		assertBehaviorForCleanTestCase();
 
-		runTestClassAndAssertStats(CleanTestCase.class, 1);
-		assertCacheStats("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
+		runTestClassAndAssertStats(InheritedClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase.class, 1);
+		assertCacheStats("after inherited class-level @DirtiesContext with clean test method and default class mode",
+			0, cacheHits.incrementAndGet(), cacheMisses.get());
+		assertBehaviorForCleanTestCase();
 
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase.class, 1);
 		assertCacheStats("after class-level @DirtiesContext with clean test method and AFTER_CLASS mode", 0,
 			cacheHits.incrementAndGet(), cacheMisses.get());
+		assertBehaviorForCleanTestCase();
 
-		runTestClassAndAssertStats(CleanTestCase.class, 1);
-		assertCacheStats("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
+		runTestClassAndAssertStats(InheritedClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase.class, 1);
+		assertCacheStats("after inherited class-level @DirtiesContext with clean test method and AFTER_CLASS mode", 0,
+			cacheHits.incrementAndGet(), cacheMisses.get());
+		assertBehaviorForCleanTestCase();
 
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase.class, 3);
 		assertCacheStats("after class-level @DirtiesContext with clean test method and AFTER_EACH_TEST_METHOD mode", 0,
 			cacheHits.incrementAndGet(), cacheMisses.addAndGet(2));
+		assertBehaviorForCleanTestCase();
 
-		runTestClassAndAssertStats(CleanTestCase.class, 1);
-		assertCacheStats("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
+		runTestClassAndAssertStats(InheritedClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase.class, 3);
+		assertCacheStats(
+			"after inherited class-level @DirtiesContext with clean test method and AFTER_EACH_TEST_METHOD mode", 0,
+			cacheHits.incrementAndGet(), cacheMisses.addAndGet(2));
+		assertBehaviorForCleanTestCase();
 
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithDirtyMethodsTestCase.class, 1);
 		assertCacheStats("after class-level @DirtiesContext with dirty test method", 0, cacheHits.incrementAndGet(),
 			cacheMisses.get());
-
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithDirtyMethodsTestCase.class, 1);
 		assertCacheStats("after class-level @DirtiesContext with dirty test method", 0, cacheHits.get(),
 			cacheMisses.incrementAndGet());
-
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithDirtyMethodsTestCase.class, 1);
 		assertCacheStats("after class-level @DirtiesContext with dirty test method", 0, cacheHits.get(),
 			cacheMisses.incrementAndGet());
+		assertBehaviorForCleanTestCase();
 
-		runTestClassAndAssertStats(CleanTestCase.class, 1);
-		assertCacheStats("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
+		runTestClassAndAssertStats(InheritedClassLevelDirtiesContextWithDirtyMethodsTestCase.class, 1);
+		assertCacheStats("after inherited class-level @DirtiesContext with dirty test method", 0,
+			cacheHits.incrementAndGet(), cacheMisses.get());
+		runTestClassAndAssertStats(InheritedClassLevelDirtiesContextWithDirtyMethodsTestCase.class, 1);
+		assertCacheStats("after inherited class-level @DirtiesContext with dirty test method", 0, cacheHits.get(),
+			cacheMisses.incrementAndGet());
+		runTestClassAndAssertStats(InheritedClassLevelDirtiesContextWithDirtyMethodsTestCase.class, 1);
+		assertCacheStats("after inherited class-level @DirtiesContext with dirty test method", 0, cacheHits.get(),
+			cacheMisses.incrementAndGet());
+		assertBehaviorForCleanTestCase();
 
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase.class, 1);
 		assertCacheStats("after class-level @DirtiesContext with clean test method and AFTER_CLASS mode", 0,
 			cacheHits.incrementAndGet(), cacheMisses.get());
+	}
+
+	private void assertBehaviorForCleanTestCase() {
+		runTestClassAndAssertStats(CleanTestCase.class, 1);
+		assertCacheStats("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
 	}
 
 	@AfterClass
@@ -180,16 +201,20 @@ public class ClassLevelDirtiesContextTests {
 	}
 
 	@DirtiesContext
-	public static final class ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends BaseTestCase {
+	public static class ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends BaseTestCase {
 
 		@Test
 		public void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
+	}
+
+	public static class InheritedClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends
+			ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase {
 	}
 
 	@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-	public static final class ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends BaseTestCase {
+	public static class ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends BaseTestCase {
 
 		@Test
 		public void verifyContextWasAutowired() {
@@ -197,8 +222,12 @@ public class ClassLevelDirtiesContextTests {
 		}
 	}
 
+	public static class InheritedClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends
+			ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase {
+	}
+
 	@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-	public static final class ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends BaseTestCase {
+	public static class ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends BaseTestCase {
 
 		@Test
 		public void verifyContextWasAutowired1() {
@@ -216,14 +245,22 @@ public class ClassLevelDirtiesContextTests {
 		}
 	}
 
+	public static class InheritedClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends
+			ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase {
+	}
+
 	@DirtiesContext
-	public static final class ClassLevelDirtiesContextWithDirtyMethodsTestCase extends BaseTestCase {
+	public static class ClassLevelDirtiesContextWithDirtyMethodsTestCase extends BaseTestCase {
 
 		@Test
 		@DirtiesContext
 		public void dirtyContext() {
 			assertApplicationContextWasAutowired();
 		}
+	}
+
+	public static class InheritedClassLevelDirtiesContextWithDirtyMethodsTestCase extends
+			ClassLevelDirtiesContextWithDirtyMethodsTestCase {
 	}
 
 }
