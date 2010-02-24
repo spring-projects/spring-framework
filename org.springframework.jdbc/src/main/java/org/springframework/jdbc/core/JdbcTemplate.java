@@ -1223,6 +1223,27 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
+	 * Create a new ArgPreparedStatementSetter using the args passed in. This method allows the
+	 * creation to be overridden by sub-classes.
+	 * @param args object array woth arguments
+	 * @return the new PreparedStatementSetter
+	 */
+	protected PreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
+		return new ArgPreparedStatementSetter(args);
+	}
+
+	/**
+	 * Create a new ArgTypePreparedStatementSetter using the args and argTypes passed in.
+	 * This method allows the creation to be overridden by sub-classes.
+	 * @param args object array woth arguments
+	 * @param argTypes int array of SQLTypes for arguments
+	 * @return the new PreparedStatementSetter
+	 */
+	protected PreparedStatementSetter newArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
+		return new ArgTypePreparedStatementSetter(args, argTypes);
+	}
+
+	/**
 	 * Throw an SQLWarningException if we're not ignoring warnings,
 	 * else log the warnings (at debug level).
 	 * @param stmt the current JDBC statement
@@ -1256,28 +1277,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throw new SQLWarningException("Warning not ignored", warning);
 		}
 	}
-
-	/**
-	 * Create a new ArgPreparedStatementSetter using the args passed in. This method allows the
-	 * creation to be overridden by sub-classes.
-	 * @param args object array woth arguments
-	 * @return the new ArgPreparedStatementSetter
-	 */
-	protected ArgPreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
-		return new ArgPreparedStatementSetter(args);
-	}
-
-	/**
-	 * Create a new ArgTypePreparedStatementSetter using the args and argTypes passed in.
-	 * This method allows the creation to be overridden by sub-classes.
-	 * @param args object array woth arguments
-	 * @param argTypes int array of SQLTypes for arguments
-	 * @return the new ArgTypePreparedStatementSetter
-	 */
-	protected ArgTypePreparedStatementSetter newArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
-		return new ArgTypePreparedStatementSetter(args, argTypes);
-	}
-
 
 	/**
 	 * Determine SQL from potential provider object.
