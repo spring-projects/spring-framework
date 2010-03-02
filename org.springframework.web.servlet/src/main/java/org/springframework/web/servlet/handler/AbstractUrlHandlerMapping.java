@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Comparator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -257,8 +258,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			}
 		}
 		String bestPatternMatch = null;
+		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
-			Collections.sort(matchingPatterns, getPathMatcher().getPatternComparator(urlPath));
+			Collections.sort(matchingPatterns, patternComparator);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Matching patterns for request [" + urlPath + "] are " + matchingPatterns);
 			}
@@ -273,8 +275,19 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			}
 			validateHandler(handler, request);
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestPatternMatch, urlPath);
-			Map<String, String> uriTemplateVariables =
-					getPathMatcher().extractUriTemplateVariables(bestPatternMatch, urlPath);
+
+			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
+			// for all of them
+			Map<String, String> uriTemplateVariables = new LinkedHashMap<String, String>();
+			for (String matchingPattern : matchingPatterns) {
+				if (patternComparator.compare(bestPatternMatch, matchingPattern) == 0) {
+					uriTemplateVariables
+							.putAll(getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath));
+				}
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("URI Template variables for request [" + urlPath + "] are " + uriTemplateVariables);
+			}
 			return buildPathExposingHandler(handler, bestPatternMatch, pathWithinMapping, uriTemplateVariables);
 		}
 		// No handler found...
