@@ -76,6 +76,16 @@ public class JibxMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
+	public void dtd() throws Exception {
+		((JibxMarshaller) marshaller).setDocTypeRootElementName("flights");
+		((JibxMarshaller) marshaller).setDocTypeSystemId("flights.dtd");
+		StringWriter writer = new StringWriter();
+		marshaller.marshal(flights, new StreamResult(writer));
+		assertTrue("doc type not written",
+				writer.toString().contains("<!DOCTYPE flights SYSTEM \"flights.dtd\">"));
+	}
+
+	@Test
 	public void testSupports() throws Exception {
 		assertTrue("JibxMarshaller does not support Flights", marshaller.supports(Flights.class));
 		assertTrue("JibxMarshaller does not support FlightType", marshaller.supports(FlightType.class));
