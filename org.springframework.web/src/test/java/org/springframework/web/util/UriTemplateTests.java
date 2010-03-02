@@ -152,4 +152,11 @@ public class UriTemplateTests {
 		assertEquals("/$replacement", uri.toString());
 	}
 
+	@Test
+	public void expandWithAtSign() {
+		UriTemplate template = new UriTemplate("http://localhost/query={query}");
+		URI uri = template.expand("foo@bar");
+		assertEquals("http://localhost/query=foo@bar", uri.toString());
+	}
+
 }

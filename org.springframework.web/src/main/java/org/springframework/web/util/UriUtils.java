@@ -61,7 +61,7 @@ public abstract class UriUtils {
 
 	private static final String SCHEME_PATTERN = "([^:/?#]+):";
 
-	private static final String USERINFO_PATTERN = "([^@]*)";
+	private static final String USERINFO_PATTERN = "([^@/]*)";
 
 	private static final String HOST_PATTERN = "([^/?#:]*)";
 
