@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
@@ -65,8 +65,8 @@ import org.springframework.oxm.ValidationFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
@@ -186,8 +186,6 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	public void afterPropertiesSet() throws JiBXException {
 		Assert.notNull(this.targetClass, "'targetClass' is required");
-		Assert.isTrue(!(StringUtils.hasLength(docTypePublicId) && StringUtils.hasLength(docTypeSystemId)),
-				"Set either 'docTypePublicId' or 'docTypeSystemId'; not both");
 		if (StringUtils.hasLength(this.bindingName)) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Configured for target class [" + this.targetClass + "] using binding [" + this.bindingName + "]");
