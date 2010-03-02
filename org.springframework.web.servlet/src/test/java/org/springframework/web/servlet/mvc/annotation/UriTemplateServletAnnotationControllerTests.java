@@ -321,6 +321,25 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("M5", response.getContentAsString());
 	}
 
+	/*
+	 * See SPR-6876
+	 */
+	@Test
+	public void variableNames() throws Exception {
+		initServlet(VariableNamesController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/foo");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("foo-foo", response.getContentAsString());
+
+		request = new MockHttpServletRequest("DELETE", "/test/bar");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("bar-bar", response.getContentAsString());
+
+	}
+
 
 	/*
 	 * Controllers
@@ -554,6 +573,22 @@ public class UriTemplateServletAnnotationControllerTests {
 			writer.write(var);
 		}
 	}
+
+	@Controller
+	@RequestMapping("/test")
+	public static class VariableNamesController {
+
+		@RequestMapping(value = "/{foo}", method=RequestMethod.GET)
+		public void foo(@PathVariable String foo, Writer writer) throws IOException {
+			writer.write("foo-" + foo);
+		}
+
+		@RequestMapping(value = "/{bar}", method=RequestMethod.DELETE)
+		public void bar(@PathVariable String bar, Writer writer) throws IOException {
+			writer.write("bar-" + bar);
+		}
+	}
+
 
 
 }
