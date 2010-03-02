@@ -117,6 +117,7 @@ public class UriUtilsTest {
 		assertEquals("Invalid encoded URI", "../../../demo/jfc/SwingSet2/src/SwingSet2.java",
 				UriUtils.encodeUri("../../../demo/jfc/SwingSet2/src/SwingSet2.java", ENC));
 		assertEquals("Invalid encoded URI", "file:///~/calendar", UriUtils.encodeUri("file:///~/calendar", ENC));
+		assertEquals("Invalid encoded URI", "http://example.com/query=foo@bar", UriUtils.encodeUri("http://example.com/query=foo@bar", ENC));
 
 	}
 

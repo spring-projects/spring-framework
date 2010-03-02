@@ -182,7 +182,7 @@ public class UriTemplate {
 			throw new IllegalStateException(ex);
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex);
+			throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);
 		}
 	}
 
@@ -201,24 +201,23 @@ public class UriTemplate {
 			Matcher m = NAMES_PATTERN.matcher(uriTemplate);
 			int end = 0;
 			while (m.find()) {
-				this.patternBuilder.append(encodeAndQuote(uriTemplate, end, m.start()));
+				this.patternBuilder.append(quote(uriTemplate, end, m.start()));
 				this.patternBuilder.append(VALUE_REGEX);
 				this.variableNames.add(m.group(1));
 				end = m.end();
 			}
-			this.patternBuilder.append(encodeAndQuote(uriTemplate, end, uriTemplate.length()));
+			this.patternBuilder.append(quote(uriTemplate, end, uriTemplate.length()));
 			int lastIdx = this.patternBuilder.length() - 1;
 			if (lastIdx >= 0 && this.patternBuilder.charAt(lastIdx) == '/') {
 				this.patternBuilder.deleteCharAt(lastIdx);
 			}
 		}
 
-		private String encodeAndQuote(String fullPath, int start, int end) {
+		private String quote(String fullPath, int start, int end) {
 			if (start == end) {
 				return "";
 			}
-			String result = encodeUri(fullPath.substring(start, end)).toASCIIString();
-			return Pattern.quote(result);
+			return Pattern.quote(fullPath.substring(start, end));
 		}
 
 		private List<String> getVariableNames() {
