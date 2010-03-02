@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.web.util;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.BitSet;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 
@@ -331,7 +331,7 @@ public abstract class UriUtils {
 	/**
 	 * Encodes the given URI query parameter.
 	 *
-	 * @param query the query parameter to be encoded
+	 * @param queryParam the query parameter to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded query parameter
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
