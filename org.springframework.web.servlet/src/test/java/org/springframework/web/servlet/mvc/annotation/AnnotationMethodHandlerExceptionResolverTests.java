@@ -34,6 +34,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -86,6 +87,17 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	public void noModelAndView() throws UnsupportedEncodingException {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		NoMAVReturningController controller = new NoMAVReturningController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("ModelAndView not empty", mav.isEmpty());
+		assertEquals("Invalid response written", "IllegalArgumentException", response.getContentAsString());
+	}
+	
+	@Test
+	public void responseBody() throws UnsupportedEncodingException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		ResponseBodyController controller = new ResponseBodyController();
+		request.addHeader("Accept", "text/plain");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("ModelAndView not empty", mav.isEmpty());
@@ -145,6 +157,16 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		@ExceptionHandler(Exception.class)
 		public void handle(Exception ex, Writer writer) throws IOException {
 			writer.write(ClassUtils.getShortName(ex.getClass()));
+		}
+	}
+
+	@Controller
+	private static class ResponseBodyController {
+
+		@ExceptionHandler(Exception.class)
+		@ResponseBody
+		public String handle(Exception ex) {
+			return ClassUtils.getShortName(ex.getClass());
 		}
 	}
 }

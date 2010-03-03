@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
@@ -33,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -46,6 +48,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -54,11 +57,23 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver} interface that handles
- * exceptions through the {@link ExceptionHandler} annotation. <p>This exception resolver is enabled by default in the
- * {@link org.springframework.web.servlet.DispatcherServlet}.
+ * exceptions through the {@link ExceptionHandler} annotation.
+ *
+ * <p>This exception resolver is enabled by default in the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -66,6 +81,11 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	private WebArgumentResolver[] customArgumentResolvers;
+
+	private HttpMessageConverter<?>[] messageConverters =
+			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
+					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
+
 
 	/**
 	 * Set a custom ArgumentResolvers to use for special method parameter types. Such a custom ArgumentResolver will kick
@@ -81,6 +101,14 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 */
 	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
+	}
+
+	/**
+	 * Set the message body converters to use.
+	 * <p>These converters are used to convert from and to HTTP requests and responses.
+	 */
+	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
+		this.messageConverters = messageConverters;
 	}
 
 	@Override
@@ -331,6 +359,11 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			HttpServletResponse response = webRequest.getResponse();
 			response.setStatus(responseStatus.value().value());
 		}
+
+		if (returnValue != null && AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
+			return handleResponseBody(returnValue, webRequest);
+		}
+
 		if (returnValue instanceof ModelAndView) {
 			return (ModelAndView) returnValue;
 		}
@@ -353,6 +386,36 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
 		}
 	}
+
+	@SuppressWarnings("unchecked")
+	private ModelAndView handleResponseBody(Object returnValue, ServletWebRequest webRequest)
+			throws ServletException, IOException {
+
+		HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
+		List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
+		if (acceptedMediaTypes.isEmpty()) {
+			acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
+		}
+		MediaType.sortBySpecificity(acceptedMediaTypes);
+		HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
+		Class<?> returnValueType = returnValue.getClass();
+		if (messageConverters != null) {
+			for (MediaType acceptedMediaType : acceptedMediaTypes) {
+				for (HttpMessageConverter messageConverter : messageConverters) {
+					if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
+						messageConverter.write(returnValue, acceptedMediaType, outputMessage);
+						return new ModelAndView();
+					}
+				}
+			}
+		}
+		if (logger.isWarnEnabled()) {
+			logger.warn("Could not find HttpMessageConverter that supports return type [" + returnValueType + "] and " +
+					acceptedMediaTypes);
+		}
+		return null;
+	}
+
 
 	/** Comparator capable of sorting exceptions based on their depth from the thrown exception type. */
 	private static class DepthComparator implements Comparator<Class<? extends Throwable>> {
