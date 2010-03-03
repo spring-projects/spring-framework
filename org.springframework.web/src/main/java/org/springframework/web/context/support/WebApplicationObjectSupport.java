@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.context.support;
 
 import java.io.File;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
@@ -42,9 +41,11 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 
 
 	public final void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-		if (servletContext != null) {
-			initServletContext(servletContext);
+		if (servletContext != this.servletContext) {
+			this.servletContext = servletContext;
+			if (servletContext != null) {
+				initServletContext(servletContext);
+			}
 		}
 	}
 
@@ -69,10 +70,10 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	@Override
 	protected void initApplicationContext(ApplicationContext context) {
 		super.initApplicationContext(context);
-		if (context instanceof WebApplicationContext) {
-			ServletContext servletContext = ((WebApplicationContext) context).getServletContext();
-			if (servletContext != null) {
-				initServletContext(servletContext);
+		if (this.servletContext == null && context instanceof WebApplicationContext) {
+			this.servletContext = ((WebApplicationContext) context).getServletContext();
+			if (this.servletContext != null) {
+				initServletContext(this.servletContext);
 			}
 		}
 	}
