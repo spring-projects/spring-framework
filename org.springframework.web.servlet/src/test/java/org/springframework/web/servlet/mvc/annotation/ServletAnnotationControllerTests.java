@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -1037,7 +1038,7 @@ public class ServletAnnotationControllerTests {
 		String requestBody = "Hello World";
 		request.setContent(requestBody.getBytes("UTF-8"));
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
-		request.addHeader("Accept", "text/*");
+		request.addHeader("Accept", "text/*, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals(200, response.getStatus());
@@ -1137,7 +1138,7 @@ public class ServletAnnotationControllerTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-				adapterDef.getPropertyValues().add("messageConverters", new MyMessageConverter());
+				adapterDef.getPropertyValues().add("messageConverters", new NotReadableMessageConverter());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 				wac.refresh();
 				return wac;
@@ -1152,6 +1153,38 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status code", HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
+	}
+
+	/*
+	 * See SPR-6877
+	 */
+	@Test
+	public void overlappingMesssageConvertersRequestBody() throws ServletException, IOException {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				List<HttpMessageConverter> messageConverters = new ArrayList<HttpMessageConverter>();
+				messageConverters.add(new StringHttpMessageConverter());
+				messageConverters
+						.add(new SimpleMessageConverter(new MediaType("application","json"), MediaType.ALL));
+				adapterDef.getPropertyValues().add("messageConverters", messageConverters);
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
+		request.setContent("Hello World".getBytes("UTF-8"));
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("Accept", "application/json, text/javascript, */*");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Invalid response status code", "application/json", response.getHeader("Content-Type"));
 	}
 
 	@Test
@@ -2123,7 +2156,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-	public static class MyMessageConverter implements HttpMessageConverter {
+	public static class NotReadableMessageConverter implements HttpMessageConverter {
 
 		public boolean canRead(Class clazz, MediaType mediaType) {
 			return true;
@@ -2145,6 +2178,37 @@ public class ServletAnnotationControllerTests {
 		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			throw new UnsupportedOperationException("Not implemented");
+		}
+	}
+
+	public static class SimpleMessageConverter implements HttpMessageConverter {
+
+		private final List<MediaType> supportedMediaTypes;
+
+		public SimpleMessageConverter(MediaType... supportedMediaTypes) {
+			this.supportedMediaTypes = Arrays.asList(supportedMediaTypes);
+		}
+
+		public boolean canRead(Class clazz, MediaType mediaType) {
+			return supportedMediaTypes.contains(mediaType);
+		}
+
+		public boolean canWrite(Class clazz, MediaType mediaType) {
+			return supportedMediaTypes.contains(mediaType);
+		}
+
+		public List getSupportedMediaTypes() {
+			return supportedMediaTypes;
+		}
+
+		public Object read(Class clazz, HttpInputMessage inputMessage)
+				throws IOException, HttpMessageNotReadableException {
+			return null;
+		}
+
+		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
+				throws IOException, HttpMessageNotWritableException {
+			outputMessage.getHeaders().setContentType(contentType);
 		}
 	}
 
