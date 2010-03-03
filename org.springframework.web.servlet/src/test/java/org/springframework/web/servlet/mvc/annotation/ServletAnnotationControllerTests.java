@@ -2209,6 +2209,7 @@ public class ServletAnnotationControllerTests {
 		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			outputMessage.getHeaders().setContentType(contentType);
+			outputMessage.getBody(); // force a header write
 		}
 	}
 
