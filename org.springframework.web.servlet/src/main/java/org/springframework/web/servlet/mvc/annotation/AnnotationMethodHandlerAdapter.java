@@ -871,16 +871,18 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
 			Class<?> returnValueType = returnValue.getClass();
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-			if (messageConverters != null) {
-				for (HttpMessageConverter messageConverter : messageConverters) {
-					allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-					for (MediaType acceptedMediaType : acceptedMediaTypes) {
+			if (getMessageConverters() != null) {
+				for (MediaType acceptedMediaType : acceptedMediaTypes) {
+					for (HttpMessageConverter messageConverter : getMessageConverters()) {
 						if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
 							messageConverter.write(returnValue, acceptedMediaType, outputMessage);
 							this.responseArgumentUsed = true;
 							return;
 						}
 					}
+				}
+				for (HttpMessageConverter messageConverter : messageConverters) {
+					allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
 				}
 			}
 			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
