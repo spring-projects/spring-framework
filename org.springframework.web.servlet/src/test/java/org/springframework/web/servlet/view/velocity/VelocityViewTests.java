@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,10 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,7 +32,9 @@ import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.easymock.MockControl;
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -145,7 +141,7 @@ public class VelocityViewTests {
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		wac.getServletContext();
-		wmc.setReturnValue(sc, 4);
+		wmc.setReturnValue(sc, 3);
 		wmc.replay();
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -201,7 +197,7 @@ public class VelocityViewTests {
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
 		wac.getServletContext();
-		wmc.setReturnValue(sc, 4);
+		wmc.setReturnValue(sc, 3);
 		wmc.replay();
 
 		HttpServletRequest request = new MockHttpServletRequest();
