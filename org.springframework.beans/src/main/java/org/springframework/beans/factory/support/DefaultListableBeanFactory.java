@@ -262,6 +262,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public boolean containsBeanDefinition(String beanName) {
+		Assert.notNull(beanName, "Bean name must not be null");
 		return this.beanDefinitionMap.containsKey(beanName);
 	}
 
@@ -574,7 +575,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
 
-		Assert.hasText(beanName, "'beanName' must not be empty");
+		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
 
 		if (beanDefinition instanceof AbstractBeanDefinition) {

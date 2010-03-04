@@ -901,6 +901,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	public boolean isCurrentlyInCreation(String beanName) {
+		Assert.notNull(beanName, "Bean name must not be null");
 		return isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName);
 	}
 
