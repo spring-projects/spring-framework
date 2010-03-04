@@ -147,7 +147,7 @@ public abstract class SharedEntityManagerCreator {
 				this.proxyClassLoader = ((EntityManagerFactoryInfo) this.targetFactory).getBeanClassLoader();
 			}
 			else {
-				this.proxyClassLoader = EntityManagerFactory.class.getClassLoader();
+				this.proxyClassLoader = this.targetFactory.getClass().getClassLoader();
 			}
 		}
 
