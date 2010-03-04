@@ -447,7 +447,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @return the ServletRequestDataBinder instance to use
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
-	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
+	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter) 
 	 */
 	protected ServletRequestDataBinder createBinder(
 			HttpServletRequest request, Object target, String objectName) throws Exception {
@@ -812,7 +812,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				}
 			}
 
-			if (returnValue != null && AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
+			if (AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
 				handleResponseBody(returnValue, webRequest);
 				return null;
 			}
@@ -861,6 +861,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		@SuppressWarnings("unchecked")
 		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest)
 				throws ServletException, IOException {
+			if (returnValue == null) {
+				return;
+			}
 
 			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
 			List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
