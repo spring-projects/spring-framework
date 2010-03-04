@@ -249,7 +249,6 @@ public class ApplicationContextExpressionTests {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 
-
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(TestBean.class);
 		bd.getPropertyValues().add("country", "#{systemProperties.country}");
@@ -264,12 +263,10 @@ public class ApplicationContextExpressionTests {
 				public void checkPropertiesAccess() {
 					throw new AccessControlException("Not Allowed");
 				}
-
 				@Override
 				public void checkPermission(Permission perm) {
 					// allow everything else
 				}
-
 			};
 			System.setSecurityManager(securityManager);
 			ac.refresh();
@@ -283,6 +280,22 @@ public class ApplicationContextExpressionTests {
 			System.getProperties().remove("country");
 		}
 	}
+
+	@Test
+	public void stringConcatenationWithDebugLogging() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setBeanClass(String.class);
+		bd.getConstructorArgumentValues().addGenericArgumentValue("test-#{ T(java.lang.System).currentTimeMillis() }");
+		ac.registerBeanDefinition("str", bd);
+		ac.refresh();
+
+		String str = ac.getBean("str", String.class);
+		assertTrue(str.startsWith("test-"));
+	}
+
 
 	public static class ValueTestBean implements Serializable {
 

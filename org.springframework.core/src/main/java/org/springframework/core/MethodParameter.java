@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,7 +230,12 @@ public class MethodParameter {
 		if (this.parameterAnnotations == null) {
 			Annotation[][] annotationArray = (this.method != null ?
 					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
-			this.parameterAnnotations = annotationArray[this.parameterIndex];
+			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
+				this.parameterAnnotations = annotationArray[this.parameterIndex];
+			}
+			else {
+				this.parameterAnnotations = new Annotation[0];
+			}
 		}
 		return this.parameterAnnotations;
 	}
