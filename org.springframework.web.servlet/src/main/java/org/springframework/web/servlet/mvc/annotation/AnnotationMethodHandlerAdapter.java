@@ -64,6 +64,7 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
@@ -556,7 +557,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (!targetHandlerMethods.isEmpty()) {
 				List<RequestMappingInfo> matches = new ArrayList<RequestMappingInfo>(targetHandlerMethods.keySet());
 				RequestMappingInfoComparator requestMappingInfoComparator =
-						new RequestMappingInfoComparator(pathComparator);
+						new RequestMappingInfoComparator(pathComparator, request);
 				Collections.sort(matches, requestMappingInfoComparator);
 				RequestMappingInfo bestMappingMatch = matches.get(0);
 				String bestMatchedPath = bestMappingMatch.bestMatchedPath();
@@ -935,19 +936,27 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	/**
 	 * Comparator capable of sorting {@link RequestMappingInfo}s (RHIs) so that sorting a list with this comparator will
-	 * result in: <ul> <li>RHIs with {@linkplain RequestMappingInfo#matchedPaths better matched paths} take prescedence
+	 * result in:
+	 * <ul>
+	 * <li>RHIs with {@linkplain RequestMappingInfo#matchedPaths better matched paths} take prescedence
 	 * over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String) path
 	 * pattern comparator}.) Typically, this means that patterns without wild cards and uri templates will be ordered
-	 * before those without.</li> <li>RHIs with one single {@linkplain RequestMappingInfo#methods request method} will be
-	 * ordered before those without a method, or with more than one method.</li> <li>RHIs with more {@linkplain
-	 * RequestMappingInfo#params request parameters} will be ordered before those with less parameters</li> </ol>
+	 * before those without.</li>
+	 * <li>RHIs with one single {@linkplain RequestMappingInfo#methods request method} will be
+	 * ordered before those without a method, or with more than one method.</li>
+	 * <li>RHIs with more {@linkplain RequestMappingInfo#params request parameters} will be ordered before those with
+	 * less parameters</li>
+	 * </ol>
 	 */
 	static class RequestMappingInfoComparator implements Comparator<RequestMappingInfo> {
 
 		private final Comparator<String> pathComparator;
 
-		RequestMappingInfoComparator(Comparator<String> pathComparator) {
+		private final ServerHttpRequest request;
+
+		RequestMappingInfoComparator(Comparator<String> pathComparator, HttpServletRequest request) {
 			this.pathComparator = pathComparator;
+			this.request = new ServletServerHttpRequest(request);
 		}
 
 		public int compare(RequestMappingInfo info1, RequestMappingInfo info2) {
@@ -965,6 +974,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (info1HeaderCount != info2HeaderCount) {
 				return info2HeaderCount - info1HeaderCount;
 			}
+			int acceptComparison = compareAcceptHeaders(info1, info2);
+			if (acceptComparison != 0) {
+				return acceptComparison;
+			}
 			int info1MethodCount = info1.methods.length;
 			int info2MethodCount = info2.methods.length;
 			if (info1MethodCount == 0 && info2MethodCount > 0) {
@@ -981,6 +994,46 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			return 0;
 		}
-	}
 
+		private int compareAcceptHeaders(RequestMappingInfo info1, RequestMappingInfo info2) {
+			List<MediaType> requestAccepts = request.getHeaders().getAccept();
+			List<MediaType> info1Accepts = getAcceptHeaderValue(info1);
+			List<MediaType> info2Accepts = getAcceptHeaderValue(info2);
+
+			for (MediaType requestAccept : requestAccepts) {
+				int pos1 = indexOfIncluded(info1Accepts, requestAccept);
+				int pos2 = indexOfIncluded(info2Accepts, requestAccept);
+				if (pos1 != pos2) {
+					return pos2 - pos1;
+				}
+			}
+			return 0;
+		}
+
+		private int indexOfIncluded(List<MediaType> infoAccepts, MediaType requestAccept) {
+			for (int i = 0; i < infoAccepts.size(); i++) {
+				MediaType info1Accept = infoAccepts.get(i);
+				if (requestAccept.includes(info1Accept)) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		private List<MediaType> getAcceptHeaderValue(RequestMappingInfo info) {
+			for (String header : info.headers) {
+				int separator = header.indexOf('=');
+				if (separator != -1) {
+					String key = header.substring(0, separator);
+					String value = header.substring(separator + 1);
+					if ("Accept".equalsIgnoreCase(key)) {
+						return MediaType.parseMediaTypes(value);
+					}
+				}
+			}
+			return Collections.emptyList();
+		}
+
+
+	}
 }

@@ -1200,20 +1200,43 @@ public class ServletAnnotationControllerTests {
 
 
 	@Test
-	public void headers() throws ServletException, IOException {
-		initServlet(HeadersController.class);
+	public void contentTypeHeaders() throws ServletException, IOException {
+		initServlet(ContentTypeHeadersController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/something");
 		request.addHeader("Content-Type", "application/pdf");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("pdf", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/something");
+		request = new MockHttpServletRequest("POST", "/something");
 		request.addHeader("Content-Type", "text/html");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("text", response.getContentAsString());
+	}
+	
+	@Test
+	public void acceptHeaders() throws ServletException, IOException {
+		initServlet(AcceptHeadersController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "text/html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("html", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "application/xml");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("xml", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "application/xml, text/html");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("xml", response.getContentAsString());
 	}
 
 	@Test
@@ -2235,7 +2258,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Controller
-	public static class HeadersController {
+	public static class ContentTypeHeadersController {
 
 		@RequestMapping(value = "/something", headers = "content-type=application/pdf")
 		public void handlePdf(Writer writer) throws IOException {
@@ -2245,6 +2268,20 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping(value = "/something", headers = "content-type=text/*")
 		public void handleHtml(Writer writer) throws IOException {
 			writer.write("text");
+		}
+	}
+
+	@Controller
+	public static class AcceptHeadersController {
+
+		@RequestMapping(value = "/something", headers = "accept=text/html")
+		public void handleHtml(Writer writer) throws IOException {
+			writer.write("html");
+		}
+
+		@RequestMapping(value = "/something", headers = "accept=application/xml")
+		public void handleXml(Writer writer) throws IOException {
+			writer.write("xml");
 		}
 	}
 
