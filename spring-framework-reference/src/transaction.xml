@@ -2414,7 +2414,7 @@ txManager.commit(status);</programlisting>
     Geronimo, and Oracle OC4J -- without any special configuration required.
     However, for fully supported transaction suspension and further advanced
     integration, Spring ships special adapters for IBM WebSphere, BEA WebLogic
-    Server, and Oracle OC4J. These adapters iare discussed in the following
+    Server, and Oracle OC4J. These adapters are discussed in the following
     sections.</para>
 
     <para><emphasis>For standard scenarios, including WebLogic Server,
