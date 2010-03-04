@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
@@ -47,7 +48,7 @@ public class RequestMappingInfoComparatorTests {
 
 	@Before
 	public void setUp() throws NoSuchMethodException {
-		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator());
+		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), new MockHttpServletRequest());
 
 		emptyInfo = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
 
@@ -83,6 +84,42 @@ public class RequestMappingInfoComparatorTests {
 		assertEquals(oneMethodInfo, infos.get(2));
 		assertEquals(twoMethodsInfo, infos.get(3));
 		assertEquals(emptyInfo, infos.get(4));
+	}
+
+	@Test
+	public void acceptHeaders() {
+		AnnotationMethodHandlerAdapter.RequestMappingInfo html = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+		html.headers = new String[] {"accept=text/html"};
+
+		AnnotationMethodHandlerAdapter.RequestMappingInfo xml = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+		xml.headers = new String[] {"accept=application/xml"};
+
+		AnnotationMethodHandlerAdapter.RequestMappingInfo none = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Accept", "application/xml, text/html");
+		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+
+		assertTrue(comparator.compare(html, xml) > 0);
+		assertTrue(comparator.compare(xml, html) < 0);
+		assertTrue(comparator.compare(xml, none) < 0);
+		assertTrue(comparator.compare(none, xml) > 0);
+		assertTrue(comparator.compare(html, none) < 0);
+		assertTrue(comparator.compare(none, html) > 0);
+
+		request = new MockHttpServletRequest();
+		request.addHeader("Accept", "application/xml, text/*");
+		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+
+		assertTrue(comparator.compare(html, xml) > 0);
+		assertTrue(comparator.compare(xml, html) < 0);
+
+		request = new MockHttpServletRequest();
+		request.addHeader("Accept", "application/pdf");
+		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+
+		assertTrue(comparator.compare(html, xml) == 0);
+		assertTrue(comparator.compare(xml, html) == 0);
 	}
 
 
