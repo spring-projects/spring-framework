@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 
 /** @author Arjen Poutsma */
 public class UriTemplateServletAnnotationControllerTests {
@@ -337,7 +338,37 @@ public class UriTemplateServletAnnotationControllerTests {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("bar-bar", response.getContentAsString());
+	}
 
+	/*
+	 * See SPR-6906
+	 */
+	@Test
+	public void controllerClassName() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(FooController.class));
+				RootBeanDefinition mapping = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
+				mapping.getPropertyValues().add("excludedPackages", null);
+				wac.registerBeanDefinition("handlerMapping", mapping);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/bar");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("plain-bar", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/foo/bar.pdf");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("pdf-bar", response.getContentAsString());
 	}
 
 
@@ -588,7 +619,6 @@ public class UriTemplateServletAnnotationControllerTests {
 			writer.write("bar-" + bar);
 		}
 	}
-
 
 
 }
