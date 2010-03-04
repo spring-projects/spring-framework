@@ -1188,6 +1188,18 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void responseBodyVoid() throws ServletException, IOException {
+		initServlet(ResponseBodyVoidController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "text/*, */*");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(200, response.getStatus());
+	}
+
+
+	@Test
 	public void headers() throws ServletException, IOException {
 		initServlet(HeadersController.class);
 
@@ -2153,6 +2165,15 @@ public class ServletAnnotationControllerTests {
 		@ResponseBody
 		public String handle(@RequestBody String body) throws IOException {
 			return body;
+		}
+	}
+
+	@Controller
+	public static class ResponseBodyVoidController {
+
+		@RequestMapping("/something")
+		@ResponseBody
+		public void handle() throws IOException {
 		}
 	}
 
