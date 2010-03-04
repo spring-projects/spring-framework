@@ -629,35 +629,15 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@SuppressWarnings("unchecked")
-		private void extractHandlerMethodUriTemplates(String mappedPath,
+		private void extractHandlerMethodUriTemplates(String mappedPattern,
 				String lookupPath,
 				HttpServletRequest request) {
-			Map<String, String> variables = null;
-			boolean hasSuffix = (mappedPath.indexOf('.') != -1);
-			if (!hasSuffix && pathMatcher.match(mappedPath + ".*", lookupPath)) {
-				String realPath = mappedPath + ".*";
-				if (pathMatcher.match(realPath, lookupPath)) {
-					variables = pathMatcher.extractUriTemplateVariables(realPath, lookupPath);
-				}
-			}
-			if (variables == null && !mappedPath.startsWith("/")) {
-				String realPath = "/**/" + mappedPath;
-				if (pathMatcher.match(realPath, lookupPath)) {
-					variables = pathMatcher.extractUriTemplateVariables(realPath, lookupPath);
-				}
-				else {
-					realPath = realPath + ".*";
-					if (pathMatcher.match(realPath, lookupPath)) {
-						variables = pathMatcher.extractUriTemplateVariables(realPath, lookupPath);
-					}
-				}
-			}
-			if (!CollectionUtils.isEmpty(variables)) {
-				Map<String, String> typeVariables =
-						(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-				if (typeVariables != null) {
-					variables.putAll(typeVariables);
-				}
+
+			Map<String, String> variables =
+					(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+			
+			if (CollectionUtils.isEmpty(variables) && pathMatcher.match(mappedPattern, lookupPath)) {
+				variables = pathMatcher.extractUriTemplateVariables(mappedPattern, lookupPath);
 				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, variables);
 			}
 		}
