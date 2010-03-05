@@ -17,6 +17,7 @@
 		<conf name="commons-fileupload" extends="runtime" description="JARs needed to run with Commons Fileupload"/>		
 		<conf name="el" extends="runtime" description="JARs needed to use EL"/>
 		<conf name="faces" extends="runtime" description="JARs neeeded to use JSF"/>
+        <conf name="feed" extends="runtime" description="JARs needed to create use Atom and RSS feeds"/>
 		<conf name="hessian" extends="runtime" description="JARs needed to use Hessian"/>
 		<conf name="httpclient" extends="runtime" description="JARs needed to use HTTPClient"/>
 		<conf name="jackson" extends="runtime" description="JARs needed to use the Jackson JSON converter"/>
@@ -34,6 +35,8 @@
 	<dependencies>
 		<dependency org="com.caucho" name="com.springsource.com.caucho" rev="3.2.1"
                     conf="optional, hessian, burlap->compile"/>
+        <dependency org="com.sun.syndication" name="com.springsource.com.sun.syndication" rev="1.0.0"
+                    conf="optional, feed->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="provided, el->compile"/>
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08"
                     conf="provided, faces->compile"/>
@@ -59,6 +62,8 @@
                     conf="optional, log4j->compile"/>
         <dependency org="org.codehaus.jackson" name="com.springsource.org.codehaus.jackson.mapper" rev="1.4.2"
                     conf="optional, jackson->compile"/>
+        <dependency org="org.jdom" name="com.springsource.org.jdom" rev="1.1.0"
+                    conf="optional, feed->compile"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration"
                     conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration"
