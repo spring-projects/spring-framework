@@ -17,9 +17,10 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,11 +37,12 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
+import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriUtils;
 
 /**
  * <strong>The central class for client-side HTTP access.</strong> It simplifies communication with HTTP servers, and
@@ -302,7 +304,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
 
-		UriTemplate uriTemplate = new UriTemplate(url);
+		UriTemplate uriTemplate = new HttpUrlTemplate(url);
 		URI expanded = uriTemplate.expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
@@ -310,7 +312,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
 
-		UriTemplate uriTemplate = new UriTemplate(url);
+		UriTemplate uriTemplate = new HttpUrlTemplate(url);
 		URI expanded = uriTemplate.expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
@@ -486,6 +488,31 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 		public HttpHeaders extractData(ClientHttpResponse response) throws IOException {
 			return response.getHeaders();
+		}
+	}
+
+	/**
+	 * HTTP-specific subclass of UriTemplate, overriding the encode method.
+	 */
+	private static class HttpUrlTemplate extends UriTemplate {
+
+		public HttpUrlTemplate(String uriTemplate) {
+			super(uriTemplate);
+		}
+
+		@Override
+		protected URI encodeUri(String uri) {
+			try {
+				String encoded = UriUtils.encodeHttpUrl(uri, "UTF-8");
+				return new URI(encoded);
+			}
+			catch (UnsupportedEncodingException ex) {
+				// should not happen, UTF-8 is always supported
+				throw new IllegalStateException(ex);
+			}
+			catch (URISyntaxException ex) {
+				throw new IllegalArgumentException("Could not create HTTP URL from [" + uri + "]: " + ex, ex);
+			}
 		}
 	}
 

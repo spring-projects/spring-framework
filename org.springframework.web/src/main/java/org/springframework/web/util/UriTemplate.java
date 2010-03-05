@@ -70,7 +70,7 @@ public class UriTemplate {
 	 * Return the names of the variables in the template, in order.
 	 * @return the template variable names
 	 */
-	public final List<String> getVariableNames() {
+	public List<String> getVariableNames() {
 		return this.variableNames;
 	}
 
@@ -172,7 +172,15 @@ public class UriTemplate {
 		return this.uriTemplate;
 	}
 
-	private static URI encodeUri(String uri) {
+	/**
+	 * Encodes the given String as URL.
+	 *
+	 * <p>Defaults to {@link UriUtils#encodeUri(String, String)}.
+	 *
+	 * @param uri the URI to encode
+	 * @return the encoded URI
+	 */
+	protected URI encodeUri(String uri) {
 		try {
 			String encoded = UriUtils.encodeUri(uri, "UTF-8");
 			return new URI(encoded);
@@ -185,7 +193,6 @@ public class UriTemplate {
 			throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);
 		}
 	}
-
 
 	/**
 	 * Static inner class to parse uri template strings into a matching regular expression.
