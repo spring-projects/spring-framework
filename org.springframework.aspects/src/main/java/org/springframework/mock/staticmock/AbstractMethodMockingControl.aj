@@ -151,7 +151,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 		expectations.verify();
 	}
 
-	Object around() : methodToMock() {
+	Object around() : methodToMock() && cflowbelow(mockStaticsTestMethod()) {
 		if (recording) {
 			expectations.expectCall(thisJoinPointStaticPart.toLongString(), thisJoinPoint.getArgs());
 			// Return value doesn't matter
