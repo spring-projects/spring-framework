@@ -20,6 +20,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.JdkVersion;
@@ -33,7 +34,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @since 3.0
  */
-public class TaskExecutorFactoryBean implements FactoryBean<TaskExecutor>, BeanNameAware {
+public class TaskExecutorFactoryBean implements FactoryBean<TaskExecutor>, BeanNameAware, DisposableBean {
 
 	private volatile TaskExecutor target;
 
@@ -88,6 +89,12 @@ public class TaskExecutorFactoryBean implements FactoryBean<TaskExecutor>, BeanN
 
 	public boolean isSingleton() {
 		return true;
+	}
+	
+	public void destroy() throws Exception {
+		if (this.target instanceof DisposableBean) {
+			((DisposableBean) this.target).destroy();
+		}
 	}
 
 	private void initializeExecutor() throws Exception {
