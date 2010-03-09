@@ -156,6 +156,33 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
 	}
 	
+	/**
+	 * Check on first usage (when the cachedExecutor in MethodReference is null) that the exception is not wrapped.
+	 */
+	@Test
+	public void testMethodThrowingException_SPR6941() {
+		// Test method on inventor: throwException()
+		// On 1 it will throw an IllegalArgumentException
+		// On 2 it will throw a RuntimeException
+		// On 3 it will exit normally
+		// In each case it increments the Inventor field 'counter' when invoked
+		
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expr = parser.parseExpression("throwException(#bar)");
+		
+		eContext.setVariable("bar",2);
+		try {
+			expr.getValue(eContext);
+			Assert.fail();
+		} catch (Exception e) {
+			if (e instanceof SpelEvaluationException) {
+				e.printStackTrace();
+				Assert.fail("Should not be a SpelEvaluationException");
+			}
+			// normal
+		}
+	}
+	
 	@Test
 	public void testMethodFiltering_SPR6764() {
 		SpelExpressionParser parser = new SpelExpressionParser();
