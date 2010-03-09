@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
@@ -29,6 +31,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -38,8 +45,11 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
+import org.springframework.http.converter.multipart.MultipartMap;
 import org.springframework.util.FileCopyUtils;
 
 /** @author Arjen Poutsma */
@@ -67,6 +77,7 @@ public class RestTemplateIntegrationTests {
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/errors/notfound");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)), "/errors/server");
 		jettyContext.addServlet(new ServletHolder(new UriServlet()), "/uri/*");
+		jettyContext.addServlet(new ServletHolder(new MultipartServlet()), "/multipart");
 		jettyServer.start();
 	}
 
@@ -130,6 +141,18 @@ public class RestTemplateIntegrationTests {
 
 		result = template.getForObject(URI + "/uri/query={query}", String.class, "foo@bar");
 		assertEquals("Invalid request URI", "/uri/query=foo@bar", result);
+	}
+
+	@Test
+	public void multipart() throws UnsupportedEncodingException {
+		MultipartMap body = new MultipartMap();
+		body.addTextPart("name 1", "value 1");
+		body.addTextPart("name 2", "value 2+1");
+		body.addTextPart("name 2", "value 2+2");
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		body.addBinaryPart("logo", logo);
+
+		template.postForLocation(URI + "/multipart", body);
 	}
 
 	/** Servlet that returns and error message for a given status code. */
@@ -206,6 +229,44 @@ public class RestTemplateIntegrationTests {
 			resp.setContentType("text/plain");
 			resp.setCharacterEncoding("UTF-8");
 			resp.getWriter().write(req.getRequestURI());
+		}
+	}
+
+	private static class MultipartServlet extends HttpServlet {
+
+		@Override
+		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			assertTrue(ServletFileUpload.isMultipartContent(req));
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			try {
+				List items = upload.parseRequest(req);
+				assertEquals(4, items.size());
+				FileItem item = (FileItem) items.get(0);
+				assertTrue(item.isFormField());
+				assertEquals("name 1", item.getFieldName());
+				assertEquals("value 1", item.getString());
+
+				item = (FileItem) items.get(1);
+				assertTrue(item.isFormField());
+				assertEquals("name 2", item.getFieldName());
+				assertEquals("value 2+1", item.getString());
+
+				item = (FileItem) items.get(2);
+				assertTrue(item.isFormField());
+				assertEquals("name 2", item.getFieldName());
+				assertEquals("value 2+2", item.getString());
+
+				item = (FileItem) items.get(3);
+				assertFalse(item.isFormField());
+				assertEquals("logo", item.getFieldName());
+				assertEquals("logo.jpg", item.getName());
+				assertEquals("application/octet-stream", item.getContentType());
+			}
+			catch (FileUploadException ex) {
+				throw new ServletException(ex);
+			}
+
 		}
 	}
 
