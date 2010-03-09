@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 /** @author Arjen Poutsma */
 @Controller
-public class FooController {
+public class ControllerClassNameController {
 
-	@RequestMapping(value = "{id}", method = RequestMethod.GET)
+	@RequestMapping(value = {"{id}", "{id}.*"}, method = RequestMethod.GET)
 	public void plain(Writer writer, @PathVariable("id") String id) throws IOException {
 		writer.write("plain-" + id);
 	}

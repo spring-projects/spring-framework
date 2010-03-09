@@ -350,7 +350,7 @@ public class UriTemplateServletAnnotationControllerTests {
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
 					throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(FooController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(ControllerClassNameController.class));
 				RootBeanDefinition mapping = new RootBeanDefinition(ControllerClassNameHandlerMapping.class);
 				mapping.getPropertyValues().add("excludedPackages", null);
 				wac.registerBeanDefinition("handlerMapping", mapping);
@@ -360,15 +360,20 @@ public class UriTemplateServletAnnotationControllerTests {
 		};
 		servlet.init(new MockServletConfig());
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/bar");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/controllerclassname/bar");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("plain-bar", response.getContentAsString());
 
-		request = new MockHttpServletRequest("GET", "/foo/bar.pdf");
+		request = new MockHttpServletRequest("GET", "/controllerclassname/bar.pdf");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("pdf-bar", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/controllerclassname/bar.do");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("plain-bar", response.getContentAsString());
 	}
 
 
