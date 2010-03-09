@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.Assert;
-import org.junit.Test;
 
+import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -221,6 +221,20 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndCheckError("madeup", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
 				"org.springframework.expression.spel.testresources.Inventor");
 	}
+
+	@Test
+	public void testRogueTrailingDotCausesNPE_SPR6866() {
+		try {
+			new SpelExpressionParser().parseExpression("placeOfBirth.foo.");
+			Assert.fail("Should have failed to parse");
+		} catch (ParseException e) {
+			Assert.assertTrue(e instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException)e;
+			Assert.assertEquals(SpelMessage.OOD,spe.getMessageCode());
+			Assert.assertEquals(16,spe.getPosition());
+		}	
+	}
+	
 
 	// nested properties
 	@Test

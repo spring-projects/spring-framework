@@ -336,7 +336,12 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (maybeEatMethodOrProperty(nullSafeNavigation) || maybeEatFunctionOrVar() || maybeEatProjection(nullSafeNavigation) || maybeEatSelection(nullSafeNavigation)) {
 			return pop();
 		}
-		raiseInternalException(t.startpos,SpelMessage.UNEXPECTED_DATA_AFTER_DOT,toString(peekToken()));
+		if (peekToken()==null) {
+			// unexpectedly ran out of data 
+			raiseInternalException(t.startpos,SpelMessage.OOD);
+		} else {
+			raiseInternalException(t.startpos,SpelMessage.UNEXPECTED_DATA_AFTER_DOT,toString(peekToken()));
+		}
 		return null;
 	}
 	
