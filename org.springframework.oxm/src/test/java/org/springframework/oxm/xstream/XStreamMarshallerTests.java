@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,10 @@ import javax.xml.transform.stream.StreamSource;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
+import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
+import com.thoughtworks.xstream.io.json.JsonWriter;
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
@@ -258,7 +261,7 @@ public class XStreamMarshallerTests {
 	}
 
 	@Test
-	public void driver() throws Exception {
+	public void jettisonDriver() throws Exception {
 		marshaller.setStreamDriver(new JettisonMappedXmlDriver());
 		Writer writer = new StringWriter();
 		marshaller.marshal(flight, new StreamResult(writer));
@@ -268,6 +271,20 @@ public class XStreamMarshallerTests {
 		Flight unflight = (Flight) o;
 		assertNotNull("Flight is null", unflight);
 		assertEquals("Number is invalid", 42L, unflight.getFlightNumber());
+	}
+
+	@Test
+	public void jsonDriver() throws Exception {
+		marshaller.setStreamDriver(new JsonHierarchicalStreamDriver() {
+			@Override
+			public HierarchicalStreamWriter createWriter(Writer writer) {
+				return new JsonWriter(writer, new char[0], "", JsonWriter.DROP_ROOT_MODE);
+			}
+		});
+
+		Writer writer = new StringWriter();
+		marshaller.marshal(flight, new StreamResult(writer));
+		assertEquals("Invalid result", "{\"flightNumber\": 42}", writer.toString());
 	}
 
 	@Test
