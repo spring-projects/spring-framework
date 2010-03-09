@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,17 +57,17 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
@@ -397,13 +397,20 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	private void marshal(Object graph, HierarchicalStreamWriter streamWriter) {
 		try {
-			this.getXStream().marshal(graph, streamWriter);
+			getXStream().marshal(graph, streamWriter);
 		}
 		catch (Exception ex) {
 			throw convertXStreamException(ex, true);
 		}
+		finally {
+			try {
+				streamWriter.flush();
+			}
+			catch (Exception ex) {
+				logger.debug("Could not flush HierarchicalStreamWriter", ex);
+			}
+		}
 	}
-
 
 	// Unmarshalling
 
