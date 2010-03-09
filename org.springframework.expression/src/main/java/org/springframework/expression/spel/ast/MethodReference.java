@@ -89,17 +89,7 @@ public class MethodReference extends SpelNodeImpl {
 				// may or may not be a root cause.  If there is a root cause it is a user created exception.
 				// If there is no root cause it was a reflective invocation problem.
 				
-				Throwable causeOfAccessException = ae.getCause();
-				Throwable rootCause = (causeOfAccessException==null?null:causeOfAccessException.getCause());
-				if (rootCause!=null) {
-					// User exception was the root cause - exit now
-					if (rootCause instanceof RuntimeException) {
-						throw (RuntimeException)rootCause;
-					} else {
-						throw new SpelEvaluationException( getStartPosition(), rootCause, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
-							this.name, state.getActiveContextObject().getValue().getClass().getName(), rootCause.getMessage());
-					}
-				}
+				throwSimpleExceptionIfPossible(state, ae);
 				
 				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
 				this.cachedExecutor = null;
@@ -113,8 +103,29 @@ public class MethodReference extends SpelNodeImpl {
 			return executorToUse.execute(
 					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
 		} catch (AccessException ae) {
+			// Same unwrapping exception handling as above in above catch block
+			throwSimpleExceptionIfPossible(state, ae);
 			throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
 					this.name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
+		}
+	}
+
+
+	/**
+	 * Decode the AccessException, throwing a lightweight evaluation exception or, if the cause was a RuntimeException, 
+	 * throw the RuntimeException directly.
+	 */
+	private void throwSimpleExceptionIfPossible(ExpressionState state, AccessException ae) {
+		Throwable causeOfAccessException = ae.getCause();
+		Throwable rootCause = (causeOfAccessException==null?null:causeOfAccessException.getCause());
+		if (rootCause!=null) {
+			// User exception was the root cause - exit now
+			if (rootCause instanceof RuntimeException) {
+				throw (RuntimeException)rootCause;
+			} else {
+				throw new SpelEvaluationException( getStartPosition(), rootCause, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
+					this.name, state.getActiveContextObject().getValue().getClass().getName(), rootCause.getMessage());
+			}
 		}
 	}
 
