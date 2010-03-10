@@ -1130,7 +1130,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					MethodParameter methodParam = BeanUtils.getWriteMethodParameter(pd);
 					// Do not allow eager init for type matching in case of a prioritized post-processor.
 					boolean eager = !PriorityOrdered.class.isAssignableFrom(bw.getWrappedClass());
-					DependencyDescriptor desc = new DependencyDescriptor(methodParam, false, eager);
+					DependencyDescriptor desc = new AutowireByTypeDependencyDescriptor(methodParam, eager);
 					Object autowiredArgument = resolveDependency(desc, beanName, autowiredBeanNames, converter);
 					if (autowiredArgument != null) {
 						pvs.add(propertyName, autowiredArgument);
@@ -1551,6 +1551,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void removeSingleton(String beanName) {
 		super.removeSingleton(beanName);
 		this.factoryBeanInstanceCache.remove(beanName);
+	}
+
+
+	/**
+	 * Special DependencyDescriptor variant for autowire="byType".
+	 * Always optional; never considering the parameter name for choosing a primary candidate.
+	 */
+	private static class AutowireByTypeDependencyDescriptor extends DependencyDescriptor {
+
+		public AutowireByTypeDependencyDescriptor(MethodParameter methodParameter, boolean eager) {
+			super(methodParameter, false, eager);
+		}
+
+		@Override
+		public String getDependencyName() {
+			return null;
+		}
 	}
 
 }
