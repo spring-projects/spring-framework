@@ -94,14 +94,7 @@ public class MvcNamespaceTests {
 		assertNotNull(adapter);
 		
 		HttpMessageConverter<?>[] messageConverters = adapter.getMessageConverters();
-		assertNotNull(messageConverters);
-		assertEquals(6, messageConverters.length);
-		assertTrue(ByteArrayHttpMessageConverter.class.equals(messageConverters[0].getClass()));
-		assertTrue(StringHttpMessageConverter.class.equals(messageConverters[1].getClass()));
-		assertTrue(FormHttpMessageConverter.class.equals(messageConverters[2].getClass()));
-		assertTrue(SourceHttpMessageConverter.class.equals(messageConverters[3].getClass()));
-		assertTrue(Jaxb2RootElementHttpMessageConverter.class.equals(messageConverters[4].getClass()));
-		assertTrue(MappingJacksonHttpMessageConverter.class.equals(messageConverters[5].getClass()));
+		assertTrue(messageConverters.length > 0);
 
 		assertNotNull(appContext.getBean(FormattingConversionServiceFactoryBean.class));
 		assertNotNull(appContext.getBean(ConversionService.class));
