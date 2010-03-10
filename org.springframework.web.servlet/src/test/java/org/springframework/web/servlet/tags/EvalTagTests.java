@@ -90,6 +90,17 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(new BigDecimal(".25"), context.getAttribute("foo"));
 	}
 
+	// SPR-6923
+	public void testNestedPropertyWithAttribtueName() throws Exception {
+		tag.setExpression("bean.bean");
+		tag.setVar("foo");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("not the bean object", context.getAttribute("foo"));
+	}
+
 	public static class Bean {
 		
 		public String method() {
@@ -103,6 +114,9 @@ public class EvalTagTests extends AbstractTagTests {
 		
 		public String html() {
 			return "<p>";
+		}
+		public String getBean() {
+			return "not the bean object";
 		}
 		
 		public String js() {
