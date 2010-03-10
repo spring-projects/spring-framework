@@ -19,7 +19,10 @@ package org.springframework.http.converter.multipart;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.List;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -59,18 +62,19 @@ public class MultipartHttpMessageConverterTest {
 	@Test
 	public void write() throws Exception {
 		MultipartMap body = new MultipartMap();
-		body.addTextPart("name 1", "value 1");
-		body.addTextPart("name 2", "value 2+1");
-		body.addTextPart("name 2", "value 2+2");
+		body.add("name 1", "value 1");
+		body.add("name 2", "value 2+1");
+		body.add("name 2", "value 2+2");
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		body.addBinaryPart("logo", logo);
-		byte[] xml = "<root><child/></root>".getBytes("UTF-8");
-		body.addPart("xml", xml, new MediaType("application", "xml"));
+		body.add("logo", logo);
+		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
+		body.add("xml", xml);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(body, null, outputMessage);
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
 		final byte[] result = outputMessage.getBodyAsBytes();
+		System.out.println(new String(result));
 		assertNotNull(contentType);
 		assertNotNull(contentType.getParameter("boundary"));
 
@@ -114,13 +118,12 @@ public class MultipartHttpMessageConverterTest {
 		assertFalse(item.isFormField());
 		assertEquals("logo", item.getFieldName());
 		assertEquals("logo.jpg", item.getName());
-		assertEquals("application/octet-stream", item.getContentType());
+		assertEquals("image/jpeg", item.getContentType());
 		assertEquals(logo.getFile().length(), item.getSize());
 
 		item = (FileItem) items.get(4);
 		assertEquals("xml", item.getFieldName());
 		assertEquals("application/xml", item.getContentType());
-		assertEquals(xml.length, item.getSize());
 	}
 
 

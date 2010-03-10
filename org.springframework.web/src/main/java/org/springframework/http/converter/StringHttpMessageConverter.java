@@ -45,9 +45,19 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	private final List<Charset> availableCharsets;
 
+	private boolean writeAcceptCharset = true;
+
 	public StringHttpMessageConverter() {
 		super(new MediaType("text", "plain", DEFAULT_CHARSET), MediaType.ALL);
 		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
+	}
+
+	/**
+	 * Indicates whether the {@code Accept-Charset} should be written to any outgoing request.
+	 * <p>Default is {@code true}.
+	 */
+	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
+		this.writeAcceptCharset = writeAcceptCharset;
 	}
 
 	@Override
@@ -81,7 +91,9 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	@Override
 	protected void writeInternal(String s, HttpOutputMessage outputMessage) throws IOException {
-		outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
+		if (writeAcceptCharset) {
+			outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
+		}
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
 		FileCopyUtils.copy(s, new OutputStreamWriter(outputMessage.getBody(), charset));

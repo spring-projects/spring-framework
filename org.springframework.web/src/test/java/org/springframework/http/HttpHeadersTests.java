@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,16 @@ public class HttpHeadersTests {
 		headers.setCacheControl(cacheControl);
 		assertEquals("Invalid Cache-Control header", cacheControl, headers.getCacheControl());
 		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
+	}
+
+	@Test
+	public void contentDisposition() {
+		headers.setContentDispositionFormData("name", null);
+		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"", headers.getFirst("Content-Disposition"));
+
+
+		headers.setContentDispositionFormData("name", "filename");
+		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"", headers.getFirst("Content-Disposition"));
 	}
 
 
