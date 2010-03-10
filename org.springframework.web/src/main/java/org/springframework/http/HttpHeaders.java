@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.LinkedHashMap;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -93,9 +93,40 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
+	private final Map<String, List<String>> headers;
 
-	private final Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<List<String>>(8);
+	/**
+	 * Private constructor that can create read-only {@code HttpHeader} instances.
+	 */
+	private HttpHeaders(Map<String, List<String>> headers, boolean readOnly) {
+		Assert.notNull(headers, "'headers' must not be null");
+		if (readOnly) {
+			Map<String, List<String>> map =
+					new LinkedCaseInsensitiveMap<List<String>>(headers.size(), Locale.ENGLISH);
+			for (Entry<String, List<String>> entry : headers.entrySet()) {
+				List<String> values = Collections.unmodifiableList(entry.getValue());
+				map.put(entry.getKey(), values);
+			}
+			this.headers = Collections.unmodifiableMap(map);
+		}
+		else {
+			this.headers = headers;
+		}
+	}
 
+	/**
+	 * Constructs a new instance of the {@code HttpHeaders} object.
+	 */
+	public HttpHeaders() {
+		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), false);
+	}
+
+	/**
+	 * Returns {@code HttpHeaders} object that can only be read, not written to.
+	 */
+	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
+		return new HttpHeaders(headers, true);
+	}
 
 	/**
 	 * Set the list of acceptable {@linkplain MediaType media types}, as specified by the {@code Accept} header.
