@@ -64,6 +64,8 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 
 	private static final String CACHE_CONTROL = "Cache-Control";
 
+	private static final String CONTENT_DISPOSITION = "Content-Disposition";
+
 	private static final String CONTENT_LENGTH = "Content-Length";
 
 	private static final String CONTENT_TYPE = "Content-Type";
@@ -94,6 +96,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 	private final Map<String, List<String>> headers;
+
 
 	/**
 	 * Private constructor that can create read-only {@code HttpHeader} instances.
@@ -227,6 +230,22 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	 */
 	public String getCacheControl() {
 		return getFirst(CACHE_CONTROL);
+	}
+
+	/**
+	 * Sets the (new) value of the {@code Content-Disposition} header for {@code form-data}.
+	 * @param name the control name
+	 * @param filename the filename, may be {@code null}
+	 */
+	public void setContentDispositionFormData(String name, String filename) {
+		Assert.notNull(name, "'name' must not be null");
+		StringBuilder builder = new StringBuilder("form-data; name=\"");
+		builder.append(name).append('\"');
+		if (filename != null) {
+			builder.append("; filename=\"");
+			builder.append(filename).append('\"');
+		}
+		set(CONTENT_DISPOSITION, builder.toString());
 	}
 
 	/**

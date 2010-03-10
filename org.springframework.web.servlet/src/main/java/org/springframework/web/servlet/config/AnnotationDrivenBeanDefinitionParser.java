@@ -30,7 +30,10 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
+import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
@@ -82,6 +85,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
 					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
+	private static boolean romePresent =
+			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
@@ -167,6 +172,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		messageConverters.setSource(source);
 		messageConverters.add(new RootBeanDefinition(ByteArrayHttpMessageConverter.class));
 		messageConverters.add(new RootBeanDefinition(StringHttpMessageConverter.class));
+		messageConverters.add(new RootBeanDefinition(ResourceHttpMessageConverter.class));
 		messageConverters.add(new RootBeanDefinition(FormHttpMessageConverter.class));
 		messageConverters.add(new RootBeanDefinition(SourceHttpMessageConverter.class));
 		if (jaxb2Present) {
@@ -174,6 +180,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		if (jacksonPresent) {
 			messageConverters.add(new RootBeanDefinition(MappingJacksonHttpMessageConverter.class));
+		}
+		if (romePresent) {
+			messageConverters.add(new RootBeanDefinition(AtomFeedHttpMessageConverter.class));
+			messageConverters.add(new RootBeanDefinition(RssChannelHttpMessageConverter.class));
 		}
 		return messageConverters;
 	}

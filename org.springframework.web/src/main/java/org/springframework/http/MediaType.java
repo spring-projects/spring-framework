@@ -49,9 +49,74 @@ import org.springframework.util.StringUtils;
 public class MediaType implements Comparable<MediaType> {
 
 	/**
-	 * Public constant that includes all media ranges (i.e. <code>&#42;/&#42;</code>).
+	 * Public constant media type that includes all media ranges (i.e. <code>&#42;/&#42;</code>).
 	 */
 	public static final MediaType ALL;
+
+	/**
+	 *  Public constant media type for {@code application/atom+xml}.
+	 */
+	public final static MediaType APPLICATION_ATOM_XML;
+
+	/**
+	 * Public constant media type for {@code application/x-www-form-urlencoded}.
+	 *  */
+	public final static MediaType APPLICATION_FORM_URLENCODED;
+
+	/**
+	 * Public constant media type for {@code application/json}.
+	 * */
+	public final static MediaType APPLICATION_JSON;
+
+	/**
+	 * Public constant media type for {@code application/octet-stream}.
+	 *  */
+	public final static MediaType APPLICATION_OCTET_STREAM;
+
+	/**
+	 * Public constant media type for {@code application/xhtml+xml}.
+	 *  */
+	public final static MediaType APPLICATION_XHTML_XML;
+
+	/**
+	 * Public constant media type for {@code image/gif}.
+	 */
+	public final static MediaType IMAGE_GIF;
+
+	/**
+	 * Public constant media type for {@code image/jpeg}.
+	 */
+	public final static MediaType IMAGE_JPEG;
+
+	/**
+	 * Public constant media type for {@code image/png}.
+	 */
+	public final static MediaType IMAGE_PNG;
+
+	/**
+	 * Public constant media type for {@code image/xml}.
+	 */
+	public final static MediaType APPLICATION_XML;
+
+	/**
+	 * Public constant media type for {@code multipart/form-data}.
+	 *  */
+	public final static MediaType MULTIPART_FORM_DATA;
+
+	/**
+	 * Public constant media type for {@code text/html}.
+	 *  */
+	public final static MediaType TEXT_HTML;
+
+	/**
+	 * Public constant media type for {@code text/plain}.
+	 *  */
+	public final static MediaType TEXT_PLAIN;
+
+	/**
+	 * Public constant media type for {@code text/xml}.
+	 *  */
+	public final static MediaType TEXT_XML;
 
 	private static final BitSet TOKEN;
 
@@ -104,6 +169,19 @@ public class MediaType implements Comparable<MediaType> {
 		TOKEN.andNot(separators);
 
 		ALL = new MediaType("*", "*");
+		APPLICATION_ATOM_XML = new MediaType("application","atom+xml");
+		APPLICATION_FORM_URLENCODED = new MediaType("application","x-www-form-urlencoded");
+		APPLICATION_JSON = new MediaType("application","json");
+		APPLICATION_OCTET_STREAM = new MediaType("application","octet-stream");
+		APPLICATION_XHTML_XML = new MediaType("application","xhtml+xml");
+		APPLICATION_XML = new MediaType("application","xml");
+		IMAGE_GIF = new MediaType("image", "gif");
+		IMAGE_JPEG = new MediaType("image", "jpeg");
+		IMAGE_PNG = new MediaType("image", "png");
+		MULTIPART_FORM_DATA = new MediaType("multipart","form-data");
+		TEXT_HTML = new MediaType("text","html");
+		TEXT_PLAIN = new MediaType("text","plain");
+		TEXT_XML = new MediaType("text","xml");
 	}
 
 	/**
@@ -154,11 +232,23 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
+	 * Copy-constructor that copies the type and subtype of the given {@link MediaType}, and allows for different
+	 * parameter.
+	 *
+	 * @param other the other media type
+	 * @param parameters the parameters, may be <code>null</code>
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 */
+	public MediaType(MediaType other, Map<String, String> parameters) {
+		this(other.getType(), other.getSubtype(), parameters);
+	}
+
+	/**
 	 * Create a new {@link MediaType} for the given type, subtype, and parameters.
 	 *
 	 * @param type the primary type
 	 * @param subtype the subtype
-	 * @param parameters the parameters, mat be <code>null</code>
+	 * @param parameters the parameters, may be <code>null</code>
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, Map<String, String> parameters) {

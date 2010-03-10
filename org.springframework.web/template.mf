@@ -7,6 +7,7 @@ Import-Template:
  com.sun.syndication.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  org.codehaus.jackson.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  com.sun.net.*;version="0";resolution:=optional,
+ javax.activation.*;version="0";resolution:=optional,
  javax.el.*;version="[1.0.0, 3.0.0)";resolution:=optional,
  javax.faces.*;version="[1.1.0, 3.0.0)";resolution:=optional,
  javax.imageio.*;version="0";resolution:=optional,

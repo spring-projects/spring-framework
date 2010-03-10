@@ -16,52 +16,22 @@
 
 package org.springframework.http.converter.multipart;
 
-import java.io.File;
-import java.nio.charset.Charset;
-
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 
 /**
+ * Represents HTTP multipart form data, mapping names to parts.
+ *
+ * <p>In addition to the normal methods defined by {@link org.springframework.util.MultiValueMap}, this class offers
+ * the following convenience methods:
+ * <ul>
+ * <li>{@link #addTextPart} to add a text part (i.e. a form field)</li>
+ * <li>{@link #addBinaryPart} to add a binary part (i.e. a file)</li>
+ * <li>{@link #addPart} to add a custom part</li>
+ * </ul>
+ *
  * @author Arjen Poutsma
  * @since 3.0.2
  */
-public class MultipartMap extends LinkedMultiValueMap<String, Part> {
-
-	public void addTextPart(String name, String value) {
-		Assert.hasText(name, "'name' must not be empty");
-		add(name, new StringPart(value));
-	}
-
-	public void addTextPart(String name, String value, Charset charset) {
-		Assert.hasText(name, "'name' must not be empty");
-		add(name, new StringPart(value, charset));
-	}
-
-	public void addBinaryPart(String name, Resource resource) {
-		Assert.hasText(name, "'name' must not be empty");
-		add(name, new ResourcePart(resource));
-	}
-
-	public void addBinaryPart(Resource resource) {
-		Assert.notNull(resource, "'resource' must not be null");
-		addBinaryPart(resource.getFilename(), resource);
-	}
-
-	public void addBinaryPart(String name, File file) {
-		addBinaryPart(name, new FileSystemResource(file));
-	}
-
-	public void addBinaryPart(File file) {
-		addBinaryPart(new FileSystemResource(file));
-	}
-
-	public void addPart(String name, byte[] value, MediaType contentType) {
-		Assert.hasText(name, "'name' must not be empty");
-		add(name, new ByteArrayPart(value, contentType));
-	}
+public class MultipartMap extends LinkedMultiValueMap<String, Object> {
 
 }

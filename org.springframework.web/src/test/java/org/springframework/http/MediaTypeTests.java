@@ -31,7 +31,7 @@ public class MediaTypeTests {
 
 	@Test
 	public void includes() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
+		MediaType textPlain = MediaType.TEXT_PLAIN;
 		assertTrue("Equal types is not inclusive", textPlain.includes(textPlain));
 		MediaType allText = new MediaType("text");
 		assertTrue("All subtypes is not inclusive", allText.includes(textPlain));

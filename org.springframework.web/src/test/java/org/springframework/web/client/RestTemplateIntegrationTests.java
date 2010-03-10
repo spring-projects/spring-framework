@@ -146,11 +146,11 @@ public class RestTemplateIntegrationTests {
 	@Test
 	public void multipart() throws UnsupportedEncodingException {
 		MultipartMap body = new MultipartMap();
-		body.addTextPart("name 1", "value 1");
-		body.addTextPart("name 2", "value 2+1");
-		body.addTextPart("name 2", "value 2+2");
+		body.add("name 1", "value 1");
+		body.add("name 2", "value 2+1");
+		body.add("name 2", "value 2+2");
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		body.addBinaryPart("logo", logo);
+		body.add("logo", logo);
 
 		template.postForLocation(URI + "/multipart", body);
 	}
@@ -261,7 +261,7 @@ public class RestTemplateIntegrationTests {
 				assertFalse(item.isFormField());
 				assertEquals("logo", item.getFieldName());
 				assertEquals("logo.jpg", item.getName());
-				assertEquals("application/octet-stream", item.getContentType());
+				assertEquals("image/jpeg", item.getContentType());
 			}
 			catch (FileUploadException ex) {
 				throw new ServletException(ex);
