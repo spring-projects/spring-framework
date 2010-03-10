@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.simple;
 
 import java.util.Map;
 
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
@@ -74,7 +75,6 @@ public interface SimpleJdbcCallOperations {
 	 * will be used to provide input values.  This is different from the <code>StoredProcedure</code> class
 	 * which for backwards compatibility reasons allows input values to be provided for parameters declared
 	 * as <code>SqlOutParameter</code>.
-	 *
 	 * @param sqlParameters the parameters to use
 	 * @return the instance of this SimpleJdbcCall
 	 */
@@ -85,13 +85,24 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
-	 * by a RowMapper. The results will be returned using the parameter name specified.  Multiple
+	 * by a RowMapper. The results will be returned using the parameter name specified. Multiple
 	 * ResultSets must be declared in the correct order. If the database you are using uses ref cursors
 	 * then the name specified must match the name of the parameter declared for the procedure in the
 	 * database.
 	 * @param parameterName the name of the returned results and/or the name of the ref cursor parameter
 	 * @param rowMapper the RowMapper implementation that will map the data returned for each row
 	 * */
+	SimpleJdbcCallOperations returningResultSet(String parameterName, RowMapper rowMapper);
+
+	/**
+	 * Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
+	 * by a RowMapper. The results will be returned using the parameter name specified. Multiple
+	 * ResultSets must be declared in the correct order. If the database you are using uses ref cursors
+	 * then the name specified must match the name of the parameter declared for the procedure in the
+	 * database.
+	 * @deprecated in favor of {@link #returningResultSet(String, org.springframework.jdbc.core.RowMapper)}
+	 */
+	@Deprecated
 	SimpleJdbcCallOperations returningResultSet(String parameterName, ParameterizedRowMapper rowMapper);
 
 	/**
@@ -104,8 +115,9 @@ public interface SimpleJdbcCallOperations {
 	/**
 	 * Execute the stored function and return the results obtained as an Object of the specified return type.
 	 * @param returnType the type of the value to return
-	 * @param args optional array containing the in parameter values to be used in the call. Parameter values must
-	 * be provided in the same order as the parameters are defined for the stored procedure.
+	 * @param args optional array containing the in parameter values to be used in the call.
+	 * Parameter values must be provided in the same order as the parameters are defined
+	 * for the stored procedure.
 	 */
 	<T> T executeFunction(Class<T> returnType, Object... args);
 

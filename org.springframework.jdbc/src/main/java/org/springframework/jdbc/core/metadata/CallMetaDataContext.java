@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -34,8 +33,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -540,7 +539,7 @@ public class CallMetaDataContext {
 		return matchedParameters;
 	}
 
-	public Map<String,?> matchInParameterValuesWithCallParameters(Object[] parameterValues) {
+	public Map<String, ?> matchInParameterValuesWithCallParameters(Object[] parameterValues) {
 		Map<String, Object> matchedParameters = new HashMap<String, Object>(parameterValues.length);
 		int i = 0;
 		for (SqlParameter parameter : this.callParameters) {
