@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,26 @@
 
 package org.springframework.http.converter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.RequestContext;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
@@ -41,29 +53,30 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void canRead() {
 		assertTrue(converter.canRead(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
+		assertFalse(converter.canRead(MultiValueMap.class, new MediaType("multipart","form-data")));
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void canWrite() {
 		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
+		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("multipart","form-data")));
 		assertTrue(converter.canWrite(MultiValueMap.class, MediaType.ALL));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void read() throws Exception {
+	@SuppressWarnings("unchecked")
+	public void readForm() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		Charset iso88591 = Charset.forName("ISO-8859-1");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(iso88591));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "x-www-form-urlencoded", iso88591));
-		MultiValueMap result = converter.read(null, inputMessage);
+		MultiValueMap<String, String> result = (MultiValueMap<String, String>) converter.read(null, inputMessage);
+
 		assertEquals("Invalid result", 3, result.size());
 		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
-		List<String> values = (List<String>) result.get("name 2");
+		List<String> values = result.get("name 2");
 		assertEquals("Invalid result", 2, values.size());
 		assertEquals("Invalid result", "value 2+1", values.get(0));
 		assertEquals("Invalid result", "value 2+2", values.get(1));
@@ -71,19 +84,95 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws IOException {
+	public void writeForm() throws IOException {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
 		body.add("name 2", "value 2+2");
 		body.add("name 3", null);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(body, null, outputMessage);
+		converter.write(body, MediaType.APPLICATION_FORM_URLENCODED, outputMessage);
 		Charset iso88591 = Charset.forName("ISO-8859-1");
 		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
 				outputMessage.getBodyAsString(iso88591));
 		assertEquals("Invalid content-type", new MediaType("application", "x-www-form-urlencoded"),
 				outputMessage.getHeaders().getContentType());
 	}
+	
+	@Test
+	public void writeMultipart() throws Exception {
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		parts.add("name 1", "value 1");
+		parts.add("name 2", "value 2+1");
+		parts.add("name 2", "value 2+2");
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		parts.add("logo", logo);
+		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
+		parts.add("xml", xml);
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(parts, MediaType.MULTIPART_FORM_DATA, outputMessage);
+
+		final MediaType contentType = outputMessage.getHeaders().getContentType();
+		assertNotNull(contentType.getParameter("boundary"));
+
+		// see if Commons FileUpload can read what we wrote
+		FileItemFactory fileItemFactory = new DiskFileItemFactory();
+		FileUpload fileUpload = new FileUpload(fileItemFactory);
+		List items = fileUpload.parseRequest(new MockHttpOutputMessageRequestContext(outputMessage));
+		assertEquals(5, items.size());
+		FileItem item = (FileItem) items.get(0);
+		assertTrue(item.isFormField());
+		assertEquals("name 1", item.getFieldName());
+		assertEquals("value 1", item.getString());
+
+		item = (FileItem) items.get(1);
+		assertTrue(item.isFormField());
+		assertEquals("name 2", item.getFieldName());
+		assertEquals("value 2+1", item.getString());
+
+		item = (FileItem) items.get(2);
+		assertTrue(item.isFormField());
+		assertEquals("name 2", item.getFieldName());
+		assertEquals("value 2+2", item.getString());
+
+		item = (FileItem) items.get(3);
+		assertFalse(item.isFormField());
+		assertEquals("logo", item.getFieldName());
+		assertEquals("logo.jpg", item.getName());
+		assertEquals("image/jpeg", item.getContentType());
+		assertEquals(logo.getFile().length(), item.getSize());
+
+		item = (FileItem) items.get(4);
+		assertEquals("xml", item.getFieldName());
+		assertEquals("application/xml", item.getContentType());
+	}
+
+	private static class MockHttpOutputMessageRequestContext implements RequestContext {
+		private final MockHttpOutputMessage outputMessage;
+
+		private MockHttpOutputMessageRequestContext(MockHttpOutputMessage outputMessage) {
+			this.outputMessage = outputMessage;
+		}
+
+		public String getCharacterEncoding() {
+			MediaType contentType = outputMessage.getHeaders().getContentType();
+			return contentType != null && contentType.getCharSet() != null ? contentType.getCharSet().name() : null;
+		}
+
+		public String getContentType() {
+			MediaType contentType = outputMessage.getHeaders().getContentType();
+			return contentType != null ? contentType.toString() : null;
+		}
+
+		public int getContentLength() {
+			return outputMessage.getBodyAsBytes().length;
+		}
+
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(outputMessage.getBodyAsBytes());
+		}
+	}
+
 
 }
