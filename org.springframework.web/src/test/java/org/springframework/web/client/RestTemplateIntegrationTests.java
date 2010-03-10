@@ -49,8 +49,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
-import org.springframework.http.converter.multipart.MultipartMap;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /** @author Arjen Poutsma */
 public class RestTemplateIntegrationTests {
@@ -145,14 +146,14 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void multipart() throws UnsupportedEncodingException {
-		MultipartMap body = new MultipartMap();
-		body.add("name 1", "value 1");
-		body.add("name 2", "value 2+1");
-		body.add("name 2", "value 2+2");
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		parts.add("name 1", "value 1");
+		parts.add("name 2", "value 2+1");
+		parts.add("name 2", "value 2+2");
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		body.add("logo", logo);
+		parts.add("logo", logo);
 
-		template.postForLocation(URI + "/multipart", body);
+		template.postForLocation(URI + "/multipart", parts);
 	}
 
 	/** Servlet that returns and error message for a given status code. */
