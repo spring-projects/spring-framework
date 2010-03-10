@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package org.springframework.jdbc.core.simple;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
@@ -121,6 +120,15 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
+	public SimpleJdbcCall returningResultSet(String parameterName, RowMapper rowMapper) {
+		addDeclaredRowMapper(parameterName, rowMapper);
+		return this;
+	}
+
+	/**
+	 * @deprecated in favor of {@link #returningResultSet(String, org.springframework.jdbc.core.RowMapper)}
+	 */
+   @Deprecated
 	public SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper) {
 		addDeclaredRowMapper(parameterName, rowMapper);
 		return this;

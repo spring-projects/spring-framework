@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.metadata.CallMetaDataContext;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -55,7 +56,7 @@ public abstract class AbstractJdbcCall {
 	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
 
 	/** List of RefCursor/ResultSet RowMapper objects */
-	private final Map<String, ParameterizedRowMapper> declaredRowMappers = new LinkedHashMap<String, ParameterizedRowMapper>();
+	private final Map<String, RowMapper> declaredRowMappers = new LinkedHashMap<String, RowMapper>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
@@ -203,7 +204,8 @@ public abstract class AbstractJdbcCall {
 	 */
 	public void addDeclaredParameter(SqlParameter parameter) {
 		if (!StringUtils.hasText(parameter.getName())) {
-			throw new InvalidDataAccessApiUsageException("You must specify a parameter name when declaring parameters for \"" + getProcedureName() + "\"");
+			throw new InvalidDataAccessApiUsageException(
+					"You must specify a parameter name when declaring parameters for \"" + getProcedureName() + "\"");
 		}
 		this.declaredParameters.add(parameter);
 		if (logger.isDebugEnabled()) {
@@ -212,15 +214,24 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Add a {@link org.springframework.jdbc.core.RowMapper} for the specified parameter or column
+	 * Add a {@link org.springframework.jdbc.core.RowMapper} for the specified parameter or column.
 	 * @param parameterName name of parameter or column
 	 * @param rowMapper the RowMapper implementation to use
 	 */
-	public void addDeclaredRowMapper(String parameterName, ParameterizedRowMapper rowMapper) {
+	public void addDeclaredRowMapper(String parameterName, RowMapper rowMapper) {
 		this.declaredRowMappers.put(parameterName, rowMapper);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added row mapper for [" + getProcedureName() + "]: " + parameterName);
 		}
+	}
+
+	/**
+	 * Add a {@link org.springframework.jdbc.core.RowMapper} for the specified parameter or column.
+	 * @deprecated in favor of {@link #addDeclaredRowMapper(String, org.springframework.jdbc.core.RowMapper)}
+	 */
+	@Deprecated
+	public void addDeclaredRowMapper(String parameterName, ParameterizedRowMapper rowMapper) {
+		addDeclaredRowMapper(parameterName, (RowMapper) rowMapper);
 	}
 
 	/**
@@ -279,7 +290,7 @@ public abstract class AbstractJdbcCall {
 		this.callMetaDataContext.initializeMetaData(getJdbcTemplate().getDataSource());
 
 		// iterate over the declared RowMappers and register the corresponding SqlParameter
-		for (Map.Entry<String, ParameterizedRowMapper> entry : this.declaredRowMappers.entrySet()) {
+		for (Map.Entry<String, RowMapper> entry : this.declaredRowMappers.entrySet()) {
 			SqlParameter resultSetParameter =
 					this.callMetaDataContext.createReturnResultSetParameter(entry.getKey(), entry.getValue());
 			this.declaredParameters.add(resultSetParameter);
@@ -402,7 +413,7 @@ public abstract class AbstractJdbcCall {
 	 * @param args the parameter values provided as an array
 	 * @return Map with parameter names and values
 	 */
-	private Map<String,?> matchInParameterValuesWithCallParameters(Object[] args) {
+	private Map<String, ?> matchInParameterValuesWithCallParameters(Object[] args) {
 		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(args);
 	}
 
