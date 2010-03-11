@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.core.io.Resource;
 /**
  * ResourceLoader implementation that resolves paths as ServletContext
  * resources, for use outside a WebApplicationContext (for example,
- * in a HttpServletBean or GenericFilterBean subclass).
+ * in an HttpServletBean or GenericFilterBean subclass).
  *
  * <p>Within a WebApplicationContext, resource paths are automatically
  * resolved as ServletContext resources by the context implementation.
