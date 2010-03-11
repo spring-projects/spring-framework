@@ -522,12 +522,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
 			super.doWithRequest(httpRequest);
 			if (!requestEntity.hasBody()) {
+				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = requestEntity.getHeaders();
 				if (!requestHeaders.isEmpty()) {
-					httpRequest.getHeaders().putAll(requestHeaders);
+					httpHeaders.putAll(requestHeaders);
 				}
-				if (httpRequest.getHeaders().getContentLength() == -1) {
-					httpRequest.getHeaders().setContentLength(0L);
+				if (httpHeaders.getContentLength() == -1) {
+					httpHeaders.setContentLength(0L);
 				}
 			}
 			else {
