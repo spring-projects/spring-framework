@@ -50,9 +50,9 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -179,7 +179,7 @@ public class RestTemplateIntegrationTests {
 	}
 
 	@Test
-	public void exchange() throws Exception {
+	public void exchangeGet() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
 		HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
@@ -188,6 +188,15 @@ public class RestTemplateIntegrationTests {
 		assertEquals("Invalid content", helloWorld, response.getBody());
 	}
 
+	@Test
+	public void exchangePost() throws Exception {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set("MyHeader", "MyValue");
+		HttpEntity<String> requestEntity = new HttpEntity<String>(helloWorld, requestHeaders);
+		HttpEntity<?> result = template.exchange(URI + "/{method}", HttpMethod.POST, requestEntity, null, "post");
+		assertEquals("Invalid location", new URI(URI + "/post/1"), result.getHeaders().getLocation());
+		assertFalse(result.hasBody());
+	}
 
 	/** Servlet that returns and error message for a given status code. */
 	private static class ErrorServlet extends GenericServlet {
