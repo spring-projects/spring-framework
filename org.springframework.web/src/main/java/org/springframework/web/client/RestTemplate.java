@@ -587,12 +587,21 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		private final HttpMessageConverterExtractor<T> delegate;
 
 		public HttpEntityResponseExtractor(Class<T> responseType) {
-			this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+			if (responseType != null) {
+				this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+			} else {
+				this.delegate = null;
+			}
 		}
 
 		public HttpEntity<T> extractData(ClientHttpResponse response) throws IOException {
-			T body = delegate.extractData(response);
-			return new HttpEntity<T>(body, response.getHeaders());
+			if (delegate != null) {
+				T body = delegate.extractData(response);
+				return new HttpEntity<T>(body, response.getHeaders());
+			}
+			else {
+				return new HttpEntity<T>(response.getHeaders());
+			}
 		}
 	}
 
