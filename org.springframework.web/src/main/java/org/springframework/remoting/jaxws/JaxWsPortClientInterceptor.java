@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.ProtocolException;
@@ -248,7 +247,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Set the interface of the service that this factory should create a proxy for.
 	 */
-	public void setServiceInterface(Class serviceInterface) {
+	public void setServiceInterface(Class<?> serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
@@ -258,7 +257,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	/**
 	 * Return the interface of the service that this factory should create a proxy for.
 	 */
-	public Class getServiceInterface() {
+	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}
 
@@ -395,10 +394,12 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 			throw new JaxWsSoapFaultException(ex);
 		}
 		catch (ProtocolException ex) {
-			throw new RemoteConnectFailureException("Could not connect to remote service [" + this.portQName + "]", ex);
+			throw new RemoteConnectFailureException(
+					"Could not connect to remote service [" + getEndpointAddress() + "]", ex);
 		}
 		catch (WebServiceException ex) {
-			throw new RemoteAccessException("Could not access remote service at [" + this.portQName + "]", ex);
+			throw new RemoteAccessException(
+					"Could not access remote service at [" + getEndpointAddress() + "]", ex);
 		}
 	}
 
