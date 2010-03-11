@@ -249,6 +249,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		return false;
 	}
 
+	// TODO when there is more time, remove this and use the version in AstUtils
 	/**
 	 * Determines the set of property resolvers that should be used to try and access a property on the specified target
 	 * type. The resolvers are considered to be in an ordered list, however in the returned list any that are exact

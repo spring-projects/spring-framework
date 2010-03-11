@@ -291,6 +291,125 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		}
 	}
 	
+
+	@Test
+	public void testNestedProperties_SPR6923() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new Foo());
+		String name = null;
+		Expression expr = null;
+		
+		expr = new SpelExpressionParser().parseRaw("resource.resource.server");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("abc",name);
+	}
+	
+	static class Foo {
+		public ResourceSummary resource = new ResourceSummary();
+	}
+	
+	static class ResourceSummary {
+		ResourceSummary() {
+			this.resource = new Resource();
+		}
+		private final Resource resource;
+		public Resource getResource() {
+	        return resource;
+	    }
+	}
+	
+	static class Resource {
+		public String getServer() {
+			return "abc";
+		}
+	}
+
+	/** Should be accessing Goo.getKey because 'bar' field evaluates to "key" */
+	@Test
+	public void testIndexingAsAPropertyAccess_SPR6968_1() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
+		String name = null;
+		Expression expr = null;
+		expr = new SpelExpressionParser().parseRaw("instance[bar]");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("hello",name);
+		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
+		Assert.assertEquals("hello",name);
+	}
+
+	/** Should be accessing Goo.getKey because 'bar' variable evaluates to "key" */
+	@Test
+	public void testIndexingAsAPropertyAccess_SPR6968_2() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
+		eContext.setVariable("bar","key");
+		String name = null;
+		Expression expr = null;
+		expr = new SpelExpressionParser().parseRaw("instance[#bar]");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("hello",name);
+		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
+		Assert.assertEquals("hello",name);
+	}
+
+	/** Should be accessing Goo.wibble field because 'bar' variable evaluates to "wibble" */
+	@Test
+	public void testIndexingAsAPropertyAccess_SPR6968_3() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new Goo());
+		eContext.setVariable("bar","wibble");
+		String name = null;
+		Expression expr = null;
+		expr = new SpelExpressionParser().parseRaw("instance[#bar]");
+		// will access the field 'wibble' and not use a getter
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("wobble",name);
+		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
+		Assert.assertEquals("wobble",name);
+	}
+	
+	/** Should be accessing (setting) Goo.wibble field because 'bar' variable evaluates to "wibble" */
+	@Test
+	public void testIndexingAsAPropertyAccess_SPR6968_4() {
+		Goo g = Goo.instance;
+		StandardEvaluationContext eContext = new StandardEvaluationContext(g);
+		eContext.setVariable("bar","wibble");
+		Expression expr = null;
+		expr = new SpelExpressionParser().parseRaw("instance[#bar]='world'");
+		// will access the field 'wibble' and not use a getter
+		expr.getValue(eContext,String.class);
+		Assert.assertEquals("world",g.wibble);
+		expr.getValue(eContext,String.class); // will be using the cached accessor this time
+		Assert.assertEquals("world",g.wibble);
+	}
+
+	/** Should be accessing Goo.setKey field because 'bar' variable evaluates to "key" */
+	@Test
+	public void testIndexingAsAPropertyAccess_SPR6968_5() {
+		Goo g = Goo.instance;
+		StandardEvaluationContext eContext = new StandardEvaluationContext(g);
+		Expression expr = null;
+		expr = new SpelExpressionParser().parseRaw("instance[bar]='world'");
+		expr.getValue(eContext,String.class);
+		Assert.assertEquals("world",g.value);
+		expr.getValue(eContext,String.class); // will be using the cached accessor this time
+		Assert.assertEquals("world",g.value);
+	}
+
+	static class Goo {
+		
+		public static Goo instance = new Goo();
+		public String bar = "key";
+		public String value = null;
+
+		public String wibble = "wobble";
+		
+		public String getKey() {
+			return "hello";
+		}
+		
+		public void setKey(String s) {
+			value = s;
+		}
+		
+	}
 	
 	// ---
 
