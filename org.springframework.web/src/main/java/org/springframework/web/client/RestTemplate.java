@@ -58,7 +58,8 @@ import org.springframework.web.util.UriUtils;
  * <tr><td>GET</td><td>{@link #getForObject}</td></tr> <tr><td>HEAD</td><td>{@link #headForHeaders}</td></tr>
  * <tr><td>OPTIONS</td><td>{@link #optionsForAllow}</td></tr> <tr><td>POST</td><td>{@link #postForLocation}</td></tr>
  * <tr><td></td><td>{@link #postForObject}</td></tr> <tr><td>PUT</td><td>{@link #put}</td></tr>
- * <tr><td>any</td><td>{@link #execute}</td></tr> </table>
+ * <tr><td>any</td><td>{@link #exchange}</td></tr>
+ * <tr><td></td><td>{@link #execute}</td></tr> </table>
  *
  * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}. Two
  * variant take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, Object[])}, {@link
@@ -358,6 +359,29 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public Set<HttpMethod> optionsForAllow(URI url) throws RestClientException {
 		HttpHeaders headers = execute(url, HttpMethod.OPTIONS, null, this.headersExtractor);
 		return headers.getAllow();
+	}
+
+	// exchange
+
+	public <Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method,
+			HttpEntity<Req> requestEntity, Class<Res> responseType, Object... uriVariables) throws RestClientException {
+		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
+		HttpEntityResponseExtractor<Res> responseExtractor = new HttpEntityResponseExtractor<Res>(responseType);
+		return execute(url, method, requestCallback, responseExtractor, uriVariables);
+	}
+
+	public <Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method,
+			HttpEntity<Req> requestEntity, Class<Res> responseType, Map<String, ?> uriVariables) throws RestClientException {
+		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
+		HttpEntityResponseExtractor<Res> responseExtractor = new HttpEntityResponseExtractor<Res>(responseType);
+		return execute(url, method, requestCallback, responseExtractor, uriVariables);
+	}
+
+	public <Req, Res> HttpEntity<Res> exchange(URI url, HttpMethod method, HttpEntity<Req> requestEntity, 
+			Class<Res> responseType) throws RestClientException {
+		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
+		HttpEntityResponseExtractor<Res> responseExtractor = new HttpEntityResponseExtractor<Res>(responseType);
+		return execute(url, method, requestCallback, responseExtractor);
 	}
 
 	// general execution
