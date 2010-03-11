@@ -795,7 +795,7 @@ TR: OK. Added to diagram.--></para>
 
         <para>Now this application is probably broken because there is no
         implementation of the JCL API on the classpath, so to fix it a new one
-        has to be prvided. In the next section we show you how to provide an
+        has to be provided. In the next section we show you how to provide an
         alternative implementation of JCL using SLF4J as an example.</para>
       </section>
 
