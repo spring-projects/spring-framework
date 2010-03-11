@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.web.client;
 import org.springframework.http.HttpStatus;
 
 /**
- * Exception thrown when a HTTP 5xx is received.
+ * Exception thrown when an HTTP 5xx is received.
  *
  * @author Arjen Poutsma
  * @since 3.0

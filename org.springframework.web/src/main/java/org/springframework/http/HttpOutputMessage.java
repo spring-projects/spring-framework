@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Represents a HTTP output message, consisting of {@linkplain #getHeaders() headers}
+ * Represents an HTTP output message, consisting of {@linkplain #getHeaders() headers}
  * and a writable {@linkplain #getBody() body}.
  *
- * <p>Typically implemented by a HTTP request on the client-side, or a response on the server-side.
+ * <p>Typically implemented by an HTTP request on the client-side, or a response on the server-side.
  *
  * @author Arjen Poutsma
  * @since 3.0
