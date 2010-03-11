@@ -180,6 +180,7 @@ public interface RestOperations {
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
 	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 * @see HttpEntity
@@ -195,6 +196,7 @@ public interface RestOperations {
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
 	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 * @see HttpEntity
@@ -209,6 +211,7 @@ public interface RestOperations {
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
 	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param responseType the type of the return value
 	 * @return the converted object
 	 * @see HttpEntity
 	 */
@@ -347,11 +350,56 @@ public interface RestOperations {
 	 */
 	Set<HttpMethod> optionsForAllow(URI url) throws RestClientException;
 
+	// exchange
+
+	/**
+	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
+	 * returns the response as {@link HttpEntity}.
+	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * @param url the URL
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @param uriVariables the variables to expand in the template
+	 * @return the response as entity
+	 * @since 3.0.2
+	 */
+	<Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method, HttpEntity<Req> requestEntity,
+			Class<Res> responseType, Object... uriVariables) throws RestClientException;
+
+	/**
+	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
+	 * returns the response as {@link HttpEntity}.
+	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * @param url the URL
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @param uriVariables the variables to expand in the template
+	 * @return the response as entity
+	 * @since 3.0.2
+	 */
+	<Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method, HttpEntity<Req> requestEntity,
+			Class<Res> responseType, Map<String, ?> uriVariables) throws RestClientException;
+
+	/**
+	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
+	 * returns the response as {@link HttpEntity}.
+	 * @param url the URL
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @return the response as entity
+	 * @since 3.0.2
+	 */
+	<Req, Res> HttpEntity<Res> exchange(URI url, HttpMethod method, HttpEntity<Req> requestEntity,
+			Class<Res> responseType) throws RestClientException;
+
 	// general execution
 
 	/**
-	 * Execute the HTTP methods to the given URI template, preparing the request with the
-	 * {@link RequestCallback}, and reading the response with a{@link ResponseExtractor}.
+	 * Execute the HTTP method to the given URI template, preparing the request with the
+	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -364,7 +412,7 @@ public interface RestOperations {
 			ResponseExtractor<T> responseExtractor, Object... uriVariables) throws RestClientException;
 
 	/**
-	 * Execute the HTTP methods to the given URI template, preparing the request with the
+	 * Execute the HTTP method to the given URI template, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables map.
 	 * @param url the URL
@@ -378,7 +426,7 @@ public interface RestOperations {
 			ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
-	 * Execute the HTTP methods to the given URL, preparing the request with the
+	 * Execute the HTTP method to the given URL, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
