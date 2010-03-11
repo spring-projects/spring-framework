@@ -538,6 +538,40 @@ public class RestTemplateTests {
 		verifyMocks();
 	}
 
+	@Test
+	public void exchange() throws Exception {
+		MediaType textPlain = new MediaType("text", "plain");
+		expect(converter.canRead(Integer.class, null)).andReturn(true);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(this.request.getHeaders()).andReturn(requestHeaders).times(2);
+		expect(converter.canWrite(String.class, null)).andReturn(true);
+		String body = "Hello World";
+		converter.write(body, null, this.request);
+		expect(this.request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		Integer expected = 42;
+		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
+		expect(converter.read(Integer.class, response)).andReturn(expected);
+		response.close();
+
+		replayMocks();
+
+		HttpEntity<String> requestEntity = new HttpEntity<String>(body, Collections.singletonMap("MyHeader", "MyValue"));
+		HttpEntity<Integer> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, Integer.class);
+		assertEquals("Invalid POST result", expected, result.getBody());
+		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
+		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid custom header", "MyValue", requestHeaders.getFirst("MyHeader"));
+
+		verifyMocks();
+	}
+
+
 	private void replayMocks() {
 		replay(requestFactory, request, response, errorHandler, converter);
 	}

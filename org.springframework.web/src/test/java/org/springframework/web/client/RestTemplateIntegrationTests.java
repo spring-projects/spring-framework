@@ -52,6 +52,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -175,6 +176,16 @@ public class RestTemplateIntegrationTests {
 		parts.add("logo", logo);
 
 		template.postForLocation(URI + "/multipart", parts);
+	}
+
+	@Test
+	public void exchange() throws Exception {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set("MyHeader", "MyValue");
+		HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
+		HttpEntity<String> response =
+				template.exchange(URI + "/{method}", HttpMethod.GET, requestEntity, String.class, "get");
+		assertEquals("Invalid content", helloWorld, response.getBody());
 	}
 
 
