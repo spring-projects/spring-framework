@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -176,6 +177,36 @@ public class RestTemplateTests {
 		verifyMocks();
 	}
 
+
+	@Test
+	public void getForEntity() throws Exception {
+		expect(converter.canRead(String.class, null)).andReturn(true);
+		MediaType textPlain = new MediaType("text", "plain");
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.GET)).andReturn(request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(request.getHeaders()).andReturn(requestHeaders);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		expect(converter.canRead(String.class, textPlain)).andReturn(true);
+		String expected = "Hello World";
+		expect(converter.read(String.class, response)).andReturn(expected);
+		response.close();
+
+		replayMocks();
+
+		HttpEntity<String> result = template.getForEntity("http://example.com", String.class);
+		assertEquals("Invalid GET result", expected, result.getBody());
+		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid Content-Type header", textPlain, result.getHeaders().getContentType());
+
+		verifyMocks();
+	}
+
+
 	@Test
 	public void headForHeaders() throws Exception {
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.HEAD)).andReturn(request);
@@ -211,6 +242,60 @@ public class RestTemplateTests {
 
 		URI result = template.postForLocation("http://example.com", helloWorld);
 		assertEquals("Invalid POST result", expected, result);
+
+		verifyMocks();
+	}
+
+	@Test
+	public void postForLocationEntityContentType() throws Exception {
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
+		String helloWorld = "Hello World";
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		expect(converter.canWrite(String.class, contentType)).andReturn(true);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(request.getHeaders()).andReturn(requestHeaders);
+		converter.write(helloWorld, contentType, request);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		URI expected = new URI("http://example.com/hotels");
+		responseHeaders.setLocation(expected);
+		expect(response.getHeaders()).andReturn(responseHeaders);
+		response.close();
+
+		replayMocks();
+
+		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, contentType);
+
+		URI result = template.postForLocation("http://example.com", entity);
+		assertEquals("Invalid POST result", expected, result);
+
+		verifyMocks();
+	}
+
+	@Test
+	public void postForLocationEntityCustomHeader() throws Exception {
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
+		String helloWorld = "Hello World";
+		expect(converter.canWrite(String.class, null)).andReturn(true);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(request.getHeaders()).andReturn(requestHeaders);
+		converter.write(helloWorld, null, request);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		URI expected = new URI("http://example.com/hotels");
+		responseHeaders.setLocation(expected);
+		expect(response.getHeaders()).andReturn(responseHeaders);
+		response.close();
+
+		replayMocks();
+
+		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, Collections.singletonMap("MyHeader", "MyValue"));
+
+		URI result = template.postForLocation("http://example.com", entity);
+		assertEquals("Invalid POST result", expected, result);
+		assertEquals("No custom header set", "MyValue", requestHeaders.getFirst("MyHeader"));
 
 		verifyMocks();
 	}
@@ -284,6 +369,37 @@ public class RestTemplateTests {
 	}
 
 	@Test
+	public void postForEntity() throws Exception {
+		MediaType textPlain = new MediaType("text", "plain");
+		expect(converter.canRead(Integer.class, null)).andReturn(true);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(this.request.getHeaders()).andReturn(requestHeaders);
+		String request = "Hello World";
+		expect(converter.canWrite(String.class, null)).andReturn(true);
+		converter.write(request, null, this.request);
+		expect(this.request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		Integer expected = 42;
+		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
+		expect(converter.read(Integer.class, response)).andReturn(expected);
+		response.close();
+
+		replayMocks();
+
+		HttpEntity<Integer> result = template.postForEntity("http://example.com", request, Integer.class);
+		assertEquals("Invalid POST result", expected, result.getBody());
+		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
+		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+
+		verifyMocks();
+	}
+
+	@Test
 	public void postForObjectNull() throws Exception {
 		MediaType textPlain = new MediaType("text", "plain");
 		expect(converter.canRead(Integer.class, null)).andReturn(true);
@@ -301,7 +417,34 @@ public class RestTemplateTests {
 		response.close();
 
 		replayMocks();
-		template.postForObject("http://example.com", null, Integer.class);
+		Integer result = template.postForObject("http://example.com", null, Integer.class);
+		assertNull("Invalid POST result", result);
+		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+
+		verifyMocks();
+	}
+	
+	@Test
+	public void postForEntityNull() throws Exception {
+		MediaType textPlain = new MediaType("text", "plain");
+		expect(converter.canRead(Integer.class, null)).andReturn(true);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(request.getHeaders()).andReturn(requestHeaders).times(2);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(textPlain);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
+		expect(converter.read(Integer.class, response)).andReturn(null);
+		response.close();
+
+		replayMocks();
+		HttpEntity<Integer> result = template.postForEntity("http://example.com", null, Integer.class);
+		assertFalse("Invalid POST result", result.hasBody());
+		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
 
 		verifyMocks();

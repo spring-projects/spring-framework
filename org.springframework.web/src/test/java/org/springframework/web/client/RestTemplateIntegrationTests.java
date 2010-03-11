@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +49,9 @@ import org.mortbay.jetty.servlet.ServletHolder;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -64,12 +68,14 @@ public class RestTemplateIntegrationTests {
 
 	private static final String URI = "http://localhost:8889";
 
+	private static MediaType contentType;
+
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
 		jettyServer = new Server(8889);
 		Context jettyContext = new Context(jettyServer, "/");
 		byte[] bytes = helloWorld.getBytes("UTF-8");
-		String contentType = "text/plain;charset=utf-8";
+		contentType = new MediaType("text", "plain", Collections.singletonMap("charset", "utf-8"));
 		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
 		jettyContext.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
 		jettyContext.addServlet(
@@ -101,6 +107,14 @@ public class RestTemplateIntegrationTests {
 	}
 
 	@Test
+	public void getEntity() {
+		HttpEntity<String> entity = template.getForEntity(URI + "/{method}", String.class, "get");
+		assertEquals("Invalid content", helloWorld, entity.getBody());
+		assertFalse("No headers", entity.getHeaders().isEmpty());
+		assertEquals("Invalid content-type", contentType, entity.getHeaders().getContentType());
+	}
+
+	@Test
 	public void getNoResponse() {
 		String s = template.getForObject(URI + "/get/nothing", String.class);
 		assertEquals("Invalid content", "", s);
@@ -109,6 +123,13 @@ public class RestTemplateIntegrationTests {
 	@Test
 	public void postForLocation() throws URISyntaxException {
 		URI location = template.postForLocation(URI + "/{method}", helloWorld, "post");
+		assertEquals("Invalid location", new URI(URI + "/post/1"), location);
+	}
+
+	@Test
+	public void postForLocationEntity() throws URISyntaxException {
+		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
+		URI location = template.postForLocation(URI + "/{method}", entity, "post");
 		assertEquals("Invalid location", new URI(URI + "/post/1"), location);
 	}
 
@@ -156,6 +177,7 @@ public class RestTemplateIntegrationTests {
 		template.postForLocation(URI + "/multipart", parts);
 	}
 
+
 	/** Servlet that returns and error message for a given status code. */
 	private static class ErrorServlet extends GenericServlet {
 
@@ -175,9 +197,9 @@ public class RestTemplateIntegrationTests {
 
 		private final byte[] buf;
 
-		private final String contentType;
+		private final MediaType contentType;
 
-		private GetServlet(byte[] buf, String contentType) {
+		private GetServlet(byte[] buf, MediaType contentType) {
 			this.buf = buf;
 			this.contentType = contentType;
 		}
@@ -185,7 +207,7 @@ public class RestTemplateIntegrationTests {
 		@Override
 		protected void doGet(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
-			response.setContentType(contentType);
+			response.setContentType(contentType.toString());
 			response.setContentLength(buf.length);
 			FileCopyUtils.copy(buf, response.getOutputStream());
 		}
@@ -199,9 +221,9 @@ public class RestTemplateIntegrationTests {
 
 		private final byte[] buf;
 
-		private final String contentType;
+		private final MediaType contentType;
 
-		private PostServlet(String s, String location, byte[] buf, String contentType) {
+		private PostServlet(String s, String location, byte[] buf, MediaType contentType) {
 			this.s = s;
 			this.location = location;
 			this.buf = buf;
@@ -218,7 +240,7 @@ public class RestTemplateIntegrationTests {
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			response.setHeader("Location", location);
 			response.setContentLength(buf.length);
-			response.setContentType(contentType);
+			response.setContentType(contentType.toString());
 			FileCopyUtils.copy(buf, response.getOutputStream());
 		}
 	}

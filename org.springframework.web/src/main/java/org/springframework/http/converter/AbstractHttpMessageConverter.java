@@ -162,15 +162,19 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 			throws IOException, HttpMessageNotWritableException {
 
 		HttpHeaders headers = outputMessage.getHeaders();
-		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-			contentType = getDefaultContentType(t);
+		if (headers.getContentType() == null) {
+			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
+				contentType = getDefaultContentType(t);
+			}
+			if (contentType != null) {
+				headers.setContentType(contentType);
+			}
 		}
-		if (contentType != null) {
-			headers.setContentType(contentType);
-		}
-		Long contentLength = getContentLength(t, contentType);
-		if (contentLength != null) {
-			headers.setContentLength(contentLength);
+		if (headers.getContentLength() == -1) {
+			Long contentLength = getContentLength(t, contentType);
+			if (contentLength != null) {
+				headers.setContentLength(contentLength);
+			}
 		}
 		writeInternal(t, outputMessage);
 		outputMessage.getBody().flush();

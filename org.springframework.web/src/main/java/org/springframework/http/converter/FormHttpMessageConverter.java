@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -241,7 +242,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			String name = entry.getKey();
 			for (Object part : entry.getValue()) {
 				writeBoundary(boundary, os);
-				writePart(name, part, os);
+				HttpEntity entity = getEntity(part);
+				writePart(name, entity, os);
 				writeNewLine(os);
 			}
 		}
@@ -255,13 +257,29 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	@SuppressWarnings("unchecked")
-	private void writePart(String name, Object part, OutputStream os) throws IOException {
-		Class<?> partType = part.getClass();
+	private HttpEntity getEntity(Object part) {
+		if (part instanceof HttpEntity) {
+			return (HttpEntity) part;
+		}
+		else {
+			return new HttpEntity(part);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void writePart(String name, HttpEntity partEntity, OutputStream os) throws IOException {
+		Object partBody = partEntity.getBody();
+		Class<?> partType = partBody.getClass();
+		HttpHeaders partHeaders = partEntity.getHeaders();
+		MediaType partContentType = partHeaders.getContentType();
 		for (HttpMessageConverter messageConverter : partConverters) {
-			if (messageConverter.canWrite(partType, null)) {
+			if (messageConverter.canWrite(partType, partContentType)) {
 				HttpOutputMessage multipartOutputMessage = new MultipartHttpOutputMessage(os);
-				multipartOutputMessage.getHeaders().setContentDispositionFormData(name, getFilename(part));
-				messageConverter.write(part, null, multipartOutputMessage);
+				multipartOutputMessage.getHeaders().setContentDispositionFormData(name, getFilename(partBody));
+				if (!partHeaders.isEmpty()) {
+					multipartOutputMessage.getHeaders().putAll(partHeaders);
+				}
+				messageConverter.write(partBody, partContentType, multipartOutputMessage);
 				return;
 			}
 		}
