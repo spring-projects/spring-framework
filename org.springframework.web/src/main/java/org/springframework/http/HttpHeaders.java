@@ -118,7 +118,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	/**
-	 * Constructs a new instance of the {@code HttpHeaders} object.
+	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
 	 */
 	public HttpHeaders() {
 		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), false);
