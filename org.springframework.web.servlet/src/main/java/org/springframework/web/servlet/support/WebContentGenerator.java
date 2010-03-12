@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.support;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -107,7 +106,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Set the HTTP methods that this content generator should support.
-	 * Default is HEAD, GET and POST.
+	 * <p>Default is GET, HEAD and POST for simple form controller types;
+	 * unrestricted for general controllers and interceptors.
 	 */
 	public final void setSupportedMethods(String[] methods) {
 		if (methods != null) {
