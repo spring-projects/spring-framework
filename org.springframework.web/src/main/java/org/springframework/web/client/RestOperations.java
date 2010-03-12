@@ -364,8 +364,8 @@ public interface RestOperations {
 	 * @return the response as entity
 	 * @since 3.0.2
 	 */
-	<Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method, HttpEntity<Req> requestEntity,
-			Class<Res> responseType, Object... uriVariables) throws RestClientException;
+	<T> HttpEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
@@ -379,8 +379,8 @@ public interface RestOperations {
 	 * @return the response as entity
 	 * @since 3.0.2
 	 */
-	<Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method, HttpEntity<Req> requestEntity,
-			Class<Res> responseType, Map<String, ?> uriVariables) throws RestClientException;
+	<T> HttpEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
@@ -392,8 +392,8 @@ public interface RestOperations {
 	 * @return the response as entity
 	 * @since 3.0.2
 	 */
-	<Req, Res> HttpEntity<Res> exchange(URI url, HttpMethod method, HttpEntity<Req> requestEntity,
-			Class<Res> responseType) throws RestClientException;
+	<T> HttpEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+			Class<T> responseType) throws RestClientException;
 
 	// general execution
 
