@@ -363,24 +363,24 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	// exchange
 
-	public <Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method,
-			HttpEntity<Req> requestEntity, Class<Res> responseType, Object... uriVariables) throws RestClientException {
+	public <T> HttpEntity<T> exchange(String url, HttpMethod method,
+			HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
-		HttpEntityResponseExtractor<Res> responseExtractor = new HttpEntityResponseExtractor<Res>(responseType);
+		HttpEntityResponseExtractor<T> responseExtractor = new HttpEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <Req, Res> HttpEntity<Res> exchange(String url, HttpMethod method,
-			HttpEntity<Req> requestEntity, Class<Res> responseType, Map<String, ?> uriVariables) throws RestClientException {
+	public <T> HttpEntity<T> exchange(String url, HttpMethod method,
+			HttpEntity<?> requestEntity, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
-		HttpEntityResponseExtractor<Res> responseExtractor = new HttpEntityResponseExtractor<Res>(responseType);
+		HttpEntityResponseExtractor<T> responseExtractor = new HttpEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <Req, Res> HttpEntity<Res> exchange(URI url, HttpMethod method, HttpEntity<Req> requestEntity, 
-			Class<Res> responseType) throws RestClientException {
+	public <T> HttpEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity, 
+			Class<T> responseType) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
-		HttpEntityResponseExtractor<Res> responseExtractor = new HttpEntityResponseExtractor<Res>(responseType);
+		HttpEntityResponseExtractor<T> responseExtractor = new HttpEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor);
 	}
 
