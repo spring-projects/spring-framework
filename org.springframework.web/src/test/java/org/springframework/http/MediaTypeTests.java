@@ -34,10 +34,15 @@ public class MediaTypeTests {
 		MediaType textPlain = MediaType.TEXT_PLAIN;
 		assertTrue("Equal types is not inclusive", textPlain.includes(textPlain));
 		MediaType allText = new MediaType("text");
+
 		assertTrue("All subtypes is not inclusive", allText.includes(textPlain));
-		assertFalse("All subtypes is not inclusive", textPlain.includes(allText));
+		assertFalse("All subtypes is inclusive", textPlain.includes(allText));
+
 		assertTrue("All types is not inclusive", MediaType.ALL.includes(textPlain));
-		assertFalse("All types is not inclusive", textPlain.includes(MediaType.ALL));
+		assertFalse("All types is inclusive", textPlain.includes(MediaType.ALL));
+
+		assertTrue("All types is not inclusive", MediaType.ALL.includes(textPlain));
+		assertFalse("All types is inclusive", textPlain.includes(MediaType.ALL));
 
 		MediaType applicationSoapXml = new MediaType("application", "soap+xml");
 		MediaType applicationWildcardXml = new MediaType("application", "*+xml");
@@ -47,6 +52,31 @@ public class MediaTypeTests {
 
 		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
 		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
+	}
+	
+	@Test
+	public void isCompatible() throws Exception {
+		MediaType textPlain = MediaType.TEXT_PLAIN;
+		assertTrue("Equal types is not compatible", textPlain.isCompatibleWith(textPlain));
+		MediaType allText = new MediaType("text");
+
+		assertTrue("All subtypes is not compatible", allText.isCompatibleWith(textPlain));
+		assertTrue("All subtypes is not compatible", textPlain.isCompatibleWith(allText));
+
+		assertTrue("All types is not compatible", MediaType.ALL.isCompatibleWith(textPlain));
+		assertTrue("All types is not compatible", textPlain.isCompatibleWith(MediaType.ALL));
+
+		assertTrue("All types is not compatible", MediaType.ALL.isCompatibleWith(textPlain));
+		assertTrue("All types is compatible", textPlain.isCompatibleWith(MediaType.ALL));
+
+		MediaType applicationSoapXml = new MediaType("application", "soap+xml");
+		MediaType applicationWildcardXml = new MediaType("application", "*+xml");
+
+		assertTrue(applicationSoapXml.isCompatibleWith(applicationSoapXml));
+		assertTrue(applicationWildcardXml.isCompatibleWith(applicationWildcardXml));
+
+		assertTrue(applicationWildcardXml.isCompatibleWith(applicationSoapXml));
+		assertTrue(applicationSoapXml.isCompatibleWith(applicationWildcardXml));
 	}
 
 	@Test

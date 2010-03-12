@@ -366,17 +366,21 @@ public class MediaType implements Comparable<MediaType> {
 	 * Indicate whether this {@link MediaType} includes the given media type.
 	 *
 	 * <p>For instance, {@code text/*} includes {@code text/plain}, {@code text/html}, and {@code application/*+xml}
-	 * includes {@code application/soap+xml}, etc.
+	 * includes {@code application/soap+xml}, etc. This method is non-symmetic.
 	 *
 	 * @param other the reference media type with which to compare
 	 * @return <code>true</code> if this media type includes the given media type; <code>false</code> otherwise
 	 */
 	public boolean includes(MediaType other) {
-		if (this == other) {
+		if (other == null) {
+			return false;
+		}
+		if (this.isWildcardType()) {
+			// */* includes anything
 			return true;
 		}
-		if (this.type.equals(other.type)) {
-			if (this.subtype.equals(other.subtype) || isWildcardSubtype()) {
+		else if (this.type.equals(other.type)) {
+			if (this.subtype.equals(other.subtype) || this.isWildcardSubtype()) {
 				return true;
 			}
 			// application/*+xml includes application/soap+xml
@@ -392,7 +396,46 @@ public class MediaType implements Comparable<MediaType> {
 				}
 			}
 		}
-		return isWildcardType();
+		return false;
+	}
+
+	/**
+	 * Indicate whether this {@link MediaType} is compatible with the given media type.
+	 *
+	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa. In
+	 * effect, this method is similar to {@link #includes(MediaType)}, except that it's symmetric.
+	 *
+	 * @param other the reference media type with which to compare
+	 * @return <code>true</code> if this media type is compatible with the given media type; <code>false</code> otherwise
+	 */
+	public boolean isCompatibleWith(MediaType other) {
+		if (other == null) {
+			return false;
+		}
+		if (isWildcardType() || other.isWildcardType()) {
+			return true;
+		}
+		else if (this.type.equals(other.type)) {
+			if (this.subtype.equals(other.subtype) || this.isWildcardSubtype() || other.isWildcardSubtype()) {
+				return true;
+			}
+			// application/*+xml is compatible with application/soap+xml, and vice-versa
+			int thisPlusIdx = this.subtype.indexOf('+');
+			int otherPlusIdx = other.subtype.indexOf('+');
+			if (thisPlusIdx != -1 && otherPlusIdx != -1) {
+				String thisSubtypeNoSuffix = this.subtype.substring(0, thisPlusIdx);
+				String otherSubtypeNoSuffix = other.subtype.substring(0, otherPlusIdx);
+
+				String thisSubtypeSuffix = this.subtype.substring(thisPlusIdx + 1);
+				String otherSubtypeSuffix = other.subtype.substring(otherPlusIdx + 1);
+
+				if (thisSubtypeSuffix.equals(otherSubtypeSuffix) &&
+						(WILDCARD_TYPE.equals(thisSubtypeNoSuffix) || WILDCARD_TYPE.equals(otherSubtypeNoSuffix))) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

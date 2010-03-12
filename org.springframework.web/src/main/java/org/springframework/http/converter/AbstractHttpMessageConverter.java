@@ -100,7 +100,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	/**
 	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List) supported media types}
 	 * include the given media type.
-	 * @param mediaType the media type
+	 * @param mediaType the media type to read, can be {@code null} if not specified. Typically the value of a
+	 *                  {@code Content-Type} header.
 	 * @return true if the supported media types include the media type, or if the media type is {@code null}
 	 */
 	protected boolean canRead(MediaType mediaType) {
@@ -123,20 +124,21 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 */
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return supports(clazz) && canWrite(mediaType);
-	}
+		}
 
 	/**
 	 * Returns true if the given media type includes any of the
 	 * {@linkplain #setSupportedMediaTypes(List) supported media types}.
-	 * @param mediaType the media type
-	 * @return true if the supported media types include the media type, or if the media type is {@code null}
+	 * @param mediaType the media type to write, can be {@code null} if not specified. Typically the value of an
+	 * 		  			{@code Accept} header.
+	 * @return true if the supported media types are compatible with the media type, or if the media type is {@code null}
 	 */
 	protected boolean canWrite(MediaType mediaType) {
-		if (mediaType == null) {
+		if (mediaType == null || MediaType.ALL.equals(mediaType)) {
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			if (mediaType.includes(supportedMediaType)) {
+			if (supportedMediaType.isCompatibleWith(mediaType)) {
 				return true;
 			}
 		}
