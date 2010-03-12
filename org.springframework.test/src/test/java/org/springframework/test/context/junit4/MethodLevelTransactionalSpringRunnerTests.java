@@ -16,13 +16,11 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +32,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import static org.springframework.test.transaction.TransactionTestUtils.*;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -85,7 +85,7 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 	}
 
 	@Test
-	@Transactional
+	@Transactional("transactionManager2")
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
 		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
@@ -109,7 +109,7 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 	public static class DatabaseSetup {
 
 		@Resource
-		public void setDataSource(DataSource dataSource) {
+		public void setDataSource2(DataSource dataSource) {
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}

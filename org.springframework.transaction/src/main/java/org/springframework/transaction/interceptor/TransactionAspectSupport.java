@@ -17,7 +17,6 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -28,18 +27,13 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.interceptor.TransactionAspectUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -249,38 +243,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 		String qualifier = txAttr.getQualifier();
 		if (StringUtils.hasLength(qualifier)) {
-			if (!(this.beanFactory instanceof ConfigurableListableBeanFactory)) {
-				throw new IllegalStateException("BeanFactory required to be a ConfigurableListableBeanFactory " +
-						"for resolution of qualifier '" + qualifier + "': " + this.beanFactory.getClass());
-			}
-			ConfigurableListableBeanFactory bf = (ConfigurableListableBeanFactory) this.beanFactory;
-			Map<String, PlatformTransactionManager> tms =
-					BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, PlatformTransactionManager.class);
-			PlatformTransactionManager chosen = null;
-			for (String beanName : tms.keySet()) {
-				if (bf.containsBeanDefinition(beanName)) {
-					BeanDefinition bd = bf.getBeanDefinition(beanName);
-					if (bd instanceof AbstractBeanDefinition) {
-						AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-						AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
-						if ((candidate != null && qualifier.equals(candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY))) ||
-								qualifier.equals(beanName) || ObjectUtils.containsElement(bf.getAliases(beanName), qualifier)) {
-							if (chosen != null) {
-								throw new IllegalStateException("No unique PlatformTransactionManager bean found " +
-										"for qualifier '" + qualifier + "'");
-							}
-							chosen = tms.get(beanName);
-						}
-					}
-				}
-			}
-			if (chosen != null) {
-				return chosen;
-			}
-			else {
-				throw new IllegalStateException(
-						"No matching PlatformTransactionManager bean found for qualifier '" + qualifier + "'");
-			}
+			return TransactionAspectUtils.getTransactionManager(this.beanFactory, qualifier);
 		}
 		else if (this.transactionManagerBeanName != null) {
 			return this.beanFactory.getBean(this.transactionManagerBeanName, PlatformTransactionManager.class);
