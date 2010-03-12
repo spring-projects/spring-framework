@@ -21,9 +21,9 @@ import java.util.List;
 import org.w3c.dom.Node;
 
 import org.springframework.aop.framework.ProxyFactoryBean;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ManagedList;
@@ -63,7 +63,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 		
 		// get the root bean name - will be the name of the generated proxy factory bean
 		String existingBeanName = definitionHolder.getBeanName();
-		BeanDefinition existingDefinition = definitionHolder.getBeanDefinition();
+		BeanDefinition targetDefinition = definitionHolder.getBeanDefinition();
 
 		// delegate to subclass for interceptor definition
 		BeanDefinition interceptorDefinition = createInterceptorDefinition(node);
@@ -74,22 +74,22 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 
 		BeanDefinitionHolder result = definitionHolder;
 
-		if (!isProxyFactoryBeanDefinition(existingDefinition)) {
+		if (!isProxyFactoryBeanDefinition(targetDefinition)) {
 			// create the proxy definition
 			RootBeanDefinition proxyDefinition = new RootBeanDefinition();
 			// create proxy factory bean definition
 			proxyDefinition.setBeanClass(ProxyFactoryBean.class);
-
-			// set up property values
-			MutablePropertyValues mpvs = new MutablePropertyValues();
-			proxyDefinition.setPropertyValues(mpvs);
-
 			// set the target
-			mpvs.add("target", existingDefinition);
-
+			proxyDefinition.getPropertyValues().add("target", targetDefinition);
 			// create the interceptor names list
-			mpvs.add("interceptorNames", new ManagedList<String>());
-
+			proxyDefinition.getPropertyValues().add("interceptorNames", new ManagedList<String>());
+			// copy autowire settings from original bean definition.
+			proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+			proxyDefinition.setPrimary(targetDefinition.isPrimary());
+			if (targetDefinition instanceof AbstractBeanDefinition) {
+				proxyDefinition.copyQualifiersFrom((AbstractBeanDefinition) targetDefinition);
+			}
+			// wrap it in a BeanDefinitionHolder with bean name
 			result = new BeanDefinitionHolder(proxyDefinition, existingBeanName);
 		}
 
@@ -99,7 +99,8 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 
 	@SuppressWarnings("unchecked")
 	private void addInterceptorNameToList(String interceptorName, BeanDefinition beanDefinition) {
-		List<String> list = (List<String>) beanDefinition.getPropertyValues().getPropertyValue("interceptorNames").getValue();
+		List<String> list = (List<String>)
+				beanDefinition.getPropertyValues().getPropertyValue("interceptorNames").getValue();
 		list.add(interceptorName);
 	}
 
