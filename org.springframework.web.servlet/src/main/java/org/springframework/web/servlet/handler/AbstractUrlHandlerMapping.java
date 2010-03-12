@@ -18,11 +18,11 @@ package org.springframework.web.servlet.handler;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Comparator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -458,7 +458,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		private final Map<String, String> uriTemplateVariables;
 
-		private UriTemplateVariablesHandlerInterceptor(Map<String, String> uriTemplateVariables) {
+		public UriTemplateVariablesHandlerInterceptor(Map<String, String> uriTemplateVariables) {
 			this.uriTemplateVariables = uriTemplateVariables;
 		}
 
