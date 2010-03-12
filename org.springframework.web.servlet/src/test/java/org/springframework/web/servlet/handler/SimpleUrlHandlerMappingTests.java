@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.Map;
+import java.util.LinkedHashMap;
+
 import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
@@ -27,14 +30,19 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.WebUtils;
+import org.springframework.context.support.StaticApplicationContext;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class SimpleUrlHandlerMappingTests extends TestCase {
+public class SimpleUrlHandlerMappingTests {
 
-	public void testHandlerBeanNotFound() throws Exception {
+	@Test
+	public void handlerBeanNotFound() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		XmlWebApplicationContext root = new XmlWebApplicationContext();
 		root.setServletContext(sc);
@@ -55,12 +63,31 @@ public class SimpleUrlHandlerMappingTests extends TestCase {
 		}
 	}
 
-	public void testUrlMappingWithUrlMap() throws Exception {
+	@Test
+	public void urlMappingWithUrlMap() throws Exception {
 		checkMappings("urlMapping");
 	}
 
-	public void testUrlMappingWithProps() throws Exception {
+	@Test
+	public void urlMappingWithProps() throws Exception {
 		checkMappings("urlMappingWithProps");
+	}
+
+	@Test
+	public void testNewlineInRequest() throws Exception {
+		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
+		handlerMapping.setUrlDecode(false);
+		Object controller = new Object();
+		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		urlMap.put("/*/baz", controller);
+		handlerMapping.setUrlMap(urlMap);
+		handlerMapping.setApplicationContext(new StaticApplicationContext());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo%0a%0dbar/baz");
+
+		HandlerExecutionChain hec = handlerMapping.getHandler(request);
+		assertNotNull(hec);
+		assertSame(controller, hec.getHandler());
 	}
 
 	private void checkMappings(String beanName) throws Exception {
@@ -132,8 +159,8 @@ public class SimpleUrlHandlerMappingTests extends TestCase {
 		HandlerExecutionChain hec = hm.getHandler(req);
 		HandlerInterceptor[] interceptors = hec.getInterceptors();
 		if (interceptors != null) {
-			for (int i = 0; i < interceptors.length; i++) {
-				interceptors[i].preHandle(req, null, hec.getHandler());
+			for (HandlerInterceptor interceptor : interceptors) {
+				interceptor.preHandle(req, null, hec.getHandler());
 			}
 		}
 		return hec;
