@@ -188,21 +188,21 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	public <T> T getForObject(String url, Class<T> responseType, Object... urlVariables) throws RestClientException {
 		AcceptHeaderRequestCallback requestCallback = new AcceptHeaderRequestCallback(responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
 	}
 
 	public <T> T getForObject(String url, Class<T> responseType, Map<String, ?> urlVariables) throws RestClientException {
 		AcceptHeaderRequestCallback requestCallback = new AcceptHeaderRequestCallback(responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
 	}
 
 	public <T> T getForObject(URI url, Class<T> responseType) throws RestClientException {
 		AcceptHeaderRequestCallback requestCallback = new AcceptHeaderRequestCallback(responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
 	}
 
@@ -268,7 +268,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 			throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(request, responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
@@ -276,7 +276,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 			throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(request, responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
@@ -509,6 +509,9 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 				}
 				if (!allSupportedMediaTypes.isEmpty()) {
 					MediaType.sortBySpecificity(allSupportedMediaTypes);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
+					}
 					request.getHeaders().setAccept(allSupportedMediaTypes);
 				}
 			}
@@ -565,6 +568,16 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 						if (!requestHeaders.isEmpty()) {
 							httpRequest.getHeaders().putAll(requestHeaders);
 						}
+						if (logger.isDebugEnabled()) {
+							if (requestContentType != null) {
+								logger.debug("Writing [" + requestBody + "] as \"" + requestContentType + 
+										"\" using [" + messageConverter + "]");
+							}
+							else {
+								logger.debug("Writing [" + requestBody + "] using [" + messageConverter + "]");
+							}
+
+						}
 						messageConverter.write(requestBody, requestContentType, httpRequest);
 						return;
 					}
@@ -588,7 +601,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 		public HttpEntityResponseExtractor(Class<T> responseType) {
 			if (responseType != null) {
-				this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+				this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 			} else {
 				this.delegate = null;
 			}

@@ -860,6 +860,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 					for (HttpMessageConverter messageConverter : getMessageConverters()) {
 						if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
 							messageConverter.write(returnValue, acceptedMediaType, outputMessage);
+							if (logger.isDebugEnabled()) {
+								MediaType contentType = outputMessage.getHeaders().getContentType();
+								if (contentType == null) {
+									contentType = acceptedMediaType;
+								}
+								logger.debug("Written [" + returnValue + "] as \"" + contentType +
+										"\" using [" + messageConverter + "]");
+							}
 							this.responseArgumentUsed = true;
 							return;
 						}
