@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.tiles.TilesApplicationContext;
 import org.apache.tiles.TilesException;
 import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
+import org.apache.tiles.context.ChainedTilesRequestContextFactory;
 import org.apache.tiles.context.TilesRequestContextFactory;
 import org.apache.tiles.definition.DefinitionsFactory;
 import org.apache.tiles.definition.DefinitionsFactoryException;
@@ -136,14 +137,27 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 
 	public TilesConfigurer() {
+		// Avoid Tiles 2.1 warn logging when default RequestContextFactory impl class not found
+		StringBuilder sb = new StringBuilder("org.apache.tiles.servlet.context.ServletTilesRequestContextFactory");
+		addClassNameIfPresent(sb, "org.apache.tiles.portlet.context.PortletTilesRequestContextFactory");
+		addClassNameIfPresent(sb, "org.apache.tiles.jsp.context.JspTilesRequestContextFactory");
+		this.tilesPropertyMap.put(ChainedTilesRequestContextFactory.FACTORY_CLASS_NAMES, sb.toString());
+
+		// Register further Spring-specific settings which differ from the Tiles defaults
 		this.tilesPropertyMap.put(AbstractTilesApplicationContextFactory.APPLICATION_CONTEXT_FACTORY_INIT_PARAM,
 				SpringTilesApplicationContextFactory.class.getName());
+		this.tilesPropertyMap.put(DefinitionsFactory.LOCALE_RESOLVER_IMPL_PROPERTY,
+				SpringLocaleResolver.class.getName());
 		this.tilesPropertyMap.put(TilesContainerFactory.PREPARER_FACTORY_INIT_PARAM,
 				BasicPreparerFactory.class.getName());
 		this.tilesPropertyMap.put(TilesContainerFactory.CONTAINER_FACTORY_MUTABLE_INIT_PARAM,
 				Boolean.toString(false));
-		this.tilesPropertyMap.put(DefinitionsFactory.LOCALE_RESOLVER_IMPL_PROPERTY,
-				SpringLocaleResolver.class.getName());
+	}
+
+	private static void addClassNameIfPresent(StringBuilder sb, String className) {
+		if (ClassUtils.isPresent(className, TilesConfigurer.class.getClassLoader())) {
+			sb.append(',').append(className);
+		}
 	}
 
 
