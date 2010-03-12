@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,26 +37,45 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 
 /** @author Arjen Poutsma */
+@SuppressWarnings("unchecked")
 public class SourceHttpMessageConverterTests {
+
+	private SourceHttpMessageConverter<Source> converter;
+
+	@Before
+	public void setUp() {
+		converter = new SourceHttpMessageConverter<Source>();
+	}
+
+	@Test
+	public void canRead() {
+		assertTrue(converter.canRead(Source.class, new MediaType("application", "xml")));
+		assertTrue(converter.canRead(Source.class, new MediaType("application", "soap+xml")));
+	}
+
+	@Test
+	public void canWrite() {
+		assertTrue(converter.canWrite(Source.class, new MediaType("application", "xml")));
+		assertTrue(converter.canWrite(Source.class, new MediaType("application", "soap+xml")));
+		assertTrue(converter.canWrite(Source.class, MediaType.ALL));
+	}
 
 	@Test
 	public void readDOMSource() throws Exception {
-		SourceHttpMessageConverter<DOMSource> converter = new SourceHttpMessageConverter<DOMSource>();
 		String body = "<root>Hello World</root>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
-		DOMSource result = converter.read(DOMSource.class, inputMessage);
+		DOMSource result = (DOMSource) converter.read(DOMSource.class, inputMessage);
 		Document document = (Document) result.getNode();
 		assertEquals("Invalid result", "root", document.getDocumentElement().getLocalName());
 	}
 
 	@Test
 	public void readSAXSource() throws Exception {
-		SourceHttpMessageConverter<SAXSource> converter = new SourceHttpMessageConverter<SAXSource>();
 		String body = "<root>Hello World</root>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
-		SAXSource result = converter.read(SAXSource.class, inputMessage);
+		SAXSource result = (SAXSource) converter.read(SAXSource.class, inputMessage);
 		InputSource inputSource = result.getInputSource();
 		String s = FileCopyUtils.copyToString(new InputStreamReader(inputSource.getByteStream()));
 		assertXMLEqual("Invalid result", body, s);
@@ -64,18 +83,16 @@ public class SourceHttpMessageConverterTests {
 
 	@Test
 	public void readStreamSource() throws Exception {
-		SourceHttpMessageConverter<StreamSource> converter = new SourceHttpMessageConverter<StreamSource>();
 		String body = "<root>Hello World</root>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
-		StreamSource result = converter.read(StreamSource.class, inputMessage);
+		StreamSource result = (StreamSource) converter.read(StreamSource.class, inputMessage);
 		String s = FileCopyUtils.copyToString(new InputStreamReader(result.getInputStream()));
 		assertXMLEqual("Invalid result", body, s);
 	}
 
 	@Test
 	public void readSource() throws Exception {
-		SourceHttpMessageConverter<Source> converter = new SourceHttpMessageConverter<Source>();
 		String body = "<root>Hello World</root>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
@@ -92,7 +109,6 @@ public class SourceHttpMessageConverterTests {
 		rootElement.setTextContent("Hello World");
 		DOMSource domSource = new DOMSource(document);
 
-		SourceHttpMessageConverter<Source> converter = new SourceHttpMessageConverter<Source>();
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(domSource, null, outputMessage);
 		assertXMLEqual("Invalid result", "<root>Hello World</root>",

@@ -35,16 +35,18 @@ public interface HttpMessageConverter<T> {
 	/**
 	 * Indicates whether the given class can be read by this converter.
 	 * @param clazz the class to test for readability
-	 * @param mediaType the media type to read, can be {@code null} if not specified
-	 * @return <code>true</code> if readable; <code>false</code> otherwise
+	 * @param mediaType the media type to read, can be {@code null} if not specified. Typically the value of a
+	 *                  {@code Content-Type} header.
+	 * @return {@code true} if readable; {@code false} otherwise
 	 */
 	boolean canRead(Class<?> clazz, MediaType mediaType);
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
 	 * @param clazz the class to test for writability
-	 * @param mediaType the media type to write, can be {@code null} if not specified
-	 * @return <code>true</code> if writable; <code>false</code> otherwise
+	 * @param mediaType the media type to write, can be {@code null} if not specified. Typically the value of an
+	 * 		  			{@code Accept} header.
+	 * @return {@code true} if writable; {@code false} otherwise
 	 */
 	boolean canWrite(Class<?> clazz, MediaType mediaType);
 

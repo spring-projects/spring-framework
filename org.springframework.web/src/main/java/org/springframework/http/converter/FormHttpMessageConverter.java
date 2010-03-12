@@ -138,8 +138,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return false;
 		}
 		if (mediaType != null) {
-			return mediaType.includes(MediaType.APPLICATION_FORM_URLENCODED) ||
-					mediaType.includes(MediaType.MULTIPART_FORM_DATA);
+			return mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED) ||
+					mediaType.isCompatibleWith(MediaType.MULTIPART_FORM_DATA);
 		}
 		else {
 			return true;
