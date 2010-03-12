@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Rollback;
@@ -40,10 +41,12 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
+import org.springframework.transaction.interceptor.TransactionAspectUtils;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -94,13 +97,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
-	private TransactionConfigurationAttributes configAttributes;
+	private TransactionConfigurationAttributes configurationAttributes;
 
 	private volatile int transactionsStarted = 0;
 
 	private final Map<Method, TransactionContext> transactionContextCache =
 			Collections.synchronizedMap(new IdentityHashMap<Method, TransactionContext>());
-
 
 	/**
 	 * If the test method of the supplied {@link TestContext test context} is
@@ -144,8 +146,18 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				logger.debug("Explicit transaction definition [" + transactionDefinition +
 						"] found for test context [" + testContext + "]");
 			}
-			TransactionContext txContext =
-					new TransactionContext(getTransactionManager(testContext), transactionDefinition);
+			String qualifier = transactionAttribute.getQualifier();
+			PlatformTransactionManager tm;
+			if (StringUtils.hasLength(qualifier)) {
+				// Use autowire-capable factory in order to support extended qualifier matching
+				// (only exposed on the internal BeanFactory, not on the ApplicationContext).
+				BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
+				tm = TransactionAspectUtils.getTransactionManager(bf, qualifier);
+			}
+			else {
+				tm = getTransactionManager(testContext);
+			}
+			TransactionContext txContext = new TransactionContext(tm, transactionDefinition);
 			runBeforeTransactionMethods(testContext);
 			startNewTransaction(testContext, txContext);
 			this.transactionContextCache.put(testMethod, txContext);
@@ -291,18 +303,14 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 */
 	protected final PlatformTransactionManager getTransactionManager(TestContext testContext) {
-		if (this.configAttributes == null) {
-			this.configAttributes = retrieveTransactionConfigurationAttributes(testContext.getTestClass());
-		}
-		String transactionManagerName = this.configAttributes.getTransactionManagerName();
+		String tmName = retrieveConfigurationAttributes(testContext).getTransactionManagerName();
 		try {
-			return (PlatformTransactionManager) testContext.getApplicationContext().getBean(
-					transactionManagerName, PlatformTransactionManager.class);
+			return testContext.getApplicationContext().getBean(tmName, PlatformTransactionManager.class);
 		}
 		catch (BeansException ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Caught exception while retrieving transaction manager with bean name [" +
-						transactionManagerName + "] for test context [" + testContext + "]", ex);
+						tmName + "] for test context [" + testContext + "]", ex);
 			}
 			throw ex;
 		}
@@ -317,7 +325,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @throws Exception if an error occurs while determining the default rollback flag
 	 */
 	protected final boolean isDefaultRollback(TestContext testContext) throws Exception {
-		return retrieveTransactionConfigurationAttributes(testContext.getTestClass()).isDefaultRollback();
+		return retrieveConfigurationAttributes(testContext).isDefaultRollback();
 	}
 
 	/**
@@ -439,7 +447,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * <p>
 	 * Retrieves the {@link TransactionConfigurationAttributes} for the
 	 * specified {@link Class class} which may optionally declare or inherit a
 	 * {@link TransactionConfiguration @TransactionConfiguration}. If a
@@ -450,32 +457,35 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * the configuration attributes should be retrieved
 	 * @return a new TransactionConfigurationAttributes instance
 	 */
-	private TransactionConfigurationAttributes retrieveTransactionConfigurationAttributes(Class<?> clazz) {
-		Class<TransactionConfiguration> annotationType = TransactionConfiguration.class;
-		TransactionConfiguration config = clazz.getAnnotation(annotationType);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieved @TransactionConfiguration [" + config + "] for test class [" + clazz + "]");
-		}
+	private TransactionConfigurationAttributes retrieveConfigurationAttributes(TestContext testContext) {
+		if (this.configurationAttributes == null) {
+			Class<?> clazz = testContext.getTestClass();
+			Class<TransactionConfiguration> annotationType = TransactionConfiguration.class;
+			TransactionConfiguration config = clazz.getAnnotation(annotationType);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Retrieved @TransactionConfiguration [" + config + "] for test class [" + clazz + "]");
+			}
 
-		String transactionManagerName;
-		boolean defaultRollback;
-		if (config != null) {
-			transactionManagerName = config.transactionManager();
-			defaultRollback = config.defaultRollback();
-		}
-		else {
-			transactionManagerName = (String) AnnotationUtils.getDefaultValue(annotationType, "transactionManager");
-			defaultRollback = (Boolean) AnnotationUtils.getDefaultValue(annotationType, "defaultRollback");
-		}
+			String transactionManagerName;
+			boolean defaultRollback;
+			if (config != null) {
+				transactionManagerName = config.transactionManager();
+				defaultRollback = config.defaultRollback();
+			}
+			else {
+				transactionManagerName = (String) AnnotationUtils.getDefaultValue(annotationType, "transactionManager");
+				defaultRollback = (Boolean) AnnotationUtils.getDefaultValue(annotationType, "defaultRollback");
+			}
 
-		TransactionConfigurationAttributes configAttributes =
-				new TransactionConfigurationAttributes(transactionManagerName, defaultRollback);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieved TransactionConfigurationAttributes [" + configAttributes + "] for class [" + clazz + "]");
+			TransactionConfigurationAttributes configAttributes =
+					new TransactionConfigurationAttributes(transactionManagerName, defaultRollback);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Retrieved TransactionConfigurationAttributes [" + configAttributes + "] for class [" + clazz + "]");
+			}
+			this.configurationAttributes = configAttributes;
 		}
-		return configAttributes;
+		return this.configurationAttributes;
 	}
-
 
 	/**
 	 * Internal context holder for a specific test method.
