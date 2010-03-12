@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -146,14 +147,7 @@ public abstract class GenericTypeResolver {
 						Class[] result = new Class[typeArgs.length];
 						for (int i = 0; i < typeArgs.length; i++) {
 							Type arg = typeArgs[i];
-							if (arg instanceof TypeVariable) {
-								TypeVariable tv = (TypeVariable) arg;
-								arg = getTypeVariableMap(ownerClass).get(tv);
-								if (arg == null) {
-									arg = extractBoundForTypeVariable(tv);
-								}
-							}
-							result[i] = (arg instanceof Class ? (Class) arg : Object.class);
+							result[i] = extractClass(ownerClass, arg);
 						}
 						return result;
 					}
@@ -168,6 +162,26 @@ public abstract class GenericTypeResolver {
 			classToIntrospect = classToIntrospect.getSuperclass();
 		}
 		return null;
+	}
+	
+	private static Class extractClass(Class ownerClass, Type arg) {
+		if (arg instanceof TypeVariable) {
+			TypeVariable tv = (TypeVariable) arg;
+			arg = getTypeVariableMap(ownerClass).get(tv);
+			if (arg == null) {
+				arg = extractBoundForTypeVariable(tv);
+			}
+			else {
+				arg = extractClass(ownerClass, arg);
+			}
+		}
+		else if (arg instanceof GenericArrayType) {
+			GenericArrayType gat = (GenericArrayType) arg;
+			Type gt = gat.getGenericComponentType();
+			Class<?> componentClass = extractClass(ownerClass, gt);
+			arg = Array.newInstance(componentClass, 0).getClass();
+		}
+		return (arg instanceof Class ? (Class) arg : Object.class);
 	}
 
 
