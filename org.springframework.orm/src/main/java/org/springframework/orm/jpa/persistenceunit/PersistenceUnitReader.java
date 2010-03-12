@@ -51,6 +51,8 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
  */
 class PersistenceUnitReader {
 
+	private static final String PERSISTENCE_VERSION = "version";
+
 	private static final String PERSISTENCE_UNIT = "persistence-unit";
 
 	private static final String UNIT_NAME = "name";
@@ -170,10 +172,11 @@ class PersistenceUnitReader {
 			Resource resource, Document document, List<SpringPersistenceUnitInfo> infos) throws IOException {
 
 		Element persistence = document.getDocumentElement();
+		String version = persistence.getAttribute(PERSISTENCE_VERSION);
 		URL unitRootURL = determinePersistenceUnitRootUrl(resource);
 		List<Element> units = DomUtils.getChildElementsByTagName(persistence, PERSISTENCE_UNIT);
 		for (Element unit : units) {
-			SpringPersistenceUnitInfo info = parsePersistenceUnitInfo(unit);
+			SpringPersistenceUnitInfo info = parsePersistenceUnitInfo(unit, version);
 			info.setPersistenceUnitRootUrl(unitRootURL);
 			infos.add(info);
 		}
@@ -224,8 +227,11 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the unit info DOM element.
 	 */
-	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo(Element persistenceUnit) throws IOException {
+	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo(Element persistenceUnit, String version) throws IOException { // JC: Changed
 		SpringPersistenceUnitInfo unitInfo = new SpringPersistenceUnitInfo();
+
+		// set JPA version (1.0 or 2.0)
+		unitInfo.setPersistenceXMLSchemaVersion(version);
 
 		// set unit name
 		unitInfo.setPersistenceUnitName(persistenceUnit.getAttribute(UNIT_NAME).trim());
