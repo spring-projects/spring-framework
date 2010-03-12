@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,28 +53,29 @@ public abstract class ScopedProxyUtils {
 
 		// Create a scoped proxy definition for the original bean name,
 		// "hiding" the target bean in an internal target definition.
-		RootBeanDefinition scopedProxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
-		scopedProxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
-		scopedProxyDefinition.setSource(definition.getSource());
-		scopedProxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		RootBeanDefinition proxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
+		proxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
+		proxyDefinition.setSource(definition.getSource());
+		proxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 		String targetBeanName = getTargetBeanName(originalBeanName);
-		scopedProxyDefinition.getPropertyValues().add("targetBeanName", targetBeanName);
+		proxyDefinition.getPropertyValues().add("targetBeanName", targetBeanName);
 
 		if (proxyTargetClass) {
 			targetDefinition.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
 			// ScopedFactoryBean's "proxyTargetClass" default is TRUE, so we don't need to set it explicitly here.
 		}
 		else {
-			scopedProxyDefinition.getPropertyValues().add("proxyTargetClass", Boolean.FALSE);
+			proxyDefinition.getPropertyValues().add("proxyTargetClass", Boolean.FALSE);
 		}
 
 		// Copy autowire settings from original bean definition.
+		proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+		proxyDefinition.setPrimary(targetDefinition.isPrimary());
 		if (targetDefinition instanceof AbstractBeanDefinition) {
-			scopedProxyDefinition.copyQualifiersFrom((AbstractBeanDefinition) targetDefinition);
+			proxyDefinition.copyQualifiersFrom((AbstractBeanDefinition) targetDefinition);
 		}
-		scopedProxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
-		scopedProxyDefinition.setPrimary(targetDefinition.isPrimary());
+
 		// The target bean should be ignored in favor of the scoped proxy.
 		targetDefinition.setAutowireCandidate(false);
 		targetDefinition.setPrimary(false);
@@ -84,7 +85,7 @@ public abstract class ScopedProxyUtils {
 
 		// Return the scoped proxy definition as primary bean definition
 		// (potentially an inner bean).
-		return new BeanDefinitionHolder(scopedProxyDefinition, originalBeanName, definition.getAliases());
+		return new BeanDefinitionHolder(proxyDefinition, originalBeanName, definition.getAliases());
 	}
 	
 	/**
