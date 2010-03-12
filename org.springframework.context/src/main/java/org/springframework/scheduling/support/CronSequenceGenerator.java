@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see CronTrigger
  */
-class CronSequenceGenerator {
+public class CronSequenceGenerator {
 
 	private final BitSet seconds = new BitSet(60);
 
