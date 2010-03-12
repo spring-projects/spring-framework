@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,18 +57,14 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target( { ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 public @interface DirtiesContext {
 
 	/**
-	 * Defines <i>modes</i> which determine how
-	 * <code>&#064;DirtiesContext</code> is interpreted when used to annotate a
-	 * test class.
-	 * 
-	 * @author Sam Brannen
-	 * @since 3.0
+	 * Defines <i>modes</i> which determine how <code>&#064;DirtiesContext</code>
+	 * is interpreted when used to annotate a test class.
 	 */
-	public static enum ClassMode {
+	static enum ClassMode {
 
 		/**
 		 * The associated <code>ApplicationContext</code> will be marked as
@@ -80,22 +76,18 @@ public @interface DirtiesContext {
 		 * The associated <code>ApplicationContext</code> will be marked as
 		 * <em>dirty</em> after each test method in the class.
 		 */
-		AFTER_EACH_TEST_METHOD;
+		AFTER_EACH_TEST_METHOD
 	}
 
 
 	/**
 	 * The <i>mode</i> to use when a test class is annotated with
 	 * <code>&#064;DirtiesContext</code>.
-	 * <p>
-	 * Defaults to {@link ClassMode#AFTER_CLASS AFTER_CLASS}.
-	 * </p>
-	 * <p>
-	 * Note: setting the class mode on an annotated test method has no meaning,
+	 * <p>Defaults to {@link ClassMode#AFTER_CLASS AFTER_CLASS}.
+	 * <p>Note: Setting the class mode on an annotated test method has no meaning,
 	 * since the mere presence of the <code>&#064;DirtiesContext</code>
 	 * annotation on a test method is sufficient.
-	 * </p>
 	 */
-	public ClassMode classMode() default ClassMode.AFTER_CLASS;
+	ClassMode classMode() default ClassMode.AFTER_CLASS;
 
 }
