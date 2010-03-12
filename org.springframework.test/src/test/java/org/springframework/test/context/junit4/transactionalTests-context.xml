@@ -10,7 +10,7 @@
 		p:driverClassName="org.hsqldb.jdbcDriver" p:url="jdbc:hsqldb:mem:transactional_tests" p:username="sa" p:password=""/>
 
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
-		p:dataSource-ref="dataSource" p:transactionSynchronizationName="SYNCHRONIZATION_NEVER"/>
+		p:dataSource-ref="dataSource"/>
 
 	<bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:dataSource-ref="dataSource2">
