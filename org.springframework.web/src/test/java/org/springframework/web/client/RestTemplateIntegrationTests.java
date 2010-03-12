@@ -192,6 +192,7 @@ public class RestTemplateIntegrationTests {
 	public void exchangePost() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
+		requestHeaders.setContentType(MediaType.TEXT_PLAIN);
 		HttpEntity<String> requestEntity = new HttpEntity<String>(helloWorld, requestHeaders);
 		HttpEntity<?> result = template.exchange(URI + "/{method}", HttpMethod.POST, requestEntity, null, "post");
 		assertEquals("Invalid location", new URI(URI + "/post/1"), result.getHeaders().getLocation());

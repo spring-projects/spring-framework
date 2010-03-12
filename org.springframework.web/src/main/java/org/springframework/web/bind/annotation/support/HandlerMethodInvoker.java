@@ -549,6 +549,10 @@ public class HandlerMethodInvoker {
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
 				if (messageConverter.canRead(paramType, contentType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reading [" + paramType.getName() + "] as \"" + contentType
+								+"\" using [" + messageConverter + "]");
+					}
 					return messageConverter.read(paramType, inputMessage);
 				}
 			}
