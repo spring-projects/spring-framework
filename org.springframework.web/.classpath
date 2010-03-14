@@ -33,5 +33,8 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-4.7.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.6.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.jetty.server/6.1.9/com.springsource.org.mortbay.jetty.server-6.1.9.jar" sourcepath="/IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.jetty.server/6.1.9/com.springsource.org.mortbay.jetty.server-sources-6.1.9.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.util/6.1.9/com.springsource.org.mortbay.util-6.1.9.jar" sourcepath="/IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.util/6.1.9/com.springsource.org.mortbay.util-sources-6.1.9.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar" sourcepath="/IVY_CACHE/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/com.thoughtworks.xstream"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.jdom/com.springsource.org.jdom/1.1.0/com.springsource.org.jdom-1.1.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
