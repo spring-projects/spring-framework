@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,19 +41,30 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
  */
 public class PropertyOrFieldReference extends SpelNodeImpl {
 
+	private final boolean nullSafe;
+
 	private final String name;
 
 	private volatile PropertyAccessor cachedReadAccessor;
 
 	private volatile PropertyAccessor cachedWriteAccessor;
 	
-	private final boolean nullSafe;
 
 	public PropertyOrFieldReference(boolean nullSafe, String propertyOrFieldName, int pos) {
 		super(pos);
-		name = propertyOrFieldName;
 		this.nullSafe = nullSafe;
+		this.name = propertyOrFieldName;
 	}
+
+
+	public boolean isNullSafe() {
+		return this.nullSafe;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
@@ -70,28 +81,38 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					try { 
 						if (isWritable(state)) {
 							List newList = ArrayList.class.newInstance();
-							writeProperty(state, name, newList);
+							writeProperty(state, this.name, newList);
 							result = readProperty(state, this.name);
 						}
-					} catch (InstantiationException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
-					} catch (IllegalAccessException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
 					}
-				} else {
+					catch (InstantiationException ex) {
+						throw new SpelEvaluationException(getStartPosition(), ex,
+								SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+					}
+					catch (IllegalAccessException ex) {
+						throw new SpelEvaluationException(getStartPosition(), ex,
+								SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+					}
+				}
+				else {
 					try { 
 						if (isWritable(state)) {
 							Map newMap = HashMap.class.newInstance();
 							writeProperty(state, name, newMap);
 							result = readProperty(state, this.name);
 						}
-					} catch (InstantiationException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
-					} catch (IllegalAccessException e) {
-						throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+					}
+					catch (InstantiationException ex) {
+						throw new SpelEvaluationException(getStartPosition(), ex,
+								SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+					}
+					catch (IllegalAccessException ex) {
+						throw new SpelEvaluationException(getStartPosition(), ex,
+								SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
 					}
 				}
-			} else {
+			}
+			else {
 				// 'simple' object
 				try { 
 					if (isWritable(state)) {
@@ -99,10 +120,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 						writeProperty(state, name, newObject);
 						result = readProperty(state, this.name);
 					}
-				} catch (InstantiationException e) {
-					throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT,result.getTypeDescriptor().getType());
-				} catch (IllegalAccessException e) {
-					throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT,result.getTypeDescriptor().getType());
+				}
+				catch (InstantiationException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, result.getTypeDescriptor().getType());
+				}
+				catch (IllegalAccessException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, result.getTypeDescriptor().getType());
 				}				
 			}
 		}
@@ -176,7 +201,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 		if (contextObject.getValue() == null) {
 			throw new SpelEvaluationException(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
-		} else {
+		}
+		else {
 			throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, name,
 					FormatHelper.formatClassNameForMessage(contextObjectClass));
 		}
@@ -215,33 +241,34 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 						return;
 					}
 				}
-			} catch (AccessException ae) {
+			}
+			catch (AccessException ae) {
 				throw new SpelEvaluationException(getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,
 						name, ae.getMessage());
 			}
 		}
 		if (contextObject.getValue()==null) {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
-		} else {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE, name, FormatHelper
-					.formatClassNameForMessage(contextObjectClass));
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
+		}
+		else {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE, name,
+					FormatHelper.formatClassNameForMessage(contextObjectClass));
 		}
 	}
 
 	public boolean isWritableProperty(String name, ExpressionState state) throws SpelEvaluationException {
 		Object contextObject = state.getActiveContextObject().getValue();
-//		TypeDescriptor td = state.getActiveContextObject().getTypeDescriptor();
+		// TypeDescriptor td = state.getActiveContextObject().getTypeDescriptor();
 		EvaluationContext eContext = state.getEvaluationContext();
-
-		List<PropertyAccessor> resolversToTry = getPropertyAccessorsToTry(getObjectClass(contextObject),state);
-
+		List<PropertyAccessor> resolversToTry = getPropertyAccessorsToTry(getObjectClass(contextObject), state);
 		if (resolversToTry != null) {
 			for (PropertyAccessor pfResolver : resolversToTry) {
 				try {
 					if (pfResolver.canWrite(eContext, contextObject, name)) {
 						return true;
 					}
-				} catch (AccessException ae) {
+				}
+				catch (AccessException ae) {
 					// let others try
 				}
 			}
@@ -287,10 +314,6 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		resolvers.addAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;
-	}
-	
-	String getName() {
-		return name;
 	}
 
 }
