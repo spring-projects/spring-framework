@@ -31,6 +31,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
+import org.springframework.expression.spel.testresources.TestPerson;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -520,6 +521,33 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testResolvingString() throws Exception {
 		Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
 		Assert.assertEquals(String.class,stringClass);
-	}
+	} 
+	 
+	/**
+	 * SPR-6984: attempting to index a collection on write using an index that doesn't currently exist in the collection (address.crossStreets[0] below)
+	 */
+	@Test
+	public void initializingCollectionElementsOnWrite() throws Exception {
+		TestPerson person = new TestPerson();
+		EvaluationContext context = new StandardEvaluationContext(person);
+		SpelParserConfiguration config = new SpelParserConfiguration(true, true);
+		ExpressionParser parser = new SpelExpressionParser(config);
+		Expression expression = parser.parseExpression("name");
+		expression.setValue(context, "Oleg");
+		Assert.assertEquals("Oleg",person.getName());
 
+		expression = parser.parseExpression("address.street");
+		expression.setValue(context, "123 High St");
+		Assert.assertEquals("123 High St",person.getAddress().getStreet());
+		
+		expression = parser.parseExpression("address.crossStreets[0]");
+		expression.setValue(context, "Blah");
+		Assert.assertEquals("Blah",person.getAddress().getCrossStreets().get(0));
+		
+		expression = parser.parseExpression("address.crossStreets[3]");
+		expression.setValue(context, "Wibble");
+		Assert.assertEquals("Blah",person.getAddress().getCrossStreets().get(0));
+		Assert.assertEquals("Wibble",person.getAddress().getCrossStreets().get(3));
+	}
+	
 }
