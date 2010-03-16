@@ -385,6 +385,15 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		}
 
 		@Override
+		protected void registerRequestContextFactory(String className,
+				List<TilesRequestContextFactory> factories, TilesRequestContextFactory parent) {
+			// Avoid Tiles 2.2 warn logging when default RequestContextFactory impl class not found
+			if (ClassUtils.isPresent(className, TilesConfigurer.class.getClassLoader())) {
+				super.registerRequestContextFactory(className, factories, parent);
+			}
+		}
+
+		@Override
 		protected List<URL> getSourceURLs(TilesApplicationContext applicationContext,
 				TilesRequestContextFactory contextFactory) {
 			if (definitions != null) {
