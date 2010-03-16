@@ -1242,7 +1242,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (this.beanExpressionResolver == null) {
 			return value;
 		}
-		Scope scope = getRegisteredScope(beanDefinition.getScope());
+		Scope scope = (beanDefinition != null ? getRegisteredScope(beanDefinition.getScope()) : null);
 		return this.beanExpressionResolver.evaluate(value, new BeanExpressionContext(this, scope));
 	}
 
