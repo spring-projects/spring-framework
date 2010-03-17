@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,29 +24,51 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.AbstractFactoryBean;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
+ * {@link FactoryBean} implementation that takes a list of location strings and creates a sorted array 
+ * of {@link Resource} instances.
  * @author Dave Syer
  * @author Juergen Hoeller
+ * @author Christian Dupuis
  * @since 3.0
  */
-public class SortedResourcesFactoryBean implements FactoryBean<Resource[]> {
+public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> implements ResourceLoaderAware {
+	
+	private final List<String> locations;
 
-	private final Resource[] resources;
+	private ResourceLoader resourceLoader;
 
-	public SortedResourcesFactoryBean(ResourceLoader resourceLoader, List<String> locations) throws IOException {
+	public SortedResourcesFactoryBean(List<String> locations) {
+		this.locations = locations;
+		setSingleton(true);
+	}
+
+	@Override
+	public Class<? extends Resource[]> getObjectType() {
+		return Resource[].class;
+	}
+
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+
+	@Override
+	protected Resource[] createInstance() throws Exception {
 		List<Resource> scripts = new ArrayList<Resource>();
 		for (String location : locations) {
 			if (resourceLoader instanceof ResourcePatternResolver) {
-				List<Resource> resources = new ArrayList<Resource>(
-						Arrays.asList(((ResourcePatternResolver) resourceLoader).getResources(location)));
+				List<Resource> resources = new ArrayList<Resource>(Arrays
+						.asList(((ResourcePatternResolver) resourceLoader).getResources(location)));
 				Collections.sort(resources, new Comparator<Resource>() {
-					public int compare(Resource o1, Resource o2) {
+					public int compare(Resource r1, Resource r2) {
 						try {
-							return o1.getURL().toString().compareTo(o2.getURL().toString());
+							return r1.getURL().toString().compareTo(r2.getURL().toString());
 						}
 						catch (IOException ex) {
 							return 0;
@@ -61,19 +83,7 @@ public class SortedResourcesFactoryBean implements FactoryBean<Resource[]> {
 				scripts.add(resourceLoader.getResource(location));
 			}
 		}
-		this.resources = scripts.toArray(new Resource[scripts.size()]);
-	}
-
-	public Resource[] getObject() {
-		return this.resources;
-	}
-
-	public Class<? extends Resource[]> getObjectType() {
-		return Resource[].class;
-	}
-
-	public boolean isSingleton() {
-		return true;
+		return scripts.toArray(new Resource[scripts.size()]);
 	}
 
 }

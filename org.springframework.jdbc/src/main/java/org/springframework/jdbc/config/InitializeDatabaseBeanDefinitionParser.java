@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 		// Use a factory bean for the resources so they can be given an order if a pattern is used
 		BeanDefinitionBuilder resourcesFactory = BeanDefinitionBuilder
 				.genericBeanDefinition(SortedResourcesFactoryBean.class);
-		resourcesFactory.addConstructorArgValue(context.getReaderContext().getResourceLoader());
 		resourcesFactory.addConstructorArgValue(locations);
 		builder.addPropertyValue("scripts", resourcesFactory.getBeanDefinition());
 

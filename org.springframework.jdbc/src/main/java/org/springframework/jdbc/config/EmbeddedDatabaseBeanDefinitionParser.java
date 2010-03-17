@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.jdbc.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -30,6 +28,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses {@code embedded-database} element and
@@ -72,7 +71,6 @@ public class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinition
 		// Use a factory bean for the resources so they can be given an order if a pattern is used
 		BeanDefinitionBuilder resourcesFactory = BeanDefinitionBuilder
 				.genericBeanDefinition(SortedResourcesFactoryBean.class);
-		resourcesFactory.addConstructorArgValue(context.getReaderContext().getResourceLoader());
 		resourcesFactory.addConstructorArgValue(locations);
 		builder.addPropertyValue("scripts", resourcesFactory.getBeanDefinition());
 

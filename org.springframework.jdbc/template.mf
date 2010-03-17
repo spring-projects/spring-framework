@@ -23,6 +23,7 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.springframework.beans.*;version=${spring.osgi.range},
  org.springframework.core.*;version=${spring.osgi.range},
+ org.springframework.context.*;version=${spring.osgi.range},
  org.springframework.dao.*;version=${spring.osgi.range},
  org.springframework.jndi.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.transaction.*;version=${spring.osgi.range},
