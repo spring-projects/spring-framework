@@ -19,6 +19,7 @@ package org.springframework.jdbc.core.metadata;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -346,10 +347,29 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 					metaDataTableName,
 					null);
 			while (tableColumns.next()) {
+				String columnName = tableColumns.getString("COLUMN_NAME");
+				int dataType = tableColumns.getInt("DATA_TYPE");
+				if (dataType == Types.DECIMAL) {
+					String typeName = tableColumns.getString("TYPE_NAME");
+					int decimalDigits = tableColumns.getInt("DECIMAL_DIGITS");
+					// override a DECIMAL data type for no-decimal numerics 
+					// (this is for better Oracle support where there have been issues 
+					// using DECIMAL for certain inserts (see SPR-6912))
+					if ("NUMBER".equals(typeName) && decimalDigits == 0) {
+						dataType = Types.NUMERIC;
+						if (logger.isDebugEnabled()) {
+							logger.debug("Overriding metadata: "
+								+ columnName +
+								" now using NUMERIC instead of DECIMAL"
+							);
+						}
+					}
+				}
+				boolean nullable = tableColumns.getBoolean("NULLABLE");
 				TableParameterMetaData meta = new TableParameterMetaData(
-						tableColumns.getString("COLUMN_NAME"),
-						tableColumns.getInt("DATA_TYPE"),
-						tableColumns.getBoolean("NULLABLE")
+						columnName,
+						dataType,
+						nullable
 				);
 				insertParameterMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
