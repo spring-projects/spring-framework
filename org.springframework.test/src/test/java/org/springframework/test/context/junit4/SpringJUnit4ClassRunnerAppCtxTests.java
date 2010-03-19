@@ -35,6 +35,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -53,6 +54,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * <li>{@link Autowired @Autowired}</li>
  * <li>{@link Qualifier @Qualifier}</li>
  * <li>{@link Resource @Resource}</li>
+ * <li>{@link Value @Value}</li>
  * <li>{@link Inject @Inject}</li>
  * <li>{@link Named @Named}</li>
  * <li>{@link ApplicationContextAware}</li>
@@ -113,6 +115,16 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	protected String bar;
 
+	@Value("enigma")
+	private String literalFieldValue;
+
+	@Value("#{2 == (1+1)}")
+	private Boolean spelFieldValue;
+
+	private String literalParameterValue;
+
+	private Boolean spelParameterValue;
+
 	@Autowired
 	@Qualifier("quux")
 	protected String quux;
@@ -144,6 +156,16 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Resource
 	protected final void setBar(final String bar) {
 		this.bar = bar;
+	}
+
+	@Autowired
+	public void setLiteralParameterValue(@Value("enigma") String literalParameterValue) {
+		this.literalParameterValue = literalParameterValue;
+	}
+
+	@Autowired
+	public void setSpelParameterValue(@Value("#{2 == (1+1)}") Boolean spelParameterValue) {
+		this.spelParameterValue = spelParameterValue;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -185,6 +207,22 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	public final void verifyAnnotationAutowiredMethods() {
 		assertNotNull("The employee setter method should have been autowired.", this.employee);
 		assertEquals("John Smith", this.employee.getName());
+	}
+
+	@Test
+	public final void verifyAutowiredAtValueFields() {
+		assertNotNull("Literal @Value field should have been autowired", this.literalFieldValue);
+		assertNotNull("SpEL @Value field should have been autowired.", this.spelFieldValue);
+		assertEquals("enigma", this.literalFieldValue);
+		assertEquals(Boolean.TRUE, this.spelFieldValue);
+	}
+
+	@Test
+	public final void verifyAutowiredAtValueMethods() {
+		assertNotNull("Literal @Value method parameter should have been autowired.", this.literalParameterValue);
+		assertNotNull("SpEL @Value method parameter should have been autowired.", this.spelParameterValue);
+		assertEquals("enigma", this.literalParameterValue);
+		assertEquals(Boolean.TRUE, this.spelParameterValue);
 	}
 
 	@Test
