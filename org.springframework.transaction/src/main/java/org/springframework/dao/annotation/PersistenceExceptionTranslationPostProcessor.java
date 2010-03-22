@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,22 +106,16 @@ public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 	}
 
 
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
-
 		Class targetClass = AopUtils.getTargetClass(bean);
-		if (targetClass == null) {
-			// Can't do much here.
-			return bean;
-		}
-		
 		if (AopUtils.canApply(this.persistenceExceptionTranslationAdvisor, targetClass)) {
 			if (bean instanceof Advised) {
 				((Advised) bean).addAdvisor(this.persistenceExceptionTranslationAdvisor);

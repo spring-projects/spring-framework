@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
@@ -82,15 +81,12 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	}
 
 
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
-	public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(final Object bean, String beanName) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
-		if (targetClass == null) {
-			return bean;
-		}
 		ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Scheduled annotation = AnnotationUtils.getAnnotation(method, Scheduled.class);

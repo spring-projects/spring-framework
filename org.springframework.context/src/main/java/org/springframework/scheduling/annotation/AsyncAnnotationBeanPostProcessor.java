@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.concurrent.Executor;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -31,8 +31,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
-import java.util.concurrent.Executor;
 
 /**
  * Bean post-processor that automatically applies asynchronous invocation
@@ -105,22 +103,16 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 	}
 
 
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
-
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
-		if (targetClass == null) {
-			// Can't do much here.
-			return bean;
-		}
-
 		if (AopUtils.canApply(this.asyncAnnotationAdvisor, targetClass)) {
 			if (bean instanceof Advised) {
 				((Advised) bean).addAdvisor(this.asyncAnnotationAdvisor);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public abstract class AopUtils {
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
 	 */
-	public static boolean isCglibProxyClass(Class clazz) {
+	public static boolean isCglibProxyClass(Class<?> clazz) {
 		return (clazz != null && isCglibProxyClassName(clazz.getName()));
 	}
 
@@ -102,18 +102,20 @@ public abstract class AopUtils {
 	 * which might be an AOP proxy.
 	 * <p>Returns the target class for an AOP proxy and the plain class else.
 	 * @param candidate the instance to check (might be an AOP proxy)
-	 * @return the target class (or the plain class of the given object as fallback)
+	 * @return the target class (or the plain class of the given object as fallback;
+	 * never <code>null</code>)
 	 * @see org.springframework.aop.TargetClassAware#getTargetClass()
 	 */
-	public static Class getTargetClass(Object candidate) {
+	public static Class<?> getTargetClass(Object candidate) {
 		Assert.notNull(candidate, "Candidate object must not be null");
+		Class<?> result = null;
 		if (candidate instanceof TargetClassAware) {
-			return ((TargetClassAware) candidate).getTargetClass();
+			result = ((TargetClassAware) candidate).getTargetClass();
 		}
-		if (isCglibProxy(candidate)) {
-			return candidate.getClass().getSuperclass();
+		if (result == null) {
+			result = (isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
 		}
-		return candidate.getClass();
+		return result;
 	}
 
 	/**
@@ -165,7 +167,7 @@ public abstract class AopUtils {
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
-	public static Method getMostSpecificMethod(Method method, Class targetClass) {
+	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
 		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
 		// If we are dealing with method with generic parameters, find the original method.
 		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
@@ -180,7 +182,7 @@ public abstract class AopUtils {
 	 * @param targetClass the class to test
 	 * @return whether the pointcut can apply on any method
 	 */
-	public static boolean canApply(Pointcut pc, Class targetClass) {
+	public static boolean canApply(Pointcut pc, Class<?> targetClass) {
 		return canApply(pc, targetClass, false);
 	}
 
@@ -194,7 +196,7 @@ public abstract class AopUtils {
 	 * for this bean includes any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
-	public static boolean canApply(Pointcut pc, Class targetClass, boolean hasIntroductions) {
+	public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
 		if (!pc.getClassFilter().matches(targetClass)) {
 			return false;
 		}
@@ -207,7 +209,7 @@ public abstract class AopUtils {
 
 		Set<Class> classes = new HashSet<Class>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 		classes.add(targetClass);
-		for (Class clazz : classes) {
+		for (Class<?> clazz : classes) {
 			Method[] methods = clazz.getMethods();
 			for (Method method : methods) {
 				if ((introductionAwareMethodMatcher != null &&
@@ -229,7 +231,7 @@ public abstract class AopUtils {
 	 * @param targetClass class we're testing
 	 * @return whether the pointcut can apply on any method
 	 */
-	public static boolean canApply(Advisor advisor, Class targetClass) {
+	public static boolean canApply(Advisor advisor, Class<?> targetClass) {
 		return canApply(advisor, targetClass, false);
 	}
 
@@ -243,7 +245,7 @@ public abstract class AopUtils {
 	 * any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
-	public static boolean canApply(Advisor advisor, Class targetClass, boolean hasIntroductions) {
+	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
 		if (advisor instanceof IntroductionAdvisor) {
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
@@ -265,7 +267,7 @@ public abstract class AopUtils {
 	 * @return sublist of Advisors that can apply to an object of the given class
 	 * (may be the incoming List as-is)
 	 */
-	public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class clazz) {
+	public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> clazz) {
 		if (candidateAdvisors.isEmpty()) {
 			return candidateAdvisors;
 		}
