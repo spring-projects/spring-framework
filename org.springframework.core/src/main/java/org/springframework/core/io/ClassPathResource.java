@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 	private ClassLoader classLoader;
 
-	private Class clazz;
+	private Class<?> clazz;
 
 
 	/**
@@ -89,7 +89,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * @param clazz the class to load resources with
 	 * @see java.lang.Class#getResourceAsStream
 	 */
-	public ClassPathResource(String path, Class clazz) {
+	public ClassPathResource(String path, Class<?> clazz) {
 		Assert.notNull(path, "Path must not be null");
 		this.path = StringUtils.cleanPath(path);
 		this.clazz = clazz;
@@ -102,7 +102,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * @param classLoader the class loader to load the resource with, if any
 	 * @param clazz the class to load resources with, if any
 	 */
-	protected ClassPathResource(String path, ClassLoader classLoader, Class clazz) {
+	protected ClassPathResource(String path, ClassLoader classLoader, Class<?> clazz) {
 		this.path = StringUtils.cleanPath(path);
 		this.classLoader = classLoader;
 		this.clazz = clazz;
@@ -190,7 +190,16 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * This implementation returns a description that includes the class path location.
 	 */
 	public String getDescription() {
-		return "class path resource [" + this.path + "]";
+		StringBuilder builder = new StringBuilder("class path resource [");
+
+		if (this.clazz != null) {
+			builder.append(ClassUtils.classPackageAsResourcePath(this.clazz));
+			builder.append('/');
+		}
+
+		builder.append(this.path);
+		builder.append(']');
+		return builder.toString();
 	}
 
 
