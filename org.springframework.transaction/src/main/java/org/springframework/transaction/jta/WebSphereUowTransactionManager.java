@@ -352,7 +352,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 				if (status.isNewSynchronization()) {
 					List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
 					TransactionSynchronizationManager.clear();
-					uowManager.registerInterposedSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
+					if (!synchronizations.isEmpty()) {
+						uowManager.registerInterposedSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
+					}
 				}
 			}
 		}

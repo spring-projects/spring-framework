@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,16 +287,21 @@ public abstract class TransactionSynchronizationManager {
 	 * @see TransactionSynchronization
 	 */
 	public static List<TransactionSynchronization> getSynchronizations() throws IllegalStateException {
-		if (!isSynchronizationActive()) {
+		List<TransactionSynchronization> synchs = synchronizations.get();
+		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		List<TransactionSynchronization> synchs = synchronizations.get();
-		// Sort lazily here, not in registerSynchronization.
-		OrderComparator.sort(synchs);
 		// Return unmodifiable snapshot, to avoid ConcurrentModificationExceptions
 		// while iterating and invoking synchronization callbacks that in turn
 		// might register further synchronizations.
-		return Collections.unmodifiableList(new ArrayList<TransactionSynchronization>(synchs));
+		if (synchs.isEmpty()) {
+			return Collections.emptyList();
+		}
+		else {
+			// Sort lazily here, not in registerSynchronization.
+			OrderComparator.sort(synchs);
+			return Collections.unmodifiableList(new ArrayList<TransactionSynchronization>(synchs));
+		}
 	}
 
 	/**
@@ -359,9 +364,6 @@ public abstract class TransactionSynchronizationManager {
 	 * flush mode of a Hibernate Session to "FlushMode.NEVER" upfront.
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
 	 * @see TransactionSynchronization#beforeCommit(boolean)
-	 * @see org.hibernate.Session#flush
-	 * @see org.hibernate.Session#setFlushMode
-	 * @see org.hibernate.FlushMode#NEVER
 	 */
 	public static boolean isCurrentTransactionReadOnly() {
 		return (currentTransactionReadOnly.get() != null);

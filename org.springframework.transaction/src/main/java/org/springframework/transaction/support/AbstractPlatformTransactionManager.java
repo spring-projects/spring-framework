@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -970,7 +970,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// invoke the afterCompletion callbacks immediately
 				invokeAfterCompletion(synchronizations, completionStatus);
 			}
-			else {
+			else if (!synchronizations.isEmpty()) {
 				// Existing transaction that we participate in, controlled outside
 				// of the scope of this Spring transaction manager -> try to register
 				// an afterCompletion callback with the existing (JTA) transaction.
