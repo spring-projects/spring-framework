@@ -17,8 +17,12 @@
 package org.springframework.web.bind.annotation.support;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,12 +44,14 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -192,7 +198,7 @@ public class HandlerMethodInvoker {
 			boolean required = false;
 			String defaultValue = null;
 			boolean validate = false;
-			int found = 0;
+			int annotationsFound = 0;
 			Annotation[] paramAnns = methodParam.getParameterAnnotations();
 
 			for (Annotation paramAnn : paramAnns) {
@@ -201,35 +207,35 @@ public class HandlerMethodInvoker {
 					paramName = requestParam.value();
 					required = requestParam.required();
 					defaultValue = parseDefaultValueAttribute(requestParam.defaultValue());
-					found++;
+					annotationsFound++;
 				}
 				else if (RequestHeader.class.isInstance(paramAnn)) {
 					RequestHeader requestHeader = (RequestHeader) paramAnn;
 					headerName = requestHeader.value();
 					required = requestHeader.required();
 					defaultValue = parseDefaultValueAttribute(requestHeader.defaultValue());
-					found++;
+					annotationsFound++;
 				}
 				else if (RequestBody.class.isInstance(paramAnn)) {
 					requestBodyFound = true;
-					found++;
+					annotationsFound++;
 				}
 				else if (CookieValue.class.isInstance(paramAnn)) {
 					CookieValue cookieValue = (CookieValue) paramAnn;
 					cookieName = cookieValue.value();
 					required = cookieValue.required();
 					defaultValue = parseDefaultValueAttribute(cookieValue.defaultValue());
-					found++;
+					annotationsFound++;
 				}
 				else if (PathVariable.class.isInstance(paramAnn)) {
 					PathVariable pathVar = (PathVariable) paramAnn;
 					pathVarName = pathVar.value();
-					found++;
+					annotationsFound++;
 				}
 				else if (ModelAttribute.class.isInstance(paramAnn)) {
 					ModelAttribute attr = (ModelAttribute) paramAnn;
 					attrName = attr.value();
-					found++;
+					annotationsFound++;
 				}
 				else if (Value.class.isInstance(paramAnn)) {
 					defaultValue = ((Value) paramAnn).value();
@@ -239,12 +245,12 @@ public class HandlerMethodInvoker {
 				}
 			}
 
-			if (found > 1) {
+			if (annotationsFound > 1) {
 				throw new IllegalStateException("Handler parameter annotations are exclusive choices - " +
 						"do not specify more than one such annotation on the same parameter: " + handlerMethod);
 			}
 
-			if (found == 0) {
+			if (annotationsFound == 0) {
 				Object argValue = resolveCommonArgument(methodParam, webRequest);
 				if (argValue != WebArgumentResolver.UNRESOLVED) {
 					args[i] = argValue;
@@ -259,6 +265,9 @@ public class HandlerMethodInvoker {
 					}
 					else if (SessionStatus.class.isAssignableFrom(paramType)) {
 						args[i] = this.sessionStatus;
+					}
+					else if (HttpEntity.class.isAssignableFrom(paramType)) {
+						args[i] = resolveHttpEntityRequest(methodParam, webRequest, handler);
 					}
 					else if (Errors.class.isAssignableFrom(paramType)) {
 						throw new IllegalStateException("Errors/BindingResult argument declared " +
@@ -527,12 +536,22 @@ public class HandlerMethodInvoker {
 	/**
 	 * Resolves the given {@link RequestBody @RequestBody} annotation.
 	 */
-	@SuppressWarnings("unchecked")
 	protected Object resolveRequestBody(MethodParameter methodParam, NativeWebRequest webRequest, Object handler)
 			throws Exception {
+		return readWithMessageConverters(methodParam, createHttpInputMessage(webRequest), methodParam.getParameterType());
+	}
 
+	@SuppressWarnings("unchecked")
+	private HttpEntity resolveHttpEntityRequest(MethodParameter methodParam, NativeWebRequest webRequest, Object handler)
+		throws Exception {
 		HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
-		Class paramType = methodParam.getParameterType();
+		Class<?> paramType = getHttpEntityType(methodParam);
+		Object body = readWithMessageConverters(methodParam, inputMessage, paramType);
+		return new HttpEntity(body, inputMessage.getHeaders());
+	}
+
+	private Object readWithMessageConverters(MethodParameter methodParam, HttpInputMessage inputMessage, Class paramType)
+			throws Exception{
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		if (contentType == null) {
 			StringBuilder builder = new StringBuilder(ClassUtils.getShortName(methodParam.getParameterType()));
@@ -542,8 +561,9 @@ public class HandlerMethodInvoker {
 				builder.append(paramName);
 			}
 			throw new HttpMediaTypeNotSupportedException(
-					"Cannot extract @RequestBody parameter (" + builder.toString() + "): no Content-Type found");
+					"Cannot extract parameter (" + builder.toString() + "): no Content-Type found");
 		}
+
 		List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 		if (this.messageConverters != null) {
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
@@ -558,6 +578,28 @@ public class HandlerMethodInvoker {
 			}
 		}
 		throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
+	}
+
+	private Class<?> getHttpEntityType(MethodParameter methodParam) {
+		Assert.isAssignable(HttpEntity.class, methodParam.getParameterType());
+		ParameterizedType type = (ParameterizedType) methodParam.getGenericParameterType();
+		if (type.getActualTypeArguments().length == 1) {
+			Type typeArgument = type.getActualTypeArguments()[0];
+			if (typeArgument instanceof Class) {
+				return (Class<?>) typeArgument;
+			}
+			else if (typeArgument instanceof GenericArrayType) {
+				Type componentType = ((GenericArrayType) typeArgument).getGenericComponentType();
+				if (componentType instanceof Class) {
+					// Surely, there should be a nicer way to do this
+					Object array = Array.newInstance((Class<?>) componentType, 0);
+					return array.getClass();
+				}
+			}
+		}
+		throw new IllegalArgumentException(
+				"HttpEntity parameter (" + methodParam.getParameterName() + ") is not parameterized");
+		
 	}
 
 	private Object resolveCookieValue(String cookieName, boolean required, String defaultValue,
