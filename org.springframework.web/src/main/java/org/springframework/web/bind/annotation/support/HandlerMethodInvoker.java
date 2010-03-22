@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +259,10 @@ public class HandlerMethodInvoker {
 				}
 				else {
 					Class paramType = methodParam.getParameterType();
-					if (Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType)) {
+					if (HttpHeaders.class.isAssignableFrom(paramType)) {
+						args[i] = resolveHttpHeadersRequest(webRequest);
+					}
+					else if (Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType)) {
 						args[i] = implicitModel;
 					}
 					else if (SessionStatus.class.isAssignableFrom(paramType)) {
@@ -480,8 +482,8 @@ public class HandlerMethodInvoker {
 			throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
-		if (Map.class.isAssignableFrom(paramType)) {
-			return resolveRequestHeaderMap((Class<? extends Map>) paramType, webRequest);
+		if (HttpHeaders.class.isAssignableFrom(paramType)) {
+			return resolveHttpHeadersRequest(webRequest);
 		}
 		if (headerName.length() == 0) {
 			headerName = getRequiredParameterName(methodParam);
@@ -505,32 +507,9 @@ public class HandlerMethodInvoker {
 		return binder.convertIfNecessary(headerValue, paramType, methodParam);
 	}
 
-	private Map resolveRequestHeaderMap(Class<? extends Map> mapType, NativeWebRequest webRequest) {
-		if (MultiValueMap.class.isAssignableFrom(mapType)) {
-			MultiValueMap<String, String> result;
-			if (HttpHeaders.class.isAssignableFrom(mapType)) {
-				result = new HttpHeaders();
-			}
-			else {
-				result = new LinkedMultiValueMap<String, String>();
-			}
-			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
-				String headerName = iterator.next();
-				for (String headerValue : webRequest.getHeaderValues(headerName)) {
-					result.add(headerName, headerValue);
-				}
-			}
-			return result;
-		}
-		else {
-			Map<String, String> result = new LinkedHashMap<String, String>();
-			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
-				String headerName = iterator.next();
-				String headerValue = webRequest.getHeader(headerName);
-				result.put(headerName, headerValue);
-			}
-			return result;
-		}
+	private HttpHeaders resolveHttpHeadersRequest(NativeWebRequest webRequest) throws Exception {
+		HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
+		return inputMessage.getHeaders();
 	}
 
 	/**
