@@ -237,7 +237,7 @@ public abstract class JmxUtils {
 	 * @return the bean class to expose
 	 * @see org.springframework.util.ClassUtils#getUserClass(Object)
 	 */
-	public static Class getClassToExpose(Object managedBean) {
+	public static Class<?> getClassToExpose(Object managedBean) {
 		return ClassUtils.getUserClass(managedBean);
 	}
 
@@ -247,12 +247,12 @@ public abstract class JmxUtils {
 	 * (for example, checked for annotations).
 	 * <p>This implementation returns the superclass for a CGLIB proxy and
 	 * the class of the given bean else (for a JDK proxy or a plain bean class).
-	 * @param beanClass the bean class (might be an AOP proxy class)
+	 * @param clazz the bean class (might be an AOP proxy class)
 	 * @return the bean class to expose
 	 * @see org.springframework.util.ClassUtils#getUserClass(Class)
 	 */
-	public static Class getClassToExpose(Class beanClass) {
-		return ClassUtils.getUserClass(beanClass);
+	public static Class<?> getClassToExpose(Class<?> clazz) {
+		return ClassUtils.getUserClass(clazz);
 	}
 
 	/**
@@ -260,14 +260,14 @@ public abstract class JmxUtils {
 	 * <p>This implementation checks for {@link javax.management.DynamicMBean}
 	 * classes as well as classes with corresponding "*MBean" interface
 	 * (Standard MBeans) or corresponding "*MXBean" interface (Java 6 MXBeans).
-	 * @param beanClass the bean class to analyze
+	 * @param clazz the bean class to analyze
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
 	 */
-	public static boolean isMBean(Class beanClass) {
-		return (beanClass != null &&
-				(DynamicMBean.class.isAssignableFrom(beanClass) ||
-						(getMBeanInterface(beanClass) != null || getMXBeanInterface(beanClass) != null)));
+	public static boolean isMBean(Class<?> clazz) {
+		return (clazz != null &&
+				(DynamicMBean.class.isAssignableFrom(clazz) ||
+						(getMBeanInterface(clazz) != null || getMXBeanInterface(clazz) != null)));
 	}
 
 	/**
@@ -277,13 +277,13 @@ public abstract class JmxUtils {
 	 * @param clazz the class to check
 	 * @return the Standard MBean interface for the given class
 	 */
-	public static Class getMBeanInterface(Class clazz) {
-		if (clazz.getSuperclass() == null) {
+	public static Class<?> getMBeanInterface(Class<?> clazz) {
+		if (clazz == null || clazz.getSuperclass() == null) {
 			return null;
 		}
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
 		Class[] implementedInterfaces = clazz.getInterfaces();
-		for (Class iface : implementedInterfaces) {
+		for (Class<?> iface : implementedInterfaces) {
 			if (iface.getName().equals(mbeanInterfaceName)) {
 				return iface;
 			}
@@ -298,12 +298,12 @@ public abstract class JmxUtils {
 	 * @param clazz the class to check
 	 * @return whether there is an MXBean interface for the given class
 	 */
-	public static Class getMXBeanInterface(Class clazz) {
-		if (clazz.getSuperclass() == null) {
+	public static Class<?> getMXBeanInterface(Class<?> clazz) {
+		if (clazz == null || clazz.getSuperclass() == null) {
 			return null;
 		}
 		Class[] implementedInterfaces = clazz.getInterfaces();
-		for (Class iface : implementedInterfaces) {
+		for (Class<?> iface : implementedInterfaces) {
 			boolean isMxBean = iface.getName().endsWith(MXBEAN_SUFFIX);
 			if (mxBeanAnnotationAvailable) {
 				Boolean checkResult = MXBeanChecker.evaluateMXBeanAnnotation(iface);
