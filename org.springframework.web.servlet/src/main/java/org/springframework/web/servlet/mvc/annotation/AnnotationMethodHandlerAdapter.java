@@ -55,6 +55,8 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -797,6 +799,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				handleResponseBody(returnValue, webRequest);
 				return null;
 			}
+			if (returnValue instanceof HttpEntity) {
+				handleHttpEntityResponse((HttpEntity<?>) returnValue, webRequest);
+				return null;
+			}
 
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
@@ -839,7 +845,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest)
 				throws ServletException, IOException {
 			if (returnValue == null) {
@@ -847,12 +852,35 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 
 			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
+			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
+
+			writeWithMessageConverters(returnValue, inputMessage, outputMessage);
+		}
+
+		private void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest)
+				throws ServletException, IOException {
+			if (responseEntity == null) {
+				return;
+			}
+			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
+			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
+
+			HttpHeaders entityHeaders = responseEntity.getHeaders();
+			if (!entityHeaders.isEmpty()) {
+				outputMessage.getHeaders().putAll(entityHeaders);
+			}
+			writeWithMessageConverters(responseEntity.getBody(), inputMessage, outputMessage);
+		}
+
+		@SuppressWarnings("unchecked")
+		private void writeWithMessageConverters(Object returnValue,
+				HttpInputMessage inputMessage, HttpOutputMessage outputMessage)
+				throws IOException, HttpMediaTypeNotAcceptableException {
 			List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
 			MediaType.sortBySpecificity(acceptedMediaTypes);
-			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
 			Class<?> returnValueType = returnValue.getClass();
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 			if (getMessageConverters() != null) {
@@ -879,6 +907,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
 		}
+
 	}
 
 

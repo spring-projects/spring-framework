@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -64,6 +65,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -1154,6 +1156,24 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("Invalid response status code", HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
 	}
+
+	@Test
+	public void httpEntity() throws ServletException, IOException {
+		initServlet(HttpEntityController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/handle");
+		String requestBody = "Hello World";
+		request.setContent(requestBody.getBytes("UTF-8"));
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("Accept", "text/*, */*");
+		request.addHeader("MyRequestHeader", "MyValue");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals(requestBody, response.getContentAsString());
+		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
+	}
+
 
 	/*
 	 * See SPR-6877
@@ -2499,6 +2519,22 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping(value = "/{templatePath}/", method = RequestMethod.GET)
 		public void templatePath(Writer writer) throws IOException {
 			writer.write("templatePath");
+		}
+	}
+
+	@Controller
+	public static class HttpEntityController {
+
+		@RequestMapping("/handle")
+		public HttpEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
+			assertNotNull(requestEntity);
+			assertEquals("MyValue", requestEntity.getHeaders().getFirst("MyRequestHeader"));
+			String requestBody = new String(requestEntity.getBody(), "UTF-8");
+			assertEquals("Hello World", requestBody);
+
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.set("MyResponseHeader", "MyValue");
+			return new HttpEntity<String>(requestBody, responseHeaders);
 		}
 	}
 
