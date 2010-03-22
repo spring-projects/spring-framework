@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1395,7 +1395,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.setRollbackOnly();
 		utControl.setThrowable(new IllegalStateException("no existing transaction"));
 		utControl.replay();
