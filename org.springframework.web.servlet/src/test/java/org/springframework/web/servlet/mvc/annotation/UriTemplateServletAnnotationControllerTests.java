@@ -376,6 +376,36 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("plain-bar", response.getContentAsString());
 	}
 
+	/*
+	 * See SPR-6978
+	 */
+	@Test
+	public void doIt() throws Exception {
+		initServlet(Spr6978Controller.class);
+		
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/100");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("loadEntity:foo:100", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/foo/100");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("publish:foo:100", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/module/100");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("loadModule:100", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/module/100");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("publish:module:100", response.getContentAsString());
+
+	}
+
+
 
 	/*
 	 * Controllers
@@ -622,6 +652,27 @@ public class UriTemplateServletAnnotationControllerTests {
 		@RequestMapping(value = "/{bar}", method=RequestMethod.DELETE)
 		public void bar(@PathVariable String bar, Writer writer) throws IOException {
 			writer.write("bar-" + bar);
+		}
+	}
+
+	@Controller
+	public static class Spr6978Controller {
+
+		@RequestMapping(value = "/{type}/{id}", method = RequestMethod.GET)
+		public void loadEntity(@PathVariable final String type, @PathVariable final long id, Writer writer)
+				throws IOException {
+			writer.write("loadEntity:" + type + ":" + id);
+		}
+
+		@RequestMapping(value = "/module/{id}", method = RequestMethod.GET)
+		public void loadModule(@PathVariable final long id, Writer writer) throws IOException {
+			writer.write("loadModule:" + id);
+		}
+
+		@RequestMapping(value = "/{type}/{id}", method = RequestMethod.POST)
+		public void publish(@PathVariable final String type, @PathVariable final long id, Writer writer)
+				throws IOException {
+			writer.write("publish:" + type + ":" + id);
 		}
 	}
 
