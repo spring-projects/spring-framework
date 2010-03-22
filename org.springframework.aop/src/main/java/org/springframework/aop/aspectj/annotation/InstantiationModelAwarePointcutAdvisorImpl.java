@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,18 +58,13 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	
 	private String aspectName;
 	
-	private Boolean isBeforeAdvice = null;
+	private Boolean isBeforeAdvice;
 
-	private Boolean isAfterAdvice = null;
+	private Boolean isAfterAdvice;
 
 
-	public InstantiationModelAwarePointcutAdvisorImpl(
-			AspectJAdvisorFactory af, 
-			AspectJExpressionPointcut ajexp, 
-			MetadataAwareAspectInstanceFactory aif, 
-			Method method,
-			int declarationOrderInAspect,
-			String aspectName) {
+	public InstantiationModelAwarePointcutAdvisorImpl(AspectJAdvisorFactory af,  AspectJExpressionPointcut ajexp,
+			MetadataAwareAspectInstanceFactory aif,  Method method, int declarationOrderInAspect, String aspectName) {
 
 		this.declaredPointcut = ajexp;
 		this.method = method;
