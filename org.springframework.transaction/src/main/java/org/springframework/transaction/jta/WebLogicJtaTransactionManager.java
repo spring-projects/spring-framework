@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 
 /**
- * Special {@link JtaTransactionManager} variant for BEA WebLogic (8.1 and higher).
+ * Special {@link JtaTransactionManager} variant for BEA WebLogic (9.0 and higher).
  * Supports the full power of Spring's transaction definitions on WebLogic's
  * transaction coordinator, <i>beyond standard JTA</i>: transaction names,
  * per-transaction isolation levels, and proper resuming of transactions in all cases.
@@ -325,7 +325,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			catch (Exception ex) {
 				throw new SystemException("Could not invoke WebLogic's UserTransaction.begin() method: " + ex);
 			}
-			return getTransactionManager().getTransaction();
+			return new ManagedTransactionAdapter(getTransactionManager());
 		}
 
 		else {

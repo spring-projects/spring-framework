@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,31 +65,30 @@ public class UserTransactionAdapter implements UserTransaction {
 	}
 
 
+	public void setTransactionTimeout(int timeout) throws SystemException {
+		this.transactionManager.setTransactionTimeout(timeout);
+	}
+
 	public void begin() throws NotSupportedException, SystemException {
 		this.transactionManager.begin();
 	}
 
 	public void commit()
 			throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
-			SecurityException, IllegalStateException, SystemException {
-
+			SecurityException, SystemException {
 		this.transactionManager.commit();
+	}
+
+	public void rollback() throws SecurityException, SystemException {
+		this.transactionManager.rollback();
+	}
+
+	public void setRollbackOnly() throws SystemException {
+		this.transactionManager.setRollbackOnly();
 	}
 
 	public int getStatus() throws SystemException {
 		return this.transactionManager.getStatus();
-	}
-
-	public void rollback() throws IllegalStateException, SecurityException, SystemException {
-		this.transactionManager.rollback();
-	}
-
-	public void setRollbackOnly() throws IllegalStateException, SystemException {
-		this.transactionManager.setRollbackOnly();
-	}
-
-	public void setTransactionTimeout(int timeout) throws SystemException {
-		this.transactionManager.setTransactionTimeout(timeout);
 	}
 
 }

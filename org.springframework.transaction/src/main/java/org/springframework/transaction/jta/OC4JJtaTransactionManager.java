@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.transaction.jta;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -241,7 +240,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 			catch (Exception ex) {
 				throw new SystemException("Could not invoke OC4J's UserTransaction.begin(String) method: " + ex);
 			}
-			return getTransactionManager().getTransaction();
+			return new ManagedTransactionAdapter(getTransactionManager());
 		}
 
 		else {
