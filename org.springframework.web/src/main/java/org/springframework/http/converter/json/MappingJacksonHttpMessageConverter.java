@@ -86,11 +86,32 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		this.prefixJson = prefixJson;
 	}
 
-
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		JavaType javaType = TypeFactory.fromClass(clazz);
+		JavaType javaType = getJavaType(clazz);
 		return this.objectMapper.canDeserialize(javaType) && canRead(mediaType);
+	}
+
+	/**
+	 * Returns the Jackson {@link JavaType} for the specific class.
+	 *
+	 * <p>Default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)}, but this can be overridden
+	 * in subclasses, to allow for custom generic collection handling. For instance:
+	 * <pre class="code">
+	 * protected JavaType getJavaType(Class&lt;?&gt; clazz) {
+	 *   if (List.class.isAssignableFrom(clazz)) {
+	 *     return TypeFactory.collectionType(ArrayList.class, MyBean.class);
+	 *   } else {
+	 *     return super.getJavaType(clazz);
+	 *   }
+	 * }
+	 * </pre>
+	 *
+	 * @param clazz the class to return the java type for
+	 * @return the java type
+	 */
+	protected JavaType getJavaType(Class<?> clazz) {
+		return TypeFactory.type(clazz);
 	}
 
 	@Override
@@ -107,8 +128,8 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	@Override
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
-
-		return this.objectMapper.readValue(inputMessage.getBody(), clazz);
+		JavaType javaType = getJavaType(clazz);
+		return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 	}
 
 	@Override
