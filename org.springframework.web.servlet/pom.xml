@@ -128,11 +128,6 @@
 			<version>1.1.2</version>
 			<optional>true</optional>
 		</dependency>
-		<!--
-			dependency> <groupId>org.apache.velocity</groupId>
-			<artifactId>velocity</artifactId> <version>1.6.2</version>
-			<optional>true</optional> </dependency
-		-->
 		<dependency>
 			<groupId>velocity</groupId>
 			<artifactId>velocity</artifactId>
@@ -173,7 +168,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 			<version>${project.version}</version>
-			<optional>true</optional>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -186,7 +181,7 @@
 			<artifactId>spring-expression</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-oxm</artifactId>
