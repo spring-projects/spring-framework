@@ -1352,10 +1352,22 @@ public class ServletAnnotationControllerTests {
 	public void requestHeaderMap() throws Exception {
 		initServlet(RequestHeaderMapController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/httpHeaders");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/map");
 		request.addHeader("Content-Type", "text/html");
 		request.addHeader("Custom-Header", new String[]{"value21", "value22"});
 		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+		assertEquals("Content-Type=text/html,Custom-Header=value21", response.getContentAsString());
+
+		request.setRequestURI("/multiValueMap");
+		response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+		assertEquals("Content-Type=[text/html],Custom-Header=[value21,value22]", response.getContentAsString());
+
+		request.setRequestURI("/httpHeaders");
+		response = new MockHttpServletResponse();
 
 		servlet.service(request, response);
 		assertEquals("Content-Type=[text/html],Custom-Header=[value21,value22]", response.getContentAsString());
@@ -2427,9 +2439,21 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	public static class RequestHeaderMapController {
 
-		@RequestMapping("/httpHeaders")
-		public void httpHeaders(HttpHeaders headers, Writer writer) throws IOException {
-			assertEquals("Invalid Content-Type", new MediaType("text", "html"), headers.getContentType());
+		@RequestMapping("/map")
+		public void map(@RequestHeader Map<String, String> headers, Writer writer) throws IOException {
+			for (Iterator<Map.Entry<String, String>> it = headers.entrySet().iterator(); it.hasNext();) {
+				Map.Entry<String, String> entry = it.next();
+				writer.write(entry.getKey() + "=" + entry.getValue());
+				if (it.hasNext()) {
+					writer.write(',');
+				}
+
+			}
+		}
+
+		@RequestMapping("/multiValueMap")
+		public void multiValueMap(@RequestHeader MultiValueMap<String, String> headers, Writer writer)
+				throws IOException {
 			for (Iterator<Map.Entry<String, List<String>>> it1 = headers.entrySet().iterator(); it1.hasNext();) {
 				Map.Entry<String, List<String>> entry = it1.next();
 				writer.write(entry.getKey() + "=[");
@@ -2445,6 +2469,12 @@ public class ServletAnnotationControllerTests {
 					writer.write(',');
 				}
 			}
+		}
+
+		@RequestMapping("/httpHeaders")
+		public void httpHeaders(@RequestHeader HttpHeaders headers, Writer writer) throws IOException {
+			assertEquals("Invalid Content-Type", new MediaType("text", "html"), headers.getContentType());
+			multiValueMap(headers, writer);
 		}
 
 	}
