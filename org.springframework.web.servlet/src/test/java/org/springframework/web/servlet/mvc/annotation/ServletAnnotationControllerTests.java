@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -1474,6 +1475,22 @@ public class ServletAnnotationControllerTests {
 	}
 
 	/*
+	 * See SPR-6021
+	 */
+	@Test
+	public void customMapEditor() throws Exception {
+		initServlet(CustomMapEditorController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handle");
+		request.addParameter("map", "bar");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+
+		assertEquals("test-{foo=bar}", response.getContentAsString());
+	}
+
+	/*
 	 * Controllers
 	 */
 
@@ -2536,6 +2553,37 @@ public class ServletAnnotationControllerTests {
 			responseHeaders.set("MyResponseHeader", "MyValue");
 			return new HttpEntity<String>(requestBody, responseHeaders);
 		}
+	}
+
+	@Controller
+	public static class CustomMapEditorController {
+
+		@InitBinder
+		public void initBinder(WebDataBinder binder) {
+			binder.initBeanPropertyAccess();
+			binder.registerCustomEditor(Map.class, new CustomMapEditor());
+		}
+
+		@RequestMapping("/handle")
+		public void handle(@RequestParam("map") Map map, Writer writer) throws IOException {
+			writer.write("test-" + map);
+		}
+
+
+	}
+
+	public static class CustomMapEditor extends PropertyEditorSupport {
+
+		@Override
+		public void setAsText(String text) throws IllegalArgumentException {
+			if (StringUtils.hasText(text)) {
+				setValue(Collections.singletonMap("foo", text));
+			}
+			else {
+				setValue(null);
+			}
+		}
+
 	}
 
 

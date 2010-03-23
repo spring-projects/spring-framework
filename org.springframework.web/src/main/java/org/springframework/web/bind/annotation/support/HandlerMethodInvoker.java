@@ -419,7 +419,7 @@ public class HandlerMethodInvoker {
 			throws Exception {
 
 		Class<?> paramType = methodParam.getParameterType();
-		if (Map.class.isAssignableFrom(paramType)) {
+		if (Map.class.isAssignableFrom(paramType) && paramName.length() == 0) {
 			return resolveRequestParamMap((Class<? extends Map>) paramType, webRequest);
 		}
 		if (paramName.length() == 0) {
