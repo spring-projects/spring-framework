@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
  * for JTA, delegating to a backend JTA provider. This is typically used to delegate
- * to a J2EE server's transaction coordinator, but may also be configured with a
+ * to a Java EE server's transaction coordinator, but may also be configured with a
  * local JTA provider which is embedded within the application.
  *
  * <p>This transaction manager is appropriate for handling distributed transactions,
@@ -66,8 +66,8 @@ import org.springframework.util.StringUtils;
  * HibernateTransactionManager is appropriate, for example.
  *
  * <p><b>For typical JTA transactions (REQUIRED, SUPPORTS, MANDATORY, NEVER), a plain
- * JtaTransactionManager definition is all you need, portable across all J2EE servers.</b>
- * This corresponds to the functionality of the JTA UserTransaction, for which J2EE
+ * JtaTransactionManager definition is all you need, portable across all Java EE servers.</b>
+ * This corresponds to the functionality of the JTA UserTransaction, for which Java EE
  * specifies a standard JNDI name ("java:comp/UserTransaction"). There is no need to
  * configure a server-specific TransactionManager lookup for this kind of JTA usage.
  *
@@ -76,20 +76,20 @@ import org.springframework.util.StringUtils;
  * autodetected by JtaTransactionManager, provided that the "autodetectTransactionManager"
  * flag is set to "true" (which it is by default).
  *
- * <p>Note: Support for the JTA TransactionManager interface is not required by J2EE.
- * Almost all J2EE servers expose it, but do so as extension to J2EE. There might be some
+ * <p>Note: Support for the JTA TransactionManager interface is not required by Java EE.
+ * Almost all Java EE servers expose it, but do so as extension to EE. There might be some
  * issues with compatibility, despite the TransactionManager interface being part of JTA.
  * As a consequence, Spring provides various vendor-specific PlatformTransactionManagers,
  * which are recommended to be used if appropriate: {@link WebLogicJtaTransactionManager},
  * {@link WebSphereUowTransactionManager} and {@link OC4JJtaTransactionManager}.
- * For all other J2EE servers, the standard JtaTransactionManager is sufficient.
+ * For all other Java EE servers, the standard JtaTransactionManager is sufficient.
  *
  * <p>This pure JtaTransactionManager class supports timeouts but not per-transaction
  * isolation levels. Custom subclasses may override the {@link #doJtaBegin} method for
  * specific JTA extensions in order to provide this functionality; Spring includes
  * corresponding {@link WebLogicJtaTransactionManager} and {@link OC4JJtaTransactionManager}
  * classes, for BEA's WebLogic Server and Oracle's OC4J, respectively. Such adapters
- * for specific J2EE transaction coordinators may also expose transaction names for
+ * for specific Java EE transaction coordinators may also expose transaction names for
  * monitoring; with standard JTA, transaction names will simply be ignored.
  *
  * <p><b>Consider using Spring's <code>tx:jta-transaction-manager</code> configuration
@@ -102,7 +102,7 @@ import org.springframework.util.StringUtils;
  * it for registering Spring-managed synchronizations when participating in an existing
  * JTA transaction (e.g. controlled by EJB CMT). If no TransactionSynchronizationRegistry
  * is available (or the JTA 1.1 API isn't available), then such synchronizations
- * will be registered via the (non-J2EE) JTA TransactionManager handle.
+ * will be registered via the (non-EE) JTA TransactionManager handle.
  *
  * <p>This class is serializable. However, active synchronizations do not survive serialization.
  *
@@ -121,7 +121,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		implements TransactionFactory, InitializingBean, Serializable {
 
 	/**
-	 * Default JNDI location for the JTA UserTransaction. Many J2EE servers
+	 * Default JNDI location for the JTA UserTransaction. Many Java EE servers
 	 * also provide support for the JTA TransactionManager interface there.
 	 * @see #setUserTransactionName
 	 * @see #setAutodetectTransactionManager
@@ -271,7 +271,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set the JTA UserTransaction to use as direct reference.
-	 * <p>Typically just used for local JTA setups; in a J2EE environment,
+	 * <p>Typically just used for local JTA setups; in a Java EE environment,
 	 * the UserTransaction will always be fetched from JNDI.
 	 * @see #setUserTransactionName
 	 * @see #setAutodetectUserTransaction
@@ -289,8 +289,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set the JNDI name of the JTA UserTransaction.
-	 * <p>Note that the UserTransaction will be autodetected at the J2EE default
-	 * location "java:comp/UserTransaction" if not specified explicitly.
+	 * <p>Note that the UserTransaction will be autodetected at the Java EE
+	 * default location "java:comp/UserTransaction" if not specified explicitly.
 	 * @see #DEFAULT_USER_TRANSACTION_NAME
 	 * @see #setUserTransaction
 	 * @see #setAutodetectUserTransaction
@@ -301,7 +301,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set whether to autodetect the JTA UserTransaction at its default
-	 * JNDI location "java:comp/UserTransaction", as specified by J2EE.
+	 * JNDI location "java:comp/UserTransaction", as specified by Java EE.
 	 * Will proceed without UserTransaction if none found.
 	 * <p>Default is "true", autodetecting the UserTransaction unless
 	 * it has been specified explicitly. Turn this flag off to allow for
@@ -1169,7 +1169,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			tm.setTransactionTimeout(timeout);
 		}
 		tm.begin();
-		return tm.getTransaction();
+		return new ManagedTransactionAdapter(tm);
 	}
 
 	public boolean supportsResourceAdapterManagedTransactions() {
