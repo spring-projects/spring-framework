@@ -69,7 +69,7 @@
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration"
                     conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context.support" rev="latest.integration"
-                    conf="optional, velocity, freemarker, jasper-reports->compile"/>
+                    conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration"
                     conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.expression" rev="latest.integration"
@@ -79,7 +79,7 @@
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration"
                     conf="compile->compile"/>
 		<!-- test dependencies -->
- 		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="4.7.0" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.fileupload" rev="1.2.0"
                     conf="test->compile"/>		
@@ -97,7 +97,7 @@
 		<dependency org="org.springframework" name="org.springframework.orm" rev="latest.integration"
                     conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" 
-		            conf="test->compile"/>
+                    conf="test->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
 		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.2.GA" conf="test->runtime"/>
