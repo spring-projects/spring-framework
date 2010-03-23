@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -49,6 +50,7 @@ import org.springframework.transaction.support.TransactionCallback;
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactory
  */
+@SuppressWarnings("serial")
 public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor, Serializable {
 
 	/**
@@ -90,7 +92,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		// Work out the target class: may be <code>null</code>.
 		// The TransactionAttributeSource should be passed the target class
 		// as well as the method, which may be from an interface.
-		Class targetClass = (invocation.getThis() != null ? invocation.getThis().getClass() : null);
+		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// If the transaction attribute is null, the method is non-transactional.
 		final TransactionAttribute txAttr =
