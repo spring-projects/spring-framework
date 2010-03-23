@@ -191,7 +191,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>4.0.0.GA</version>
+			<version>4.0.2.GA</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
