@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,21 +69,11 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	 */
 	private boolean shouldInvokeOnReturnValueOf(Method method, Object returnValue) {
 		Class type = getDiscoveredReturningType();
-		Object genericType = getDiscoveredReturningGenericType();
+		Type genericType = getDiscoveredReturningGenericType();
 		// If we aren't dealing with a raw type, check if  generic parameters are assignable.
 		return (ClassUtils.isAssignableValue(type, returnValue) &&
-				(genericType == null || genericType == type || GenericTypeMatcher.isAssignable(genericType, method)));
-	}
-
-
-	/**
-	 * Inner class to avoid a static JDK 1.5 dependency for generic type matching.
-	 */
-	private static class GenericTypeMatcher {
-
-		public static boolean isAssignable(Object genericType, Method method) {
-			return TypeUtils.isAssignable((Type) genericType, method.getGenericReturnType());
-		}
+				(genericType == null || genericType == type ||
+						TypeUtils.isAssignable(genericType, method.getGenericReturnType())));
 	}
 
 }
