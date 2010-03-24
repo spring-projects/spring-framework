@@ -133,22 +133,22 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson/1.0.0/com.springsource.org.codehaus.jackson-1.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson/1.4.2/com.springsource.org.codehaus.jackson-1.4.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson/1.0.0/com.springsource.org.codehaus.jackson-sources-1.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson/1.4.2/com.springsource.org.codehaus.jackson-sources-1.4.2.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson.mapper/1.0.0/com.springsource.org.codehaus.jackson.mapper-1.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson.mapper/1.4.2/com.springsource.org.codehaus.jackson.mapper-1.4.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson.mapper/1.0.0/com.springsource.org.codehaus.jackson.mapper-sources-1.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.codehaus.jackson/com.springsource.org.codehaus.jackson.mapper/1.4.2/com.springsource.org.codehaus.jackson.mapper-sources-1.4.2.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
