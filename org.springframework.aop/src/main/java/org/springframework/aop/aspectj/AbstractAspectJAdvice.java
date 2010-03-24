@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -139,9 +140,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	private boolean argumentsIntrospected = false;
 
-	// The actual type is java.lang.reflect.Type,
-	// but for JDK 1.4 compatibility we use Object as the static type.
-	private Object discoveredReturningGenericType;
+	private Type discoveredReturningGenericType;
 	// Note: Unlike return type, no such generic information is needed for the throwing type,
 	// since Java doesn't allow exception types to be parameterized.
 
@@ -295,7 +294,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return this.discoveredReturningType;
 	}
 
-	protected Object getDiscoveredReturningGenericType() {
+	protected Type getDiscoveredReturningGenericType() {
 		return this.discoveredReturningGenericType;
 	}
 
