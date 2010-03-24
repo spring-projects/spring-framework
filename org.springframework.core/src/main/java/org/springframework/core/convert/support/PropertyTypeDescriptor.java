@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.expression.spel.support;
+package org.springframework.core.convert.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -28,40 +28,41 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@link TypeDescriptor} extension that exposes additional annotations as
- * conversion metadata: namely, annotations on other accessor methods
+ * {@link TypeDescriptor} extension that exposes additional annotations
+ * as conversion metadata: namely, annotations on other accessor methods
  * (getter/setter) and on the underlying field, if found.
- * 
- * org.springframework.beans.BeanTypeDescriptor (beans module) is very 
- * similar to this but depending on that would introduce a beans 
- * dependency from the SpEL module.
- * 
+ *
  * @author Juergen Hoeller
- * @author Andy Clement
  * @since 3.0
  */
-public class BeanTypeDescriptor extends TypeDescriptor {
+public class PropertyTypeDescriptor extends TypeDescriptor {
 
 	private final PropertyDescriptor propertyDescriptor;
 
 	private Annotation[] cachedAnnotations;
 
+
 	/**
 	 * Create a new BeanTypeDescriptor for the given bean property.
-	 * 
-	 * @param propertyDescriptor
-	 *            the corresponding JavaBean PropertyDescriptor
-	 * @param methodParameter
-	 *            the target method parameter
-	 * @param type
-	 *            the specific type to expose (may be an array/collection
-	 *            element)
+	 * @param propertyDescriptor the corresponding JavaBean PropertyDescriptor
+	 * @param methodParameter the target method parameter
 	 */
-	public BeanTypeDescriptor(PropertyDescriptor propertyDescriptor,
-			MethodParameter methodParameter, Class type) {
+	public PropertyTypeDescriptor(PropertyDescriptor propertyDescriptor, MethodParameter methodParameter) {
+		super(methodParameter);
+		this.propertyDescriptor = propertyDescriptor;
+	}
+
+	/**
+	 * Create a new BeanTypeDescriptor for the given bean property.
+	 * @param propertyDescriptor the corresponding JavaBean PropertyDescriptor
+	 * @param methodParameter the target method parameter
+	 * @param type the specific type to expose (may be an array/collection element)
+	 */
+	public PropertyTypeDescriptor(PropertyDescriptor propertyDescriptor, MethodParameter methodParameter, Class type) {
 		super(methodParameter, type);
 		this.propertyDescriptor = propertyDescriptor;
 	}
+
 
 	/**
 	 * Return the underlying PropertyDescriptor.
@@ -70,33 +71,33 @@ public class BeanTypeDescriptor extends TypeDescriptor {
 		return this.propertyDescriptor;
 	}
 
-	@Override
 	public Annotation[] getAnnotations() {
 		Annotation[] anns = this.cachedAnnotations;
 		if (anns == null) {
 			Field underlyingField = ReflectionUtils.findField(
-					getMethodParameter().getMethod().getDeclaringClass(),
-					this.propertyDescriptor.getName());
+					getMethodParameter().getMethod().getDeclaringClass(), this.propertyDescriptor.getName());
 			Map<Class, Annotation> annMap = new LinkedHashMap<Class, Annotation>();
 			if (underlyingField != null) {
 				for (Annotation ann : underlyingField.getAnnotations()) {
 					annMap.put(ann.annotationType(), ann);
 				}
 			}
-			Method targetMethod = getMethodParameter().getMethod();
 			Method writeMethod = this.propertyDescriptor.getWriteMethod();
 			Method readMethod = this.propertyDescriptor.getReadMethod();
-			if (writeMethod != null && writeMethod != targetMethod) {
+			if (writeMethod != null && writeMethod != getMethodParameter().getMethod()) {
 				for (Annotation ann : writeMethod.getAnnotations()) {
 					annMap.put(ann.annotationType(), ann);
 				}
 			}
-			if (readMethod != null && readMethod != targetMethod) {
+			if (readMethod != null && readMethod != getMethodParameter().getMethod()) {
 				for (Annotation ann : readMethod.getAnnotations()) {
 					annMap.put(ann.annotationType(), ann);
 				}
 			}
-			for (Annotation ann : targetMethod.getAnnotations()) {
+			for (Annotation ann : getMethodParameter().getMethodAnnotations()) {
+				annMap.put(ann.annotationType(), ann);
+			}
+			for (Annotation ann : getMethodParameter().getParameterAnnotations()) {
 				annMap.put(ann.annotationType(), ann);
 			}
 			anns = annMap.values().toArray(new Annotation[annMap.size()]);
