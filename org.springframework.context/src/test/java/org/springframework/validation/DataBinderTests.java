@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,6 +321,83 @@ public class DataBinderTests extends TestCase {
 			assertNotNull(editor);
 			editor.setAsText("1,6");
 			assertEquals(new Float(1.6), editor.getValue());
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
+	public void testBindingErrorWithFormatter() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb);
+		FormattingConversionService conversionService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(conversionService);
+		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		binder.setConversionService(conversionService);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("myFloat", "1x2");
+
+		LocaleContextHolder.setLocale(Locale.GERMAN);
+		try {
+			binder.bind(pvs);
+			assertEquals(new Float(0.0), tb.getMyFloat());
+			assertEquals("1x2", binder.getBindingResult().getFieldValue("myFloat"));
+			assertTrue(binder.getBindingResult().hasFieldErrors("myFloat"));
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
+	public void testBindingWithFormatterAgainstFields() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb);
+		FormattingConversionService conversionService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(conversionService);
+		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		binder.setConversionService(conversionService);
+		binder.initDirectFieldAccess();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("myFloat", "1,2");
+
+		LocaleContextHolder.setLocale(Locale.GERMAN);
+		try {
+			binder.bind(pvs);
+			assertEquals(new Float(1.2), tb.getMyFloat());
+			assertEquals("1,2", binder.getBindingResult().getFieldValue("myFloat"));
+
+			PropertyEditor editor = binder.getBindingResult().findEditor("myFloat", Float.class);
+			assertNotNull(editor);
+			editor.setValue(new Float(1.4));
+			assertEquals("1,4", editor.getAsText());
+
+			editor = binder.getBindingResult().findEditor("myFloat", null);
+			assertNotNull(editor);
+			editor.setAsText("1,6");
+			assertEquals(new Float(1.6), editor.getValue());
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
+	public void testBindingErrorWithFormatterAgainstFields() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb);
+		binder.initDirectFieldAccess();
+		FormattingConversionService conversionService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(conversionService);
+		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		binder.setConversionService(conversionService);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("myFloat", "1x2");
+
+		LocaleContextHolder.setLocale(Locale.GERMAN);
+		try {
+			binder.bind(pvs);
+			assertEquals(new Float(0.0), tb.getMyFloat());
+			assertEquals("1x2", binder.getBindingResult().getFieldValue("myFloat"));
+			assertTrue(binder.getBindingResult().hasFieldErrors("myFloat"));
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();

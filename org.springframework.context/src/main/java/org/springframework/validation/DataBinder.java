@@ -495,7 +495,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 */
 	public void setConversionService(ConversionService conversionService) {
+		Assert.state(this.conversionService == null, "DataBinder is already initialized with ConversionService");
 		this.conversionService = conversionService;
+		if (this.bindingResult != null && conversionService != null) {
+			this.bindingResult.initConversion(conversionService);
+		}
 	}
 
 	/**

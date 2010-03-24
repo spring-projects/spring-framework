@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -125,16 +127,24 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 			Object convertedValue = this.typeConverterDelegate.convertIfNecessary(oldValue, newValue, field);
 			field.set(this.target, convertedValue);
 		}
-		catch (IllegalAccessException ex) {
-			throw new InvalidPropertyException(this.target.getClass(), propertyName, "Field is not accessible", ex);
+		catch (ConverterNotFoundException ex) {
+			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
+			throw new ConversionNotSupportedException(pce, field.getType(), ex);
 		}
-		catch (IllegalArgumentException ex) {
+		catch (ConversionException ex) {
 			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
 			throw new TypeMismatchException(pce, field.getType(), ex);
 		}
 		catch (IllegalStateException ex) {
 			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
 			throw new ConversionNotSupportedException(pce, field.getType(), ex);
+		}
+		catch (IllegalArgumentException ex) {
+			PropertyChangeEvent pce = new PropertyChangeEvent(this.target, propertyName, oldValue, newValue);
+			throw new TypeMismatchException(pce, field.getType(), ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new InvalidPropertyException(this.target.getClass(), propertyName, "Field is not accessible", ex);
 		}
 	}
 
