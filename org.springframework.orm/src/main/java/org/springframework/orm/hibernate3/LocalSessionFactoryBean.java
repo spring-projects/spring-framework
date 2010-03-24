@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -875,21 +875,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	@Override
 	protected void afterSessionFactoryCreation() throws Exception {
 		if (this.schemaUpdate) {
-			DataSource dataSource = getDataSource();
-			if (dataSource != null) {
-				// Make given DataSource available for the schema update,
-				// which unfortunately reinstantiates a ConnectionProvider.
-				configTimeDataSourceHolder.set(dataSource);
-			}
-			try {
-				updateDatabaseSchema();
-			}
-			finally {
-				if (dataSource != null) {
-					// Reset DataSource holder.
-					configTimeDataSourceHolder.set(null);
-				}
-			}
+			updateDatabaseSchema();
 		}
 	}
 
@@ -917,14 +903,101 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 
 	/**
+	 * Execute schema update script, determined by the Configuration object
+	 * used for creating the SessionFactory. A replacement for Hibernate's
+	 * SchemaUpdate class, for automatically executing schema update scripts
+	 * on application startup. Can also be invoked manually.
+	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
+	 * SessionFactory to be able to invoke this method, e.g. via
+	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
+	 * <p>Uses the SessionFactory that this bean generates for accessing a
+	 * JDBC connection to perform the script.
+	 * @throws DataAccessException in case of script execution errors
+	 * @see #setSchemaUpdate
+	 * @see org.hibernate.cfg.Configuration#generateSchemaUpdateScript
+	 * @see org.hibernate.tool.hbm2ddl.SchemaUpdate
+	 */
+	public void updateDatabaseSchema() throws DataAccessException {
+		logger.info("Updating database schema for Hibernate SessionFactory");
+		DataSource dataSource = getDataSource();
+		if (dataSource != null) {
+			// Make given DataSource available for the schema update.
+			configTimeDataSourceHolder.set(dataSource);
+		}
+		try {
+			HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
+			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
+			hibernateTemplate.execute(
+				new HibernateCallback<Object>() {
+					public Object doInHibernate(Session session) throws HibernateException, SQLException {
+						Connection con = session.connection();
+						Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
+						String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
+						executeSchemaScript(con, sql);
+						return null;
+					}
+				}
+			);
+		}
+		finally {
+			if (dataSource != null) {
+				configTimeDataSourceHolder.set(null);
+			}
+		}
+	}
+
+	/**
+	 * Execute schema creation script, determined by the Configuration object
+	 * used for creating the SessionFactory. A replacement for Hibernate's
+	 * SchemaValidator class, to be invoked after application startup.
+	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
+	 * SessionFactory to be able to invoke this method, e.g. via
+	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
+	 * <p>Uses the SessionFactory that this bean generates for accessing a
+	 * JDBC connection to perform the script.
+	 * @throws DataAccessException in case of script execution errors
+	 * @see org.hibernate.cfg.Configuration#validateSchema
+	 * @see org.hibernate.tool.hbm2ddl.SchemaValidator
+	 */
+	public void validateDatabaseSchema() throws DataAccessException {
+		logger.info("Validating database schema for Hibernate SessionFactory");
+		DataSource dataSource = getDataSource();
+		if (dataSource != null) {
+			// Make given DataSource available for the schema update.
+			configTimeDataSourceHolder.set(dataSource);
+		}
+		try {
+			HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
+			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
+			hibernateTemplate.execute(
+				new HibernateCallback<Object>() {
+					public Object doInHibernate(Session session) throws HibernateException, SQLException {
+						Connection con = session.connection();
+						Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect, false);
+						getConfiguration().validateSchema(dialect, metadata);
+						return null;
+					}
+				}
+			);
+		}
+		finally {
+			if (dataSource != null) {
+				configTimeDataSourceHolder.set(null);
+			}
+		}
+	}
+
+	/**
 	 * Execute schema drop script, determined by the Configuration object
 	 * used for creating the SessionFactory. A replacement for Hibernate's
 	 * SchemaExport class, to be invoked on application setup.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
 	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
-	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
-	 * connection to perform the script.
+	 * <p>Uses the SessionFactory that this bean generates for accessing a
+	 * JDBC connection to perform the script.
 	 * @throws org.springframework.dao.DataAccessException in case of script execution errors
 	 * @see org.hibernate.cfg.Configuration#generateDropSchemaScript
 	 * @see org.hibernate.tool.hbm2ddl.SchemaExport#drop
@@ -952,59 +1025,38 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
 	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
-	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
-	 * connection to perform the script.
+	 * <p>Uses the SessionFactory that this bean generates for accessing a
+	 * JDBC connection to perform the script.
 	 * @throws DataAccessException in case of script execution errors
 	 * @see org.hibernate.cfg.Configuration#generateSchemaCreationScript
 	 * @see org.hibernate.tool.hbm2ddl.SchemaExport#create
 	 */
 	public void createDatabaseSchema() throws DataAccessException {
 		logger.info("Creating database schema for Hibernate SessionFactory");
-		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
-		hibernateTemplate.execute(
-			new HibernateCallback<Object>() {
-				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-					String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
-					executeSchemaScript(con, sql);
-					return null;
+		DataSource dataSource = getDataSource();
+		if (dataSource != null) {
+			// Make given DataSource available for the schema update.
+			configTimeDataSourceHolder.set(dataSource);
+		}
+		try {
+			HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
+			hibernateTemplate.execute(
+				new HibernateCallback<Object>() {
+					public Object doInHibernate(Session session) throws HibernateException, SQLException {
+						Connection con = session.connection();
+						Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+						String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
+						executeSchemaScript(con, sql);
+						return null;
+					}
 				}
+			);
+		}
+		finally {
+			if (dataSource != null) {
+				configTimeDataSourceHolder.set(null);
 			}
-		);
-	}
-
-	/**
-	 * Execute schema update script, determined by the Configuration object
-	 * used for creating the SessionFactory. A replacement for Hibernate's
-	 * SchemaUpdate class, for automatically executing schema update scripts
-	 * on application startup. Can also be invoked manually.
-	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
-	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
-	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
-	 * connection to perform the script.
-	 * @throws DataAccessException in case of script execution errors
-	 * @see #setSchemaUpdate
-	 * @see org.hibernate.cfg.Configuration#generateSchemaUpdateScript
-	 * @see org.hibernate.tool.hbm2ddl.SchemaUpdate
-	 */
-	public void updateDatabaseSchema() throws DataAccessException {
-		logger.info("Updating database schema for Hibernate SessionFactory");
-		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
-		hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
-		hibernateTemplate.execute(
-			new HibernateCallback<Object>() {
-				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
-					DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
-					String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
-					executeSchemaScript(con, sql);
-					return null;
-				}
-			}
-		);
+		}
 	}
 
 	/**
