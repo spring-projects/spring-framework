@@ -157,17 +157,17 @@ class OptionWriter {
 	 * {@link Map} as the source.
 	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
-	private void renderFromMap(final TagWriter tagWriter) throws JspException {
+	private void renderFromMap(TagWriter tagWriter) throws JspException {
 		Map<?, ?> optionMap = (Map) this.optionSource;
 		for (Map.Entry entry : optionMap.entrySet()) {
 			Object mapKey = entry.getKey();
 			Object mapValue = entry.getValue();
-			BeanWrapper mapKeyWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapKey);
-			BeanWrapper mapValueWrapper = PropertyAccessorFactory.forBeanPropertyAccess(mapValue);
-			Object renderValue = (this.valueProperty != null ? mapKeyWrapper.getPropertyValue(this.valueProperty) :
-					mapKey.toString());
-			Object renderLabel = (this.labelProperty != null ? mapValueWrapper.getPropertyValue(this.labelProperty) :
-					mapValue.toString());
+			Object renderValue = (this.valueProperty != null ?
+					PropertyAccessorFactory.forBeanPropertyAccess(mapKey).getPropertyValue(this.valueProperty) :
+					mapKey);
+			Object renderLabel = (this.labelProperty != null ?
+					PropertyAccessorFactory.forBeanPropertyAccess(mapValue).getPropertyValue(this.labelProperty) :
+					mapValue);
 			renderOption(tagWriter, mapKey, renderValue, renderLabel);
 		}
 	}
@@ -184,7 +184,7 @@ class OptionWriter {
 	 * Renders the inner '<code>option</code>' tags using the {@link #optionSource}.
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
-	private void renderFromEnum(final TagWriter tagWriter) throws JspException {
+	private void renderFromEnum(TagWriter tagWriter) throws JspException {
 		doRenderFromCollection(CollectionUtils.arrayToList(((Class) this.optionSource).getEnumConstants()), tagWriter);
 	}
 
