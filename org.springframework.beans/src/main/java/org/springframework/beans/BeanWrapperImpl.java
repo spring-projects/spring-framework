@@ -781,7 +781,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					"Getter for property '" + actualName + "' threw exception", ex);
 		}
 		
-		catch(IllegalAccessException ex) {
+		catch (IllegalAccessException ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Illegal attempt to get property '" + actualName + "' threw exception", ex);
 		}
@@ -813,7 +813,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			setPropertyValue(name, newArray);
 			return newArray;
-		} else {
+		}
+		else {
 			return array;
 		}
 	}
