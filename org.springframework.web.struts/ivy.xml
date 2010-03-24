@@ -42,6 +42,8 @@
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.test" rev="latest.integration"
                     conf="test->compile"/>
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.1.0"
+                    conf="test->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.1.2"
                     conf="test->compile"/>
 	</dependencies>
