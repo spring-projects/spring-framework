@@ -3,26 +3,32 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.2 (2010-03-22)
+Changes in version 3.0.2 (2010-03-29)
 -------------------------------------
 
 * fixed cross-module version ranges in OSGi manifests
 * upgraded to Hibernate Validator 4.0.2 and Jackson 1.4.2
+* fixed exception propagation issue with Hessian 4.0
 * compatibility with OpenJPA 2.0 (support for persistence.xml versioning)
+* PropertyEditor lookup fallback works on Google App Engine as well (e.g. for form tags)
 * fixed TypeDescriptor/MethodParameter toString for all cases in debug log messages
 * widened AbstractFactoryBean's "getObjectType" signature to return any Class as well
+* BeanPostProcessors are allowed to return a null bean value in the middle of the chain
 * autowire="byType" ignores parameter name when choosing a primary bean, as defined
 * "conversionService" bean will be ignored if it is not of type ConversionService
 * SimpleJdbcCall's "returningResultSet" accepts any plain RowMapper now
+* added public "validateDatabaseSchema" method to Hibernate LocalSessionFactoryBean
 * HibernateJpaDialect borrows JDBC Connection on demand (supporting aggressive release)
-* @Transactional qualifiers work in unit tests as well (TransactionalTestExecutionListener) 
+* JCA listener containers delegate to wrapped Transaction handle (for Geronimo compatibility)
+* @Transactional qualifiers work in unit tests as well (TransactionalTestExecutionListener)
+* @Value processing works in test instances (using the test context framework) as well now
 * @DirtiesContext is now inherited for class-level usage
 * WebApplicationObjectSupport's initServletContext will be called only once in any scenario
 * WebContentInterceptor does not restrict HTTP methods by default anymore
+* fixed DataBinder's conversion error handling for direct field access with ConversionService
 * @InitBinder methods support all applicable Spring 3.0 parameter annotations as well
 * fixed @RequestParam(required=false) regression for @InitBinder methods
 * fixed indexed property binding regression in form tag library
-* fixed exception propagation issue with Hessian 4.0
 * fixed @Configurable issue with null bean name
 
 
