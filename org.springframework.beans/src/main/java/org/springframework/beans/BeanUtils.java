@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -389,8 +389,17 @@ public abstract class BeanUtils {
 		}
 		ClassLoader cl = targetType.getClassLoader();
 		if (cl == null) {
-			cl = ClassLoader.getSystemClassLoader();
-			if (cl == null) {
+			try {
+				cl = ClassLoader.getSystemClassLoader();
+				if (cl == null) {
+					return null;
+				}
+			}
+			catch (Throwable ex) {
+				// e.g. AccessControlException on Google App Engine
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not access system ClassLoader: " + ex);
+				}
 				return null;
 			}
 		}
@@ -398,8 +407,10 @@ public abstract class BeanUtils {
 		try {
 			Class<?> editorClass = cl.loadClass(editorName);
 			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
-				logger.warn("Editor class [" + editorName +
-						"] does not implement [java.beans.PropertyEditor] interface");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Editor class [" + editorName +
+							"] does not implement [java.beans.PropertyEditor] interface");
+				}
 				unknownEditorTypes.put(targetType, Boolean.TRUE);
 				return null;
 			}
