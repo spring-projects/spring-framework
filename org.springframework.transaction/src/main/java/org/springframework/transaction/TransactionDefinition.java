@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,8 @@ public interface TransactionDefinition {
 	 * Execute within a nested transaction if a current transaction exists,
 	 * behave like {@link #PROPAGATION_REQUIRED} else. There is no analogous
 	 * feature in EJB.
-	 * <p><b>NOTE:</b> Actual creation of a nested transaction will only work on specific
-	 * transaction managers. Out of the box, this only applies to the JDBC
+	 * <p><b>NOTE:</b> Actual creation of a nested transaction will only work on
+	 * specific transaction managers. Out of the box, this only applies to the JDBC
 	 * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
 	 * when working on a JDBC 3.0 driver. Some JTA providers might support
 	 * nested transactions as well.
@@ -142,10 +142,10 @@ public interface TransactionDefinition {
 	/**
 	 * Indicates that dirty reads, non-repeatable reads and phantom reads
 	 * can occur.
-	 * <p>This level allows a row changed by one transaction to be read by
-	 * another transaction before any changes in that row have been committed
-	 * (a "dirty read"). If any of the changes are rolled back, the second
-	 * transaction will have retrieved an invalid row.
+	 * <p>This level allows a row changed by one transaction to be read by another
+	 * transaction before any changes in that row have been committed (a "dirty read").
+	 * If any of the changes are rolled back, the second transaction will have
+	 * retrieved an invalid row.
 	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
 	 */
 	int ISOLATION_READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;
@@ -162,11 +162,10 @@ public interface TransactionDefinition {
 	/**
 	 * Indicates that dirty reads and non-repeatable reads are prevented;
 	 * phantom reads can occur.
-	 * <p>This level prohibits a transaction from reading a row with
-	 * uncommitted changes in it, and it also prohibits the situation
-	 * where one transaction reads a row, a second transaction alters
-	 * the row, and the first transaction rereads the row, getting
-	 * different values the second time (a "non-repeatable read").
+	 * <p>This level prohibits a transaction from reading a row with uncommitted changes
+	 * in it, and it also prohibits the situation where one transaction reads a row,
+	 * a second transaction alters the row, and the first transaction re-reads the row,
+	 * getting different values the second time (a "non-repeatable read").
 	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
 	 */
 	int ISOLATION_REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;
@@ -174,13 +173,12 @@ public interface TransactionDefinition {
 	/**
 	 * Indicates that dirty reads, non-repeatable reads and phantom reads
 	 * are prevented.
-	 * <p>This level includes the prohibitions in
-	 * {@link #ISOLATION_REPEATABLE_READ} and further prohibits the
-	 * situation where one transaction reads all rows that satisfy a
-	 * <code>WHERE</code> condition, a second transaction inserts a
-	 * row that satisfies that <code>WHERE</code> condition, and the
-	 * first transaction rereads for the same condition, retrieving
-	 * the additional "phantom" row in the second read.
+	 * <p>This level includes the prohibitions in {@link #ISOLATION_REPEATABLE_READ}
+	 * and further prohibits the situation where one transaction reads all rows that
+	 * satisfy a <code>WHERE</code> condition, a second transaction inserts a row
+	 * that satisfies that <code>WHERE</code> condition, and the first transaction
+	 * re-reads for the same condition, retrieving the additional "phantom" row
+	 * in the second read.
 	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
 	 */
 	int ISOLATION_SERIALIZABLE = Connection.TRANSACTION_SERIALIZABLE;
@@ -209,9 +207,8 @@ public interface TransactionDefinition {
 	 * defined on {@link TransactionDefinition this interface}.
 	 * <p>Only makes sense in combination with {@link #PROPAGATION_REQUIRED}
 	 * or {@link #PROPAGATION_REQUIRES_NEW}.
-	 * <p>Note that a transaction manager that does not support custom
-	 * isolation levels will throw an exception when given any other level
-	 * than {@link #ISOLATION_DEFAULT}.
+	 * <p>Note that a transaction manager that does not support custom isolation levels
+	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
 	 * @return the isolation level
 	 */
 	int getIsolationLevel();
@@ -221,9 +218,8 @@ public interface TransactionDefinition {
 	 * <p>Must return a number of seconds, or {@link #TIMEOUT_DEFAULT}.
 	 * <p>Only makes sense in combination with {@link #PROPAGATION_REQUIRED}
 	 * or {@link #PROPAGATION_REQUIRES_NEW}.
-	 * <p>Note that a transaction manager that does not support timeouts
-	 * will throw an exception when given any other timeout than
-	 * {@link #TIMEOUT_DEFAULT}.
+	 * <p>Note that a transaction manager that does not support timeouts will throw
+	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
 	 * @return the transaction timeout
 	 */
 	int getTimeout();
@@ -237,9 +233,9 @@ public interface TransactionDefinition {
 	 * ({@link #PROPAGATION_SUPPORTS}). In the latter case, the flag will
 	 * only apply to managed resources within the application, such as a
 	 * Hibernate <code>Session</code>.
-	 * <p>This just serves as a hint for the actual transaction subsystem;
+<<	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
-	 * A transaction manager that cannot interpret the read-only hint will
+	 * A transaction manager which cannot interpret the read-only hint will
 	 * <i>not</i> throw an exception when asked for a read-only transaction.
 	 * @return <code>true</code> if the transaction is to be optimized as read-only 
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit(boolean)
@@ -251,10 +247,8 @@ public interface TransactionDefinition {
 	 * Return the name of this transaction. Can be <code>null</code>.
 	 * <p>This will be used as the transaction name to be shown in a
 	 * transaction monitor, if applicable (for example, WebLogic's).
-	 * <p>In case of Spring's declarative transactions, the exposed name
-	 * must (and will) be the
-	 * <code>fully-qualified class name + "." + method name</code>
-	 * (by default).
+	 * <p>In case of Spring's declarative transactions, the exposed name will be
+	 * the <code>fully-qualified class name + "." + method name</code> (by default).
 	 * @return the name of this transaction
 	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()

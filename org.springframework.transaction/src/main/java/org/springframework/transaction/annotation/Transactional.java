@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,15 @@ import org.springframework.transaction.TransactionDefinition;
  * it will be treated like
  * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}
  * (rolling back on runtime exceptions).
- * 
+ *
+ * <p>For specific information about the semantics of this annotation's attributes,
+ * consider the {@link org.springframework.transaction.TransactionDefinition} and
+ * {@link org.springframework.transaction.interceptor.TransactionAttribute} javadocs.
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 1.2
+ * @see org.springframework.transaction.interceptor.TransactionAttribute
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
  * @see org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
  */
@@ -60,25 +65,33 @@ public @interface Transactional {
 
 	/**
 	 * The transaction propagation type.
-	 * <p>Defaults to {@link Propagation#REQUIRED}.
+	 * Defaults to {@link Propagation#REQUIRED}.
+	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
 	 */
 	Propagation propagation() default Propagation.REQUIRED;
 
 	/**
 	 * The transaction isolation level.
-	 * <p>Defaults to {@link Isolation#DEFAULT}.
+	 * Defaults to {@link Isolation#DEFAULT}.
+	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getIsolationLevel()
 	 */
 	Isolation isolation() default Isolation.DEFAULT;
 
 	/**
 	 * The timeout for this transaction.
-	 * <p>Defaults to the default timeout of the underlying transaction system.
+	 * Defaults to the default timeout of the underlying transaction system.
+	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
 	 */
 	int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
 
 	/**
 	 * <code>true</code> if the transaction is read-only.
-	 * <p>Defaults to <code>false</code>.
+	 * Defaults to <code>false</code>.
+	 * <p>This just serves as a hint for the actual transaction subsystem;
+	 * it will <i>not necessarily</i> cause failure of write access attempts.
+	 * A transaction manager which cannot interpret the read-only hint will
+	 * <i>not</i> throw an exception when asked for a read-only transaction.
+	 * @see org.springframework.transaction.interceptor.TransactionAttribute#isReadOnly()
 	 */
 	boolean readOnly() default false;
 
