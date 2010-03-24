@@ -33,6 +33,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.PropertyTypeDescriptor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -152,7 +153,7 @@ class TypeConverterDelegate {
 			throws IllegalArgumentException {
 
 		return convertIfNecessary(descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(),
-				new BeanTypeDescriptor(descriptor));
+				new PropertyTypeDescriptor(descriptor, BeanUtils.getWriteMethodParameter(descriptor)));
 	}
 
 	/**
@@ -348,8 +349,8 @@ class TypeConverterDelegate {
 	 */
 	protected PropertyEditor findDefaultEditor(Class requiredType, TypeDescriptor typeDescriptor) {
 		PropertyEditor editor = null;
-		if (typeDescriptor instanceof BeanTypeDescriptor) {
-			PropertyDescriptor pd = ((BeanTypeDescriptor) typeDescriptor).getPropertyDescriptor();
+		if (typeDescriptor instanceof PropertyTypeDescriptor) {
+			PropertyDescriptor pd = ((PropertyTypeDescriptor) typeDescriptor).getPropertyDescriptor();
 			editor = pd.createPropertyEditor(this.targetObject);
 		}
 		if (editor == null && requiredType != null) {

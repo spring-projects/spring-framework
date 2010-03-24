@@ -345,7 +345,14 @@ public class TypeDescriptor {
 			return this.cachedFieldAnnotations;
 		}
 		else if (this.methodParameter != null) {
-			return this.methodParameter.getParameterAnnotations();
+			if (this.methodParameter.getParameterIndex() < 0) {
+				// The best we can do for return type metadata is to expose
+				// method-level annotations when the target is the return type...
+				return this.methodParameter.getMethodAnnotations();
+			}
+			else {
+				return this.methodParameter.getParameterAnnotations();
+			}
 		}
 		else {
 			return new Annotation[0];

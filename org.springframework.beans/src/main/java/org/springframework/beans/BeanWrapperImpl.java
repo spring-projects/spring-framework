@@ -44,6 +44,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.PropertyTypeDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -368,10 +369,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			if (pd != null) {
 				Class type = getPropertyType(propertyName);
 				if (pd.getReadMethod() != null) {
-					return new BeanTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), type);
+					return new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), type);
 				}
 				else if (pd.getWriteMethod() != null) {
-					return new BeanTypeDescriptor(pd, BeanUtils.getWriteMethodParameter(pd), type);
+					return new PropertyTypeDescriptor(pd, BeanUtils.getWriteMethodParameter(pd), type);
 				}
 			}
 		}
