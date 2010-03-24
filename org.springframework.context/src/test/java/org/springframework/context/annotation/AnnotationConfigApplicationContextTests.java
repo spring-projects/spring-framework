@@ -27,6 +27,7 @@ import static org.junit.matchers.JUnitMatchers.*;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
@@ -152,6 +153,31 @@ public class AnnotationConfigApplicationContextTests {
 	public void autowiringIsEnabledByDefault() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AutowiredConfig.class);
 		assertThat(context.getBean(TestBean.class).name, equalTo("foo"));
+	}
+
+	@Test
+	public void nullReturningBeanPostProcessor() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(AutowiredConfig.class);
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				return (bean instanceof TestBean ? null : bean);
+			}
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				return bean;
+			}
+		});
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				bean.getClass().getName();
+				return bean;
+			}
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				bean.getClass().getName();
+				return bean;
+			}
+		});
+		context.refresh();
 	}
 
 
