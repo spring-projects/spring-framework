@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setContextConfigLocation
  * @see #setNamespace
  */
-public abstract class FrameworkServlet extends HttpServletBean
-		implements ApplicationListener<ContextRefreshedEvent> {
+public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Suffix for WebApplicationContext namespaces. If a servlet of this class is
@@ -437,7 +436,7 @@ public abstract class FrameworkServlet extends HttpServletBean
 		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
 		wac.setConfigLocation(getContextConfigLocation());
-		wac.addApplicationListener(new SourceFilteringListener(wac, this));
+		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
 		postProcessWebApplicationContext(wac);
 		wac.refresh();
@@ -514,10 +513,8 @@ public abstract class FrameworkServlet extends HttpServletBean
 	}
 
 	/**
-	 * ApplicationListener endpoint that receives events from this servlet's
-	 * WebApplicationContext.
-	 * <p>The default implementation calls {@link #onRefresh} in case of a
-	 * {@link org.springframework.context.event.ContextRefreshedEvent},
+	 * Callback that receives refresh events from this servlet's WebApplicationContext.
+	 * <p>The default implementation calls {@link #onRefresh},
 	 * triggering a refresh of this servlet's context-dependent state.
 	 * @param event the incoming ApplicationContext event
 	 */
@@ -738,6 +735,18 @@ public abstract class FrameworkServlet extends HttpServletBean
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
+		}
+	}
+
+
+	/**
+	 * ApplicationListener endpoint that receives events from this servlet's WebApplicationContext
+	 * only, delegating to <code>onApplicationEvent</code> on the FrameworkServlet instance.
+	 */
+	private class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
+
+		public void onApplicationEvent(ContextRefreshedEvent event) {
+			FrameworkServlet.this.onApplicationEvent(event);
 		}
 	}
 
