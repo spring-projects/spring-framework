@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.ObjectFactory
  * @see ServiceLocatorFactoryBean
  */
-public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean {
+public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<ObjectFactory> {
 
 	private String targetBeanName;
 
@@ -123,7 +123,7 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean {
 	}
 
 	@Override
-	protected Object createInstance() {
+	protected ObjectFactory createInstance() {
 		return new ObjectFactory() {
 			public Object getObject() throws BeansException {
 				return getTargetBean(targetBeanName);

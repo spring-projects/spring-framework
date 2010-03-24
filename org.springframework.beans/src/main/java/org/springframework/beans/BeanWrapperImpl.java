@@ -102,6 +102,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private TypeConverterDelegate typeConverterDelegate;
 
 	/**
+	 * The security context used for invoking the property methods
+	 */
+	private AccessControlContext acc;
+
+	/**
 	 * Cached introspections results for this object, to prevent encountering
 	 * the cost of JavaBeans introspection every time.
 	 */
@@ -111,9 +116,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Map with cached nested BeanWrappers: nested path -> BeanWrapper instance.
 	 */
 	private Map<String, BeanWrapperImpl> nestedBeanWrappers;
-
-	/** The security context used for invoking the property methods */
-	private AccessControlContext acc;
 
 	private boolean autoGrowNestedPaths = false;
 
@@ -216,16 +218,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		setIntrospectionClass(object.getClass());
 	}
 
-	/**
-	 * Set the security context used during the invocation of the wrapped instance methods.
-	 * Can be null.
-	 * 
-	 * @param acc
-	 */
-	public void setSecurityContext(AccessControlContext acc) {
-		this.acc = acc;
-	}
-
 	public final Object getWrappedInstance() {
 		return this.object;
 	}
@@ -272,6 +264,22 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 */
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
+	}
+
+	/**
+	 * Set the security context used during the invocation of the wrapped instance methods.
+	 * Can be null.
+	 */
+	public void setSecurityContext(AccessControlContext acc) {
+		this.acc = acc;
+	}
+
+	/**
+	 * Return the security context used during the invocation of the wrapped instance methods.
+	 * Can be null.
+	 */
+	public AccessControlContext getSecurityContext() {
+		return this.acc;
 	}
 
 	/**

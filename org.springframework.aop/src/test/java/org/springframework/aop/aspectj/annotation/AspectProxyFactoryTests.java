@@ -16,15 +16,13 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import static org.junit.Assert.*;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import static org.junit.Assert.*;
 import org.junit.Test;
-
 import test.aop.PerThisAspect;
-
+import test.util.SerializationTestUtils;
 
 /**
  * @author Rob Harrop
@@ -88,8 +86,10 @@ public final class AspectProxyFactoryTests {
 		proxyFactory.addAspect(aspect);
 
 		ITestBean proxy = proxyFactory.getProxy();
-
 		assertEquals(target.getAge() * multiple, proxy.getAge());
+
+		ITestBean serializedProxy = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
+		assertEquals(target.getAge() * multiple, serializedProxy.getAge());
 	}
 
 	@Test(expected=IllegalArgumentException.class)
