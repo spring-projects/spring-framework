@@ -57,6 +57,7 @@ import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
+import org.springframework.beans.GenericBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -104,6 +107,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
@@ -257,6 +261,33 @@ public class ServletAnnotationControllerTests {
 			System.clearProperty("myHeader");
 		}
 		assertEquals("foo-bar-/myApp", response.getContentAsString());
+	}
+
+	@Test
+	public void typeNestedSetBinding() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(NestedSetController.class));
+				RootBeanDefinition csDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+				csDef.getPropertyValues().add("converters", new TestBeanConverter());
+				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+				wbiDef.getPropertyValues().add("conversionService", csDef);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("testBeanSet", new String[] {"1", "2"});
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("[1, 2]-org.springframework.beans.TestBean", response.getContentAsString());
 	}
 
 	@Test
@@ -1666,6 +1697,7 @@ public class ServletAnnotationControllerTests {
 		public String post(@ModelAttribute("object1") Object object1) {
 			//do something with object1
 			return "myPage";
+
 		}
 	}
 
@@ -2173,6 +2205,23 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Controller
+	public static class NestedSetController {
+
+		@RequestMapping("/myPath.do")
+		public void myHandle(GenericBean gb, HttpServletResponse response) throws Exception {
+			response.getWriter().write(gb.getTestBeanSet().toString() + "-" +
+					gb.getTestBeanSet().iterator().next().getClass().getName());
+		}
+	}
+
+	public static class TestBeanConverter implements Converter<String, ITestBean> {
+
+		public ITestBean convert(String source) {
+			return new TestBean(source);
+		}
+	}
+
+	@Controller
 	public static class MethodNotAllowedController {
 
 		@RequestMapping(value = "/myPath.do", method = RequestMethod.DELETE)
@@ -2568,8 +2617,6 @@ public class ServletAnnotationControllerTests {
 		public void handle(@RequestParam("map") Map map, Writer writer) throws IOException {
 			writer.write("test-" + map);
 		}
-
-
 	}
 
 	public static class CustomMapEditor extends PropertyEditorSupport {

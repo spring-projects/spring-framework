@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.springframework.core.io.Resource;
 public class GenericBean<T> {
 
 	private Set<Integer> integerSet;
+
+	private Set<ITestBean> testBeanSet;
 
 	private List<Resource> resourceList;
 
@@ -103,6 +105,14 @@ public class GenericBean<T> {
 
 	public void setIntegerSet(Set<Integer> integerSet) {
 		this.integerSet = integerSet;
+	}
+
+	public Set<ITestBean> getTestBeanSet() {
+		return testBeanSet;
+	}
+
+	public void setTestBeanSet(Set<ITestBean> testBeanSet) {
+		this.testBeanSet = testBeanSet;
 	}
 
 	public List<Resource> getResourceList() {
