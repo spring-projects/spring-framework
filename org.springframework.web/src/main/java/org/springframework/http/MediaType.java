@@ -648,6 +648,35 @@ public class MediaType implements Comparable<MediaType> {
 		}
 	}
 
+	/**
+	 * Sorts the given list of {@link MediaType} objects by quality value.
+	 *
+	 * <p>Given two media types:
+	 * <ol>
+	 *   <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
+	 *   with the highest quality value is ordered before the other.</li>
+	 *   <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
+	 *   wildcard is ordered before the other.</li>
+	 *   <li>if the two media types have different {@linkplain #getType() types}, then they are considered equal and
+	 *   remain their current order.</li>
+	 *   <li>if either media type has a {@linkplain #isWildcardSubtype() wildcard subtype}, then the media type without
+	 *   the wildcard is sorted before the other.</li>
+	 *   <li>if the two media types have different {@linkplain #getSubtype() subtypes}, then they are considered equal
+	 *   and remain their current order.</li>
+	 *   <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
+	 *   media type with the most parameters is ordered before the other.</li>
+	 * </ol>
+	 *
+	 * @param mediaTypes the list of media types to be sorted
+	 * @see #getQualityValue()
+	 */
+	public static void sortByQualityValue(List<MediaType> mediaTypes) {
+		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
+		if (mediaTypes.size() > 1) {
+			Collections.sort(mediaTypes, QUALITY_VALUE_COMPARATOR);
+		}
+	}
+
 	static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new Comparator<MediaType>() {
 
 		public int compare(MediaType mediaType1, MediaType mediaType2) {
@@ -686,4 +715,39 @@ public class MediaType implements Comparable<MediaType> {
 		}
 	};
 
+	static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = new Comparator<MediaType>() {
+
+		public int compare(MediaType mediaType1, MediaType mediaType2) {
+			double quality1 = mediaType1.getQualityValue();
+			double quality2 = mediaType2.getQualityValue();
+			int qualityComparison = Double.compare(quality2, quality1);
+			if (qualityComparison != 0) {
+				return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
+			}
+			else if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
+				return 1;
+			}
+			else if (mediaType2.isWildcardType() && !mediaType1.isWildcardType()) { // audio/* > */*
+				return -1;
+			}
+			else if (!mediaType1.getType().equals(mediaType2.getType())) { // audio/basic == text/html
+				return 0;
+			}
+			else { // mediaType1.getType().equals(mediaType2.getType())
+				if (mediaType1.isWildcardSubtype() && !mediaType2.isWildcardSubtype()) { // audio/* < audio/basic
+					return 1;
+				}
+				else if (mediaType2.isWildcardSubtype() && !mediaType1.isWildcardSubtype()) { // audio/basic > audio/*
+					return -1;
+				}
+				else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) { // audio/basic == audio/wave
+					return 0;
+				} else {
+					int paramsSize1 = mediaType1.parameters.size();
+					int paramsSize2 = mediaType2.parameters.size();
+					return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
+				}
+			}
+		}
+	};
 }

@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.activation.FileTypeMap;
@@ -292,7 +290,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			String acceptHeader = request.getHeader(ACCEPT_HEADER);
 			if (StringUtils.hasText(acceptHeader)) {
 				List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
-				MediaType.sortBySpecificity(mediaTypes);
+				MediaType.sortByQualityValue(mediaTypes);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Requested media types are " + mediaTypes + " (based on Accept header)");
 				}

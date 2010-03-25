@@ -1289,6 +1289,12 @@ public class ServletAnnotationControllerTests {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("xml", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "text/html;q=0.9, application/xml");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("xml", response.getContentAsString());
 	}
 
 	@Test
@@ -2632,6 +2638,5 @@ public class ServletAnnotationControllerTests {
 		}
 
 	}
-
 
 }

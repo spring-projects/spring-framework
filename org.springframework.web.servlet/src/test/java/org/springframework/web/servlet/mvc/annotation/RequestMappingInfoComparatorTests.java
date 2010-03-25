@@ -120,8 +120,15 @@ public class RequestMappingInfoComparatorTests {
 
 		assertTrue(comparator.compare(html, xml) == 0);
 		assertTrue(comparator.compare(xml, html) == 0);
-	}
 
+		// See SPR-7000
+		request = new MockHttpServletRequest();
+		request.addHeader("Accept", "text/html;q=0.9,application/xml");
+		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+
+		assertTrue(comparator.compare(html, xml) > 0);
+		assertTrue(comparator.compare(xml, html) < 0);
+	}
 
 	private static class MockComparator implements Comparator<String> {
 
