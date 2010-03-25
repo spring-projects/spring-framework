@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,41 @@
 
 package org.springframework.util;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
+ * Unit tests for {@link TypeUtils}.
+ *
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
 public class TypeUtilsTests {
 
+	public static Object object;
+
+	public static String string;
+
+	public static Integer number;
+
 	public static List<Object> objects;
+
+	public static List<String> strings;
 
 	public static List<? extends Object> openObjects;
 
-	public static List<String> strings;
+	public static List<? extends Number> openNumbers;
+
+	public static List<? super Object> storableObjectList;
 
 	public static List<Number>[] array;
 
@@ -51,6 +66,7 @@ public class TypeUtilsTests {
 		assertTrue(TypeUtils.isAssignable(List.class, LinkedList.class));
 		assertFalse(TypeUtils.isAssignable(List.class, Collection.class));
 		assertFalse(TypeUtils.isAssignable(List.class, HashSet.class));
+		assertFalse(TypeUtils.isAssignable(null, Object.class));
 	}
 
 	@Test
@@ -74,6 +90,25 @@ public class TypeUtilsTests {
 		assertTrue(TypeUtils.isAssignable(openObjectsType, stringsType));
 		assertFalse(TypeUtils.isAssignable(stringsType, objectsType));
 		assertFalse(TypeUtils.isAssignable(objectsType, stringsType));
+	}
+
+	@Test
+	public void withWildcardTypes() throws Exception {
+		ParameterizedType openObjectsType = (ParameterizedType) getClass().getField("openObjects").getGenericType();
+		ParameterizedType openNumbersType = (ParameterizedType) getClass().getField("openNumbers").getGenericType();
+		Type storableObjectListType = getClass().getField("storableObjectList").getGenericType();
+
+		Type objectType = getClass().getField("object").getGenericType();
+		Type numberType = getClass().getField("number").getGenericType();
+		Type stringType = getClass().getField("string").getGenericType();
+
+		Type openWildcard = openObjectsType.getActualTypeArguments()[0]; // '?'
+		Type openNumbersWildcard = openNumbersType.getActualTypeArguments()[0]; // '? extends number'
+
+		assertTrue(TypeUtils.isAssignable(openWildcard, objectType));
+		assertTrue(TypeUtils.isAssignable(openNumbersWildcard, numberType));
+		assertFalse(TypeUtils.isAssignable(openNumbersWildcard, stringType));
+		assertFalse(TypeUtils.isAssignable(storableObjectListType, openObjectsType));
 	}
 
 	@Test
