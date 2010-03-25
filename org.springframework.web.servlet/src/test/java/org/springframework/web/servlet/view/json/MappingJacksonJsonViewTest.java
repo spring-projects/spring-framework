@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.annotate.JsonUseSerializer;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerFactory;
 import org.codehaus.jackson.map.SerializerProvider;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.ser.BeanSerializerFactory;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -79,12 +79,31 @@ public class MappingJacksonJsonViewTest {
 
 		view.render(model, request, response);
 
+		assertEquals("no-cache", response.getHeader("Pragma"));
+		assertEquals("no-cache, no-store, max-age=0", response.getHeader("Cache-Control"));
+		assertNotNull(response.getHeader("Expires"));
+
 		assertEquals(MappingJacksonJsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
 
 		validateResult();
+	}
+
+	@Test
+	public void renderCaching() throws Exception {
+		view.setDisableCaching(false);
+
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("bindingResult", createMock("binding_result", BindingResult.class));
+		model.put("foo", "bar");
+
+		view.render(model, request, response);
+
+		assertNull(response.getHeader("Pragma"));
+		assertNull(response.getHeader("Cache-Control"));
+		assertNull(response.getHeader("Expires"));
 	}
 
 	@Test
@@ -181,6 +200,7 @@ public class MappingJacksonJsonViewTest {
 		assertNotNull("Json Result did not eval as valid JavaScript", jsResult);
 	}
 
+
 	public static class TestBeanSimple {
 
 		private String value = "foo";
@@ -212,7 +232,7 @@ public class MappingJacksonJsonViewTest {
 		}
 	}
 
-	@JsonUseSerializer(TestBeanSimpleSerializer.class)
+	@JsonSerialize(using=TestBeanSimpleSerializer.class)
 	public static class TestBeanSimpleAnnotated extends TestBeanSimple {
 
 	}
