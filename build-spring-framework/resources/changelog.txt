@@ -7,8 +7,9 @@ Changes in version 3.0.2 (2010-03-29)
 -------------------------------------
 
 * fixed cross-module version ranges in OSGi manifests
+* fixed contents of org.springframework.web.struts jar
 * upgraded to Hibernate Validator 4.0.2 and Jackson 1.4.2
-* fixed exception propagation issue with Hessian 4.0
+* compatibility with Hessian 4.0 in terms of exception propagation
 * compatibility with OpenJPA 2.0 (support for persistence.xml versioning)
 * PropertyEditor lookup fallback works on Google App Engine as well (e.g. for form tags)
 * fixed TypeDescriptor/MethodParameter toString for all cases in debug log messages
@@ -25,6 +26,7 @@ Changes in version 3.0.2 (2010-03-29)
 * @DirtiesContext is now inherited for class-level usage
 * WebApplicationObjectSupport's initServletContext will be called only once in any scenario
 * WebContentInterceptor does not restrict HTTP methods by default anymore
+* introduced support for HttpEntity wrapper, containing headers in addition to body value
 * fixed DataBinder's conversion error handling for direct field access with ConversionService
 * @InitBinder methods support all applicable Spring 3.0 parameter annotations as well
 * fixed @RequestParam(required=false) regression for @InitBinder methods
