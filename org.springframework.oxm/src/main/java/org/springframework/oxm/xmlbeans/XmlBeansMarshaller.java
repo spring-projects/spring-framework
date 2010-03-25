@@ -21,8 +21,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.io.FilterInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.ref.WeakReference;
+import java.nio.CharBuffer;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamReader;
@@ -35,6 +38,8 @@ import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
 import org.apache.xmlbeans.XmlSaxHandler;
 import org.apache.xmlbeans.XmlValidationError;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -181,7 +186,8 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	@Override
 	protected final Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
 		try {
-			XmlObject object = XmlObject.Factory.parse(inputStream, getXmlOptions());
+			InputStream nonClosingInputStream = new NonClosingInputStream(inputStream);
+			XmlObject object = XmlObject.Factory.parse(nonClosingInputStream, getXmlOptions());
 			validate(object);
 			return object;
 		}
@@ -193,7 +199,8 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	@Override
 	protected final Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
 		try {
-			XmlObject object = XmlObject.Factory.parse(reader, getXmlOptions());
+			Reader nonClosingReader = new NonClosingReader(reader);
+			XmlObject object = XmlObject.Factory.parse(nonClosingReader, getXmlOptions());
 			validate(object);
 			return object;
 		}
@@ -305,6 +312,162 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 			// fallback
 			return new UncategorizedMappingException("Unknown XMLBeans exception", ex);
 		}
+	}
+
+	/**
+	 * See SPR-7034
+	 */
+	private static class NonClosingInputStream extends InputStream {
+
+		private final WeakReference<InputStream> in;
+
+		private NonClosingInputStream(InputStream in) {
+			this.in = new WeakReference<InputStream>(in);
+		}
+
+		private InputStream getInputStream() {
+			return this.in.get();
+		}
+		
+		@Override
+		public int read() throws IOException {
+			InputStream in = getInputStream();
+			return in != null ? in.read() : -1;
+		}
+
+		@Override
+		public int read(byte[] b) throws IOException {
+			InputStream in = getInputStream();
+			return in != null ? in.read(b) : -1;
+		}
+
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException {
+			InputStream in = getInputStream();
+			return in != null ? in.read(b, off, len) : -1;
+		}
+
+		@Override
+		public long skip(long n) throws IOException {
+			InputStream in = getInputStream();
+			return in != null ? in.skip(n) : 0;
+		}
+
+		@Override
+		public boolean markSupported() {
+			InputStream in = getInputStream();
+			return in != null && in.markSupported();
+		}
+
+		@Override
+		public void mark(int readlimit) {
+			InputStream in = getInputStream();
+			if (in != null) {
+				in.mark(readlimit);
+			}
+		}
+
+		@Override
+		public void reset() throws IOException {
+			InputStream in = getInputStream();
+			if (in != null) {
+				in.reset();
+			}
+		}
+
+		@Override
+		public int available() throws IOException {
+			InputStream in = getInputStream();
+			return in != null ? in.available() : 0;
+		}
+
+		@Override
+		public void close() throws IOException {
+			InputStream in = getInputStream();
+			if(in != null) {
+			  this.in.clear();
+			}
+		}
+	}
+
+	private static class NonClosingReader extends Reader {
+
+		private final WeakReference<Reader> reader;
+
+		private NonClosingReader(Reader reader) {
+			this.reader = new WeakReference<Reader>(reader);
+		}
+
+		private Reader getReader() {
+			return this.reader.get();
+		}
+
+		@Override
+		public int read(CharBuffer target) throws IOException {
+			Reader rdr = getReader();
+			return rdr != null ? rdr.read(target) : -1;
+		}
+
+		@Override
+		public int read() throws IOException {
+			Reader rdr = getReader();
+			return rdr != null ? rdr.read() : -1;
+		}
+
+		@Override
+		public int read(char[] cbuf) throws IOException {
+			Reader rdr = getReader();
+			return rdr != null ? rdr.read(cbuf) : -1;
+		}
+
+		@Override
+		public int read(char[] cbuf, int off, int len) throws IOException {
+			Reader rdr = getReader();
+			return rdr != null ? rdr.read(cbuf, off, len) : -1;
+		}
+
+		@Override
+		public long skip(long n) throws IOException {
+			Reader rdr = getReader();
+			return rdr != null ? rdr.skip(n) : 0;
+		}
+
+		@Override
+		public boolean ready() throws IOException {
+			Reader rdr = getReader();
+			return rdr != null && rdr.ready();
+		}
+
+		@Override
+		public boolean markSupported() {
+			Reader rdr = getReader();
+			return rdr != null && rdr.markSupported();
+		}
+
+		@Override
+		public void mark(int readAheadLimit) throws IOException {
+			Reader rdr = getReader();
+			if (rdr != null) {
+				rdr.mark(readAheadLimit);
+			}
+		}
+
+		@Override
+		public void reset() throws IOException {
+			Reader rdr = getReader();
+			if (rdr != null) {
+				rdr.reset();
+			}
+		}
+
+		@Override
+		public void close() throws IOException {
+			Reader rdr = getReader();
+			if (rdr != null) {
+				this.reader.clear();
+			}
+		}
+
 	}
 
 }
