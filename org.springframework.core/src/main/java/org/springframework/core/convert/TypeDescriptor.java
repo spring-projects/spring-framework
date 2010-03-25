@@ -103,8 +103,6 @@ public class TypeDescriptor {
 		this.field = field;
 	}
 
-	// protected constructors for subclasses
-	
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
 	 * <p>Use this constructor when a target conversion point originates from a method parameter,
@@ -112,9 +110,20 @@ public class TypeDescriptor {
 	 * @param methodParameter the MethodParameter to wrap
 	 * @param type the specific type to expose (may be an array/collection element)
 	 */
-	protected TypeDescriptor(MethodParameter methodParameter, Class<?> type) {
+	public TypeDescriptor(MethodParameter methodParameter, Class<?> type) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
+		this.type = type;
+	}
+
+	/**
+	 * Create a new type descriptor for a field.
+	 * Use this constructor when a target conversion point originates from a field.
+	 * @param field the field to wrap
+	 */
+	public TypeDescriptor(Field field, Class<?> type) {
+		Assert.notNull(field, "Field must not be null");
+		this.field = field;
 		this.type = type;
 	}
 
@@ -227,24 +236,43 @@ public class TypeDescriptor {
 
 	/**
 	 * If this type is an array type or {@link Collection} type, returns the underlying element type.
-	 * Returns null if the type is neither an array or collection.
+	 * Returns <code>null</code> if the type is neither an array or collection.
 	 */
 	public Class<?> getElementType() {
-		return getElementTypeDescriptor().getType();
+		if (isArray()) {
+			return getArrayComponentType();
+		}
+		else if (isCollection()) {
+			return getCollectionElementType();
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
 	 * Return the element type as a type descriptor.
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
-		if (isArray()) {
-			return TypeDescriptor.valueOf(getArrayComponentType());
+		return TypeDescriptor.valueOf(getElementType());
+	}
+
+	/**
+	 * Create a copy of this type descriptor, preserving the context information
+	 * but exposing the specified element type (e.g. an array/collection element).
+	 * @param elementType the desired type to expose
+	 * @return the type descriptor
+	 */
+	public TypeDescriptor forElementType(Class<?> elementType) {
+		Assert.notNull(elementType, "Element type must not be null");
+		if (getType().equals(elementType)) {
+			return this;
 		}
-		else if (isCollection()) {
-			return TypeDescriptor.valueOf(getCollectionElementType());
+		else if (this.methodParameter != null) {
+			return new TypeDescriptor(this.methodParameter, elementType);
 		}
 		else {
-			return TypeDescriptor.NULL;
+			return new TypeDescriptor(this.field, elementType);
 		}
 	}
 

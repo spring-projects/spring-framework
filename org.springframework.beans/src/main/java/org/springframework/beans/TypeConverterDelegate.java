@@ -196,8 +196,9 @@ class TypeConverterDelegate {
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && convertedValue != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(convertedValue);
-			if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
-				return (T) conversionService.convert(convertedValue, sourceTypeDesc, typeDescriptor);
+			TypeDescriptor targetTypeDesc = typeDescriptor.forElementType(requiredType);
+			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
+				return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
 			}
 		}
 
@@ -205,8 +206,8 @@ class TypeConverterDelegate {
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
 					convertedValue instanceof String && typeDescriptor.getMethodParameter() != null) {
-				Class elementType = GenericCollectionTypeResolver.getCollectionParameterType(typeDescriptor.getMethodParameter());
-				if (elementType != null && Enum.class.isAssignableFrom(elementType)) {
+				Class elemType = GenericCollectionTypeResolver.getCollectionParameterType(typeDescriptor.getMethodParameter());
+				if (elemType != null && Enum.class.isAssignableFrom(elemType)) {
 					convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
 				}
 			}
@@ -572,7 +573,8 @@ class TypeConverterDelegate {
 			if (methodParam != null) {
 				methodParam.increaseNestingLevel();
 			}
-			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element, elementType);
+			Object convertedElement = convertIfNecessary(
+					indexedPropertyName, null, element, elementType, typeDescriptor);
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}
@@ -651,11 +653,11 @@ class TypeConverterDelegate {
 				methodParam.increaseNestingLevel();
 				methodParam.setTypeIndexForCurrentLevel(0);
 			}
-			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType);
+			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, typeDescriptor);
 			if (methodParam != null) {
 				methodParam.setTypeIndexForCurrentLevel(1);
 			}
-			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType);
+			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, typeDescriptor);
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}

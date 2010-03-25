@@ -58,7 +58,7 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 	 * @param methodParameter the target method parameter
 	 * @param type the specific type to expose (may be an array/collection element)
 	 */
-	public PropertyTypeDescriptor(PropertyDescriptor propertyDescriptor, MethodParameter methodParameter, Class type) {
+	public PropertyTypeDescriptor(PropertyDescriptor propertyDescriptor, MethodParameter methodParameter, Class<?> type) {
 		super(methodParameter, type);
 		this.propertyDescriptor = propertyDescriptor;
 	}
