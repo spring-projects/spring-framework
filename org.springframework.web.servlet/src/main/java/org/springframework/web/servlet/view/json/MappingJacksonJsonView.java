@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,8 @@ public class MappingJacksonJsonView extends AbstractView {
 
 	private Set<String> renderedAttributes;
 
+	private boolean disableCaching = true;
+
 	/**
 	 * Construct a new {@code JacksonJsonView}, setting the content type to {@code application/json}.
 	 */
@@ -109,10 +111,24 @@ public class MappingJacksonJsonView extends AbstractView {
 		this.renderedAttributes = renderedAttributes;
 	}
 
+	/**
+	 * Disables caching of the generated JSON.
+	 *
+	 * <p>Default is {@code true}, which will prevent the client from caching the generated JSON.
+	 */
+	public void setDisableCaching(boolean disableCaching) {
+		this.disableCaching = disableCaching;
+	}
+
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
 		response.setContentType(getContentType());
 		response.setCharacterEncoding(encoding.getJavaName());
+		if (disableCaching) {
+			response.addHeader("Pragma", "no-cache");
+			response.addHeader("Cache-Control", "no-cache, no-store, max-age=0");
+			response.addDateHeader("Expires", 1L);
+		}
 	}
 
 	@Override
