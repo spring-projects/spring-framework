@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ class RuntimeTestWalker {
 		catch (IllegalAccessException illegalAccessEx) {
 			// Famous last words... but I don't see how this can happen given the
 			// makeAccessible call above
-			throw new IllegalStateException("Unable to access ShadowMatchImpl.runtimeTest field.");
+			throw new IllegalStateException("Unable to access ShadowMatchImpl.residualTest field");
 		}
 	}
 
@@ -83,15 +83,18 @@ class RuntimeTestWalker {
 	 * then it tests subtype sensitive vars.
 	 */
 	public boolean testsSubtypeSensitiveVars() {
-		return new SubtypeSensitiveVarTypeTestVisitor().testsSubtypeSensitiveVars(this.runtimeTest);
+		return (this.runtimeTest != null &&
+				new SubtypeSensitiveVarTypeTestVisitor().testsSubtypeSensitiveVars(this.runtimeTest));
 	}
 
 	public boolean testThisInstanceOfResidue(Class thisClass) {
-		return new ThisInstanceOfResidueTestVisitor(thisClass).thisInstanceOfMatches(this.runtimeTest);
+		return (this.runtimeTest != null &&
+				new ThisInstanceOfResidueTestVisitor(thisClass).thisInstanceOfMatches(this.runtimeTest));
 	}
 
 	public boolean testTargetInstanceOfResidue(Class targetClass) {
-		return new TargetInstanceOfResidueTestVisitor(targetClass).targetInstanceOfMatches(this.runtimeTest);
+		return (this.runtimeTest != null &&
+				new TargetInstanceOfResidueTestVisitor(targetClass).targetInstanceOfMatches(this.runtimeTest));
 	}
 
 
@@ -139,8 +142,7 @@ class RuntimeTestWalker {
 			try {
 				Field varTypeField = ReflectionVar.class.getDeclaredField("varType");
 				ReflectionUtils.makeAccessible(varTypeField);
-				Integer varTypeValue = (Integer) varTypeField.get(v);
-				return varTypeValue.intValue();
+				return (Integer) varTypeField.get(v);
 			}
 			catch (NoSuchFieldException noSuchFieldEx) {
 				throw new IllegalStateException("the version of aspectjtools.jar / aspectjweaver.jar " +
@@ -150,7 +152,7 @@ class RuntimeTestWalker {
 			catch (IllegalAccessException illegalAccessEx) {
 				// Famous last words... but I don't see how this can happen given the
 				// makeAccessible call above
-				throw new IllegalStateException("Unable to access ReflectionVar.varType field.");
+				throw new IllegalStateException("Unable to access ReflectionVar.varType field");
 			}
 		}
 	}
