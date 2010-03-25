@@ -74,7 +74,6 @@ import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -883,7 +882,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
 			}
-			MediaType.sortBySpecificity(acceptedMediaTypes);
+			MediaType.sortByQualityValue(acceptedMediaTypes);
 			Class<?> returnValueType = returnValue.getClass();
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 			if (getMessageConverters() != null) {
@@ -1017,6 +1016,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		private int compareAcceptHeaders(RequestMappingInfo info1, RequestMappingInfo info2) {
 			List<MediaType> requestAccepts = request.getHeaders().getAccept();
+			MediaType.sortByQualityValue(requestAccepts);
+			
 			List<MediaType> info1Accepts = getAcceptHeaderValue(info1);
 			List<MediaType> info2Accepts = getAcceptHeaderValue(info2);
 
