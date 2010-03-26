@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
+import static org.springframework.util.StringUtils.collectionToCommaDelimitedString;
+
 import java.beans.ConstructorProperties;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -44,6 +46,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -51,6 +54,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Helper class for resolving constructors and factory methods.
@@ -497,12 +501,25 @@ class ConstructorResolver {
 			}
 
 			if (factoryMethodToUse == null) {
+				boolean hasArgs  = resolvedValues.getArgumentCount() > 0;
+				String argDesc = "";
+				if (hasArgs) {
+					List<String> argTypes = new ArrayList<String>();
+					for (ValueHolder value : resolvedValues.getIndexedArgumentValues().values()) {
+						String argType = value.getType() != null ?
+								ClassUtils.getShortName(value.getType()) : value.getValue().getClass().getSimpleName();
+						argTypes.add(argType);
+					}
+					argDesc = StringUtils.collectionToCommaDelimitedString(argTypes);
+				}
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"No matching factory method found: " +
 						(mbd.getFactoryBeanName() != null ?
-						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
-						"factory method '" + mbd.getFactoryMethodName() + "'. " +
-						"Check that a method of the specified name exists and that it is " +
+							"factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
+						"factory method '" + mbd.getFactoryMethodName() + "(" + argDesc + ")'. " +
+						"Check that a method with the specified name " +
+						(hasArgs ? "and arguments " : "") +
+						"exists and that it is " +
 						(isStatic ? "static" : "non-static") + ".");
 			}
 			else if (void.class.equals(factoryMethodToUse.getReturnType())) {
