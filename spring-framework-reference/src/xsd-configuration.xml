@@ -362,10 +362,12 @@ public class Client {
 </util:list>]]></programlisting>
                 <para>If no <literal>'list-class'</literal> attribute is supplied, a
                 <interfacename>List</interfacename> implementation will be chosen by the container.</para>
+                <!-- Commented out until SPR-6523 is resolved.
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:list/&gt;</literal>
                 element; collection merging is described in more detail in
                 <xref linkend="beans-collection-elements-merging"/>.</para>
+                -->
             </section>
             <section id="xsd-config-body-schemas-util-map">
                 <title><literal>&lt;util:map/&gt;</literal></title>
@@ -407,10 +409,12 @@ public class Client {
 </util:map>]]></programlisting>
                 <para>If no <literal>'map-class'</literal> attribute is supplied, a
                 <interfacename>Map</interfacename> implementation will be chosen by the container.</para>
+                <!-- Commented out until SPR-6523 is resolved.
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:map/&gt;</literal>
                 element; collection merging is described in more detail in
                 <xref linkend="beans-collection-elements-merging"/>.</para>
+                -->
             </section>
             <section id="xsd-config-body-schemas-util-set">
                 <title><literal>&lt;util:set/&gt;</literal></title>
@@ -452,10 +456,12 @@ public class Client {
 </util:set>]]></programlisting>
                 <para>If no <literal>'set-class'</literal> attribute is supplied, a
                 <interfacename>Set</interfacename> implementation will be chosen by the container.</para>
+                <!-- Commented out until SPR-6523 is resolved.
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:set/&gt;</literal>
                 element; collection merging is described in more detail in
                 <xref linkend="beans-collection-elements-merging"/>.</para>
+                -->
             </section>
         </section>
         <section id="xsd-config-body-schemas-jee">
