@@ -1331,24 +1331,28 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>DELETE</entry>
 
               <entry><ulink
-              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#delete(String,%20String...)">delete(String
-              url, String… urlVariables)</ulink></entry>
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)">delete</ulink></entry>
             </row>
 
             <row>
               <entry>GET</entry>
 
               <entry><ulink
-              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20String...)">getForObject(String
-              url, Class&lt;T&gt; responseType, String…
-              urlVariables)</ulink></entry>
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)">getForObject</ulink></entry>
+            </row>
+
+            <row>
+              <entry></entry>
+
+              <entry><ulink
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)">getForEntity</ulink></entry>
             </row>
 
             <row>
               <entry>HEAD</entry>
 
               <entry><ulink
-              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20String...)">headForHeaders(String
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)">headForHeaders(String
               url, String… urlVariables)</ulink></entry>
             </row>
 
@@ -1356,7 +1360,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>OPTIONS</entry>
 
               <entry><ulink
-              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20String...)">optionsForAllow(String
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)">optionsForAllow(String
               url, String… urlVariables)</ulink></entry>
             </row>
 
@@ -1364,7 +1368,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>POST</entry>
 
               <entry><ulink
-              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20String...)">postForLocation(String
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)">postForLocation(String
               url, Object request, String… urlVariables)</ulink></entry>
             </row>
 
@@ -1381,7 +1385,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>PUT</entry>
 
               <entry><ulink
-              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20String...)">put(String
+              url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)">put(String
               url, Object request, String…urlVariables)</ulink></entry>
             </row>
           </tbody>
@@ -1486,6 +1490,33 @@ URI location = template.postForLocation(uri, booking, "1");
       request and handle any errors. Refer to the API documentation for more
       information on using the execute method and the meaning of its other
       method arguments.</para>
+
+      <section>
+        <title>Dealing with request and response headers</title>
+
+        <para>Besides the methods described above, the <classname>RestTemplate</classname>
+        also has the <methodname>exchange</methodname> method, which can be
+        used for arbitrary HTTP method execution based on the <classname>HttpEntity</classname>
+        class.</para>
+
+        <para>Perhaps most importantly, the <methodname>execute</methodname> 
+        method can be used to add request headers and read response headers.
+        For example:</para>
+
+        <programlisting language="java">HttpHeaders requestHeaders = new HttpHeaders();
+requestHeaders.set("MyRequestHeader", "MyValue");
+HttpEntity&lt;?&gt; requestEntity = new HttpEntity(requestHeaders);
+
+HttpEntity&lt;String&gt; response = template.exchange("http://example.com/hotels/{hotel}",
+  HttpMethod.GET, requestEntity, String.class, "42");
+
+String responseHeader = response.getHeaders().getFirst("MyResponseHeader");
+String body = response.getBody();</programlisting>
+
+        <para>In the above example, we first prepare a request entity that contains the
+        <literal>MyRequestHeader</literal> header. We then retrieve the response, and
+        read the <literal>MyResponseHeader</literal> and body.</para>
+        </section>
     </section>
 
     <section id="rest-message-conversion">
@@ -1501,8 +1532,11 @@ URI location = template.postForLocation(uri, booking, "1");
 
       <programlisting language="java">public interface HttpMessageConverter&lt;T&gt; {
 
-      // Indicate whether the given class is supported by this converter.
-      boolean supports(Class&lt;? extends T&gt; clazz);
+      // Indicate whether the given class and media type can be read by this converter.
+      boolean canRead(Class&lt;?&gt; clazz, MediaType mediaType);
+
+      // Indicate whether the given class and media type can be written by this converter.
+      boolean canWrite(Class&lt;?&gt; clazz, MediaType mediaType);
 
       // Return the list of MediaType objects supported by this converter.
       List&lt;MediaType&gt; getSupportedMediaTypes();
