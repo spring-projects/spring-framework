@@ -1023,18 +1023,26 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
-              <para><classname>@RequestHeader</classname> annotated parameters
+              <para><interfacename>@RequestHeader</interfacename> annotated parameters
               for access to specific Servlet request HTTP headers. Parameter
               values are converted to the declared method argument
               type.</para>
             </listitem>
 
             <listitem>
-              <para><classname>@RequestBody</classname> annotated parameters
+              <para><interfacename>@RequestBody</interfacename> annotated parameters
               for access to the HTTP request body. Parameter values are
               converted to the declared method argument type using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
               linkend="mvc-ann-requestbody" />.</para>
+            </listitem>
+
+            <listitem>
+              <para><classname>HttpEntity&lt;?&gt;</classname> parameters
+              for access to the Servlet request HTTP headers and contents. The request stream will be
+              converted to the entity body using
+              <interfacename>HttpMessageConverter</interfacename>s. See <xref
+              linkend="mvc-ann-httpentity" />.</para>
             </listitem>
 
             <listitem>
@@ -1146,6 +1154,14 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
+              <para>A <classname>HttpEntity&lt;?&gt;</classname>} object
+              to access to the Servlet reponse HTTP headers and contents. The entity body will
+              be converted to the response stream using
+              <interfacename>HttpMessageConverter</interfacename>s. See <xref
+              linkend="mvc-ann-httpentity" />.</para>
+            </listitem>
+
+            <listitem>
               <para>Any other return type is considered to be a single model
               attribute to be exposed to the view, using the attribute name
               specified through <literal>@ModelAttribute</literal> at the
@@ -1159,7 +1175,7 @@ public class RelativePathUriTemplateController {
 
       <section id="mvc-ann-requestparam">
         <title>Binding request parameters to method parameters with
-        <classname>@RequestParam</classname></title>
+        <interfacename>@RequestParam</interfacename></title>
 
         <para>Use the <classname>@RequestParam</classname> annotation to bind
         request parameters to a method parameter in your controller.</para>
@@ -1280,12 +1296,12 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
       </section>
 
       <section id="mvc-ann-responsebody">
-        <title>Mapping the response body with the @ResponseBody
+        <title>Mapping the response body with the <interfacename>@ResponseBody</interfacename>
         annotation</title>
 
         <para>The <interfacename>@ResponseBody</interfacename> annotation is
         similar to <interfacename>@RequestBody</interfacename>. This
-        annotation can be put on a method <!--Revise *can be put on*. You do *what* with this annotation in regard to a method?-->and
+        annotation can be put on a method and
         indicates that the return type should be written straight to the HTTP
         response body (and not placed in a Model, or interpreted as a view
         name). For example:</para>
@@ -1306,12 +1322,45 @@ public String helloWorld()  {
         linkend="rest-message-conversion">Message Converters</link>.</para>
       </section>
 
+      <section id="mvc-ann-httpentity">
+        <title>Using <classname>HttpEntity&lt;?&gt;</classname></title>
+
+        <para>The <classname>HttpEntity</classname> is similar to
+        <interfacename>@RequestBody</interfacename> and
+        <interfacename>@ResponseBody</interfacename>. Besides getting
+        access to the request and response body, the <classname>HttpEntity</classname>
+        also allows access to the request and response headers, like so:</para>
+
+        <programlisting language="java">@RequestMapping("/something")
+public HttpEntity&lt;String&gt; handle(HttpEntity&lt;byte[]&gt; requestEntity) throws UnsupportedEncodingException {
+  String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader"));
+  byte[] requestBody = requestEntity.getBody();
+  // do something with request header and body
+
+  HttpHeaders responseHeaders = new HttpHeaders();
+  responseHeaders.set("MyResponseHeader", "MyValue");
+  return new HttpEntity&lt;String&gt;("Hello World", responseHeaders);
+}</programlisting>
+
+        <para>The above example gets the value of the "MyRequestHeader" request
+        header, and reads the body as a byte array. It adds the "MyResponseHeader"
+        to the response, and writes <literal>Hello World</literal> to the response
+        stream.</para>
+
+        <para>As with <interfacename>@RequestBody</interfacename> and
+        <interfacename>@ResponseBody</interfacename>, Spring
+        uses <interfacename>HttpMessageConverter</interfacename> to convert
+        from and to the request and response streams. For more
+        information on these converters, see the previous section and <link
+        linkend="rest-message-conversion">Message Converters</link>.</para>
+      </section>
+
       <section id="mvc-ann-modelattrib">
         <title>Providing a link to data from the model with
         <classname>@ModelAttribute</classname></title>
 
         <para><classname>@ModelAttribute</classname> has two usage scenarios
-        in controllers. When you map it to <!--is this correct, *map it to*? If not, what do you mean by *is placed on*?-->a
+        in controllers. When you place it on a
         method parameter, <classname>@ModelAttribute</classname> maps a model
         attribute to the specific, annotated method parameter (see the
         <literal>processSubmit()</literal> method below). This is how the
