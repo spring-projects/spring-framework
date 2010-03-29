@@ -48,6 +48,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -802,10 +803,18 @@ public class HandlerMethodInvoker {
 
 	/**
 	 * Return a {@link HttpInputMessage} for the given {@link NativeWebRequest}.
-	 * <p>Throws an UnsupportedOperationException by default.
+	 * <p>Throws an UnsupportedOperation1Exception by default.
 	 */
 	protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
 		throw new UnsupportedOperationException("@RequestBody not supported");
+	}
+
+	/**
+	 * Return a {@link HttpOutputMessage} for the given {@link NativeWebRequest}.
+	 * <p>Throws an UnsupportedOperationException by default.
+	 */
+	protected HttpOutputMessage createHttpOutputMessage(NativeWebRequest webRequest) throws Exception {
+		throw new UnsupportedOperationException("@ResponseBody not supported");
 	}
 
 	protected String parseDefaultValueAttribute(String value) {

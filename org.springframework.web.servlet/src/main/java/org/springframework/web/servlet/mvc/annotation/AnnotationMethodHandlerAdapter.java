@@ -457,6 +457,32 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		return new ServletRequestDataBinder(target, objectName);
 	}
 
+	/**
+	 * Template method for creating a new HttpInputMessage instance.
+	 * <p>The default implementation creates a standard {@link ServletServerHttpRequest}.
+	 * This can be overridden for custom {@code HttpInputMessage} implementations
+	 * @param servletRequest current HTTP request
+	 * @return the HttpInputMessage instance to use
+	 * @throws Exception in case of errors
+	 */
+    protected HttpInputMessage createHttpInputMessage(HttpServletRequest servletRequest) throws Exception {
+
+		return new ServletServerHttpRequest(servletRequest);
+	}
+
+	/**
+	 * Template method for creating a new HttpOuputMessage instance.
+	 * <p>The default implementation creates a standard {@link ServletServerHttpResponse}.
+	 * This can be overridden for custom {@code HttpOutputMessage} implementations
+	 * @param servletResponse current HTTP response
+	 * @return the HttpInputMessage instance to use
+	 * @throws Exception in case of errors
+	 */
+    protected HttpOutputMessage createHttpOutputMessage(HttpServletResponse servletResponse) throws Exception {
+
+		return new ServletServerHttpResponse(servletResponse);
+	}
+
 
 	/**
 	 * Servlet-specific subclass of {@link HandlerMethodResolver}.
@@ -687,7 +713,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		@Override
 		protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
 			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
-			return new ServletServerHttpRequest(servletRequest);
+			return AnnotationMethodHandlerAdapter.this.createHttpInputMessage(servletRequest);
+		}
+
+        @Override
+		protected HttpOutputMessage createHttpOutputMessage(NativeWebRequest webRequest) throws Exception {
+			HttpServletResponse servletResponse = (HttpServletResponse) webRequest.getNativeResponse();
+			return AnnotationMethodHandlerAdapter.this.createHttpOutputMessage(servletResponse);
 		}
 
 		@Override
@@ -848,24 +880,24 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest)
-				throws ServletException, IOException {
+				throws Exception {
 			if (returnValue == null) {
 				return;
 			}
 
-			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
-			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
+			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
+			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
 
 			writeWithMessageConverters(returnValue, inputMessage, outputMessage);
 		}
 
 		private void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest)
-				throws ServletException, IOException {
+				throws Exception {
 			if (responseEntity == null) {
 				return;
 			}
-			HttpInputMessage inputMessage = new ServletServerHttpRequest(webRequest.getRequest());
-			HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
+			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
+			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
 
 			HttpHeaders entityHeaders = responseEntity.getHeaders();
 			if (!entityHeaders.isEmpty()) {
