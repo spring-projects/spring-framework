@@ -91,8 +91,13 @@ import java.lang.annotation.Target;
  * {@link org.springframework.http.HttpHeaders HttpHeaders} method parameter to
  * gain access to all request headers.
  * <li>{@link RequestBody @RequestBody} annotated parameters for access to
- * the Servlet request HTTP contents. Parameter values will be
+ * the Servlet request HTTP contents. The request stream will be
  * converted to the declared method argument type using 
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message
+ * converters}.
+ * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
+ * for access to the Servlet request HTTP headers and contents. The request stream will be
+ * converted to the entity body using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
  * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
@@ -141,6 +146,16 @@ import java.lang.annotation.Target;
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.ModelMap} argument
  * (see above).
+ * <li>{@link ResponseBody @ResponseBody} annotated methods for access to
+ * the Servlet response HTTP contents. The return value will be converted
+ * to the response stream using
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message
+ * converters}.
+ * <li>A {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} object
+ * to access to the Servlet reponse HTTP headers and contents. The entity body will
+ * be converted to the response stream using
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message
+ * converters}.
  * <li><code>void</code> if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
