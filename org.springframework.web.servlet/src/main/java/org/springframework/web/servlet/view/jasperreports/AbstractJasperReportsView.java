@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view.jasperreports;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -490,15 +491,27 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading pre-compiled Jasper Report from " + resource);
 				}
-				return (JasperReport) JRLoader.loadObject(resource.getInputStream());
+				InputStream is = resource.getInputStream();
+				try {
+					return (JasperReport) JRLoader.loadObject(is);
+				}
+				finally {
+					is.close();
+				}
 			}
 			else if (fileName.endsWith(".jrxml")) {
 				// Compile report on-the-fly.
 				if (logger.isInfoEnabled()) {
 					logger.info("Compiling Jasper Report loaded from " + resource);
 				}
-				JasperDesign design = JRXmlLoader.load(resource.getInputStream());
-				return JasperCompileManager.compileReport(design);
+				InputStream is = resource.getInputStream();
+				try {
+					JasperDesign design = JRXmlLoader.load(is);
+					return JasperCompileManager.compileReport(design);
+				}
+				finally {
+					is.close();
+				}
 			}
 			else {
 				throw new IllegalArgumentException(
