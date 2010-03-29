@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.jasperreports;
 import net.sf.jasperreports.engine.JRExporter;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.Assert;
 
 /**
  * Configurable JasperReports View, allowing to specify the JasperReports exporter
@@ -33,7 +34,7 @@ import org.springframework.beans.BeanUtils;
  */
 public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFormatView {
 
-	private Class exporterClass;
+	private Class<? extends JRExporter> exporterClass;
 
 	private boolean useWriter = true;
 
@@ -43,11 +44,8 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 	 * {@link IllegalArgumentException} if the <code>Class</code> doesn't implement
 	 * {@link JRExporter}. Required setting, as it does not have a default.
 	 */
-	public void setExporterClass(Class exporterClass) {
-		if (!(JRExporter.class.isAssignableFrom(exporterClass))) {
-			throw new IllegalArgumentException(
-					"Exporter class [" + exporterClass.getName() + "] does not implement JRExporter");
-		}
+	public void setExporterClass(Class<? extends JRExporter> exporterClass) {
+		Assert.isAssignable(JRExporter.class, exporterClass);
 		this.exporterClass = exporterClass;
 	}
 
@@ -78,7 +76,7 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 	 */
 	@Override
 	protected JRExporter createExporter() {
-		return (JRExporter) BeanUtils.instantiateClass(this.exporterClass);
+		return BeanUtils.instantiateClass(this.exporterClass);
 	}
 
 	/**

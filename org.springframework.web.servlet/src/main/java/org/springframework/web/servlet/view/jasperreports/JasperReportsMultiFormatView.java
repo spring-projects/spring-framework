@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * Stores the format mappings, with the format discriminator
 	 * as key and the corresponding view class as value.
 	 */
-	private Map<String, Class> formatMappings;
+	private Map<String, Class<? extends AbstractJasperReportsView>> formatMappings;
 
 	/**
 	 * Stores the mappings of mapping keys to Content-Disposition header values.
@@ -95,7 +95,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * with a default set of mappings.
 	 */
 	public JasperReportsMultiFormatView() {
-		this.formatMappings = new HashMap<String, Class>(4);
+		this.formatMappings = new HashMap<String, Class<? extends AbstractJasperReportsView>>(4);
 		this.formatMappings.put("csv", JasperReportsCsvView.class);
 		this.formatMappings.put("html", JasperReportsHtmlView.class);
 		this.formatMappings.put("pdf", JasperReportsPdfView.class);
@@ -120,7 +120,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * <li><code>xls</code> - <code>JasperReportsXlsView</code></li>
 	 * </ul>
 	 */
-	public void setFormatMappings(Map<String, Class> formatMappings) {
+	public void setFormatMappings(Map<String, Class<? extends AbstractJasperReportsView>> formatMappings) {
 		if (CollectionUtils.isEmpty(formatMappings)) {
 			throw new IllegalArgumentException("'formatMappings' must not be empty");
 		}
@@ -173,7 +173,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 			logger.debug("Rendering report using format mapping key [" + format + "]");
 		}
 
-		Class viewClass = this.formatMappings.get(format);
+		Class<? extends AbstractJasperReportsView> viewClass = this.formatMappings.get(format);
 		if (viewClass == null) {
 			throw new IllegalArgumentException("Format discriminator [" + format + "] is not a configured mapping");
 		}
@@ -182,7 +182,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 			logger.debug("Rendering report using view class [" + viewClass.getName() + "]");
 		}
 
-		AbstractJasperReportsView view = (AbstractJasperReportsView) BeanUtils.instantiateClass(viewClass);
+		AbstractJasperReportsView view = BeanUtils.instantiateClass(viewClass);
 		// Can skip most initialization since all relevant URL processing
 		// has been done - just need to convert parameters on the sub view.
 		view.setExporterParameters(getExporterParameters());

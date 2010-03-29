@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,6 @@ import org.springframework.context.support.StaticApplicationContext;
  */
 public abstract class AbstractConfigurableJasperReportsViewTests extends AbstractJasperReportsViewTests {
 
-	public void testSetInvalidExporterClass() throws Exception {
-		try {
-			new ConfigurableJasperReportsView().setExporterClass(String.class);
-			fail("Should not be able to set invalid view class.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
-	}
-
 	public void testNoConfiguredExporter() throws Exception {
 		ConfigurableJasperReportsView view = new ConfigurableJasperReportsView();
 		view.setUrl(COMPILED_REPORT);
@@ -44,4 +34,5 @@ public abstract class AbstractConfigurableJasperReportsViewTests extends Abstrac
 			// success
 		}
 	}
+
 }

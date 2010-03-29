@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.sql.DataSource;
-
-import net.sf.jasperreports.engine.design.JRCompiler;
 
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
@@ -47,8 +45,6 @@ public class JasperReportsViewResolver extends UrlBasedViewResolver {
 	private Map<String, Object> exporterParameters = new HashMap<String, Object>();
 
 	private DataSource jdbcDataSource;
-
-	private JRCompiler reportCompiler;
 
 
 	/**
