@@ -2679,7 +2679,7 @@ public class FileUpoadController {
 
     <section>
       <title
-      id="mvc-HandlerExceptionResolver"><interfacename>HandlerExceptionResolver<!--I thought HandlerExceptionResolver needed its own section.--></interfacename></title>
+      id="mvc-HandlerExceptionResolver"><interfacename>HandlerExceptionResolver</interfacename></title>
 
       <para>Spring <literal>HandlerExceptionResolvers</literal> ease the pain
       of unexpected exceptions that occur while your request is handled by a
@@ -2705,6 +2705,60 @@ public class FileUpoadController {
       exception mapping feature from the Servlet API, but it is also possible
       to implement more finely grained mappings of exceptions from different
       handlers.</para>
+
+      <para>By default, the <classname>DispatcherServlet</classname> registers
+      the <classname>DefaultHandlerExceptionResolver</classname>. This resolver
+      handles certain standard Spring MVC exceptions by setting a specific
+      response status code:
+      <informaltable>
+          <tgroup cols="2">
+              <thead>
+                  <row>
+                      <entry>Exception</entry>
+                      <entry>HTTP Status Code</entry>
+                  </row>
+              </thead>
+              <tbody>
+                  <row>
+                      <entry><classname>ConversionNotSupportedException</classname></entry>
+                      <entry>500 (Internal Server Error)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>HttpMediaTypeNotAcceptableException</classname></entry>
+                      <entry>406 (Not Acceptable)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>HttpMediaTypeNotSupportedException</classname></entry>
+                      <entry>415 (Unsupported Media Type)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>HttpMessageNotReadableException</classname></entry>
+                      <entry>400 (Bad Request)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>HttpMessageNotWritableException</classname></entry>
+                      <entry>500 (Internal Server Error)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>HttpRequestMethodNotSupportedException</classname></entry>
+                      <entry>405 (Method Not Allowed)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>MissingServletRequestParameterException</classname></entry>
+                      <entry>400 (Bad Request)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>NoSuchRequestHandlingMethodException</classname></entry>
+                      <entry>404 (Not Found)</entry>
+                  </row>
+                  <row>
+                      <entry><classname>TypeMismatchException</classname></entry>
+                      <entry>400 (Bad Request)</entry>
+                  </row>
+              </tbody>
+          </tgroup>
+      </informaltable>
+      </para>
     </section>
 
     <section id="mvc-ann-exceptionhandler">
