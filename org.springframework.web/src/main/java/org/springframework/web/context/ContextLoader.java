@@ -34,6 +34,7 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Performs the actual initialization work for the root application context.
@@ -253,16 +254,19 @@ public class ContextLoader {
 		if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
 			// Servlet <= 2.4: resort to name specified in web.xml, if any.
 			String servletContextName = sc.getServletContextName();
-			if (servletContextName != null) {
-				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName);
-			}
-			else {
-				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX);
-			}
+			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+					ObjectUtils.getDisplayString(servletContextName));
 		}
 		else {
 			// Servlet 2.5's getContextPath available!
-			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + sc.getContextPath());
+			try {
+				String contextPath = (String) ServletContext.class.getMethod("getContextPath").invoke(sc);
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+						ObjectUtils.getDisplayString(contextPath));
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Failed to invoke Servlet 2.5 getContextPath method", ex);
+			}
 		}
 
 		wac.setParent(parent);
