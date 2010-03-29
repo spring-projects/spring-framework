@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperR
 	protected AbstractJasperReportsView getViewImplementation() {
 		JasperReportsMultiFormatView view = new JasperReportsMultiFormatView();
 		view.setFormatKey("fmt");
-		Map<String, Class> mappings = new HashMap<String, Class>();
+		Map<String, Class<? extends AbstractJasperReportsView>> mappings =
+				new HashMap<String, Class<? extends AbstractJasperReportsView>>();
 		mappings.put("csv", JasperReportsCsvView.class);
 		mappings.put("comma-separated", JasperReportsCsvView.class);
 		mappings.put("html", JasperReportsHtmlView.class);
