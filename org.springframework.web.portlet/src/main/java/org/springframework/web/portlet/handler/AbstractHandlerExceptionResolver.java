@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,10 @@ import org.springframework.web.portlet.ModelAndView;
 import org.springframework.core.Ordered;
 
 /**
- * Abstract base class for {@link HandlerExceptionResolver} implementations. <p>Provides a set of mapped handlers that
- * the resolver should map to, and the {@link Ordered} implementation.
+ * Abstract base class for {@link HandlerExceptionResolver} implementations.
+ *
+ * <p>Provides a set of mapped handlers that the resolver should map to,
+ * and the {@link Ordered} implementation.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -53,6 +55,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	private Log warnLogger;
 
 	private boolean renderWhenMinimized = false;
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -115,14 +118,13 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		this.renderWhenMinimized = renderWhenMinimized;
 	}
 
+
 	/**
 	 * Checks whether this resolver is supposed to apply (i.e. the handler
 	 * matches in case of "mappedHandlers" having been specified), then
 	 * delegates to the {@link #doResolveException} template method.
 	 */
-	public ModelAndView resolveException(
-			RenderRequest request, RenderResponse response, Object handler, Exception ex) {
-
+	public ModelAndView resolveException(RenderRequest request, RenderResponse response, Object handler, Exception ex) {
 		if (shouldApplyTo(request, handler)) {
 			return doResolveException(request, response, handler, ex);
 		}
@@ -131,9 +133,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		}
 	}
 
-	public ModelAndView resolveException(
-			ResourceRequest request, ResourceResponse response, Object handler, Exception ex) {
-
+	public ModelAndView resolveException(ResourceRequest request, ResourceResponse response, Object handler, Exception ex) {
 		if (shouldApplyTo(request, handler)) {
 			return doResolveException(request, response, handler, ex);
 		}
@@ -205,14 +205,14 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		return "Handler execution resulted in exception";
 	}
 
+
 	/**
 	 * Actually resolve the given exception that got thrown during on handler execution,
 	 * returning a ModelAndView that represents a specific error page if appropriate.
-	 *
-	 * <p>Must be overridden in subclasses, in order to apply specific exception checks. Note that this template method
-	 * will be invoked <i>after</i> checking whether this resolved applies ("mappedHandlers" etc), so an implementation
-	 * may simply proceed with its actual exception handling.
-
+	 * <p>Must be overridden in subclasses, in order to apply specific exception checks.
+	 * Note that this template method will be invoked <i>after</i> checking whether this
+	 * resolved applies ("mappedHandlers" etc), so an implementation may simply proceed
+	 * with its actual exception handling.
 	 * @param request current portlet request
 	 * @param response current portlet response
 	 * @param handler the executed handler, or null if none chosen at the time of
@@ -220,9 +220,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to, or null for default processing
 	 */
-	protected abstract ModelAndView doResolveException(PortletRequest request,
-			MimeResponse response,
-			Object handler,
-			Exception ex);
+	protected abstract ModelAndView doResolveException(PortletRequest request, MimeResponse response,
+			Object handler, Exception ex);
 
 }

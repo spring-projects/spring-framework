@@ -82,21 +82,23 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private WebArgumentResolver[] customArgumentResolvers;
 
 	private HttpMessageConverter<?>[] messageConverters =
-			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
+			new HttpMessageConverter[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
 					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
 
 
 	/**
-	 * Set a custom ArgumentResolvers to use for special method parameter types. Such a custom ArgumentResolver will kick
-	 * in first, having a chance to resolve an argument value before the standard argument handling kicks in.
+	 * Set a custom ArgumentResolvers to use for special method parameter types.
+	 * <p>Such a custom ArgumentResolver will kick in first, having a chance to resolve
+	 * an argument value before the standard argument handling kicks in.
 	 */
 	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
 		this.customArgumentResolvers = new WebArgumentResolver[]{argumentResolver};
 	}
 
 	/**
-	 * Set one or more custom ArgumentResolvers to use for special method parameter types. Any such custom ArgumentResolver
-	 * will kick in first, having a chance to resolve an argument value before the standard argument handling kicks in.
+	 * Set one or more custom ArgumentResolvers to use for special method parameter types.
+	 * <p>Any such custom ArgumentResolver will kick in first, having a chance to resolve
+	 * an argument value before the standard argument handling kicks in.
 	 */
 	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
@@ -288,7 +290,10 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest,
 			Exception thrownException) throws Exception {
 
-		if (WebRequest.class.isAssignableFrom(parameterType)) {
+		if (parameterType.isInstance(thrownException)) {
+			return thrownException;
+		}
+		else if (WebRequest.class.isAssignableFrom(parameterType)) {
 			return webRequest;
 		}
 
@@ -321,9 +326,6 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 		else if (Writer.class.isAssignableFrom(parameterType)) {
 			return response.getWriter();
-		}
-		else if (parameterType.isInstance(thrownException)) {
-			return thrownException;
 		}
 		else {
 			return WebArgumentResolver.UNRESOLVED;
