@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,21 +51,21 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		this.requestInterceptor.preHandle(new DispatcherServletWebRequest(request));
+		this.requestInterceptor.preHandle(new DispatcherServletWebRequest(request, response));
 		return true;
 	}
 
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception {
 
-		this.requestInterceptor.postHandle(new DispatcherServletWebRequest(request),
+		this.requestInterceptor.postHandle(new DispatcherServletWebRequest(request, response),
 				(modelAndView != null && !modelAndView.wasCleared() ? modelAndView.getModelMap() : null));
 	}
 
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
 
-		this.requestInterceptor.afterCompletion(new DispatcherServletWebRequest(request), ex);
+		this.requestInterceptor.afterCompletion(new DispatcherServletWebRequest(request, response), ex);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Locale;
-
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -42,6 +42,15 @@ public class DispatcherServletWebRequest extends ServletWebRequest {
 	 */
 	public DispatcherServletWebRequest(HttpServletRequest request) {
 		super(request);
+	}
+
+	/**
+	 * Create a new DispatcherServletWebRequest instance for the given request and response.
+	 * @param request current HTTP request
+	 * @param request current HTTP response
+	 */
+	public DispatcherServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
+		super(request, response);
 	}
 
 	@Override
