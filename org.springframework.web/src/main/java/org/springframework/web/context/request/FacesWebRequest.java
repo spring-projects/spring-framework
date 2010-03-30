@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,28 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 
 	public Object getNativeResponse() {
 		return getExternalContext().getResponse();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest(Class<T> requiredType) {
+		if (requiredType != null) {
+			Object request = getExternalContext().getRequest();
+			if (requiredType.isInstance(request)) {
+				return (T) request;
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeResponse(Class<T> requiredType) {
+		if (requiredType != null) {
+			Object response = getExternalContext().getResponse();
+			if (requiredType.isInstance(response)) {
+				return (T) response;
+			}
+		}
+		return null;
 	}
 
 

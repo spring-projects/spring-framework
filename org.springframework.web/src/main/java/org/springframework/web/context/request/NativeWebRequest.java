@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,5 +43,27 @@ public interface NativeWebRequest extends WebRequest {
 	 * @see javax.portlet.RenderResponse
 	 */
 	Object getNativeResponse();
+
+	/**
+	 * Return the underlying native request object, if available.
+	 * @param requiredType the desired type of request object
+	 * @return the matching request object, or <code>null</code> if none
+	 * of that type is available
+	 * @see javax.servlet.http.HttpServletRequest
+	 * @see javax.portlet.ActionRequest
+	 * @see javax.portlet.RenderRequest
+	 */
+	<T> T getNativeRequest(Class<T> requiredType);
+
+	/**
+	 * Return the underlying native request object, if available.
+	 * @param requiredType the desired type of response object
+	 * @return the matching response object, or <code>null</code> if none
+	 * of that type is available
+	 * @see javax.servlet.http.HttpServletRequest
+	 * @see javax.portlet.ActionRequest
+	 * @see javax.portlet.RenderRequest
+	 */
+	<T> T getNativeResponse(Class<T> requiredType);
 
 }

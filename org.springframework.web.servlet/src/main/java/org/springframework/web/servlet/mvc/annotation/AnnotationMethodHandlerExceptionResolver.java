@@ -110,11 +110,11 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		this.messageConverters = messageConverters;
 	}
 
+
 	@Override
-	protected ModelAndView doResolveException(HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler,
-			Exception ex) {
+	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
+			Object handler, Exception ex) {
+
 		if (handler != null) {
 			Method handlerMethod = findBestExceptionHandlerMethod(handler, ex);
 			if (handlerMethod != null) {
@@ -137,7 +137,6 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 	/**
 	 * Finds the handler method that matches the thrown exception best.
-	 *
 	 * @param handler the handler object
 	 * @param thrownException the exception to be handled
 	 * @return the best matching method; or <code>null</code> if none is found
@@ -145,7 +144,6 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private Method findBestExceptionHandlerMethod(Object handler, final Exception thrownException) {
 		final Class<?> handlerType = handler.getClass();
 		final Class<? extends Throwable> thrownExceptionType = thrownException.getClass();
-
 		final Map<Class<? extends Throwable>, Method> resolverMethods =
 				new LinkedHashMap<Class<? extends Throwable>, Method>();
 
@@ -165,7 +163,6 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 										"Ambiguous exception handler mapped for " + handledException + "]: {" +
 												oldMappedMethod + ", " + method + "}.");
 							}
-
 						}
 					}
 				}
@@ -176,10 +173,10 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 	/**
-	 * Returns all the exception classes handled by the given method. <p>Default implementation looks for exceptions in the
-	 * {@linkplain ExceptionHandler#value() annotation}, or - if that annotation element is empty - any exceptions listed
-	 * in the method parameters if the method is annotated with {@code @ExceptionHandler}.
-	 *
+	 * Returns all the exception classes handled by the given method.
+	 * <p>The default implementation looks for exceptions in the {@linkplain ExceptionHandler#value() annotation},
+	 * or - if that annotation element is empty - any exceptions listed in the method parameters if the method
+	 * is annotated with {@code @ExceptionHandler}.
 	 * @param method the method
 	 * @return the handled exceptions
 	 */
@@ -202,9 +199,12 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		return result;
 	}
 
-	/** Returns the best matching method. Uses the {@link DepthComparator}. */
+	/**
+	 * Returns the best matching method. Uses the {@link DepthComparator}.
+	 */
 	private Method getBestMatchingMethod(Exception thrownException,
 			Map<Class<? extends Throwable>, Method> resolverMethods) {
+
 		if (!resolverMethods.isEmpty()) {
 			List<Class<? extends Throwable>> handledExceptions =
 					new ArrayList<Class<? extends Throwable>>(resolverMethods.keySet());
@@ -217,31 +217,26 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 	}
 
-	/** Resolves the arguments for the given method. Delegates to {@link #resolveCommonArgument}. */
-	private Object[] resolveHandlerArguments(Method handlerMethod,
-			Object handler,
-			NativeWebRequest webRequest,
-			Exception thrownException) throws Exception {
+	/**
+	 * Resolves the arguments for the given method. Delegates to {@link #resolveCommonArgument}.
+	 */
+	private Object[] resolveHandlerArguments(Method handlerMethod, Object handler,
+			NativeWebRequest webRequest, Exception thrownException) throws Exception {
 
 		Class[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
-
 		Class<?> handlerType = handler.getClass();
-
 		for (int i = 0; i < args.length; i++) {
 			MethodParameter methodParam = new MethodParameter(handlerMethod, i);
 			GenericTypeResolver.resolveParameterType(methodParam, handlerType);
-
 			Class paramType = methodParam.getParameterType();
-
 			Object argValue = resolveCommonArgument(methodParam, webRequest, thrownException);
 			if (argValue != WebArgumentResolver.UNRESOLVED) {
 				args[i] = argValue;
 			}
 			else {
-				throw new IllegalStateException(
-						"Unsupported argument [" + paramType.getName() + "] for @ExceptionHandler method: " +
-								handlerMethod);
+				throw new IllegalStateException("Unsupported argument [" + paramType.getName() +
+						"] for @ExceptionHandler method: " + handlerMethod);
 			}
 		}
 		return args;
@@ -250,15 +245,14 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	/**
 	 * Resolves common method arguments. Delegates to registered {@link #setCustomArgumentResolver(WebArgumentResolver)
 	 * argumentResolvers} first, then checking {@link #resolveStandardArgument}.
-	 *
 	 * @param methodParameter the method parameter
 	 * @param webRequest the request
 	 * @param thrownException the exception thrown
 	 * @return the argument value, or {@link WebArgumentResolver#UNRESOLVED}
 	 */
-	protected Object resolveCommonArgument(MethodParameter methodParameter,
-			NativeWebRequest webRequest,
+	protected Object resolveCommonArgument(MethodParameter methodParameter, NativeWebRequest webRequest,
 			Exception thrownException) throws Exception {
+
 		// Invoke custom argument resolvers if present...
 		if (this.customArgumentResolvers != null) {
 			for (WebArgumentResolver argumentResolver : this.customArgumentResolvers) {
@@ -282,25 +276,24 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 	/**
-	 * Resolves standard method arguments. Default implementation handles {@link NativeWebRequest}, {@link ServletRequest},
-	 * {@link ServletResponse}, {@link HttpSession}, {@link Principal}, {@link Locale}, request {@link InputStream},
-	 * request {@link Reader}, response {@link OutputStream}, response {@link Writer}, and the given {@code
-	 * thrownException}.
-	 *
+	 * Resolves standard method arguments. The default implementation handles {@link NativeWebRequest},
+	 * {@link ServletRequest}, {@link ServletResponse}, {@link HttpSession}, {@link Principal},
+	 * {@link Locale}, request {@link InputStream}, request {@link Reader}, response {@link OutputStream},
+	 * response {@link Writer}, and the given {@code thrownException}.
 	 * @param parameterType the method parameter type
 	 * @param webRequest the request
 	 * @param thrownException the exception thrown
 	 * @return the argument value, or {@link WebArgumentResolver#UNRESOLVED}
 	 */
-	protected Object resolveStandardArgument(Class parameterType,
-			NativeWebRequest webRequest,
+	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest,
 			Exception thrownException) throws Exception {
+
 		if (WebRequest.class.isAssignableFrom(parameterType)) {
 			return webRequest;
 		}
 
-		HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-		HttpServletResponse response = (HttpServletResponse) webRequest.getNativeResponse();
+		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 
 		if (ServletRequest.class.isAssignableFrom(parameterType)) {
 			return request;
@@ -416,7 +409,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 
-	/** Comparator capable of sorting exceptions based on their depth from the thrown exception type. */
+	/**
+	 * Comparator capable of sorting exceptions based on their depth from the thrown exception type.
+	 */
 	private static class DepthComparator implements Comparator<Class<? extends Throwable>> {
 
 		private final Class<? extends Throwable> handlerExceptionType;
@@ -443,6 +438,6 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 			return getDepth(exceptionType.getSuperclass(), depth + 1);
 		}
-
 	}
+
 }

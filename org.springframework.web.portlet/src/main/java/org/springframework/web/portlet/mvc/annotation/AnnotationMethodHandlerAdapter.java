@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -534,13 +534,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				throws Exception {
 
 			return AnnotationMethodHandlerAdapter.this.createBinder(
-					(PortletRequest) webRequest.getNativeRequest(), target, objectName);
+					webRequest.getNativeRequest(PortletRequest.class), target, objectName);
 		}
 
 		@Override
 		protected void doBind(WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
 			PortletRequestDataBinder portletBinder = (PortletRequestDataBinder) binder;
-			portletBinder.bind((PortletRequest) webRequest.getNativeRequest());
+			portletBinder.bind(webRequest.getNativeRequest(PortletRequest.class));
 		}
 
 		@Override
@@ -560,7 +560,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
 				throws Exception {
 
-			PortletRequest portletRequest = (PortletRequest) webRequest.getNativeRequest();
+			PortletRequest portletRequest = webRequest.getNativeRequest(PortletRequest.class);
 			Cookie cookieValue = PortletUtils.getCookie(portletRequest, cookieName);
 			if (Cookie.class.isAssignableFrom(paramType)) {
 				return cookieValue;
@@ -577,8 +577,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest)
 				throws Exception {
 
-			PortletRequest request = (PortletRequest) webRequest.getNativeRequest();
-			PortletResponse response = (PortletResponse) webRequest.getNativeResponse();
+			PortletRequest request = webRequest.getNativeRequest(PortletRequest.class);
+			PortletResponse response = webRequest.getNativeResponse(PortletResponse.class);
 
 			if (PortletRequest.class.isAssignableFrom(parameterType)) {
 				return request;

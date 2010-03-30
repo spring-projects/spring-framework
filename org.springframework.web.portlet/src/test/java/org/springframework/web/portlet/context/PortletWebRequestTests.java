@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,29 @@ package org.springframework.web.portlet.context;
 import java.util.Locale;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import javax.portlet.PortletRequest;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
+import javax.portlet.PortletResponse;
+import javax.portlet.filter.PortletRequestWrapper;
+import javax.portlet.filter.PortletResponseWrapper;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockPortletRequest;
+import org.springframework.mock.web.portlet.MockPortletResponse;
+import org.springframework.mock.web.portlet.MockRenderRequest;
+import org.springframework.mock.web.portlet.MockRenderResponse;
+import org.springframework.web.multipart.MultipartRequest;
 
 /**
  * @author Juergen Hoeller
  * @since 26.07.2006
  */
-public class PortletWebRequestTests extends TestCase {
+public class PortletWebRequestTests {
 
+	@Test
 	public void testParameters() {
 		MockPortletRequest portletRequest = new MockPortletRequest();
 		portletRequest.addParameter("param1", "value1");
@@ -53,12 +66,49 @@ public class PortletWebRequestTests extends TestCase {
 		assertEquals("value2a", ((String[]) paramMap.get("param2"))[1]);
 	}
 
+	@Test
 	public void testLocale() {
 		MockPortletRequest portletRequest = new MockPortletRequest();
 		portletRequest.addPreferredLocale(Locale.UK);
 
 		PortletWebRequest request = new PortletWebRequest(portletRequest);
 		assertEquals(Locale.UK, request.getLocale());
+	}
+
+	@Test
+	public void testNativeRequest() {
+		MockRenderRequest portletRequest = new MockRenderRequest();
+		MockRenderResponse portletResponse = new MockRenderResponse();
+		PortletWebRequest request = new PortletWebRequest(portletRequest, portletResponse);
+		assertSame(portletRequest, request.getNativeRequest());
+		assertSame(portletRequest, request.getNativeRequest(PortletRequest.class));
+		assertSame(portletRequest, request.getNativeRequest(RenderRequest.class));
+		assertSame(portletRequest, request.getNativeRequest(MockRenderRequest.class));
+		assertNull(request.getNativeRequest(MultipartRequest.class));
+		assertSame(portletResponse, request.getNativeResponse());
+		assertSame(portletResponse, request.getNativeResponse(PortletResponse.class));
+		assertSame(portletResponse, request.getNativeResponse(RenderResponse.class));
+		assertSame(portletResponse, request.getNativeResponse(MockRenderResponse.class));
+		assertNull(request.getNativeResponse(MultipartRequest.class));
+	}
+
+	@Test
+	public void testDecoratedNativeRequest() {
+		MockRenderRequest portletRequest = new MockRenderRequest();
+		MockRenderResponse portletResponse = new MockRenderResponse();
+		PortletRequest decoratedRequest = new PortletRequestWrapper(portletRequest);
+		PortletResponse decoratedResponse = new PortletResponseWrapper(portletResponse);
+		PortletWebRequest request = new PortletWebRequest(decoratedRequest, decoratedResponse);
+		assertSame(decoratedRequest, request.getNativeRequest());
+		assertSame(decoratedRequest, request.getNativeRequest(PortletRequest.class));
+		assertSame(portletRequest, request.getNativeRequest(RenderRequest.class));
+		assertSame(portletRequest, request.getNativeRequest(MockRenderRequest.class));
+		assertNull(request.getNativeRequest(MultipartRequest.class));
+		assertSame(decoratedResponse, request.getNativeResponse());
+		assertSame(decoratedResponse, request.getNativeResponse(PortletResponse.class));
+		assertSame(portletResponse, request.getNativeResponse(RenderResponse.class));
+		assertSame(portletResponse, request.getNativeResponse(MockRenderResponse.class));
+		assertNull(request.getNativeResponse(MultipartRequest.class));
 	}
 
 }

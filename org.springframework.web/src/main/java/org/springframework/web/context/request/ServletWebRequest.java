@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -78,6 +82,44 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	public Object getNativeResponse() {
 		return getResponse();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest(Class<T> requiredType) {
+		if (requiredType != null) {
+			ServletRequest request = getRequest();
+			while (request != null) {
+				if (requiredType.isInstance(request)) {
+					return (T) request;
+				}
+				else if (request instanceof ServletRequestWrapper) {
+					request = ((ServletRequestWrapper) request).getRequest();
+				}
+				else {
+					request = null;
+				}
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeResponse(Class<T> requiredType) {
+		if (requiredType != null) {
+			ServletResponse response = getResponse();
+			while (response != null) {
+				if (requiredType.isInstance(response)) {
+					return (T) response;
+				}
+				else if (response instanceof ServletResponseWrapper) {
+					response = ((ServletResponseWrapper) response).getResponse();
+				}
+				else {
+					response = null;
+				}
+			}
+		}
+		return null;
 	}
 
 
