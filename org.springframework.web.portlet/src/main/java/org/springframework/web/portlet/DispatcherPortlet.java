@@ -700,21 +700,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		try {
 			ModelAndView mv;
 			try {
-				// Check for forwarded exception from the action phase
-				PortletSession session = request.getPortletSession(false);
-				if (session != null) {
-					if (request.getParameter(ACTION_EXCEPTION_RENDER_PARAMETER) != null) {
-						Exception ex = (Exception) session.getAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
-						if (ex != null) {
-							logger.debug("Render phase found exception caught during action phase - rethrowing it");
-							throw ex;
-						}
-					}
-					else {
-						session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
-					}
-				}
-				
 				// Determine handler for the current request.
 				mappedHandler = getHandler(request, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
@@ -732,6 +717,21 @@ public class DispatcherPortlet extends FrameworkPortlet {
 							return;
 						}
 						interceptorIndex = i;
+					}
+				}
+
+				// Check for forwarded exception from the action phase
+				PortletSession session = request.getPortletSession(false);
+				if (session != null) {
+					if (request.getParameter(ACTION_EXCEPTION_RENDER_PARAMETER) != null) {
+						Exception ex = (Exception) session.getAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
+						if (ex != null) {
+							logger.debug("Render phase found exception caught during action phase - rethrowing it");
+							throw ex;
+						}
+					}
+					else {
+						session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
 					}
 				}
 
@@ -930,7 +930,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			try {
 				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, ex.toString());
 				request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
-				logger.debug("Caught exception during action phase - forwarding to render phase", ex);
+				logger.debug("Caught exception during event phase - forwarding to render phase", ex);
 			}
 			catch (IllegalStateException ex2) {
 				// Probably sendRedirect called... need to rethrow exception immediately.
