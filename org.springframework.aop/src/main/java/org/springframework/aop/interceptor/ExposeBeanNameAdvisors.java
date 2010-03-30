@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public abstract class ExposeBeanNameAdvisors {
 	 * Binding for the bean name of the bean which is currently being invoked
 	 * in the ReflectiveMethodInvocation userAttributes Map.
 	 */
-	private static final String BEAN_NAME_ATTRIBUTE = ExposeBeanNameAdvisors.class.getName() + ".beanName";
+	private static final String BEAN_NAME_ATTRIBUTE = ExposeBeanNameAdvisors.class.getName() + ".BEAN_NAME";
 
 
 	/**
@@ -114,7 +114,7 @@ public abstract class ExposeBeanNameAdvisors {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
 			ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
-			pmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, beanName);
+			pmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, this.beanName);
 			return mi.proceed();
 		}
 	}
@@ -137,7 +137,7 @@ public abstract class ExposeBeanNameAdvisors {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
 			ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
-			pmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, beanName);
+			pmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, this.beanName);
 			return super.invoke(mi);
 		}
 
