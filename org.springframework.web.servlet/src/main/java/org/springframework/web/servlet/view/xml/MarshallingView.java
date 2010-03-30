@@ -132,7 +132,7 @@ public class MarshallingView extends AbstractView {
 			return o;
 		}
 		for (Object o : model.values()) {
-			if (this.marshaller.supports(o.getClass())) {
+			if (o != null && this.marshaller.supports(o.getClass())) {
 				return o;
 			}
 		}
