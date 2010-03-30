@@ -185,7 +185,44 @@ public class HandlerMethodInvoker {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	public final void updateModelAttributes(Object handler, Map<String, Object> mavModel,
+			ExtendedModelMap implicitModel, NativeWebRequest webRequest) throws Exception {
+
+		if (this.methodResolver.hasSessionAttributes() && this.sessionStatus.isComplete()) {
+			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
+				this.sessionAttributeStore.cleanupAttribute(webRequest, attrName);
+			}
+		}
+
+		// Expose model attributes as session attributes, if required.
+		// Expose BindingResults for all attributes, making custom editors available.
+		Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
+		try {
+			for (String attrName : new HashSet<String>(model.keySet())) {
+				Object attrValue = model.get(attrName);
+				boolean isSessionAttr =
+						this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null));
+				if (isSessionAttr && !this.sessionStatus.isComplete()) {
+					this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
+				}
+				if (!attrName.startsWith(BindingResult.MODEL_KEY_PREFIX) &&
+						(isSessionAttr || isBindingCandidate(attrValue))) {
+					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
+					if (mavModel != null && !model.containsKey(bindingResultKey)) {
+						WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
+						initBinder(handler, attrName, binder, webRequest);
+						mavModel.put(bindingResultKey, binder.getBindingResult());
+					}
+				}
+			}
+		}
+		catch (InvocationTargetException ex) {
+			// User-defined @InitBinder method threw an exception...
+			ReflectionUtils.rethrowException(ex.getTargetException());
+		}
+	}
+
+
 	private Object[] resolveHandlerArguments(Method handlerMethod, Object handler,
 			NativeWebRequest webRequest, ExtendedModelMap implicitModel) throws Exception {
 
@@ -274,7 +311,7 @@ public class HandlerMethodInvoker {
 						args[i] = this.sessionStatus;
 					}
 					else if (HttpEntity.class.isAssignableFrom(paramType)) {
-						args[i] = resolveHttpEntityRequest(methodParam, webRequest, handler);
+						args[i] = resolveHttpEntityRequest(methodParam, webRequest);
 					}
 					else if (Errors.class.isAssignableFrom(paramType)) {
 						throw new IllegalStateException("Errors/BindingResult argument declared " +
@@ -546,20 +583,22 @@ public class HandlerMethodInvoker {
 	 */
 	protected Object resolveRequestBody(MethodParameter methodParam, NativeWebRequest webRequest, Object handler)
 			throws Exception {
+
 		return readWithMessageConverters(methodParam, createHttpInputMessage(webRequest), methodParam.getParameterType());
 	}
 
-	@SuppressWarnings("unchecked")
-	private HttpEntity resolveHttpEntityRequest(MethodParameter methodParam, NativeWebRequest webRequest, Object handler)
-		throws Exception {
+	private HttpEntity resolveHttpEntityRequest(MethodParameter methodParam, NativeWebRequest webRequest)
+			throws Exception {
+
 		HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
 		Class<?> paramType = getHttpEntityType(methodParam);
 		Object body = readWithMessageConverters(methodParam, inputMessage, paramType);
-		return new HttpEntity(body, inputMessage.getHeaders());
+		return new HttpEntity<Object>(body, inputMessage.getHeaders());
 	}
 
 	private Object readWithMessageConverters(MethodParameter methodParam, HttpInputMessage inputMessage, Class paramType)
-			throws Exception{
+			throws Exception {
+
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		if (contentType == null) {
 			StringBuilder builder = new StringBuilder(ClassUtils.getShortName(methodParam.getParameterType()));
@@ -717,43 +756,6 @@ public class HandlerMethodInvoker {
 		return binder;
 	}
 
-	@SuppressWarnings("unchecked")
-	public final void updateModelAttributes(Object handler, Map<String, Object> mavModel,
-			ExtendedModelMap implicitModel, NativeWebRequest webRequest) throws Exception {
-
-		if (this.methodResolver.hasSessionAttributes() && this.sessionStatus.isComplete()) {
-			for (String attrName : this.methodResolver.getActualSessionAttributeNames()) {
-				this.sessionAttributeStore.cleanupAttribute(webRequest, attrName);
-			}
-		}
-
-		// Expose model attributes as session attributes, if required.
-		// Expose BindingResults for all attributes, making custom editors available.
-		Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
-		try {
-			for (String attrName : new HashSet<String>(model.keySet())) {
-				Object attrValue = model.get(attrName);
-				boolean isSessionAttr =
-						this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null));
-				if (isSessionAttr && !this.sessionStatus.isComplete()) {
-					this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
-				}
-				if (!attrName.startsWith(BindingResult.MODEL_KEY_PREFIX) &&
-						(isSessionAttr || isBindingCandidate(attrValue))) {
-					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
-					if (mavModel != null && !model.containsKey(bindingResultKey)) {
-						WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
-						initBinder(handler, attrName, binder, webRequest);
-						mavModel.put(bindingResultKey, binder.getBindingResult());
-					}
-				}
-			}
-		}
-		catch (InvocationTargetException ex) {
-			// User-defined @InitBinder method threw an exception...
-			ReflectionUtils.rethrowException(ex.getTargetException());
-		}
-	}
 
 	/**
 	 * Determine whether the given value qualifies as a "binding candidate", i.e. might potentially be subject to
