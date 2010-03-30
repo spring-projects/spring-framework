@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.Assert;
 
@@ -53,6 +54,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	private final Set<String> externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet<String>());
 
+	private BeanDefinitionHolder decoratedDefinition;
+
 	boolean isFactoryMethodUnique;
 
 	/** Package-visible field for caching the resolved constructor or factory method */
@@ -74,7 +77,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	boolean postProcessed = false;
 
 	final Object postProcessingLock = new Object();
-
 
 	/**
 	 * Create a new RootBeanDefinition, to be configured through its bean
@@ -224,7 +226,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	RootBeanDefinition(BeanDefinition original) {
 		super(original);
 		if (original instanceof RootBeanDefinition) {
-			this.isFactoryMethodUnique = ((RootBeanDefinition) original).isFactoryMethodUnique;
+			RootBeanDefinition originalRbd = (RootBeanDefinition) original;
+			this.decoratedDefinition = originalRbd.decoratedDefinition;
+			this.isFactoryMethodUnique = originalRbd.isFactoryMethodUnique;
 		}
 	}
 
@@ -287,6 +291,14 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	public boolean isExternallyManagedDestroyMethod(String destroyMethod) {
 		return this.externallyManagedDestroyMethods.contains(destroyMethod);
+	}
+
+	public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {
+		this.decoratedDefinition = decoratedDefinition;
+	}
+
+	public BeanDefinitionHolder getDecoratedDefinition() {
+		return this.decoratedDefinition;
 	}
 
 

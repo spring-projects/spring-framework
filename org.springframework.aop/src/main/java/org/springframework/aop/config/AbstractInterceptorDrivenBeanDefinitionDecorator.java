@@ -64,13 +64,15 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 		// get the root bean name - will be the name of the generated proxy factory bean
 		String existingBeanName = definitionHolder.getBeanName();
 		BeanDefinition targetDefinition = definitionHolder.getBeanDefinition();
+		BeanDefinitionHolder targetHolder = new BeanDefinitionHolder(targetDefinition, existingBeanName + ".TARGET");
 
 		// delegate to subclass for interceptor definition
 		BeanDefinition interceptorDefinition = createInterceptorDefinition(node);
 
 		// generate name and register the interceptor
 		String interceptorName = existingBeanName + "." + getInterceptorNameSuffix(interceptorDefinition);
-		BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(interceptorDefinition, interceptorName), registry);
+		BeanDefinitionReaderUtils.registerBeanDefinition(
+				new BeanDefinitionHolder(interceptorDefinition, interceptorName), registry);
 
 		BeanDefinitionHolder result = definitionHolder;
 
@@ -79,8 +81,10 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 			RootBeanDefinition proxyDefinition = new RootBeanDefinition();
 			// create proxy factory bean definition
 			proxyDefinition.setBeanClass(ProxyFactoryBean.class);
+			proxyDefinition.setScope(targetDefinition.getScope());
 			// set the target
-			proxyDefinition.getPropertyValues().add("target", targetDefinition);
+			proxyDefinition.setDecoratedDefinition(targetHolder);
+			proxyDefinition.getPropertyValues().add("target", targetHolder);
 			// create the interceptor names list
 			proxyDefinition.getPropertyValues().add("interceptorNames", new ManagedList<String>());
 			// copy autowire settings from original bean definition.

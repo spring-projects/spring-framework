@@ -57,6 +57,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -473,7 +474,20 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return parentBeanFactory.isTypeMatch(originalBeanName(name), targetType);
 			}
 
+			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+
+			// Check decorated bean definition, if any: We assume it'll be easier
+			// to determine the decorated bean's type than the proxy's type.
+			BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
+			if (dbd != null) {
+				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
+				Class targetClass = predictBeanType(dbd.getBeanName(), tbd, FactoryBean.class, typeToMatch);
+				if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
+					return typeToMatch.isAssignableFrom(targetClass);
+				}
+			}
+
 			Class beanClass = predictBeanType(beanName, mbd, FactoryBean.class, typeToMatch);
 			if (beanClass == null) {
 				return false;
