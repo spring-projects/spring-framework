@@ -3,19 +3,23 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.2 (2010-03-29)
+Changes in version 3.0.2 (2010-03-31)
 -------------------------------------
 
 * fixed cross-module version ranges in OSGi manifests
 * fixed contents of org.springframework.web.struts jar
 * upgraded to Hibernate Validator 4.0.2 and Jackson 1.4.2
-* compatibility with Hessian 4.0 in terms of exception propagation
+* restored compatibility with Servlet 2.4 containers on all VMs
 * compatibility with OpenJPA 2.0 (support for persistence.xml versioning)
+* compatibility with Hessian 4.0 in terms of exception propagation
+* compatibility with JasperReports 3.x in terms of resource management
 * PropertyEditor lookup fallback works on Google App Engine as well (e.g. for form tags)
 * fixed TypeDescriptor/MethodParameter toString for all cases in debug log messages
 * widened AbstractFactoryBean's "getObjectType" signature to return any Class as well
 * BeanPostProcessors are allowed to return a null bean value in the middle of the chain
 * autowire="byType" ignores parameter name when choosing a primary bean, as defined
+* ObjectFactoryCreatingFactoryBean creates a serializable ObjectFactory reference
+* added ProviderCreatingFactoryBean, exposing a serializable JSR-330 Provider reference
 * "conversionService" bean will be ignored if it is not of type ConversionService
 * SimpleJdbcCall's "returningResultSet" accepts any plain RowMapper now
 * added public "validateDatabaseSchema" method to Hibernate LocalSessionFactoryBean
@@ -24,11 +28,16 @@ Changes in version 3.0.2 (2010-03-29)
 * @Transactional qualifiers work in unit tests as well (TransactionalTestExecutionListener)
 * @Value processing works in test instances (using the test context framework) as well now
 * @DirtiesContext is now inherited for class-level usage
-* WebApplicationObjectSupport's initServletContext will be called only once in any scenario
+* NativeWebRequest detects native MultipartRequest when decorated by HiddenHttpMethodFilter
+* WebRequestInterceptor exposes HttpServletResponse through NativeWebRequest (after downcast)
 * WebContentInterceptor does not restrict HTTP methods by default anymore
+* WebApplicationObjectSupport's initServletContext will be called only once in any scenario
+* DispatcherPortlet passes handler instance into HandlerExceptionResolver for action exception
+* DispatcherPortlet applies preHandleRender callbacks in case of action exception as well
 * introduced support for HttpEntity wrapper, containing headers in addition to body value
 * fixed DataBinder's conversion error handling for direct field access with ConversionService
 * @InitBinder methods support all applicable Spring 3.0 parameter annotations as well
+* @ExceptionHandler methods consistently receive original exception as thrown by user methods
 * fixed @RequestParam(required=false) regression for @InitBinder methods
 * fixed indexed property binding regression in form tag library
 * fixed @Configurable issue with null bean name
