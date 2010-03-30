@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,10 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Abstract base class for {@link HandlerExceptionResolver} implementations. <p>Provides a set of mapped handlers that
- * the resolver should map to, and the {@link Ordered} implementation.
+ * Abstract base class for {@link HandlerExceptionResolver} implementations.
+ *
+ * <p>Provides a set of mapped handlers that the resolver should map to,
+ * and the {@link Ordered} implementation.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -46,6 +48,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	private Class[] mappedHandlerClasses;
 
 	private Log warnLogger;
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -82,7 +85,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * Commons Logging, getting interpreted as log category according to the logger's configuration. <p>Default is no warn
 	 * logging. Specify this setting to activate warn logging into a specific category. Alternatively, override the {@link
 	 * #logException} method for custom logging.
-	 *
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
 	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
@@ -91,14 +93,14 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		this.warnLogger = LogFactory.getLog(loggerName);
 	}
 
+
 	/**
-	 * Checks whether this resolver is supposed to apply (i.e. the handler matches in case of "mappedHandlers" having been
-	 * specified), then delegates to the {@link #doResolveException} template method.
+	 * Checks whether this resolver is supposed to apply (i.e. the handler matches
+	 * in case of "mappedHandlers" having been specified), then delegates to the
+	 * {@link #doResolveException} template method.
 	 */
-	public ModelAndView resolveException(HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler,
-			Exception ex) {
+	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
+			Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
 			// Log exception, both at debug log level and at warn level, if desired.
@@ -114,13 +116,14 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Check whether this resolver is supposed to apply to the given handler. <p>The default implementation checks against
-	 * the specified mapped handlers and handler classes, if any.
-	 *
+	 * Check whether this resolver is supposed to apply to the given handler.
+	 * <p>The default implementation checks against the specified mapped handlers
+	 * and handler classes, if any.
 	 * @param request current HTTP request
-	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of the exception (for example,
-	 * if multipart resolution failed)
-	 * @return whether this resolved should proceed with resolving the exception for the given request and handler
+	 * @param handler the executed handler, or <code>null</code> if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return whether this resolved should proceed with resolving the exception
+	 * for the given request and handler
 	 * @see #setMappedHandlers
 	 * @see #setMappedHandlerClasses
 	 */
@@ -142,10 +145,10 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Log the given exception at warn level, provided that warn logging has been activated through the {@link
-	 * #setWarnLogCategory "warnLogCategory"} property. <p>Calls {@link #buildLogMessage} in order to determine the
-	 * concrete message to log. Always passes the full exception to the logger.
-	 *
+	 * Log the given exception at warn level, provided that warn logging has been
+	 * activated through the {@link #setWarnLogCategory "warnLogCategory"} property.
+	 * <p>Calls {@link #buildLogMessage} in order to determine the concrete message to log.
+	 * Always passes the full exception to the logger.
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @see #setWarnLogCategory
@@ -160,7 +163,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	/**
 	 * Build a log message for the given exception, occured during processing the given request.
-	 *
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the log message to use
@@ -170,21 +172,20 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Actually resolve the given exception that got thrown during on handler execution, returning a ModelAndView that
-	 * represents a specific error page if appropriate. <p>May be overridden in subclasses, in order to apply specific
-	 * exception checks. Note that this template method will be invoked <i>after</i> checking whether this resolved applies
-	 * ("mappedHandlers" etc), so an implementation may simply proceed with its actual exception handling.
-	 *
+	 * Actually resolve the given exception that got thrown during on handler execution,
+	 * returning a ModelAndView that represents a specific error page if appropriate.
+	 * <p>May be overridden in subclasses, in order to apply specific exception checks.
+	 * Note that this template method will be invoked <i>after</i> checking whether this
+	 * resolved applies ("mappedHandlers" etc), so an implementation may simply proceed
+	 * with its actual exception handling.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of the exception (for example,
-	 * if multipart resolution failed)
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the time
+	 * of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
 	 */
 	protected abstract ModelAndView doResolveException(HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler,
-			Exception ex);
+			HttpServletResponse response, Object handler, Exception ex);
 
 }

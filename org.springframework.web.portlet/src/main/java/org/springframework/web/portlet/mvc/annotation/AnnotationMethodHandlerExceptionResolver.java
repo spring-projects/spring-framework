@@ -245,10 +245,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		Class paramType = methodParameter.getParameterType();
 		Object value = resolveStandardArgument(paramType, webRequest, thrownException);
 		if (value != WebArgumentResolver.UNRESOLVED && !ClassUtils.isAssignableValue(paramType, value)) {
-			throw new IllegalStateException(
-					"Standard argument type [" + paramType.getName() + "] resolved to incompatible value of type [" +
-							(value != null ? value.getClass() : null) +
-							"]. Consider declaring the argument type in a less specific fashion.");
+			throw new IllegalStateException("Standard argument type [" + paramType.getName() +
+					"] resolved to incompatible value of type [" + (value != null ? value.getClass() : null) +
+					"]. Consider declaring the argument type in a less specific fashion.");
 		}
 		return value;
 	}
@@ -266,7 +265,10 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest,
 			Exception thrownException) throws Exception {
 
-		if (WebRequest.class.isAssignableFrom(parameterType)) {
+		if (parameterType.isInstance(thrownException)) {
+			return thrownException;
+		}
+		else if (WebRequest.class.isAssignableFrom(parameterType)) {
 			return webRequest;
 		}
 
@@ -329,9 +331,6 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 				throw new IllegalStateException("Event can only get obtained from EventRequest");
 			}
 			return ((EventRequest) request).getEvent();
-		}
-		else if (parameterType.isInstance(thrownException)) {
-			return thrownException;
 		}
 		else {
 			return WebArgumentResolver.UNRESOLVED;
