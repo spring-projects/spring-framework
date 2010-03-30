@@ -19,6 +19,10 @@
 		<property name="age" value="23"/>
 	</bean>
 
+	<bean id="debuggingTestBeanNoInstance" class="org.springframework.beans.ITestBean">
+		<test:debug/>
+	</bean>
+
 	<bean id="chainedTestBean" class="org.springframework.beans.TestBean">
 		<test:debug/>
 		<test:nop/>

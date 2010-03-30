@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,32 @@
 
 package org.springframework.beans.factory.xml.support;
 
-import static java.lang.String.format;
-import static org.junit.Assert.*;
-
 import java.io.IOException;
+import static java.lang.String.format;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import test.interceptor.NopInterceptor;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDecorator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -51,12 +59,6 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-
-import test.interceptor.NopInterceptor;
 
 /**
  * Unit tests for custom XML namespace handler implementations.
@@ -65,7 +67,7 @@ import test.interceptor.NopInterceptor;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class CustomNamespaceHandlerTests {
+public class CustomNamespaceHandlerTests {
 	
 	private static final Class<?> CLASS = CustomNamespaceHandlerTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -92,19 +94,19 @@ public final class CustomNamespaceHandlerTests {
 	@Test
 	public void testSimpleParser() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
-		assetTestBean(bean);
+		assertTestBean(bean);
 	}
 
 	@Test
 	public void testSimpleDecorator() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("customisedTestBean");
-		assetTestBean(bean);
+		assertTestBean(bean);
 	}
 
 	@Test
 	public void testProxyingDecorator() throws Exception {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("debuggingTestBean");
-		assetTestBean(bean);
+		assertTestBean(bean);
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
 		assertEquals("Incorrect number of advisors", 1, advisors.length);
@@ -112,9 +114,22 @@ public final class CustomNamespaceHandlerTests {
 	}
 
 	@Test
+	public void testProxyingDecoratorNoInstance() throws Exception {
+		String[] beanNames = this.beanFactory.getBeanNamesForType(ITestBean.class);
+		assertTrue(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance"));
+		try {
+			this.beanFactory.getBean("debuggingTestBeanNoInstance");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getRootCause() instanceof BeanInstantiationException);
+		}
+	}
+
+	@Test
 	public void testChainedDecorators() throws Exception {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("chainedTestBean");
-		assetTestBean(bean);
+		assertTestBean(bean);
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
 		assertEquals("Incorrect number of advisors", 2, advisors.length);
@@ -159,7 +174,7 @@ public final class CustomNamespaceHandlerTests {
 	}
 
 
-	private void assetTestBean(ITestBean bean) {
+	private void assertTestBean(ITestBean bean) {
 		assertEquals("Invalid name", "Rob Harrop", bean.getName());
 		assertEquals("Invalid age", 23, bean.getAge());
 	}
@@ -174,7 +189,6 @@ public final class CustomNamespaceHandlerTests {
 		public DummySchemaResolver() {
 			super(CLASS.getClassLoader());
 		}
-
 
 		public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 			InputSource source = super.resolveEntity(publicId, systemId);
