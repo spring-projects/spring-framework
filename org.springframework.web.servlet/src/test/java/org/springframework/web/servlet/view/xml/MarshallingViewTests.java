@@ -95,6 +95,27 @@ public class MarshallingViewTests {
 	}
 
 	@Test
+	public void renderNullModelValue() throws Exception {
+		String modelKey = "key";
+		Map model = new HashMap();
+		model.put(modelKey, null);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		replay(marshallerMock);
+		try {
+			view.render(model, request, response);
+			fail("ServletException expected");
+		}
+		catch (ServletException ex) {
+			// expected
+		}
+		assertEquals("Invalid content length", 0, response.getContentLength());
+		verify(marshallerMock);
+	}
+
+	@Test
 	public void renderModelKeyUnsupported() throws Exception {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
