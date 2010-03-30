@@ -47,8 +47,8 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -156,12 +156,11 @@ public class HandlerMethodInvoker {
 				if (!"".equals(attrName) && implicitModel.containsAttribute(attrName)) {
 					continue;
 				}
-				Object attrValue = doInvokeMethod(attributeMethodToInvoke, handler, args);
+				ReflectionUtils.makeAccessible(attributeMethodToInvoke);
+				Object attrValue = attributeMethodToInvoke.invoke(handler, args);
 				if ("".equals(attrName)) {
-					Class resolvedType =
-							GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
-					attrName =
-							Conventions.getVariableNameForReturnType(attributeMethodToInvoke, resolvedType, attrValue);
+					Class resolvedType = GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
+					attrName = Conventions.getVariableNameForReturnType(attributeMethodToInvoke, resolvedType, attrValue);
 				}
 				if (!implicitModel.containsAttribute(attrName)) {
 					implicitModel.addAttribute(attrName, attrValue);
@@ -171,11 +170,18 @@ public class HandlerMethodInvoker {
 			if (debug) {
 				logger.debug("Invoking request handler method: " + handlerMethodToInvoke);
 			}
-			return doInvokeMethod(handlerMethodToInvoke, handler, args);
+			ReflectionUtils.makeAccessible(handlerMethodToInvoke);
+			return handlerMethodToInvoke.invoke(handler, args);
 		}
 		catch (IllegalStateException ex) {
-			// Throw exception with full handler method context...
+			// Internal assertion failed (e.g. invalid signature):
+			// throw exception with full handler method context...
 			throw new HandlerMethodInvocationException(handlerMethodToInvoke, ex);
+		}
+		catch (InvocationTargetException ex) {
+			// User-defined @ModelAttribute/@InitBinder/@RequestMapping method threw an exception...
+			ReflectionUtils.rethrowException(ex.getTargetException());
+			return null;
 		}
 	}
 
@@ -336,7 +342,8 @@ public class HandlerMethodInvoker {
 						if (debug) {
 							logger.debug("Invoking init-binder method: " + methodToInvoke);
 						}
-						Object returnValue = doInvokeMethod(methodToInvoke, handler, initBinderArgs);
+						ReflectionUtils.makeAccessible(methodToInvoke);
+						Object returnValue = methodToInvoke.invoke(handler, initBinderArgs);
 						if (returnValue != null) {
 							throw new IllegalStateException(
 									"InitBinder methods must not have a return value: " + methodToInvoke);
@@ -395,9 +402,8 @@ public class HandlerMethodInvoker {
 						paramName = "";
 					}
 					else {
-						throw new IllegalStateException(
-								"Unsupported argument [" + paramType.getName() + "] for @InitBinder method: " +
-										initBinderMethod);
+						throw new IllegalStateException("Unsupported argument [" + paramType.getName() +
+								"] for @InitBinder method: " + initBinderMethod);
 					}
 				}
 			}
@@ -724,22 +730,28 @@ public class HandlerMethodInvoker {
 		// Expose model attributes as session attributes, if required.
 		// Expose BindingResults for all attributes, making custom editors available.
 		Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
-		for (String attrName : new HashSet<String>(model.keySet())) {
-			Object attrValue = model.get(attrName);
-			boolean isSessionAttr =
-					this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null));
-			if (isSessionAttr && !this.sessionStatus.isComplete()) {
-				this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
-			}
-			if (!attrName.startsWith(BindingResult.MODEL_KEY_PREFIX) &&
-					(isSessionAttr || isBindingCandidate(attrValue))) {
-				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
-				if (mavModel != null && !model.containsKey(bindingResultKey)) {
-					WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
-					initBinder(handler, attrName, binder, webRequest);
-					mavModel.put(bindingResultKey, binder.getBindingResult());
+		try {
+			for (String attrName : new HashSet<String>(model.keySet())) {
+				Object attrValue = model.get(attrName);
+				boolean isSessionAttr =
+						this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null));
+				if (isSessionAttr && !this.sessionStatus.isComplete()) {
+					this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
+				}
+				if (!attrName.startsWith(BindingResult.MODEL_KEY_PREFIX) &&
+						(isSessionAttr || isBindingCandidate(attrValue))) {
+					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
+					if (mavModel != null && !model.containsKey(bindingResultKey)) {
+						WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
+						initBinder(handler, attrName, binder, webRequest);
+						mavModel.put(bindingResultKey, binder.getBindingResult());
+					}
 				}
 			}
+		}
+		catch (InvocationTargetException ex) {
+			// User-defined @InitBinder method threw an exception...
+			ReflectionUtils.rethrowException(ex.getTargetException());
 		}
 	}
 
@@ -750,17 +762,6 @@ public class HandlerMethodInvoker {
 	protected boolean isBindingCandidate(Object value) {
 		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
-	}
-
-	private Object doInvokeMethod(Method method, Object target, Object[] args) throws Exception {
-		ReflectionUtils.makeAccessible(method);
-		try {
-			return method.invoke(target, args);
-		}
-		catch (InvocationTargetException ex) {
-			ReflectionUtils.rethrowException(ex.getTargetException());
-		}
-		throw new IllegalStateException("Should never get here");
 	}
 
 	protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
@@ -843,10 +844,9 @@ public class HandlerMethodInvoker {
 		Class paramType = methodParameter.getParameterType();
 		Object value = resolveStandardArgument(paramType, webRequest);
 		if (value != WebArgumentResolver.UNRESOLVED && !ClassUtils.isAssignableValue(paramType, value)) {
-			throw new IllegalStateException(
-					"Standard argument type [" + paramType.getName() + "] resolved to incompatible value of type [" +
-							(value != null ? value.getClass() : null) +
-							"]. Consider declaring the argument type in a less specific fashion.");
+			throw new IllegalStateException("Standard argument type [" + paramType.getName() +
+					"] resolved to incompatible value of type [" + (value != null ? value.getClass() : null) +
+					"]. Consider declaring the argument type in a less specific fashion.");
 		}
 		return value;
 	}
