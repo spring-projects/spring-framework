@@ -37,10 +37,10 @@ import org.springframework.util.MultiValueMap;
  * </pre>
  *
  * @author Arjen Poutsma
+ * @since 3.0.2
  * @see org.springframework.web.client.RestTemplate
  * @see #getBody()
  * @see #getHeaders()
- * @since 3.0.2
  */
 public class HttpEntity<T> {
 
@@ -49,9 +49,11 @@ public class HttpEntity<T> {
 	 */
 	public static final HttpEntity EMPTY = new HttpEntity();
 
+
 	private final HttpHeaders headers;
 
 	private final T body;
+
 
 	/**
 	 * Create a new, empty {@code HttpEntity}.
@@ -62,7 +64,6 @@ public class HttpEntity<T> {
 
 	/**
 	 * Create a new {@code HttpEntity} with the given body and no headers.
-	 *
 	 * @param body the entity body
 	 */
 	public HttpEntity(T body) {
@@ -71,7 +72,6 @@ public class HttpEntity<T> {
 
 	/**
 	 * Create a new {@code HttpEntity} with the given headers and no body.
-	 *
 	 * @param headers the entity headers
 	 */
 	public HttpEntity(Map<String, String> headers) {
@@ -80,7 +80,6 @@ public class HttpEntity<T> {
 
 	/**
 	 * Create a new {@code HttpEntity} with the given headers and no body.
-	 *
 	 * @param headers the entity headers
 	 */
 	public HttpEntity(MultiValueMap<String, String> headers) {
@@ -89,8 +88,7 @@ public class HttpEntity<T> {
 
 	/**
 	 * Create a new {@code HttpEntity} with the given body and {@code Content-Type} header value.
-	 *
-	 * @param body		the entity body
+	 * @param body the entity body
 	 * @param contentType the value of the {@code Content-Type header}
 	 */
 	public HttpEntity(T body, MediaType contentType) {
@@ -99,8 +97,7 @@ public class HttpEntity<T> {
 
 	/**
 	 * Create a new {@code HttpEntity} with the given body and headers.
-	 *
-	 * @param body	the entity body
+	 * @param body the entity body
 	 * @param headers the entity headers
 	 */
 	public HttpEntity(T body, Map<String, String> headers) {
@@ -109,8 +106,7 @@ public class HttpEntity<T> {
 
 	/**
 	 * Create a new {@code HttpEntity} with the given body and headers.
-	 *
-	 * @param body	the entity body
+	 * @param body the entity body
 	 * @param headers the entity headers
 	 */
 	public HttpEntity(T body, MultiValueMap<String, String> headers) {
@@ -121,6 +117,29 @@ public class HttpEntity<T> {
 		}
 		this.headers = HttpHeaders.readOnlyHttpHeaders(tempHeaders);
 	}
+
+
+	/**
+	 * Returns the headers of this entity.
+	 */
+	public HttpHeaders getHeaders() {
+		return this.headers;
+	}
+
+	/**
+	 * Returns the body of this entity.
+	 */
+	public T getBody() {
+		return this.body;
+	}
+
+	/**
+	 * Indicates whether this entity has a body.
+	 */
+	public boolean hasBody() {
+		return (this.body != null);
+	}
+
 
 	private static MultiValueMap<String, String> toMultiValueMap(Map<String, String> map) {
 		if (map == null) {
@@ -142,27 +161,6 @@ public class HttpEntity<T> {
 			result.setContentType(contentType);
 			return result;
 		}
-	}
-
-	/**
-	 * Returns the headers of this entity.
-	 */
-	public HttpHeaders getHeaders() {
-		return headers;
-	}
-
-	/**
-	 * Returns the body of this entity.
-	 */
-	public T getBody() {
-		return body;
-	}
-
-	/**
-	 * Indicates whether this entity has a body.
-	 */
-	public boolean hasBody() {
-		return body != null;
 	}
 
 }
