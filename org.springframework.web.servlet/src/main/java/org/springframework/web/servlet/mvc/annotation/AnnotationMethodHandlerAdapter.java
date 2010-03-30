@@ -688,7 +688,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		@Override
 		protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
-			throw new MissingServletRequestParameterException(paramName, paramType.getName());
+			throw new MissingServletRequestParameterException(paramName, paramType.getSimpleName());
 		}
 
 		@Override

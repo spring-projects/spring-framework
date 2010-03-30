@@ -521,7 +521,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 		@Override
 		protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
-			throw new MissingPortletRequestParameterException(paramName, paramType.getName());
+			throw new MissingPortletRequestParameterException(paramName, paramType.getSimpleName());
 		}
 
 		@Override
