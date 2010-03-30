@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.Map;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
+import javax.portlet.filter.PortletRequestWrapper;
+import javax.portlet.filter.PortletResponseWrapper;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -73,6 +75,44 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 
 	public Object getNativeResponse() {
 		return getResponse();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest(Class<T> requiredType) {
+		if (requiredType != null) {
+			PortletRequest request = getRequest();
+			while (request != null) {
+				if (requiredType.isInstance(request)) {
+					return (T) request;
+				}
+				else if (request instanceof PortletRequestWrapper) {
+					request = ((PortletRequestWrapper) request).getRequest();
+				}
+				else {
+					request = null;
+				}
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeResponse(Class<T> requiredType) {
+		if (requiredType != null) {
+			PortletResponse response = getResponse();
+			while (response != null) {
+				if (requiredType.isInstance(response)) {
+					return (T) response;
+				}
+				else if (response instanceof PortletResponseWrapper) {
+					response = ((PortletResponseWrapper) response).getResponse();
+				}
+				else {
+					response = null;
+				}
+			}
+		}
+		return null;
 	}
 
 

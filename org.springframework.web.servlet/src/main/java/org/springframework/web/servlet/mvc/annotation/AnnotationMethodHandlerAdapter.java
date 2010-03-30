@@ -701,18 +701,18 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				throws Exception {
 
 			return AnnotationMethodHandlerAdapter.this.createBinder(
-					(HttpServletRequest) webRequest.getNativeRequest(), target, objectName);
+					webRequest.getNativeRequest(HttpServletRequest.class), target, objectName);
 		}
 
 		@Override
 		protected void doBind(WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
 			ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
-			servletBinder.bind((ServletRequest) webRequest.getNativeRequest());
+			servletBinder.bind(webRequest.getNativeRequest(ServletRequest.class));
 		}
 
 		@Override
 		protected HttpInputMessage createHttpInputMessage(NativeWebRequest webRequest) throws Exception {
-			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+			HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 			return AnnotationMethodHandlerAdapter.this.createHttpInputMessage(servletRequest);
 		}
 
@@ -739,7 +739,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
 				throws Exception {
 
-			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+			HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 			Cookie cookieValue = WebUtils.getCookie(servletRequest, cookieName);
 			if (Cookie.class.isAssignableFrom(paramType)) {
 				return cookieValue;
@@ -757,7 +757,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		protected String resolvePathVariable(String pathVarName, Class paramType, NativeWebRequest webRequest)
 				throws Exception {
 
-			HttpServletRequest servletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+			HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 			Map<String, String> uriTemplateVariables =
 					(Map<String, String>) servletRequest.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			if (uriTemplateVariables == null || !uriTemplateVariables.containsKey(pathVarName)) {
@@ -769,8 +769,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		@Override
 		protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest) throws Exception {
-			HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-			HttpServletResponse response = (HttpServletResponse) webRequest.getNativeResponse();
+			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+			HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 
 			if (ServletRequest.class.isAssignableFrom(parameterType)) {
 				return request;

@@ -427,8 +427,9 @@ public class HandlerMethodInvoker {
 			paramName = getRequiredParameterName(methodParam);
 		}
 		Object paramValue = null;
-		if (webRequest.getNativeRequest() instanceof MultipartRequest) {
-			paramValue = ((MultipartRequest) webRequest.getNativeRequest()).getFile(paramName);
+		MultipartRequest multipartRequest = webRequest.getNativeRequest(MultipartRequest.class);
+		if (multipartRequest != null) {
+			paramValue = multipartRequest.getFile(paramName);
 		}
 		if (paramValue == null) {
 			String[] paramValues = webRequest.getParameterValues(paramName);
