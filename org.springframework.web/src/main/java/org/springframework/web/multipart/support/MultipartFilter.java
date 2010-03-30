@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.multipart.support;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -46,9 +45,10 @@ import org.springframework.web.multipart.MultipartResolver;
  * for each call but rather return a reference to a pre-built instance.
  *
  * <p>Note: This filter is an <b>alternative</b> to using DispatcherServlet's
- * MultipartResolver support, for example for web applications with custom
- * web views that do not use Spring's web MVC. It should not be combined with
- * servlet-specific multipart resolution.
+ * MultipartResolver support, for example for web applications with custom web views
+ * which do not use Spring's web MVC, or for custom filters applied before a Spring MVC
+ * DispatcherServlet (e.g. {@link org.springframework.web.filter.HiddenHttpMethodFilter}).
+ * In any case, this filter should not be combined with servlet-specific multipart resolution.
  *
  * @author Juergen Hoeller
  * @since 08.10.2003
@@ -77,7 +77,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * root application context.
 	 */
 	protected String getMultipartResolverBeanName() {
-		return multipartResolverBeanName;
+		return this.multipartResolverBeanName;
 	}
 
 
@@ -143,9 +143,8 @@ public class MultipartFilter extends OncePerRequestFilter {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using MultipartResolver '" + getMultipartResolverBeanName() + "' for MultipartFilter");
 		}
-		WebApplicationContext wac =
-				WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return (MultipartResolver) wac.getBean(getMultipartResolverBeanName(), MultipartResolver.class);
+		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+		return wac.getBean(getMultipartResolverBeanName(), MultipartResolver.class);
 	}
 
 }
