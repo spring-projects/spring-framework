@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ import java.lang.annotation.Target;
  * to have very flexible signatures. They may have arguments of the following
  * types, in arbitrary order:
  * <ul>
+ * <li>An exception argument: declared as a general Exception or as a more
+ * specific exception. This also serves as a mapping hint if the annotation
+ * itself does not narrow the exception types through its {@link #value()}.
  * <li>Request and/or response objects (Servlet API or Portlet API).
  * You may choose any specific request/response type, e.g.
  * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}
@@ -87,21 +90,19 @@ import java.lang.annotation.Target;
  * with {@link ResponseStatus @ResponseStatus}, to define the response status
  * for the HTTP response.
  *
- * <p><b>NOTE: <code>@RequestMapping</code> will only be processed if a
- * corresponding <code>HandlerMapping</code> (for type level annotations)
- * and/or <code>HandlerAdapter</code> (for method level annotations) is
- * present in the dispatcher.</b> This is the case by default in both
- * <code>DispatcherServlet</code> and <code>DispatcherPortlet</code>.
- * However, if you are defining custom <code>HandlerMappings</code> or
- * <code>HandlerAdapters</code>, then you need to make sure that a
- * corresponding custom <code>DefaultAnnotationHandlerMapping</code>
- * and/or <code>AnnotationMethodHandlerAdapter</code> is defined as well
- * - provided that you intend to use <code>@RequestMapping</code>.
+ * <p><b>Note:</b> In Portlet environments, {@code ExceptionHandler} annotated methods
+ * will only be called during the render and resource phases - just like
+ * {@link org.springframework.web.portlet.HandlerExceptionResolver} beans would.
+ * Exceptions carried over from the action and event phases will be invoked during
+ * the render phase as well, with exception handler methods having to be present
+ * on the controller class that defines the applicable <i>render</i> method.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @since 3.0
  * @see org.springframework.web.context.request.WebRequest
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver
- * @since 3.0
+ * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -109,8 +110,8 @@ import java.lang.annotation.Target;
 public @interface ExceptionHandler {
 
 	/**
-	 * Exceptions handled by the annotation method. If empty, will default to any exceptions listed in the method
-	 * argument list.
+	 * Exceptions handled by the annotation method. If empty, will default
+	 * to any exceptions listed in the method argument list.
 	 */
 	Class<? extends Throwable>[] value() default {};
 
