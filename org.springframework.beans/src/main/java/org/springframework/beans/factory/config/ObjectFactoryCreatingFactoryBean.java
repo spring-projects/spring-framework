@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
+import java.io.Serializable;
+
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.util.Assert;
 
@@ -41,7 +44,7 @@ import org.springframework.util.Assert;
  * <pre class="code">&lt;beans&gt;
  *
  *   &lt;!-- Prototype bean since we have state --&gt;
- *   &lt;bean id="myService" class="a.b.c.MyService" singleton="false"/&gt;
+ *   &lt;bean id="myService" class="a.b.c.MyService" scope="prototype"/&gt;
  *
  *   &lt;bean id="myServiceFactory"
  *       class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean"&gt;
@@ -63,9 +66,9 @@ import org.springframework.util.Assert;
  *
  * public class MyClientBean {
  *
- *   private ObjectFactory myServiceFactory;
+ *   private ObjectFactory&lt;MyService&gt; myServiceFactory;
  *
- *   public void setMyServiceFactory(ObjectFactory myServiceFactory) {
+ *   public void setMyServiceFactory(ObjectFactory&lt;MyService&gt; myServiceFactory) {
  *     this.myServiceFactory = myServiceFactory;
  *   }
  *
@@ -98,13 +101,10 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 
 	/**
 	 * Set the name of the target bean.
-	 * <p>The target does not <i>have</> to be a prototype bean, but realisticially
-	 * always will be (because if the target bean were a singleton, then said
-	 * singleton bean could simply be injected straight into the dependent object,
-	 * thus obviating the need for the extra level of indirection afforded by
-	 * the approach encapsulated by this class). Please note that no exception
-	 * will be thrown if the supplied <code>targetBeanName</code> does not
-	 * reference a prototype bean.
+	 * <p>The target does not <i>have</> to be a non-singleton bean, but realisticially
+	 * always will be (because if the target bean were a singleton, then said singleton
+	 * bean could simply be injected straight into the dependent object, thus obviating
+	 * the need for the extra level of indirection afforded by this factory approach).
 	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
@@ -124,21 +124,27 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 
 	@Override
 	protected ObjectFactory createInstance() {
-		return new ObjectFactory() {
-			public Object getObject() throws BeansException {
-				return getTargetBean(targetBeanName);
-			}
-		};
+		return new TargetBeanObjectFactory(getBeanFactory(), this.targetBeanName);
 	}
 
+
 	/**
-	 * Template method for obtaining a target bean instance.
-	 * Called by the exposed ObjectFactory's <code>getObject()</code> method.
-	 * @param targetBeanName the name of the target bean
-	 * @return the target bean instance
+	 * Independent inner class - for serialization purposes.
 	 */
-	protected Object getTargetBean(String targetBeanName) {
-		return getBeanFactory().getBean(targetBeanName);
+	private static class TargetBeanObjectFactory implements ObjectFactory, Serializable {
+
+		private final BeanFactory beanFactory;
+
+		private final String targetBeanName;
+
+		public TargetBeanObjectFactory(BeanFactory beanFactory, String targetBeanName) {
+			this.beanFactory = beanFactory;
+			this.targetBeanName = targetBeanName;
+		}
+
+		public Object getObject() throws BeansException {
+			return this.beanFactory.getBean(this.targetBeanName);
+		}
 	}
 
 }
