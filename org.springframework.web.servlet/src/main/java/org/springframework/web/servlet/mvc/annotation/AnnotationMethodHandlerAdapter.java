@@ -114,23 +114,26 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Implementation of the {@link org.springframework.web.servlet.HandlerAdapter} interface that maps handler methods
- * based on HTTP paths, HTTP methods and request parameters expressed through the {@link RequestMapping} annotation.
+ * Implementation of the {@link org.springframework.web.servlet.HandlerAdapter} interface
+ * that maps handler methods based on HTTP paths, HTTP methods and request parameters
+ * expressed through the {@link RequestMapping} annotation.
  *
- * <p>Supports request parameter binding through the {@link RequestParam} annotation. Also supports the {@link
- * ModelAttribute} annotation for exposing model attribute values to the view, as well as {@link InitBinder} for binder
- * initialization methods and {@link SessionAttributes} for automatic session management of specific attributes.
+ * <p>Supports request parameter binding through the {@link RequestParam} annotation.
+ * Also supports the {@link ModelAttribute} annotation for exposing model attribute
+ * values to the view, as well as {@link InitBinder} for binder initialization methods
+ * and {@link SessionAttributes} for automatic session management of specific attributes.
  *
- * <p>This adapter can be customized through various bean properties. A common use case is to apply shared binder
- * initialization logic through a custom {@link #setWebBindingInitializer WebBindingInitializer}.
+ * <p>This adapter can be customized through various bean properties.
+ * A common use case is to apply shared binder initialization logic through
+ * a custom {@link #setWebBindingInitializer WebBindingInitializer}.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @since 2.5
  * @see #setPathMatcher
  * @see #setMethodNameResolver
  * @see #setWebBindingInitializer
  * @see #setSessionAttributeStore
- * @since 2.5
  */
 public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		implements HandlerAdapter, Ordered, BeanFactoryAware {
@@ -451,9 +454,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
 	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter) 
 	 */
-	protected ServletRequestDataBinder createBinder(
-			HttpServletRequest request, Object target, String objectName) throws Exception {
-
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName)
+			throws Exception {
 		return new ServletRequestDataBinder(target, objectName);
 	}
 
@@ -466,7 +468,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @throws Exception in case of errors
 	 */
     protected HttpInputMessage createHttpInputMessage(HttpServletRequest servletRequest) throws Exception {
-
 		return new ServletServerHttpRequest(servletRequest);
 	}
 
@@ -479,7 +480,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @throws Exception in case of errors
 	 */
     protected HttpOutputMessage createHttpOutputMessage(HttpServletResponse servletResponse) throws Exception {
-
 		return new ServletServerHttpResponse(servletResponse);
 	}
 
@@ -833,12 +833,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				handleResponseBody(returnValue, webRequest);
 				return null;
 			}
-			if (returnValue instanceof HttpEntity) {
+			else if (returnValue instanceof HttpEntity) {
 				handleHttpEntityResponse((HttpEntity<?>) returnValue, webRequest);
 				return null;
 			}
-
-			if (returnValue instanceof ModelAndView) {
+			else if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
 				mav.getModelMap().mergeAttributes(implicitModel);
 				return mav;
@@ -884,10 +883,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (returnValue == null) {
 				return;
 			}
-
 			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
 			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
-
 			writeWithMessageConverters(returnValue, inputMessage, outputMessage);
 		}
 
@@ -898,7 +895,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
 			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
-
 			HttpHeaders entityHeaders = responseEntity.getHeaders();
 			if (!entityHeaders.isEmpty()) {
 				outputMessage.getHeaders().putAll(entityHeaders);
@@ -1086,7 +1082,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			return Collections.emptyList();
 		}
-
-
 	}
+
 }
