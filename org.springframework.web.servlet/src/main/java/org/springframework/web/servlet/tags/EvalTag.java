@@ -72,7 +72,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Set the variable name to expose the evaluation result under.
-	 * Defaults to rendering the result to the current JspWriter
+	 * Defaults to rendering the result to the current JspWriter.
 	 */
 	public void setVar(String var) {
 		this.var = var;
