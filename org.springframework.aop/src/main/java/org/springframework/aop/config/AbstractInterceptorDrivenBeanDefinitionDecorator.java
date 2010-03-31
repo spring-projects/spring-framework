@@ -82,6 +82,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 			// create proxy factory bean definition
 			proxyDefinition.setBeanClass(ProxyFactoryBean.class);
 			proxyDefinition.setScope(targetDefinition.getScope());
+			proxyDefinition.setLazyInit(targetDefinition.isLazyInit());
 			// set the target
 			proxyDefinition.setDecoratedDefinition(targetHolder);
 			proxyDefinition.getPropertyValues().add("target", targetHolder);
