@@ -57,6 +57,8 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -77,17 +79,18 @@ public class CustomNamespaceHandlerTests {
 	private static final String NS_XML = format("%s/%s-context.xml", FQ_PATH, CLASSNAME);
 	private static final String TEST_XSD = format("%s/%s.xsd", FQ_PATH, CLASSNAME);
 
-	private DefaultListableBeanFactory beanFactory;
+	private GenericApplicationContext beanFactory;
 
 	@Before
 	public void setUp() throws Exception {
 		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(CLASS.getClassLoader(), NS_PROPS);
-		this.beanFactory = new DefaultListableBeanFactory();
+		this.beanFactory = new GenericApplicationContext();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setNamespaceHandlerResolver(resolver);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
 		reader.setEntityResolver(new DummySchemaResolver());
 		reader.loadBeanDefinitions(getResource());
+		this.beanFactory.refresh();
 	}
 
 
@@ -115,7 +118,7 @@ public class CustomNamespaceHandlerTests {
 
 	@Test
 	public void testProxyingDecoratorNoInstance() throws Exception {
-		String[] beanNames = this.beanFactory.getBeanNamesForType(ITestBean.class);
+		String[] beanNames = this.beanFactory.getBeanNamesForType(ApplicationListener.class);
 		assertTrue(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance"));
 		try {
 			this.beanFactory.getBean("debuggingTestBeanNoInstance");
