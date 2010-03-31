@@ -33,13 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -239,6 +233,7 @@ public class MvcNamespaceTests {
 		mapping.setDefaultHandler(new TestController());		
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("GET");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
@@ -253,7 +248,6 @@ public class MvcNamespaceTests {
 		assertNotNull(adapter);
 		
 		request.setRequestURI("/foo");
-		request.setMethod("GET");
 		chain = mapping2.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
@@ -262,7 +256,9 @@ public class MvcNamespaceTests {
 		ModelAndView mv = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
 		assertNull(mv.getViewName());
 
-		request.setRequestURI("/bar");
+		request.setRequestURI("/myapp/app/bar");
+		request.setContextPath("/myapp");
+		request.setServletPath("/app");
 		chain = mapping2.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
@@ -270,7 +266,66 @@ public class MvcNamespaceTests {
 		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 		ModelAndView mv2 = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
 		assertEquals("baz", mv2.getViewName());
+
+		request.setRequestURI("/myapp/app/");
+		request.setContextPath("/myapp");
+		request.setServletPath("/app");
+		chain = mapping2.getHandler(request);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
+		ModelAndView mv3 = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
+		assertEquals("root", mv3.getViewName());
 	}
+
+	/** WebSphere gives trailing servlet path slashes by default!! */
+	@Test
+	public void testViewControllersOnWebSphere() throws Exception {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
+		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml", getClass()));
+		assertEquals(9, appContext.getBeanDefinitionCount());
+		appContext.refresh();
+
+		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
+		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("GET");
+		request.setRequestURI("/myapp/app/bar");
+		request.setContextPath("/myapp");
+		request.setServletPath("/app/");
+		HandlerExecutionChain chain = mapping2.getHandler(request);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
+		ModelAndView mv2 = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
+		assertEquals("baz", mv2.getViewName());
+
+		request.setRequestURI("/myapp/app/");
+		request.setContextPath("/myapp");
+		request.setServletPath("/app/");
+		chain = mapping2.getHandler(request);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
+		ModelAndView mv3 = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
+		assertEquals("root", mv3.getViewName());
+
+		request.setRequestURI("/myapp/");
+		request.setContextPath("/myapp");
+		request.setServletPath("/");
+		chain = mapping2.getHandler(request);
+		assertEquals(4, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
+		mv3 = adapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
+		assertEquals("root", mv3.getViewName());
+	}
+
 
 	@Controller
 	public static class TestController {
