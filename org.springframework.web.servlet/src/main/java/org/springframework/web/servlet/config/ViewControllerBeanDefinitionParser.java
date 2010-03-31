@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.servlet.config;
 
 import java.util.Map;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -27,12 +29,12 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
-import org.w3c.dom.Element;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a {@code view-controller} element to register
- * a {@link ParameterizableViewController}.  Will also register a {@link SimpleUrlHandlerMapping} for view controllers.
- * 
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
+ * {@code view-controller} element to register a {@link ParameterizableViewController}.
+ * Will also register a {@link SimpleUrlHandlerMapping} for view controllers.
+ *
  * @author Keith Donald
  * @author Christian Dupuis
  * @since 3.0
@@ -40,20 +42,21 @@ import org.w3c.dom.Element;
 class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String HANDLER_ADAPTER_BEAN_NAME = 
-		"org.springframework.web.servlet.config.internalHandlerAdapter";
-	
+		"org.springframework.web.servlet.config.viewControllerHandlerAdapter";
+
 	private static final String HANDLER_MAPPING_BEAN_NAME = 
-		"org.springframework.web.servlet.config.internalHandlerMapping";
-	
+		"org.springframework.web.servlet.config.viewControllerHandlerMapping";
+
+
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 
 		// Register handler adapter
-		registerHanderAdapter(element, parserContext, source);
+		registerHanderAdapter(parserContext, source);
 		
 		// Register handler mapping
-		BeanDefinition handlerMappingDef = registerHandlerMapping(element, parserContext, source);
-		
+		BeanDefinition handlerMappingDef = registerHandlerMapping(parserContext, source);
+
 		// Create view controller bean definition
 		RootBeanDefinition viewControllerDef = new RootBeanDefinition(ParameterizableViewController.class);
 		viewControllerDef.setSource(source);
@@ -63,7 +66,8 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		Map<String, BeanDefinition> urlMap;
 		if (handlerMappingDef.getPropertyValues().contains("urlMap")) {
 			urlMap = (Map<String, BeanDefinition>) handlerMappingDef.getPropertyValues().getPropertyValue("urlMap").getValue();
-		} else {
+		}
+		else {
 			urlMap = new ManagedMap<String, BeanDefinition>();
 			handlerMappingDef.getPropertyValues().add("urlMap", urlMap);			
 		}
@@ -71,7 +75,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 	
-	private void registerHanderAdapter(Element element, ParserContext parserContext, Object source) {
+	private void registerHanderAdapter(ParserContext parserContext, Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(HANDLER_ADAPTER_BEAN_NAME)) {
 			RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(SimpleControllerHandlerAdapter.class);
 			handlerAdapterDef.setSource(source);
@@ -81,7 +85,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 	
-	private BeanDefinition registerHandlerMapping(Element element, ParserContext parserContext, Object source) {
+	private BeanDefinition registerHandlerMapping(ParserContext parserContext, Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(HANDLER_MAPPING_BEAN_NAME)) {
 			RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 			handlerMappingDef.setSource(source);
@@ -95,4 +99,5 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 			return parserContext.getRegistry().getBeanDefinition(HANDLER_MAPPING_BEAN_NAME);
 		}
 	}
+
 }
