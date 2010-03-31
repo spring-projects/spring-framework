@@ -21,6 +21,7 @@ Changes in version 3.0.2 (2010-03-31)
 * ObjectFactoryCreatingFactoryBean creates a serializable ObjectFactory reference
 * added ProviderCreatingFactoryBean, exposing a serializable JSR-330 Provider reference
 * "conversionService" bean will be ignored if it is not of type ConversionService
+* revised AbstractInterceptorDrivenBeanDefinitionDecorator for alignment with auto-proxying
 * SimpleJdbcCall's "returningResultSet" accepts any plain RowMapper now
 * added public "validateDatabaseSchema" method to Hibernate LocalSessionFactoryBean
 * HibernateJpaDialect borrows JDBC Connection on demand (supporting aggressive release)
@@ -34,6 +35,7 @@ Changes in version 3.0.2 (2010-03-31)
 * WebApplicationObjectSupport's initServletContext will be called only once in any scenario
 * DispatcherPortlet passes handler instance into HandlerExceptionResolver for action exception
 * DispatcherPortlet applies preHandleRender callbacks in case of action exception as well
+* UrlPathHelper cuts off trailing servlet-path slashes for root mappings (on WebSphere)
 * introduced support for HttpEntity wrapper, containing headers in addition to body value
 * fixed DataBinder's conversion error handling for direct field access with ConversionService
 * @InitBinder methods support all applicable Spring 3.0 parameter annotations as well
