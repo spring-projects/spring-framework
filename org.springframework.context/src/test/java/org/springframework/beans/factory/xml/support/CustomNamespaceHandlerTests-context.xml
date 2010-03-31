@@ -5,7 +5,8 @@
 	   xmlns:util="http://www.springframework.org/schema/util"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
-       http://www.springframework.org/schema/beans/test http://www.springframework.org/schema/beans/factory/xml/support/CustomNamespaceHandlerTests.xsd">
+       http://www.springframework.org/schema/beans/test http://www.springframework.org/schema/beans/factory/xml/support/CustomNamespaceHandlerTests.xsd"
+	default-lazy-init="true">
 
 	<test:testBean id="testBean" name="Rob Harrop" age="23"/>
 
@@ -19,7 +20,7 @@
 		<property name="age" value="23"/>
 	</bean>
 
-	<bean id="debuggingTestBeanNoInstance" class="org.springframework.beans.ITestBean">
+	<bean id="debuggingTestBeanNoInstance" class="org.springframework.context.ApplicationListener">
 		<test:debug/>
 	</bean>
 

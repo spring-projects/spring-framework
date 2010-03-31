@@ -480,7 +480,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.
 			BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
-			if (dbd != null) {
+			if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
 				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
 				Class targetClass = predictBeanType(dbd.getBeanName(), tbd, FactoryBean.class, typeToMatch);
 				if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
