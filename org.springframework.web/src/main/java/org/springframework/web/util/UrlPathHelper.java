@@ -18,7 +18,6 @@ package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -225,6 +224,10 @@ public class UrlPathHelper {
 		String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
 		if (servletPath == null) {
 			servletPath = request.getServletPath();
+		}
+		if (servletPath.length() > 1 && servletPath.endsWith("/")) {
+			// Probably on WebSphere: removing trailing slash...
+			servletPath = servletPath.substring(0, servletPath.length() - 1);
 		}
 		return servletPath;
 	}
