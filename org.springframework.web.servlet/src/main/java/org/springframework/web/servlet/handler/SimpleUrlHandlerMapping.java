@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * @param urlMap map with URLs as keys and beans as values
 	 * @see #setMappings
 	 */
-	public void setUrlMap(Map<String, Object> urlMap) {
+	public void setUrlMap(Map<String, ?> urlMap) {
 		this.urlMap.putAll(urlMap);
 	}
 
@@ -89,7 +89,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * This is particularly useful for adding or overriding entries in child
 	 * bean definitions.
 	 */
-	public Map getUrlMap() {
+	public Map<String, ?> getUrlMap() {
 		return this.urlMap;
 	}
 
