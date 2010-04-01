@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
@@ -123,7 +122,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 			}
 		};
 		lsfb.afterPropertiesSet();
-		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+		final SessionFactory sfProxy = lsfb.getObject();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
@@ -345,7 +344,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 			}
 		};
 		lsfb.afterPropertiesSet();
-		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+		final SessionFactory sfProxy = lsfb.getObject();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
@@ -422,7 +421,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 			}
 		};
 		lsfb.afterPropertiesSet();
-		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+		final SessionFactory sfProxy = lsfb.getObject();
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sfProxy);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -776,7 +775,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 			}
 		};
 		lsfb.afterPropertiesSet();
-		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+		final SessionFactory sfProxy = lsfb.getObject();
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sfProxy);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -860,7 +859,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 			}
 		};
 		lsfb.afterPropertiesSet();
-		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+		final SessionFactory sfProxy = lsfb.getObject();
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sfProxy);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1657,7 +1656,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		props.setProperty("hibernate.cache.provider_class", NoCacheProvider.class.getName());
 		lsfb.setHibernateProperties(props);
 		lsfb.afterPropertiesSet();
-		final SessionFactory sf = (SessionFactory) lsfb.getObject();
+		final SessionFactory sf = lsfb.getObject();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setSessionFactory(sf);
@@ -1698,7 +1697,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		props.setProperty("hibernate.cache.provider_class", NoCacheProvider.class.getName());
 		lsfb.setHibernateProperties(props);
 		lsfb.afterPropertiesSet();
-		final SessionFactory sf = (SessionFactory) lsfb.getObject();
+		final SessionFactory sf = lsfb.getObject();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setSessionFactory(sf);
@@ -1751,9 +1750,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		Properties props = new Properties();
 		props.setProperty("hibernate.dialect", HSQLDialect.class.getName());
 		props.setProperty("hibernate.cache.provider_class", NoCacheProvider.class.getName());
+		props.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false");
 		lsfb.setHibernateProperties(props);
 		lsfb.afterPropertiesSet();
-		final SessionFactory sf = (SessionFactory) lsfb.getObject();
+		final SessionFactory sf = lsfb.getObject();
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setSessionFactory(sf);

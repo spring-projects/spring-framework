@@ -3,16 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.2 (2010-03-31)
+Changes in version 3.0.2 (2010-04-01)
 -------------------------------------
 
 * fixed cross-module version ranges in OSGi manifests
 * fixed contents of org.springframework.web.struts jar
 * upgraded to Hibernate Validator 4.0.2 and Jackson 1.4.2
 * restored compatibility with Servlet 2.4 containers on all VMs
-* compatibility with OpenJPA 2.0 (support for persistence.xml versioning)
-* compatibility with Hessian 4.0 in terms of exception propagation
-* compatibility with JasperReports 3.x in terms of resource management
+* compatibility with Hibernate 3.5 final (native and also as a JPA 2.0 provider)
+* compatibility with OpenJPA 2.0 (support for JPA 2.0 persistence.xml versioning)
+* compatibility with Hessian 4.0 (in terms of exception propagation)
+* compatibility with JasperReports 3.x (in terms of resource management)
 * PropertyEditor lookup fallback works on Google App Engine as well (e.g. for form tags)
 * fixed TypeDescriptor/MethodParameter toString for all cases in debug log messages
 * widened AbstractFactoryBean's "getObjectType" signature to return any Class as well
@@ -36,7 +37,7 @@ Changes in version 3.0.2 (2010-03-31)
 * DispatcherPortlet passes handler instance into HandlerExceptionResolver for action exception
 * DispatcherPortlet applies preHandleRender callbacks in case of action exception as well
 * UrlPathHelper cuts off trailing servlet-path slashes for root mappings (on WebSphere)
-* introduced support for HttpEntity wrapper, containing headers in addition to body value
+* introduced support for HttpEntity and ResponseEntity wrappers, adding context to body values
 * fixed DataBinder's conversion error handling for direct field access with ConversionService
 * @InitBinder methods support all applicable Spring 3.0 parameter annotations as well
 * @ExceptionHandler methods consistently receive original exception as thrown by user methods
