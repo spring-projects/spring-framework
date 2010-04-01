@@ -16,9 +16,6 @@
 
 package org.springframework.http;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -39,10 +36,13 @@ public class HttpEntityTests {
 	}
 	
 	@Test
-	public void contentType() {
-		MediaType contentType = MediaType.TEXT_PLAIN;
-		HttpEntity<String> entity = new HttpEntity<String>("foo", contentType);
-		assertEquals(contentType, entity.getHeaders().getContentType());
+	public void httpHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		String body = "foo";
+		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
+		assertEquals(body, entity.getBody());
+		assertEquals(MediaType.TEXT_PLAIN, entity.getHeaders().getContentType());
 		assertEquals("text/plain", entity.getHeaders().getFirst("Content-Type"));
 	}
 
@@ -50,18 +50,24 @@ public class HttpEntityTests {
 	public void multiValueMap() {
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.set("Content-Type", "text/plain");
-		HttpEntity<String> entity = new HttpEntity<String>("foo", map);
+		String body = "foo";
+		HttpEntity<String> entity = new HttpEntity<String>(body, map);
+		assertEquals(body, entity.getBody());
 		assertEquals(MediaType.TEXT_PLAIN, entity.getHeaders().getContentType());
 		assertEquals("text/plain", entity.getHeaders().getFirst("Content-Type"));
 	}
-
+	
 	@Test
-	public void map() {
-		Map<String, String> map = new LinkedHashMap<String, String>();
-		map.put("Content-Type", "text/plain");
-		HttpEntity<String> entity = new HttpEntity<String>("foo", map);
+	public void responseEntity() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		String body = "foo";
+		ResponseEntity<String> entity = new ResponseEntity<String>(body, headers, HttpStatus.OK);
+		assertEquals(body, entity.getBody());
 		assertEquals(MediaType.TEXT_PLAIN, entity.getHeaders().getContentType());
 		assertEquals("text/plain", entity.getHeaders().getFirst("Content-Type"));
+		assertEquals("text/plain", entity.getHeaders().getFirst("Content-Type"));
+
 	}
 
 }

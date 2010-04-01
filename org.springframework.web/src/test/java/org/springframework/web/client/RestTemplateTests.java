@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
@@ -194,14 +195,16 @@ public class RestTemplateTests {
 		expect(converter.canRead(String.class, textPlain)).andReturn(true);
 		String expected = "Hello World";
 		expect(converter.read(String.class, response)).andReturn(expected);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
 
-		HttpEntity<String> result = template.getForEntity("http://example.com", String.class);
+		ResponseEntity<String> result = template.getForEntity("http://example.com", String.class);
 		assertEquals("Invalid GET result", expected, result.getBody());
 		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
 		assertEquals("Invalid Content-Type header", textPlain, result.getHeaders().getContentType());
+		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
 		verifyMocks();
 	}
@@ -265,7 +268,9 @@ public class RestTemplateTests {
 
 		replayMocks();
 
-		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, contentType);
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(contentType);
+		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
 
 		URI result = template.postForLocation("http://example.com", entity);
 		assertEquals("Invalid POST result", expected, result);
@@ -291,7 +296,9 @@ public class RestTemplateTests {
 
 		replayMocks();
 
-		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, Collections.singletonMap("MyHeader", "MyValue"));
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.set("MyHeader", "MyValue");
+		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
 
 		URI result = template.postForLocation("http://example.com", entity);
 		assertEquals("Invalid POST result", expected, result);
@@ -387,14 +394,16 @@ public class RestTemplateTests {
 		Integer expected = 42;
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
 
-		HttpEntity<Integer> result = template.postForEntity("http://example.com", request, Integer.class);
+		ResponseEntity<Integer> result = template.postForEntity("http://example.com", request, Integer.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
 		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
 		verifyMocks();
 	}
@@ -439,13 +448,15 @@ public class RestTemplateTests {
 		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(null);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
-		HttpEntity<Integer> result = template.postForEntity("http://example.com", null, Integer.class);
+		ResponseEntity<Integer> result = template.postForEntity("http://example.com", null, Integer.class);
 		assertFalse("Invalid POST result", result.hasBody());
 		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
 		assertEquals("Invalid content length", 0, requestHeaders.getContentLength());
+		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
 		verifyMocks();
 	}
@@ -557,16 +568,20 @@ public class RestTemplateTests {
 		Integer expected = 42;
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
 
-		HttpEntity<String> requestEntity = new HttpEntity<String>(body, Collections.singletonMap("MyHeader", "MyValue"));
-		HttpEntity<Integer> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, Integer.class);
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.set("MyHeader", "MyValue");
+		HttpEntity<String> requestEntity = new HttpEntity<String>(body, entityHeaders);
+		ResponseEntity<Integer> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, Integer.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
 		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
 		assertEquals("Invalid custom header", "MyValue", requestHeaders.getFirst("MyHeader"));
+		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
 		verifyMocks();
 	}

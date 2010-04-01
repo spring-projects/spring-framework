@@ -1154,7 +1154,8 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
-              <para>A <classname>HttpEntity&lt;?&gt;</classname>} object
+              <para>A <classname>HttpEntity&lt;?&gt;</classname> or
+              <classname>ResponseEntity&lt;?&gt;</classname> object
               to access to the Servlet reponse HTTP headers and contents. The entity body will
               be converted to the response stream using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
@@ -1328,24 +1329,25 @@ public String helloWorld()  {
         <para>The <classname>HttpEntity</classname> is similar to
         <interfacename>@RequestBody</interfacename> and
         <interfacename>@ResponseBody</interfacename>. Besides getting
-        access to the request and response body, the <classname>HttpEntity</classname>
+        access to the request and response body, <classname>HttpEntity</classname>
+        (and the response-specific subclass <classname>ResponseEntity</classname>)
         also allows access to the request and response headers, like so:</para>
 
         <programlisting language="java">@RequestMapping("/something")
-public HttpEntity&lt;String&gt; handle(HttpEntity&lt;byte[]&gt; requestEntity) throws UnsupportedEncodingException {
+public ResponseEntity&lt;String&gt; handle(HttpEntity&lt;byte[]&gt; requestEntity) throws UnsupportedEncodingException {
   String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader"));
   byte[] requestBody = requestEntity.getBody();
   // do something with request header and body
 
   HttpHeaders responseHeaders = new HttpHeaders();
   responseHeaders.set("MyResponseHeader", "MyValue");
-  return new HttpEntity&lt;String&gt;("Hello World", responseHeaders);
+  return new ResponseEntity&lt;String&gt;("Hello World", responseHeaders, HttpStatus.CREATED);
 }</programlisting>
 
         <para>The above example gets the value of the "MyRequestHeader" request
         header, and reads the body as a byte array. It adds the "MyResponseHeader"
-        to the response, and writes <literal>Hello World</literal> to the response
-        stream.</para>
+        to the response, writes <literal>Hello World</literal> to the response
+        stream, and sets the response status code to 201 (Created).</para>
 
         <para>As with <interfacename>@RequestBody</interfacename> and
         <interfacename>@ResponseBody</interfacename>, Spring

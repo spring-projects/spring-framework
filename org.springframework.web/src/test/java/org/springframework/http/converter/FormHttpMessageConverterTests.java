@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
@@ -109,7 +110,9 @@ public class FormHttpMessageConverterTests {
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
 		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
-		HttpEntity<Source> entity = new HttpEntity<Source>(xml, MediaType.TEXT_XML);
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(MediaType.TEXT_XML);
+		HttpEntity<Source> entity = new HttpEntity<Source>(xml, entityHeaders);
 		parts.add("xml", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();

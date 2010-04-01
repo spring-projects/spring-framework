@@ -151,7 +151,8 @@ import java.lang.annotation.Target;
  * to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
- * <li>A {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} object
+ * <li>A {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
+ * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
  * to access to the Servlet reponse HTTP headers and contents. The entity body will
  * be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message

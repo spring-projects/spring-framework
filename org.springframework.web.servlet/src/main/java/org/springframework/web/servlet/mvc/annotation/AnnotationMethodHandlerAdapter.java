@@ -61,12 +61,14 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
@@ -895,6 +897,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
 			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
+			if (responseEntity instanceof ResponseEntity && outputMessage instanceof ServerHttpResponse) {
+				((ServerHttpResponse)outputMessage).setStatusCode(((ResponseEntity) responseEntity).getStatusCode());
+			}
 			HttpHeaders entityHeaders = responseEntity.getHeaders();
 			if (!entityHeaders.isEmpty()) {
 				outputMessage.getHeaders().putAll(entityHeaders);

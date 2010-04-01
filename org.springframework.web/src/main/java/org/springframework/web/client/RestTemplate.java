@@ -29,6 +29,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
@@ -212,26 +213,26 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
 	}
 
-	public <T> HttpEntity<T> getForEntity(String url, Class<T> responseType, Object... urlVariables)
+	public <T> ResponseEntity<T> getForEntity(String url, Class<T> responseType, Object... urlVariables)
 			throws RestClientException {
 		AcceptHeaderRequestCallback requestCallback = new AcceptHeaderRequestCallback(responseType);
-		HttpEntityResponseExtractor<T> responseExtractor =
-				new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor =
+				new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
 	}
 
-	public <T> HttpEntity<T> getForEntity(String url, Class<T> responseType, Map<String, ?> urlVariables)
+	public <T> ResponseEntity<T> getForEntity(String url, Class<T> responseType, Map<String, ?> urlVariables)
 			throws RestClientException {
 		AcceptHeaderRequestCallback requestCallback = new AcceptHeaderRequestCallback(responseType);
-		HttpEntityResponseExtractor<T> responseExtractor =
-				new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor =
+				new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
 	}
 
-	public <T> HttpEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException {
+	public <T> ResponseEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException {
 		AcceptHeaderRequestCallback requestCallback = new AcceptHeaderRequestCallback(responseType);
-		HttpEntityResponseExtractor<T> responseExtractor =
-				new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor =
+				new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
 	}
 
@@ -293,11 +294,11 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor);
 	}
 
-	public <T> HttpEntity<T> postForEntity(String url, Object request, Class<T> responseType, Object... uriVariables)
+	public <T> ResponseEntity<T> postForEntity(String url, Object request, Class<T> responseType, Object... uriVariables)
 			throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(request, responseType);
-		HttpEntityResponseExtractor<T> responseExtractor =
-				new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor =
+				new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
@@ -307,15 +308,15 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 										   Map<String, ?> uriVariables)
 			throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(request, responseType);
-		HttpEntityResponseExtractor<T> responseExtractor =
-				new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor =
+				new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <T> HttpEntity<T> postForEntity(URI url, Object request, Class<T> responseType) throws RestClientException {
+	public <T> ResponseEntity<T> postForEntity(URI url, Object request, Class<T> responseType) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(request, responseType);
-		HttpEntityResponseExtractor<T> responseExtractor =
-				new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor =
+				new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor);
 	}
 
@@ -369,24 +370,24 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 
 	// exchange
 
-	public <T> HttpEntity<T> exchange(String url, HttpMethod method,
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
-		HttpEntityResponseExtractor<T> responseExtractor = new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <T> HttpEntity<T> exchange(String url, HttpMethod method,
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
-		HttpEntityResponseExtractor<T> responseExtractor = new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <T> HttpEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity, 
+	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity, 
 			Class<T> responseType) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
-		HttpEntityResponseExtractor<T> responseExtractor = new HttpEntityResponseExtractor<T>(responseType);
+		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor);
 	}
 
@@ -601,11 +602,11 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 	/**
 	 * Response extractor for {@link HttpEntity}.
 	 */
-	private class HttpEntityResponseExtractor<T> implements ResponseExtractor<HttpEntity<T>> {
+	private class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<T>> {
 
 		private final HttpMessageConverterExtractor<T> delegate;
 
-		public HttpEntityResponseExtractor(Class<T> responseType) {
+		public ResponseEntityResponseExtractor(Class<T> responseType) {
 			if (responseType != null) {
 				this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 			} else {
@@ -613,13 +614,13 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 			}
 		}
 
-		public HttpEntity<T> extractData(ClientHttpResponse response) throws IOException {
+		public ResponseEntity<T> extractData(ClientHttpResponse response) throws IOException {
 			if (delegate != null) {
 				T body = delegate.extractData(response);
-				return new HttpEntity<T>(body, response.getHeaders());
+				return new ResponseEntity<T>(body, response.getHeaders(), response.getStatusCode());
 			}
 			else {
-				return new HttpEntity<T>(response.getHeaders());
+				return new ResponseEntity<T>(response.getHeaders(), response.getStatusCode());
 			}
 		}
 	}
