@@ -66,7 +66,6 @@ public class TypeUtilsTests {
 		assertTrue(TypeUtils.isAssignable(List.class, LinkedList.class));
 		assertFalse(TypeUtils.isAssignable(List.class, Collection.class));
 		assertFalse(TypeUtils.isAssignable(List.class, HashSet.class));
-		assertFalse(TypeUtils.isAssignable(null, Object.class));
 	}
 
 	@Test

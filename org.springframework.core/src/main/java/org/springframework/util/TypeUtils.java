@@ -42,13 +42,8 @@ public abstract class TypeUtils {
 	 * @return true if rhs is assignable to lhs
 	 */
 	public static boolean isAssignable(Type lhsType, Type rhsType) {
-		if (rhsType == null) {
-			return true;
-		}
-
-		if (lhsType == null) {
-			return false;
-		}
+		Assert.notNull(lhsType, "Left-hand side type must not be null");
+		Assert.notNull(rhsType, "Right-hand side type must not be null");
 
 		// all types are assignable to themselves and to class Object
 		if (lhsType.equals(rhsType) || lhsType.equals(Object.class)) {
@@ -175,13 +170,13 @@ public abstract class TypeUtils {
 
 			for (Type lBound : lUpperBounds) {
 				for (Type rBound : rUpperBounds) {
-					if (!isAssignable(lBound, rBound)) {
+					if (!isAssignableBound(lBound, rBound)) {
 						return false;
 					}
 				}
 
 				for (Type rBound : rLowerBounds) {
-					if (!isAssignable(lBound, rBound)) {
+					if (!isAssignableBound(lBound, rBound)) {
 						return false;
 					}
 				}
@@ -189,13 +184,13 @@ public abstract class TypeUtils {
 
 			for (Type lBound : lLowerBounds) {
 				for (Type rBound : rUpperBounds) {
-					if (!isAssignable(rBound, lBound)) {
+					if (!isAssignableBound(rBound, lBound)) {
 						return false;
 					}
 				}
 
 				for (Type rBound : rLowerBounds) {
-					if (!isAssignable(rBound, lBound)) {
+					if (!isAssignableBound(rBound, lBound)) {
 						return false;
 					}
 				}
@@ -203,13 +198,13 @@ public abstract class TypeUtils {
 		}
 		else {
 			for (Type lBound : lUpperBounds) {
-				if (!isAssignable(lBound, rhsType)) {
+				if (!isAssignableBound(lBound, rhsType)) {
 					return false;
 				}
 			}
 
 			for (Type lBound : lLowerBounds) {
-				if (!isAssignable(rhsType, lBound)) {
+				if (!isAssignableBound(rhsType, lBound)) {
 					return false;
 				}
 			}
@@ -217,4 +212,16 @@ public abstract class TypeUtils {
 
 		return true;
 	}
+	
+	public static boolean isAssignableBound(Type lhsType, Type rhsType) {
+		if (rhsType == null) {
+			return true;
+		}
+
+		if (lhsType == null) {
+			return false;
+		}
+		return isAssignable(lhsType, rhsType);
+	}
+
 }
