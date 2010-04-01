@@ -28,11 +28,14 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
 
 /**
- * {@link FactoryBean} implementation that takes a list of location strings and creates a sorted array 
- * of {@link Resource} instances.
+ * {@link FactoryBean} implementation that takes a list of location Strings
+ * and creates a sorted array of {@link Resource} instances.
+ *
  * @author Dave Syer
  * @author Juergen Hoeller
  * @author Christian Dupuis
@@ -42,45 +45,48 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 	
 	private final List<String> locations;
 
-	private ResourceLoader resourceLoader;
+	private ResourcePatternResolver resourcePatternResolver;
+
 
 	public SortedResourcesFactoryBean(List<String> locations) {
 		this.locations = locations;
-		setSingleton(true);
+		this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
 	}
+
+	public SortedResourcesFactoryBean(ResourceLoader resourceLoader, List<String> locations) {
+		this.locations = locations;
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+	}
+
+
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+	}
+
 
 	@Override
 	public Class<? extends Resource[]> getObjectType() {
 		return Resource[].class;
 	}
 
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
-
 	@Override
 	protected Resource[] createInstance() throws Exception {
 		List<Resource> scripts = new ArrayList<Resource>();
-		for (String location : locations) {
-			if (resourceLoader instanceof ResourcePatternResolver) {
-				List<Resource> resources = new ArrayList<Resource>(Arrays
-						.asList(((ResourcePatternResolver) resourceLoader).getResources(location)));
-				Collections.sort(resources, new Comparator<Resource>() {
-					public int compare(Resource r1, Resource r2) {
-						try {
-							return r1.getURL().toString().compareTo(r2.getURL().toString());
-						}
-						catch (IOException ex) {
-							return 0;
-						}
+		for (String location : this.locations) {
+			List<Resource> resources = new ArrayList<Resource>(
+					Arrays.asList(this.resourcePatternResolver.getResources(location)));
+			Collections.sort(resources, new Comparator<Resource>() {
+				public int compare(Resource r1, Resource r2) {
+					try {
+						return r1.getURL().toString().compareTo(r2.getURL().toString());
 					}
-				});
-				for (Resource resource : resources) {
-					scripts.add(resource);
+					catch (IOException ex) {
+						return 0;
+					}
 				}
-			}
-			else {
-				scripts.add(resourceLoader.getResource(location));
+			});
+			for (Resource resource : resources) {
+				scripts.add(resource);
 			}
 		}
 		return scripts.toArray(new Resource[scripts.size()]);
