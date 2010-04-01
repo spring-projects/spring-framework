@@ -15,7 +15,7 @@ Import-Template:
  javax.servlet.jsp.jstl.*;version="[1.1.0, 2.0.0)";resolution:=optional,
  javax.xml.*;version="0";resolution:=optional,
  jxl.*;version="[2.6.6, 3.0.0)";resolution:=optional,
- net.sf.jasperreports.*;version="[2.0.5, 3.0.0)";resolution:=optional,
+ net.sf.jasperreports.*;version="[2.0.5, 4.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)";resolution:=optional,
  org.apache.poi.*;version="[3.0.2.FINAL, 4.0.0)";resolution:=optional,
  org.apache.tiles.*;version="[2.1.2, 3.0.0)";resolution:=optional,
