@@ -250,9 +250,7 @@ public class DefaultPersistenceUnitManager
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourcePatternResolver = (resourceLoader != null ?
-				ResourcePatternUtils.getResourcePatternResolver(resourceLoader) :
-				new PathMatchingResourcePatternResolver());
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 
