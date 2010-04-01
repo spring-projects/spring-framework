@@ -21,6 +21,24 @@ import org.springframework.util.MultiValueMap;
 /**
  * Extension of {@link HttpEntity} that adds a {@link HttpStatus} status code.
  *
+ * <p>Returned by {@link org.springframework.web.client.RestTemplate#getForEntity}:
+ * <pre class="code">
+ * ResponseEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
+ * String body = entity.getBody();
+ * MediaType contentType = entity.getHeaders().getContentType();
+ * HttpStatus statusCode = entity.getStatusCode();
+ * </pre>
+ * Can also be used in Spring MVC, as a return value from a @Controller method:
+ * <p>Can be used in Spring MVC, as a return value from a @Controller method:
+ * <pre class="code">
+ * &#64;RequestMapping("/handle")
+ * public ResponseEntity&lt;String&gt; handle() {
+ *   HttpHeaders responseHeaders = new HttpHeaders();
+ *   responseHeaders.set("MyResponseHeader", "MyValue");
+ *   return new ResponseEntity&lt;String&gt;("Hello World", responseHeaders, HttpStatus.CREATED);
+ * }
+ * </pre>
+ *
  * @author Arjen Poutsma
  * @since 3.0.2
  * @see #getStatusCode()

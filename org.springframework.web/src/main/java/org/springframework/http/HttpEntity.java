@@ -23,7 +23,9 @@ import org.springframework.util.MultiValueMap;
  *
  * <p>Typically used in combination with the {@link org.springframework.web.client.RestTemplate RestTemplate}, like so:
  * <pre class="code">
- * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;String&gt;(helloWorld, MediaType.TEXT_PLAIN);
+ * HttpHeaders headers = new HttpHeaders();
+ * headers.setContentType(MediaType.TEXT_PLAIN);
+ * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;String&gt;(helloWorld, headers);
  * URI location = template.postForLocation("http://example.com", entity);
  * </pre>
  * or
@@ -33,12 +35,12 @@ import org.springframework.util.MultiValueMap;
  * MediaType contentType = entity.getHeaders().getContentType();
  * </pre>
  * Can also be used in Spring MVC, as a return value from a @Controller method:
- * <pre>
+ * <pre class="code">
  * &#64;RequestMapping("/handle")
- * public HttpEntity&ltString&gt handle() {
+ * public HttpEntity&lt;String&gt; handle() {
  *   HttpHeaders responseHeaders = new HttpHeaders();
  *   responseHeaders.set("MyResponseHeader", "MyValue");
- *   return new HttpEntity<String>("Hello World", responseHeaders);
+ *   return new HttpEntity&lt;String&gt;("Hello World", responseHeaders);
  * }
  * </pre>
  *
