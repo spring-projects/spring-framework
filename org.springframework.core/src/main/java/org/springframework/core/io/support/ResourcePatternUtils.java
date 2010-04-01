@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public abstract class ResourcePatternUtils {
 	 * ResourcePatternResolver extension, or a PathMatchingResourcePatternResolver
 	 * built on the given ResourceLoader.
 	 * @param resourceLoader the ResourceLoader to build a pattern resolver for
-	 * (not <code>null</code>)
+	 * (may be <code>null</code> to indicate a default ResourceLoader)
 	 * @return the ResourcePatternResolver
 	 * @see PathMatchingResourcePatternResolver
 	 */
@@ -63,8 +63,11 @@ public abstract class ResourcePatternUtils {
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			return (ResourcePatternResolver) resourceLoader;
 		}
-		else {
+		else if (resourceLoader != null) {
 			return new PathMatchingResourcePatternResolver(resourceLoader);
+		}
+		else {
+			return new PathMatchingResourcePatternResolver();
 		}
 	}
 
