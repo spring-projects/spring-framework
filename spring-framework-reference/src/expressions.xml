@@ -1015,28 +1015,28 @@ List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]"
       <para>Expression templates allow a mixing of literal text with one or
       more evaluation blocks. Each evaluation block is delimited with prefix
       and suffix characters that you can define, a common choice is to use
-      <literal>${} </literal>as the delimiters. For example,</para>
+      <literal>#{ }</literal> as the delimiters. For example,</para>
 
       <programlisting language="java">String randomPhrase = 
-   parser.parseExpression("random number is ${T(java.lang.Math).random()}", 
-                          new TemplatedParserContext()).getValue(String.class);
+   parser.parseExpression("random number is #{T(java.lang.Math).random()}", 
+                          new TemplateParserContext()).getValue(String.class);
 
 // evaluates to "random number is 0.7038186818312008"</programlisting>
 
       <para>The string is evaluated by concatenating the literal text 'random
-      number is ' with the result of evaluating the expression inside the ${}
+      number is ' with the result of evaluating the expression inside the #{ }
       delimiter, in this case the result of calling that random() method. The
       second argument to the method <literal>parseExpression()</literal> is of
       the type <interfacename>ParserContext</interfacename>. The
       <interfacename>ParserContext</interfacename> interface is used to
       influence how the expression is parsed in order to support the
       expression templating functionality. The definition of
-      <classname>TemplatedParserContext</classname> is shown below.</para>
+      <classname>TemplateParserContext</classname> is shown below.</para>
 
-      <programlisting language="java">public class TemplatedParserContext implements ParserContext {
+      <programlisting language="java">public class TemplateParserContext implements ParserContext {
 
   public String getExpressionPrefix() {
-    return "${";
+    return "#{";
   }
 
   public String getExpressionSuffix() {
