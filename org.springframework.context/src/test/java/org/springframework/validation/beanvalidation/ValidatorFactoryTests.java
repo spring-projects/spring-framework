@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class ValidatorFactoryTests {
 
 
 	@NameAddressValid
-	private static class ValidPerson {
+	public static class ValidPerson {
 
 		@NotNull
 		private String name;
@@ -157,7 +157,7 @@ public class ValidatorFactoryTests {
 	}
 
 
-	private static class ValidAddress {
+	public static class ValidAddress {
 
 		@NotNull
 		private String street;
