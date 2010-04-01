@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core.type.classreading;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -37,18 +36,8 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 	private static final int MAX_ENTRIES = 256;
 
-	@SuppressWarnings("serial")
-	private static final <K, V> Map<K, V> createLRUCache() {
-		return new LinkedHashMap<K, V>(MAX_ENTRIES, 0.75f, true) {
-
-			@Override
-			protected boolean removeEldestEntry(Entry<K, V> eldest) {
-				return size() > MAX_ENTRIES;
-			}
-		};
-	}
-
 	private final Map<Resource, MetadataReader> classReaderCache = createLRUCache();
+
 
 	/**
 	 * Create a new CachingMetadataReaderFactory for the default class loader.
@@ -74,6 +63,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 		super(classLoader);
 	}
 
+
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		synchronized (this.classReaderCache) {
@@ -85,4 +75,16 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 			return metadataReader;
 		}
 	}
+
+
+	@SuppressWarnings("serial")
+	private static <K, V> Map<K, V> createLRUCache() {
+		return new LinkedHashMap<K, V>(MAX_ENTRIES, 0.75f, true) {
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+				return size() > MAX_ENTRIES;
+			}
+		};
+	}
+
 }
