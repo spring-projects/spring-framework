@@ -23,6 +23,7 @@ import java.util.Set;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Interface specifying a basic set of RESTful operations. Implemented by {@link RestTemplate}.
@@ -71,7 +72,7 @@ public interface RestOperations {
 
 	/**
 	 * Retrieve an entity by doing a GET on the specified URL.
-	 * The response is converted and stored in an {@link HttpEntity}.
+	 * The response is converted and stored in an {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -79,11 +80,11 @@ public interface RestOperations {
 	 * @return the entity
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> getForEntity(String url, Class<T> responseType, Object... uriVariables) throws RestClientException;
+	<T> ResponseEntity<T> getForEntity(String url, Class<T> responseType, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Retrieve a representation by doing a GET on the URI template.
-	 * The response is converted and stored in an {@link HttpEntity}.
+	 * The response is converted and stored in an {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given map.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -91,17 +92,17 @@ public interface RestOperations {
 	 * @return the converted object
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> getForEntity(String url, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
+	<T> ResponseEntity<T> getForEntity(String url, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Retrieve a representation by doing a GET on the URL .
-	 * The response is converted and stored in an {@link HttpEntity}.
+	 * The response is converted and stored in an {@link ResponseEntity}.
 	 * @param url the URL
 	 * @param responseType the type of the return value
 	 * @return the converted object
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException;
+	<T> ResponseEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException;
 
 	// HEAD
 
@@ -219,7 +220,7 @@ public interface RestOperations {
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template,
-	 * and returns the response as {@link HttpEntity}.
+	 * and returns the response as {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
@@ -230,7 +231,7 @@ public interface RestOperations {
 	 * @see HttpEntity
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> postForEntity(String url, Object request, Class<T> responseType, Object... uriVariables)
+	<T> ResponseEntity<T> postForEntity(String url, Object request, Class<T> responseType, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -251,7 +252,7 @@ public interface RestOperations {
 
 	/**
 	 * Create a new resource by POSTing the given object to the URL,
-	 * and returns the response as {@link HttpEntity}.
+	 * and returns the response as {@link ResponseEntity}.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
@@ -260,7 +261,7 @@ public interface RestOperations {
 	 * @see HttpEntity
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> postForEntity(URI url, Object request, Class<T> responseType) throws RestClientException;
+	<T> ResponseEntity<T> postForEntity(URI url, Object request, Class<T> responseType) throws RestClientException;
 
 	// PUT
 
@@ -354,7 +355,7 @@ public interface RestOperations {
 
 	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
-	 * returns the response as {@link HttpEntity}.
+	 * returns the response as {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -364,12 +365,12 @@ public interface RestOperations {
 	 * @return the response as entity
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+	<T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
 			Class<T> responseType, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
-	 * returns the response as {@link HttpEntity}.
+	 * returns the response as {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -379,12 +380,12 @@ public interface RestOperations {
 	 * @return the response as entity
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+	<T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
 			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and
-	 * returns the response as {@link HttpEntity}.
+	 * returns the response as {@link ResponseEntity}.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}
@@ -392,7 +393,7 @@ public interface RestOperations {
 	 * @return the response as entity
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+	<T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
 			Class<T> responseType) throws RestClientException;
 
 	// general execution

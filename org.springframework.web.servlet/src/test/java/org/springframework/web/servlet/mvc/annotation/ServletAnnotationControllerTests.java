@@ -75,6 +75,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -1201,7 +1202,7 @@ public class ServletAnnotationControllerTests {
 		request.addHeader("MyRequestHeader", "MyValue");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals(200, response.getStatus());
+		assertEquals(201, response.getStatus());
 		assertEquals(requestBody, response.getContentAsString());
 		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
 	}
@@ -2598,7 +2599,7 @@ public class ServletAnnotationControllerTests {
 	public static class HttpEntityController {
 
 		@RequestMapping("/handle")
-		public HttpEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
+		public ResponseEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
 			assertNotNull(requestEntity);
 			assertEquals("MyValue", requestEntity.getHeaders().getFirst("MyRequestHeader"));
 			String requestBody = new String(requestEntity.getBody(), "UTF-8");
@@ -2606,7 +2607,7 @@ public class ServletAnnotationControllerTests {
 
 			HttpHeaders responseHeaders = new HttpHeaders();
 			responseHeaders.set("MyResponseHeader", "MyValue");
-			return new HttpEntity<String>(requestBody, responseHeaders);
+			return new ResponseEntity<String>(requestBody, responseHeaders, HttpStatus.CREATED);
 		}
 	}
 

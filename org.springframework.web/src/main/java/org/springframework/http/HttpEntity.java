@@ -16,9 +16,6 @@
 
 package org.springframework.http;
 
-import java.util.Map;
-
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -34,6 +31,15 @@ import org.springframework.util.MultiValueMap;
  * HttpEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
  * String body = entity.getBody();
  * MediaType contentType = entity.getHeaders().getContentType();
+ * </pre>
+ * Can also be used in Spring MVC, as a return value from a @Controller method:
+ * <pre>
+ * &#64;RequestMapping("/handle")
+ * public HttpEntity&ltString&gt handle() {
+ *   HttpHeaders responseHeaders = new HttpHeaders();
+ *   responseHeaders.set("MyResponseHeader", "MyValue");
+ *   return new HttpEntity<String>("Hello World", responseHeaders);
+ * }
  * </pre>
  *
  * @author Arjen Poutsma
@@ -59,7 +65,7 @@ public class HttpEntity<T> {
 	 * Create a new, empty {@code HttpEntity}.
 	 */
 	private HttpEntity() {
-		this(null, (MultiValueMap<String, String>) null);
+		this(null, null);
 	}
 
 	/**
@@ -67,15 +73,7 @@ public class HttpEntity<T> {
 	 * @param body the entity body
 	 */
 	public HttpEntity(T body) {
-		this(body, (MultiValueMap<String, String>) null);
-	}
-
-	/**
-	 * Create a new {@code HttpEntity} with the given headers and no body.
-	 * @param headers the entity headers
-	 */
-	public HttpEntity(Map<String, String> headers) {
-		this(null, toMultiValueMap(headers));
+		this(body, null);
 	}
 
 	/**
@@ -84,24 +82,6 @@ public class HttpEntity<T> {
 	 */
 	public HttpEntity(MultiValueMap<String, String> headers) {
 		this(null, headers);
-	}
-
-	/**
-	 * Create a new {@code HttpEntity} with the given body and {@code Content-Type} header value.
-	 * @param body the entity body
-	 * @param contentType the value of the {@code Content-Type header}
-	 */
-	public HttpEntity(T body, MediaType contentType) {
-		this(body, toMultiValueMap(contentType));
-	}
-
-	/**
-	 * Create a new {@code HttpEntity} with the given body and headers.
-	 * @param body the entity body
-	 * @param headers the entity headers
-	 */
-	public HttpEntity(T body, Map<String, String> headers) {
-		this(body, toMultiValueMap(headers));
 	}
 
 	/**
@@ -138,29 +118,6 @@ public class HttpEntity<T> {
 	 */
 	public boolean hasBody() {
 		return (this.body != null);
-	}
-
-
-	private static MultiValueMap<String, String> toMultiValueMap(Map<String, String> map) {
-		if (map == null) {
-			return null;
-		}
-		else {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(map.size());
-			result.setAll(map);
-			return result;
-		}
-	}
-
-	private static MultiValueMap<String, String> toMultiValueMap(MediaType contentType) {
-		if (contentType == null) {
-			return null;
-		}
-		else {
-			HttpHeaders result = new HttpHeaders();
-			result.setContentType(contentType);
-			return result;
-		}
 	}
 
 }

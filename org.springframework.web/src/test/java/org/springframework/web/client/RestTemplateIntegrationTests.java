@@ -52,7 +52,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -109,10 +111,11 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void getEntity() {
-		HttpEntity<String> entity = template.getForEntity(URI + "/{method}", String.class, "get");
+		ResponseEntity<String> entity = template.getForEntity(URI + "/{method}", String.class, "get");
 		assertEquals("Invalid content", helloWorld, entity.getBody());
 		assertFalse("No headers", entity.getHeaders().isEmpty());
 		assertEquals("Invalid content-type", contentType, entity.getHeaders().getContentType());
+		assertEquals("Invalid status code", HttpStatus.OK, entity.getStatusCode());
 	}
 
 	@Test
@@ -129,7 +132,9 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void postForLocationEntity() throws URISyntaxException {
-		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
+		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
 		URI location = template.postForLocation(URI + "/{method}", entity, "post");
 		assertEquals("Invalid location", new URI(URI + "/post/1"), location);
 	}
@@ -183,7 +188,7 @@ public class RestTemplateIntegrationTests {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");
 		HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
-		HttpEntity<String> response =
+		ResponseEntity<String> response =
 				template.exchange(URI + "/{method}", HttpMethod.GET, requestEntity, String.class, "get");
 		assertEquals("Invalid content", helloWorld, response.getBody());
 	}
