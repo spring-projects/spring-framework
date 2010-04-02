@@ -3,18 +3,18 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.2 (2010-04-01)
+Changes in version 3.0.2 (2010-04-02)
 -------------------------------------
 
 * fixed cross-module version ranges in OSGi manifests
 * fixed contents of org.springframework.web.struts jar
 * upgraded to Hibernate Validator 4.0.2 and Jackson 1.4.2
-* restored compatibility with Servlet 2.4 containers on all VMs
 * compatibility with Hibernate 3.5 final (native and also as a JPA 2.0 provider)
 * compatibility with OpenJPA 2.0 (support for JPA 2.0 persistence.xml versioning)
 * compatibility with Hessian 4.0 (in terms of exception propagation)
 * compatibility with JasperReports 3.x (in terms of resource management)
-* PropertyEditor lookup fallback works on Google App Engine as well (e.g. for form tags)
+* restored full compatibility with Servlet 2.4 containers on all VMs
+* PropertyEditor lookup fallback works on Google App Engine as well
 * fixed TypeDescriptor/MethodParameter toString for all cases in debug log messages
 * widened AbstractFactoryBean's "getObjectType" signature to return any Class as well
 * BeanPostProcessors are allowed to return a null bean value in the middle of the chain
@@ -40,8 +40,8 @@ Changes in version 3.0.2 (2010-04-01)
 * introduced support for HttpEntity and ResponseEntity wrappers, adding context to body values
 * fixed DataBinder's conversion error handling for direct field access with ConversionService
 * @InitBinder methods support all applicable Spring 3.0 parameter annotations as well
-* @ExceptionHandler methods consistently receive original exception as thrown by user methods
 * fixed @RequestParam(required=false) regression for @InitBinder methods
+* @ExceptionHandler methods consistently receive original exception
 * fixed indexed property binding regression in form tag library
 * fixed @Configurable issue with null bean name
 
