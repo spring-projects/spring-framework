@@ -520,6 +520,10 @@ class TypeConverterDelegate {
 			Collection original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		boolean originalAllowed = requiredType.isInstance(original);
+		if (!originalAllowed && !Collection.class.isAssignableFrom(requiredType)) {
+			return original;
+		}
+
 		MethodParameter methodParam = typeDescriptor.getMethodParameter();
 		Class elementType = null;
 		if (methodParam != null) {
@@ -594,8 +598,14 @@ class TypeConverterDelegate {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map convertToTypedMap(Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
+	protected Map convertToTypedMap(
+			Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
+
 		boolean originalAllowed = requiredType.isInstance(original);
+		if (!originalAllowed && !Map.class.isAssignableFrom(requiredType)) {
+			return original;
+		}
+
 		Class keyType = null;
 		Class valueType = null;
 		MethodParameter methodParam = typeDescriptor.getMethodParameter();
