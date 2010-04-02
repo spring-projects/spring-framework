@@ -1307,6 +1307,7 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("something", response.getContentAsString());
 		assertEquals(201, response.getStatus());
+		assertEquals("It's alive!", response.getErrorMessage());
 	}
 
 	@Test
@@ -2382,7 +2383,7 @@ public class ServletAnnotationControllerTests {
 	public static class ResponseStatusController {
 
 		@RequestMapping("/something")
-		@ResponseStatus(HttpStatus.CREATED)
+		@ResponseStatus(value = HttpStatus.CREATED, reason = "It's alive!")
 		public void handle(Writer writer) throws IOException {
 			writer.write("something");
 		}
