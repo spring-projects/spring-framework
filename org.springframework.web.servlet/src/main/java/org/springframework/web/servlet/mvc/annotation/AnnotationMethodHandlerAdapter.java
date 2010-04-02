@@ -814,9 +814,17 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
 			if (responseStatusAnn != null) {
 				HttpStatus responseStatus = responseStatusAnn.value();
+				String reason = responseStatusAnn.reason();
+				if (!StringUtils.hasText(reason)) {
+					webRequest.getResponse().setStatus(responseStatus.value());
+				}
+				else {
+					webRequest.getResponse().sendError(responseStatus.value(), reason);
+				}
+
 				// to be picked up by the RedirectView
 				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, responseStatus);
-				webRequest.getResponse().setStatus(responseStatus.value());
+
 				responseArgumentUsed = true;
 			}
 
