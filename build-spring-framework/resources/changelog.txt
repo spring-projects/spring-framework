@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.3 (2010-04-27)
+-------------------------------------
+
+* clarified that Spring requires Jackson 1.3 or higher
+* specific detection of CGLIB subclasses in order to properly handle CGLIB interfaces
+
+
 Changes in version 3.0.2 (2010-04-02)
 -------------------------------------
 
