@@ -336,8 +336,17 @@ public class DefaultPersistenceUnitManager
 	 * @param persistenceUnitName the name of the desired persistence unit
 	 * @return the PersistenceUnitInfo in mutable form, or <code>null</code> if not available
 	 */
-	protected final PersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
-		return this.persistenceUnitInfos.get(persistenceUnitName);
+	protected final MutablePersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
+		PersistenceUnitInfo pui = this.persistenceUnitInfos.get(persistenceUnitName);
+		if (Proxy.isProxyClass(pui.getClass())) {
+			// JPA 2.0 PersistenceUnitInfo decorator with a SpringPersistenceUnitInfo as target
+			Jpa2PersistenceUnitInfoDecorator dec = (Jpa2PersistenceUnitInfoDecorator) Proxy.getInvocationHandler(pui);
+			return dec.getTarget();
+		}
+		else {
+			// Must be a raw JPA 1.0 SpringPersistenceUnitInfo instance
+			return (MutablePersistenceUnitInfo) pui;
+		}
 	}
 
 	/**
@@ -418,6 +427,10 @@ public class DefaultPersistenceUnitManager
 			catch (Exception ex) {
 				throw new IllegalStateException("JPA 2.0 API enum types not present", ex);
 			}
+		}
+
+		public final SpringPersistenceUnitInfo getTarget() {
+			return this.target;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
