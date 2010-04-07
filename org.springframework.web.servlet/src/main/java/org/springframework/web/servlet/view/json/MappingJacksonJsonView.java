@@ -104,6 +104,13 @@ public class MappingJacksonJsonView extends AbstractView {
 	}
 
 	/**
+	 * Returns the attributes in the model that should be rendered by this view.
+	 */
+	public Set<String> getRenderedAttributes() {
+		return renderedAttributes;
+	}
+
+	/**
 	 * Sets the attributes in the model that should be rendered by this view. When set, all other model attributes will be
 	 * ignored.
 	 */
