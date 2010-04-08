@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,8 @@ import java.util.List;
 public abstract class ReflectionUtils {
 
 	/**
-	 * Attempt to find a {@link Field field} on the supplied {@link Class} with
-	 * the supplied <code>name</code>. Searches all superclasses up to
-	 * {@link Object}.
+	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
+	 * supplied <code>name</code>. Searches all superclasses up to {@link Object}.
 	 * @param clazz the class to introspect
 	 * @param name the name of the field
 	 * @return the corresponding Field object, or <code>null</code> if not found
@@ -54,9 +53,9 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Attempt to find a {@link Field field} on the supplied {@link Class} with
-	 * the supplied <code>name</code> and/or {@link Class type}. Searches all
-	 * superclasses up to {@link Object}.
+	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
+	 * supplied <code>name</code> and/or {@link Class type}. Searches all superclasses
+	 * up to {@link Object}.
 	 * @param clazz the class to introspect
 	 * @param name the name of the field (may be <code>null</code> if type is specified)
 	 * @param type the type of the field (may be <code>null</code> if name is specified)
@@ -115,8 +114,8 @@ public abstract class ReflectionUtils {
 		}
 		catch (IllegalAccessException ex) {
 			handleReflectionException(ex);
-			throw new IllegalStateException("Unexpected reflection exception - " + ex.getClass().getName() + ": "
-					+ ex.getMessage());
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
 		}
 	}
 
@@ -382,8 +381,8 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.reflect.Field#setAccessible
 	 */
 	public static void makeAccessible(Field field) {
-		if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers())) 
-					&& !field.isAccessible()) {
+		if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
+				Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
 			field.setAccessible(true);
 		}
 	}
@@ -572,6 +571,7 @@ public abstract class ReflectionUtils {
 		boolean matches(Method method);
 	}
 
+
 	/**
 	 * Callback interface invoked on each field in the hierarchy.
 	 */
@@ -607,6 +607,7 @@ public abstract class ReflectionUtils {
 			return !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
 		}
 	};
+
 
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods.
