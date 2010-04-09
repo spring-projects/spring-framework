@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,6 @@ public class URIEditor extends PropertyEditorSupport {
 	/**
 	 * Create a new URIEditor, converting "classpath:" locations into
 	 * standard URIs (not trying to resolve them into physical resources).
-	 *
 	 * @param encode indicates whether Strings will be encoded or not
 	 */
 	public URIEditor(boolean encode) {
@@ -141,14 +140,16 @@ public class URIEditor extends PropertyEditorSupport {
 	 * @throws java.net.URISyntaxException if URI conversion failed
 	 */
 	protected URI createURI(String value) throws URISyntaxException {
-		int idx = value.indexOf(':');
-		if (encode && idx != -1) {
-			String scheme = value.substring(0, idx);
-			String ssp = value.substring(idx + 1);
-			return new URI(scheme, ssp, null);
+		int colonIndex = value.indexOf(':');
+		if (this.encode && colonIndex != -1) {
+			int fragmentIndex = value.indexOf('#', colonIndex + 1);
+			String scheme = value.substring(0, colonIndex);
+			String ssp = value.substring(colonIndex + 1, (fragmentIndex > 0 ? fragmentIndex : value.length()));
+			String fragment = (fragmentIndex > 0 ? value.substring(fragmentIndex + 1) : null);
+			return new URI(scheme, ssp, fragment);
 		}
 		else {
-			// not encoding or the value contains no scheme , fallback to default
+			// not encoding or the value contains no scheme - fallback to default
 			return new URI(value);
 		}
 	}

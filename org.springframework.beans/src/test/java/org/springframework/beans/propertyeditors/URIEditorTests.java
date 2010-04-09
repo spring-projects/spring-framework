@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,24 +30,33 @@ import org.springframework.util.ClassUtils;
  */
 public class URIEditorTests {
 
-	@Test
-	public void standardURI() throws Exception {
+	private void doTestURI(String uriSpec) {
 		PropertyEditor uriEditor = new URIEditor();
-		uriEditor.setAsText("mailto:juergen.hoeller@interface21.com");
+		uriEditor.setAsText(uriSpec);
 		Object value = uriEditor.getValue();
 		assertTrue(value instanceof URI);
 		URI uri = (URI) value;
-		assertEquals(uri.toString(), uriEditor.getAsText());
+		assertEquals(uriSpec, uri.toString());
+	}
+
+	@Test
+	public void standardURI() throws Exception {
+		doTestURI("mailto:juergen.hoeller@interface21.com");
+	}
+
+	@Test
+	public void withNonExistentResource() throws Exception {
+		doTestURI("gonna:/freak/in/the/morning/freak/in/the.evening");
 	}
 
 	@Test
 	public void standardURL() throws Exception {
-		PropertyEditor uriEditor = new URIEditor();
-		uriEditor.setAsText("http://www.springframework.org");
-		Object value = uriEditor.getValue();
-		assertTrue(value instanceof URI);
-		URI uri = (URI) value;
-		assertEquals(uri.toString(), uriEditor.getAsText());
+		doTestURI("http://www.springframework.org");
+	}
+
+	@Test
+	public void standardURLWithFragment() throws Exception {
+		doTestURI("http://www.springframework.org#1");
 	}
 
 	@Test
@@ -57,7 +66,7 @@ public class URIEditorTests {
 		Object value = uriEditor.getValue();
 		assertTrue(value instanceof URI);
 		URI uri = (URI) value;
-		assertEquals(uri.toString(), uriEditor.getAsText());
+		assertEquals("http://www.springframework.org", uri.toString());
 	}
 
 	@Test
@@ -93,16 +102,6 @@ public class URIEditorTests {
 		URI uri = (URI) value;
 		assertEquals(uri.toString(), uriEditor.getAsText());
 		assertTrue(uri.getScheme().startsWith("classpath"));
-	}
-
-	@Test
-	public void withNonExistentResource() throws Exception {
-		PropertyEditor uriEditor = new URIEditor();
-		uriEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
-		Object value = uriEditor.getValue();
-		assertTrue(value instanceof URI);
-		URI uri = (URI) value;
-		assertEquals(uri.toString(), uriEditor.getAsText());
 	}
 
 	@Test
