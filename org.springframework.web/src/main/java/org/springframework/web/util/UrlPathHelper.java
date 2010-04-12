@@ -40,6 +40,14 @@ import org.springframework.util.StringUtils;
  */
 public class UrlPathHelper {
 
+	/**
+	 * Special WebSphere request attribute, indicating the original request URI.
+	 * Preferable over the standard Servlet 2.4 forward attribute on WebSphere,
+	 * simply because we need the very first URI in the request forwarding chain.
+	 */
+	private static final String WEBSPHERE_URI_ATTRIBUTE = "com.ibm.websphere.servlet.uri_non_decoded";
+
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private boolean alwaysUseFullPath = false;
@@ -236,13 +244,14 @@ public class UrlPathHelper {
 	/**
 	 * Return the request URI for the given request. If this is a forwarded request,
 	 * correctly resolves to the request URI of the original request.
-	 * <p>Relies on the Servlet 2.4 'forward' attributes. These attributes may be set by
-	 * other components when running in a Servlet 2.3 environment.
 	 */
 	public String getOriginatingRequestUri(HttpServletRequest request) {
-		String uri = (String) request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
+		String uri = (String) request.getAttribute(WEBSPHERE_URI_ATTRIBUTE);
 		if (uri == null) {
-			uri = request.getRequestURI();
+			uri = (String) request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
+			if (uri == null) {
+				uri = request.getRequestURI();
+			}
 		}
 		return decodeAndCleanUriString(request, uri);
 	}
@@ -252,8 +261,6 @@ public class UrlPathHelper {
 	 * URL if called within a RequestDispatcher include.
 	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
-	 * <p>Relies on the Servlet 2.4 'forward' attributes. These attributes may be set by
-	 * other components when running in a Servlet 2.3 environment.
 	 * @param request current HTTP request
 	 * @return the context path
 	 */
