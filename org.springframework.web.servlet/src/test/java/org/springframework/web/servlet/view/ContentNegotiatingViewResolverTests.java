@@ -49,12 +49,22 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
-	public void getMediaTypeFromFilename() {
-		assertEquals("Invalid content type", new MediaType("text", "html"),
-				viewResolver.getMediaTypeFromFilename("test.html"));
+	public void getMediaTypeFromFilenameMediaTypes() {
 		viewResolver.setMediaTypes(Collections.singletonMap("HTML", "application/xhtml+xml"));
 		assertEquals("Invalid content type", new MediaType("application", "xhtml+xml"),
 				viewResolver.getMediaTypeFromFilename("test.html"));
+	}
+
+	@Test
+	public void getMediaTypeFromFilenameJaf() {
+		assertEquals("Invalid content type", new MediaType("text", "html"),
+				viewResolver.getMediaTypeFromFilename("test.html"));
+	}
+
+	@Test
+	public void getMediaTypeFromFilenameNoJaf() {
+		viewResolver.setUseJaf(false);
+		assertNull("Invalid content type", viewResolver.getMediaTypeFromFilename("test.html"));
 	}
 
 	@Test
