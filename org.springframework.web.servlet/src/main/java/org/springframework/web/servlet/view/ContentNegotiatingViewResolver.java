@@ -72,7 +72,8 @@ import org.springframework.web.util.WebUtils;
  * media type. The default name of the parameter is <code>format</code> and it can be configured using the
  * {@link #setParameterName(String) parameterName} property.</li>
  * <li>If there is no match in the {@link #setMediaTypes(Map) mediaTypes} property and if the Java Activation
- * Framework (JAF) is present on the class path, {@link FileTypeMap#getContentType(String)} is used instead.</li>
+ * Framework (JAF) is both {@linkplain #setUseJaf(boolean) enabled} and present on the class path,
+ * {@link FileTypeMap#getContentType(String)} is used instead.</li>
  * <li>If the previous steps did not result in a media type, and
  * {@link #setIgnoreAcceptHeader(boolean) ignoreAcceptHeader} is {@code false}, the request {@code Accept} header is
  * used.</li>
@@ -122,6 +123,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private boolean useNotAcceptableStatusCode = false;
 
 	private boolean ignoreAcceptHeader = false;
+
+	private boolean useJaf = true;
 
 	private ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
 
@@ -225,12 +228,21 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	}
 
 	/**
+	 * Indicates whether to use the Java Activation Framework to map from file extensions to media types.
+	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used.
+	 */
+	public void setUseJaf(boolean useJaf) {
+		this.useJaf = useJaf;
+	}
+
+	/**
 	 * Sets the view resolvers to be wrapped by this view resolver.
 	 * <p>If this property is not set, view resolvers will be detected automatically.
 	 */
 	public void setViewResolvers(List<ViewResolver> viewResolvers) {
 		this.viewResolvers = viewResolvers;
 	}
+
 
 	@Override
 	protected void initServletContext(ServletContext servletContext) {
@@ -324,7 +336,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 		extension = extension.toLowerCase(Locale.ENGLISH);
 		MediaType mediaType = this.mediaTypes.get(extension);
-		if (mediaType == null && jafPresent) {
+		if (mediaType == null && useJaf && jafPresent) {
 			mediaType = ActivationMediaTypeFactory.getMediaType(filename);
 			if (mediaType != null) {
 				this.mediaTypes.putIfAbsent(extension, mediaType);
