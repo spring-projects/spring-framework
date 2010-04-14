@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -1575,6 +1576,20 @@ public final class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test",
 				new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class.getName(), null, null));
 		lbf.preInstantiateSingletons();
+	}
+
+	@Test
+	public void testPrototypeStringCreatedRepeatedly() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition stringDef = new RootBeanDefinition(String.class);
+		stringDef.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		stringDef.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue("value"));
+		lbf.registerBeanDefinition("string", stringDef);
+		String val1 = lbf.getBean("string", String.class);
+		String val2 = lbf.getBean("string", String.class);
+		assertEquals("value", val1);
+		assertEquals("value", val2);
+		assertNotSame(val1, val2);
 	}
 
 	@Test

@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import static org.springframework.util.StringUtils.collectionToCommaDelimitedString;
-
 import java.beans.ConstructorProperties;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -44,9 +42,9 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -112,6 +110,7 @@ class ConstructorResolver {
 		this.beanFactory.initBeanWrapper(bw);
 
 		Constructor constructorToUse = null;
+		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
 		if (explicitArgs != null) {
@@ -179,7 +178,7 @@ class ConstructorResolver {
 							"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
 				}
 
-				ArgumentsHolder args;
+				ArgumentsHolder argsHolder;
 				if (resolvedValues != null) {
 					try {
 						String[] paramNames = null;
@@ -192,7 +191,7 @@ class ConstructorResolver {
 								paramNames = pnd.getParameterNames(candidate);
 							}
 						}
-						args = createArgumentArray(
+						argsHolder = createArgumentArray(
 								beanName, mbd, resolvedValues, bw, paramTypes, paramNames, candidate, autowiring);
 					}
 					catch (UnsatisfiedDependencyException ex) {
@@ -223,15 +222,16 @@ class ConstructorResolver {
 					if (paramTypes.length != explicitArgs.length) {
 						continue;
 					}
-					args = new ArgumentsHolder(explicitArgs);
+					argsHolder = new ArgumentsHolder(explicitArgs);
 				}
 
 				int typeDiffWeight = (mbd.isLenientConstructorResolution() ?
-						args.getTypeDifferenceWeight(paramTypes) : args.getAssignabilityWeight(paramTypes));
+						argsHolder.getTypeDifferenceWeight(paramTypes) : argsHolder.getAssignabilityWeight(paramTypes));
 				// Choose this constructor if it represents the closest match.
 				if (typeDiffWeight < minTypeDiffWeight) {
 					constructorToUse = candidate;
-					argsToUse = args.arguments;
+					argsHolderToUse = argsHolder;
+					argsToUse = argsHolder.arguments;
 					minTypeDiffWeight = typeDiffWeight;
 					ambiguousConstructors = null;
 				}
@@ -257,6 +257,7 @@ class ConstructorResolver {
 
 			if (explicitArgs == null) {
 				mbd.resolvedConstructorOrFactoryMethod = constructorToUse;
+				argsHolderToUse.storeCache(mbd);
 			}
 		}
 
@@ -274,8 +275,8 @@ class ConstructorResolver {
 				}, beanFactory.getAccessControlContext());
 			}
 			else {
-				beanInstance = beanFactory.getInstantiationStrategy().instantiate(
-						mbd, beanName, beanFactory, constructorToUse, argsToUse);
+				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
+						mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
 			
 			bw.setWrappedInstance(beanInstance);
@@ -365,6 +366,7 @@ class ConstructorResolver {
 		}
 
 		Method factoryMethodToUse = null;
+		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
 		if (explicitArgs != null) {
@@ -436,7 +438,7 @@ class ConstructorResolver {
 				Class[] paramTypes = candidate.getParameterTypes();
 
 				if (paramTypes.length >= minNrOfArgs) {
-					ArgumentsHolder args;
+					ArgumentsHolder argsHolder;
 
 					if (resolvedValues != null) {
 						// Resolved constructor arguments: type conversion and/or autowiring necessary.
@@ -446,7 +448,7 @@ class ConstructorResolver {
 							if (pnd != null) {
 								paramNames = pnd.getParameterNames(candidate);
 							}
-							args = createArgumentArray(
+							argsHolder = createArgumentArray(
 									beanName, mbd, resolvedValues, bw, paramTypes, paramNames, candidate, autowiring);
 						}
 						catch (UnsatisfiedDependencyException ex) {
@@ -478,15 +480,16 @@ class ConstructorResolver {
 						if (paramTypes.length != explicitArgs.length) {
 							continue;
 						}
-						args = new ArgumentsHolder(explicitArgs);
+						argsHolder = new ArgumentsHolder(explicitArgs);
 					}
 
 					int typeDiffWeight = (mbd.isLenientConstructorResolution() ?
-							args.getTypeDifferenceWeight(paramTypes) : args.getAssignabilityWeight(paramTypes));
+							argsHolder.getTypeDifferenceWeight(paramTypes) : argsHolder.getAssignabilityWeight(paramTypes));
 					// Choose this factory method if it represents the closest match.
 					if (typeDiffWeight < minTypeDiffWeight) {
 						factoryMethodToUse = candidate;
-						argsToUse = args.arguments;
+						argsHolderToUse = argsHolder;
+						argsToUse = argsHolder.arguments;
 						minTypeDiffWeight = typeDiffWeight;
 						ambiguousFactoryMethods = null;
 					}
@@ -536,6 +539,7 @@ class ConstructorResolver {
 
 			if (explicitArgs == null) {
 				mbd.resolvedConstructorOrFactoryMethod = factoryMethodToUse;
+				argsHolderToUse.storeCache(mbd);
 			}
 		}
 
@@ -642,7 +646,6 @@ class ConstructorResolver {
 		Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
 				new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
 		Set<String> autowiredBeanNames = new LinkedHashSet<String>(4);
-		boolean resolveNecessary = false;
 
 		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {
 			Class<?> paramType = paramTypes[paramIndex];
@@ -679,7 +682,7 @@ class ConstructorResolver {
 							args.preparedArguments[paramIndex] = convertedValue;
 						}
 						else {
-							resolveNecessary = true;
+							args.resolveNecessary = true;
 							args.preparedArguments[paramIndex] = sourceValue;
 						}
 					}
@@ -709,7 +712,7 @@ class ConstructorResolver {
 					args.rawArguments[paramIndex] = autowiredArgument;
 					args.arguments[paramIndex] = autowiredArgument;
 					args.preparedArguments[paramIndex] = new AutowiredArgumentMarker();
-					resolveNecessary = true;
+					args.resolveNecessary = true;
 				}
 				catch (BeansException ex) {
 					throw new UnsatisfiedDependencyException(
@@ -726,13 +729,6 @@ class ConstructorResolver {
 			}
 		}
 
-		if (resolveNecessary) {
-			mbd.preparedConstructorArguments = args.preparedArguments;
-		}
-		else {
-			mbd.resolvedConstructorArguments = args.arguments;
-		}
-		mbd.constructorArgumentsResolved = true;
 		return args;
 	}
 
@@ -801,6 +797,8 @@ class ConstructorResolver {
 
 		public Object preparedArguments[];
 
+		public boolean resolveNecessary = false;
+
 		public ArgumentsHolder(int size) {
 			this.rawArguments = new Object[size];
 			this.arguments = new Object[size];
@@ -835,6 +833,16 @@ class ConstructorResolver {
 				}
 			}
 			return Integer.MAX_VALUE - 1024;
+		}
+
+		public void storeCache(RootBeanDefinition mbd) {
+			if (this.resolveNecessary) {
+				mbd.preparedConstructorArguments = this.preparedArguments;
+			}
+			else {
+				mbd.resolvedConstructorArguments = this.arguments;
+			}
+			mbd.constructorArgumentsResolved = true;
 		}
 	}
 
