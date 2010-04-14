@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2010 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,7 @@ import org.springframework.beans.factory.BeanFactory;
  * @since 1.1
  */
 public interface InstantiationStrategy {
-	
+
 	/**
 	 * Return an instance of the bean with the given name in this factory.
 	 * @param beanDefinition the bean definition
@@ -43,9 +43,9 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation failed
 	 */
-	Object instantiate(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) throws BeansException;
-	
+	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner)
+			throws BeansException;
+
 	/**
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given constructor.
@@ -59,10 +59,9 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation failed
 	 */
-	Object instantiate(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Constructor ctor, Object[] args) throws BeansException;
-	
+	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+			Constructor<?> ctor, Object[] args) throws BeansException;
+
 	/**
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given factory method.
@@ -78,8 +77,7 @@ public interface InstantiationStrategy {
 	 * @return a bean instance for this bean definition
 	 * @throws BeansException if the instantiation failed
 	 */
-	Object instantiate(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+	Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Object factoryBean, Method factoryMethod, Object[] args) throws BeansException;
-	
+
 }

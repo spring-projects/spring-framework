@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,10 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
-	public Object instantiate(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
-
+	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
-			Constructor constructorToUse = (Constructor) beanDefinition.resolvedConstructorOrFactoryMethod;
+			Constructor<?> constructorToUse = (Constructor<?>) beanDefinition.resolvedConstructorOrFactoryMethod;
 			if (constructorToUse == null) {
 				final Class clazz = beanDefinition.getBeanClass();
 				if (clazz.isInterface()) {
@@ -60,7 +58,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 								return clazz.getDeclaredConstructor((Class[]) null);
 							}
 						});
-					} else {
+					}
+					else {
 						constructorToUse =	clazz.getDeclaredConstructor((Class[]) null);
 					}
 					beanDefinition.resolvedConstructorOrFactoryMethod = constructorToUse;
@@ -90,9 +89,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	public Object instantiate(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			final Constructor ctor, Object[] args) {
+	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+			final Constructor<?> ctor, Object[] args) {
 
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
 			if (System.getSecurityManager() != null) {
@@ -117,16 +115,14 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use the given constructor and parameters.
 	 */
-	protected Object instantiateWithMethodInjection(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
-			Constructor ctor, Object[] args) {
+	protected Object instantiateWithMethodInjection(RootBeanDefinition beanDefinition,
+			String beanName, BeanFactory owner, Constructor ctor, Object[] args) {
 
 		throw new UnsupportedOperationException(
 				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	public Object instantiate(
-			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Object factoryBean, final Method factoryMethod, Object[] args) {
 
 		try {
@@ -159,4 +155,5 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					"Factory method [" + factoryMethod + "] threw exception", ex.getTargetException());
 		}
 	}
+
 }
