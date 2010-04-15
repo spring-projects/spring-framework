@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags;
 import java.io.IOException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.el.VariableResolver;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.AccessException;
@@ -40,6 +41,7 @@ import org.springframework.web.util.TagUtils;
  * Supports the standard JSP evaluation context consisting of implicit variables and scoped attributes.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0.1
  */
 public class EvalTag extends HtmlEscapingAwareTag {
@@ -140,17 +142,21 @@ public class EvalTag extends HtmlEscapingAwareTag {
 	private static class JspPropertyAccessor implements PropertyAccessor {
 
 		private final PageContext pageContext;
-		
+
+		private final VariableResolver variableResolver;
+
 		public JspPropertyAccessor(PageContext pageContext) {
 			this.pageContext = pageContext;
+			this.variableResolver = pageContext.getVariableResolver();
 		}
-		
+
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return target == null && (resolveImplicitVariable(name) != null || this.pageContext.findAttribute(name) != null);
+			return (target == null && (resolveImplicitVariable(name) != null) ||
+					this.pageContext.findAttribute(name) != null);
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
@@ -170,8 +176,11 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 		
 		private Object resolveImplicitVariable(String name) throws AccessException {
+			if (this.variableResolver == null) {
+				return null;
+			}
 			try {
-				return this.pageContext.getVariableResolver().resolveVariable(name);
+				return this.variableResolver.resolveVariable(name);
 			}
 			catch (Exception ex) {
 				throw new AccessException(
