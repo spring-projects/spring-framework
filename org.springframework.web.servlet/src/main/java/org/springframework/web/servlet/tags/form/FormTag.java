@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,7 +315,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 
-
 	/**
 	 * Writes the opening part of the block	'<code>form</code>' tag and exposes
 	 * the form object name in the {@link javax.servlet.jsp.PageContext}.
@@ -329,7 +328,8 @@ public class FormTag extends AbstractHtmlElementTag {
 		tagWriter.startTag(FORM_TAG);
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
-		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
+		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE,
+				isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
 		writeOptionalAttribute(tagWriter, TARGET_ATTRIBUTE, getTarget());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
