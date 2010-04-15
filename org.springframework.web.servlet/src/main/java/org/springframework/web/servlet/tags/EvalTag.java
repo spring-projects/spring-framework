@@ -155,8 +155,8 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (target == null && (resolveImplicitVariable(name) != null) ||
-					this.pageContext.findAttribute(name) != null);
+			return (target == null &&
+					(resolveImplicitVariable(name) != null || this.pageContext.findAttribute(name) != null));
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {

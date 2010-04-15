@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags;
 
 import java.math.BigDecimal;
-
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.format.annotation.NumberFormat;
@@ -26,6 +25,9 @@ import org.springframework.format.support.FormattingConversionServiceFactoryBean
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockPageContext;
 
+/**
+ * @author Keith Donald
+ */
 public class EvalTagTests extends AbstractTagTests {
 
 	private EvalTag tag;
@@ -91,7 +93,7 @@ public class EvalTagTests extends AbstractTagTests {
 	}
 
 	// SPR-6923
-	public void testNestedPropertyWithAttribtueName() throws Exception {
+	public void testNestedPropertyWithAttributeName() throws Exception {
 		tag.setExpression("bean.bean");
 		tag.setVar("foo");
 		int action = tag.doStartTag();
@@ -100,6 +102,7 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_PAGE, action);
 		assertEquals("not the bean object", context.getAttribute("foo"));
 	}
+
 
 	public static class Bean {
 		
@@ -123,4 +126,5 @@ public class EvalTagTests extends AbstractTagTests {
 			return "function foo() { alert(\"hi\") }";
 		}
 	}
+
 }
