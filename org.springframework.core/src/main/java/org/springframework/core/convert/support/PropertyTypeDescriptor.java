@@ -26,6 +26,7 @@ import java.util.Map;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link TypeDescriptor} extension that exposes additional annotations
@@ -33,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * (getter/setter) and on the underlying field, if found.
  *
  * @author Juergen Hoeller
- * @since 3.0
+ * @since 3.0.2
  */
 public class PropertyTypeDescriptor extends TypeDescriptor {
 
@@ -74,12 +75,22 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 	public Annotation[] getAnnotations() {
 		Annotation[] anns = this.cachedAnnotations;
 		if (anns == null) {
-			Field underlyingField = ReflectionUtils.findField(
-					getMethodParameter().getMethod().getDeclaringClass(), this.propertyDescriptor.getName());
 			Map<Class, Annotation> annMap = new LinkedHashMap<Class, Annotation>();
-			if (underlyingField != null) {
-				for (Annotation ann : underlyingField.getAnnotations()) {
-					annMap.put(ann.annotationType(), ann);
+			String name = this.propertyDescriptor.getName();
+			if (StringUtils.hasLength(name)) {
+				Class clazz = getMethodParameter().getMethod().getDeclaringClass();
+				Field field = ReflectionUtils.findField(clazz, name);
+				if (field == null) {
+					// Same lenient fallback checking as in CachedIntrospectionResults...
+					field = ReflectionUtils.findField(clazz, name.substring(0, 1).toLowerCase() + name.substring(1));
+					if (field == null) {
+						field = ReflectionUtils.findField(clazz, name.substring(0, 1).toUpperCase() + name.substring(1));
+					}
+				}
+				if (field != null) {
+					for (Annotation ann : field.getAnnotations()) {
+						annMap.put(ann.annotationType(), ann);
+					}
 				}
 			}
 			Method writeMethod = this.propertyDescriptor.getWriteMethod();
