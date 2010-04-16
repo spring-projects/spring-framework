@@ -222,6 +222,12 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndCheckError("madeup", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
 				"org.springframework.expression.spel.testresources.Inventor");
 	}
+	
+	@Test
+	public void testPropertyField02_SPR7100() {
+		evaluate("_name", "Nikola Tesla", String.class);
+		evaluate("_name_", "Nikola Tesla", String.class);
+	}
 
 	@Test
 	public void testRogueTrailingDotCausesNPE_SPR6866() {
@@ -407,6 +413,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testIndexer03() {
 		evaluate("'christian'[8]", "n", String.class);
 	}
+	
 	
 	@Test
 	public void testIndexerError() {

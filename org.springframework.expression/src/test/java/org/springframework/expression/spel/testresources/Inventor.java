@@ -10,6 +10,8 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class Inventor {
 	private String name;
+	public String _name;
+	public String _name_;
 	public String publicName;
 	private PlaceOfBirth placeOfBirth;
 	private Date birthdate;
@@ -36,6 +38,8 @@ public class Inventor {
 	
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
+		this._name = name;
+		this._name_ = name;
 		this.birthdate = birthdate;
 		this.nationality = nationality;
 		this.arrayContainer = new ArrayContainer();
