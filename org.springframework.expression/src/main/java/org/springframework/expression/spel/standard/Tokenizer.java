@@ -57,6 +57,9 @@ class Tokenizer {
 				case '+':
 					pushCharToken(TokenKind.PLUS);
 					break;
+				case '_': // the other way to start an identifier
+					lexIdentifier();
+					break;
 				case '-':
 					pushCharToken(TokenKind.MINUS);
 					break;
