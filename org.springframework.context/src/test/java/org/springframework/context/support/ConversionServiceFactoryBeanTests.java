@@ -16,13 +16,13 @@
 
 package org.springframework.context.support;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
@@ -31,7 +31,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 
 /**
  * @author Keith Donald

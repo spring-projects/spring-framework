@@ -433,12 +433,10 @@ public class TypeDescriptor {
 		if (this == TypeDescriptor.NULL || targetType == TypeDescriptor.NULL) {
 			return true;
 		}
-		if (isCollection()) {
-			return targetType.isCollection() && getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());			
-		} else if (isMap()) {
-			return targetType.isMap() && getMapKeyTypeDescriptor().isAssignableTo(targetType.getMapKeyTypeDescriptor()) && getMapValueTypeDescriptor().isAssignableTo(targetType.getMapValueTypeDescriptor());
-		} else if (isArray()) {
-			return targetType.isArray() && getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());				
+		if (isCollection() && targetType.isCollection() || isArray() && targetType.isArray()) {
+			return targetType.getType().isAssignableFrom(getType()) && getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());			
+		} else if (isMap() && targetType.isMap()) {
+			return targetType.getType().isAssignableFrom(getType()) && getMapKeyTypeDescriptor().isAssignableTo(targetType.getMapKeyTypeDescriptor()) && getMapValueTypeDescriptor().isAssignableTo(targetType.getMapValueTypeDescriptor());
 		} else {
 			return targetType.getObjectType().isAssignableFrom(getObjectType());
 		}
