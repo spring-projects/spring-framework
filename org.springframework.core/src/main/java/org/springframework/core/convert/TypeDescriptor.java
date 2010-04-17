@@ -433,7 +433,15 @@ public class TypeDescriptor {
 		if (this == TypeDescriptor.NULL || targetType == TypeDescriptor.NULL) {
 			return true;
 		}
-		return targetType.getObjectType().isAssignableFrom(getObjectType());
+		if (isCollection()) {
+			return targetType.isCollection() && getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());			
+		} else if (isMap()) {
+			return targetType.isMap() && getMapKeyTypeDescriptor().isAssignableTo(targetType.getMapKeyTypeDescriptor()) && getMapValueTypeDescriptor().isAssignableTo(targetType.getMapValueTypeDescriptor());
+		} else if (isArray()) {
+			return targetType.isArray() && getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());				
+		} else {
+			return targetType.getObjectType().isAssignableFrom(getObjectType());
+		}
 	}
 
 	/**
