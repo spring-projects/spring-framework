@@ -95,14 +95,14 @@ public class ConversionServiceFactoryBeanTests {
 	public void conversionServiceInApplicationContext() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("conversionService.xml", getClass());
 		ResourceTestBean tb = ctx.getBean("resourceTestBean", ResourceTestBean.class);
-		//assertTrue(tb.getResource() instanceof ClassPathResource);
-		//assertTrue(tb.getResourceArray().length > 0);
-		//assertTrue(tb.getResourceArray()[0] instanceof ClassPathResource);
-		//assertTrue(tb.getResourceMap().size() == 1);
+		assertTrue(tb.getResource() instanceof ClassPathResource);
+		assertTrue(tb.getResourceArray().length > 0);
+		assertTrue(tb.getResourceArray()[0] instanceof ClassPathResource);
+		assertTrue(tb.getResourceMap().size() == 1);
 		assertTrue(tb.getResourceMap().get("key1") instanceof ClassPathResource);
-		//assertTrue(tb.getResourceArrayMap().size() == 1);
-		//assertTrue(tb.getResourceArrayMap().get("key1").length > 0);
-		//assertTrue(tb.getResourceArrayMap().get("key1")[0] instanceof ClassPathResource);
+		assertTrue(tb.getResourceArrayMap().size() == 1);
+		assertTrue(tb.getResourceArrayMap().get("key1").length > 0);
+		assertTrue(tb.getResourceArrayMap().get("key1")[0] instanceof ClassPathResource);
 	}
 
 
