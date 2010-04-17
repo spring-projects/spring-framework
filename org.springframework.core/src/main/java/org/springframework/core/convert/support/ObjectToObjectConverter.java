@@ -52,9 +52,6 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (sourceType.isAssignableTo(targetType)) {
-			return source;
-		}
 		Class<?> sourceClass = sourceType.getObjectType();
 		Class<?> targetClass = targetType.getObjectType();
 		Object target;

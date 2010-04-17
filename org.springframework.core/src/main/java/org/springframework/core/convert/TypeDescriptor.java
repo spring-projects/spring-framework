@@ -231,7 +231,7 @@ public class TypeDescriptor {
 	 * Is this type a {@link Collection} type?
 	 */
 	public boolean isCollection() {
-		return isTypeAssignableTo(Collection.class);
+		return Collection.class.isAssignableFrom(getType());
 	}
 
 	/**
@@ -258,6 +258,15 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Return the element type as a type descriptor; if the element type is null (cannot be determined), the type descriptor is derived from the element argument.
+	 * @param element the element
+	 * @return the element type descriptor
+	 */
+	public TypeDescriptor getElementTypeDescriptor(Object element) {
+		return getElementType() != null ? getElementTypeDescriptor() : TypeDescriptor.forObject(element);
+	}
+
+	/**
 	 * Create a copy of this type descriptor, preserving the context information
 	 * but exposing the specified element type (e.g. an array/collection element).
 	 * @param elementType the desired type to expose
@@ -280,7 +289,7 @@ public class TypeDescriptor {
 	 * Is this type a {@link Map} type?
 	 */
 	public boolean isMap() {
-		return isTypeAssignableTo(Map.class);
+		return Map.class.isAssignableFrom(getType());
 	}
 
 	/**
@@ -356,10 +365,28 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Return the map key type as a type descriptor; if the key type is null (cannot be determined), the type descriptor is derived from the key argument.
+	 * @param key the key
+	 * @return the map key type descriptor
+	 */
+	public TypeDescriptor getMapKeyTypeDescriptor(Object key) {
+		return getMapKeyType() != null ? getMapKeyTypeDescriptor() : TypeDescriptor.forObject(key);
+	}
+	
+	/**
 	 * Returns map value type as a type descriptor.
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
 		return TypeDescriptor.valueOf(getMapValueType());
+	}
+
+	/**
+	 * Return the map value type as a type descriptor; if the value type is null (cannot be determined), the type descriptor is derived from the value argument.
+	 * @param value the value
+	 * @return the map value type descriptor
+	 */
+	public TypeDescriptor getMapValueTypeDescriptor(Object value) {
+		return getMapValueType() != null ? getMapValueTypeDescriptor() : TypeDescriptor.forObject(value);
 	}
 
 	/**
@@ -374,8 +401,6 @@ public class TypeDescriptor {
 		}
 		else if (this.methodParameter != null) {
 			if (this.methodParameter.getParameterIndex() < 0) {
-				// The best we can do for return type metadata is to expose
-				// method-level annotations when the target is the return type...
 				return this.methodParameter.getMethodAnnotations();
 			}
 			else {
@@ -400,76 +425,22 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Returns true if an object this type can be assigned to a reference of given targetType.
+	 * Returns true if an object of this type can be assigned to a reference of given targetType.
 	 * @param targetType the target type
 	 * @return true if this type is assignable to the target
 	 */
 	public boolean isAssignableTo(TypeDescriptor targetType) {
-		Class targetClass = targetType.getType();
-		if (!isTypeAssignableTo(targetClass)) {
-			return false;
+		if (this == TypeDescriptor.NULL || targetType == TypeDescriptor.NULL) {
+			return true;
 		}
-		if (targetClass != null) {
-			if (Collection.class.isAssignableFrom(targetClass)) {
-				Class<?> elementType = targetType.getCollectionElementType();
-				if (elementType != null) {
-					Class<?> sourceElementType = getCollectionElementType();
-					if (sourceElementType == null || !elementType.isAssignableFrom(sourceElementType)) {
-						return false;
-					}
-				}
-			}
-			else if (Map.class.isAssignableFrom(targetClass)) {
-				Class<?> keyType = targetType.getMapKeyType();
-				if (keyType != null) {
-					Class<?> sourceKeyType = getMapKeyType();
-					if (sourceKeyType == null || !keyType.isAssignableFrom(sourceKeyType)) {
-						return false;
-					}
-				}
-				Class<?> valueType = targetType.getMapValueType();
-				if (valueType != null) {
-					Class<?> sourceValueType = getMapValueType();
-					if (sourceValueType == null || !valueType.isAssignableFrom(sourceValueType)) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
+		return targetType.getObjectType().isAssignableFrom(getObjectType());
 	}
 
 	/**
 	 * A textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages
 	 */
 	public String asString() {
-		StringBuffer stringValue = new StringBuffer();
-		if (isArray()) {
-			// TODO should properly handle multi dimensional arrays
-			stringValue.append(getArrayComponentType().getName()).append("[]");
-		}
-		else {
-			Class<?> clazz = getType();
-			if (clazz == null) {
-				return "null";
-			}
-			stringValue.append(clazz.getName());
-			if (isCollection()) {
-				Class<?> collectionType = getCollectionElementType();
-				if (collectionType != null) {
-					stringValue.append("<").append(collectionType.getName()).append(">");
-				}
-			}
-			else if (isMap()) {
-				Class<?> keyType = getMapKeyType();
-				Class<?> valType = getMapValueType();
-				if (keyType != null && valType != null) {
-					stringValue.append("<").append(keyType.getName()).append(",");
-					stringValue.append(valType).append(">");
-				}
-			}
-		}
-		return stringValue.toString();
+		return toString();
 	}
 
 	public String toString() {
@@ -484,6 +455,14 @@ public class TypeDescriptor {
 				builder.append("@").append(ann.annotationType().getName()).append(' ');
 			}
 			builder.append(ClassUtils.getQualifiedName(getType()));
+			if (isMap()) {
+				Class<?> mapKeyType = getMapKeyType();
+				Class<?> valueKeyType = getMapValueType();
+				builder.append("<").append(mapKeyType != null ? ClassUtils.getQualifiedName(mapKeyType) : "?").append(", ").append(valueKeyType != null ? ClassUtils.getQualifiedName(valueKeyType) : "?").append(">");
+			} else if (isCollection()) {
+				Class<?> elementType = getElementType();
+				builder.append("<").append(elementType != null ? ClassUtils.getQualifiedName(elementType) : "?").append(">");				
+			}
 			builder.append("]");
 			return builder.toString();
 		}
@@ -521,12 +500,6 @@ public class TypeDescriptor {
 		}
 	}
 
-	private boolean isTypeAssignableTo(Class<?> clazz) {
-		Class<?> type = getType();
-		return (type != null && (clazz == null || ClassUtils.isAssignable(clazz, type)));
-	}
-
-
 	// static factory methods
 
 	/**
@@ -551,7 +524,7 @@ public class TypeDescriptor {
 		if (object == null) {
 			return NULL;
 		}
-		else if (object instanceof Collection || object instanceof Map) {
+		else if (object instanceof Collection<?> || object instanceof Map<?, ?>) {
 			return new TypeDescriptor(object);
 		}
 		else {

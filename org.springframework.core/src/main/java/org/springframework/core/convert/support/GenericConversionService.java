@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -39,6 +40,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -113,29 +115,68 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		assertNotNull(sourceType, targetType);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Checking if I can convert " + sourceType + " to " + targetType);
+		}		
 		if (sourceType == TypeDescriptor.NULL || targetType == TypeDescriptor.NULL) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Yes, I can convert");
+			}
 			return true;
 		}
-		return getConverter(sourceType, targetType) != null;
+		GenericConverter converter = getConverter(sourceType, targetType);
+		if (converter != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Yes, I can convert");
+			}
+			return true;
+		} else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No, I cannot convert");
+			}
+			return false;
+		}
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		assertNotNull(sourceType, targetType);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Converting value of " + sourceType + " to " + targetType);
+			logger.debug("Converting value " + StylerUtils.style(source) + " of " + sourceType + " to " + targetType);
 		}
 		if (sourceType == TypeDescriptor.NULL) {
-			Assert.isTrue(source == null, "The source must be null if sourceType == TypeDescriptor.NULL");
-			return convertNullSource(sourceType, targetType);			
+			Assert.isTrue(source == null, "The value must be null if sourceType == TypeDescriptor.NULL");
+			Object result = convertNullSource(sourceType, targetType);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Converted to " + StylerUtils.style(result));
+			}			
+			return result;
 		}
 		if (targetType == TypeDescriptor.NULL) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Converted to null");
+			}
 			return null;
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter == null) {
-			throw new ConverterNotFoundException(sourceType, targetType);
+			ConverterNotFoundException e = new ConverterNotFoundException(sourceType, targetType);
+			if (logger.isDebugEnabled()) {
+				logger.debug(e);
+			}
+			throw e;
 		}
-		return ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
+		try {
+			Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Converted to " + StylerUtils.style(result));
+			}
+			return result;
+		} catch (ConversionException e) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(e);
+			}
+			throw e;
+		}
 	}
 
 	public String toString() {
@@ -197,7 +238,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	/**
 	 * Return the default converter if no converter is found for the given sourceType/targetType pair.
-	 * Returns a NO_OP Converter if the sourceType is assignalbe to the targetType.
+	 * Returns a NO_OP Converter if the sourceType is assignable to the targetType.
 	 * Returns <code>null</code> otherwise, indicating no suitable converter could be found.
 	 * Subclasses may override.
 	 * @param sourceType the source type to convert from
@@ -366,7 +407,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	private GenericConverter matchConverter(
 			MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
-
 		return (matchable != null ? matchable.matchConverter(sourceFieldType, targetFieldType) : null);
 	}
 
@@ -453,19 +493,19 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				for (ConditionalGenericConverter conditional : this.conditionalConverters) {
 					if (conditional.matches(sourceType, targetType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Conditional converter lookup [MATCHED] " + conditional);
+							logger.debug("[MATCHED] converter " + conditional);
 						}
 						return conditional;
 					}
 					else {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Conditional converter lookup [DID NOT MATCH] " + conditional);
+							logger.debug("[DID NOT MATCH] converter " + conditional);
 						}
 					}
 				}
 			}
 			if (this.defaultConverter != null && logger.isDebugEnabled()) {
-				logger.debug("Default converter lookup [MATCHED] " + this.defaultConverter);
+				logger.debug("[MATCHED] converter " + this.defaultConverter);
 			}			
 			return this.defaultConverter;
 		}

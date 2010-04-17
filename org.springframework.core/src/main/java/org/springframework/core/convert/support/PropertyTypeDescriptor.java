@@ -75,10 +75,10 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 	public Annotation[] getAnnotations() {
 		Annotation[] anns = this.cachedAnnotations;
 		if (anns == null) {
-			Map<Class, Annotation> annMap = new LinkedHashMap<Class, Annotation>();
+			Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
 			String name = this.propertyDescriptor.getName();
 			if (StringUtils.hasLength(name)) {
-				Class clazz = getMethodParameter().getMethod().getDeclaringClass();
+				Class<?> clazz = getMethodParameter().getMethod().getDeclaringClass();
 				Field field = ReflectionUtils.findField(clazz, name);
 				if (field == null) {
 					// Same lenient fallback checking as in CachedIntrospectionResults...

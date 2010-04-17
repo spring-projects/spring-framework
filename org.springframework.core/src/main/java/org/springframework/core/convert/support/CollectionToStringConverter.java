@@ -20,10 +20,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts a Collection to a comma-delimited String.
@@ -35,9 +34,9 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 
 	private static final String DELIMITER = ",";
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public CollectionToStringConverter(GenericConversionService conversionService) {
+	public CollectionToStringConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -51,48 +50,23 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
 		if (sourceCollection.size() == 0) {
 			return "";
 		}
-		else {
-			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-			if (sourceElementType == TypeDescriptor.NULL) {
-				sourceElementType = ConversionUtils.getElementType(sourceCollection);
+		StringBuilder string = new StringBuilder();
+		int i = 0;
+		for (Object sourceElement : sourceCollection) {
+			if (i > 0) {
+				string.append(DELIMITER);
 			}
-			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
-				StringBuilder string = new StringBuilder();
-				int i = 0;
-				for (Object element : sourceCollection) {
-					if (i > 0) {
-						string.append(DELIMITER);
-					}
-					string.append(element);
-					i++;
-				}
-				return string.toString();
-			}
-			else {
-				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
-				if (converter == null) {
-					throw new ConverterNotFoundException(sourceElementType, targetType);
-				}
-				StringBuilder string = new StringBuilder();
-				int i = 0;
-				for (Object sourceElement : sourceCollection) {
-					if (i > 0) {
-						string.append(DELIMITER);
-					}
-					Object targetElement = ConversionUtils.invokeConverter(
-							converter, sourceElement, sourceElementType, targetType);
-					string.append(targetElement);
-					i++;
-				}
-				return string.toString();
-			}
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType);
+			string.append(targetElement);
+			i++;
 		}
+		return string.toString();
 	}
 
 }

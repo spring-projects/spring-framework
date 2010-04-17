@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ObjectUtils;
@@ -35,7 +36,7 @@ final class ArrayToStringConverter implements ConditionalGenericConverter {
 
 	private final CollectionToStringConverter helperConverter;
 
-	public ArrayToStringConverter(GenericConversionService conversionService) {
+	public ArrayToStringConverter(ConversionService conversionService) {
 		this.helperConverter = new CollectionToStringConverter(conversionService);
 	}
 

@@ -21,10 +21,9 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts an Object to a single-element Collection containing the Object.
@@ -35,9 +34,9 @@ import org.springframework.core.convert.converter.GenericConverter;
  */
 final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public ObjectToCollectionConverter(GenericConversionService conversionService) {
+	public ObjectToCollectionConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -52,20 +51,11 @@ final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), 1);
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
-			target.add(source);
-		}
-		else {
-			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetElementType);
-			}
-			target.add(ConversionUtils.invokeConverter(converter, source, sourceType, targetElementType));
-		}
+		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementTypeDescriptor(source));
+		target.add(targetElement);
 		return target;
 	}
 

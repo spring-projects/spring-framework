@@ -20,10 +20,9 @@ import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.Set;
 
-import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -34,9 +33,9 @@ import org.springframework.util.StringUtils;
  */
 final class StringToArrayConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public StringToArrayConverter(GenericConversionService conversionService) {
+	public StringToArrayConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -50,25 +49,17 @@ final class StringToArrayConverter implements ConditionalGenericConverter {
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}		
 		String string = (String) source;
 		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (sourceType.isAssignableTo(targetElementType)) {
-			return fields;
+		Object target = Array.newInstance(targetType.getElementType(), fields.length);
+		for (int i = 0; i < fields.length; i++) {
+			Object sourceElement = fields[i];
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType, targetType.getElementTypeDescriptor());
+			Array.set(target, i, targetElement);
 		}
-		else {
-			Object target = Array.newInstance(targetElementType.getType(), fields.length);
-			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetElementType);
-			}
-			for (int i = 0; i < fields.length; i++) {
-				Array.set(target, i, ConversionUtils.invokeConverter(converter, fields[i], sourceType, targetElementType));
-			}
-			return target;
-		}
+		return target;
 	}
 
 }

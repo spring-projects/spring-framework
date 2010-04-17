@@ -21,10 +21,9 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,9 +34,9 @@ import org.springframework.util.StringUtils;
  */
 final class StringToCollectionConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public StringToCollectionConverter(GenericConversionService conversionService) {
+	public StringToCollectionConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -52,27 +51,14 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
 		String string = (String) source;
 		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
 		Collection target = CollectionFactory.createCollection(targetType.getType(), fields.length);
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
-			for (String field : fields) {
-				target.add(field);
-			}
-		}
-		else {
-			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetElementType);
-			}
-			for (String sourceElement : fields) {
-				Object targetElement = ConversionUtils.invokeConverter(
-						converter, sourceElement, sourceType, targetElementType);
-				target.add(targetElement);
-			}
+		for (String sourceElement : fields) {
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType, targetType.getElementTypeDescriptor(sourceElement));
+			target.add(targetElement);
 		}
 		return target;
 	}

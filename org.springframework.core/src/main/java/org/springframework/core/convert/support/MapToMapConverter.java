@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
@@ -37,9 +38,9 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  */
 final class MapToMapConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public MapToMapConverter(GenericConversionService conversionService) {
+	public MapToMapConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -55,57 +56,19 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
 		Map<?, ?> sourceMap = (Map<?, ?>) source;
-		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
-		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
-		if (targetKeyType == TypeDescriptor.NULL && targetValueType == TypeDescriptor.NULL) {
-			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
-		}
-		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
-		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
-		if (sourceKeyType == TypeDescriptor.NULL || sourceValueType == TypeDescriptor.NULL) {
-			TypeDescriptor[] sourceEntryTypes = ConversionUtils.getMapEntryTypes(sourceMap);
-			sourceKeyType = sourceEntryTypes[0];
-			sourceValueType = sourceEntryTypes[1];
-		}
-		if (sourceKeyType == TypeDescriptor.NULL && sourceValueType == TypeDescriptor.NULL) {
-			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
-		}
-		boolean keysCompatible = false;
-		if (sourceKeyType != TypeDescriptor.NULL && sourceKeyType.isAssignableTo(targetKeyType)) {
-			keysCompatible = true;
-		}
-		boolean valuesCompatible = false;
-		if (sourceValueType != TypeDescriptor.NULL && sourceValueType.isAssignableTo(targetValueType)) {
-			valuesCompatible = true;
-		}
-		if (keysCompatible && valuesCompatible) {
-			return compatibleMapWithoutEntryConversion(sourceMap, targetType);
-		}
 		Map targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
-		MapEntryConverter converter = new MapEntryConverter(sourceKeyType, sourceValueType, targetKeyType,
-				targetValueType, keysCompatible, valuesCompatible, this.conversionService);
 		for (Object entry : sourceMap.entrySet()) {
 			Map.Entry sourceMapEntry = (Map.Entry) entry;
-			Object targetKey = converter.convertKey(sourceMapEntry.getKey());
-			Object targetValue = converter.convertValue(sourceMapEntry.getValue());
+			Object sourceKey = sourceMapEntry.getKey();
+			Object sourceValue = sourceMapEntry.getValue();
+			Object targetKey = this.conversionService.convert(sourceKey, sourceType.getMapKeyTypeDescriptor(sourceKey), targetType.getMapKeyTypeDescriptor(sourceKey));
+			Object targetValue = this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor(sourceValue), targetType.getMapValueTypeDescriptor(sourceValue));
 			targetMap.put(targetKey, targetValue);
 		}
 		return targetMap;
 	}
-
-	@SuppressWarnings("unchecked")
-	private Map<?, ?> compatibleMapWithoutEntryConversion(Map<?, ?> source, TypeDescriptor targetType) {
-		if (targetType.getType().isInstance(source)) {
-			return source;
-		}
-		else {
-			Map target = CollectionFactory.createMap(targetType.getType(), source.size());
-			target.putAll(source);
-			return target;
-		}
-	}
-
+	
 }

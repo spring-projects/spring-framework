@@ -17,12 +17,14 @@
 package org.springframework.format.support;
 
 import java.lang.annotation.Annotation;
+import java.text.ParseException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
@@ -66,6 +68,9 @@ public class FormattingConversionService extends GenericConversionService implem
 		}		
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 
+		final Map<FieldFormatterKey, GenericConverter> cachedPrinters = new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
+		final Map<FieldFormatterKey, GenericConverter> cachedParsers = new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
+		
 		for (final Class<?> fieldType : fieldTypes) {
 			addConverter(new ConditionalGenericConverter() {
 				public Set<ConvertiblePair> getConvertibleTypes() {
@@ -75,8 +80,14 @@ public class FormattingConversionService extends GenericConversionService implem
 					return (sourceType.getAnnotation(annotationType) != null);
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-					Printer<?> printer = annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType), sourceType.getType());
-					return new PrinterConverter(fieldType, printer, FormattingConversionService.this).convert(source, sourceType, targetType);
+					FieldFormatterKey key = new FieldFormatterKey(sourceType.getAnnotation(annotationType), fieldType);
+					GenericConverter converter = cachedPrinters.get(key);
+					if (converter == null) {
+						Printer<?> printer = annotationFormatterFactory.getPrinter(key.getAnnotation(), key.getFieldType());
+						converter = new PrinterConverter(fieldType, printer, FormattingConversionService.this);
+						cachedPrinters.put(key, converter);
+					}
+					return converter.convert(source, sourceType, targetType);
 				}
 				public String toString() {
 					return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " +
@@ -91,8 +102,14 @@ public class FormattingConversionService extends GenericConversionService implem
 					return (targetType.getAnnotation(annotationType) != null);
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-					Parser<?> parser = annotationFormatterFactory.getParser(targetType.getAnnotation(annotationType), targetType.getType());
-					return new ParserConverter(fieldType, parser, FormattingConversionService.this).convert(source, sourceType, targetType);
+					FieldFormatterKey key = new FieldFormatterKey(targetType.getAnnotation(annotationType), fieldType);
+					GenericConverter converter = cachedParsers.get(key);
+					if (converter == null) {
+						Parser<?> printer = annotationFormatterFactory.getParser(key.getAnnotation(), key.getFieldType());
+						converter = new ParserConverter(fieldType, printer, FormattingConversionService.this);
+						cachedParsers.put(key, converter);
+					}
+					return converter.convert(source, sourceType, targetType);
 				}
 				public String toString() {
 					return String.class.getName() + " -> @" + annotationType.getName() + " " +
@@ -102,6 +119,38 @@ public class FormattingConversionService extends GenericConversionService implem
 		}
 	}
 
+	private static final class FieldFormatterKey {
+		
+		private final Annotation annotation;
+		
+		private final Class<?> fieldType;
+		
+		public FieldFormatterKey(Annotation annotation, Class<?> fieldType) {
+			this.annotation = annotation;
+			this.fieldType = fieldType;
+		}
+		
+		public Annotation getAnnotation() {
+			return annotation;
+		}
+		
+		public Class<?> getFieldType() {
+			return fieldType;
+		}
+		
+		public boolean equals(Object o) {
+			if (!(o instanceof FieldFormatterKey)) {
+				return false;
+			}
+			FieldFormatterKey key = (FieldFormatterKey) o;
+			return this.annotation.equals(key.annotation) && this.fieldType.equals(key.fieldType);
+		}
+		
+		public int hashCode() {
+			return this.annotation.hashCode() + this.fieldType.hashCode();
+		}
+		
+	}
 
 	private static class PrinterConverter implements GenericConverter {
 
@@ -142,7 +191,6 @@ public class FormattingConversionService extends GenericConversionService implem
 		}
 	}
 
-
 	private static class ParserConverter implements GenericConverter {
 
 		private Class<?> fieldType;
@@ -166,17 +214,17 @@ public class FormattingConversionService extends GenericConversionService implem
 			if (text == null || text.length() == 0) {
 				return null;
 			}
+			Object result;
 			try {
-				Object result = this.parser.parse(text, LocaleContextHolder.getLocale());
-				TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
-				if (!resultType.isAssignableTo(targetType)) {
-					result = this.conversionService.convert(result, resultType, targetType);
-				}
-				return result;
+				result = this.parser.parse(text, LocaleContextHolder.getLocale());
+			} catch (ParseException e) {
+				throw new IllegalArgumentException("Unable to parse '" + text + "'", e);
 			}
-			catch (Exception ex) {
-				throw new ConversionFailedException(sourceType, targetType, source, ex);
+			TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
+			if (!resultType.isAssignableTo(targetType)) {
+				result = this.conversionService.convert(result, resultType, targetType);
 			}
+			return result;
 		}
 
 		public String toString() {
