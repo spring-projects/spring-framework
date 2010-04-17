@@ -19,6 +19,7 @@ package org.springframework.core.convert.support;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
@@ -218,6 +219,12 @@ public class DefaultConversionTests {
 		assertEquals(Locale.ENGLISH, conversionService.convert("en", Locale.class));
 	}
 
+	@Test
+	public void testStringToString() {
+		String str = "test";
+		assertSame(str, conversionService.convert(str, String.class));
+	}
+	
 	@Test
 	public void testNumberToNumber() {
 		assertEquals(Long.valueOf(1), conversionService.convert(Integer.valueOf(1), Long.class));
