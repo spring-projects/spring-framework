@@ -39,19 +39,20 @@ public class GenericConversionServiceTests {
 	private GenericConversionService conversionService = new GenericConversionService();
 
 	@Test
-	public void executeConversion() {
+	public void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertEquals(new Integer(3), conversionService.convert("3", Integer.class));
 	}
 
 	@Test
-	public void executeConversionNullSource() {
+	public void convertNullSource() {
 		assertEquals(null, conversionService.convert(null, Integer.class));
 	}
 
 	@Test
-	public void executeCompatibleSource() {
+	public void convertAssignableSource() {
 		assertEquals(Boolean.FALSE, conversionService.convert(false, boolean.class));
+		assertEquals(Boolean.FALSE, conversionService.convert(false, Boolean.class));
 	}
 
 	@Test
@@ -189,7 +190,7 @@ public class GenericConversionServiceTests {
 		input.put("key", "value");
 		Object converted = conversionService.convert(input, TypeDescriptor.forObject(input),
 				new TypeDescriptor(getClass().getField("wildcardMap")));
-		assertSame(input, converted);
+		assertEquals(input, converted);
 	}
 
 

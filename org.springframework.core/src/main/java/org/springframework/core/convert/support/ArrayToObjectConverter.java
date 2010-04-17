@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ObjectUtils;
@@ -35,7 +36,7 @@ final class ArrayToObjectConverter implements ConditionalGenericConverter {
 
 	private final CollectionToObjectConverter helperConverter;
 
-	public ArrayToObjectConverter(GenericConversionService conversionService) {
+	public ArrayToObjectConverter(ConversionService conversionService) {
 		this.helperConverter = new CollectionToObjectConverter(conversionService);
 	}
 

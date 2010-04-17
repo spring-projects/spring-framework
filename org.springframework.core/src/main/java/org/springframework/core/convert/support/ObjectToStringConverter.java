@@ -43,10 +43,10 @@ final class ObjectToStringConverter implements ConditionalGenericConverter {
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
-		return Number.class.isAssignableFrom(sourceClass) || Boolean.class.equals(sourceClass) ||
-				Character.class.equals(sourceClass) || CharSequence.class.isAssignableFrom(sourceClass) ||
-				StringWriter.class.isAssignableFrom(sourceClass) || sourceClass.isEnum() ||
-				ObjectToObjectConverter.hasValueOfMethodOrConstructor(sourceClass, String.class);
+		return String.class.equals(sourceClass) || Number.class.isAssignableFrom(sourceClass) || 
+				Boolean.class.equals(sourceClass) || Character.class.equals(sourceClass) ||
+				CharSequence.class.isAssignableFrom(sourceClass) || StringWriter.class.isAssignableFrom(sourceClass) ||
+				sourceClass.isEnum() || ObjectToObjectConverter.hasValueOfMethodOrConstructor(sourceClass, String.class);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

@@ -20,10 +20,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts a Collection to an Object by returning the first collection element after converting it to the desired targetType.
@@ -33,9 +32,9 @@ import org.springframework.core.convert.converter.GenericConverter;
  */
 final class CollectionToObjectConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public CollectionToObjectConverter(GenericConversionService conversionService) {
+	public CollectionToObjectConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -49,29 +48,14 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
 		if (sourceCollection.size() == 0) {
 			return null;
 		}
-		else {
-			Object firstElement = sourceCollection.iterator().next();
-			TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-			if (sourceElementType == TypeDescriptor.NULL && firstElement != null) {
-				sourceElementType = TypeDescriptor.valueOf(firstElement.getClass());
-			}
-			if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetType)) {
-				return firstElement;
-			}
-			else {
-				GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetType);
-				if (converter == null) {
-					throw new ConverterNotFoundException(sourceElementType, targetType);
-				}
-				return ConversionUtils.invokeConverter(converter, firstElement, sourceElementType, targetType);
-			}
-		}
+		Object firstElement = sourceCollection.iterator().next();
+		return this.conversionService.convert(firstElement, sourceType.getElementTypeDescriptor(firstElement), targetType);
 	}
 
 }

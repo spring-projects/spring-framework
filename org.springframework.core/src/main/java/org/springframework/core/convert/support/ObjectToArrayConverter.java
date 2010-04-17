@@ -20,10 +20,9 @@ import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.Set;
 
-import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts an Object to a single-element Array containing the Object.
@@ -34,9 +33,9 @@ import org.springframework.core.convert.converter.GenericConverter;
  */
 final class ObjectToArrayConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public ObjectToArrayConverter(GenericConversionService conversionService) {
+	public ObjectToArrayConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -50,20 +49,11 @@ final class ObjectToArrayConverter implements ConditionalGenericConverter {
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		Object target = Array.newInstance(targetElementType.getType(), 1);
-		if (sourceType.isAssignableTo(targetElementType)) {
-			Array.set(target, 0, source);
-		}
-		else {
-			GenericConverter converter = this.conversionService.getConverter(sourceType, targetElementType);
-			if (converter == null) {
-				throw new ConverterNotFoundException(sourceType, targetElementType);
-			}
-			Array.set(target, 0, ConversionUtils.invokeConverter(converter, source, sourceType, targetElementType));
-		}
+		Object target = Array.newInstance(targetType.getElementType(), 1);
+		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementTypeDescriptor());
+		Array.set(target, 0, targetElement);
 		return target;
 	}
 

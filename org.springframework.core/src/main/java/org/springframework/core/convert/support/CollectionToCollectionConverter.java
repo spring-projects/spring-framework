@@ -21,10 +21,9 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from a Collection to another Collection.
@@ -39,9 +38,9 @@ import org.springframework.core.convert.converter.GenericConverter;
  */
 final class CollectionToCollectionConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public CollectionToCollectionConverter(GenericConversionService conversionService) {
+	public CollectionToCollectionConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -56,32 +55,13 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
-		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-		if (sourceElementType == TypeDescriptor.NULL) {
-			sourceElementType = ConversionUtils.getElementType(sourceCollection);
-		}
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (sourceElementType == TypeDescriptor.NULL || targetElementType == TypeDescriptor.NULL
-				|| sourceElementType.isAssignableTo(targetElementType)) {
-			if (sourceType.isAssignableTo(targetType)) {
-				return sourceCollection;
-			}
-			else {
-				Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-				target.addAll(sourceCollection);
-				return target;
-			}
-		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		GenericConverter converter = this.conversionService.getConverter(sourceElementType, targetElementType);
-		if (converter == null) {
-			throw new ConverterNotFoundException(sourceElementType, targetElementType);
-		}
-		for (Object element : sourceCollection) {
-			target.add(ConversionUtils.invokeConverter(converter, element, sourceElementType, targetElementType));
+		for (Object sourceElement : sourceCollection) {
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor(sourceElement));
+			target.add(targetElement);
 		}
 		return target;
 	}

@@ -56,7 +56,7 @@ public class TypeDescriptorTests {
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
 	}
-
+	
 	@Test
 	public void complexTypeDescriptors() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("arrayOfListOfString"));

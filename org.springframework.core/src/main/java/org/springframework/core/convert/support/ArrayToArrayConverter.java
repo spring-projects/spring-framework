@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.ObjectUtils;
@@ -35,7 +36,7 @@ final class ArrayToArrayConverter implements GenericConverter {
 
 	private final CollectionToArrayConverter helperConverter;
 
-	public ArrayToArrayConverter(GenericConversionService conversionService) {
+	public ArrayToArrayConverter(ConversionService conversionService) {
 		this.helperConverter = new CollectionToArrayConverter(conversionService);
 	}
 
