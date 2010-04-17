@@ -247,6 +247,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 */
 	protected GenericConverter getDefaultConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.isAssignableTo(targetType)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Matched default NO_OP_CONVERTER");
+			}
 			return NO_OP_CONVERTER;
 		}
 		else {
@@ -287,15 +290,15 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	}
 
 	private GenericConverter findConverterForClassPair(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Looking for Converter to convert from " + sourceType + " to " + targetType);
-		}
 		Class<?> sourceObjectType = sourceType.getObjectType();
 		if (sourceObjectType.isInterface()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(sourceObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
+				if (logger.isTraceEnabled()) {
+					logger.trace("Looking for converters indexed by sourceType [" + currentClass.getName() + "]");
+				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
 				if (converter != null) {
@@ -314,6 +317,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			classQueue.addFirst(sourceObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
+				if (logger.isTraceEnabled()) {
+					logger.trace("Looking for converters indexed by sourceType [" + currentClass.getName() + "]");
+				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
 				if (converter != null) {
@@ -356,6 +362,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			classQueue.addFirst(targetObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
+				if (logger.isTraceEnabled()) {
+					logger.trace("and indexed by targetType [" + currentClass.getName() + "]");
+				}
 				MatchableConverters matchable = converters.get(currentClass);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 				if (converter != null) {
@@ -366,6 +375,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 					classQueue.addFirst(ifc);
 				}
 			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("and indexed by [java.lang.Object]");
+			}							
 			return matchConverter(converters.get(Object.class), sourceType, targetType);
 		}
 		else {
@@ -373,6 +385,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			classQueue.addFirst(targetObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
+				if (logger.isTraceEnabled()) {
+					logger.trace("and indexed by targetType [" + currentClass.getName() + "]");
+				}				
 				MatchableConverters matchable = converters.get(currentClass);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 				if (converter != null) {
@@ -405,9 +420,14 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-	private GenericConverter matchConverter(
-			MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
-		return (matchable != null ? matchable.matchConverter(sourceFieldType, targetFieldType) : null);
+	private GenericConverter matchConverter(MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
+		if (matchable == null) {
+			return null;
+		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("Found matchable converters " + matchable);
+		}
+		return matchable.matchConverter(sourceFieldType, targetFieldType);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -491,21 +511,24 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		public GenericConverter matchConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (this.conditionalConverters != null) {
 				for (ConditionalGenericConverter conditional : this.conditionalConverters) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Matching " + conditional);
+					}
 					if (conditional.matches(sourceType, targetType)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("[MATCHED] converter " + conditional);
+							logger.debug("Matched converter " + conditional);
 						}
 						return conditional;
 					}
 					else {
 						if (logger.isDebugEnabled()) {
-							logger.debug("[DID NOT MATCH] converter " + conditional);
+							logger.debug("Did not match converter " + conditional);
 						}
 					}
 				}
 			}
 			if (this.defaultConverter != null && logger.isDebugEnabled()) {
-				logger.debug("[MATCHED] converter " + this.defaultConverter);
+				logger.debug("Matched converter " + this.defaultConverter);
 			}			
 			return this.defaultConverter;
 		}
