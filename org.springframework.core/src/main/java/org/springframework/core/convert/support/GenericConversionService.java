@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,11 +66,23 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	};
 
+	private static final GenericConverter NO_MATCH = new GenericConverter() {
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			throw new UnsupportedOperationException();
+		}
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			throw new UnsupportedOperationException();
+		}
+		public String toString() {
+			return "null";
+		}
+	};
 
 	private final Map<Class<?>, Map<Class<?>, MatchableConverters>> converters =
 			new HashMap<Class<?>, Map<Class<?>, MatchableConverters>>(36);
 
-
+	private final Map<ConverterCacheKey, GenericConverter> converterCache = new ConcurrentHashMap<ConverterCacheKey, GenericConverter>();
+	
 	// implementing ConverterRegistry
 
 	public void addConverter(GenericConverter converter) {
@@ -219,20 +232,45 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	/**
 	 * Hook method to lookup the converter for a given sourceType/targetType pair.
-	 * First queries this ConversionService's converter map.
-	 * <p>Returns <code>null</code> if this ConversionService simply cannot convert
-	 * between sourceType and targetType. Subclasses may override.
+	 * First queries this ConversionService's converter cache.
+	 * On a cache miss, then performs an exhaustive search for a matching converter.
+	 * If no converter matches, returns the default converter.
+	 * Subclasses may override.
 	 * @param sourceType the source type to convert from
 	 * @param targetType the target type to convert to
 	 * @return the generic converter that will perform the conversion, or <code>null</code> if no suitable converter was found
+	 * @see #getDefaultConverter(TypeDescriptor, TypeDescriptor)
 	 */
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		GenericConverter converter = findConverterForClassPair(sourceType, targetType);
+		ConverterCacheKey key = new ConverterCacheKey(sourceType, targetType);
+		GenericConverter converter = converterCache.get(key);
 		if (converter != null) {
-			return converter;
-		}
-		else {
-			return getDefaultConverter(sourceType, targetType);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Matched cached converter " + converter);
+			}
+			return converter != NO_MATCH ? converter : null; 
+		} else {			
+			converter = findConverterForClassPair(sourceType, targetType);
+			if (converter != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Caching under " + key);
+				}
+				converterCache.put(key, converter);
+				return converter;
+			}
+			converter = getDefaultConverter(sourceType, targetType);
+			if (converter != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Caching under " + key);
+				}
+				converterCache.put(key, converter);
+				return converter;				
+			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("Caching NO_MATCH under " + key);
+			}
+			converterCache.put(key, NO_MATCH);
+			return null;
 		}
 	}
 
@@ -297,7 +335,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
-					logger.trace("Looking for converters indexed by sourceType [" + currentClass.getName() + "]");
+					logger.trace("Searching for converters indexed by sourceType [" + currentClass.getName() + "]");
 				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
@@ -318,7 +356,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
-					logger.trace("Looking for converters indexed by sourceType [" + currentClass.getName() + "]");
+					logger.trace("Searching for converters indexed by sourceType [" + currentClass.getName() + "]");
 				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
@@ -550,6 +588,34 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			else {
 				return this.defaultConverter.toString();
 			}
+		}
+	}
+	
+	private static class ConverterCacheKey {
+
+		private TypeDescriptor sourceType;
+		
+		private TypeDescriptor targetType;
+		
+		public ConverterCacheKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			this.sourceType = sourceType;
+			this.targetType = targetType;
+		}
+		
+		public boolean equals(Object o) {
+			if (!(o instanceof ConverterCacheKey)) {
+				return false;
+			}
+			ConverterCacheKey key = (ConverterCacheKey) o;
+			return sourceType.equals(key.sourceType) && targetType.equals(key.targetType);
+		}
+		
+		public int hashCode() {
+			return sourceType.hashCode() + targetType.hashCode();
+		}
+		
+		public String toString() {
+			return "[ConverterCacheKey sourceType = " + sourceType + ", targetType = " + targetType + "]";
 		}
 	}
 
