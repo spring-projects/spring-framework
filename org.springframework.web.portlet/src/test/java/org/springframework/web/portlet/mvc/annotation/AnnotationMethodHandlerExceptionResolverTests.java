@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.web.portlet.mvc.annotation;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
-
+import java.net.SocketException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
@@ -26,8 +27,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.mock.web.portlet.MockPortletRequest;
-import org.springframework.mock.web.portlet.MockPortletResponse;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.stereotype.Controller;
@@ -35,7 +34,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.portlet.ModelAndView;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ */
 public class AnnotationMethodHandlerExceptionResolverTests {
 
 	private AnnotationMethodHandlerExceptionResolver exceptionResolver;
@@ -43,6 +45,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	private MockRenderRequest request;
 
 	private MockRenderResponse response;
+
 
 	@Before
 	public void setUp() {
@@ -52,12 +55,39 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void simple() {
+	public void simpleWithIOException() {
+		IOException ex = new IOException();
+		SimpleController controller = new SimpleController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "X:IOException", mav.getViewName());
+	}
+
+	@Test
+	public void simpleWithSocketException() {
+		SocketException ex = new SocketException();
+		SimpleController controller = new SimpleController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "Y:SocketException", mav.getViewName());
+	}
+
+	@Test
+	public void simpleWithFileNotFoundException() {
+		FileNotFoundException ex = new FileNotFoundException();
+		SimpleController controller = new SimpleController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "X:FileNotFoundException", mav.getViewName());
+	}
+
+	@Test
+	public void simpleWithBindException() {
 		BindException ex = new BindException();
 		SimpleController controller = new SimpleController();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
 		assertNotNull("No ModelAndView returned", mav);
-		assertEquals("Invalid view name returned", "BindException", mav.getViewName());
+		assertEquals("Invalid view name returned", "Y:BindException", mav.getViewName());
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -67,17 +97,18 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		exceptionResolver.resolveException(request, response, controller, ex);
 	}
 
+
 	@Controller
 	private static class SimpleController {
 
 		@ExceptionHandler(IOException.class)
 		public String handleIOException(IOException ex, PortletRequest request) {
-			return ClassUtils.getShortName(ex.getClass());
+			return "X:" + ClassUtils.getShortName(ex.getClass());
 		}
 
-		@ExceptionHandler(BindException.class)
-		public String handleBindException(Exception ex, PortletResponse response) {
-			return ClassUtils.getShortName(ex.getClass());
+		@ExceptionHandler(SocketException.class)
+		public String handleSocketException(Exception ex, PortletResponse response) {
+			return "Y:" + ClassUtils.getShortName(ex.getClass());
 		}
 
 		@ExceptionHandler(IllegalArgumentException.class)
@@ -87,12 +118,12 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 
 	}
 
+
 	@Controller
 	private static class AmbiguousController {
 
 		@ExceptionHandler({BindException.class, IllegalArgumentException.class})
-		public String handle1(Exception ex, PortletRequest request, PortletResponse response)
-				throws IOException {
+		public String handle1(Exception ex, PortletRequest request, PortletResponse response) {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 
@@ -102,4 +133,5 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		}
 
 	}
+
 }
