@@ -16,11 +16,16 @@
 
 package org.springframework.core.convert;
 
-import java.util.List;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
 
 /**
@@ -66,4 +71,32 @@ public class TypeDescriptorTests {
 		assertEquals("[TypeDescriptor java.util.List[]]",typeDescriptor.asString());
 	}
 	
+	@Test
+	public void testEquals() throws Exception {
+		TypeDescriptor t1 = TypeDescriptor.valueOf(String.class);
+		TypeDescriptor t2 = TypeDescriptor.valueOf(String.class);
+		TypeDescriptor t3 = TypeDescriptor.valueOf(Date.class);
+		TypeDescriptor t4 = TypeDescriptor.valueOf(Date.class);
+		TypeDescriptor t5 = TypeDescriptor.valueOf(List.class);
+		TypeDescriptor t6 = TypeDescriptor.valueOf(List.class);
+		TypeDescriptor t7 = TypeDescriptor.valueOf(Map.class);
+		TypeDescriptor t8 = TypeDescriptor.valueOf(Map.class);
+		assertEquals(t1, t2);
+		assertEquals(t3, t4);
+		assertEquals(t5, t6);
+		assertEquals(t7, t8);
+		
+		TypeDescriptor t9 = new TypeDescriptor(getClass().getField("listField"));
+		TypeDescriptor t10 = new TypeDescriptor(getClass().getField("listField"));
+		assertEquals(t9, t10);
+
+		TypeDescriptor t11 = new TypeDescriptor(getClass().getField("mapField"));
+		TypeDescriptor t12 = new TypeDescriptor(getClass().getField("mapField"));
+		assertEquals(t11, t12);
+	}
+	
+	public List<Integer> listField = new ArrayList<Integer>();
+	
+	public Map<String, Integer> mapField = new HashMap<String, Integer>();
+
 }

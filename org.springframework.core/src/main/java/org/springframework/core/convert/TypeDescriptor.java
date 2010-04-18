@@ -26,6 +26,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Context about a type to convert to.
@@ -37,7 +38,7 @@ import org.springframework.util.ClassUtils;
  */
 public class TypeDescriptor {
 
-	/** Constant defining an 'unknown' TypeDescriptor */
+	/** Constant defining an 'unknown type' TypeDescriptor */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
 	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
@@ -72,9 +73,6 @@ public class TypeDescriptor {
 	private Field field;
 
 	private Object value;
-
-	private Annotation[] cachedFieldAnnotations;
-
 
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
@@ -153,7 +151,7 @@ public class TypeDescriptor {
 		TypeDescriptor desc = typeDescriptorCache.get(type);
 		return (desc != null ? desc : new TypeDescriptor(type));
 	}
-	
+
 	/**
 	 * Return the wrapped MethodParameter, if any.
 	 * <p>Note: Either MethodParameter or Field is available.
@@ -370,10 +368,7 @@ public class TypeDescriptor {
 	 */
 	public Annotation[] getAnnotations() {
 		if (this.field != null) {
-			if (this.cachedFieldAnnotations == null) {
-				this.cachedFieldAnnotations = this.field.getAnnotations();
-			}
-			return this.cachedFieldAnnotations;
+			return this.field.getAnnotations();
 		}
 		else if (this.methodParameter != null) {
 			if (this.methodParameter.getParameterIndex() < 0) {
@@ -436,6 +431,32 @@ public class TypeDescriptor {
 			return new TypeDescriptor(this.field, elementType);
 		} else { 
 			return TypeDescriptor.valueOf(elementType);
+		}
+	}
+
+	public boolean equals(Object obj) {
+		if (!(obj instanceof TypeDescriptor)) {
+			return false;
+		}
+		TypeDescriptor td = (TypeDescriptor) obj;
+		boolean annotatedTypeEquals = getType().equals(td.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), td.getAnnotations());
+		if (isCollection()) {
+			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(), td.getElementType());
+		} else if (isMap()) { 
+			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(), td.getMapKeyType()) && ObjectUtils.nullSafeEquals(getMapValueType(), td.getMapValueType());
+		} else {
+			return annotatedTypeEquals; 
+		}
+	}
+	
+	public int hashCode() {
+		int annotatedTypeHash = getType().hashCode() + ObjectUtils.nullSafeHashCode(getAnnotations());
+		if (isCollection()) {
+			return annotatedTypeHash + ObjectUtils.nullSafeHashCode(getElementType()); 
+		} else if (isMap()) {
+			return annotatedTypeHash + ObjectUtils.nullSafeHashCode(getMapKeyType()) + ObjectUtils.nullSafeHashCode(getMapValueType());
+		} else {
+			return annotatedTypeHash;
 		}
 	}
 	
