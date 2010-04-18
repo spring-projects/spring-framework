@@ -27,7 +27,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -75,6 +75,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * <p>This exception resolver is enabled by default in the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
@@ -114,8 +115,8 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 
 	@Override
-	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+	protected ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
 		if (handler != null) {
 			Method handlerMethod = findBestExceptionHandlerMethod(handler, ex);
@@ -171,7 +172,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 		});
 
-		return getBestMatchingMethod(thrownException, resolverMethods);
+		return getBestMatchingMethod(resolverMethods, thrownException);
 	}
 
 	/**
@@ -204,15 +205,13 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	/**
 	 * Returns the best matching method. Uses the {@link DepthComparator}.
 	 */
-	private Method getBestMatchingMethod(Exception thrownException,
-			Map<Class<? extends Throwable>, Method> resolverMethods) {
+	private Method getBestMatchingMethod(
+			Map<Class<? extends Throwable>, Method> resolverMethods, Exception thrownException) {
 
 		if (!resolverMethods.isEmpty()) {
-			List<Class<? extends Throwable>> handledExceptions =
-					new ArrayList<Class<? extends Throwable>>(resolverMethods.keySet());
-			Collections.sort(handledExceptions, new DepthComparator(thrownException));
-			Class<? extends Throwable> bestMatchMethod = handledExceptions.get(0);
-			return resolverMethods.get(bestMatchMethod);
+			Class<? extends Throwable> closestMatch =
+					ExceptionDepthComparator.findClosestMatch(resolverMethods.keySet(), thrownException);
+			return resolverMethods.get(closestMatch);
 		}
 		else {
 			return null;
@@ -408,38 +407,6 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 					acceptedMediaTypes);
 		}
 		return null;
-	}
-
-
-	/**
-	 * Comparator capable of sorting exceptions based on their depth from the thrown exception type.
-	 */
-	private static class DepthComparator implements Comparator<Class<? extends Throwable>> {
-
-		private final Class<? extends Throwable> handlerExceptionType;
-
-		private DepthComparator(Exception handlerException) {
-			this.handlerExceptionType = handlerException.getClass();
-		}
-
-		public int compare(Class<? extends Throwable> o1, Class<? extends Throwable> o2) {
-			int depth1 = getDepth(o1, 0);
-			int depth2 = getDepth(o2, 0);
-
-			return depth2 - depth1;
-		}
-
-		private int getDepth(Class exceptionType, int depth) {
-			if (exceptionType.equals(handlerExceptionType)) {
-				// Found it!
-				return depth;
-			}
-			// If we've gone as far as we can go and haven't found it...
-			if (Throwable.class.equals(exceptionType)) {
-				return -1;
-			}
-			return getDepth(exceptionType.getSuperclass(), depth + 1);
-		}
 	}
 
 }

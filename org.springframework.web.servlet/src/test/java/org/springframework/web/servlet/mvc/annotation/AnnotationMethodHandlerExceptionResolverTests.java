@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Writer;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.BindException;
+import java.net.SocketException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,12 +35,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 public class AnnotationMethodHandlerExceptionResolverTests {
 
@@ -47,6 +50,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
+
 
 	@Before
 	public void setUp() {
@@ -57,15 +61,45 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void simple() {
+	public void simpleWithIOException() {
+		IOException ex = new IOException();
+		SimpleController controller = new SimpleController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "X:IOException", mav.getViewName());
+		assertEquals("Invalid status code returned", 500, response.getStatus());
+	}
+
+	@Test
+	public void simpleWithSocketException() {
+		SocketException ex = new SocketException();
+		SimpleController controller = new SimpleController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "Y:SocketException", mav.getViewName());
+		assertEquals("Invalid status code returned", 406, response.getStatus());
+	}
+
+	@Test
+	public void simpleWithFileNotFoundException() {
+		FileNotFoundException ex = new FileNotFoundException();
+		SimpleController controller = new SimpleController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "X:FileNotFoundException", mav.getViewName());
+		assertEquals("Invalid status code returned", 500, response.getStatus());
+	}
+
+	@Test
+	public void simpleWithBindException() {
 		BindException ex = new BindException();
 		SimpleController controller = new SimpleController();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
 		assertNotNull("No ModelAndView returned", mav);
-		assertEquals("Invalid view name returned", "BindException", mav.getViewName());
+		assertEquals("Invalid view name returned", "Y:BindException", mav.getViewName());
 		assertEquals("Invalid status code returned", 406, response.getStatus());
 	}
-	
+
 	@Test
 	public void inherited()	{
 		IOException ex = new IOException();
@@ -104,36 +138,38 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertEquals("Invalid response written", "IllegalArgumentException", response.getContentAsString());
 	}
 
+
 	@Controller
 	private static class SimpleController {
 
 		@ExceptionHandler(IOException.class)
 		@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 		public String handleIOException(IOException ex, HttpServletRequest request) {
-			return ClassUtils.getShortName(ex.getClass());
+			return "X:" + ClassUtils.getShortName(ex.getClass());
 		}
 
-		@ExceptionHandler(BindException.class)
+		@ExceptionHandler(SocketException.class)
 		@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-		public String handleBindException(Exception ex, HttpServletResponse response) {
-			return ClassUtils.getShortName(ex.getClass());
+		public String handleSocketException(Exception ex, HttpServletResponse response) {
+			return "Y:" + ClassUtils.getShortName(ex.getClass());
 		}
 
 		@ExceptionHandler(IllegalArgumentException.class)
 		public String handleIllegalArgumentException(Exception ex) {
 			return ClassUtils.getShortName(ex.getClass());
 		}
-
 	}
 
+
 	@Controller
-	private static class InheritedController extends SimpleController
-	{
+	private static class InheritedController extends SimpleController {
+
 		@Override
 		public String handleIOException(IOException ex, HttpServletRequest request)	{
 			return "GenericError";
 		}
 	}
+
 
 	@Controller
 	private static class AmbiguousController {
@@ -148,8 +184,8 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		public String handle2(IllegalArgumentException ex) {
 			return ClassUtils.getShortName(ex.getClass());
 		}
-
 	}
+
 
 	@Controller
 	private static class NoMAVReturningController {
@@ -160,6 +196,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		}
 	}
 
+
 	@Controller
 	private static class ResponseBodyController {
 
@@ -169,4 +206,5 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 	}
+
 }
