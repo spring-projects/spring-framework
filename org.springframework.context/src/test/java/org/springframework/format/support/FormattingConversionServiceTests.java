@@ -16,18 +16,21 @@
 
 package org.springframework.format.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
@@ -103,6 +106,31 @@ public class FormattingConversionServiceTests {
 	}
 	
 	@Test
+	public void testFormatCollectionFieldForAnnotation() throws Exception {
+		formattingService.addConverter(new Converter<Date, Long>() {
+			public Long convert(Date source) {
+				return source.getTime();
+			}
+		});
+		formattingService.addConverter(new Converter<DateTime, Date>() {
+			public Date convert(DateTime source) {
+				return source.toDate();
+			}
+		});
+		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+		List<Date> dates = new ArrayList<Date>();
+		dates.add(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime().toDate());
+		dates.add(new LocalDate(2009, 11, 1).toDateTimeAtCurrentTime().toDate());
+		dates.add(new LocalDate(2009, 11, 2).toDateTimeAtCurrentTime().toDate());
+		String formatted = (String) formattingService.convert(dates, new TypeDescriptor(Model.class.getField("dates")), TypeDescriptor.valueOf(String.class));
+		assertEquals("10/31/09,11/1/09,11/2/09", formatted);
+		dates = (List<Date>) formattingService.convert("10/31/09,11/1/09,11/2/09", TypeDescriptor.valueOf(String.class), new TypeDescriptor(Model.class.getField("dates")));
+		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(dates.get(0)));
+		assertEquals(new LocalDate(2009, 11, 1), new LocalDate(dates.get(1)));
+		assertEquals(new LocalDate(2009, 11, 2), new LocalDate(dates.get(2)));
+	}
+	
+	@Test
 	public void testPrintNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
 		assertEquals("", formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
@@ -140,6 +168,10 @@ public class FormattingConversionServiceTests {
 		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(style="S-")
 		public Date date;
+		
+		@SuppressWarnings("unused")
+		@org.springframework.format.annotation.DateTimeFormat(style="S-")
+		public List<Date> dates;
 
 	}
 
