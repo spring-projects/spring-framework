@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -202,20 +201,24 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	@Ignore	
 	public void testPerformance1() {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 		StopWatch watch = new StopWatch("conversionPerformance");
-		watch.start("convert 4,000,000");
+		watch.start("convert 4,000,000 with conversion service");
 		for (int i = 0; i < 4000000; i++) {
 			conversionService.convert(3, String.class);
+		}
+		watch.stop();
+		watch.start("convert 4,000,000 with converter directly");
+		ObjectToStringConverter converter = new ObjectToStringConverter();
+		for (int i = 0; i < 4000000; i++) {
+			converter.convert(3, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
 		}
 		watch.stop();
 		System.out.println(watch.prettyPrint());
 	}
 	
 	@Test
-	@Ignore
 	public void testPerformance2() throws Exception {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 		StopWatch watch = new StopWatch("conversionPerformance");
@@ -235,7 +238,6 @@ public class GenericConversionServiceTests {
 	public static List<Integer> list;
 
 	@Test
-	@Ignore
 	public void testPerformance3() throws Exception {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 		StopWatch watch = new StopWatch("conversionPerformance");
