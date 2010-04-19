@@ -203,16 +203,15 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testPerformance1() {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
-		StopWatch watch = new StopWatch("conversionPerformance");
+		StopWatch watch = new StopWatch("integer->string conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
 		for (int i = 0; i < 4000000; i++) {
 			conversionService.convert(3, String.class);
 		}
 		watch.stop();
-		watch.start("convert 4,000,000 with converter directly");
-		ObjectToStringConverter converter = new ObjectToStringConverter();
+		watch.start("convert 4,000,000 manually");
 		for (int i = 0; i < 4000000; i++) {
-			converter.convert(3, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
+			new Integer(3).toString();
 		}
 		watch.stop();
 		System.out.println(watch.prettyPrint());
@@ -221,8 +220,8 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testPerformance2() throws Exception {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
-		StopWatch watch = new StopWatch("conversionPerformance");
-		watch.start("convert 4,000,000");
+		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
+		watch.start("convert 4,000,000 with conversion service");
 		List<String> source = new LinkedList<String>();
 		source.add("1");
 		source.add("2");
@@ -232,6 +231,14 @@ public class GenericConversionServiceTests {
 			conversionService.convert(source, TypeDescriptor.forObject(source), td);
 		}
 		watch.stop();
+		watch.start("convert 4,000,000 manually");
+		for (int i = 0; i < 4000000; i++) {
+			List<Integer> target = new ArrayList<Integer>(source.size());
+			for (String element : source) {
+				target.add(Integer.valueOf(element));
+			}
+		}
+		watch.stop();		
 		System.out.println(watch.prettyPrint());
 	}
 
@@ -240,8 +247,8 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testPerformance3() throws Exception {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
-		StopWatch watch = new StopWatch("conversionPerformance");
-		watch.start("convert 4,000,000");
+		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
+		watch.start("convert 4,000,000 with conversion service");
 		Map<String, String> source = new HashMap<String, String>();
 		source.put("1", "1");
 		source.put("2", "2");
@@ -251,6 +258,14 @@ public class GenericConversionServiceTests {
 			conversionService.convert(source, TypeDescriptor.forObject(source), td);
 		}
 		watch.stop();
+		watch.start("convert 4,000,000 manually");
+		for (int i = 0; i < 4000000; i++) {
+			Map<String, Integer> target = new HashMap<String, Integer>(source.size());
+			for (Map.Entry<String, String> entry : source.entrySet()) {
+				target.put(entry.getKey(), Integer.valueOf(entry.getValue()));
+			}
+		}
+		watch.stop();		
 		System.out.println(watch.prettyPrint());
 	}
 	
