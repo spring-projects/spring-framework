@@ -74,7 +74,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			throw new UnsupportedOperationException();
 		}
 		public String toString() {
-			return "null";
+			return "NO_MATCH";
 		}
 	};
 
@@ -84,13 +84,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	private final Map<ConverterCacheKey, GenericConverter> converterCache = new ConcurrentHashMap<ConverterCacheKey, GenericConverter>();
 	
 	// implementing ConverterRegistry
-
-	public void addConverter(GenericConverter converter) {
-		Set<GenericConverter.ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
-		for (GenericConverter.ConvertiblePair convertibleType : convertibleTypes) {
-			getMatchableConvertersList(convertibleType.getSourceType(), convertibleType.getTargetType()).add(converter);
-		}
-	}
 
 	public void addConverter(Converter<?, ?> converter) {
 		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converter, Converter.class);
@@ -109,11 +102,19 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		addConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
 	}
+	
+	public void addConverter(GenericConverter converter) {
+		Set<GenericConverter.ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
+		for (GenericConverter.ConvertiblePair convertibleType : convertibleTypes) {
+			getMatchableConverters(convertibleType.getSourceType(), convertibleType.getTargetType()).add(converter);
+		}
+		invalidateCache();
+	}
 
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
 		getSourceConverterMap(sourceType).remove(targetType);
+		invalidateCache();
 	}
-
 
 	// implementing ConversionService
 
@@ -210,7 +211,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return builder.toString();
 	}
 
-
 	// subclassing hooks
 
 	/**
@@ -295,7 +295,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-
 	// internal helpers
 
 	private GenericConverter.ConvertiblePair getRequiredTypeInfo(Object converter, Class<?> genericIfc) {
@@ -303,7 +302,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return (args != null ? new GenericConverter.ConvertiblePair(args[0], args[1]) : null);
 	}
 
-	private MatchableConverters getMatchableConvertersList(Class<?> sourceType, Class<?> targetType) {
+	private MatchableConverters getMatchableConverters(Class<?> sourceType, Class<?> targetType) {
 		Map<Class<?>, MatchableConverters> sourceMap = getSourceConverterMap(sourceType);
 		MatchableConverters matchable = sourceMap.get(targetType);
 		if (matchable == null) {
@@ -311,6 +310,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			sourceMap.put(targetType, matchable);
 		}
 		return matchable;
+	}
+	
+	private void invalidateCache() {
+		this.converterCache.clear();
 	}
 
 	private Map<Class<?>, MatchableConverters> getSourceConverterMap(Class<?> sourceType) {
