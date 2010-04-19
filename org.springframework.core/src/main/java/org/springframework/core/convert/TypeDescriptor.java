@@ -65,7 +65,6 @@ public class TypeDescriptor {
 		typeDescriptorCache.put(String.class, new TypeDescriptor(String.class));
 	}
 	
-
 	private Class<?> type;
 
 	private MethodParameter methodParameter;
