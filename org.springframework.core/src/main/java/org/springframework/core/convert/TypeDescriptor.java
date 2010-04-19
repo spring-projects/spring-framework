@@ -400,6 +400,9 @@ public class TypeDescriptor {
 			return false;
 		}
 		TypeDescriptor td = (TypeDescriptor) obj;
+		if (this == td) {
+			return true;
+		}
 		boolean annotatedTypeEquals = getType().equals(td.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), td.getAnnotations());
 		if (isCollection()) {
 			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(), td.getElementType());
@@ -411,14 +414,7 @@ public class TypeDescriptor {
 	}
 	
 	public int hashCode() {
-		int annotatedTypeHash = getType().hashCode() + ObjectUtils.nullSafeHashCode(getAnnotations());
-		if (isCollection()) {
-			return annotatedTypeHash + ObjectUtils.nullSafeHashCode(getElementType()); 
-		} else if (isMap()) {
-			return annotatedTypeHash + ObjectUtils.nullSafeHashCode(getMapKeyType()) + ObjectUtils.nullSafeHashCode(getMapValueType());
-		} else {
-			return annotatedTypeHash;
-		}
+		return getType().hashCode();
 	}
 	
 	/**

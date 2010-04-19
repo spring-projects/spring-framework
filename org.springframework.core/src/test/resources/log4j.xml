@@ -12,7 +12,7 @@
 	</appender>
 
 	<logger name="org.springframework.core">
-		<level value="trace" />
+		<level value="warn" />
 	</logger>
 
 	<!-- Root Logger -->

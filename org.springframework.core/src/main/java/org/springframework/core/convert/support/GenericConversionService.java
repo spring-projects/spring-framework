@@ -64,6 +64,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return source;
 		}
+		public String toString() {
+			return "NO_OP";
+		}
 	};
 
 	private static final GenericConverter NO_MATCH = new GenericConverter() {
@@ -396,7 +399,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	private GenericConverter getMatchingConverterForTarget(TypeDescriptor sourceType, TypeDescriptor targetType,
 			Map<Class<?>, MatchableConverters> converters) {
-
 		Class<?> targetObjectType = targetType.getObjectType();
 		if (targetObjectType.isInterface()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
@@ -594,11 +596,11 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 	
-	private static class ConverterCacheKey {
+	private static final class ConverterCacheKey {
 
-		private TypeDescriptor sourceType;
+		private final TypeDescriptor sourceType;
 		
-		private TypeDescriptor targetType;
+		private final TypeDescriptor targetType;
 		
 		public ConverterCacheKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			this.sourceType = sourceType;
@@ -614,7 +616,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		
 		public int hashCode() {
-			return sourceType.hashCode() + targetType.hashCode();
+			return sourceType.hashCode() * 29 + targetType.hashCode();
 		}
 		
 		public String toString() {
