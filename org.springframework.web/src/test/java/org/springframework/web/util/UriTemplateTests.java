@@ -87,9 +87,9 @@ public class UriTemplateTests {
 
 	@Test
 	public void expandEncoded() throws Exception {
-		UriTemplate template = new UriTemplate("http://example.com//hotel list/{hotel}");
+		UriTemplate template = new UriTemplate("http://example.com/hotel list/{hotel}");
 		URI result = template.expand("Z\u00fcrich");
-		assertEquals("Invalid expanded template", new URI("http://example.com//hotel%20list/Z%FCrich"), result);
+		assertEquals("Invalid expanded template", new URI("http://example.com/hotel%20list/Z%C3%BCrich"), result);
 	}
 
 	@Test
