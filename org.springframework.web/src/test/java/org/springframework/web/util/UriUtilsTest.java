@@ -53,7 +53,7 @@ public class UriUtilsTest {
 	public void encodePath() throws UnsupportedEncodingException {
 		assertEquals("Invalid encoded result", "/foo/bar", UriUtils.encodePath("/foo/bar", ENC));
 		assertEquals("Invalid encoded result", "/foo%20bar", UriUtils.encodePath("/foo bar", ENC));
-		assertEquals("Invalid encoded result", "/Z%FCrich", UriUtils.encodePath("/Z\u00fcrich", ENC));
+		assertEquals("Invalid encoded result", "/Z%C3%BCrich", UriUtils.encodePath("/Z\u00fcrich", ENC));
 	}
 
 	@Test
@@ -67,6 +67,7 @@ public class UriUtilsTest {
 		assertEquals("Invalid encoded result", "foobar", UriUtils.encodeQuery("foobar", ENC));
 		assertEquals("Invalid encoded result", "foo%20bar", UriUtils.encodeQuery("foo bar", ENC));
 		assertEquals("Invalid encoded result", "foobar/+", UriUtils.encodeQuery("foobar/+", ENC));
+		assertEquals("Invalid encoded result", "T%C5%8Dky%C5%8D", UriUtils.encodeQuery("T\u014dky\u014d", ENC));
 	}
 
 	@Test
@@ -101,8 +102,8 @@ public class UriUtilsTest {
 				UriUtils.encodeUri("http://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeUri("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded URI", "http://www.google.com/?q=z%FCrich",
-				UriUtils.encodeUri("http://www.google.com/?q=z\u00fcrich", ENC));
+		assertEquals("Invalid encoded URI", "http://www.google.com/?q=Z%C3%BCrich",
+				UriUtils.encodeUri("http://www.google.com/?q=Z\u00fcrich", ENC));
 		assertEquals("Invalid encoded URI",
 				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
 				UriUtils.encodeUri(
@@ -130,8 +131,8 @@ public class UriUtilsTest {
 				UriUtils.encodeHttpUrl("http://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeHttpUrl("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://www.google.com/?q=z%FCrich",
-				UriUtils.encodeHttpUrl("http://www.google.com/?q=z\u00fcrich", ENC));
+		assertEquals("Invalid encoded HTTP URL", "http://www.google.com/?q=Z%C3%BCrich",
+				UriUtils.encodeHttpUrl("http://www.google.com/?q=Z\u00fcrich", ENC));
 		assertEquals("Invalid encoded HTTP URL",
 				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar",
 				UriUtils.encodeHttpUrl(

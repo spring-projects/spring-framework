@@ -424,22 +424,33 @@ public abstract class UriUtils {
 			throws UnsupportedEncodingException {
 		Assert.notNull(source, "'source' must not be null");
 		Assert.hasLength(encoding, "'encoding' must not be empty");
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length() * 2);
 
-		for (int i = 0; i < source.length(); i++) {
-			int ch = source.charAt(i);
-			if (notEncoded.get(ch)) {
-				bos.write(ch);
+		byte[] bytes = encode(source.getBytes(encoding), notEncoded);
+		return new String(bytes, "US-ASCII");
+	}
+
+	private static byte[] encode(byte[] source, BitSet notEncoded) {
+		Assert.notNull(source, "'source' must not be null");
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length * 2);
+
+		for (int i = 0; i < source.length; i++) {
+			int b = source[i];
+			if (b < 0) {
+				b += 256;
+			}
+			if (notEncoded.get(b)) {
+				bos.write(b);
 			}
 			else {
 				bos.write('%');
-				char hex1 = Character.toUpperCase(Character.forDigit((ch >> 4) & 0xF, 16));
-				char hex2 = Character.toUpperCase(Character.forDigit(ch & 0xF, 16));
+				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
+				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
 				bos.write(hex1);
 				bos.write(hex2);
 			}
 		}
-		return new String(bos.toByteArray(), encoding);
+		return bos.toByteArray();
 	}
 
 	/**
