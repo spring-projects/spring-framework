@@ -78,6 +78,8 @@ public class TypeDescriptor {
 	private TypeDescriptor mapKeyType;
 	
 	private TypeDescriptor mapValueType;
+
+	private Annotation[] annotations;
 	
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
@@ -245,13 +247,11 @@ public class TypeDescriptor {
 	/**
 	 * Return the element type as a type descriptor.
 	 */
-	public TypeDescriptor getElementTypeDescriptor() {
-		if (elementType != null) { 
-			return elementType;
-		} else {
+	public synchronized TypeDescriptor getElementTypeDescriptor() {
+		if (elementType == null) {
 			elementType = forElementType(resolveElementType());
-			return elementType;
 		}
+		return elementType;
 	}
 
 	/**
@@ -289,13 +289,11 @@ public class TypeDescriptor {
 	/**
 	 * Returns map key type as a type descriptor.
 	 */
-	public TypeDescriptor getMapKeyTypeDescriptor() {
-		if (mapKeyType != null) {
-			return mapKeyType;
-		} else {
-			mapKeyType = isMap() ? forElementType(resolveMapKeyType()) : null;
-			return mapKeyType;
+	public synchronized TypeDescriptor getMapKeyTypeDescriptor() {
+		if (mapKeyType == null) {
+			mapKeyType = forElementType(resolveMapKeyType());			
 		}
+		return mapKeyType;
 	}
 
 	/**
@@ -319,13 +317,11 @@ public class TypeDescriptor {
 	/**
 	 * Returns map value type as a type descriptor.
 	 */
-	public TypeDescriptor getMapValueTypeDescriptor() {
-		if (mapValueType != null) {
-			return mapValueType;
-		} else {
-			mapValueType = isMap() ? forElementType(resolveMapValueType()) : null;
-			return mapValueType;
+	public synchronized TypeDescriptor getMapValueTypeDescriptor() {
+		if (mapValueType == null) {
+			mapValueType = forElementType(resolveMapValueType());
 		}
+		return mapValueType;
 	}
 
 	/**
@@ -341,23 +337,11 @@ public class TypeDescriptor {
 	/**
 	 * Obtain the annotations associated with the wrapped parameter/field, if any.
 	 */
-	public Annotation[] getAnnotations() {
-		if (this.field != null) {
-			// not caching
-			return this.field.getAnnotations();
+	public synchronized Annotation[] getAnnotations() {
+		if (this.annotations == null) {
+			this.annotations = resolveAnnotations();
 		}
-		else if (this.methodParameter != null) {
-			if (this.methodParameter.getParameterIndex() < 0) {
-				// not caching
-				return this.methodParameter.getMethodAnnotations();
-			}
-			else {
-				return this.methodParameter.getParameterAnnotations();
-			}
-		}
-		else {
-			return EMPTY_ANNOTATION_ARRAY;
-		}
+		return this.annotations;
 	}
 
 	/**
@@ -521,7 +505,7 @@ public class TypeDescriptor {
 				}
 			}
 		}
-		return type != null ? GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type) : null;
+		return type != null && isMap() ? GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type) : null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -541,7 +525,24 @@ public class TypeDescriptor {
 				}
 			}
 		}
-		return type != null ? GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type) : null;
+		return isMap() && type != null ? GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type) : null;
+	}
+	
+	private Annotation[] resolveAnnotations() {
+		if (this.field != null) {
+			return this.field.getAnnotations();
+		}
+		else if (this.methodParameter != null) {
+			if (this.methodParameter.getParameterIndex() < 0) {
+				return this.methodParameter.getMethodAnnotations();
+			}
+			else {
+				return this.methodParameter.getParameterAnnotations();
+			}
+		}
+		else {
+			return EMPTY_ANNOTATION_ARRAY;
+		}
 	}
 	
 	/**
