@@ -16,19 +16,27 @@
 
 package org.springframework.core.convert.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.util.StopWatch;
 
 /**
  * @author Keith Donald
@@ -193,6 +201,58 @@ public class GenericConversionServiceTests {
 		assertEquals(input, converted);
 	}
 
+	@Test
+	@Ignore	
+	public void testPerformance1() {
+		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		StopWatch watch = new StopWatch("conversionPerformance");
+		watch.start("convert 4,000,000");
+		for (int i = 0; i < 4000000; i++) {
+			conversionService.convert(3, String.class);
+		}
+		watch.stop();
+		System.out.println(watch.prettyPrint());
+	}
+	
+	@Test
+	@Ignore
+	public void testPerformance2() throws Exception {
+		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		StopWatch watch = new StopWatch("conversionPerformance");
+		watch.start("convert 4,000,000");
+		List<String> source = new LinkedList<String>();
+		source.add("1");
+		source.add("2");
+		source.add("3");
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("list"));
+		for (int i = 0; i < 1000000; i++) {
+			conversionService.convert(source, TypeDescriptor.forObject(source), td);
+		}
+		watch.stop();
+		System.out.println(watch.prettyPrint());
+	}
+
+	public static List<Integer> list;
+
+	@Test
+	@Ignore
+	public void testPerformance3() throws Exception {
+		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		StopWatch watch = new StopWatch("conversionPerformance");
+		watch.start("convert 4,000,000");
+		Map<String, String> source = new HashMap<String, String>();
+		source.put("1", "1");
+		source.put("2", "2");
+		source.put("3", "3");
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));		
+		for (int i = 0; i < 1000000; i++) {
+			conversionService.convert(source, TypeDescriptor.forObject(source), td);
+		}
+		watch.stop();
+		System.out.println(watch.prettyPrint());
+	}
+	
+	public static Map<String, Integer> map;
 
 	private interface MyBaseInterface {
 
