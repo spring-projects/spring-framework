@@ -135,7 +135,7 @@ class OptionWriter {
 		else if (this.optionSource instanceof Map) {
 			renderFromMap(tagWriter);
 		}
-		else if (this.optionSource instanceof Class && this.optionSource.getClass().isEnum()) {
+		else if (this.optionSource instanceof Class && ((Class) this.optionSource).isEnum()) {
 			renderFromEnum(tagWriter);
 		}
 		else {
