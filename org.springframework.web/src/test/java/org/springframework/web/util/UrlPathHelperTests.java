@@ -94,7 +94,6 @@ public class UrlPathHelperTests {
 		request.setPathInfo(null);
 		request.setServletPath("/");
 		request.setRequestURI("/test/");
-
 		assertEquals("/", helper.getLookupPathForRequest(request));
 	}
 
@@ -118,7 +117,6 @@ public class UrlPathHelperTests {
 		assertEquals("/foo/", helper.getLookupPathForRequest(request));
 	}
 
-
 	@Test
 	public void wasDefaultServletRoot() throws Exception {
 		request.setContextPath("/test");
@@ -128,6 +126,12 @@ public class UrlPathHelperTests {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/");
 
 		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasDefaultServletRootWithCompliantSetting() throws Exception {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/");
+		tomcatDefaultServletRoot();
 	}
 
 	@Test
@@ -142,6 +146,13 @@ public class UrlPathHelperTests {
 	}
 
 	@Test
+	public void tomcatDefaultServletFileWithCompliantSetting() throws Exception {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
+		tomcatDefaultServletFile();
+	}
+
+
+	@Test
 	public void wasDefaultServletFolder() throws Exception {
 		request.setContextPath("/test");
 		request.setPathInfo("/foo/");
@@ -151,6 +162,13 @@ public class UrlPathHelperTests {
 
 		assertEquals("/foo/", helper.getLookupPathForRequest(request));
 	}
+
+	@Test
+	public void tomcatDefaultServletFolderWithCompliantSetting() throws Exception {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
+		tomcatDefaultServletFolder();
+	}
+
 
 	//
 	// /foo/* mapping
@@ -208,6 +226,12 @@ public class UrlPathHelperTests {
 		assertEquals("/", helper.getLookupPathForRequest(request));
 	}
 
+	@Test
+	public void wasCasualServletRootWithCompliantSetting() throws Exception {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
+		tomcatCasualServletRoot();
+	}
+
 	// test the root mapping for /foo/* w/o a trailing slash - <host>/<context>/foo
 	@Test
 	public void wasCasualServletRootWithMissingSlash() throws Exception {
@@ -218,6 +242,12 @@ public class UrlPathHelperTests {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
 
 		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasCasualServletRootWithMissingSlashWithCompliantSetting() throws Exception {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
+		tomcatCasualServletRootWithMissingSlash();
 	}
 
 	@Test
@@ -232,6 +262,12 @@ public class UrlPathHelperTests {
 	}
 
 	@Test
+	public void wasCasualServletFileWithCompliantSetting() throws Exception {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/foo");
+		tomcatCasualServletFile();
+	}
+
+	@Test
 	public void wasCasualServletFolder() throws Exception {
 		request.setContextPath("/test");
 		request.setPathInfo("/foo/");
@@ -240,5 +276,11 @@ public class UrlPathHelperTests {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/foo/");
 
 		assertEquals("/foo/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasCasualServletFolderWithCompliantSetting() throws Exception {
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/foo/");
+		tomcatCasualServletFolder();
 	}
 }
