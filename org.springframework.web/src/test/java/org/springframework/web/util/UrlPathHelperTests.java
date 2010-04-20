@@ -16,26 +16,24 @@
 
 package org.springframework.web.util;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import junit.framework.TestCase;
-
-import org.springframework.mock.web.MockHttpServletRequest;
-
-import org.junit.Test;
-import org.junit.Before;
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Costin Leau
  */
 public class UrlPathHelperTests {
 
 	private UrlPathHelper helper;
 
 	private MockHttpServletRequest request;
+
+	private static final String WEBSPHERE_URI_ATTRIBUTE = "com.ibm.websphere.servlet.uri_non_decoded";
 
 	@Before
 	public void setUp() {
@@ -80,4 +78,167 @@ public class UrlPathHelperTests {
 
 	}
 
+	//
+	// suite of tests root requests for default servlets (SRV 11.2) on Websphere vs Tomcat and other containers
+	// see: http://jira.springframework.org/browse/SPR-7064
+	// 
+
+
+	//
+	// / mapping (default servlet)
+	//
+
+	@Test
+	public void tomcatDefaultServletRoot() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo(null);
+		request.setServletPath("/");
+		request.setRequestURI("/test/");
+
+		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void tomcatDefaultServletFile() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo(null);
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo");
+
+		assertEquals("/foo", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void tomcatDefaultServletFolder() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo(null);
+		request.setServletPath("/foo/");
+		request.setRequestURI("/test/foo/");
+
+		assertEquals("/foo/", helper.getLookupPathForRequest(request));
+	}
+
+
+	@Test
+	public void wasDefaultServletRoot() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/");
+		request.setServletPath("");
+		request.setRequestURI("/test/");
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/");
+
+		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasDefaultServletFile() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/foo");
+		request.setServletPath("");
+		request.setRequestURI("/test/foo");
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
+
+		assertEquals("/foo", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasDefaultServletFolder() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/foo/");
+		request.setServletPath("");
+		request.setRequestURI("/test/foo/");
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
+
+		assertEquals("/foo/", helper.getLookupPathForRequest(request));
+	}
+
+	//
+	// /foo/* mapping
+	//
+
+	@Test
+	public void tomcatCasualServletRoot() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/");
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo/");
+
+		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	// test the root mapping for /foo/* w/o a trailing slash - <host>/<context>/foo
+	@Test
+	public void tomcatCasualServletRootWithMissingSlash() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo(null);
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo");
+
+		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void tomcatCasualServletFile() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/foo");
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo/foo");
+
+		assertEquals("/foo", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void tomcatCasualServletFolder() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/foo/");
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo/foo/");
+
+		assertEquals("/foo/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasCasualServletRoot() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo(null);
+		request.setServletPath("/foo/");
+		request.setRequestURI("/test/foo/");
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
+
+		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	// test the root mapping for /foo/* w/o a trailing slash - <host>/<context>/foo
+	@Test
+	public void wasCasualServletRootWithMissingSlash() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo(null);
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo");
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
+
+		assertEquals("/", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasCasualServletFile() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/foo");
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo/foo");
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/foo");
+
+		assertEquals("/foo", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void wasCasualServletFolder() throws Exception {
+		request.setContextPath("/test");
+		request.setPathInfo("/foo/");
+		request.setServletPath("/foo");
+		request.setRequestURI("/test/foo/foo/");
+		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/foo/");
+
+		assertEquals("/foo/", helper.getLookupPathForRequest(request));
+	}
 }
