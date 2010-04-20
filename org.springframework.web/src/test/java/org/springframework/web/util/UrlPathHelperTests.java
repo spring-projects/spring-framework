@@ -164,7 +164,7 @@ public class UrlPathHelperTests {
 	}
 
 	@Test
-	public void tomcatDefaultServletFolderWithCompliantSetting() throws Exception {
+	public void wasDefaultServletFolderWithCompliantSetting() throws Exception {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
 		tomcatDefaultServletFolder();
 	}
