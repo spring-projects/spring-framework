@@ -295,6 +295,7 @@ public class MvcNamespaceTests {
 		request.setRequestURI("/myapp/app/bar");
 		request.setContextPath("/myapp");
 		request.setServletPath("/app/");
+		request.setAttribute("com.ibm.websphere.servlet.uri_non_decoded", "/myapp/app/bar");
 		HandlerExecutionChain chain = mapping2.getHandler(request);
 		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
