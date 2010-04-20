@@ -233,8 +233,10 @@ public class UrlPathHelper {
 		if (servletPath == null) {
 			servletPath = request.getServletPath();
 		}
-		if (servletPath.length() > 1 && servletPath.endsWith("/")) {
-			// Probably on WebSphere: removing trailing slash...
+		if (servletPath.length() > 1 && servletPath.endsWith("/") &&
+				request.getAttribute(WEBSPHERE_URI_ATTRIBUTE) != null) {
+			// On WebSphere, for a "/foo/" case that would be "/foo" on all other servlet containers:
+			// removing trailing slash, proceeding with that slash as final path mapping...
 			servletPath = servletPath.substring(0, servletPath.length() - 1);
 		}
 		return servletPath;
