@@ -16,10 +16,11 @@
 
 package org.springframework.web.util;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
@@ -146,11 +147,10 @@ public class UrlPathHelperTests {
 	}
 
 	@Test
-	public void tomcatDefaultServletFileWithCompliantSetting() throws Exception {
+	public void wasDefaultServletFileWithCompliantSetting() throws Exception {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
 		tomcatDefaultServletFile();
 	}
-
 
 	@Test
 	public void wasDefaultServletFolder() throws Exception {
@@ -163,10 +163,16 @@ public class UrlPathHelperTests {
 		assertEquals("/foo/", helper.getLookupPathForRequest(request));
 	}
 
-	//	@Test
+	@Test
 	public void wasDefaultServletFolderWithCompliantSetting() throws Exception {
-		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
-		tomcatDefaultServletFolder();
+		UrlPathHelper.websphereComplianceFlag = true;
+		try {
+			request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
+			tomcatDefaultServletFolder();
+		}
+		finally {
+			UrlPathHelper.websphereComplianceFlag = false;
+		}
 	}
 
 
@@ -185,7 +191,7 @@ public class UrlPathHelperTests {
 	}
 
 	// test the root mapping for /foo/* w/o a trailing slash - <host>/<context>/foo
-	//	@Test
+	@Test @Ignore
 	public void tomcatCasualServletRootWithMissingSlash() throws Exception {
 		request.setContextPath("/test");
 		request.setPathInfo(null);
@@ -226,14 +232,14 @@ public class UrlPathHelperTests {
 		assertEquals("/", helper.getLookupPathForRequest(request));
 	}
 
-	//	@Test
+	@Test
 	public void wasCasualServletRootWithCompliantSetting() throws Exception {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/");
 		tomcatCasualServletRoot();
 	}
 
 	// test the root mapping for /foo/* w/o a trailing slash - <host>/<context>/foo
-	//	@Test
+	@Test @Ignore
 	public void wasCasualServletRootWithMissingSlash() throws Exception {
 		request.setContextPath("/test");
 		request.setPathInfo(null);
@@ -244,7 +250,7 @@ public class UrlPathHelperTests {
 		assertEquals("/", helper.getLookupPathForRequest(request));
 	}
 
-	//	@Test
+	@Test @Ignore
 	public void wasCasualServletRootWithMissingSlashWithCompliantSetting() throws Exception {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
 		tomcatCasualServletRootWithMissingSlash();
