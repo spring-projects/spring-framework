@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -47,8 +48,10 @@ public class UrlPathHelper {
 	 */
 	private static final String WEBSPHERE_URI_ATTRIBUTE = "com.ibm.websphere.servlet.uri_non_decoded";
 
+	private static final Log logger = LogFactory.getLog(UrlPathHelper.class);
 
-	private final Log logger = LogFactory.getLog(getClass());
+	static volatile Boolean websphereComplianceFlag;
+
 
 	private boolean alwaysUseFullPath = false;
 
@@ -234,9 +237,10 @@ public class UrlPathHelper {
 			servletPath = request.getServletPath();
 		}
 		if (servletPath.length() > 1 && servletPath.endsWith("/") &&
-				request.getAttribute(WEBSPHERE_URI_ATTRIBUTE) != null) {
-			// On WebSphere, for a "/foo/" case that would be "/foo" on all other servlet containers:
-			// removing trailing slash, proceeding with that slash as final path mapping...
+				shouldRemoveTrailingServletPathSlash(request)) {
+			// On WebSphere, in non-compliant mode, for a "/foo/" case that would be "/foo"
+			// on all other servlet containers: removing trailing slash, proceeding with
+			// that remaining slash as final lookup path...
 			servletPath = servletPath.substring(0, servletPath.length() - 1);
 		}
 		return servletPath;
@@ -345,6 +349,37 @@ public class UrlPathHelper {
 			enc = getDefaultEncoding();
 		}
 		return enc;
+	}
+
+
+	private boolean shouldRemoveTrailingServletPathSlash(HttpServletRequest request) {
+		if (request.getAttribute(WEBSPHERE_URI_ATTRIBUTE) == null) {
+			// Regular servlet container: behaves as expected in any case,
+			// so the trailing slash is the result of a "/" url-pattern mapping.
+			// Don't remove that slash.
+			return false;
+		}
+		if (websphereComplianceFlag == null) {
+			ClassLoader classLoader = UrlPathHelper.class.getClassLoader();
+			String className = "com.ibm.ws.webcontainer.WebContainer";
+			String methodName = "getWebContainerProperties";
+			String propName = "com.ibm.ws.webcontainer.removetrailingservletpathslash";
+			boolean flag = false;
+			try {
+				Class<?> cl = classLoader.loadClass(className);
+				Properties prop = (Properties) cl.getMethod(methodName).invoke(null);
+				flag = Boolean.parseBoolean(prop.getProperty(propName));
+			}
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not introspect WebSphere web container properties: " + ex);
+				}
+			}
+			websphereComplianceFlag = flag;
+		}
+		// Don't bother if WebSphere is configured to be fully Servlet compliant.
+		// However, if it is not compliant, do remove the improper trailing slash!
+		return !websphereComplianceFlag;
 	}
 
 }
