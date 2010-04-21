@@ -146,7 +146,7 @@ public class JmxTestBean implements IJmxTestBean {
       will attempt to locate the running <interfacename>MBeanServer</interfacename>
       and register your beans with that server (if any). This behavior is
       useful when your application is running inside a container such as
-      Tomcat or IBM WebSphere that has itss own
+      Tomcat or IBM WebSphere that has its own
       <interfacename>MBeanServer</interfacename>.</para>
 
       <para>However, this approach is of no use in a standalone environment,
