@@ -534,12 +534,24 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+
+			// Check decorated bean definition, if any: We assume it'll be easier
+			// to determine the decorated bean's type than the proxy's type.
+			BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
+			if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
+				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
+				Class targetClass = predictBeanType(dbd.getBeanName(), tbd);
+				if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
+					return targetClass;
+				}
+			}
+
 			Class beanClass = predictBeanType(beanName, mbd);
 
 			// Check bean class whether we're dealing with a FactoryBean.
 			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
-					// If it's a FactoryBean, we want to look at what it creates, not the factory class.
+					// If it's a FactoryBean, we want to look at what it creates, not at the factory class.
 					return getTypeForFactoryBean(beanName, mbd);
 				}
 				else {

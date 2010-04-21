@@ -46,7 +46,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
@@ -68,6 +67,7 @@ import org.springframework.core.io.Resource;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class CustomNamespaceHandlerTests {
 	
@@ -120,6 +120,7 @@ public class CustomNamespaceHandlerTests {
 	public void testProxyingDecoratorNoInstance() throws Exception {
 		String[] beanNames = this.beanFactory.getBeanNamesForType(ApplicationListener.class);
 		assertTrue(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance"));
+		assertEquals(ApplicationListener.class, this.beanFactory.getType("debuggingTestBeanNoInstance"));
 		try {
 			this.beanFactory.getBean("debuggingTestBeanNoInstance");
 			fail("Should have thrown BeanCreationException");
