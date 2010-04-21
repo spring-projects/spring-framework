@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.util;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -37,9 +39,20 @@ public class PropertyPlaceholderHelper {
 
 	private static final Log logger = LogFactory.getLog(PropertyPlaceholderHelper.class);
 
+	private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<String, String>(4);
+
+	static {
+		wellKnownSimplePrefixes.put("}", "{");
+		wellKnownSimplePrefixes.put("]", "[");
+		wellKnownSimplePrefixes.put(")", "(");
+	}
+
+
 	private final String placeholderPrefix;
 
 	private final String placeholderSuffix;
+
+	private final String simplePrefix;
 
 	private final String valueSeparator;
 
@@ -70,6 +83,13 @@ public class PropertyPlaceholderHelper {
 		Assert.notNull(placeholderSuffix, "placeholderSuffix must not be null");
 		this.placeholderPrefix = placeholderPrefix;
 		this.placeholderSuffix = placeholderSuffix;
+		String simplePrefixForSuffix = wellKnownSimplePrefixes.get(this.placeholderSuffix);
+		if (simplePrefixForSuffix != null && this.placeholderPrefix.endsWith(simplePrefixForSuffix)) {
+			this.simplePrefix = simplePrefixForSuffix;
+		}
+		else {
+			this.simplePrefix = this.placeholderPrefix;
+		}
 		this.valueSeparator = valueSeparator;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
@@ -176,9 +196,9 @@ public class PropertyPlaceholderHelper {
 					return index;
 				}
 			}
-			else if (StringUtils.substringMatch(buf, index, this.placeholderPrefix)) {
+			else if (StringUtils.substringMatch(buf, index, this.simplePrefix)) {
 				withinNestedPlaceholder++;
-				index = index + this.placeholderPrefix.length();
+				index = index + this.simplePrefix.length();
 			}
 			else {
 				index++;

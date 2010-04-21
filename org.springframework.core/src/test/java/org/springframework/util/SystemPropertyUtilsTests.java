@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,57 @@ public class SystemPropertyUtilsTests {
 	}
 
 	@Test
+	public void testReplaceFromSystemPropertyWithDefault() {
+		System.setProperty("test.prop", "bar");
+		try {
+			String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:foo}");
+			assertEquals("bar", resolved);
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
+	}
+
+	@Test
+	public void testReplaceFromSystemPropertyWithExpressionDefault() {
+		System.setProperty("test.prop", "bar");
+		try {
+			String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:#{foo.bar}}");
+			assertEquals("bar", resolved);
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
+	}
+
+	@Test
+	public void testReplaceFromSystemPropertyWithExpressionContainingDefault() {
+		System.setProperty("test.prop", "bar");
+		try {
+			String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:Y#{foo.bar}X}");
+			assertEquals("bar", resolved);
+		}
+		finally {
+			System.getProperties().remove("test.prop");
+		}
+	}
+
+	@Test
 	public void testReplaceWithDefault() {
 		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:foo}");
 		assertEquals("foo", resolved);
+	}
+
+	@Test
+	public void testReplaceWithExpressionDefault() {
+		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:#{foo.bar}}");
+		assertEquals("#{foo.bar}", resolved);
+	}
+
+	@Test
+	public void testReplaceWithExpressionContainingDefault() {
+		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop:Y#{foo.bar}X}");
+		assertEquals("Y#{foo.bar}X", resolved);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
