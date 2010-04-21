@@ -135,6 +135,8 @@ public class UriUtilsTest {
 				UriUtils.encodeHttpUrl("https://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded HTTP URL", "http://www.google.com/?q=Z%C3%BCrich",
 				UriUtils.encodeHttpUrl("http://www.google.com/?q=Z\u00fcrich", ENC));
+		assertEquals("Invalid encoded HTTP URL", "http://ws.geonames.org/searchJSON?q=T%C5%8Dky%C5%8D&style=FULL&maxRows=300",
+				UriUtils.encodeHttpUrl("http://ws.geonames.org/searchJSON?q=T\u014dky\u014d&style=FULL&maxRows=300", ENC));
 		assertEquals("Invalid encoded HTTP URL",
 				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar",
 				UriUtils.encodeHttpUrl(
