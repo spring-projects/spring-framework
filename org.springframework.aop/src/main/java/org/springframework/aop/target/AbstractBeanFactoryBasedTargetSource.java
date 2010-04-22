@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 package org.springframework.aop.target;
 
-import java.io.NotSerializableException;
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.ClassUtils;
@@ -65,7 +62,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	private String targetBeanName;
 
 	/** Class of the target */
-	private Class targetClass;
+	private Class<?> targetClass;
 
 	/**
 	 * BeanFactory that owns this TargetSource. We need to hold onto this
@@ -108,7 +105,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 * Set the owning BeanFactory. We need to save a reference so that we can
 	 * use the <code>getBean</code> method on every invocation.
 	 */
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		if (this.targetBeanName == null) {
 			throw new IllegalStateException("Property'targetBeanName' is required");
 		}
@@ -123,7 +120,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 
-	public synchronized Class getTargetClass() {
+	public synchronized Class<?> getTargetClass() {
 		if (this.targetClass == null && this.beanFactory != null) {
 			// Determine type of the target bean.
 			this.targetClass = this.beanFactory.getType(this.targetBeanName);
@@ -131,7 +128,10 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 				if (logger.isTraceEnabled()) {
 					logger.trace("Getting bean with name '" + this.targetBeanName + "' in order to determine type");
 				}
-				this.targetClass = this.beanFactory.getBean(this.targetBeanName).getClass();
+				Object beanInstance = this.beanFactory.getBean(this.targetBeanName);
+				if (beanInstance != null) {
+					this.targetClass = beanInstance.getClass();
+				}
 			}
 		}
 		return this.targetClass;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	 * a meaningful value when the target is still <code>null</code>.
 	 * @see #isInitialized()
 	 */
-	public synchronized Class getTargetClass() {
+	public synchronized Class<?> getTargetClass() {
 		return (this.lazyTarget != null ? this.lazyTarget.getClass() : null);
 	}
 
