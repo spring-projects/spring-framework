@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.aop.framework;
 import java.util.Arrays;
 
 import org.springframework.aop.SpringProxy;
+import org.springframework.aop.TargetClassAware;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.Assert;
 
 /**
@@ -33,6 +36,34 @@ import org.springframework.util.Assert;
  * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AopProxyUtils {
+
+	/**
+	 * Determine the ultimate target class of the given bean instance, traversing
+	 * not only a top-level proxy but any number of nested proxies as well -
+	 * as long as possible without side effects, that is, just for singleton targets.
+	 * @param candidate the instance to check (might be an AOP proxy)
+	 * @return the target class (or the plain class of the given object as fallback;
+	 * never <code>null</code>)
+	 * @see org.springframework.aop.TargetClassAware#getTargetClass()
+	 * @see org.springframework.aop.framework.Advised#getTargetSource()
+	 */
+	public static Class<?> ultimateTargetClass(Object candidate) {
+		Assert.notNull(candidate, "Candidate object must not be null");
+		Object current = candidate;
+		Class<?> result = null;
+		while (current instanceof TargetClassAware) {
+			result = ((TargetClassAware) current).getTargetClass();
+			Object nested = null;
+			if (current instanceof Advised) {
+				TargetSource targetSource = ((Advised) current).getTargetSource();
+				if (targetSource instanceof SingletonTargetSource) {
+					nested = ((SingletonTargetSource) targetSource).getTarget();
+				}
+			}
+			current = nested;
+		}
+		return result;
+	}
 
 	/**
 	 * Determine the complete set of interfaces to proxy for the given AOP configuration.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,20 +293,33 @@ public final class ProxyFactoryTests {
 	public void testProxyTargetClassWithInterfaceAsTarget() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(ITestBean.class);
-
 		Object proxy = pf.getProxy();
 		assertTrue("Proxy is a JDK proxy", AopUtils.isJdkDynamicProxy(proxy));
 		assertTrue(proxy instanceof ITestBean);
+		assertEquals(ITestBean.class, AopProxyUtils.ultimateTargetClass(proxy));
+
+		ProxyFactory pf2 = new ProxyFactory(proxy);
+		Object proxy2 = pf2.getProxy();
+		assertTrue("Proxy is a JDK proxy", AopUtils.isJdkDynamicProxy(proxy2));
+		assertTrue(proxy2 instanceof ITestBean);
+		assertEquals(ITestBean.class, AopProxyUtils.ultimateTargetClass(proxy2));
 	}
 
 	@Test
 	public void testProxyTargetClassWithConcreteClassAsTarget() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(TestBean.class);
-
 		Object proxy = pf.getProxy();
 		assertTrue("Proxy is a CGLIB proxy", AopUtils.isCglibProxy(proxy));
 		assertTrue(proxy instanceof TestBean);
+		assertEquals(TestBean.class, AopProxyUtils.ultimateTargetClass(proxy));
+
+		ProxyFactory pf2 = new ProxyFactory(proxy);
+		pf2.setProxyTargetClass(true);
+		Object proxy2 = pf2.getProxy();
+		assertTrue("Proxy is a CGLIB proxy", AopUtils.isCglibProxy(proxy2));
+		assertTrue(proxy2 instanceof TestBean);
+		assertEquals(TestBean.class, AopProxyUtils.ultimateTargetClass(proxy2));
 	}
 
 	@Test
