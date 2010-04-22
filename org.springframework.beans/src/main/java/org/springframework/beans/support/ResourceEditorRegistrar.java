@@ -21,10 +21,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 
+import org.xml.sax.InputSource;
+
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
+import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
@@ -79,6 +82,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader);
 		registry.registerCustomEditor(Resource.class, baseEditor);
 		registry.registerCustomEditor(InputStream.class, new InputStreamEditor(baseEditor));
+		registry.registerCustomEditor(InputSource.class, new InputSourceEditor(baseEditor));
 		registry.registerCustomEditor(File.class, new FileEditor(baseEditor));
 		registry.registerCustomEditor(URL.class, new URLEditor(baseEditor));
 

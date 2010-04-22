@@ -42,6 +42,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.xml.sax.InputSource;
+
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharacterEditor;
@@ -54,6 +56,7 @@ import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomMapEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
+import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PatternEditor;
@@ -169,6 +172,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Currency.class, new CurrencyEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
+		this.defaultEditors.put(InputSource.class, new InputSourceEditor());
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
 		this.defaultEditors.put(Pattern.class, new PatternEditor());
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());

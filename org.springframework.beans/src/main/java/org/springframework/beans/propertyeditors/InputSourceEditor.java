@@ -19,47 +19,46 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
+import org.xml.sax.InputSource;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.util.Assert;
 
 /**
- * One-way PropertyEditor which can convert from a text String to a
- * <code>java.io.InputStream</code>, interpreting the given String
- * as Spring resource location (e.g. a URL String).
+ * Editor for <code>org.xml.sax.InputSource</code>, converting from a
+ * Spring resource location String to a SAX InputSource object.
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
  * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
  *
- * <p>Note that in the default usage, the stream is not closed by Spring itself!
- *
  * @author Juergen Hoeller
- * @since 1.0.1
- * @see java.io.InputStream
+ * @since 3.0.3
+ * @see org.xml.sax.InputSource
  * @see org.springframework.core.io.ResourceEditor
  * @see org.springframework.core.io.ResourceLoader
- * @see URLEditor
- * @see FileEditor
+ * @see org.springframework.beans.propertyeditors.URLEditor
+ * @see org.springframework.beans.propertyeditors.FileEditor
  */
-public class InputStreamEditor extends PropertyEditorSupport {
+public class InputSourceEditor extends PropertyEditorSupport {
 
 	private final ResourceEditor resourceEditor;
 
 
 	/**
-	 * Create a new InputStreamEditor,
+	 * Create a new InputSourceEditor,
 	 * using the default ResourceEditor underneath.
 	 */
-	public InputStreamEditor() {
+	public InputSourceEditor() {
 		this.resourceEditor = new ResourceEditor();
 	}
 
 	/**
-	 * Create a new InputStreamEditor,
+	 * Create a new InputSourceEditor,
 	 * using the given ResourceEditor underneath.
 	 * @param resourceEditor the ResourceEditor to use
 	 */
-	public InputStreamEditor(ResourceEditor resourceEditor) {
+	public InputSourceEditor(ResourceEditor resourceEditor) {
 		Assert.notNull(resourceEditor, "ResourceEditor must not be null");
 		this.resourceEditor = resourceEditor;
 	}
@@ -70,21 +69,18 @@ public class InputStreamEditor extends PropertyEditorSupport {
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
 		try {
-			setValue(resource != null ? resource.getInputStream() : null);
+			setValue(resource != null ? new InputSource(resource.getURL().toString()) : null);
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException(
-					"Could not retrieve InputStream for " + resource + ": " + ex.getMessage());
+					"Could not retrieve URL for " + resource + ": " + ex.getMessage());
 		}
 	}
 
-	/**
-	 * This implementation returns <code>null</code> to indicate that
-	 * there is no appropriate text representation.
-	 */
 	@Override
 	public String getAsText() {
-		return null;
+		InputSource value = (InputSource) getValue();
+		return (value != null ? value.getSystemId() : "");
 	}
 
 }
