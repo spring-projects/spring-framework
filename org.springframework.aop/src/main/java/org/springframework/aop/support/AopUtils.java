@@ -98,13 +98,13 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Determine the target class of the given bean instance,
-	 * which might be an AOP proxy.
+	 * Determine the target class of the given bean instance which might be an AOP proxy.
 	 * <p>Returns the target class for an AOP proxy and the plain class else.
 	 * @param candidate the instance to check (might be an AOP proxy)
 	 * @return the target class (or the plain class of the given object as fallback;
 	 * never <code>null</code>)
 	 * @see org.springframework.aop.TargetClassAware#getTargetClass()
+	 * @see org.springframework.aop.framework.AopProxyUtils#ultimateTargetClass(Object)
 	 */
 	public static Class<?> getTargetClass(Object candidate) {
 		Assert.notNull(candidate, "Candidate object must not be null");
