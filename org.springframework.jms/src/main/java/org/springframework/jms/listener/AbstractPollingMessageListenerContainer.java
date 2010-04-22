@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,7 +236,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 		if (this.transactionManager != null) {
 			// Execute receive within transaction.
 			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
-			boolean messageReceived = true;
+			boolean messageReceived;
 			try {
 				messageReceived = doReceiveAndExecute(invoker, session, consumer, status);
 			}
@@ -288,7 +288,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				transactional = (sessionToUse != null);
 			}
 			if (sessionToUse == null) {
-				Connection conToUse = null;
+				Connection conToUse;
 				if (sharedConnectionEnabled()) {
 					conToUse = getSharedConnection();
 				}
