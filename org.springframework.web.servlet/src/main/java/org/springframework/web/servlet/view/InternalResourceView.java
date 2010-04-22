@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,10 +214,10 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		String dispatcherPath = prepareForRendering(requestToExpose, response);
 
 		// Obtain a RequestDispatcher for the target resource (typically a JSP).
-		RequestDispatcher rd = requestToExpose.getRequestDispatcher(dispatcherPath);
+		RequestDispatcher rd = getRequestDispatcher(requestToExpose, dispatcherPath);
 		if (rd == null) {
-			throw new ServletException(
-					"Could not get RequestDispatcher for [" + getUrl() + "]: check that this file exists within your WAR");
+			throw new ServletException("Could not get RequestDispatcher for [" + getUrl() +
+					"]: Check that the corresponding file exists within your web application archive!");
 		}
 
 		// If already included or response already committed, perform include, else forward.
@@ -237,6 +237,23 @@ public class InternalResourceView extends AbstractUrlBasedView {
 			}
 			rd.forward(requestToExpose, response);
 		}
+	}
+
+	/**
+	 * Get the request handle to expose to the RequestDispatcher, i.e. to the view.
+	 * <p>The default implementation wraps the original request for exposure of
+	 * Spring beans as request attributes (if demanded).
+	 * @param originalRequest the original servlet request as provided by the engine
+	 * @return the wrapped request, or the original request if no wrapping is necessary
+	 * @see #setExposeContextBeansAsAttributes
+	 * @see org.springframework.web.context.support.ContextExposingHttpServletRequest
+	 */
+	protected HttpServletRequest getRequestToExpose(HttpServletRequest originalRequest) {
+		if (this.exposeContextBeansAsAttributes || this.exposedContextBeanNames != null) {
+			return new ContextExposingHttpServletRequest(
+					originalRequest, getWebApplicationContext(), this.exposedContextBeanNames);
+		}
+		return originalRequest;
 	}
 
 	/**
@@ -281,20 +298,16 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Get the request handle to expose to the RequestDispatcher, i.e. to the view.
-	 * <p>The default implementation wraps the original request for exposure of
-	 * Spring beans as request attributes (if demanded).
-	 * @param originalRequest the original servlet request as provided by the engine
-	 * @return the wrapped request, or the original request if no wrapping is necessary
-	 * @see #setExposeContextBeansAsAttributes
-	 * @see org.springframework.web.context.support.ContextExposingHttpServletRequest
+	 * Obtain the RequestDispatcher to use for the forward/include.
+	 * <p>The default implementation simply calls
+	 * {@link HttpServletRequest#getRequestDispatcher(String)}.
+	 * Can be overridden in subclasses.
+	 * @param request current HTTP request
+	 * @param path the target URL (as returned from {@link #prepareForRendering})
+	 * @return a corresponding RequestDispatcher
 	 */
-	protected HttpServletRequest getRequestToExpose(HttpServletRequest originalRequest) {
-		if (this.exposeContextBeansAsAttributes || this.exposedContextBeanNames != null) {
-			return new ContextExposingHttpServletRequest(
-					originalRequest, getWebApplicationContext(), this.exposedContextBeanNames);
-		}
-		return originalRequest;
+	protected RequestDispatcher getRequestDispatcher(HttpServletRequest request, String path) {
+		return request.getRequestDispatcher(path);
 	}
 
 	/**
