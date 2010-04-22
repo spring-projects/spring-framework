@@ -1,5 +1,5 @@
 /*<
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface TargetSource extends TargetClassAware {
 	 * target class.
 	 * @return the type of targets returned by this {@link TargetSource}
 	 */
-	Class getTargetClass();
+	Class<?> getTargetClass();
 
 	/**
 	 * Will all calls to {@link #getTarget()} return the same object?

@@ -34,6 +34,6 @@ public interface TargetClassAware {
 	 * (typically a proxy configuration or an actual proxy).
 	 * @return the target Class, or <code>null</code> if not known
 	 */
-	Class getTargetClass();
+	Class<?> getTargetClass();
 
 }
