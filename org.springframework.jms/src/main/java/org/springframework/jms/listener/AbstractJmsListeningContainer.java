@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jms.listener;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.jms.Connection;
 import javax.jms.JMSException;
 
@@ -209,7 +208,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	public void shutdown() throws JmsException {
 		logger.debug("Shutting down JMS listener container");
-		boolean wasRunning = false;
+		boolean wasRunning;
 		synchronized (this.lifecycleMonitor) {
 			wasRunning = this.running;
 			this.running = false;
@@ -549,6 +548,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 	}
 
+	/**
+	 * Determine the number of currently paused tasks, if any.
+	 */
 	public int getPausedTaskCount() {
 		synchronized (this.lifecycleMonitor) {
 			return this.pausedTasks.size();
