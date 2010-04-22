@@ -248,6 +248,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
 		Assert.notNull(requiredType, "Required type must not be null");
 		String[] beanNames = getBeanNamesForType(requiredType);
+		if (beanNames.length > 1) {
+			ArrayList<String> autowireCandidates = new ArrayList<String>();
+			for (String beanName : beanNames) {
+				if (getBeanDefinition(beanName).isAutowireCandidate()) {
+					autowireCandidates.add(beanName);
+				}
+			}
+			if (autowireCandidates.size() > 0) {
+				beanNames = autowireCandidates.toArray(new String[autowireCandidates.size()]);
+			}
+		}
 		if (beanNames.length == 1) {
 			return getBean(beanNames[0], requiredType);
 		}
