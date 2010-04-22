@@ -989,6 +989,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					if (wasWaiting) {
 						activeInvokerCount++;
 					}
+					if (scheduledInvokers.size() > maxConcurrentConsumers) {
+						active = false;
+					}
 				}
 				if (active) {
 					messageReceived = (invokeListener() || messageReceived);
