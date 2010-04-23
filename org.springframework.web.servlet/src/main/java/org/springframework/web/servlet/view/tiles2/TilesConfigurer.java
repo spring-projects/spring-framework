@@ -32,12 +32,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tiles.TilesApplicationContext;
 import org.apache.tiles.TilesException;
+import org.apache.tiles.awareness.TilesApplicationContextAware;
 import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
 import org.apache.tiles.context.ChainedTilesRequestContextFactory;
 import org.apache.tiles.context.TilesRequestContextFactory;
 import org.apache.tiles.definition.DefinitionsFactory;
 import org.apache.tiles.definition.DefinitionsFactoryException;
 import org.apache.tiles.definition.DefinitionsReader;
+import org.apache.tiles.definition.Refreshable;
 import org.apache.tiles.definition.digester.DigesterDefinitionsReader;
 import org.apache.tiles.evaluator.AttributeEvaluator;
 import org.apache.tiles.evaluator.el.ELAttributeEvaluator;
@@ -55,6 +57,8 @@ import org.apache.tiles.startup.BasicTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
@@ -435,7 +439,22 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		protected DefinitionsFactory createDefinitionsFactory(TilesApplicationContext applicationContext,
 				TilesRequestContextFactory contextFactory, LocaleResolver resolver) {
 			if (definitionsFactoryClass != null) {
-				return BeanUtils.instantiate(definitionsFactoryClass);
+				DefinitionsFactory factory = BeanUtils.instantiate(definitionsFactoryClass);
+				if (factory instanceof TilesApplicationContextAware) {
+					((TilesApplicationContextAware) factory).setApplicationContext(applicationContext);
+				}
+				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(factory);
+				if (bw.isWritableProperty("localeResolver")) {
+					bw.setPropertyValue("localeResolver", resolver);
+				}
+				if (bw.isWritableProperty("definitionDAO")) {
+					bw.setPropertyValue("definitionDAO",
+							createLocaleDefinitionDao(applicationContext, contextFactory, resolver));
+				}
+				if (factory instanceof Refreshable) {
+					((Refreshable) factory).refresh();
+				}
+				return factory;
 			}
 			else {
 				return super.createDefinitionsFactory(applicationContext, contextFactory, resolver);
