@@ -181,6 +181,15 @@ public class MediaTypeTests {
 	}
 
 	@Test
+	public void parseQuotedCharset() {
+		String s = "application/xml;charset=\"utf-8\"";
+		MediaType mediaType = MediaType.parseMediaType(s);
+		assertEquals("Invalid type", "application", mediaType.getType());
+		assertEquals("Invalid subtype", "xml", mediaType.getSubtype());
+		assertEquals("Invalid charset", Charset.forName("UTF-8"), mediaType.getCharSet());
+	}
+
+	@Test
 	public void parseURLConnectionMediaType() throws Exception {
 		String s = "*; q=.2";
 		MediaType mediaType = MediaType.parseMediaType(s);
