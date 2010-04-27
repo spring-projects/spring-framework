@@ -264,7 +264,7 @@ public class MediaType implements Comparable<MediaType> {
 				String attribute = entry.getKey();
 				String value = entry.getValue();
 				checkParameters(attribute, value);
-				m.put(attribute, value);
+				m.put(attribute, unquote(value));
 			}
 			this.parameters = Collections.unmodifiableMap(m);
 		}
@@ -293,10 +293,12 @@ public class MediaType implements Comparable<MediaType> {
 		Assert.hasLength(value, "parameter value must not be empty");
 		checkToken(attribute);
 		if (PARAM_QUALITY_FACTOR.equals(attribute)) {
+			value = unquote(value);
 			double d = Double.parseDouble(value);
 			Assert.isTrue(d >= 0D && d <= 1D, "Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
 		}
 		else if (PARAM_CHARSET.equals(attribute)) {
+			value = unquote(value);
 			Charset.forName(value);
 		}
 		else if (!isQuotedString(value)) {
@@ -306,6 +308,13 @@ public class MediaType implements Comparable<MediaType> {
 
 	private boolean isQuotedString(String s) {
 		return s.length() > 1 && s.startsWith("\"") && s.endsWith("\"") ;
+	}
+
+	private String unquote(String s) {
+		if (s == null) {
+			return null;
+		}
+		return isQuotedString(s) ? s.substring(1, s.length() - 1) : s;
 	}
 
 	/** Return the primary type. */
