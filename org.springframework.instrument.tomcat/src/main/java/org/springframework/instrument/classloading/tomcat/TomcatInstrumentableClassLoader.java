@@ -22,7 +22,6 @@ import java.lang.reflect.Modifier;
 
 import org.apache.catalina.loader.ResourceEntry;
 import org.apache.catalina.loader.WebappClassLoader;
-
 import org.springframework.instrument.classloading.WeavingTransformer;
 
 /**
@@ -58,6 +57,7 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  */
 public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
+	private static final String CLASS_SUFFIX = ".class";
 	/** Use an internal WeavingTransformer */
 	private final WeavingTransformer weavingTransformer;
 
@@ -112,8 +112,10 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	protected ResourceEntry findResourceInternal(String name, String path) {
 		ResourceEntry entry = super.findResourceInternal(name, path);
 		// Postpone String parsing as much as possible (it is slow).
-		if (entry != null && entry.binaryContent != null && path.endsWith(".class")) {
-			byte[] transformed = this.weavingTransformer.transformIfNecessary(name, entry.binaryContent);
+		if (entry != null && entry.binaryContent != null && path.endsWith(CLASS_SUFFIX)) {
+			String className = (name.endsWith(CLASS_SUFFIX) ? name.substring(0, name.length() - CLASS_SUFFIX.length())
+					: name);
+			byte[] transformed = this.weavingTransformer.transformIfNecessary(className, entry.binaryContent);
 			entry.binaryContent = transformed;
 		}
 		return entry;
@@ -128,7 +130,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	}
 
 
-	// The code below is orginially taken from ReflectionUtils and optimized for
+	// The code below is originally taken from ReflectionUtils and optimized for
 	// local usage. There is no dependency on ReflectionUtils to keep this class
 	// self-contained (since it gets deployed into Tomcat's server class loader).
 
