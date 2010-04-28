@@ -3633,7 +3633,6 @@ http://www.springframework.org/schema/context
           <itemizedlist>
             <listitem>
               <para>Tomcat 6.0.x or higher</para>
-            </listitem>
 
             <orderedlist>
               <listitem>
@@ -3669,10 +3668,10 @@ http://www.springframework.org/schema/context
                 for more details about available context locations.</para>
               </listitem>
             </orderedlist>
-          
-            <listitem>
+	        </listitem>
+              
+          <listitem>
               <para>Tomcat 5.0.x/5.5.x</para>
-            </listitem>
 
             <orderedlist>
               <listitem>
@@ -3725,9 +3724,12 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
     &lt;Loader
         loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             <emphasis role="bold">useSystemClassLoaderAsParent="false"</emphasis>/&gt;
-&lt;/Context&gt;</programlisting><para>This setting is not needed if using Tomcat 6 or higher.</para>
+&lt;/Context&gt;</programlisting><para>This setting is not needed on Tomcat 6 or higher.</para>
               </listitem>
             </orderedlist>
+            
+            </listitem>
+            
           </itemizedlist>
 
           <para>Alternatively, consider the use of the Spring-provided generic
