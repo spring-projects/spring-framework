@@ -252,7 +252,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 </programlisting>
 
       <para>The following example shows the data access objects
-      <literal>daos.xml</literal>) file:</para>
+      <literal>daos.xml</literal> file:</para>
 
       <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -1012,11 +1012,6 @@ public class ExampleBean {
         no-argument constructor or no-argument <literal>static</literal>
         factory method to instantiate your bean.</para>
 
-        <para>The <interfacename>ApplicationContext</interfacename> supports
-        constructor- and setter-based DI for the beans it manages. It also
-        supports setter-based DI after some dependencies are already injected
-        through the constructor approach.</para>
-
         <para>The following example shows a class that can only be
         dependency-injected using pure setter injection. This class is
         conventional Java. It is a POJO that has no dependencies on container
@@ -1089,7 +1084,7 @@ public class ExampleBean {
         <orderedlist>
           <listitem>
             <para>The <interfacename>ApplicationContext</interfacename> is
-            created an initialized with configuration metadata that describes
+            created and initialized with configuration metadata that describes
             all the beans. Configuration metadata can be specified via XML,
             Java code or annotations.</para>
           </listitem>
@@ -1806,7 +1801,7 @@ support=support@example.co.uk</programlisting>
 
         <para>The example shows an attribute in the p-namespace called email
         in the bean definition. This tells Spring to include a property
-        declaration. As previously mentioned, the p-namespace not have a
+        declaration. As previously mentioned, the p-namespace does not have a
         schema definition, so you can set the name of the attribute to the
         property name.</para>
 
@@ -1994,7 +1989,7 @@ support=support@example.co.uk</programlisting>
           <listitem>
             <para>Autowiring can update a configuration as your objects
             evolve. For example, if you need to add a dependency to a class,
-            that dependency can be satisfied automatically your needing to
+            that dependency can be satisfied automatically without your needing to
             modify the configuration. Thus autowiring can be especially useful
             during development, without negating the option of switching to
             explicit wiring when the code base becomes more stable.</para>
@@ -2567,7 +2562,7 @@ public class ReplacementComputeValue implements MethodReplacer {
             linkend="beans-factory-scopes-singleton">singleton</link>
             </para></entry>
 
-            <entry><para>Scopes a single bean definition to a single object
+            <entry><para>(Default) Scopes a single bean definition to a single object
             instance per Spring IoC container.</para></entry>
           </row>
 
@@ -3245,7 +3240,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope
       <methodname>destroy()</methodname> for the latter to allow the bean to
       perform certain actions upon initialization and destruction of your
       beans. You can also achieve the same integration with the container
-      without coupling your classes to Spring interfaces though the use of
+      without coupling your classes to Spring interfaces through the use of
       init-method and destroy method object definition metadata.</para>
 
       <para>Internally, the Spring Framework uses
@@ -3410,7 +3405,7 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope
         attribute on the top-level <literal>&lt;beans/&gt;</literal> element
         attribute causes the Spring IoC container to recognize a method called
         <literal>init</literal> on beans as the initialization method
-        callback. When a bean is created and assembled, if the beans class has
+        callback. When a bean is created and assembled, if the bean class has
         such a method, it is invoked at the appropriate time.</para>
 
         <para>You configure destroy method callbacks similarly (in XML, that
@@ -4551,7 +4546,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     <para>An alternative to XML setups is provided by annotation-based
     configuration which rely on the bytecode metadata for wiring up components
     instead on angle-bracket declarations. Instead of using XML to describe a
-    bean wiring, the developers moves the configuration into the component
+    bean wiring, the developer moves the configuration into the component
     class itself by using annotations on relevant class, method or field
     declaration. As mentioned in <xref
     linkend="beans-factory-extension-bpp-examples-rabpp" />, using a
@@ -6784,7 +6779,7 @@ public class AppConfig {
     programmatic way. The <literal>org.springframework.context</literal>
     package adds the <ulink
     url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/ApplicationContext.html"><interfacename>ApplicationContext</interfacename></ulink>
-    interface, which implements the <interfacename>BeanFactory</interfacename>
+    interface, which extends the <interfacename>BeanFactory</interfacename>
     interface, in addition to extending other interfaces to provide additional
     functionality in a more <emphasis>application framework-oriented
     style</emphasis>. Many people use the
