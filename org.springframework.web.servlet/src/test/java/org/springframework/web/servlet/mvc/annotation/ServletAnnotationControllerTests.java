@@ -1192,9 +1192,9 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void httpEntity() throws ServletException, IOException {
-		initServlet(HttpEntityController.class);
+		initServlet(ResponseEntityController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/handle");
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/foo");
 		String requestBody = "Hello World";
 		request.setContent(requestBody.getBytes("UTF-8"));
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -1205,6 +1205,11 @@ public class ServletAnnotationControllerTests {
 		assertEquals(201, response.getStatus());
 		assertEquals(requestBody, response.getContentAsString());
 		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
+
+		request = new MockHttpServletRequest("PUT", "/bar");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(404, response.getStatus());
 	}
 
 
@@ -2597,10 +2602,10 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Controller
-	public static class HttpEntityController {
+	public static class ResponseEntityController {
 
-		@RequestMapping("/handle")
-		public ResponseEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
+		@RequestMapping("/foo")
+		public ResponseEntity<String> foo(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
 			assertNotNull(requestEntity);
 			assertEquals("MyValue", requestEntity.getHeaders().getFirst("MyRequestHeader"));
 			String requestBody = new String(requestEntity.getBody(), "UTF-8");
@@ -2610,6 +2615,12 @@ public class ServletAnnotationControllerTests {
 			responseHeaders.set("MyResponseHeader", "MyValue");
 			return new ResponseEntity<String>(requestBody, responseHeaders, HttpStatus.CREATED);
 		}
+
+		@RequestMapping("/bar")
+		public ResponseEntity<String> bar() {
+			return new ResponseEntity<String>(new HttpHeaders(), HttpStatus.NOT_FOUND);
+		}
+
 	}
 
 	@Controller

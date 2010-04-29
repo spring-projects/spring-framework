@@ -912,7 +912,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (!entityHeaders.isEmpty()) {
 				outputMessage.getHeaders().putAll(entityHeaders);
 			}
-			writeWithMessageConverters(responseEntity.getBody(), inputMessage, outputMessage);
+			Object body = responseEntity.getBody();
+			if (body != null) {
+				writeWithMessageConverters(body, inputMessage, outputMessage);
+			}
 		}
 
 		@SuppressWarnings("unchecked")
