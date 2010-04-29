@@ -92,6 +92,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 	private Remote exportedObject;
 
+	private boolean createdRegistry = false;
+
 
 	/**
 	 * Set the name of the exported RMI service,
@@ -258,10 +260,13 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 					"RMIServerSocketFactory without RMIClientSocketFactory for registry not supported");
 		}
 
+		this.createdRegistry = false;
+
 		// Determine RMI registry to use.
 		if (this.registry == null) {
 			this.registry = getRegistry(this.registryHost, this.registryPort,
 				this.registryClientSocketFactory, this.registryServerSocketFactory);
+			this.createdRegistry = true;
 		}
 
 		// Initialize and cache exported object.
@@ -318,7 +323,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			throws RemoteException {
 
 		if (registryHost != null) {
-			// Host explictly specified: only lookup possible.
+			// Host explicitly specified: only lookup possible.
 			if (logger.isInfoEnabled()) {
 				logger.info("Looking for RMI registry at port '" + registryPort + "' of host [" + registryHost + "]");
 			}
@@ -422,15 +427,15 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	public void destroy() throws RemoteException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Unbinding RMI service '" + this.serviceName +
-					"' from registry at port '" + this.registryPort + "'");
+					"' from registry" + (this.createdRegistry ? (" at port '" + this.registryPort + "'") : ""));
 		}
 		try {
 			this.registry.unbind(this.serviceName);
 		}
 		catch (NotBoundException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("RMI service '" + this.serviceName + "' is not bound to registry at port '" +
-						this.registryPort + "' anymore", ex);
+				logger.warn("RMI service '" + this.serviceName + "' is not bound to registry"
+						+ (this.createdRegistry ? (" at port '" + this.registryPort + "' anymore") : ""), ex);
 			}
 		}
 		finally {
@@ -451,5 +456,4 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			}
 		}
 	}
-
 }
