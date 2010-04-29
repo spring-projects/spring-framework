@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,14 @@ final class SimpleClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			// Header field 0 is the status line, so we start at 1
+			// Header field 0 is the status line for most HttpURLConnections, but not on GAE
+			String name = this.connection.getHeaderFieldKey(0);
+			if (StringUtils.hasLength(name)) {
+				this.headers.add(name, this.connection.getHeaderField(0));
+			}
 			int i = 1;
 			while (true) {
-				String name = this.connection.getHeaderFieldKey(i);
+				name = this.connection.getHeaderFieldKey(i);
 				if (!StringUtils.hasLength(name)) {
 					break;
 				}
