@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.activation.FileTypeMap;
@@ -119,7 +120,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private boolean favorParameter = false;
 
 	private String parameterName = "format";
-	
+
 	private boolean useNotAcceptableStatusCode = false;
 
 	private boolean ignoreAcceptHeader = false;
@@ -188,7 +189,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 *
 	 * <p>Default is {@code false}, meaning that this view resolver returns {@code null} for
 	 * {@link #resolveViewName(String, Locale)} when an acceptable view cannot be found. This will allow for view
-	 * resolvers chaining. When this property is set to {@code true}, 
+	 * resolvers chaining. When this property is set to {@code true},
 	 * {@link #resolveViewName(String, Locale)} will respond with a view that sets the response status to
 	 * {@code 406 Not Acceptable} instead.
 	 */
@@ -229,7 +230,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	/**
 	 * Indicates whether to use the Java Activation Framework to map from file extensions to media types.
-	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used.
+	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used (if available).
 	 */
 	public void setUseJaf(boolean useJaf) {
 		this.useJaf = useJaf;
@@ -360,44 +361,14 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
 		Assert.isInstanceOf(ServletRequestAttributes.class, attrs);
-		ServletRequestAttributes servletAttrs = (ServletRequestAttributes) attrs;
 
-		List<MediaType> requestedMediaTypes = getMediaTypes(servletAttrs.getRequest());
+		List<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
 
-		List<View> candidateViews = new ArrayList<View>();
-		for (ViewResolver viewResolver : this.viewResolvers) {
-			View view = viewResolver.resolveViewName(viewName, locale);
-			if (view != null) {
-				candidateViews.add(view);
-			}
-		}
-		if (!CollectionUtils.isEmpty(this.defaultViews)) {
-			candidateViews.addAll(this.defaultViews);
-		}
+		List<View> candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);
 
-		MediaType bestRequestedMediaType = null;
-		View bestView = null;
-		for (MediaType requestedMediaType : requestedMediaTypes) {
-			for (View candidateView : candidateViews) {
-				if (StringUtils.hasText(candidateView.getContentType())) {
-					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
-					if (requestedMediaType.includes(candidateContentType)) {
-						bestRequestedMediaType = requestedMediaType;
-						bestView = candidateView;
-						break;
-					}
-				}
-			}
-			if (bestView != null) {
-				break;
-			}
-		}
+		View bestView = getBestView(candidateViews, requestedMediaTypes);
 
 		if (bestView != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Returning [" + bestView + "] based on requested media type '" +
-						bestRequestedMediaType + "'");
-			}
 			return bestView;
 		}
 		else {
@@ -414,6 +385,71 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				return null;
 			}
 		}
+	}
+
+	private List<View> getCandidateViews(String viewName, Locale locale, List<MediaType> requestedMediaTypes)
+			throws Exception {
+		List<View> candidateViews = new ArrayList<View>();
+
+		for (ViewResolver viewResolver : this.viewResolvers) {
+			View view = viewResolver.resolveViewName(viewName, locale);
+			if (view != null) {
+				candidateViews.add(view);
+			}
+			for (MediaType requestedMediaType : requestedMediaTypes) {
+				List<String> extensions = getExtensionsForMediaType(requestedMediaType);
+				for (String extension : extensions) {
+					String viewNameWithExtension = viewName + "." + extension;
+					view = viewResolver.resolveViewName(viewNameWithExtension, locale);
+					if (view != null) {
+						candidateViews.add(view);
+					}
+				}
+
+			}
+		}
+
+		if (!CollectionUtils.isEmpty(this.defaultViews)) {
+			candidateViews.addAll(this.defaultViews);
+		}
+		return candidateViews;
+	}
+
+	private List<String> getExtensionsForMediaType(MediaType requestedMediaType) {
+		List<String> result = new ArrayList<String>();
+		for (Entry<String, MediaType> entry : mediaTypes.entrySet()) {
+			if (requestedMediaType.includes(entry.getValue())) {
+				result.add(entry.getKey());
+			}
+		}
+		return result;
+	}
+
+	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes) {
+		MediaType bestRequestedMediaType = null;
+		View bestView = null;
+		for (MediaType requestedMediaType : requestedMediaTypes) {
+			for (View candidateView : candidateViews) {
+				if (StringUtils.hasText(candidateView.getContentType())) {
+					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
+					if (requestedMediaType.includes(candidateContentType)) {
+						bestRequestedMediaType = requestedMediaType;
+						bestView = candidateView;
+						break;
+					}
+				}
+			}
+			if (bestView != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							"Returning [" + bestView + "] based on requested media type '" + bestRequestedMediaType +
+									"'");
+				}
+				break;
+			}
+		}
+		return bestView;
+
 	}
 
 	/**
