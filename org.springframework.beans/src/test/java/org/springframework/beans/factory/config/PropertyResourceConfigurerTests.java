@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -376,6 +376,9 @@ public final class PropertyResourceConfigurerTests {
 		cas.addGenericArgumentValue("${var}name${age}");
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
+
+		pvs.add("stringArray", new String[] {"${os.name}", "${age}"});
+
 		List<Object> friends = new ManagedList<Object>();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
@@ -422,6 +425,9 @@ public final class PropertyResourceConfigurerTests {
 		assertEquals(tb2, tb1.getSpouse());
 		assertEquals(1, tb1.getSomeMap().size());
 		assertEquals("myValue", tb1.getSomeMap().get("myKey"));
+		assertEquals(2, tb2.getStringArray().length);
+		assertEquals(System.getProperty("os.name"), tb2.getStringArray()[0]);
+		assertEquals("98", tb2.getStringArray()[1]);
 		assertEquals(2, tb2.getFriends().size());
 		assertEquals("na98me", tb2.getFriends().iterator().next());
 		assertEquals(tb2, tb2.getFriends().toArray()[1]);

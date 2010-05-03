@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,6 +183,9 @@ public class BeanDefinitionVisitor {
 				return new RuntimeBeanNameReference(newBeanName);
 			}
 		}
+		else if (value instanceof Object[]) {
+			visitArray((Object[]) value);
+		}
 		else if (value instanceof List) {
 			visitList((List) value);
 		}
@@ -204,6 +207,17 @@ public class BeanDefinitionVisitor {
 			return resolveStringValue((String) value);
 		}
 		return value;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void visitArray(Object[] arrayVal) {
+		for (int i = 0; i < arrayVal.length; i++) {
+			Object elem = arrayVal[i];
+			Object newVal = resolveValue(elem);
+			if (!ObjectUtils.nullSafeEquals(newVal, elem)) {
+				arrayVal[i] = newVal;
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
