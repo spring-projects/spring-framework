@@ -32,7 +32,6 @@ import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.interceptor.TransactionAspectUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -238,7 +237,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Determine the specific transaction manager to use for the given transaction.
 	 */
 	protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
-		if (this.transactionManager != null || this.beanFactory == null) {
+		if (this.transactionManager != null || this.beanFactory == null || txAttr == null) {
 			return this.transactionManager;
 		}
 		String qualifier = txAttr.getQualifier();
