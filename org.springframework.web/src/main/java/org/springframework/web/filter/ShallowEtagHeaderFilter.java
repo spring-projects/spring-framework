@@ -113,8 +113,9 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Generate the ETag header value from the given response body byte array. <p>The default implementation generates an
-	 * MD5 hash.
+	 * Generate the ETag header value from the given response body byte array.
+	 *
+	 * <p>The default implementation generates an MD5 hash.
 	 *
 	 * @param bytes the response bdoy as byte array
 	 * @return the ETag header value
@@ -140,7 +141,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		private PrintWriter writer;
 
-		private int statusCode = -1;
+		private int statusCode = HttpServletResponse.SC_OK;
 
 		private ShallowEtagResponseWrapper(HttpServletResponse response) {
 			super(response);

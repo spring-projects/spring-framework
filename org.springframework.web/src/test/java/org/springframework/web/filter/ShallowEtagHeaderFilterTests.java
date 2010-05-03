@@ -31,7 +31,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
 
-public class ShallowEtagHeaderFilterTest {
+public class ShallowEtagHeaderFilterTests {
 
 	private ShallowEtagHeaderFilter filter;
 
@@ -85,7 +85,6 @@ public class ShallowEtagHeaderFilterTest {
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid request passed", request, filterRequest);
-				((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
 				byte[] responseBody = "Hello World".getBytes("UTF-8");
 				FileCopyUtils.copy(responseBody, filterResponse.getOutputStream());
 			}
