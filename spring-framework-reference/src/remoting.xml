@@ -10,7 +10,7 @@
     <para>Spring features integration classes for remoting support using
     various technologies. The remoting support eases the development of
     remote-enabled services, implemented by your usual (Spring) POJOs.
-    Currently, Spring supports four remoting technologies: <itemizedlist>
+    Currently, Spring supports the following remoting technologies: <itemizedlist>
         <listitem>
           <para><emphasis>Remote Method Invocation (RMI)</emphasis>. Through
           the use of the <classname>RmiProxyFactoryBean</classname> and the
@@ -222,7 +222,7 @@ public class AccountServiceImpl implements AccountService {
       Using Spring's <classname>DispatcherServlet</classname> principles, as
       known from Spring Web MVC usage, you can easily wire up such a servlet
       exposing your services. First we'll have to create a new servlet in your
-      application (this an excerpt from
+      application (this is an excerpt from
       <filename>'web.xml'</filename>):</para>
 
       <programlisting language="xml">&lt;servlet&gt;
@@ -358,7 +358,7 @@ public class AccountServiceImpl implements AccountService {
     &lt;property name="authorizedRoles" value="administrator,operator"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>This an example where we explicitly mention the
+      <para>This is an example where we explicitly mention the
       <classname>BeanNameUrlHandlerMapping</classname> and set an interceptor
       allowing only administrators and operators to call the beans mentioned
       in this application context.</para>
@@ -376,7 +376,7 @@ public class AccountServiceImpl implements AccountService {
     <title>Exposing services using HTTP invokers</title>
 
     <para>As opposed to Burlap and Hessian, which are both lightweight
-    protocols using their own slim serialization mechanisms, Spring Http
+    protocols using their own slim serialization mechanisms, Spring HTTP
     invokers use the standard Java serialization mechanism to expose services
     through HTTP. This has a huge advantage if your arguments and return types
     are complex types that cannot be serialized using the serialization
@@ -393,7 +393,7 @@ public class AccountServiceImpl implements AccountService {
     <section id="remoting-httpinvoker-server">
       <title>Exposing the service object</title>
 
-      <para>Setting up the HTTP invoker infrastructure for a service objects
+      <para>Setting up the HTTP invoker infrastructure for a service object
       much resembles the way you would do using Hessian or Burlap. Just as
       Hessian support provides the
       <classname>HessianServiceExporter</classname>, Spring's HttpInvoker
@@ -439,10 +439,10 @@ public class AccountServiceImpl implements AccountService {
     &lt;url-pattern&gt;/remoting/AccountService&lt;/url-pattern&gt;
 &lt;/servlet-mapping&gt;</programlisting>
 
-      <para>f you are running outside of a servlet container and are using
+      <para>If you are running outside of a servlet container and are using
       Sun's Java 6, then you can use the built-in HTTP server implementation.
-      You can configure the SimpleHttpServerFactoryBean together with a
-      SimpleHttpInvokerServiceExporter as is shown in this example:</para>
+      You can configure the <classname>SimpleHttpServerFactoryBean</classname> together with a
+      <classname>SimpleHttpInvokerServiceExporter</classname> as is shown in this example:</para>
 
       <programlisting language="xml">&lt;bean name="accountExporter" 
     class="org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter"&gt;
@@ -619,7 +619,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
 
       <para>Where <literal>serviceInterface</literal> is our remote business
       interface the clients will use. <literal>wsdlDocumentUrl</literal> is
-      the URL for the WSDL file. Spring needs this a startup time to create
+      the URL for the WSDL file. Spring needs this at startup time to create
       the JAX-RPC Service. <literal>namespaceUri</literal> corresponds to the
       targetNamespace in the .wsdl file. <literal>serviceName</literal>
       corresponds to the service name in the .wsdl file.
@@ -1000,7 +1000,7 @@ public class AccountServiceEndpoint {
       <title>Exposing web services using XFire</title>
 
       <para>XFire is a lightweight SOAP library, hosted by Codehaus. Exposing
-      XFire is done using a XFire context that shipping with XFire itself in
+      XFire is done using a XFire context that is shipping with XFire itself in
       combination with a RemoteExporter-style bean you have to add to your
       <interfacename>WebApplicationContext</interfacename>. As with all
       methods that allow you to expose service, you have to create a
@@ -1226,12 +1226,12 @@ public class Client {
     <title>Considerations when choosing a technology</title>
 
     <para>Each and every technology presented here has its drawbacks. You
-    should carefully consider you needs, the services your exposing and the
+    should carefully consider your needs, the services you are exposing and the
     objects you'll be sending over the wire when choosing a technology.</para>
 
     <para>When using RMI, it's not possible to access the objects through the
     HTTP protocol, unless you're tunneling the RMI traffic. RMI is a fairly
-    heavy-weight protocol in that it support full-object serialization which
+    heavy-weight protocol in that it supports full-object serialization which
     is important when using a complex data model that needs serialization over
     the wire. However, RMI-JRMP is tied to Java clients: It is a Java-to-Java
     remoting solution.</para>
@@ -1402,7 +1402,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       response HTTP Location header where the newly created object can be
       found. In case of an exception processing the HTTP request, an exception
       of the type <classname>RestClientException</classname> will be
-      thrown, this behavior can be changed by plugging in another <interfacename>ResponseErrorHandler</interfacename>
+      thrown; this behavior can be changed by plugging in another <interfacename>ResponseErrorHandler</interfacename>
 	  implementation into the <classname>RestTemplate</classname>.</para>
 
       <para>Objects passed to and returned from these methods are converted to
@@ -1495,7 +1495,7 @@ URI location = template.postForLocation(uri, booking, "1");
         <title>Dealing with request and response headers</title>
 
         <para>Besides the methods described above, the <classname>RestTemplate</classname>
-        also has the <methodname>exchange</methodname> method, which can be
+        also has the <methodname>execute</methodname> method, which can be
         used for arbitrary HTTP method execution based on the <classname>HttpEntity</classname>
         class.</para>
 
