@@ -2523,9 +2523,9 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <programlisting language="xml">&lt;%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%&gt;
 &lt;html&gt;
    &lt;head&gt;
-      &lt;link rel="stylesheet" href="&lt;spring:theme code="styleSheet"/&gt;" type="text/css"/&gt;
+      &lt;link rel="stylesheet" href="&lt;spring:theme code='styleSheet'/&gt;" type="text/css"/&gt;
    &lt;/head&gt;
-   &lt;body style="background=&lt;spring:theme code="background"/&gt;"&gt;
+   &lt;body style="background=&lt;spring:theme code='background'/&gt;"&gt;
       ...
    &lt;/body&gt;
 &lt;/html&gt;</programlisting>
@@ -2685,7 +2685,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <para>The next step is to create a controller that handles the file
       upload.This controller is very similar to a <link
       linkend="mvc-ann-controller">normal annotated
-      <interfacename>@Controllers</interfacename></link>, except that we use
+      <interfacename>@Controller</interfacename></link>, except that we use
       <classname>MultipartHttpServletRequest</classname> or
       <filename>MultipartFile</filename> in the method parameters:
       <programlisting language="java">@Controller

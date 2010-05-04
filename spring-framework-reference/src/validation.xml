@@ -40,7 +40,7 @@
 
     <section id="validator">
         <title>Validation using Spring's <interfacename>Validator</interfacename> interface</title>
-        <para>Spring's features a <interfacename>Validator</interfacename> interface that you can
+        <para>Spring features a <interfacename>Validator</interfacename> interface that you can
         use to validate objects. The <interfacename>Validator</interfacename> interface works using
         an <interfacename>Errors</interfacename> object so that while validating, validators can report
         validation failures to the <interfacename>Errors</interfacename> object.</para>
@@ -1258,7 +1258,7 @@ public interface FormatterRegistry {
 			<para>
 				JSR-303 standardizes validation constraint declaration and metadata for the Java platform.
 				Using this API, you annotate domain model properties with declarative validation constraints and the runtime enforces them.
-				There are a number of built-in constraints you can can take advantage of.
+				There are a number of built-in constraints you can take advantage of.
 				You may also define your own custom constraints.
 			</para>
 			<para>
@@ -1384,7 +1384,7 @@ public class MyConstraintValidator implements ConstraintValidator {
 				<para>
 					The default <classname>LocalValidatorFactoryBean</classname> configuration should prove sufficient for most cases.
 					There are a number of other configuration options for various JSR-303 constructs, from message interpolation to traversal resolution.
-					See the JavaDocs of <classname>LocalValidatorFactoryBean</classname> more information on these options.
+					See the JavaDocs of <classname>LocalValidatorFactoryBean</classname> for more information on these options.
 				</para>
 			</section>
 		</section>
@@ -1510,7 +1510,7 @@ public class MyController {
 				<para>
 					With this minimal configuration, anytime a @Valid @Controller input is encountered, it will be validated by the JSR-303 provider.
 					JSR-303, in turn, will enforce any constraints declared against the input.
-					Any ConstaintViolations will automatically be exposed as errors in the BindingResult renderable by standard Spring MVC form tags.
+					Any ConstraintViolations will automatically be exposed as errors in the BindingResult renderable by standard Spring MVC form tags.
 				</para>
 			</section>
 		</section>
