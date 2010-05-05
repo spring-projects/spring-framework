@@ -1324,7 +1324,7 @@ public class ExampleBean {
         <para>The <literal>value</literal> attribute of the
         <literal>&lt;property/&gt;</literal> element specifies a property or
         constructor argument as a human-readable string representation. <link
-        linkend="beans-factory-collaborators-propertyeditor">As mentioned
+        linkend="beans-beans-conversion">As mentioned
         previously</link>, JavaBeans <literal>PropertyEditors</literal> are
         used to convert these string values from a
         <classname>String</classname> to the actual type of the property or
@@ -2296,8 +2296,7 @@ support=support@example.co.uk</programlisting>
       bean B every time one is needed.</para>
 
       <para>A solution is to forego some inversion of control. You can <link
-      linkend="beans-factory-aware-beanfactoryaware">make bean A aware of the
-      container</link> by implementing the
+      linkend="beans-factory-aware">make bean A aware of the container</link> by implementing the
       <interfacename>ApplicationContextAware</interfacename> interface, and by
       <link linkend="beans-factory-client">making a getBean("B") call to the
       container</link> ask for (a typically new) bean B instance every time

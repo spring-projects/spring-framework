@@ -62,7 +62,22 @@
     <para>
 		There are many excellent articles and tutorials that show how to get started with Spring 3 features.
 		Read them at the <ulink url="http://www.springsource.org/documentation">Spring Documentation</ulink> page.
-	</para>
+	  </para>
+	  <para id="new-in-3-samples">
+	  The samples have been improved and updated to take advantage of the new features in Spring 3.
+	  Additionally, the samples have been moved out of the source tree into a dedicated SVN 
+	  <ulink url="https://anonsvn.springframework.org/svn/spring-samples/">repository</ulink> available at:</para>
+	  
+    <para>
+	  <literal>https://anonsvn.springframework.org/svn/spring-samples/</literal>
+	  </para>
+	  
+	  <para>As such, the samples are no longer distributed alongside Spring 3 and need to be downloaded separately from the repository mentioned above. However, this documentation
+	  will continue to refer to some samples (in particular Petclinic) to illustrate various features.</para>
+	  
+	  <note>For more information on Subversion (or in short SVN), see the project homepage at:
+      <literal>http://subversion.apache.org/</literal>
+	  </note>
 
   </section>
 
