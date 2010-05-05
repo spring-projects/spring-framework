@@ -1757,8 +1757,8 @@ public class SimpleTest {
     <section id="testing-examples-petclinic">
       <title>PetClinic example</title>
 
-      <para>The PetClinic sample application included with the full Spring
-      distribution illustrates several features of the <emphasis>Spring
+      <para>The PetClinic application, available from the <link linkend="new-in-3-samples">samples repository</link>,
+      illustrates several features of the <emphasis>Spring
       TestContext Framework</emphasis> in a JUnit 4.5+ environment. Most test
       functionality is included in the
       <classname>AbstractClinicTests</classname>, for which a partial listing

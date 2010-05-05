@@ -589,12 +589,10 @@
     configure access to Servlet or Portlet facilities.</para>
 
     <tip>
-      <para>The Spring distribution ships with the
-      <emphasis>PetClinic</emphasis> sample, a web application that leverages
+      <para>Available in the <link linkend="new-in-3-samples">samples repository</link>, 
+      the <emphasis>PetClinic</emphasis> web application leverages
       the annotation support described in this section, in the context of
-      simple form processing. The <emphasis>PetClinic</emphasis> application
-      resides in the <literal>org.springframework.samples.petclinic</literal>
-      module.</para>
+      simple form processing.</para>
 
       <!-- MLP Note removed reference to imagedb -->
     </tip>
