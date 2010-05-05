@@ -28,6 +28,7 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.Assign;
+import org.springframework.expression.spel.ast.BeanReference;
 import org.springframework.expression.spel.ast.BooleanLiteral;
 import org.springframework.expression.spel.ast.CompoundExpression;
 import org.springframework.expression.spel.ast.ConstructorReference;
@@ -437,6 +438,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return pop();
 		} else if (maybeEatTypeReference() || maybeEatNullReference() || maybeEatConstructorReference() || maybeEatMethodOrProperty(false) || maybeEatFunctionOrVar()) {
 			return pop();
+		} else if (maybeEatBeanReference()) {
+			return pop();
 		} else if (maybeEatProjection(false) || maybeEatSelection(false) || maybeEatIndexer()) {
 			return pop();
 		} else {
@@ -444,7 +447,30 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 	}
 	
-
+	// parse: @beanname @'bean.name'
+	// quoted if dotted
+	private boolean maybeEatBeanReference() {
+		if (peekToken(TokenKind.BEAN_REF)) {
+			Token beanRefToken = nextToken();
+			Token beanNameToken = null;
+			String beanname = null;
+			if (peekToken(TokenKind.IDENTIFIER)) {
+				beanNameToken = eatToken(TokenKind.IDENTIFIER);
+				beanname = beanNameToken.data;
+			} else if (peekToken(TokenKind.LITERAL_STRING)) {
+				beanNameToken = eatToken(TokenKind.LITERAL_STRING);
+				beanname = beanNameToken.stringValue();
+				beanname = beanname.substring(1, beanname.length() - 1);
+			} else {
+				raiseInternalException(beanRefToken.startpos,SpelMessage.INVALID_BEAN_REFERENCE);
+			}
+			
+			BeanReference beanReference = new BeanReference(toPos(beanNameToken),beanname);
+			constructedNodes.push(beanReference);
+			return true;
+		}
+		return false;
+	}
 
 	private boolean maybeEatTypeReference() {
 		if (peekToken(TokenKind.IDENTIFIER)) {
@@ -454,7 +480,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			}
 			nextToken();
 			eatToken(TokenKind.LPAREN);
-			SpelNodeImpl node = eatPossiblyQualifiedId(true);
+			SpelNodeImpl node = eatPossiblyQualifiedId();
 			// dotted qualified id
 			eatToken(TokenKind.RPAREN);
 			constructedNodes.push(new TypeReference(toPos(typeName),node));
@@ -518,31 +544,24 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	/**
-	 * Eat an identifier, possibly qualified (meaning that it is dotted).  If the dollarAllowed parameter is true then
-	 * it will process any dollar characters found between names, and this allows it to support inner type references
-	 * correctly.  For example 'com.foo.bar.Outer$Inner' will produce the identifier sequence com, foo, bar, Outer, $Inner,
-	 * note that the $ has been prefixed onto the Inner identifier.  The code in TypeReference which reforms this into
-	 * a typename copes with the $ prefixed identifiers.
+	 * Eat an identifier, possibly qualified (meaning that it is dotted).
 	 * TODO AndyC Could create complete identifiers (a.b.c) here rather than a sequence of them? (a, b, c)
 	 */
-	private SpelNodeImpl eatPossiblyQualifiedId(boolean dollarAllowed) {
+	private SpelNodeImpl eatPossiblyQualifiedId() {
 		List<SpelNodeImpl> qualifiedIdPieces = new ArrayList<SpelNodeImpl>();
 		Token startnode = eatToken(TokenKind.IDENTIFIER);
 		qualifiedIdPieces.add(new Identifier(startnode.stringValue(),toPos(startnode)));
-		boolean dollar = false;
-		while (peekToken(TokenKind.DOT,true) || (dollarAllowed && (dollar = peekToken(TokenKind.DOLLAR,true)))) {
+		while (peekToken(TokenKind.DOT,true)) {
 			Token node = eatToken(TokenKind.IDENTIFIER);
-			if (dollar) {
-				qualifiedIdPieces.add(new Identifier("$"+node.stringValue(),((node.startpos-1)<<16)+node.endpos));			
-			} else {
-				qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));							
-			}
+			qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));							
 		}
 		return new QualifiedIdentifier(toPos(startnode.startpos,qualifiedIdPieces.get(qualifiedIdPieces.size()-1).getEndPosition()),qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
 	}
 	
+	// This is complicated due to the support for dollars in identifiers.  Dollars are normally separate tokens but
+	// there we want to combine a series of identifiers and dollars into a single identifier
 	private boolean maybeEatMethodOrProperty(boolean nullSafeNavigation) {
-		if (peekToken(TokenKind.IDENTIFIER)) {
+			if (peekToken(TokenKind.IDENTIFIER)) {
 			Token methodOrPropertyName = nextToken();
 			SpelNodeImpl[] args = maybeEatMethodArgs();
 			if (args==null) {
@@ -557,6 +576,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			}
 		}
 		return false;
+
 	}
 	
 	//constructor  
@@ -564,7 +584,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private boolean maybeEatConstructorReference() {
 		if (peekIdentifierToken("new")) {
 			Token newToken = nextToken();
-			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId(true);
+			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId();
 			List<SpelNodeImpl> nodes = new ArrayList<SpelNodeImpl>();
 			nodes.add(possiblyQualifiedConstructorName);
 			eatConstructorArgs(nodes);
