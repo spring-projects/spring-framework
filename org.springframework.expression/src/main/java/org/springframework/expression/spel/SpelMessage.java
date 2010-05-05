@@ -93,6 +93,9 @@ public enum SpelMessage {
 	UNABLE_TO_CREATE_LIST_FOR_INDEXING(Kind.ERROR,1054,"Unable to dynamically create a List to replace a null value"),//
 	UNABLE_TO_CREATE_MAP_FOR_INDEXING(Kind.ERROR,1055,"Unable to dynamically create a Map to replace a null value"),//
 	UNABLE_TO_DYNAMICALLY_CREATE_OBJECT(Kind.ERROR,1056,"Unable to dynamically create instance of ''{0}'' to replace a null value"),//
+	NO_BEAN_RESOLVER_REGISTERED(Kind.ERROR,1057,"No bean resolver registered in the context to resolve access to bean ''{0}''"),//
+	EXCEPTION_DURING_BEAN_RESOLUTION(Kind.ERROR, 1058, "A problem occurred when trying to resolve bean ''{0}'':''{1}''"), // 
+	INVALID_BEAN_REFERENCE(Kind.ERROR,1059,"@ can only be followed by an identifier or a quoted name"),//
 	;
 
 	private Kind kind;

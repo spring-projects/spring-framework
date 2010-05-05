@@ -20,8 +20,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
@@ -267,18 +267,18 @@ public class ParsingTests {
 	// parseCheck("{'a','b','a','d','e'}.distinct()");
 	// }
 
-	// // references
-	// public void testReferences01() {
-	// parseCheck("@(foo)");
-	// }
-	//
-	// public void testReferences02() {
-	// parseCheck("@(p:foo)");
-	// }
-	//
-	// public void testReferences04() {
-	// parseCheck("@(a/b/c:foo)", "@(a.b.c:foo)");
-	// }// normalized to '.' for separator in QualifiedIdentifier
+	// references
+	@Test
+	public void testReferences01() {
+		parseCheck("@foo");
+		parseCheck("@'foo.bar'");
+		parseCheck("@\"foo.bar.goo\"","@'foo.bar.goo'");
+	}
+
+	@Test
+	public void testReferences03() {
+		parseCheck("@$$foo");
+	}
 
 	// properties
 	@Test

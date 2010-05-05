@@ -74,6 +74,11 @@ public interface EvaluationContext {
 	OperatorOverloader getOperatorOverloader();
 
 	/**
+	 * @return a bean resolver that can lookup named beans
+	 */
+	BeanResolver getBeanResolver();
+
+	/**
 	 * Set a named variable within this evaluation context to a specified value.
 	 * @param name variable to set
 	 * @param value value to be placed in the variable

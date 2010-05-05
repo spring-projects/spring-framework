@@ -96,6 +96,9 @@ class Tokenizer {
 				case ']':
 					pushCharToken(TokenKind.RSQUARE);
 					break;
+				case '@':
+					pushCharToken(TokenKind.BEAN_REF);
+					break;
 				case '^':
 					if (isTwoCharToken(TokenKind.SELECT_FIRST)) {
 						pushPairToken(TokenKind.SELECT_FIRST);
@@ -134,7 +137,7 @@ class Tokenizer {
 					if (isTwoCharToken(TokenKind.SELECT_LAST)) {
 						pushPairToken(TokenKind.SELECT_LAST);
 					} else {
-						pushCharToken(TokenKind.DOLLAR);					
+						lexIdentifier();
 					}
 					break;
 				case '>':
@@ -424,9 +427,9 @@ class Tokenizer {
 		tokens.add(new Token(kind,pos,pos+kind.getLength()));
 	}
 
-	//	ID:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|DOT_ESCAPED)*;
+	//	ID:	('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'$'|'0'..'9'|DOT_ESCAPED)*;
 	private boolean isIdentifier(char ch) {
-		return isAlphabetic(ch) || isDigit(ch) || ch=='_';
+		return isAlphabetic(ch) || isDigit(ch) || ch=='_' || ch=='$';
 	}
 	
 	private boolean isChar(char a,char b) {

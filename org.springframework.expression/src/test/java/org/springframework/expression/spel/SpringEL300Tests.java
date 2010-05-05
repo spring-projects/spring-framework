@@ -24,6 +24,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.AccessException;
+import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -349,6 +350,47 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
 		Assert.assertEquals("hello",name);
 	}
+	
+	/** $ related identifiers */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testDollarPrefixedIdentifier_SPR7100() {
+		Holder h = new Holder();
+		StandardEvaluationContext eContext = new StandardEvaluationContext(h);
+		eContext.addPropertyAccessor(new MapAccessor());
+		h.map.put("$foo","wibble");
+		h.map.put("foo$bar","wobble");
+		h.map.put("foobar$$","wabble");
+		h.map.put("$","wubble");
+		h.map.put("$$","webble");
+		h.map.put("$_$","tribble");
+		String name = null;
+		Expression expr = null;
+		
+		expr = new SpelExpressionParser().parseRaw("map.$foo");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("wibble",name);
+
+		expr = new SpelExpressionParser().parseRaw("map.foo$bar");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("wobble",name);
+
+		expr = new SpelExpressionParser().parseRaw("map.foobar$$");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("wabble",name);
+
+		expr = new SpelExpressionParser().parseRaw("map.$");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("wubble",name);
+
+		expr = new SpelExpressionParser().parseRaw("map.$$");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("webble",name);
+
+		expr = new SpelExpressionParser().parseRaw("map.$_$");
+		name = expr.getValue(eContext,String.class);
+		Assert.assertEquals("tribble",name);
+	}
 
 	/** Should be accessing Goo.wibble field because 'bar' variable evaluates to "wibble" */
 	@Test
@@ -392,6 +434,36 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		expr.getValue(eContext,String.class); // will be using the cached accessor this time
 		Assert.assertEquals("world",g.value);
 	}
+	
+	@Test
+	public void testDollars() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		Expression expr = null;
+		expr = new SpelExpressionParser().parseRaw("m['$foo']");
+		eContext.setVariable("file_name","$foo");
+		Assert.assertEquals("wibble",expr.getValue(eContext,String.class));
+	}
+	
+	@Test
+	public void testDollars2() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		Expression expr = null;
+		expr = new SpelExpressionParser().parseRaw("m[$foo]");
+		eContext.setVariable("file_name","$foo");
+		Assert.assertEquals("wibble",expr.getValue(eContext,String.class));
+	}
+	
+	static class XX {
+		public Map<String,String> m;
+		
+		public String floo ="bar";
+		
+		public XX() {
+			 m = new HashMap<String,String>();
+			m.put("$foo","wibble");
+			m.put("bar","siddle");
+		}
+	}
 
 	static class Goo {
 		
@@ -409,6 +481,11 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			value = s;
 		}
 		
+	}
+	
+	static class Holder {
+		
+		public Map map = new HashMap();
 	}
 	
 	// ---
@@ -452,5 +529,102 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		}
 	};
 	
+//	@Test
+//	public void testFails() {
+//		
+//		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+//		evaluationContext.setVariable("target", new Foo2());
+//		for (int i = 0; i < 300000; i++) {
+//			evaluationContext.addPropertyAccessor(new MapAccessor());
+//			ExpressionParser parser = new SpelExpressionParser();
+//			Expression expression = parser.parseExpression("#target.execute(payload)");
+//			Message message = new Message();
+//			message.setPayload(i+"");
+//			expression.getValue(evaluationContext, message);
+//		}	
+//	}
+	
+	static class Foo2 {
+		public void execute(String str){
+			System.out.println("Value: " + str);
+		}
+	}
+	
+	static class Message{
+		private String payload;
+
+		public String getPayload() {
+			return payload;
+		}
+
+		public void setPayload(String payload) {
+			this.payload = payload;
+		}
+	}
+
+	// bean resolver tests
+	
+	@Test
+	public void beanResolution() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		Expression expr = null;
+
+		// no resolver registered == exception
+		try {
+			expr = new SpelExpressionParser().parseRaw("@foo");
+			Assert.assertEquals("custard",expr.getValue(eContext,String.class));
+		} catch (SpelEvaluationException see) {
+			Assert.assertEquals(SpelMessage.NO_BEAN_RESOLVER_REGISTERED,see.getMessageCode());
+			Assert.assertEquals("foo",see.getInserts()[0]);
+		}
+		
+		eContext.setBeanResolver(new MyBeanResolver());
+
+		// bean exists
+		expr = new SpelExpressionParser().parseRaw("@foo");
+		Assert.assertEquals("custard",expr.getValue(eContext,String.class));
+
+		// bean does not exist
+		expr = new SpelExpressionParser().parseRaw("@bar");
+		Assert.assertEquals(null,expr.getValue(eContext,String.class));
+
+		// bean name will cause AccessException
+		expr = new SpelExpressionParser().parseRaw("@goo");
+		try {
+			Assert.assertEquals(null,expr.getValue(eContext,String.class));
+		} catch (SpelEvaluationException see) {
+			Assert.assertEquals(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION,see.getMessageCode());
+			Assert.assertEquals("goo",see.getInserts()[0]);
+			Assert.assertTrue(see.getCause() instanceof AccessException);
+			Assert.assertTrue(((AccessException)see.getCause()).getMessage().startsWith("DONT"));
+		}
+		
+		// bean exists
+		expr = new SpelExpressionParser().parseRaw("@'foo.bar'");
+		Assert.assertEquals("trouble",expr.getValue(eContext,String.class));
+		
+		// bean exists
+		try {
+			expr = new SpelExpressionParser().parseRaw("@378");
+			Assert.assertEquals("trouble",expr.getValue(eContext,String.class));
+		} catch (SpelParseException spe) {
+			Assert.assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
+		}
+	}
+	
+	static class MyBeanResolver implements BeanResolver {
+		public Object resolve(EvaluationContext context, String beanname) throws AccessException {
+			if (beanname.equals("foo")) {
+				return "custard";
+			} else if (beanname.equals("foo.bar")) {
+				return "trouble";
+			} else if (beanname.equals("goo")) {
+				throw new AccessException("DONT ASK ME ABOUT GOO");
+			}
+			return null;
+		}
+	}
+	
+	// end bean resolver tests
 
 }

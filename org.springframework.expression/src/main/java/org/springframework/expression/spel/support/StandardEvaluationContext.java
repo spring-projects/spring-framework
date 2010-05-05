@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.expression.BeanResolver;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodFilter;
@@ -45,7 +46,7 @@ import org.springframework.util.Assert;
  * @since 3.0
  */
 public class StandardEvaluationContext implements EvaluationContext {
-
+	
 	private TypedValue rootObject;
 
 	private List<ConstructorResolver> constructorResolvers;
@@ -65,6 +66,8 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
 	private final Map<String, Object> variables = new HashMap<String, Object>();
+	
+	private BeanResolver beanResolver;
 
 
 	public StandardEvaluationContext() {
@@ -134,6 +137,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return this.methodResolvers;
 	}
 
+	public void setBeanResolver(BeanResolver beanResolver) {
+		this.beanResolver = beanResolver;
+	}
+	
+	public BeanResolver getBeanResolver() {
+		return this.beanResolver;
+	}
+	
 	public void setMethodResolvers(List<MethodResolver> methodResolvers) {
 		this.methodResolvers = methodResolvers;
 	}

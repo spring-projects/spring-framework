@@ -26,8 +26,8 @@ enum TokenKind {
 	COLON(":"),HASH("#"),RSQUARE("]"), LSQUARE("["), 
 	DOT("."), PLUS("+"), STAR("*"), DIV("/"), NOT("!"), MINUS("-"), SELECT_FIRST("^["), SELECT_LAST("$["), QMARK("?"), PROJECT("!["),
 	GE(">="),GT(">"),LE("<="),LT("<"),EQ("=="),NE("!="),ASSIGN("="), INSTANCEOF("instanceof"), MATCHES("matches"), BETWEEN("between"),
-	SELECT("?["),  MOD("%"), POWER("^"), DOLLAR("$"),
-	ELVIS("?:"), SAFE_NAVI("?.");
+	SELECT("?["),  MOD("%"), POWER("^"),
+	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@")
 	;
 	 
 	char[] tokenChars;
