@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.ExpressionInvocationTargetException;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypedValue;
@@ -123,8 +124,9 @@ public class MethodReference extends SpelNodeImpl {
 			if (rootCause instanceof RuntimeException) {
 				throw (RuntimeException)rootCause;
 			} else {
-				throw new SpelEvaluationException( getStartPosition(), rootCause, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
-					this.name, state.getActiveContextObject().getValue().getClass().getName(), rootCause.getMessage());
+				throw new ExpressionInvocationTargetException( getStartPosition(), 
+						"A problem occurred when trying to execute method '"+this.name+"' on object of type '"+state.getActiveContextObject().getValue().getClass().getName()+"'",
+						rootCause);
 			}
 		}
 	}
