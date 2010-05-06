@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionInvocationTargetException;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodFilter;
 import org.springframework.expression.MethodResolver;
@@ -146,7 +147,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 			Assert.fail();
 		} catch (Exception e) {
 			// 4 means it will throw a checked exception - this will be wrapped
-			if (!(e instanceof SpelEvaluationException)) {
+			if (!(e instanceof ExpressionInvocationTargetException)) {
 				e.printStackTrace();
 				Assert.fail("Should have been wrapped");
 			}
@@ -181,6 +182,29 @@ public class MethodInvocationTests extends ExpressionTestCase {
 			}
 			// normal
 		}
+	}
+	
+	@Test
+	public void testMethodThrowingException_SPR6941_2() {
+		// Test method on inventor: throwException()
+		// On 1 it will throw an IllegalArgumentException
+		// On 2 it will throw a RuntimeException
+		// On 3 it will exit normally
+		// In each case it increments the Inventor field 'counter' when invoked
+		
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expr = parser.parseExpression("throwException(#bar)");
+		
+		eContext.setVariable("bar",4);
+		try {
+			expr.getValue(eContext);
+			Assert.fail();
+		} catch (ExpressionInvocationTargetException e) {
+			Throwable t = e.getCause();
+			Assert.assertEquals("org.springframework.expression.spel.testresources.Inventor$TestException", t.getClass().getName());
+			return;
+		}
+		Assert.fail("Should not be a SpelEvaluationException");
 	}
 	
 	@Test
