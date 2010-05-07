@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,8 +264,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final LinkedList<Session> sessionList;
 
-		private final Map<Destination, MessageProducer> cachedProducers =
-				new HashMap<Destination, MessageProducer>();
+		private final Map<DestinationCacheKey, MessageProducer> cachedProducers =
+				new HashMap<DestinationCacheKey, MessageProducer>();
 
 		private final Map<ConsumerCacheKey, MessageConsumer> cachedConsumers =
 				new HashMap<ConsumerCacheKey, MessageConsumer>();
@@ -337,7 +337,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		private MessageProducer getCachedProducer(Destination dest) throws JMSException {
-			MessageProducer producer = this.cachedProducers.get(dest);
+			DestinationCacheKey cacheKey = new DestinationCacheKey(dest);
+			MessageProducer producer = this.cachedProducers.get(cacheKey);
 			if (producer != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Found cached JMS MessageProducer for destination [" + dest + "]: " + producer);
@@ -348,7 +349,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating cached JMS MessageProducer for destination [" + dest + "]: " + producer);
 				}
-				this.cachedProducers.put(dest, producer);
+				this.cachedProducers.put(cacheKey, producer);
 			}
 			return new CachedMessageProducer(producer);
 		}
@@ -428,12 +429,52 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 
 	/**
+	 * Simple wrapper class around a Destination reference.
+	 * Used as the cache key when caching MessageProducer objects.
+	 */
+	private static class DestinationCacheKey {
+
+		private final Destination destination;
+
+		private String destinationString;
+
+		public DestinationCacheKey(Destination destination) {
+			this.destination = destination;
+		}
+
+		private String getDestinationString() {
+			if (this.destinationString == null) {
+				this.destinationString = this.destination.toString();
+			}
+			return this.destinationString;
+		}
+
+		protected boolean destinationEquals(DestinationCacheKey otherKey) {
+			return (this.destination.getClass().equals(otherKey.destination.getClass()) &&
+					(this.destination.equals(otherKey.destination) ||
+							getDestinationString().equals(otherKey.getDestinationString())));
+		}
+
+		public boolean equals(Object other) {
+			// Effectively checking object equality as well as toString equality.
+			// On WebSphere MQ, Destination objects do not implement equals...
+			return (other == this || destinationEquals((DestinationCacheKey) other));
+		}
+
+		public int hashCode() {
+			// Can't use a more specific hashCode since we can't rely on
+			// this.destination.hashCode() actually being the same value
+			// for equivalent destinations... Thanks a lot, WebSphere MQ!
+			return this.destination.getClass().hashCode();
+		}
+	}
+
+
+	/**
 	 * Simple wrapper class around a Destination and other consumer attributes.
 	 * Used as the cache key when caching MessageConsumer objects.
 	 */
-	private static class ConsumerCacheKey {
-
-		private final Destination destination;
+	private static class ConsumerCacheKey extends DestinationCacheKey {
 
 		private final String selector;
 
@@ -441,8 +482,8 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final String subscription;
 
-		private ConsumerCacheKey(Destination destination, String selector, boolean noLocal, String subscription) {
-			this.destination = destination;
+		public ConsumerCacheKey(Destination destination, String selector, boolean noLocal, String subscription) {
+			super(destination);
 			this.selector = selector;
 			this.noLocal = noLocal;
 			this.subscription = subscription;
@@ -453,14 +494,10 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				return true;
 			}
 			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
-			return (this.destination.equals(otherKey.destination) &&
+			return (destinationEquals(otherKey) &&
 					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
 					this.noLocal == otherKey.noLocal &&
 					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription));
-		}
-
-		public int hashCode() {
-			return this.destination.hashCode();
 		}
 	}
 
