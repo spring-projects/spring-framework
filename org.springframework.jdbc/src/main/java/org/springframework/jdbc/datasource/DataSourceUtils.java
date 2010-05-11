@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -170,8 +169,11 @@ public abstract class DataSourceUtils {
 				logger.debug("Changing isolation level of JDBC Connection [" + con + "] to " +
 						definition.getIsolationLevel());
 			}
-			previousIsolationLevel = con.getTransactionIsolation();
-			con.setTransactionIsolation(definition.getIsolationLevel());
+			int currentIsolation = con.getTransactionIsolation();
+			if (currentIsolation != definition.getIsolationLevel()) {
+				previousIsolationLevel = currentIsolation;
+				con.setTransactionIsolation(definition.getIsolationLevel());
+			}
 		}
 
 		return previousIsolationLevel;
@@ -193,7 +195,7 @@ public abstract class DataSourceUtils {
 					logger.debug("Resetting isolation level of JDBC Connection [" +
 							con + "] to " + previousIsolationLevel);
 				}
-				con.setTransactionIsolation(previousIsolationLevel.intValue());
+				con.setTransactionIsolation(previousIsolationLevel);
 			}
 
 			// Reset read-only flag.
