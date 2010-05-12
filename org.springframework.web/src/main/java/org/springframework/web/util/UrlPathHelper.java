@@ -158,8 +158,10 @@ public class UrlPathHelper {
 		else {
 			// Special case: URI is different from servlet path.
 			// Can happen e.g. with index page: URI="/", servletPath="/index.html"
-			// Use servlet path in this case, as it indicates the actual target path.
-			return servletPath;
+			// Use path info if available, as it indicates an index page within
+			// a servlet mapping. Otherwise, use the full servlet path.
+			String pathInfo = request.getPathInfo();
+			return (pathInfo != null ? pathInfo : servletPath);
 		}
 	}
 
