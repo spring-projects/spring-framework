@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.remoting.jaxws;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceRef;
+import javax.xml.ws.soap.AddressingFeature;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -37,9 +38,29 @@ import org.springframework.context.support.GenericApplicationContext;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class JaxWsSupportTests extends TestCase {
+public class JaxWsSupportTests {
 
+	@Test
 	public void testJaxWsPortAccess() throws Exception {
+		doTestJaxWsPortAccess((Object[]) null);
+	}
+
+	@Test
+	public void testJaxWsPortAccessWithFeatureObject() throws Exception {
+		doTestJaxWsPortAccess(new AddressingFeature());
+	}
+
+	@Test
+	public void testJaxWsPortAccessWithFeatureClass() throws Exception {
+		doTestJaxWsPortAccess(AddressingFeature.class);
+	}
+
+	@Test
+	public void testJaxWsPortAccessWithFeatureString() throws Exception {
+		doTestJaxWsPortAccess("javax.xml.ws.soap.AddressingFeature");
+	}
+
+	private void doTestJaxWsPortAccess(Object... features) throws Exception {
 		GenericApplicationContext ac = new GenericApplicationContext();
 
 		GenericBeanDefinition serviceDef = new GenericBeanDefinition();
@@ -60,6 +81,9 @@ public class JaxWsSupportTests extends TestCase {
 		clientDef.getPropertyValues().add("serviceName", "OrderService");
 		clientDef.getPropertyValues().add("serviceInterface", OrderService.class);
 		clientDef.getPropertyValues().add("lookupServiceOnStartup", Boolean.FALSE);
+		if (features != null) {
+			clientDef.getPropertyValues().add("webServiceFeatures", features);
+		}
 		ac.registerBeanDefinition("client", clientDef);
 
 		GenericBeanDefinition serviceFactoryDef = new GenericBeanDefinition();

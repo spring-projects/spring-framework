@@ -25,17 +25,22 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor}  for accessing a
@@ -54,7 +59,7 @@ import org.springframework.remoting.RemoteProxyFailureException;
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
 public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
-		implements MethodInterceptor, InitializingBean {
+		implements MethodInterceptor, BeanClassLoaderAware, InitializingBean {
 
 	private Service jaxWsService;
 
@@ -74,9 +79,13 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 
 	private Map<String, Object> customProperties;
 
+	private Object[] webServiceFeatures;
+
 	private Class<?> serviceInterface;
 
 	private boolean lookupServiceOnStartup = true;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private QName portQName;
 
@@ -245,6 +254,15 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	}
 
 	/**
+	 * Allows for providing JAX-WS 2.1 WebServiceFeature specifications:
+	 * in the form of actual {@link javax.xml.ws.WebServiceFeature} objects,
+	 * WebServiceFeature Class references, or WebServiceFeature class names.
+	 */
+	public void setWebServiceFeatures(Object[] webServiceFeatures) {
+		this.webServiceFeatures = webServiceFeatures;
+	}
+
+	/**
 	 * Set the interface of the service that this factory should create a proxy for.
 	 */
 	public void setServiceInterface(Class<?> serviceInterface) {
@@ -271,6 +289,23 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		this.lookupServiceOnStartup = lookupServiceOnStartup;
 	}
 
+	/**
+	 * Set the bean ClassLoader to use for this interceptor:
+	 * for resolving WebServiceFeature class names as specified through
+	 * {@link #setWebServiceFeatures}, and also for building a client
+	 * proxy in the {@link JaxWsPortProxyFactoryBean} subclass.
+	 */
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
+	/**
+	 * Return the bean ClassLoader to use for this interceptor.
+	 */
+	protected ClassLoader getBeanClassLoader() {
+		return this.beanClassLoader;
+	}
+
 
 	public void afterPropertiesSet() {
 		if (this.lookupServiceOnStartup) {
@@ -278,6 +313,9 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		}
 	}
 
+	/**
+	 * Initialize the JAX-WS port for this interceptor.
+	 */
 	public void prepare() {
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("Property 'serviceInterface' is required");
@@ -287,8 +325,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 			serviceToUse = createJaxWsService();
 		}
 		this.portQName = getQName(getPortName() != null ? getPortName() : getServiceInterface().getName());
-		Object stub = (getPortName() != null ?
-				serviceToUse.getPort(this.portQName, getServiceInterface()) : serviceToUse.getPort(getServiceInterface()));
+		Object stub = getPortStub(serviceToUse, (getPortName() != null ? this.portQName : null));
 		preparePortStub(stub);
 		this.portStub = stub;
 	}
@@ -310,6 +347,23 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	protected final QName getPortQName() {
 		return this.portQName;
+	}
+
+	/**
+	 * Obtain the port stub from the given JAX-WS Service.
+	 * @param service the Service object to obtain the port from
+	 * @param portQName the name of the desired port, if specified
+	 * @return the corresponding port object as returned from
+	 * <code>Service.getPort(...)</code>
+	 */
+	protected Object getPortStub(Service service, QName portQName) {
+		if (this.webServiceFeatures != null) {
+			return new FeaturePortProvider().getPortStub(service, portQName, this.webServiceFeatures);
+		}
+		else {
+			return (portQName != null ? service.getPort(portQName, getServiceInterface()) :
+					service.getPort(getServiceInterface()));
+		}
 	}
 
 	/**
@@ -422,6 +476,46 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		catch (Throwable ex) {
 			throw new RemoteProxyFailureException("Invocation of stub method failed: " + method, ex);
 		}
+	}
+
+
+	/**
+	 * Inner class in order to avoid a hard-coded JAX-WS 2.1 dependency.
+	 * JAX-WS 2.0, as used in Java EE 5, didn't have WebServiceFeatures yet...
+	 */
+	private class FeaturePortProvider {
+
+		public Object getPortStub(Service service, QName portQName, Object[] features) {
+			WebServiceFeature[] wsFeatures = new WebServiceFeature[features.length];
+			for (int i = 0; i < features.length; i++) {
+				wsFeatures[i] = convertWebServiceFeature(features[i]);
+			}
+			return (portQName != null ? service.getPort(portQName, getServiceInterface(), wsFeatures) :
+					service.getPort(getServiceInterface(), wsFeatures));
+		}
+
+		private WebServiceFeature convertWebServiceFeature(Object feature) {
+			Assert.notNull(feature, "WebServiceFeature specification object must not be null");
+			if (feature instanceof WebServiceFeature) {
+				return (WebServiceFeature) feature;
+			}
+			else if (feature instanceof Class) {
+				return (WebServiceFeature) BeanUtils.instantiate((Class<?>) feature);
+			}
+			else if (feature instanceof String) {
+				try {
+					Class<?> featureClass = getBeanClassLoader().loadClass((String) feature);
+					return (WebServiceFeature) BeanUtils.instantiate(featureClass);
+				}
+				catch (ClassNotFoundException ex) {
+					throw new IllegalArgumentException("Could not load WebServiceFeature class [" + feature + "]");
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Unknown WebServiceFeature specification type: " + feature.getClass());
+			}
+		}
+
 	}
 
 }
