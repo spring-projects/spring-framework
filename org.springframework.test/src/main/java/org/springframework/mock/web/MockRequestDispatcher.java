@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	public void include(ServletRequest request, ServletResponse response) {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
-		getMockHttpServletResponse(response).setIncludedUrl(this.url);
+		getMockHttpServletResponse(response).addIncludedUrl(this.url);
 		if (logger.isDebugEnabled()) {
 			logger.debug("MockRequestDispatcher: including URL [" + this.url + "]");
 		}
