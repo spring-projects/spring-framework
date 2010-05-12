@@ -338,7 +338,7 @@ public class DefaultPersistenceUnitManager
 	 */
 	protected final MutablePersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
 		PersistenceUnitInfo pui = this.persistenceUnitInfos.get(persistenceUnitName);
-		if (Proxy.isProxyClass(pui.getClass())) {
+		if (pui != null && Proxy.isProxyClass(pui.getClass())) {
 			// JPA 2.0 PersistenceUnitInfo decorator with a SpringPersistenceUnitInfo as target
 			Jpa2PersistenceUnitInfoDecorator dec = (Jpa2PersistenceUnitInfoDecorator) Proxy.getInvocationHandler(pui);
 			return dec.getTarget();
