@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private String forwardedUrl;
 
-	private String includedUrl;
+	private final List<String> includedUrls = new ArrayList<String>();
 
 
 	//---------------------------------------------------------------------
@@ -443,11 +443,28 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void setIncludedUrl(String includedUrl) {
-		this.includedUrl = includedUrl;
+		this.includedUrls.clear();
+		if (includedUrl != null) {
+			this.includedUrls.add(includedUrl);
+		}
 	}
 
 	public String getIncludedUrl() {
-		return this.includedUrl;
+		int count = this.includedUrls.size();
+		if (count > 1) {
+			throw new IllegalStateException(
+					"More than 1 URL included - check getIncludedUrls instead: " + this.includedUrls);
+		}
+		return (count == 1 ? this.includedUrls.get(0) : null);
+	}
+
+	public void addIncludedUrl(String includedUrl) {
+		Assert.notNull(includedUrl, "Included URL must not be null");
+		this.includedUrls.add(includedUrl);
+	}
+
+	public List<String> getIncludedUrls() {
+		return this.includedUrls;
 	}
 
 
