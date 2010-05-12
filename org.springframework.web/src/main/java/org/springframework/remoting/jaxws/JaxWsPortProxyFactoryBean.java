@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package org.springframework.remoting.jaxws;
 import javax.xml.ws.BindingProvider;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} for a specific port of a
@@ -34,16 +32,10 @@ import org.springframework.util.ClassUtils;
  * @see LocalJaxWsServiceFactoryBean
  */
 public class JaxWsPortProxyFactoryBean extends JaxWsPortClientInterceptor
-		implements FactoryBean<Object>, BeanClassLoaderAware {
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+		implements FactoryBean<Object> {
 
 	private Object serviceProxy;
 
-
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
 
 	@Override
 	public void afterPropertiesSet() {
@@ -54,7 +46,7 @@ public class JaxWsPortProxyFactoryBean extends JaxWsPortClientInterceptor
 		pf.addInterface(getServiceInterface());
 		pf.addInterface(BindingProvider.class);
 		pf.addAdvice(this);
-		this.serviceProxy = pf.getProxy(this.beanClassLoader);
+		this.serviceProxy = pf.getProxy(getBeanClassLoader());
 	}
 
 
