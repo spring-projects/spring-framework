@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.core.NamedInheritableThreadLocal;
 /**
  * A holder for a thread-local user {@link JodaTimeContext}.
  *
- * @since 3.0
  * @author Keith Donald
+ * @since 3.0
  */
 public final class JodaTimeContextHolder {
 
@@ -51,18 +51,18 @@ public final class JodaTimeContextHolder {
 		return jodaTimeContextHolder.get();
 	}
 
+
 	/**
-	 * Gets the Formatter with the user-specific settings applied to thefrom the base <code>formatter</code>.
-	 * @param formatter the base formatter that establishes default formatting rules, generally user independent
-	 * @param locale the current user locale (may be null if not known)
-	 * @return the user's DateTimeFormatter
+	 * Obtain a DateTimeFormatter with user-specific settings applied to the given base Formatter.
+	 * @param formatter the base formatter that establishes default formatting rules
+	 * (generally user independent)
+	 * @param locale the current user locale (may be <code>null</code> if not known)
+	 * @return the user-specific DateTimeFormatter
 	 */
 	public static DateTimeFormatter getFormatter(DateTimeFormatter formatter, Locale locale) {
-		if (locale != null) {
-			formatter = formatter.withLocale(locale);
-		}
+		DateTimeFormatter formatterToUse = (locale != null ? formatter.withLocale(locale) : formatter);
 		JodaTimeContext context = getJodaTimeContext();
-		return (context != null ? context.getFormatter(formatter) : formatter);
+		return (context != null ? context.getFormatter(formatterToUse) : formatterToUse);
 	}
-	
+
 }
