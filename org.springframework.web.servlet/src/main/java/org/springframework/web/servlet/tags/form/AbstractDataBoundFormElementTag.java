@@ -219,6 +219,16 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	}
 
 	/**
+	 * Get a display String for the given value, converted by a PropertyEditor
+	 * that the BindStatus may have registered for the value's Class.
+	 */
+	protected String convertToDisplayString(Object value) throws JspException {
+		PropertyEditor editor = (value != null ? getBindStatus().findEditor(value.getClass()) : null);
+		return getDisplayString(value, editor);
+	}
+
+
+	/**
 	 * Disposes of the {@link BindStatus} instance.
 	 */
 	@Override

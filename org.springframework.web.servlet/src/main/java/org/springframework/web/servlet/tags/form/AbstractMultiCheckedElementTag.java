@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,7 +228,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 			}
 		}
 		else {
-			throw new IllegalArgumentException("Attribute 'items' must be a Collection, an Array or a Map");
+			throw new IllegalArgumentException("Attribute 'items' must be an array, a Collection or a Map");
 		}
 
 		return SKIP_BODY;
@@ -286,7 +286,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		tagWriter.endTag();
 		tagWriter.startTag("label");
 		tagWriter.writeAttribute("for", id);
-		tagWriter.appendValue(label.toString());
+		tagWriter.appendValue(convertToDisplayString(label));
 		tagWriter.endTag();
 		tagWriter.endTag();
 	}
