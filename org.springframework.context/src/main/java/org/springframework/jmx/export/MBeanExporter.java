@@ -44,7 +44,6 @@ import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -873,7 +872,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
 		}
 		for (String beanName : beanNames) {
-			if (!isExcluded(beanName)) {
+			if (!isExcluded(beanName) && !isBeanDefinitionAbstract(this.beanFactory, beanName)) {
 				try {
 					Class beanClass = this.beanFactory.getType(beanName);
 					if (beanClass != null && callback.include(beanClass, beanName)) {
@@ -900,9 +899,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 					}
 					// otherwise ignore beans where the class is not resolvable
 				}
-				catch (BeanIsAbstractException ex) {
-					// ignore - can't expose an abstract bean
-				}
 			}
 		}
 	}
@@ -915,6 +911,14 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				(this.excludedBeans.contains(beanName) ||
 						(beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX) &&
 								this.excludedBeans.contains(beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length())))));
+	}
+
+	/**
+	 * Return whether the specified bean definition should be considered as abstract.
+	 */
+	private boolean isBeanDefinitionAbstract(ListableBeanFactory beanFactory, String beanName) {
+		return (beanFactory instanceof ConfigurableListableBeanFactory && beanFactory.containsBeanDefinition(beanName) &&
+				((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(beanName).isAbstract());
 	}
 
 
