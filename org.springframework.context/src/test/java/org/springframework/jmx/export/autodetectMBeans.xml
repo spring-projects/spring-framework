@@ -25,4 +25,6 @@
 
 	<bean id="toBeIgnored" class="javax.management.DynamicMBean" abstract="true"/>
 
+	<bean id="toBeIgnoredToo" class="javax.management.DynamicMBean" abstract="true" lazy-init="true"/>
+
 </beans>
