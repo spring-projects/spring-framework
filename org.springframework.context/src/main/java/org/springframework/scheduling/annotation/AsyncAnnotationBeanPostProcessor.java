@@ -89,10 +89,10 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 	}
 
 	public void afterPropertiesSet() {
-		this.asyncAnnotationAdvisor = (this.executor != null) ?
-				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor();
+		this.asyncAnnotationAdvisor = (this.executor != null ?
+				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor());
 		if (this.asyncAnnotationType != null) {
-			this.asyncAnnotationAdvisor.setAsyncAnnotationType(asyncAnnotationType);
+			this.asyncAnnotationAdvisor.setAsyncAnnotationType(this.asyncAnnotationType);
 		}
 	}
 
@@ -115,7 +115,7 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (AopUtils.canApply(this.asyncAnnotationAdvisor, targetClass)) {
 			if (bean instanceof Advised) {
-				((Advised) bean).addAdvisor(this.asyncAnnotationAdvisor);
+				((Advised) bean).addAdvisor(0, this.asyncAnnotationAdvisor);
 				return bean;
 			}
 			else {
