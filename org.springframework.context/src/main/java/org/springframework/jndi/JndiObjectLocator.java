@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 
 	private String jndiName;
 
-	private Class expectedType;
+	private Class<?> expectedType;
 
 
 	/**
@@ -73,7 +73,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * Specify the type that the located JNDI object is supposed
 	 * to be assignable to, if any.
 	 */
-	public void setExpectedType(Class expectedType) {
+	public void setExpectedType(Class<?> expectedType) {
 		this.expectedType = expectedType;
 	}
 
@@ -81,7 +81,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * Return the type that the located JNDI object is supposed
 	 * to be assignable to, if any.
 	 */
-	public Class getExpectedType() {
+	public Class<?> getExpectedType() {
 		return this.expectedType;
 	}
 
