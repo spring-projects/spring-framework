@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public class StopWatch {
 	/** Total running time */
 	private long totalTimeMillis;
 
+
 	/**
 	 * Construct a new stop watch. Does not start any task.
 	 */
@@ -85,6 +86,7 @@ public class StopWatch {
 		this.id = id;
 	}
 
+
 	/**
 	 * Determine whether the TaskInfo array is built over time. Set this to
 	 * "false" when using a StopWatch for millions of intervals, or the task
@@ -93,6 +95,7 @@ public class StopWatch {
 	public void setKeepTaskList(boolean keepTaskList) {
 		this.keepTaskList = keepTaskList;
 	}
+
 
 	/**
 	 * Start an unnamed task. The results are undefined if {@link #stop()}
@@ -146,12 +149,13 @@ public class StopWatch {
 		return this.running;
 	}
 
+
 	/**
 	 * Return the time taken by the last task.
 	 */
 	public long getLastTaskTimeMillis() throws IllegalStateException {
 		if (this.lastTaskInfo == null) {
-			throw new IllegalStateException("No tests run: can't get last interval");
+			throw new IllegalStateException("No tasks run: can't get last task interval");
 		}
 		return this.lastTaskInfo.getTimeMillis();
 	}
@@ -161,30 +165,41 @@ public class StopWatch {
 	 */
 	public String getLastTaskName() throws IllegalStateException {
 		if (this.lastTaskInfo == null) {
-			throw new IllegalStateException("No tests run: can't get last interval");
+			throw new IllegalStateException("No tasks run: can't get last task name");
 		}
 		return this.lastTaskInfo.getTaskName();
 	}
 
 	/**
+	 * Return the last task as a TaskInfo object.
+	 */
+	public TaskInfo getLastTaskInfo() throws IllegalStateException {
+		if (this.lastTaskInfo == null) {
+			throw new IllegalStateException("No tasks run: can't get last task info");
+		}
+		return this.lastTaskInfo;
+	}
+
+
+	/**
 	 * Return the total time in milliseconds for all tasks.
 	 */
 	public long getTotalTimeMillis() {
-		return totalTimeMillis;
+		return this.totalTimeMillis;
 	}
 
 	/**
 	 * Return the total time in seconds for all tasks.
 	 */
 	public double getTotalTimeSeconds() {
-		return totalTimeMillis / 1000.0;
+		return this.totalTimeMillis / 1000.0;
 	}
 
 	/**
 	 * Return the number of tasks timed.
 	 */
 	public int getTaskCount() {
-		return taskCount;
+		return this.taskCount;
 	}
 
 	/**
@@ -196,6 +211,7 @@ public class StopWatch {
 		}
 		return this.taskList.toArray(new TaskInfo[this.taskList.size()]);
 	}
+
 
 	/**
 	 * Return a short description of the total running time.
@@ -251,16 +267,17 @@ public class StopWatch {
 		return sb.toString();
 	}
 
+
 	/**
 	 * Inner class to hold data about one task executed within the stop watch.
 	 */
-	public static class TaskInfo {
+	public static final class TaskInfo {
 
 		private final String taskName;
 
 		private final long timeMillis;
 
-		private TaskInfo(String taskName, long timeMillis) {
+		TaskInfo(String taskName, long timeMillis) {
 			this.taskName = taskName;
 			this.timeMillis = timeMillis;
 		}
@@ -269,21 +286,21 @@ public class StopWatch {
 		 * Return the name of this task.
 		 */
 		public String getTaskName() {
-			return taskName;
+			return this.taskName;
 		}
 
 		/**
 		 * Return the time in milliseconds this task took.
 		 */
 		public long getTimeMillis() {
-			return timeMillis;
+			return this.timeMillis;
 		}
 
 		/**
 		 * Return the time in seconds this task took.
 		 */
 		public double getTimeSeconds() {
-			return timeMillis / 1000.0;
+			return this.timeMillis / 1000.0;
 		}
 	}
 
