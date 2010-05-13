@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspException;
 
 /**
@@ -45,8 +44,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * bound value.
 	 */
 	protected void renderFromValue(Object item, Object value, TagWriter tagWriter) throws JspException {
-		PropertyEditor editor = (value != null ? getBindStatus().findEditor(value.getClass()) : null);
-		tagWriter.writeAttribute("value", getDisplayString(value, editor));
+		tagWriter.writeAttribute("value", convertToDisplayString(value));
 		if (isOptionSelected(value) || (value != item && isOptionSelected(item))) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
