@@ -12,7 +12,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.jdbc"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.oxm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.transaction"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.web"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-2.0.8.jar" sourcepath="/IVY_CACHE/com.lowagie.text/com.springsource.com.lowagie.text/2.0.8/com.springsource.com.lowagie.text-sources-2.0.8.jar"/>
