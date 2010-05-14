@@ -24,6 +24,9 @@ import java.net.URL;
 import org.springframework.core.io.VfsUtils;
 
 /**
+ * Artificial class used for accessing the {@link VfsUtils} methods without exposing them
+ * to the entire world. 
+ * 
  * @author Costin Leau
  *
  */
