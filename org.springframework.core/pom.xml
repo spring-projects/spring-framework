@@ -45,13 +45,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.vfs</groupId>
-			<artifactId>com.springsource.org.jboss.virtual</artifactId>
-			<version>2.1.0.GA</version>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
