@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @author Costin Leau
  * @author Arjen Poutsma
+ * @author Luke Taylor
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
  * @since 1.2
@@ -115,6 +116,25 @@ public abstract class DomUtils {
 	public static String getChildElementValueByTagName(Element ele, String childEleName) {
 		Element child = getChildElementByTagName(ele, childEleName);
 		return (child != null ? getTextValue(child) : null);
+	}
+
+	/**
+	 * Retrieve all child elements of the given DOM element	
+
+	 * @param ele		   the DOM element to analyze
+	 * @return a List of child <code>org.w3c.dom.Element</code> instances
+	 */
+	public static List<Element> getChildElements(Element ele) {
+		Assert.notNull(ele, "Element must not be null");
+		NodeList nl = ele.getChildNodes();
+		List<Element> childEles = new ArrayList<Element>();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node instanceof Element) {
+				childEles.add((Element) node);
+			}
+		}
+		return childEles;
 	}
 
 	/**

@@ -9,7 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.oxm"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.caucho/com.springsource.com.caucho/3.2.1/com.springsource.com.caucho-3.2.1.jar" sourcepath="/IVY_CACHE/com.caucho/com.springsource.com.caucho/3.2.1/com.springsource.com.caucho-sources-3.2.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.el/com.springsource.javax.el/1.0.0/com.springsource.javax.el-1.0.0.jar" sourcepath="/IVY_CACHE/javax.el/com.springsource.javax.el/1.0.0/com.springsource.javax.el-sources-1.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.faces/com.springsource.javax.faces/1.2.0.08/com.springsource.javax.faces-1.2.0.08.jar" sourcepath="/IVY_CACHE/javax.faces/com.springsource.javax.faces/1.2.0.08/com.springsource.javax.faces-sources-1.2.0.08.jar"/>

@@ -102,20 +102,17 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		configureAutoProxyCreator(parserContext, element);
 
-		NodeList childNodes = element.getChildNodes();
-		for (int i = 0; i < childNodes.getLength(); i++) {
-			Node node = childNodes.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				String localName = parserContext.getDelegate().getLocalName(node);
-				if (POINTCUT.equals(localName)) {
-					parsePointcut((Element) node, parserContext);
-				}
-				else if (ADVISOR.equals(localName)) {
-					parseAdvisor((Element) node, parserContext);
-				}
-				else if (ASPECT.equals(localName)) {
-					parseAspect((Element) node, parserContext);
-				}
+		List<Element> childElts = DomUtils.getChildElements(element);
+		for (Element elt: childElts) {
+			String localName = parserContext.getDelegate().getLocalName(elt);
+			if (POINTCUT.equals(localName)) {
+				parsePointcut(elt, parserContext);
+			}
+			else if (ADVISOR.equals(localName)) {
+				parseAdvisor(elt, parserContext);
+			}
+			else if (ASPECT.equals(localName)) {
+				parseAspect(elt, parserContext);
 			}
 		}
 
