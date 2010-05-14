@@ -34,11 +34,13 @@ import org.springframework.util.ReflectionUtils;
  * Utility for detecting the JBoss VFS version available in the classpath.
  * JBoss AS 5+ uses VFS 2.x (package <code>org.jboss.virtual</code>) while JBoss AS 6+ uses
  * VFS 3.x (package <code>org.jboss.vfs</code>).
+ * 
  * <p/>
  * Thanks go to Marius Bogoevici for the initial patch. 
+ *
+ * <b>Note:</b> This is an internal class and should not be used outside the framework.
  * 
  * @author Costin Leau
- * 
  */
 public abstract class VfsUtils {
 
@@ -228,12 +230,14 @@ public abstract class VfsUtils {
 		}
 	}
 
-	protected static Object getRoot(URL url) throws IOException {
-		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URL, null, url);
-	}
-
 	static Object getRoot(URI url) throws IOException {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URI, null, url);
+	}
+
+	// protected methods used by the support sub-package
+
+	protected static Object getRoot(URL url) throws IOException {
+		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URL, null, url);
 	}
 
 	protected static Object doGetVisitorAttribute() {
