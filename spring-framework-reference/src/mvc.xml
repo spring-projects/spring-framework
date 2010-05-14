@@ -2681,7 +2681,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
 &lt;/html&gt;</programlisting>
 
       <para>The next step is to create a controller that handles the file
-      upload.This controller is very similar to a <link
+      upload. This controller is very similar to a <link
       linkend="mvc-ann-controller">normal annotated
       <interfacename>@Controller</interfacename></link>, except that we use
       <classname>MultipartHttpServletRequest</classname> or
