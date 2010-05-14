@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 
-import org.jboss.virtual.VFS;
-
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -89,12 +87,11 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	private static class VfsResourceDelegate {
 
 		public static Resource getResource(URL url) throws IOException {
-			return new VfsResource(VFS.getRoot(url));
+			return new VfsResource(VfsUtils.getRoot(url));
 		}
 
 		public static Resource getResource(URI uri) throws IOException {
-			return new VfsResource(VFS.getRoot(uri));
+			return new VfsResource(VfsUtils.getRoot(uri));
 		}
 	}
-
 }
