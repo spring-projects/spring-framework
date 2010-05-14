@@ -604,7 +604,7 @@ public abstract class AbstractJdbcInsert {
 		int colIndex = 0;
 		for (Object value : values) {
 			colIndex++;
-			if (columnTypes == null || colIndex < columnTypes.length) {
+			if (columnTypes == null || colIndex > columnTypes.length) {
 				StatementCreatorUtils.setParameterValue(preparedStatement, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
 			}
 			else {
