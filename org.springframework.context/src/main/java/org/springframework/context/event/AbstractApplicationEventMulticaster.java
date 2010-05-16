@@ -45,12 +45,12 @@ import org.springframework.core.OrderComparator;
  *
  * @author Juergen Hoeller
  * @since 1.2.3
- * @see #getApplicationListeners()
+ * @see #getApplicationListeners(ApplicationEvent)
  * @see SimpleApplicationEventMulticaster
  */
 public abstract class AbstractApplicationEventMulticaster implements ApplicationEventMulticaster, BeanFactoryAware {
 
-	private final ListenerRetriever defaultRetriever = new ListenerRetriever();
+	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
 	private final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
 			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>();
@@ -133,7 +133,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 			return retriever.getApplicationListeners();
 		}
 		else {
-			retriever = new ListenerRetriever();
+			retriever = new ListenerRetriever(true);
 			LinkedList<ApplicationListener> allListeners = new LinkedList<ApplicationListener>();
 			synchronized (this.defaultRetriever) {
 				for (ApplicationListener listener : this.defaultRetriever.applicationListeners) {
@@ -221,9 +221,12 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 
 		public final Set<String> applicationListenerBeans;
 
-		public ListenerRetriever() {
+		private final boolean preFiltered;
+
+		public ListenerRetriever(boolean preFiltered) {
 			this.applicationListeners = new LinkedHashSet<ApplicationListener>();
 			this.applicationListenerBeans = new LinkedHashSet<String>();
+			this.preFiltered = preFiltered;
 		}
 
 		public Collection<ApplicationListener> getApplicationListeners() {
@@ -235,7 +238,9 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 				BeanFactory beanFactory = getBeanFactory();
 				for (String listenerBeanName : this.applicationListenerBeans) {
 					ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-					allListeners.add(listener);
+					if (!this.preFiltered && !allListeners.contains(listener)) {
+						allListeners.add(listener);
+					}
 				}
 			}
 			OrderComparator.sort(allListeners);
