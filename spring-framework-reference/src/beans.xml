@@ -1098,9 +1098,9 @@ public class ExampleBean {
           </listitem>
 
           <listitem>
-            <para>Each property or constructor argument an actual definition
-            of the value to set, or a reference to another bean in the
-            container.</para>
+            <para>Each property or constructor argument is an actual
+            definition of the value to set, or a reference to another bean
+            in the container.</para>
           </listitem>
 
           <listitem>
@@ -1801,8 +1801,8 @@ support=support@example.co.uk</programlisting>
 
         <para>The example shows an attribute in the p-namespace called email
         in the bean definition. This tells Spring to include a property
-        declaration. As previously mentioned, the p-namespace does not have a
-        schema definition, so you can set the name of the attribute to the
+        declaration. As previously mentioned, the p-namespace does not have
+        a schema definition, so you can set the name of the attribute to the
         property name.</para>
 
         <para>This next example includes two more bean definitions that both
@@ -1989,7 +1989,7 @@ support=support@example.co.uk</programlisting>
           <listitem>
             <para>Autowiring can update a configuration as your objects
             evolve. For example, if you need to add a dependency to a class,
-            that dependency can be satisfied automatically without your needing to
+            that dependency can be satisfied automatically without you needing to
             modify the configuration. Thus autowiring can be especially useful
             during development, without negating the option of switching to
             explicit wiring when the code base becomes more stable.</para>
@@ -3135,9 +3135,9 @@ public class ReplacementComputeValue implements MethodReplacer {
 
         <para>After you write and test one or more custom
         <interfacename>Scope</interfacename> implementations, you need to make
-        the Spring container aware of your new scope(s). The central method to
-        register a new <interfacename>Scope</interfacename> with the Spring
-        container.</para>
+        the Spring container aware of your new scope(s). The following method is
+        the central method to register a new <interfacename>Scope</interfacename>
+        with the Spring container:</para>
 
         <programlisting language="java">void registerScope(String scopeName, Scope scope);</programlisting>
 
