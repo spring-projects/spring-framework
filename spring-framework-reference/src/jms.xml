@@ -275,19 +275,21 @@
       receiving a message (and possibly responding to it), and delegates
       boilerplate JMS infrastructure concerns to the framework.</para>
 
-      <para>There are three standard JMS message listener containers packaged
+      <para>There are two standard JMS message listener containers packaged
       with Spring, each with its specialised feature set.</para>
 
       <section id="jms-mdp-simple">
         <title>SimpleMessageListenerContainer</title>
 
-        <para>This message listener container is the simplest of the three
-        standard flavors. It simply creates a fixed number of JMS sessions at
-        startup and uses them throughout the lifespan of the container. This
-        container doesn't allow for dynamic adaption to runtime demands or
-        participate in externally managed transactions. However, it does have
-        the fewest requirements on the JMS provider: This listener container
-        only requires simple JMS API compliance.</para>
+        <para>This message listener container is the simpler of the two
+        standard flavors. It creates a fixed number of JMS sessions and
+        consumers at startup, registers the listener using the standard JMS
+        <methodname>MessageConsumer.setMessageListener</methodname> method,
+        and leaves it up the JMS provider to perform listener callbacks.
+        This variant does not allow for dynamic adaption to runtime demands or
+        for participation in externally managed transactions. Compatibility-wise,
+        it stays very close to the spirit of the standalone JMS specification
+        - but is generally not compatible with Java EE's JMS restrictions.</para>
       </section>
 
       <section id="jms-mdp-default">
@@ -297,25 +299,12 @@
         In contrast to <classname>SimpleMessageListenerContainer</classname>,
         this container variant does allow for dynamic adaption to runtime
         demands and is able to participate in externally managed transactions.
-        Each received message is registered with an XA transaction (when
-        configured with a <classname>JtaTransactionManager</classname>);
-        processing can take advantage of XA transation semantics. This
-        listener container strikes a good balance between low requirements on
-        the JMS provider and good functionality including transaction
-        participation.</para>
-      </section>
-
-      <section id="jms-mdp-server-session">
-        <title>ServerSessionMessageListenerContainer</title>
-
-        <para>This listener container leverages the JMS ServerSessionPool SPI
-        to allow for dynamic management of JMS sessions. The use of this
-        variety of message listener container enables the provider to perform
-        dynamic runtime tuning but, at the expense of requiring the JMS
-        provider to support the ServerSessionPool SPI. If there is no need for
-        provider-driven runtime tuning, look at the
-        <classname>DefaultMessageListenerContainer</classname> or the
-        <classname>SimpleMessageListenerContainer</classname> instead.</para>
+        Each received message is registered with an XA transaction when
+        configured with a <classname>JtaTransactionManager</classname>;
+        so processing may take advantage of XA transation semantics. This
+        listener container strikes a good balance between low requirements
+        on the JMS provider, advanced functionality such as transaction
+        participation, and compatibility with Java EE environments.</para>
       </section>
     </section>
 
