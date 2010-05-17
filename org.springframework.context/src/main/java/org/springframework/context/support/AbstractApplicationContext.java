@@ -22,7 +22,9 @@ import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -571,22 +573,40 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
+		Set<String> processedBeans = new HashSet<String>();
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-			Collection<BeanDefinitionRegistryPostProcessor> registryPostProcessors =
-					beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false).values();
-			for (BeanDefinitionRegistryPostProcessor postProcessor : registryPostProcessors) {
-				postProcessor.postProcessBeanFactory(beanFactory);
-			}
+			List<BeanFactoryPostProcessor> regularPostProcessors = new LinkedList<BeanFactoryPostProcessor>();
+			List<BeanDefinitionRegistryPostProcessor> registryPostProcessors =
+					new LinkedList<BeanDefinitionRegistryPostProcessor>();
 			for (BeanFactoryPostProcessor postProcessor : getBeanFactoryPostProcessors()) {
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
-					((BeanDefinitionRegistryPostProcessor) postProcessor).postProcessBeanDefinitionRegistry(registry);
+					BeanDefinitionRegistryPostProcessor registryPostProcessor =
+							(BeanDefinitionRegistryPostProcessor) postProcessor;
+					registryPostProcessor.postProcessBeanDefinitionRegistry(registry);
+					registryPostProcessors.add(registryPostProcessor);
+				}
+				else {
+					regularPostProcessors.add(postProcessor);
 				}
 			}
+			Map<String, BeanDefinitionRegistryPostProcessor> beanMap =
+					beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false);
+			List<BeanDefinitionRegistryPostProcessor> registryPostProcessorBeans =
+					new ArrayList<BeanDefinitionRegistryPostProcessor>(beanMap.values());
+			OrderComparator.sort(registryPostProcessorBeans);
+			for (BeanDefinitionRegistryPostProcessor postProcessor : registryPostProcessorBeans) {
+				postProcessor.postProcessBeanDefinitionRegistry(registry);
+			}
+			invokeBeanFactoryPostProcessors(registryPostProcessors, beanFactory);
+			invokeBeanFactoryPostProcessors(registryPostProcessorBeans, beanFactory);
+			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
+			processedBeans.addAll(beanMap.keySet());
 		}
-
-		// Invoke factory processors registered with the context instance.
-		invokeBeanFactoryPostProcessors(getBeanFactoryPostProcessors(), beanFactory);
+		else {
+			// Invoke factory processors registered with the context instance.
+			invokeBeanFactoryPostProcessors(getBeanFactoryPostProcessors(), beanFactory);
+		}
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let the bean factory post-processors apply to them!
@@ -599,7 +619,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		List<String> orderedPostProcessorNames = new ArrayList<String>();
 		List<String> nonOrderedPostProcessorNames = new ArrayList<String>();
 		for (String ppName : postProcessorNames) {
-			if (isTypeMatch(ppName, PriorityOrdered.class)) {
+			if (processedBeans.contains(ppName)) {
+				// skip - already processed in first phase above
+			}
+			else if (isTypeMatch(ppName, PriorityOrdered.class)) {
 				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
 			}
 			else if (isTypeMatch(ppName, Ordered.class)) {
@@ -634,7 +657,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Invoke the given BeanFactoryPostProcessor beans.
 	 */
 	private void invokeBeanFactoryPostProcessors(
-			List<BeanFactoryPostProcessor> postProcessors, ConfigurableListableBeanFactory beanFactory) {
+			Collection<? extends BeanFactoryPostProcessor> postProcessors, ConfigurableListableBeanFactory beanFactory) {
 
 		for (BeanFactoryPostProcessor postProcessor : postProcessors) {
 			postProcessor.postProcessBeanFactory(beanFactory);
@@ -996,7 +1019,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Close the state of this context itself.
 			closeBeanFactory();
 
+			// Let subclasses do some final clean-up if they wish...
 			onClose();
+
 			synchronized (this.activeMonitor) {
 				this.active = false;
 			}
