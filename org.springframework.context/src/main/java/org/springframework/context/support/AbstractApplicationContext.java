@@ -573,15 +573,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			Collection<BeanDefinitionRegistryPostProcessor> registryPostProcessors =
+					beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false).values();
+			for (BeanDefinitionRegistryPostProcessor postProcessor : registryPostProcessors) {
+				postProcessor.postProcessBeanFactory(beanFactory);
+			}
 			for (BeanFactoryPostProcessor postProcessor : getBeanFactoryPostProcessors()) {
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					((BeanDefinitionRegistryPostProcessor) postProcessor).postProcessBeanDefinitionRegistry(registry);
 				}
-			}
-			Collection<BeanDefinitionRegistryPostProcessor> registryPostProcessors =
-					beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false).values();
-			for (BeanDefinitionRegistryPostProcessor postProcessor : registryPostProcessors) {
-				postProcessor.postProcessBeanDefinitionRegistry(registry);
 			}
 		}
 
