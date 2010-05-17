@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -343,6 +344,49 @@ public class DataBinderTests extends TestCase {
 			assertEquals(new Float(0.0), tb.getMyFloat());
 			assertEquals("1x2", binder.getBindingResult().getFieldValue("myFloat"));
 			assertTrue(binder.getBindingResult().hasFieldErrors("myFloat"));
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
+	public void testBindingWithFormatterAgainstList() {
+		BeanWithIntegerList tb = new BeanWithIntegerList();
+		DataBinder binder = new DataBinder(tb);
+		FormattingConversionService conversionService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(conversionService);
+		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		binder.setConversionService(conversionService);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("integerList[0]", "1");
+
+		LocaleContextHolder.setLocale(Locale.GERMAN);
+		try {
+			binder.bind(pvs);
+			assertEquals(new Integer(1), tb.getIntegerList().get(0));
+			assertEquals("1", binder.getBindingResult().getFieldValue("integerList[0]"));
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
+	public void testBindingErrorWithFormatterAgainstList() {
+		BeanWithIntegerList tb = new BeanWithIntegerList();
+		DataBinder binder = new DataBinder(tb);
+		FormattingConversionService conversionService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(conversionService);
+		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
+		binder.setConversionService(conversionService);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("integerList[0]", "1x2");
+
+		LocaleContextHolder.setLocale(Locale.GERMAN);
+		try {
+			binder.bind(pvs);
+			assertTrue(tb.getIntegerList().isEmpty());
+			assertEquals("1x2", binder.getBindingResult().getFieldValue("integerList[0]"));
+			assertTrue(binder.getBindingResult().hasFieldErrors("integerList[0]"));
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -1433,6 +1477,20 @@ public class DataBinderTests extends TestCase {
 		String[] disallowedFields = binder.getBindingResult().getSuppressedFields();
 		assertEquals(1, disallowedFields.length);
 		assertEquals("beanName", disallowedFields[0]);
+	}
+
+
+	private static class BeanWithIntegerList {
+
+		private List<Integer> integerList;
+
+		public List<Integer> getIntegerList() {
+			return integerList;
+		}
+
+		public void setIntegerList(List<Integer> integerList) {
+			this.integerList = integerList;
+		}
 	}
 
 

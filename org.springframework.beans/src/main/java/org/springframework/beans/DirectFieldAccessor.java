@@ -124,7 +124,8 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		try {
 			ReflectionUtils.makeAccessible(field);
 			oldValue = field.get(this.target);
-			Object convertedValue = this.typeConverterDelegate.convertIfNecessary(oldValue, newValue, field);
+			Object convertedValue = this.typeConverterDelegate.convertIfNecessary(
+					field.getName(), oldValue, newValue, field.getType(), new TypeDescriptor(field));
 			field.set(this.target, convertedValue);
 		}
 		catch (ConverterNotFoundException ex) {

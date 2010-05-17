@@ -82,18 +82,6 @@ class TypeConverterDelegate {
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
 	 * (or <code>null</code> if not known, for example in case of a collection element)
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType) throws IllegalArgumentException {
-		return convertIfNecessary(null, null, newValue, requiredType, TypeDescriptor.valueOf(requiredType));
-	}
-
-	/**
-	 * Convert the value to the specified required type.
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
 	 * @param methodParam the method parameter that is the target of the conversion
 	 * (may be <code>null</code>)
 	 * @return the new value, possibly the result of type conversion
@@ -131,60 +119,12 @@ class TypeConverterDelegate {
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
 	 * (or <code>null</code> if not known, for example in case of a collection element)
-	 * @param methodParam the method parameter that is the target of the conversion
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	public <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
-			Class<T> requiredType, MethodParameter methodParam) throws IllegalArgumentException {
-
-		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, new TypeDescriptor(methodParam));
-	}
-
-	/**
-	 * Convert the value to the required type for the specified property.
-	 * @param oldValue the previous value, if available (may be <code>null</code>)
-	 * @param newValue the proposed new value
-	 * @param descriptor the JavaBeans descriptor for the property
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	public Object convertIfNecessary(Object oldValue, Object newValue, PropertyDescriptor descriptor)
-			throws IllegalArgumentException {
-
-		return convertIfNecessary(descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(),
-				new PropertyTypeDescriptor(descriptor, BeanUtils.getWriteMethodParameter(descriptor)));
-	}
-
-	/**
-	 * Convert the value to the required type for the specified property.
-	 * @param oldValue the previous value, if available (may be <code>null</code>)
-	 * @param newValue the proposed new value
-	 * @param field the field that is the target of the conversion
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	public Object convertIfNecessary(Object oldValue, Object newValue, Field field)
-			throws IllegalArgumentException {
-
-		return convertIfNecessary(field.getName(), oldValue, newValue, field.getType(), new TypeDescriptor(field));
-	}
-
-
-	/**
-	 * Convert the value to the required type (if necessary from a String),
-	 * for the specified property.
-	 * @param propertyName name of the property
-	 * @param oldValue the previous value, if available (may be <code>null</code>)
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
 	 * @param typeDescriptor the descriptor for the target property or field
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@SuppressWarnings("unchecked")
-	private <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
+	public <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
 			Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
 		Object convertedValue = newValue;
