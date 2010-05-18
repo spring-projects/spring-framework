@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package org.springframework.http.server;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * @author Arjen Poutsma
@@ -46,6 +47,16 @@ public class ServletHttpRequestTests {
 	public void getMethod() throws Exception {
 		mockRequest.setMethod("POST");
 		assertEquals("Invalid method", HttpMethod.POST, request.getMethod());
+	}
+
+	@Test
+	public void getURI() throws Exception {
+		URI uri = new URI("http://example.com/path?query");
+		mockRequest.setServerName(uri.getHost());
+		mockRequest.setServerPort(uri.getPort());
+		mockRequest.setRequestURI(uri.getPath());
+		mockRequest.setQueryString(uri.getQuery());
+		assertEquals("Invalid uri", uri, request.getURI());
 	}
 
 	@Test

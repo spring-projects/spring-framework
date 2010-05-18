@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
@@ -53,6 +55,15 @@ final class CommonsClientHttpRequest extends AbstractClientHttpRequest {
 
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(httpMethod.getName());
+	}
+
+	public URI getURI() {
+		try {
+			return URI.create(httpMethod.getURI().getEscapedURI());
+		}
+		catch (URIException ex) {
+			throw new IllegalStateException("Could not get HttpMethod URI: " + ex.getMessage(), ex);
+		}
 	}
 
 	@Override

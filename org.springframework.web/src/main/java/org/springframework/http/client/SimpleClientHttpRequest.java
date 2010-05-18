@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +47,15 @@ final class SimpleClientHttpRequest extends AbstractClientHttpRequest {
 
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.connection.getRequestMethod());
+	}
+
+	public URI getURI() {
+		try {
+			return this.connection.getURL().toURI();
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Could not get HttpURLConnection URI: " + ex.getMessage(), ex);
+		}
 	}
 
 	@Override
