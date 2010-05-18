@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.junit.Ignore;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
@@ -76,6 +75,7 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals(long.class, ClassUtils.forName("long"));
 		assertEquals(float.class, ClassUtils.forName("float"));
 		assertEquals(double.class, ClassUtils.forName("double"));
+		assertEquals(void.class, ClassUtils.forName("void"));
 	}
 
 	public void testForNameWithPrimitiveArrays() throws ClassNotFoundException {
