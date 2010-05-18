@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.http.server;
+
+import java.net.URI;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
@@ -32,5 +34,12 @@ public interface ServerHttpRequest extends HttpInputMessage {
 	 * @return the HTTP method as an HttpMethod enum value
 	 */
 	HttpMethod getMethod();
+
+	/**
+	 * Return the URI of the request.
+	 * @return the URI of the request
+	 */
+	URI getURI();
+
 
 }

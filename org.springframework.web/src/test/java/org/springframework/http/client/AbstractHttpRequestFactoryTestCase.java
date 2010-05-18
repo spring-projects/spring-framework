@@ -83,9 +83,11 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 
 	@Test
 	public void status() throws Exception {
+		URI uri = new URI(BASE_URL + "/status/notfound");
 		ClientHttpRequest request =
-				factory.createRequest(new URI(BASE_URL + "/status/notfound"), HttpMethod.GET);
+				factory.createRequest(uri, HttpMethod.GET);
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
+		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		ClientHttpResponse response = request.execute();
 		assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
 	}

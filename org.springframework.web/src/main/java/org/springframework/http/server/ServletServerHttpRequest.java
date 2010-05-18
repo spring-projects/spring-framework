@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.util.Assert;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -50,6 +52,17 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.servletRequest.getMethod());
+	}
+
+	public URI getURI() {
+		try {
+			return new URI(servletRequest.getScheme(), null, servletRequest.getServerName(),
+					servletRequest.getServerPort(), servletRequest.getRequestURI(),
+					servletRequest.getQueryString(), null);
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
+		}
 	}
 
 	public HttpHeaders getHeaders() {
