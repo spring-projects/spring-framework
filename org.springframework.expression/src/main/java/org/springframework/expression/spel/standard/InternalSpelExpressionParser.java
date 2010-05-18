@@ -135,14 +135,26 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (moreTokens()) {
 			Token t = peekToken();
 			if (t.kind==TokenKind.ASSIGN) { // a=b
+				if (expr==null) {
+				expr = new NullLiteral(toPos(t.startpos-1,t.endpos-1));
+			}
 				nextToken();
 				SpelNodeImpl assignedValue = eatLogicalOrExpression();
 				return new Assign(toPos(t),expr,assignedValue);
 			} else if (t.kind==TokenKind.ELVIS) { // a?:b (a if it isn't null, otherwise b)
+				if (expr==null) {
+					expr = new NullLiteral(toPos(t.startpos-1,t.endpos-2));
+				}
 				nextToken(); // elvis has left the building
 				SpelNodeImpl valueIfNull = eatExpression();
+				if (valueIfNull==null) {
+					valueIfNull = new NullLiteral(toPos(t.startpos+1,t.endpos+1));
+				}
 				return new Elvis(toPos(t),expr,valueIfNull);
 			} else if (t.kind==TokenKind.QMARK) { // a?b:c
+				if (expr==null) {
+					expr = new NullLiteral(toPos(t.startpos-1,t.endpos-1));
+				}
 				nextToken();
 				SpelNodeImpl ifTrueExprValue = eatExpression();	
 				eatToken(TokenKind.COLON);

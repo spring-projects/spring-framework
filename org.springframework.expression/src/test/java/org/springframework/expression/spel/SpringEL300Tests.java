@@ -627,4 +627,50 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	
 	// end bean resolver tests
 
+	@Test
+	public void elvis_SPR7209_1() {
+		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
+		Expression expr = null;
+		
+		// Different parts of elvis expression are null
+		expr = new SpelExpressionParser().parseRaw("(?:'default')");
+		Assert.assertEquals("default", expr.getValue());
+		expr = new SpelExpressionParser().parseRaw("?:'default'");
+		Assert.assertEquals("default", expr.getValue());
+		expr = new SpelExpressionParser().parseRaw("?:");
+		Assert.assertEquals(null, expr.getValue());
+
+		// Different parts of ternary expression are null
+		try {
+			expr = new SpelExpressionParser().parseRaw("(?'abc':'default')");
+			expr.getValue(eContext);
+			Assert.fail();
+		} catch (SpelEvaluationException see ) {
+			Assert.assertEquals(SpelMessage.TYPE_CONVERSION_ERROR,see.getMessageCode());
+		}
+		expr = new SpelExpressionParser().parseRaw("(false?'abc':null)");
+		Assert.assertEquals(null, expr.getValue());
+
+		// Assignment
+		try {
+			expr = new SpelExpressionParser().parseRaw("(='default')");
+			expr.getValue(eContext);
+			Assert.fail();
+		} catch (SpelEvaluationException see ) {
+			Assert.assertEquals(SpelMessage.SETVALUE_NOT_SUPPORTED,see.getMessageCode());
+		}
+	}
+
+	@Test
+	public void elvis_SPR7209_2() {
+		Expression expr = null;
+		// Have empty string treated as null for elvis
+		expr = new SpelExpressionParser().parseRaw("?:'default'");
+		Assert.assertEquals("default", expr.getValue());
+		expr = new SpelExpressionParser().parseRaw("\"\"?:'default'");
+		Assert.assertEquals("default", expr.getValue());
+		expr = new SpelExpressionParser().parseRaw("''?:'default'");
+		Assert.assertEquals("default", expr.getValue());
+	}
+	
 }

@@ -42,7 +42,7 @@ public class Elvis extends SpelNodeImpl {
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		TypedValue value = children[0].getValueInternal(state);
-		if (value.getValue()!=null) {
+		if (value.getValue()!=null && !((value.getValue() instanceof String) && ((String)value.getValue()).length()==0)) {
 			return value;
 		} else {
 			return children[1].getValueInternal(state);
