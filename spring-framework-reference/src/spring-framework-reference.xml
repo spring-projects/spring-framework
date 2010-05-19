@@ -166,6 +166,12 @@
 
         <surname>Syer</surname>
       </author>
+      
+      <author>
+        <firstname>Oliver</firstname>
+
+        <surname>Gierke</surname>
+      </author>
     </authorgroup>
 
     <copyright>
@@ -176,7 +182,7 @@
       Kopylenko, Mark Pollack, Thierry Templier, Erwin Vervaet, Portia Tung,
       Ben Hale, Adrian Colyer, John Lewis, Costin Leau, Mark Fisher, Sam
       Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo,
-      Andy Clement</holder>
+      Andy Clement, Dave Syer, Oliver Gierke</holder>
     </copyright>
 
     <legalnotice>
