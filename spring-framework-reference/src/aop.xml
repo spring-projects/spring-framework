@@ -1275,6 +1275,44 @@ public void audit(Auditable auditable) {
 }</programlisting>
         </section>
 
+        <section id="aop-ataspectj-advice-params-generics">
+          <title>Advice parameters and generics</title>
+
+          <para>Spring AOP can handle generics used in class declarations and
+          method parameters. Suppose you have a generic type like this:</para>
+
+          <programlisting language="java">public interface Sample&lt;T&gt; {
+  void sampleGenericMethod(T param);
+  void sampleGenericCollectionMethod(Collection&gt;T&gt; param);
+}</programlisting>
+
+          <para>You can restrict interception of method types to certain
+          parameter types by simply typing the advice parameter to the
+          parameter type you want to intercept the method for:</para>
+
+          <programlisting language="java">@Before("execution(* ..Sample+.sampleGenericMethod(*)) &amp;&amp; args(param)")
+public void beforeSampleMethod(MyType param) {
+  // Advice implementation
+}</programlisting>
+
+          <para>That this works is pretty obvious as we already discussed
+          above. However, it's worth pointing out that this won't work for
+          generic collections. So you cannot define a pointcut like
+          this:</para>
+
+          <programlisting language="java">@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) &amp;&amp; args(param)")
+public void beforeSampleMethod(Collection&lt;MyType&gt; param) {
+  // Advice implementation
+}</programlisting>
+
+          <para>To make this work we would have to inspect every element of
+          the collection, which is not reasonable as we also cannot decide how
+          to treat <literal>null</literal> values in general. To achieve
+          something similar to this you have to type the parameter to
+          <interfacename>Collection&lt;?&gt;</interfacename> and manually
+          check the type of the elements.</para>
+        </section>
+
         <section id="aop-ataspectj-advice-params-names">
           <title>Determining argument names</title>
 
