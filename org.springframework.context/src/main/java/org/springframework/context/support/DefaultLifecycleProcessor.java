@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.Phased;
@@ -161,7 +162,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				if (logger.isDebugEnabled()) {
 					logger.debug("Starting bean '" + beanName + "' of type [" + bean.getClass() + "]");
 				}
-				bean.start();
+				try {
+					bean.start();
+				}
+				catch (Throwable ex) {
+					throw new ApplicationContextException("Failed to start bean '" + beanName + "'", ex);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Successfully started bean '" + beanName + "'");
 				}

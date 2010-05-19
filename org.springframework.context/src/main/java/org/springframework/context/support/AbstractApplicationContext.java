@@ -1007,11 +1007,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				publishEvent(new ContextClosedEvent(this));
 			}
 			catch (Throwable ex) {
-				logger.error("Exception thrown from ApplicationListener handling ContextClosedEvent", ex);
+				logger.warn("Exception thrown from ApplicationListener handling ContextClosedEvent", ex);
 			}
 
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			getLifecycleProcessor().onClose();
+			try {
+				getLifecycleProcessor().onClose();
+			}
+			catch (Throwable ex) {
+				logger.warn("Exception thrown from LifecycleProcessor on context close", ex);
+			}
 
 			// Destroy all cached singletons in the context's BeanFactory.
 			destroyBeans();
