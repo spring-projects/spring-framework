@@ -37,6 +37,7 @@ public class TilesConfigurerTests {
 		MockServletContext sc = new MockServletContext();
 		TilesConfigurer tc = new TilesConfigurer();
 		tc.setDefinitions(new String[] {"/org/springframework/web/servlet/view/tiles2/tiles-definitions.xml"});
+		tc.setCheckRefresh(true);
 		tc.setServletContext(sc);
 		tc.afterPropertiesSet();
 
