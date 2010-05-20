@@ -3,24 +3,41 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.3 (2010-05-10)
+Changes in version 3.0.3 (2010-05-26)
 -------------------------------------
 
 * clarified that Spring's Jackson support requires Jackson 1.3 or higher
+* Spring autodetects JodaTime 1.3 or higher (as required), ignoring older JodaTime versions
+* revised VFS support for Spring's component scanning to work on JBoss AS 6.0.0 M3 as well
 * fixed URIEditor's URI construction to consider fragment as well
 * added default InputSourceEditor for SAX InputSource construction with a URL String as system id
+* revised BeanWrapper's exception wrapping to consistently handle ConversionExceptions
+* ConversionService is able to apply Converters to interface-based array elements
+* a context ConversionService is able to override an ApplicationContext's resource editors
+* refined LifecycleProcessor exception handling, properly wrapping a start exception from a bean
 * fixed constructor argument caching for prototypes with multiple constructor matches
 * specific detection of CGLIB subclasses in order to properly handle CGLIB interfaces
 * revised AbstractInterceptorDrivenBeanDefinitionDecorator for further alignment with auto-proxying
 * BeanDefinitionVisitor/PropertyPlaceholderConfigurer finds and resolves values in arrays as well
 * property placeholders can deal with nested expressions which happen to use the same suffix
+* SpEL's Elvis operator is able to deal with #{${myProp}?:defaultValue} case if myProp is empty
+* setTransactionIsolation on JDBC Connection only called when actually necessary (for PostgreSQL)
+* CachingConnectionFactory detects destination equality for WebSphere MQ as well (using toString)
 * DefaultPersistenceUnitManager's getPersistenceUnitInfo method has 2.5 compatible signature again
 * DefaultMessageListenerContainer reacts to maxConcurrentConsumers reduction for long-lived tasks
-* fixed @ExceptionHandler resolution in case of multiple matches at different inheritance levels
+* added "idleConsumerLimit" bean property to DefaultMessageListenerContainer (default is 1)
+* AsyncAnnotationBeanPostProcessor consistently adds @Async processing as first Advisor in the chain
+* added support for JAX-WS 2.1 WebServiceFeatures to JaxWsPortClientInterceptor/PortProxyFactoryBean
+* ServletContextResourcePatternResolver handles "/WEB-INF/lib/*.jar!/**/context.xml" style patterns
 * fixed MVC mapping regression for servlet url-pattern "/" case on servers other than WebSphere
+* MVC mappings properly apply even to welcome file entries that forward to a DispatcherServlet
+* fixed @ExceptionHandler resolution in case of multiple matches at different inheritance levels
+* added convenient "checkRefresh" bean property to TilesConfigurer
+* TilesConfigurer's "definitionsFactoryClass" property applies common Tiles DefinitionsFactory setup
 * JSP FormTag calculates proper default form action even when using a rewrite filter on WebSphere
 * fixed JSP SelectTag's support for rendering enum constants
-* TilesConfigurer's "definitionsFactoryClass" property applies common Tiles DefinitionsFactory setup
+* JSP Radiobutton/CheckboxesTag utilizes PropertyEditor/ConversionService for label rendering
+* MockHttpServletResponse supports multiple includes
 
 
 Changes in version 3.0.2 (2010-04-02)
