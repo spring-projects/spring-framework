@@ -51,8 +51,7 @@ import org.springframework.util.Assert;
 public abstract class DataSourceUtils {
 
 	/**
-	 * Order value for TransactionSynchronization objects that clean up
-	 * JDBC Connections.
+	 * Order value for TransactionSynchronization objects that clean up JDBC Connections.
 	 */
 	public static final int CONNECTION_SYNCHRONIZATION_ORDER = 1000;
 
@@ -156,7 +155,12 @@ public abstract class DataSourceUtils {
 				con.setReadOnly(true);
 			}
 			catch (Throwable ex) {
-				// SQLException or UnsupportedOperationException
+				if (ex instanceof SQLException && (ex.getClass().getSimpleName().contains("Timeout") ||
+						(ex.getCause() != null && ex.getCause().getClass().getSimpleName().contains("Timeout")))) {
+					// Assume it's a connection timeout that would otherwise get lost: e.g. from C3P0.
+					throw (SQLException) ex;
+				}
+				// "read-only not supported" SQLException or UnsupportedOperationException
 				// -> ignore, it's just a hint anyway.
 				logger.debug("Could not set JDBC Connection read-only", ex);
 			}
