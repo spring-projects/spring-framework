@@ -40,6 +40,8 @@ import org.apache.tiles.definition.DefinitionsFactory;
 import org.apache.tiles.definition.DefinitionsFactoryException;
 import org.apache.tiles.definition.DefinitionsReader;
 import org.apache.tiles.definition.Refreshable;
+import org.apache.tiles.definition.dao.BaseLocaleUrlDefinitionDAO;
+import org.apache.tiles.definition.dao.CachingLocaleUrlDefinitionDAO;
 import org.apache.tiles.definition.digester.DigesterDefinitionsReader;
 import org.apache.tiles.evaluator.AttributeEvaluator;
 import org.apache.tiles.evaluator.el.ELAttributeEvaluator;
@@ -126,6 +128,8 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	private boolean overrideLocaleResolver = false;
 
 	private String[] definitions;
+
+	private boolean checkRefresh = false;
 
 	private boolean validateDefinitions = true;
 
@@ -220,6 +224,16 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		else {
 			this.tilesPropertyMap.remove(DefinitionsFactory.DEFINITIONS_CONFIG);
 		}
+	}
+
+	/**
+	 * Set whether to check Tiles definition files for a refresh at runtime.
+	 * Default is "false".
+	 */
+	public void setCheckRefresh(boolean checkRefresh) {
+		this.checkRefresh = checkRefresh;
+		this.tilesPropertyMap.put(CachingLocaleUrlDefinitionDAO.CHECK_REFRESH_INIT_PARAMETER,
+				Boolean.toString(checkRefresh));
 	}
 
 	/**
@@ -418,6 +432,17 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		}
 
 		@Override
+		protected BaseLocaleUrlDefinitionDAO instantiateLocaleDefinitionDao(TilesApplicationContext applicationContext,
+				TilesRequestContextFactory contextFactory, LocaleResolver resolver) {
+			BaseLocaleUrlDefinitionDAO dao = super.instantiateLocaleDefinitionDao(
+					applicationContext, contextFactory, resolver);
+			if (checkRefresh && dao instanceof CachingLocaleUrlDefinitionDAO) {
+				((CachingLocaleUrlDefinitionDAO) dao).setCheckRefresh(checkRefresh);
+			}
+			return dao;
+		}
+
+		@Override
 		protected DefinitionsReader createDefinitionsReader(TilesApplicationContext applicationContext,
 				TilesRequestContextFactory contextFactory) {
 			DigesterDefinitionsReader reader = new DigesterDefinitionsReader();
@@ -427,12 +452,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				reader.init(map);
 			}
 			return reader;
-		}
-
-		@Override
-		protected LocaleResolver createLocaleResolver(TilesApplicationContext applicationContext,
-				TilesRequestContextFactory contextFactory) {
-			return new SpringLocaleResolver();
 		}
 
 		@Override
@@ -470,6 +489,12 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			else {
 				return super.createPreparerFactory(applicationContext, contextFactory);
 			}
+		}
+
+		@Override
+		protected LocaleResolver createLocaleResolver(TilesApplicationContext applicationContext,
+				TilesRequestContextFactory contextFactory) {
+			return new SpringLocaleResolver();
 		}
 	}
 
