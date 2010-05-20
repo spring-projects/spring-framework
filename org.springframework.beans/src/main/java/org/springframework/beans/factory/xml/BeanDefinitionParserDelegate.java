@@ -621,7 +621,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (isDefaultElement(node) && nodeNameEquals(node, META_ELEMENT)) {
+			if (isCandidateElement(node) && nodeNameEquals(node, META_ELEMENT)) {
 				Element metaElement = (Element) node;
 				String key = metaElement.getAttribute(KEY_ATTRIBUTE);
 				String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
@@ -680,7 +680,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (isDefaultElement(node) && nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
+			if (isCandidateElement(node) && nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
 				parseConstructorArgElement((Element) node, bd);
 			}
 		}
@@ -693,7 +693,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (isDefaultElement(node) && nodeNameEquals(node, PROPERTY_ELEMENT)) {
+			if (isCandidateElement(node) && nodeNameEquals(node, PROPERTY_ELEMENT)) {
 				parsePropertyElement((Element) node, bd);
 			}
 		}
@@ -706,7 +706,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (isDefaultElement(node) && nodeNameEquals(node, QUALIFIER_ELEMENT)) {
+			if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ELEMENT)) {
 				parseQualifierElement((Element) node, bd);
 			}
 		}
@@ -719,7 +719,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (isDefaultElement(node) && nodeNameEquals(node, LOOKUP_METHOD_ELEMENT)) {
+			if (isCandidateElement(node) && nodeNameEquals(node, LOOKUP_METHOD_ELEMENT)) {
 				Element ele = (Element) node;
 				String methodName = ele.getAttribute(NAME_ATTRIBUTE);
 				String beanRef = ele.getAttribute(BEAN_ELEMENT);
@@ -737,7 +737,7 @@ public class BeanDefinitionParserDelegate {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (isDefaultElement(node) && nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
+			if (isCandidateElement(node) && nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
 				Element replacedMethodEle = (Element) node;
 				String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
 				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
@@ -860,7 +860,7 @@ public class BeanDefinitionParserDelegate {
 			NodeList nl = ele.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
-				if (isDefaultElement(node) && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
+				if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
 					Element attributeEle = (Element) node;
 					String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
 					String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
@@ -1405,7 +1405,6 @@ public class BeanDefinitionParserDelegate {
 	 * Get the namespace URI for the supplied node. The default implementation uses {@link Node#getNamespaceURI}.
 	 * Subclasses may override the default implementation to provide a different namespace identification mechanism.
 	 * @param node the node
-	 * @return the namespace URI of the the node.
 	 */
 	public String getNamespaceURI(Node node) {
 		return node.getNamespaceURI();
@@ -1415,7 +1414,6 @@ public class BeanDefinitionParserDelegate {
 	 * Ges the local name for the supplied {@link Node}. The default implementation calls {@link Node#getLocalName}.
 	 * Subclasses may override the default implementation to provide a different mechanism for getting the local name.
 	 * @param node the <code>Node</code>
-	 * @return the local name of the supplied <code>Node</code>.
 	 */
 	public String getLocalName(Node node) {
 		return node.getLocalName();
@@ -1423,12 +1421,12 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Determine whether the name of the supplied node is equal to the supplied name.
-	 * The default implementation checks the supplied desired name against both {@link Node#getNodeName)
-	 * and {@link #getLoclName}.
-	 * Subclasses may override the default implementation to provide a different mechanism for comparing node names.
+	 * <p>The default implementation checks the supplied desired name against both
+	 * {@link Node#getNodeName()) and {@link Node#getLocalName()}.
+	 * <p>Subclasses may override the default implementation to provide a different
+	 * mechanism for comparing node names.
 	 * @param node the node to compare
 	 * @param desiredName the name to check for
-	 * @return <code>true</code> if the names are equal otherwise <code>false</code>.
 	 */
 	public boolean nodeNameEquals(Node node, String desiredName) {
 		return desiredName.equals(node.getNodeName()) || desiredName.equals(getLocalName(node));
@@ -1442,8 +1440,8 @@ public class BeanDefinitionParserDelegate {
 		return isDefaultNamespace(getNamespaceURI(node));
 	}
 
-	private boolean isDefaultElement(Node node) {
-		return (node instanceof Element && isDefaultNamespace(node));
+	private boolean isCandidateElement(Node node) {
+		return (node instanceof Element && (isDefaultNamespace(node) || !isDefaultNamespace(node.getParentNode())));
 	}
 
 }
