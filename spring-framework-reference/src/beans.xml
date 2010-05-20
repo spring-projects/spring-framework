@@ -3667,7 +3667,7 @@ public final class Boot {
 
       <para>When an <interfacename>ApplicationContext</interfacename> creates
       a class that implements the
-      <interfacename>org.springframework.contxt.ApplicationContextAware</interfacename>
+      <interfacename>org.springframework.context.ApplicationContextAware</interfacename>
       interface, the class is provided with a reference to that
       <interfacename>ApplicationContext</interfacename>.</para>
 
@@ -4532,7 +4532,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       annotated classes are no longer POJOs and further more that the
       configuration becomes decentralized and harder to control.</para>
 
-      <para>No matter the choice, Spring can accomodate both styles and even
+      <para>No matter the choice, Spring can accommodate both styles and even
       mix them together. It's worth pointing out that through its <link
       linkend="beans-java">JavaConfig</link> option, Spring allows annotations
       to be used in a non-invasive way, without touching the target components
@@ -6715,8 +6715,8 @@ public class AppConfig {
 		</para>
 		 <note>
 		<para>
-		Behaviour could be different according to the scope 
-		of your bean. We are talking here about Singletons.
+		The behavior could be different according to the scope 
+		of your bean. We are talking about singletons here.
 		</para>
 		</note>
 		 <note>
