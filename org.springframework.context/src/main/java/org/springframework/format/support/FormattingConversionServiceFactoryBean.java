@@ -49,7 +49,7 @@ public class FormattingConversionServiceFactoryBean
 		implements FactoryBean<FormattingConversionService>, InitializingBean {
 
 	private static final boolean jodaTimePresent = ClassUtils.isPresent(
-			"org.joda.time.DateTime", FormattingConversionService.class.getClassLoader());
+			"org.joda.time.LocalDate", FormattingConversionService.class.getClassLoader());
 
 	private Set<?> converters;
 
