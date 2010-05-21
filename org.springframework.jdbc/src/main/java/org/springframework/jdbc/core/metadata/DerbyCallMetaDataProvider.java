@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.sql.SQLException;
  * This class is intended for internal use by the Simple JDBC classes.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public class DerbyCallMetaDataProvider extends GenericCallMetaDataProvider {
@@ -32,11 +33,14 @@ public class DerbyCallMetaDataProvider extends GenericCallMetaDataProvider {
 		super(databaseMetaData);
 	}
 
-
 	@Override
 	public String metaDataSchemaNameToUse(String schemaName) {
-		// Use current user schema if no schema specified
-		return schemaName == null ? getUserName().toUpperCase() : super.metaDataSchemaNameToUse(schemaName);
+		if (schemaName != null) {
+			return super.metaDataSchemaNameToUse(schemaName);
+		}
+		// Use current user schema if no schema specified...
+		String userName = getUserName();
+		return (userName != null ? userName.toUpperCase() : null);
 	}
 
 }
