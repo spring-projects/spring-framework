@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,16 @@ public class CronTrigger implements Trigger {
 
 	private final CronSequenceGenerator sequenceGenerator;
 
+
+	/**
+	 * Build a {@link CronTrigger} from the pattern provided in the default time zone.
+	 * @param cronExpression a space-separated list of time fields,
+	 * following cron expression conventions
+	 */
+	public CronTrigger(String cronExpression) {
+		this(cronExpression, TimeZone.getDefault());
+	}
+
 	/**
 	 * Build a {@link CronTrigger} from the pattern provided.
 	 * @param cronExpression a space-separated list of time fields,
@@ -44,14 +54,6 @@ public class CronTrigger implements Trigger {
 		this.sequenceGenerator = new CronSequenceGenerator(cronExpression, timeZone);
 	}
 
-	/**
-	 * Build a {@link CronTrigger} from the pattern provided in the default time zone. 
-	 * @param cronExpression a space-separated list of time fields,
-	 * following cron expression conventions
-	 */
-	public CronTrigger(String cronExpression) {
-		this(cronExpression, TimeZone.getDefault());
-	}
 
 	public Date nextExecutionTime(TriggerContext triggerContext) {
 		Date date = triggerContext.lastCompletionTime();
@@ -61,10 +63,11 @@ public class CronTrigger implements Trigger {
 		return this.sequenceGenerator.next(date);
 	}
 
+
 	@Override
 	public boolean equals(Object obj) {
-		return (this == obj || (obj instanceof CronTrigger && this.sequenceGenerator
-				.equals(((CronTrigger) obj).sequenceGenerator)));
+		return (this == obj || (obj instanceof CronTrigger &&
+				this.sequenceGenerator.equals(((CronTrigger) obj).sequenceGenerator)));
 	}
 
 	@Override
