@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
@@ -463,6 +462,8 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		con.rollback();
 		conControl.setVoidCallable(1);
+		con.setReadOnly(true);
+		conControl.setThrowable(new SQLException("read-only not supported"), 1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 		con.close();
