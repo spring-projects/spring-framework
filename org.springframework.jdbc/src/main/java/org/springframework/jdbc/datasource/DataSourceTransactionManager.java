@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -236,7 +235,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			}
 		}
 
-		catch (SQLException ex) {
+		catch (Exception ex) {
 			DataSourceUtils.releaseConnection(con, this.dataSource);
 			throw new CannotCreateTransactionException("Could not open JDBC Connection for transaction", ex);
 		}
