@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 	private TaskScheduler taskScheduler;
 
+	private ScheduledExecutorService localExecutor;
+
 	private Map<Runnable, Trigger> triggerTasks;
 
 	private Map<Runnable, String> cronTasks;
@@ -53,11 +55,19 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	private final Set<ScheduledFuture> scheduledFutures = new LinkedHashSet<ScheduledFuture>();
 
 
+	/**
+	 * Set the TaskScheduler to register scheduled tasks with.
+	 */
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		this.taskScheduler = taskScheduler;
 	}
 
+	/**
+	 * Set the {@link org.springframework.scheduling.TaskScheduler} to register scheduled
+	 * tasks with, or a {@link java.util.concurrent.ScheduledExecutorService} to be
+	 * wrapped as a TaskScheduler.
+	 */
 	public void setScheduler(Object scheduler) {
 		Assert.notNull(scheduler, "Scheduler object must not be null");
 		if (scheduler instanceof TaskScheduler) {
@@ -71,18 +81,34 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 		}
 	}
 
+	/**
+	 * Specify triggered tasks as a Map of Runnables (the tasks) and Trigger objects
+	 * (typically custom implementations of the {@link Trigger} interface).
+	 */
 	public void setTriggerTasks(Map<Runnable, Trigger> triggerTasks) {
 		this.triggerTasks = triggerTasks;
 	}
 
+	/**
+	 * Specify triggered tasks as a Map of Runnables (the tasks) and cron expressions.
+	 * @see CronTrigger
+	 */
 	public void setCronTasks(Map<Runnable, String> cronTasks) {
 		this.cronTasks = cronTasks;
 	}
 
+	/**
+	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-rate values.
+	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
+	 */
 	public void setFixedRateTasks(Map<Runnable, Long> fixedRateTasks) {
 		this.fixedRateTasks = fixedRateTasks;
 	}
 
+	/**
+	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-delay values.
+	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
+	 */
 	public void setFixedDelayTasks(Map<Runnable, Long> fixedDelayTasks) {
 		this.fixedDelayTasks = fixedDelayTasks;
 	}
@@ -90,7 +116,8 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 	public void afterPropertiesSet() {
 		if (this.taskScheduler == null) {
-			this.taskScheduler = new ConcurrentTaskScheduler(Executors.newSingleThreadScheduledExecutor());
+			this.localExecutor = Executors.newSingleThreadScheduledExecutor();
+			this.taskScheduler = new ConcurrentTaskScheduler(this.localExecutor);
 		}
 		if (this.triggerTasks != null) {
 			for (Map.Entry<Runnable, Trigger> entry : this.triggerTasks.entrySet()) {
@@ -98,7 +125,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 			}
 		}
 		if (this.cronTasks != null) {
-			for (Map.Entry<Runnable, String> entry : cronTasks.entrySet()) {
+			for (Map.Entry<Runnable, String> entry : this.cronTasks.entrySet()) {
 				this.scheduledFutures.add(this.taskScheduler.schedule(entry.getKey(), new CronTrigger(entry.getValue())));
 			}
 		}
@@ -118,6 +145,9 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	public void destroy() {
 		for (ScheduledFuture future : this.scheduledFutures) {
 			future.cancel(true);
+		}
+		if (this.localExecutor != null) {
+			this.localExecutor.shutdownNow();
 		}
 	}
 
