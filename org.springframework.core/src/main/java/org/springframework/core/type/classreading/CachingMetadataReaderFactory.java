@@ -34,9 +34,19 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
-	private static final int MAX_ENTRIES = 256;
+	/** Default maximum number of entries for the MetadataReader cache: 256 */
+	public static final int DEFAULT_CACHE_LIMIT = 256;
 
-	private final Map<Resource, MetadataReader> classReaderCache = createLRUCache();
+
+	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
+
+	private final Map<Resource, MetadataReader> classReaderCache =
+			new LinkedHashMap<Resource, MetadataReader>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
+				@Override
+				protected boolean removeEldestEntry(Map.Entry<Resource, MetadataReader> eldest) {
+					return size() > getCacheLimit();
+				}
+			};
 
 
 	/**
@@ -64,8 +74,27 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 	}
 
 
+	/**
+	 * Specify the maximum number of entries for the MetadataReader cache.
+	 * Default is 256.
+	 */
+	public void setCacheLimit(int cacheLimit) {
+		this.cacheLimit = cacheLimit;
+	}
+
+	/**
+	 * Return the maximum number of entries for the MetadataReader cache.
+	 */
+	public int getCacheLimit() {
+		return this.cacheLimit;
+	}
+
+
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
+		if (getCacheLimit() <= 0) {
+			return super.getMetadataReader(resource);
+		}
 		synchronized (this.classReaderCache) {
 			MetadataReader metadataReader = this.classReaderCache.get(resource);
 			if (metadataReader == null) {
@@ -74,17 +103,6 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 			}
 			return metadataReader;
 		}
-	}
-
-
-	@SuppressWarnings("serial")
-	private static <K, V> Map<K, V> createLRUCache() {
-		return new LinkedHashMap<K, V>(MAX_ENTRIES, 0.75f, true) {
-			@Override
-			protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-				return size() > MAX_ENTRIES;
-			}
-		};
 	}
 
 }

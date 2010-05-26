@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -60,11 +59,23 @@ import org.springframework.util.Assert;
  */
 public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations {
 
+	/** Default maximum number of entries for this template's SQL cache: 256 */
+	public static final int DEFAULT_CACHE_LIMIT = 256;
+
+
 	/** The JdbcTemplate we are wrapping */
 	private final JdbcOperations classicJdbcTemplate;
 
-	/** Map of original SQL String to ParsedSql representation */
-	private final Map<String, ParsedSql> parsedSqlCache = new HashMap<String, ParsedSql>();
+	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
+
+	/** Cache of original SQL String to ParsedSql representation */
+	private final Map<String, ParsedSql> parsedSqlCache =
+			new LinkedHashMap<String, ParsedSql>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
+				@Override
+				protected boolean removeEldestEntry(Map.Entry<String, ParsedSql> eldest) {
+					return size() > getCacheLimit();
+				}
+			};
 
 
 	/**
@@ -73,7 +84,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * @param dataSource the JDBC DataSource to access
 	 */
 	public NamedParameterJdbcTemplate(DataSource dataSource) {
-		Assert.notNull(dataSource, "The [dataSource] argument cannot be null.");
+		Assert.notNull(dataSource, "DataSource must not be null");
 		this.classicJdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -94,6 +105,21 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 */
 	public JdbcOperations getJdbcOperations() {
 		return this.classicJdbcTemplate;
+	}
+
+	/**
+	 * Specify the maximum number of entries for this template's SQL cache.
+	 * Default is 256.
+	 */
+	public void setCacheLimit(int cacheLimit) {
+		this.cacheLimit = cacheLimit;
+	}
+
+	/**
+	 * Return the maximum number of entries for this template's SQL cache.
+	 */
+	public int getCacheLimit() {
+		return this.cacheLimit;
 	}
 
 
@@ -294,10 +320,15 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	/**
 	 * Obtain a parsed representation of the given SQL statement.
+	 * <p>The default implementation uses an LRU cache with an upper limit
+	 * of 256 entries.
 	 * @param sql the original SQL
 	 * @return a representation of the parsed SQL statement
 	 */
 	protected ParsedSql getParsedSql(String sql) {
+		if (getCacheLimit() <= 0) {
+			return NamedParameterUtils.parseSqlStatement(sql);
+		}
 		synchronized (this.parsedSqlCache) {
 			ParsedSql parsedSql = this.parsedSqlCache.get(sql);
 			if (parsedSql == null) {
