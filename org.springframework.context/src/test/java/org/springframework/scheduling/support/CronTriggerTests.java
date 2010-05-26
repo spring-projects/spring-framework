@@ -49,12 +49,12 @@ public class CronTriggerTests {
 		this.timeZone = timeZone;
 		this.date = date;
 	}
-	
+
 	@Parameters
 	public static List<Object[]> getParameters() {
 		List<Object[]> list = new ArrayList<Object[]>();
-		list.add(new Object[] {new Date(), TimeZone.getDefault()});
-		list.add(new Object[] {new Date(), TimeZone.getTimeZone("CET")});
+		list.add(new Object[] { new Date(), TimeZone.getDefault() });
+		list.add(new Object[] { new Date(), TimeZone.getTimeZone("CET") });
 		return list;
 	}
 
@@ -65,7 +65,6 @@ public class CronTriggerTests {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
 	}
-
 
 	@Before
 	public void setUp() {
@@ -561,6 +560,51 @@ public class CronTriggerTests {
 		assertEquals(trigger1, trigger2);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testSecondInvalid() throws Exception {
+		new CronTrigger("77 * * * * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testSecondRangeInvalid() throws Exception {
+		new CronTrigger("44-77 * * * * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testMinuteInvalid() throws Exception {
+		new CronTrigger("* 77 * * * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testMinuteRangeInvalid() throws Exception {
+		new CronTrigger("* 44-77 * * * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testHourInvalid() throws Exception {
+		new CronTrigger("* * 27 * * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testHourRangeInvalid() throws Exception {
+		new CronTrigger("* * 23-28 * * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testDayInvalid() throws Exception {
+		new CronTrigger("* * * 45 * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testDayRangeInvalid() throws Exception {
+		new CronTrigger("* * * 28-45 * *", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testMonthInvalid() throws Exception {
+		new CronTrigger("* * * * 11-13 *", timeZone);
+	}
+
 	@Test
 	public void testWhitespace() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("*  *  * *  1 *", timeZone);
@@ -578,7 +622,6 @@ public class CronTriggerTests {
 		TriggerContext context = getTriggerContext(date);
 		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
 	}
-
 
 	private static TriggerContext getTriggerContext(Date lastCompletionTime) {
 		SimpleTriggerContext context = new SimpleTriggerContext();

@@ -68,7 +68,6 @@ public class CronSequenceGenerator {
 
 	private final TimeZone timeZone;
 
-
 	/**
 	 * Construct a {@link CronSequenceGenerator} from the pattern provided.
 	 * @param expression a space-separated list of time fields
@@ -80,7 +79,6 @@ public class CronSequenceGenerator {
 		this.timeZone = timeZone;
 		parse(expression);
 	}
-
 
 	/**
 	 * Get the next {@link Date} in the sequence matching the Cron pattern and
@@ -156,13 +154,13 @@ public class CronSequenceGenerator {
 		if (dayOfMonth == updateDayOfMonth) {
 			resets.add(Calendar.DAY_OF_MONTH);
 		} else {
-			doNext(calendar);			
+			doNext(calendar);
 		}
 
 		int month = calendar.get(Calendar.MONTH);
 		int updateMonth = findNext(this.months, month, calendar, Calendar.MONTH, Calendar.YEAR, resets);
 		if (month != updateMonth) {
-			doNext(calendar);			
+			doNext(calendar);
 		}
 
 	}
@@ -313,6 +311,9 @@ public class CronSequenceGenerator {
 			}
 			result[0] = Integer.valueOf(split[0]);
 			result[1] = Integer.valueOf(split[1]);
+		}
+		if (result[0] >= max || result[1] >= max) {
+			throw new IllegalArgumentException("Range exceeds maximum (" + max + "): " + field);
 		}
 		return result;
 	}
