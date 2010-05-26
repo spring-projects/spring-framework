@@ -16,13 +16,13 @@
 
 package org.springframework.context.support;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
@@ -31,6 +31,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 
 /**
  * @author Keith Donald
@@ -92,16 +93,25 @@ public class ConversionServiceFactoryBeanTests {
 
 	@Test
 	public void conversionServiceInApplicationContext() {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("conversionService.xml", getClass());
+		doTestConversionServiceInApplicationContext("conversionService.xml", ClassPathResource.class);
+	}
+
+	@Test
+	public void conversionServiceInApplicationContextWithResourceOverriding() {
+		doTestConversionServiceInApplicationContext("conversionServiceWithResourceOverriding.xml", FileSystemResource.class);
+	}
+
+	private void doTestConversionServiceInApplicationContext(String fileName, Class resourceClass) {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext(fileName, getClass());
 		ResourceTestBean tb = ctx.getBean("resourceTestBean", ResourceTestBean.class);
-		assertTrue(tb.getResource() instanceof ClassPathResource);
+		assertTrue(resourceClass.isInstance(tb.getResource()));
 		assertTrue(tb.getResourceArray().length > 0);
-		assertTrue(tb.getResourceArray()[0] instanceof ClassPathResource);
+		assertTrue(resourceClass.isInstance(tb.getResourceArray()[0]));
 		assertTrue(tb.getResourceMap().size() == 1);
-		assertTrue(tb.getResourceMap().get("key1") instanceof ClassPathResource);
+		assertTrue(resourceClass.isInstance(tb.getResourceMap().get("key1")));
 		assertTrue(tb.getResourceArrayMap().size() == 1);
 		assertTrue(tb.getResourceArrayMap().get("key1").length > 0);
-		assertTrue(tb.getResourceArrayMap().get("key1")[0] instanceof ClassPathResource);
+		assertTrue(resourceClass.isInstance(tb.getResourceArrayMap().get("key1")[0]));
 	}
 
 

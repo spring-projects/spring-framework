@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.support;
 
+import java.beans.PropertyEditor;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
@@ -25,6 +26,7 @@ import org.xml.sax.InputSource;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.PropertyEditorRegistrySupport;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
@@ -80,19 +82,32 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 */
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
 		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader);
-		registry.registerCustomEditor(Resource.class, baseEditor);
-		registry.registerCustomEditor(InputStream.class, new InputStreamEditor(baseEditor));
-		registry.registerCustomEditor(InputSource.class, new InputSourceEditor(baseEditor));
-		registry.registerCustomEditor(File.class, new FileEditor(baseEditor));
-		registry.registerCustomEditor(URL.class, new URLEditor(baseEditor));
+		doRegisterEditor(registry, Resource.class, baseEditor);
+		doRegisterEditor(registry, InputStream.class, new InputStreamEditor(baseEditor));
+		doRegisterEditor(registry, InputSource.class, new InputSourceEditor(baseEditor));
+		doRegisterEditor(registry, File.class, new FileEditor(baseEditor));
+		doRegisterEditor(registry, URL.class, new URLEditor(baseEditor));
 
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();
-		registry.registerCustomEditor(Class.class, new ClassEditor(classLoader));
-		registry.registerCustomEditor(URI.class, new URIEditor(classLoader));
+		doRegisterEditor(registry, Class.class, new ClassEditor(classLoader));
+		doRegisterEditor(registry, URI.class, new URIEditor(classLoader));
 
 		if (this.resourceLoader instanceof ResourcePatternResolver) {
-			registry.registerCustomEditor(Resource[].class,
+			doRegisterEditor(registry, Resource[].class,
 					new ResourceArrayPropertyEditor((ResourcePatternResolver) this.resourceLoader));
+		}
+	}
+
+	/**
+	 * Override default editor, if possible (since that's what we really mean to do here);
+	 * otherwise register as a custom editor.
+	 */
+	private void doRegisterEditor(PropertyEditorRegistry registry, Class requiredType, PropertyEditor editor) {
+		if (registry instanceof PropertyEditorRegistrySupport) {
+			((PropertyEditorRegistrySupport) registry).overrideDefaultEditor(requiredType, editor);
+		}
+		else {
+			registry.registerCustomEditor(requiredType, editor);
 		}
 	}
 
