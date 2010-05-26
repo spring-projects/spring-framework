@@ -147,7 +147,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				logger.debug("Yes, I can convert");
 			}
 			return true;
-		} else {
+		}
+		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("No, I cannot convert");
 			}
@@ -252,7 +253,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				logger.debug("Matched cached converter " + converter);
 			}
 			return converter != NO_MATCH ? converter : null; 
-		} else {			
+		}
+		else {
 			converter = findConverterForClassPair(sourceType, targetType);
 			if (converter != null) {
 				if (logger.isTraceEnabled()) {
@@ -374,6 +376,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 					if (componentType.getSuperclass() != null) {
 						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
 					}
+					else if (componentType.isInterface()) {
+						classQueue.addFirst(Object[].class);
+					}
 				}
 				else {
 					Class<?>[] interfaces = currentClass.getInterfaces();
@@ -440,6 +445,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 					Class<?> componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
 					if (componentType.getSuperclass() != null) {
 						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
+					}
+					else if (componentType.isInterface()) {
+						classQueue.addFirst(Object[].class);
 					}
 				}
 				else {

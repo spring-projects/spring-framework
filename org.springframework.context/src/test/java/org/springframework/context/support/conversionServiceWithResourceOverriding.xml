@@ -3,7 +3,11 @@
 
 <beans>
 
-	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean"/>
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<bean class="org.springframework.context.support.ResourceConverter"/>
+		</property>
+	</bean>
 
 	<bean id="resourceTestBean" class="org.springframework.beans.ResourceTestBean">
 		<property name="resource" value="org/springframework/context/support/conversionService.xml"/>

@@ -93,6 +93,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private Map<Class, PropertyEditor> defaultEditors;
 
+	private Map<Class, PropertyEditor> overriddenDefaultEditors;
+
 	private Map<Class, PropertyEditor> customEditors;
 
 	private Map<String, CustomEditorHolder> customEditorsForPath;
@@ -142,6 +144,22 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	}
 
 	/**
+	 * Override the default editor for the specified type with the given property editor.
+	 * <p>Note that this is different from registering a custom editor in that the editor
+	 * semantically still is a default editor. A ConversionService will override such a
+	 * default editor, whereas custom editors usually override the ConversionService.
+	 * @param requiredType the type of the property
+	 * @param propertyEditor the editor to register
+	 * @see #registerCustomEditor(Class, PropertyEditor)
+	 */
+	public void overrideDefaultEditor(Class requiredType, PropertyEditor propertyEditor) {
+		if (this.overriddenDefaultEditors == null) {
+			this.overriddenDefaultEditors = new HashMap<Class, PropertyEditor>();
+		}
+		this.overriddenDefaultEditors.put(requiredType, propertyEditor);
+	}
+
+	/**
 	 * Retrieve the default editor for the given property type, if any.
 	 * <p>Lazily registers the default editors, if they are active.
 	 * @param requiredType type of the property
@@ -152,8 +170,14 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		if (!this.defaultEditorsActive) {
 			return null;
 		}
+		if (this.overriddenDefaultEditors != null) {
+			PropertyEditor editor = this.overriddenDefaultEditors.get(requiredType);
+			if (editor != null) {
+				return editor;
+			}
+		}
 		if (this.defaultEditors == null) {
-			doRegisterDefaultEditors();
+			createDefaultEditors();
 		}
 		return this.defaultEditors.get(requiredType);
 	}
@@ -161,7 +185,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	/**
 	 * Actually register the default editors for this registry instance.
 	 */
-	private void doRegisterDefaultEditors() {
+	private void createDefaultEditors() {
 		this.defaultEditors = new HashMap<Class, PropertyEditor>(64);
 
 		// Simple editors, without parameterization capabilities.
@@ -234,9 +258,10 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @param target the target registry to copy to
 	 */
 	protected void copyDefaultEditorsTo(PropertyEditorRegistrySupport target) {
-		target.defaultEditors = this.defaultEditors;
 		target.defaultEditorsActive = this.defaultEditorsActive;
 		target.configValueEditorsActive = this.configValueEditorsActive;
+		target.defaultEditors = this.defaultEditors;
+		target.overriddenDefaultEditors = this.overriddenDefaultEditors;
 	}
 
 

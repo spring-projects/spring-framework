@@ -16,13 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -30,7 +23,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -188,6 +183,24 @@ public class GenericConversionServiceTests {
 		conversionService.addConverter(new ObjectToStringConverter());
 		Object converted = conversionService.convert(new MyInterfaceImplementer(), String.class);
 		assertEquals("RESULT", converted);
+	}
+
+	@Test
+	public void testInterfaceArrayToStringArray() {
+		GenericConversionService conversionService = new GenericConversionService();
+		conversionService.addConverter(new MyBaseInterfaceConverter());
+		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
+		String[] converted = conversionService.convert(new MyInterface[] {new MyInterfaceImplementer()}, String[].class);
+		assertEquals("RESULT", converted[0]);
+	}
+
+	@Test
+	public void testObjectArrayToStringArray() {
+		GenericConversionService conversionService = new GenericConversionService();
+		conversionService.addConverter(new MyBaseInterfaceConverter());
+		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
+		String[] converted = conversionService.convert(new MyInterfaceImplementer[] {new MyInterfaceImplementer()}, String[].class);
+		assertEquals("RESULT", converted[0]);
 	}
 
 	@Test
