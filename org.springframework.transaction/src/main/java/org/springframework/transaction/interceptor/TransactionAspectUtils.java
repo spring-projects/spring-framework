@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ObjectUtils;
 
@@ -64,7 +66,7 @@ public abstract class TransactionAspectUtils {
 	/**
 	 * Obtain a PlatformTransactionManager from the given BeanFactory,
 	 * matching the given qualifier.
-	 * @param beanFactory the BeanFactory to get the PlatformTransactionManager bean from
+	 * @param bf the BeanFactory to get the PlatformTransactionManager bean from
 	 * @param qualifier the qualifier for selecting between multiple PlatformTransactionManager matches
 	 * @return the chosen PlatformTransactionManager (never <code>null</code>)
 	 * @throws IllegalStateException if no matching PlatformTransactionManager bean found
@@ -74,20 +76,12 @@ public abstract class TransactionAspectUtils {
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, PlatformTransactionManager.class);
 		PlatformTransactionManager chosen = null;
 		for (String beanName : tms.keySet()) {
-			if (bf.containsBeanDefinition(beanName)) {
-				BeanDefinition bd = bf.getBeanDefinition(beanName);
-				if (bd instanceof AbstractBeanDefinition) {
-					AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-					AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
-					if ((candidate != null && qualifier.equals(candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY))) ||
-							qualifier.equals(beanName) || ObjectUtils.containsElement(bf.getAliases(beanName), qualifier)) {
-						if (chosen != null) {
-							throw new IllegalStateException("No unique PlatformTransactionManager bean found " +
-									"for qualifier '" + qualifier + "'");
-						}
-						chosen = tms.get(beanName);
-					}
+			if (isQualifierMatch(qualifier, beanName, bf)) {
+				if (chosen != null) {
+					throw new IllegalStateException("No unique PlatformTransactionManager bean found " +
+							"for qualifier '" + qualifier + "'");
 				}
+				chosen = tms.get(beanName);
 			}
 		}
 		if (chosen != null) {
@@ -97,6 +91,39 @@ public abstract class TransactionAspectUtils {
 			throw new IllegalStateException("No matching PlatformTransactionManager bean found for qualifier '" +
 					qualifier + "' - neither qualifier match nor bean name match!");
 		}
+	}
+
+	/**
+	 * Check whether we have a qualifier match for the given candidate bean.
+	 * @param qualifier the qualifier that we are looking for
+	 * @param beanName the name of the candidate bean
+	 * @param bf the BeanFactory to get the bean definition from
+	 * @return <code>true</code> if either the bean definition (in the XML case)
+	 * or the bean's factory method (in the @Bean case) defines a matching qualifier
+	 * value (through &lt;qualifier<&gt; or @Qualifier)
+	 */
+	private static boolean isQualifierMatch(String qualifier, String beanName, ConfigurableListableBeanFactory bf) {
+		if (bf.containsBeanDefinition(beanName)) {
+			BeanDefinition bd = bf.getMergedBeanDefinition(beanName);
+			if (bd instanceof AbstractBeanDefinition) {
+				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+				AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
+				if ((candidate != null && qualifier.equals(candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY))) ||
+						qualifier.equals(beanName) || ObjectUtils.containsElement(bf.getAliases(beanName), qualifier)) {
+					return true;
+				}
+			}
+			if (bd instanceof RootBeanDefinition) {
+				Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
+				if (factoryMethod != null) {
+					Qualifier targetAnnotation = factoryMethod.getAnnotation(Qualifier.class);
+					if (targetAnnotation != null && qualifier.equals(targetAnnotation.value())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 }
