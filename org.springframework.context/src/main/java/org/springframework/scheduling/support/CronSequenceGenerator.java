@@ -88,7 +88,6 @@ public class CronSequenceGenerator {
 	 * @return the next value matching the pattern
 	 */
 	public Date next(Date date) {
-
 		/*
 		The plan:
 
@@ -106,11 +105,10 @@ public class CronSequenceGenerator {
 		4.2 Reset the minutes and seconds and go to 2
 		
 		...
-
-		 */
+		*/
 
 		Calendar calendar = new GregorianCalendar();
-		calendar.setTimeZone(timeZone);
+		calendar.setTimeZone(this.timeZone);
 		calendar.setTime(date);
 
 		// Truncate to the next whole second
@@ -136,7 +134,8 @@ public class CronSequenceGenerator {
 		int updateMinute = findNext(this.minutes, minute, calendar, Calendar.MINUTE, Calendar.HOUR_OF_DAY, resets);
 		if (minute == updateMinute) {
 			resets.add(Calendar.MINUTE);
-		} else {
+		}
+		else {
 			doNext(calendar);
 		}
 
@@ -144,7 +143,8 @@ public class CronSequenceGenerator {
 		int updateHour = findNext(this.hours, hour, calendar, Calendar.HOUR_OF_DAY, Calendar.DAY_OF_WEEK, resets);
 		if (hour == updateHour) {
 			resets.add(Calendar.HOUR_OF_DAY);
-		} else {
+		}
+		else {
 			doNext(calendar);
 		}
 
@@ -153,7 +153,8 @@ public class CronSequenceGenerator {
 		int updateDayOfMonth = findNextDay(calendar, this.daysOfMonth, dayOfMonth, daysOfWeek, dayOfWeek, 366, resets);
 		if (dayOfMonth == updateDayOfMonth) {
 			resets.add(Calendar.DAY_OF_MONTH);
-		} else {
+		}
+		else {
 			doNext(calendar);
 		}
 
@@ -278,7 +279,8 @@ public class CronSequenceGenerator {
 				// Not an incrementer so it must be a range (possibly empty)
 				int[] range = getRange(field, max);
 				bits.set(range[0], range[1] + 1);
-			} else {
+			}
+			else {
 				String[] split = StringUtils.delimitedListToStringArray(field, "/");
 				if (split.length > 2) {
 					throw new IllegalArgumentException("Incrementer has more than two fields: " + field);
@@ -304,7 +306,8 @@ public class CronSequenceGenerator {
 		}
 		if (!field.contains("-")) {
 			result[0] = result[1] = Integer.valueOf(field);
-		} else {
+		}
+		else {
 			String[] split = StringUtils.delimitedListToStringArray(field, "-");
 			if (split.length > 2) {
 				throw new IllegalArgumentException("Range has more than two fields: " + field);
@@ -324,19 +327,21 @@ public class CronSequenceGenerator {
 			return false;
 		}
 		CronSequenceGenerator cron = (CronSequenceGenerator) obj;
-		return cron.months.equals(months) && cron.daysOfMonth.equals(daysOfMonth) && cron.daysOfWeek.equals(daysOfWeek)
-				&& cron.hours.equals(hours) && cron.minutes.equals(minutes) && cron.seconds.equals(seconds);
+		return cron.months.equals(this.months) && cron.daysOfMonth.equals(this.daysOfMonth) &&
+				cron.daysOfWeek.equals(this.daysOfWeek) && cron.hours.equals(this.hours) &&
+				cron.minutes.equals(this.minutes) && cron.seconds.equals(this.seconds);
 	}
 
 	@Override
 	public int hashCode() {
-		return 37 + 17 * months.hashCode() + 29 * daysOfMonth.hashCode() + 37 * daysOfWeek.hashCode() + 41
-				* hours.hashCode() + 53 * minutes.hashCode() + 61 * seconds.hashCode();
+		return 37 + 17 * this.months.hashCode() + 29 * this.daysOfMonth.hashCode() +
+				37 * this.daysOfWeek.hashCode() + 41 * this.hours.hashCode() +
+				53 * this.minutes.hashCode() + 61 * this.seconds.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + ": " + expression;
+		return getClass().getSimpleName() + ": " + this.expression;
 	}
 
 }

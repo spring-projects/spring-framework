@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.scheduling.support;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,16 +23,19 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.scheduling.TriggerContext;
 
 /**
  * @author Dave Syer
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 @RunWith(Parameterized.class)
 public class CronTriggerTests {
@@ -44,6 +45,7 @@ public class CronTriggerTests {
 	private final Date date;
 
 	private final TimeZone timeZone;
+
 
 	public CronTriggerTests(Date date, TimeZone timeZone) {
 		this.timeZone = timeZone;
@@ -58,9 +60,6 @@ public class CronTriggerTests {
 		return list;
 	}
 
-	/**
-	 * @param calendar
-	 */
 	private void roundup(Calendar calendar) {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
@@ -107,6 +106,17 @@ public class CronTriggerTests {
 	}
 
 	@Test
+	public void testIncrementSecondWithPreviousExecutionTooEarly() throws Exception {
+		CronTrigger trigger = new CronTrigger("11 * * * * *", timeZone);
+		calendar.set(Calendar.SECOND, 11);
+		SimpleTriggerContext context = new SimpleTriggerContext();
+		context.update(calendar.getTime(), new Date(calendar.getTimeInMillis() - 100),
+				new Date(calendar.getTimeInMillis() - 90));
+		calendar.add(Calendar.MINUTE, 1);
+		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+	}
+
+	@Test
 	public void testIncrementSecondAndRollover() throws Exception {
 		CronTrigger trigger = new CronTrigger("10 * * * * *", timeZone);
 		calendar.set(Calendar.SECOND, 11);
@@ -126,17 +136,6 @@ public class CronTriggerTests {
 	}
 
 	@Test
-	public void testIncrementMinuteByOne() throws Exception {
-		CronTrigger trigger = new CronTrigger("0 11 * * * *", timeZone);
-		calendar.set(Calendar.MINUTE, 10);
-		Date date = calendar.getTime();
-		calendar.add(Calendar.MINUTE, 1);
-		calendar.set(Calendar.SECOND, 0);
-		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
-	}
-
-	@Test
 	public void testIncrementMinute() throws Exception {
 		CronTrigger trigger = new CronTrigger("0 * * * * *", timeZone);
 		calendar.set(Calendar.MINUTE, 10);
@@ -144,10 +143,22 @@ public class CronTriggerTests {
 		calendar.add(Calendar.MINUTE, 1);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		date = trigger.nextExecutionTime(context1);
+		assertEquals(calendar.getTime(), date);
 		calendar.add(Calendar.MINUTE, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		date = trigger.nextExecutionTime(context2);
+		assertEquals(calendar.getTime(), date);
+	}
+
+	@Test
+	public void testIncrementMinuteByOne() throws Exception {
+		CronTrigger trigger = new CronTrigger("0 11 * * * *", timeZone);
+		calendar.set(Calendar.MINUTE, 10);
+		TriggerContext context = getTriggerContext(calendar.getTime());
+		calendar.add(Calendar.MINUTE, 1);
+		calendar.set(Calendar.SECOND, 0);
+		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
 	}
 
 	@Test
@@ -612,10 +623,7 @@ public class CronTriggerTests {
 		assertEquals(trigger1, trigger2);
 	}
 
-	/**
-	 * @param trigger
-	 * @param calendar
-	 */
+
 	private void assertMatchesNextSecond(CronTrigger trigger, Calendar calendar) {
 		Date date = calendar.getTime();
 		roundup(calendar);
