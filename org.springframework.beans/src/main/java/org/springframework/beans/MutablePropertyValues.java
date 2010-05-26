@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -339,8 +339,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	@Override
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();
-		StringBuilder sb = new StringBuilder("PropertyValues: length=" + pvs.length + "; ");
-		sb.append(StringUtils.arrayToDelimitedString(pvs, "; "));
+		StringBuilder sb = new StringBuilder("PropertyValues: length=").append(pvs.length);
+		if (pvs.length > 0) {
+			sb.append("; ").append(StringUtils.arrayToDelimitedString(pvs, "; "));
+		}
 		return sb.toString();
 	}
 
