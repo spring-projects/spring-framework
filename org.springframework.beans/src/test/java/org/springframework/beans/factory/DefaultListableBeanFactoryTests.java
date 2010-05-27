@@ -89,7 +89,7 @@ import org.springframework.util.StopWatch;
  * @author Sam Brannen
  * @author Chris Beams
  */
-public final class DefaultListableBeanFactoryTests {
+public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
@@ -1278,6 +1278,15 @@ public final class DefaultListableBeanFactoryTests {
 				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 		assertEquals("The FactoryBeanDependentBean should have been autowired 'by type' with the LazyInitFactory.",
 				factoryBean, bean.getFactoryBean());
+	}
+
+	@Test
+	public void testGetTypeForAbstractFactoryBean() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class);
+		bd.setAbstract(true);
+		lbf.registerBeanDefinition("factoryBean", bd);
+		assertNull(lbf.getType("factoryBean"));
 	}
 
 	/**
