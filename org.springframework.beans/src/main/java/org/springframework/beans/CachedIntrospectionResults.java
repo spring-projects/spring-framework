@@ -22,11 +22,10 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -141,19 +140,20 @@ public class CachedIntrospectionResults {
 			results = (CachedIntrospectionResults) value;
 		}
 		if (results == null) {
-			// can throw BeansException
-			results = new CachedIntrospectionResults(beanClass);
 			// On JDK 1.5 and higher, it is almost always safe to cache the bean class...
 			// The sole exception is a custom BeanInfo class being provided in a non-safe ClassLoader.
-			if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
-					isClassLoaderAccepted(beanClass.getClassLoader()) ||
-					!ClassUtils.isPresent(beanClass.getName() + "BeanInfo", beanClass.getClassLoader())) {
+			boolean fullyCacheable =
+					ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
+					isClassLoaderAccepted(beanClass.getClassLoader());
+			if (fullyCacheable || !ClassUtils.isPresent(beanClass.getName() + "BeanInfo", beanClass.getClassLoader())) {
+				results = new CachedIntrospectionResults(beanClass, fullyCacheable);
 				classCache.put(beanClass, results);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
 				}
+				results = new CachedIntrospectionResults(beanClass, true);
 				classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
 			}
 		}
@@ -216,7 +216,7 @@ public class CachedIntrospectionResults {
 	 * @param beanClass the bean class to analyze
 	 * @throws BeansException in case of introspection failure
 	 */
-	private CachedIntrospectionResults(Class beanClass) throws BeansException {
+	private CachedIntrospectionResults(Class beanClass, boolean cacheFullMetadata) throws BeansException {
 		try {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
@@ -237,24 +237,29 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
-			this.propertyDescriptorCache = new HashMap<String, PropertyDescriptor>();
+			this.propertyDescriptorCache = new LinkedHashMap<String, PropertyDescriptor>();
 
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
+				if (Class.class.equals(beanClass) && "classLoader".equals(pd.getName())) {
+					// Ignore Class.getClassLoader() method - nobody needs to bind to that
+					continue;
+				}
 				if (logger.isTraceEnabled()) {
 					logger.trace("Found bean property '" + pd.getName() + "'" +
 							(pd.getPropertyType() != null ? " of type [" + pd.getPropertyType().getName() + "]" : "") +
 							(pd.getPropertyEditorClass() != null ?
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
-				pd = new GenericTypeAwarePropertyDescriptor(beanClass, pd.getName(), pd.getReadMethod(),
-						pd.getWriteMethod(), pd.getPropertyEditorClass());
+				if (cacheFullMetadata) {
+					pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+				}
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 		}
 		catch (IntrospectionException ex) {
-			throw new FatalBeanException("Cannot get BeanInfo for object of class [" + beanClass.getName() + "]", ex);
+			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
 		}
 	}
 
@@ -275,12 +280,29 @@ public class CachedIntrospectionResults {
 				pd = this.propertyDescriptorCache.get(name.substring(0, 1).toUpperCase() + name.substring(1));
 			}
 		}
-		return pd;
+		return (pd == null || pd instanceof GenericTypeAwarePropertyDescriptor ? pd :
+				buildGenericTypeAwarePropertyDescriptor(getBeanClass(), pd));
 	}
 
 	PropertyDescriptor[] getPropertyDescriptors() {
-		Collection<PropertyDescriptor> descriptorCollection = this.propertyDescriptorCache.values();
-		return descriptorCollection.toArray(new PropertyDescriptor[descriptorCollection.size()]);
+		PropertyDescriptor[] pds = new PropertyDescriptor[this.propertyDescriptorCache.size()];
+		int i = 0;
+		for (PropertyDescriptor pd : this.propertyDescriptorCache.values()) {
+			pds[i] = (pd instanceof GenericTypeAwarePropertyDescriptor ? pd :
+					buildGenericTypeAwarePropertyDescriptor(getBeanClass(), pd));
+			i++;
+		}
+		return pds;
+	}
+
+	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class beanClass, PropertyDescriptor pd) {
+		try {
+			return new GenericTypeAwarePropertyDescriptor(beanClass, pd.getName(), pd.getReadMethod(),
+					pd.getWriteMethod(), pd.getPropertyEditorClass());
+		}
+		catch (IntrospectionException ex) {
+			throw new FatalBeanException("Failed to re-introspect class [" + beanClass.getName() + "]", ex);
+		}
 	}
 
 }
