@@ -89,7 +89,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		// Indexing into a Map
-		if (targetObjectTypeDescriptor.isMap()) {
+		if (targetObject instanceof Map) {
 			if (targetObject == null) {
 			    // Current decision: attempt to index into null map == exception and does not just return null
 				throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
