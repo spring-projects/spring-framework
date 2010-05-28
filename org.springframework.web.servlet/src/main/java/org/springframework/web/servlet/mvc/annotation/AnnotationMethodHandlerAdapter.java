@@ -839,12 +839,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				}
 			}
 
-			if (AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
-				handleResponseBody(returnValue, webRequest);
+			if (returnValue instanceof HttpEntity) {
+				handleHttpEntityResponse((HttpEntity<?>) returnValue, webRequest);
 				return null;
 			}
-			else if (returnValue instanceof HttpEntity) {
-				handleHttpEntityResponse((HttpEntity<?>) returnValue, webRequest);
+			else if (AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
+				handleResponseBody(returnValue, webRequest);
 				return null;
 			}
 			else if (returnValue instanceof ModelAndView) {
