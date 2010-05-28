@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -28,6 +29,7 @@ import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
@@ -672,5 +674,28 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		expr = new SpelExpressionParser().parseRaw("''?:'default'");
 		Assert.assertEquals("default", expr.getValue());
 	}
+	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testMapOfMap_SPR7244() throws Exception {
+        Map<String,Object> map = new LinkedHashMap();
+        map.put("uri", "http:");
+        Map nameMap = new LinkedHashMap();
+        nameMap.put("givenName", "Arthur");
+        map.put("value", nameMap);
+        
+        StandardEvaluationContext ctx = new StandardEvaluationContext(map);
+        ExpressionParser parser = new SpelExpressionParser();
+        String el1 = "#root['value'].get('givenName')";
+        Expression exp = parser.parseExpression(el1);
+        Object evaluated = exp.getValue(ctx);
+        Assert.assertEquals("Arthur", evaluated);
+
+        String el2 = "#root['value']['givenName']";
+        exp = parser.parseExpression(el2);
+        evaluated = exp.getValue(ctx);
+        Assert.assertEquals("Arthur",evaluated);
+    }
+
 	
 }
