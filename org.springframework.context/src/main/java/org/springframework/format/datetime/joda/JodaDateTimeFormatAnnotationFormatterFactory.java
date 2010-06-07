@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,14 @@ import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
 import org.joda.time.format.DateTimeFormatter;
 
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Formats fields annotated with the {@link DateTimeFormat} annotation.
@@ -46,9 +48,12 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see DateTimeFormat
  */
-public final class JodaDateTimeFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<DateTimeFormat> {
+public class JodaDateTimeFormatAnnotationFormatterFactory
+		implements AnnotationFormatterFactory<DateTimeFormat>, EmbeddedValueResolverAware {
 
 	private final Set<Class<?>> fieldTypes;
+
+	private StringValueResolver embeddedValueResolver;
 	
 
 	public JodaDateTimeFormatAnnotationFormatterFactory() {
@@ -64,8 +69,17 @@ public final class JodaDateTimeFormatAnnotationFormatterFactory implements Annot
 		this.fieldTypes = Collections.unmodifiableSet(rawFieldTypes);
 	}
 
-	public Set<Class<?>> getFieldTypes() {
+	public final Set<Class<?>> getFieldTypes() {
 		return this.fieldTypes;
+	}
+
+
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
+	protected String resolveEmbeddedValue(String value) {
+		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 
@@ -92,24 +106,26 @@ public final class JodaDateTimeFormatAnnotationFormatterFactory implements Annot
 	}
 
 
-	// internal helpers
-	
 	private DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
 		if (StringUtils.hasLength(annotation.pattern())) {
-			return forPattern(annotation.pattern());
+			return forPattern(resolveEmbeddedValue(annotation.pattern()));
 		}
 		else if (annotation.iso() != ISO.NONE) {
 			return forIso(annotation.iso());
 		}
 		else {
-			return forStyle(annotation.style());
+			return forStyle(resolveEmbeddedValue(annotation.style()));
 		}
 	}
 
 	private DateTimeFormatter forPattern(String pattern) {
 		return org.joda.time.format.DateTimeFormat.forPattern(pattern);
 	}
-	
+
+	private DateTimeFormatter forStyle(String style) {
+		return org.joda.time.format.DateTimeFormat.forStyle(style);
+	}
+
 	private DateTimeFormatter forIso(ISO iso) {
 		if (iso == ISO.DATE) {
 			return org.joda.time.format.ISODateTimeFormat.date();
@@ -120,10 +136,6 @@ public final class JodaDateTimeFormatAnnotationFormatterFactory implements Annot
 		else {
 			return org.joda.time.format.ISODateTimeFormat.dateTime();
 		}		
-	}
-
-	private DateTimeFormatter forStyle(String style) {
-		return org.joda.time.format.DateTimeFormat.forStyle(style);
 	}
 
 }

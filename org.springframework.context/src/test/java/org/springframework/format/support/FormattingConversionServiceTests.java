@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,24 @@
 
 package org.springframework.format.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConversionServiceFactory;
@@ -70,7 +72,7 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	public void testFormatFieldForTypeWithPrinterParserWithCoersion() throws ParseException {
+	public void testFormatFieldForTypeWithPrinterParserWithCoercion() throws ParseException {
 		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
 			public LocalDate convert(DateTime source) {
 				return source.toLocalDate();
@@ -86,6 +88,24 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void testFormatFieldForAnnotation() throws Exception {
+		doTestFormatFieldForAnnotation(Model.class);
+	}
+
+	@Test
+	public void testFormatFieldForAnnotationWithPlaceholders() throws Exception {
+		GenericApplicationContext context = new GenericApplicationContext();
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.setProperty("dateStyle", "S-");
+		props.setProperty("datePattern", "M/d/yy");
+		ppc.setProperties(props);
+		context.getBeanFactory().registerSingleton("ppc", ppc);
+		context.refresh();
+		context.getBeanFactory().initializeBean(formattingService, "formattingService");
+		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class);
+	}
+
+	private void doTestFormatFieldForAnnotation(Class<?> modelClass) throws Exception {
 		formattingService.addConverter(new Converter<Date, Long>() {
 			public Long convert(Date source) {
 				return source.getTime();
@@ -97,34 +117,23 @@ public class FormattingConversionServiceTests {
 			}
 		});
 		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+
 		String formatted = (String) formattingService.convert(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime()
-				.toDate(), new TypeDescriptor(Model.class.getField("date")), TypeDescriptor.valueOf(String.class));
+				.toDate(), new TypeDescriptor(modelClass.getField("date")), TypeDescriptor.valueOf(String.class));
 		assertEquals("10/31/09", formatted);
 		LocalDate date = new LocalDate(formattingService.convert("10/31/09", TypeDescriptor.valueOf(String.class),
-				new TypeDescriptor(Model.class.getField("date"))));
+				new TypeDescriptor(modelClass.getField("date"))));
 		assertEquals(new LocalDate(2009, 10, 31), date);
-	}
-	
-	@Test
-	public void testFormatCollectionFieldForAnnotation() throws Exception {
-		formattingService.addConverter(new Converter<Date, Long>() {
-			public Long convert(Date source) {
-				return source.getTime();
-			}
-		});
-		formattingService.addConverter(new Converter<DateTime, Date>() {
-			public Date convert(DateTime source) {
-				return source.toDate();
-			}
-		});
-		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+
 		List<Date> dates = new ArrayList<Date>();
 		dates.add(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime().toDate());
 		dates.add(new LocalDate(2009, 11, 1).toDateTimeAtCurrentTime().toDate());
 		dates.add(new LocalDate(2009, 11, 2).toDateTimeAtCurrentTime().toDate());
-		String formatted = (String) formattingService.convert(dates, new TypeDescriptor(Model.class.getField("dates")), TypeDescriptor.valueOf(String.class));
+		formatted = (String) formattingService.convert(dates,
+				new TypeDescriptor(modelClass.getField("dates")), TypeDescriptor.valueOf(String.class));
 		assertEquals("10/31/09,11/1/09,11/2/09", formatted);
-		dates = (List<Date>) formattingService.convert("10/31/09,11/1/09,11/2/09", TypeDescriptor.valueOf(String.class), new TypeDescriptor(Model.class.getField("dates")));
+		dates = (List<Date>) formattingService.convert("10/31/09,11/1/09,11/2/09",
+				TypeDescriptor.valueOf(String.class), new TypeDescriptor(modelClass.getField("dates")));
 		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(dates.get(0)));
 		assertEquals(new LocalDate(2009, 11, 1), new LocalDate(dates.get(1)));
 		assertEquals(new LocalDate(2009, 11, 2), new LocalDate(dates.get(2)));
@@ -163,6 +172,7 @@ public class FormattingConversionServiceTests {
 		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
+
 	private static class Model {
 
 		@SuppressWarnings("unused")
@@ -170,7 +180,20 @@ public class FormattingConversionServiceTests {
 		public Date date;
 		
 		@SuppressWarnings("unused")
-		@org.springframework.format.annotation.DateTimeFormat(style="S-")
+		@org.springframework.format.annotation.DateTimeFormat(pattern="M/d/yy")
+		public List<Date> dates;
+
+	}
+
+
+	private static class ModelWithPlaceholders {
+
+		@SuppressWarnings("unused")
+		@org.springframework.format.annotation.DateTimeFormat(style="${dateStyle}")
+		public Date date;
+
+		@SuppressWarnings("unused")
+		@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
 		public List<Date> dates;
 
 	}

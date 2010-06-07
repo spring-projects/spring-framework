@@ -26,7 +26,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -35,6 +35,7 @@ import org.springframework.scheduling.support.MethodInvokingRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Bean post-processor that registers methods annotated with {@link Scheduled @Scheduled}
@@ -47,10 +48,13 @@ import org.springframework.util.ReflectionUtils.MethodCallback;
  * @see Scheduled
  * @see org.springframework.scheduling.TaskScheduler
  */
-public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered,
-		ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
+public class ScheduledAnnotationBeanPostProcessor
+		implements BeanPostProcessor, Ordered, EmbeddedValueResolverAware, ApplicationContextAware,
+		ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	private Object scheduler;
+
+	private StringValueResolver embeddedValueResolver;
 
 	private ApplicationContext applicationContext;
 
@@ -70,6 +74,10 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	 */
 	public void setScheduler(Object scheduler) {
 		this.scheduler = scheduler;
+	}
+
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
 	}
 
 	public void setApplicationContext(ApplicationContext applicationContext) {
@@ -102,17 +110,16 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					try {
 						runnable.prepare();
 					}
-					catch (Exception e) {
-						throw new IllegalStateException("failed to prepare task", e);
+					catch (Exception ex) {
+						throw new IllegalStateException("failed to prepare task", ex);
 					}
 					boolean processedSchedule = false;
 					String errorMessage = "Exactly one of 'cron', 'fixedDelay', or 'fixedRate' is required.";
 					String cron = annotation.cron();
 					if (!"".equals(cron)) {
 						processedSchedule = true;
-						if (applicationContext instanceof ConfigurableApplicationContext) {
-							cron = ((ConfigurableApplicationContext) applicationContext)
-									.getBeanFactory().resolveEmbeddedValue(cron);
+						if (embeddedValueResolver != null) {
+							cron = embeddedValueResolver.resolveStringValue(cron);
 						}
 						cronTasks.put(runnable, cron);
 					}
