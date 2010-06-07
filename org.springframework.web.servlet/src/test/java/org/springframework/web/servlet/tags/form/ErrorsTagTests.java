@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
@@ -399,8 +398,39 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
 		this.tag.doEndTag();
 		String output = getOutput();
-		assertBlockTagContains(output, "object error");
-		assertFalse(output.indexOf("field error") != -1);
+		assertTrue(output.contains("id=\"testBean.errors\""));
+		assertTrue(output.contains("object error"));
+		assertFalse(output.contains("field error"));
+	}
+
+	public void testSpecificPathMatchesSpecificFieldOnly() throws Exception {
+		this.tag.setPath("name");
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
+		errors.reject("some.code", "object error");
+		errors.rejectValue("name", "some.code", "field error");
+		exposeBindingResult(errors);
+		this.tag.doStartTag();
+		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		this.tag.doEndTag();
+		String output = getOutput();
+		assertTrue(output.contains("id=\"name.errors\""));
+		assertFalse(output.contains("object error"));
+		assertTrue(output.contains("field error"));
+	}
+
+	public void testStarMatchesAllErrors() throws Exception {
+		this.tag.setPath("*");
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
+		errors.reject("some.code", "object error");
+		errors.rejectValue("name", "some.code", "field error");
+		exposeBindingResult(errors);
+		this.tag.doStartTag();
+		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		this.tag.doEndTag();
+		String output = getOutput();
+		assertTrue(output.contains("id=\"testBean.errors\""));
+		assertTrue(output.contains("object error"));
+		assertTrue(output.contains("field error"));
 	}
 
 	protected void exposeBindingResult(Errors errors) {
