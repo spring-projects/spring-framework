@@ -38,7 +38,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -104,15 +103,22 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		stringHttpMessageConverter.setWriteAcceptCharset(false);
 		this.partConverters.add(stringHttpMessageConverter);
 		this.partConverters.add(new ResourceHttpMessageConverter());
-		this.partConverters.add(new SourceHttpMessageConverter());
 	}
 
 
 	/**
+	 * Add a message body converter. Such a converters is used to convert objects to MIME parts.
+	 */
+	public final void addPartConverter(HttpMessageConverter<?> partConverter) {
+		Assert.notNull(partConverter, "'partConverter' must not be NULL");
+		this.partConverters.add(partConverter);
+	}
+
+	/**
 	 * Set the message body converters to use. These converters are used to convert objects to MIME parts.
 	 */
-	public void setPartConverters(List<HttpMessageConverter<?>> partConverters) {
-		Assert.notEmpty(partConverters, "'messageConverters' must not be empty");
+	public final void setPartConverters(List<HttpMessageConverter<?>> partConverters) {
+		Assert.notEmpty(partConverters, "'partConverters' must not be empty");
 		this.partConverters = partConverters;
 	}
 
