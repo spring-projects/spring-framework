@@ -375,7 +375,7 @@ TR: OK. Added to diagram.--></para>
       write a web application you don't need the spring-web modules. To refer
       to Spring library modules in this guide we use a shorthand naming
       convention <code>spring-*</code> or <code>spring-*.jar,</code> where "*"
-      represents shot name for the module (e.g. <code>spring-core</code>,
+      represents the short name for the module (e.g. <code>spring-core</code>,
       <code>spring-webmvc</code>, <code>spring-jms</code>, etc.). The actual
       jar file name that you use may be in this form (see below) or it may
       not, and normally it also has a version number in the file name (e.g.
