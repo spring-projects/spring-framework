@@ -47,10 +47,10 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.ui.Model;
@@ -86,7 +86,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 	private HttpMessageConverter<?>[] messageConverters =
 			new HttpMessageConverter[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new FormHttpMessageConverter(), new SourceHttpMessageConverter()};
+					new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
 
 
 	/**

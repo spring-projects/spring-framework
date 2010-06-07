@@ -35,7 +35,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.HttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -44,6 +43,7 @@ import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.UriTemplate;
@@ -138,8 +138,8 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter());
-		this.messageConverters.add(new FormHttpMessageConverter());
 		this.messageConverters.add(new SourceHttpMessageConverter());
+		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
 		if (jaxb2Present) {
 			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
