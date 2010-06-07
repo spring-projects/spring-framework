@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stream.StreamResult;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.custommonkey.xmlunit.XMLAssert.*;
 import org.custommonkey.xmlunit.XMLUnit;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Attr;
@@ -71,6 +72,30 @@ public abstract class AbstractMarshallerTests {
 		Document result = builder.newDocument();
 		DOMResult domResult = new DOMResult(result);
 		marshaller.marshal(flights, domResult);
+		Document expected = builder.newDocument();
+		Element flightsElement = expected.createElementNS("http://samples.springframework.org/flight", "tns:flights");
+		Attr namespace = expected.createAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:tns");
+		namespace.setNodeValue("http://samples.springframework.org/flight");
+		flightsElement.setAttributeNode(namespace);
+		expected.appendChild(flightsElement);
+		Element flightElement = expected.createElementNS("http://samples.springframework.org/flight", "tns:flight");
+		flightsElement.appendChild(flightElement);
+		Element numberElement = expected.createElementNS("http://samples.springframework.org/flight", "tns:number");
+		flightElement.appendChild(numberElement);
+		Text text = expected.createTextNode("42");
+		numberElement.appendChild(text);
+		assertXMLEqual("Marshaller writes invalid DOMResult", expected, result);
+	}
+
+	@Test
+	public void marshalEmptyDOMResult() throws Exception {
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+		documentBuilderFactory.setNamespaceAware(true);
+		DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+		DOMResult domResult = new DOMResult();
+		marshaller.marshal(flights, domResult);
+		assertTrue("DOMResult does not contain a Document", domResult.getNode() instanceof Document);
+		Document result = (Document) domResult.getNode();
 		Document expected = builder.newDocument();
 		Element flightsElement = expected.createElementNS("http://samples.springframework.org/flight", "tns:flights");
 		Attr namespace = expected.createAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:tns");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,21 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * @see #marshalDomNode(Object, org.w3c.dom.Node)
 	 */
 	protected void marshalDomResult(Object graph, DOMResult domResult) throws XmlMappingException {
-		Assert.notNull(domResult.getNode(), "DOMResult does not contain Node");
+		if (domResult.getNode() == null) {
+			try {
+				synchronized (this.documentBuilderFactoryMonitor) {
+					if (this.documentBuilderFactory == null) {
+						this.documentBuilderFactory = createDocumentBuilderFactory();
+					}
+				}
+				DocumentBuilder documentBuilder = createDocumentBuilder(this.documentBuilderFactory);
+				domResult.setNode(documentBuilder.newDocument());
+			}
+			catch (ParserConfigurationException ex) {
+				throw new UnmarshallingFailureException(
+						"Could not create document placeholder for DOMResult: " + ex.getMessage(), ex);
+			}
+		}
 		marshalDomNode(graph, domResult.getNode());
 	}
 
