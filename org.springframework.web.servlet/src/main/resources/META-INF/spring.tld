@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<taglib xmlns="http://java.sun.com/xml/ns/j2ee" 
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd" 
-        version="2.0">  
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+		version="2.0">
 
 	<description>Spring Framework JSP Tag Library</description>
 	<tlib-version>3.0</tlib-version>
 	<short-name>spring</short-name>
 	<uri>http://www.springframework.org/tags</uri>
-	
+
 	<tag>
 		<description>
 			Sets default HTML escape value for the current page.
@@ -25,7 +25,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Escapes its enclosed body content, applying HTML escaping and/or JavaScript escaping.
@@ -50,7 +50,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Retrieves the message with the given code, or text if code isn't resolvable.
@@ -133,7 +133,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Retrieves the theme message with the given code, or text if code isn't resolvable.
@@ -210,7 +210,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Provides Errors instance in case of bind errors.
@@ -240,7 +240,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Sets a nested path to be used by the bind tag's path.
@@ -261,7 +261,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Provides BindStatus object for the given bind path.
@@ -298,7 +298,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Provides transformation of variables to Strings, using an appropriate
@@ -341,7 +341,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>URL tag based on the JSTL c:url tag.  This variant is fully 
 		backwards compatible with the standard tag.  Enhancements include support 
@@ -393,7 +393,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>Parameter tag based on the JSTL c:param tag.  The sole purpose is to 
 		support params inside the spring:url tag.</description>
@@ -413,7 +413,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>Evaluates a Spring expression (SpEL) and either prints the result or assigns it to a variable.</description>
 		<name>eval</name>
@@ -453,5 +453,5 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 </taglib>
