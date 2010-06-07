@@ -64,7 +64,8 @@ public class TypeDescriptor {
 		typeDescriptorCache.put(Double.class, new TypeDescriptor(Double.class));
 		typeDescriptorCache.put(String.class, new TypeDescriptor(String.class));
 	}
-	
+
+
 	private Class<?> type;
 
 	private MethodParameter methodParameter;
@@ -81,6 +82,7 @@ public class TypeDescriptor {
 
 	private Annotation[] annotations;
 	
+
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
 	 * <p>Use this constructor when a target conversion point originates from a method parameter,
@@ -127,37 +129,35 @@ public class TypeDescriptor {
 		this.type = type;
 	}
 
-	// static factory methods
+	/**
+	 * Internal constructor for a NULL descriptor.
+	 */
+	private TypeDescriptor() {
+	}
 
 	/**
-	 * Create a new type descriptor for the class of the given object.
-	 * @param object the object
-	 * @return the type descriptor
+	 * Create a new descriptor for the type of the given value.
+	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
+	 * Collection, where no additional context is available but elements can be introspected.
+	 * @param type the actual type to wrap
 	 */
-	public static TypeDescriptor forObject(Object object) {
-		if (object == null) {
-			return NULL;
-		}
-		else if (object instanceof Collection<?> || object instanceof Map<?, ?>) {
-			return new TypeDescriptor(object);
-		}
-		else {
-			return valueOf(object.getClass());
-		}
+	private TypeDescriptor(Object value) {
+		Assert.notNull(value, "Value must not be null");
+		this.value = value;
+		this.type = value.getClass();
 	}
-	
+
 	/**
-	 * Create a new type descriptor for the given class.
-	 * @param type the class
-	 * @return the type descriptor
+	 * Create a new descriptor for the given type.
+	 * <p>Use this constructor when a conversion point comes from a plain source type,
+	 * where no additional context is available.
+	 * @param type the actual type to wrap
 	 */
-	public static TypeDescriptor valueOf(Class<?> type) {
-		if (type == null) {
-			return TypeDescriptor.NULL;
-		}
-		TypeDescriptor desc = typeDescriptorCache.get(type);
-		return (desc != null ? desc : new TypeDescriptor(type));
+	private TypeDescriptor(Class<?> type) {
+		Assert.notNull(type, "Type must not be null");
+		this.type = type;
 	}
+
 
 	/**
 	 * Return the wrapped MethodParameter, if any.
@@ -255,13 +255,14 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Return the element type as a type descriptor; if the element type is null (cannot be determined), the type descriptor is derived from the element argument.
+	 * Return the element type as a type descriptor; if the element type is null (cannot be determined),
+	 * the type descriptor is derived from the element argument.
 	 * @param element the element
 	 * @return the element type descriptor
 	 */
 	public TypeDescriptor getElementTypeDescriptor(Object element) {
 		TypeDescriptor elementType = getElementTypeDescriptor();
-		return elementType != TypeDescriptor.NULL ? elementType : TypeDescriptor.forObject(element); 
+		return (elementType != TypeDescriptor.NULL ? elementType : forObject(element));
 	}
 
 	/**
@@ -318,20 +319,21 @@ public class TypeDescriptor {
 	 * Returns map value type as a type descriptor.
 	 */
 	public synchronized TypeDescriptor getMapValueTypeDescriptor() {
-		if (mapValueType == null) {
+		if (this.mapValueType == null) {
 			mapValueType = forElementType(resolveMapValueType());
 		}
-		return mapValueType;
+		return this.mapValueType;
 	}
 
 	/**
-	 * Return the map value type as a type descriptor; if the value type is null (cannot be determined), the type descriptor is derived from the value argument.
+	 * Return the map value type as a type descriptor; if the value type is null
+	 * (cannot be determined), the type descriptor is derived from the value argument.
 	 * @param value the value
 	 * @return the map value type descriptor
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor(Object value) {
 		TypeDescriptor valueType = getMapValueTypeDescriptor();
-		return valueType != TypeDescriptor.NULL ? valueType : TypeDescriptor.forObject(value);
+		return (valueType != TypeDescriptor.NULL ? valueType : TypeDescriptor.forObject(value));
 	}
 
 	/**
@@ -366,10 +368,15 @@ public class TypeDescriptor {
 			return true;
 		}
 		if (isCollection() && targetType.isCollection() || isArray() && targetType.isArray()) {
-			return targetType.getType().isAssignableFrom(getType()) && getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());			
-		} else if (isMap() && targetType.isMap()) {
-			return targetType.getType().isAssignableFrom(getType()) && getMapKeyTypeDescriptor().isAssignableTo(targetType.getMapKeyTypeDescriptor()) && getMapValueTypeDescriptor().isAssignableTo(targetType.getMapValueTypeDescriptor());
-		} else {
+			return targetType.getType().isAssignableFrom(getType()) &&
+					getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());
+		}
+		else if (isMap() && targetType.isMap()) {
+			return targetType.getType().isAssignableFrom(getType()) &&
+					getMapKeyTypeDescriptor().isAssignableTo(targetType.getMapKeyTypeDescriptor()) &&
+					getMapValueTypeDescriptor().isAssignableTo(targetType.getMapValueTypeDescriptor());
+		}
+		else {
 			return targetType.getObjectType().isAssignableFrom(getObjectType());
 		}
 	}
@@ -383,14 +390,17 @@ public class TypeDescriptor {
 	public TypeDescriptor forElementType(Class<?> elementType) {
 		if (getType().equals(elementType)) {
 			return this;
-		} else if (elementType == null) {
+		}
+		else if (elementType == null) {
 			return TypeDescriptor.NULL;
-		} else if (this.methodParameter != null) {
+		}
+		else if (this.methodParameter != null) {
 			return new TypeDescriptor(this.methodParameter, elementType);
 		}
 		else if (this.field != null) {
 			return new TypeDescriptor(this.field, elementType);
-		} else { 
+		}
+		else {
 			return TypeDescriptor.valueOf(elementType);
 		}
 	}
@@ -403,12 +413,16 @@ public class TypeDescriptor {
 		if (this == td) {
 			return true;
 		}
-		boolean annotatedTypeEquals = getType().equals(td.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), td.getAnnotations());
+		boolean annotatedTypeEquals =
+				getType().equals(td.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), td.getAnnotations());
 		if (isCollection()) {
 			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(), td.getElementType());
-		} else if (isMap()) { 
-			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(), td.getMapKeyType()) && ObjectUtils.nullSafeEquals(getMapValueType(), td.getMapValueType());
-		} else {
+		}
+		else if (isMap()) {
+			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(), td.getMapKeyType()) &&
+					ObjectUtils.nullSafeEquals(getMapValueType(), td.getMapValueType());
+		}
+		else {
 			return annotatedTypeEquals; 
 		}
 	}
@@ -439,8 +453,11 @@ public class TypeDescriptor {
 			if (isMap()) {
 				Class<?> mapKeyType = getMapKeyType();
 				Class<?> valueKeyType = getMapValueType();
-				builder.append("<").append(mapKeyType != null ? ClassUtils.getQualifiedName(mapKeyType) : "?").append(", ").append(valueKeyType != null ? ClassUtils.getQualifiedName(valueKeyType) : "?").append(">");
-			} else if (isCollection()) {
+				builder.append("<").append(mapKeyType != null ? ClassUtils.getQualifiedName(mapKeyType) : "?");
+				builder.append(", ").append(valueKeyType != null ? ClassUtils.getQualifiedName(valueKeyType) : "?");
+				builder.append(">");
+			}
+			else if (isCollection()) {
 				Class<?> elementType = getElementType();
 				builder.append("<").append(elementType != null ? ClassUtils.getQualifiedName(elementType) : "?").append(">");				
 			}
@@ -481,7 +498,7 @@ public class TypeDescriptor {
 				}
 			}
 		}
-		return type != null ? GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type) : null;
+		return (this.type != null ? GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type) : null);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -501,7 +518,7 @@ public class TypeDescriptor {
 				}
 			}
 		}
-		return type != null && isMap() ? GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type) : null;
+		return (this.type != null && isMap() ? GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type) : null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -521,7 +538,7 @@ public class TypeDescriptor {
 				}
 			}
 		}
-		return isMap() && type != null ? GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type) : null;
+		return (isMap() && this.type != null ? GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type) : null);
 	}
 	
 	private Annotation[] resolveAnnotations() {
@@ -540,34 +557,38 @@ public class TypeDescriptor {
 			return EMPTY_ANNOTATION_ARRAY;
 		}
 	}
-	
+
+
+	// static factory methods
+
 	/**
-	 * Internal constructor for a NULL descriptor.
+	 * Create a new type descriptor for the class of the given object.
+	 * @param object the object
+	 * @return the type descriptor
 	 */
-	private TypeDescriptor() {
+	public static TypeDescriptor forObject(Object object) {
+		if (object == null) {
+			return NULL;
+		}
+		else if (object instanceof Collection<?> || object instanceof Map<?, ?>) {
+			return new TypeDescriptor(object);
+		}
+		else {
+			return valueOf(object.getClass());
+		}
 	}
 
 	/**
-	 * Create a new descriptor for the type of the given value.
-	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
-	 * Collection, where no additional context is available but elements can be introspected.
-	 * @param type the actual type to wrap
+	 * Create a new type descriptor for the given class.
+	 * @param type the class
+	 * @return the type descriptor
 	 */
-	private TypeDescriptor(Object value) {
-		Assert.notNull(value, "Value must not be null");
-		this.value = value;
-		this.type = value.getClass();
-	}
-
-	/**
-	 * Create a new descriptor for the given type.
-	 * <p>Use this constructor when a conversion point comes from a plain source type,
-	 * where no additional context is available.
-	 * @param type the actual type to wrap
-	 */
-	private TypeDescriptor(Class<?> type) {
-		Assert.notNull(type, "Type must not be null");
-		this.type = type;
+	public static TypeDescriptor valueOf(Class<?> type) {
+		if (type == null) {
+			return TypeDescriptor.NULL;
+		}
+		TypeDescriptor desc = typeDescriptorCache.get(type);
+		return (desc != null ? desc : new TypeDescriptor(type));
 	}
 
 }

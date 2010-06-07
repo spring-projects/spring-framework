@@ -32,11 +32,11 @@ import org.springframework.util.StringUtils;
  * retrievable via {@link HttpServletRequest#getMethod()}. Since browsers currently only
  * support GET and POST, a common technique - used by the Prototype library, for instance -
  * is to use a normal POST with an additional hidden form field (<code>_method</code>)
- * to pass the "real" HTTP method. This filter reads that parameter, and changes of
- * {@link HttpServletRequestWrapper#getMethod()} accordingly.
+ * to pass the "real" HTTP method along. This filter reads that parameter and changes
+ * the {@link HttpServletRequestWrapper#getMethod()} return value accordingly.
  *
  * <p>The name of the request parameter defaults to <code>_method</code>, but can be
- * changed via the {@link #setMethodParam(String) methodParam} property.
+ * adapted via the {@link #setMethodParam(String) methodParam} property.
  *
  * <p><b>NOTE: This filter needs to run after multipart processing in case of a multipart
  * POST request, due to its inherent need for checking a POST body parameter.</b>
@@ -70,7 +70,7 @@ public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 		String paramValue = request.getParameter(this.methodParam);
 		if ("POST".equals(request.getMethod()) && StringUtils.hasLength(paramValue)) {
 			String method = paramValue.toUpperCase(Locale.ENGLISH);
-			HttpServletRequest wrapper = new HttpMethodRequestWrapper(method, request);
+			HttpServletRequest wrapper = new HttpMethodRequestWrapper(request, method);
 			filterChain.doFilter(wrapper, response);
 		}
 		else {
@@ -87,7 +87,7 @@ public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 
 		private final String method;
 
-		public HttpMethodRequestWrapper(String method, HttpServletRequest request) {
+		public HttpMethodRequestWrapper(HttpServletRequest request, String method) {
 			super(request);
 			this.method = method;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.apache.commons.httpclient.HttpMethod;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpResponse;
 
 /**
  * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
@@ -42,34 +41,36 @@ final class CommonsClientHttpResponse implements ClientHttpResponse {
 
 	private HttpHeaders headers;
 
+
 	CommonsClientHttpResponse(HttpMethod httpMethod) {
 		this.httpMethod = httpMethod;
 	}
 
+
 	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(httpMethod.getStatusCode());
+		return HttpStatus.valueOf(this.httpMethod.getStatusCode());
 	}
 
 	public String getStatusText() {
-		return httpMethod.getStatusText();
+		return this.httpMethod.getStatusText();
 	}
 
 	public HttpHeaders getHeaders() {
-		if (headers == null) {
-			headers = new HttpHeaders();
-			for (Header header : httpMethod.getResponseHeaders()) {
-				headers.add(header.getName(), header.getValue());
+		if (this.headers == null) {
+			this.headers = new HttpHeaders();
+			for (Header header : this.httpMethod.getResponseHeaders()) {
+				this.headers.add(header.getName(), header.getValue());
 			}
 		}
-		return headers;
+		return this.headers;
 	}
 
 	public InputStream getBody() throws IOException {
-		return httpMethod.getResponseBodyAsStream();
+		return this.httpMethod.getResponseBodyAsStream();
 	}
 
 	public void close() {
-		httpMethod.releaseConnection();
+		this.httpMethod.releaseConnection();
 	}
 
 }
