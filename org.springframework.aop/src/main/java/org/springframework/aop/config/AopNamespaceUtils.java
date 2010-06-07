@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,11 @@ public abstract class AopNamespaceUtils {
 	 * The <code>proxy-target-class</code> attribute as found on AOP-related XML tags.
 	 */
 	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
+
+	/**
+	 * The <code>expose-proxy</code> attribute as found on AOP-related XML tags.
+	 */
+	private static final String EXPOSE_PROXY_ATTRIBUTE = "expose-proxy";
 
 
 	public static void registerAutoProxyCreatorIfNecessary(
@@ -101,6 +106,10 @@ public abstract class AopNamespaceUtils {
 			boolean proxyTargetClass = Boolean.valueOf(sourceElement.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE));
 			if (proxyTargetClass) {
 				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+			}
+			boolean exposeProxy = Boolean.valueOf(sourceElement.getAttribute(EXPOSE_PROXY_ATTRIBUTE));
+			if (exposeProxy) {
+				AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
 			}
 		}
 	}

@@ -56,6 +56,15 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="expose-proxy" type="xsd:boolean" default="false">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Indicate that the proxy should be exposed by the AOP framework as a
+	ThreadLocal for retrieval via the AopContext class. Off by default,
+	i.e. no guarantees that AopContext access will work.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -81,6 +90,15 @@
 					<xsd:documentation><![CDATA[
 	Are class-based (CGLIB) proxies to be created? By default, standard
 	Java interface-based proxies are created.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="expose-proxy" type="xsd:boolean" default="false">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Indicate that the proxy should be exposed by the AOP framework as a
+	ThreadLocal for retrieval via the AopContext class. Off by default,
+	i.e. no guarantees that AopContext access will work.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

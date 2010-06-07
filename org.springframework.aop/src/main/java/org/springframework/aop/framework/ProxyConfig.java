@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,12 +113,14 @@ public class ProxyConfig implements Serializable {
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
 	 * if an advised object needs to call another advised method on itself.
 	 * (If it uses <code>this</code>, the invocation will not be advised).
-	 * <p>Default is "false", for optimal performance.
+	 * <p>Default is "false", in order to avoid unnecessary extra interception.
+	 * This means that no guarantees are provided that AopContext access will
+	 * work consistently within any method of the advised object.
 	 */
 	public void setExposeProxy(boolean exposeProxy) {
 		this.exposeProxy = exposeProxy;
 	}
-	
+
 	/**
 	 * Return whether the AOP proxy will expose the AOP proxy for
 	 * each invocation.
