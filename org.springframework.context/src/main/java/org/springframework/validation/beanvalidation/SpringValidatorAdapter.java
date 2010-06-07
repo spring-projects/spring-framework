@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
@@ -76,10 +77,17 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 			String field = violation.getPropertyPath().toString();
 			FieldError fieldError = errors.getFieldError(field);
 			if (fieldError == null || !fieldError.isBindingFailure()) {
-				errors.rejectValue(field,
-						violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
-						getArgumentsForConstraint(errors.getObjectName(), field, violation.getConstraintDescriptor()),
-						violation.getMessage());
+				try {
+					errors.rejectValue(field,
+							violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
+							getArgumentsForConstraint(errors.getObjectName(), field, violation.getConstraintDescriptor()),
+							violation.getMessage());
+				}
+				catch (NotReadablePropertyException ex) {
+					throw new IllegalStateException("JSR-303 validated property '" + field +
+							"' does not have a corresponding accessor for Spring data binding - " +
+							"check your DataBinder's configuration (bean property versus direct field access)", ex);
+				}
 			}
 		}
 	}
