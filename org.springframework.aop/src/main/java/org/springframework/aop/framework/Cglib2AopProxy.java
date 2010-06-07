@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,7 +268,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 		// Choose a "straight to target" interceptor. (used for calls that are
 		// unadvised but can return this). May be required to expose the proxy.
-		Callback targetInterceptor = null;
+		Callback targetInterceptor;
 		if (exposeProxy) {
 			targetInterceptor = isStatic ?
 					new StaticUnadvisedExposedInterceptor(this.advised.getTargetSource().getTarget()) :
@@ -316,12 +316,8 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			// Now copy both the callbacks from mainCallbacks
 			// and fixedCallbacks into the callbacks array.
 			callbacks = new Callback[mainCallbacks.length + fixedCallbacks.length];
-			for (int x = 0; x < mainCallbacks.length; x++) {
-				callbacks[x] = mainCallbacks[x];
-			}
-			for (int x = 0; x < fixedCallbacks.length; x++) {
-				callbacks[x + mainCallbacks.length] = fixedCallbacks[x];
-			}
+			System.arraycopy(mainCallbacks, 0, callbacks, 0, mainCallbacks.length);
+			System.arraycopy(fixedCallbacks, 0, callbacks, mainCallbacks.length, fixedCallbacks.length);
 			this.fixedInterceptorOffset = mainCallbacks.length;
 		}
 		else {
@@ -610,7 +606,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 					targetClass = target.getClass();
 				}
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
-				Object retVal = null;
+				Object retVal;
 				// Check whether we only have one InvokerInterceptor: that is,
 				// no real advice, but just reflective invocation of the target.
 				if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
