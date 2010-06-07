@@ -97,6 +97,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
 
+
 	public FormHttpMessageConverter() {
 		this.partConverters.add(new ByteArrayHttpMessageConverter());
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
@@ -105,6 +106,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		this.partConverters.add(new ResourceHttpMessageConverter());
 		this.partConverters.add(new SourceHttpMessageConverter());
 	}
+
 
 	/**
 	 * Set the message body converters to use. These converters are used to convert objects to MIME parts.
@@ -120,6 +122,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	public void setCharset(Charset charset) {
 		this.charset = charset;
 	}
+
 
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
@@ -151,8 +154,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	public MultiValueMap<String, String> read(Class<? extends MultiValueMap<String, ?>> clazz,
-											  HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
+			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : this.charset;
 		String body = FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
@@ -201,9 +204,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	private void writeForm(MultiValueMap<String, String> form, HttpOutputMessage outputMessage) throws IOException {
-
 		outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
 		StringBuilder builder = new StringBuilder();
 		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
 			String name = nameIterator.next();
@@ -225,8 +226,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		FileCopyUtils.copy(builder.toString(), new OutputStreamWriter(outputMessage.getBody(), charset));
 	}
 
-	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
-			throws IOException {
+	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
 		byte[] boundary = generateMultipartBoundary();
 
 		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, "US-ASCII"));
@@ -304,7 +304,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Generate a multipart boundary.
-	 *
 	 * <p>Default implementation returns a random boundary. Can be overridden in subclasses.
 	 */
 	protected byte[] generateMultipartBoundary() {
@@ -316,11 +315,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
-	 * Returns the filename of the given multipart part. This value will be used for the {@code Content-Disposition} header.
-	 *
+	 * Return the filename of the given multipart part. This value will be used for the {@code Content-Disposition} header.
 	 * <p>Default implementation returns {@link Resource#getFilename()} if the part is a {@code Resource}, and
 	 * {@code null} in other cases. Can be overridden in subclasses.
-	 *
 	 * @param part the part to determine the file name for
 	 * @return the filename, or {@code null} if not known
 	 */
@@ -334,10 +331,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
+
 	/**
 	 * Implementation of {@link org.springframework.http.HttpOutputMessage} used for writing multipart data.
 	 */
-
 	private class MultipartHttpOutputMessage implements HttpOutputMessage {
 
 		private final HttpHeaders headers = new HttpHeaders();
@@ -386,7 +383,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 				throw new IllegalStateException(ex);
 			}
 		}
-
-
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -550,7 +550,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Apply the given relative path to the given path,
-	 * assuming standard Java folder separation (i.e. "/" separators);
+	 * assuming standard Java folder separation (i.e. "/" separators).
 	 * @param path the path to start from (usually a full file path)
 	 * @param relativePath the relative path to apply
 	 * (relative to the full file path above)

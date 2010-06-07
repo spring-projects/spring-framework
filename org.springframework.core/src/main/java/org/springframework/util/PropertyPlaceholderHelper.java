@@ -71,8 +71,10 @@ public class PropertyPlaceholderHelper {
 
 	/**
 	 * Creates a new <code>PropertyPlaceholderHelper</code> that uses the supplied prefix and suffix.
-	 * @param placeholderPrefix the prefix that denotes the start of a placeholder.
-	 * @param placeholderSuffix the suffix that denotes the end of a placeholder.
+	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
+	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
+	 * @param valueSeparator the separating character between the placeholder variable
+	 * and the associated default value, if any
 	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should be ignored
 	 * (<code>true</code>) or cause an exception (<code>false</code>).
 	 */
@@ -158,11 +160,9 @@ public class PropertyPlaceholderHelper {
 					// previously resolved placeholder value.
 					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
-
 					if (logger.isTraceEnabled()) {
 						logger.trace("Resolved placeholder '" + placeholder + "'");
 					}
-
 					startIndex = buf.indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
 				else if (this.ignoreUnresolvablePlaceholders) {

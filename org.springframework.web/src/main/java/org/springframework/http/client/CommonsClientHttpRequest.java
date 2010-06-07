@@ -53,13 +53,14 @@ final class CommonsClientHttpRequest extends AbstractClientHttpRequest {
 		this.httpMethod = httpMethod;
 	}
 
+
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(httpMethod.getName());
+		return HttpMethod.valueOf(this.httpMethod.getName());
 	}
 
 	public URI getURI() {
 		try {
-			return URI.create(httpMethod.getURI().getEscapedURI());
+			return URI.create(this.httpMethod.getURI().getEscapedURI());
 		}
 		catch (URIException ex) {
 			throw new IllegalStateException("Could not get HttpMethod URI: " + ex.getMessage(), ex);
@@ -74,13 +75,13 @@ final class CommonsClientHttpRequest extends AbstractClientHttpRequest {
 				httpMethod.addRequestHeader(headerName, headerValue);
 			}
 		}
-		if (httpMethod instanceof EntityEnclosingMethod) {
-			EntityEnclosingMethod entityEnclosingMethod = (EntityEnclosingMethod) httpMethod;
+		if (this.httpMethod instanceof EntityEnclosingMethod) {
+			EntityEnclosingMethod entityEnclosingMethod = (EntityEnclosingMethod) this.httpMethod;
 			RequestEntity requestEntity = new ByteArrayRequestEntity(output);
 			entityEnclosingMethod.setRequestEntity(requestEntity);
 		}
-		httpClient.executeMethod(httpMethod);
-		return new CommonsClientHttpResponse(httpMethod);
+		this.httpClient.executeMethod(this.httpMethod);
+		return new CommonsClientHttpResponse(this.httpMethod);
 	}
 
 }
