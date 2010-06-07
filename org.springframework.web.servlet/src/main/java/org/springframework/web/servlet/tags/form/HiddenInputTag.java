@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import javax.servlet.jsp.JspException;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class HiddenInputTag extends AbstractDataBoundFormElementTag {
+public class HiddenInputTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Writes the HTML '<code>input</code>' tag to the supplied {@link TagWriter} including the
