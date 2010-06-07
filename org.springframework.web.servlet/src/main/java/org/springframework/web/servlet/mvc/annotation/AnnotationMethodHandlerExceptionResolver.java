@@ -45,6 +45,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -56,6 +57,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -347,10 +349,16 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ServletWebRequest webRequest)
 			throws Exception {
 
-		ResponseStatus responseStatus = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
-		if (responseStatus != null) {
-			HttpServletResponse response = webRequest.getResponse();
-			response.setStatus(responseStatus.value().value());
+		ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
+		if (responseStatusAnn != null) {
+			HttpStatus responseStatus = responseStatusAnn.value();
+			String reason = responseStatusAnn.reason();
+			if (!StringUtils.hasText(reason)) {
+				webRequest.getResponse().setStatus(responseStatus.value());
+			}
+			else {
+				webRequest.getResponse().sendError(responseStatus.value(), reason);
+			}
 		}
 
 		if (returnValue != null && AnnotationUtils.findAnnotation(handlerMethod, ResponseBody.class) != null) {
