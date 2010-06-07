@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,11 +136,15 @@ abstract class AutowireUtils {
 	 * @return the resolved value
 	 */
 	public static Object resolveAutowiringValue(Object autowiringValue, Class requiredType) {
-		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue) &&
-				autowiringValue instanceof Serializable && requiredType.isInterface()) {
-			autowiringValue = Proxy.newProxyInstance(
-					requiredType.getClassLoader(), new Class[] {requiredType},
-					new ObjectFactoryDelegatingInvocationHandler((ObjectFactory) autowiringValue));
+		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
+			ObjectFactory factory = (ObjectFactory) autowiringValue;
+			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
+				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
+						new Class[] {requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
+			}
+			else {
+				return factory.getObject();
+			}
 		}
 		return autowiringValue;
 	}
