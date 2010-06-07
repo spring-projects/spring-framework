@@ -949,10 +949,8 @@ public class RelativePathUriTemplateController {
 
         <para>Handler methods that are annotated with
         <classname>@RequestMapping</classname> can have very flexible
-        signatures. They may have arguments of the following types, in
-        arbitrary order (except for validation results, which need to follow
-        right after the corresponding command object, if desired): <!--Reword preceding sentence to clarify, make it a complete sentence and no parentheses: first it says validation results *must*--><!--immediately follow command object, but then it says *if desired*. Clarify what must happen if what is desired. And are validation --><!-- results a type of argument? Relate to the sentence that precedes it.-->
-        <itemizedlist>
+        signatures. Most of them can be used in arbitrary order (see below for
+        more details). <itemizedlist>
             <listitem>
               <para>Request or response objects (Servlet API). Choose any
               specific request or response type, for example
@@ -1083,6 +1081,30 @@ public class RelativePathUriTemplateController {
               annotation at the handler type level.</para>
             </listitem>
           </itemizedlist></para>
+
+        <para>The <interfacename>Errors</interfacename> or
+        <interfacename>BindingResult</interfacename> parameters have to follow
+        the model object that is being bound immediately as the method
+        signature might have more that one model object and Spring will create
+        a separate <interfacename>BindingResult</interfacename> instance for
+        each of them so the following sample won't work:</para>
+
+        <example>
+          <title>Invalid ordering of BindingResult and @ModelAttribute</title>
+
+          <programlisting lang="java">@RequestMapping(method = RequestMethod.POST)
+public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>,
+    Model model, <emphasis role="bold">BindingResult result</emphasis>) { … }</programlisting>
+
+          <para>Note, that there is a <interfacename>Model</interfacename>
+          parameter in between <classname>Pet</classname> and
+          <interfacename>BindingResult</interfacename>. To get this working
+          you have to reorder the parameters as follows:</para>
+
+          <programlisting lang="java">@RequestMapping(method = RequestMethod.POST)
+public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>,
+    <emphasis role="bold">BindingResult result</emphasis>, Model model) { … }</programlisting>
+        </example>
 
         <para>The following return types are supported for handler methods:
         <itemizedlist>
