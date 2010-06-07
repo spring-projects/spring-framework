@@ -82,6 +82,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private boolean postProcessBeanDefinitionRegistryCalled = false;
 
+	private boolean postProcessBeanFactoryCalled = false;
+
 
 	/**
 	 * Set the {@link SourceExtractor} to use for generated bean definitions
@@ -128,6 +130,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+		if (this.postProcessBeanDefinitionRegistryCalled) {
+			throw new IllegalStateException(
+					"postProcessBeanDefinitionRegistry already called for this post-processor");
+		}
+		if (this.postProcessBeanFactoryCalled) {
+			throw new IllegalStateException(
+					"postProcessBeanFactory already called for this post-processor");
+		}
 		this.postProcessBeanDefinitionRegistryCalled = true;
 		processConfigBeanDefinitions(registry);
 	}
@@ -137,6 +147,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * by replacing them with CGLIB-enhanced subclasses.
 	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		if (this.postProcessBeanFactoryCalled) {
+			throw new IllegalStateException(
+					"postProcessBeanFactory already called for this post-processor");
+		}
+		this.postProcessBeanFactoryCalled = true;
 		if (!this.postProcessBeanDefinitionRegistryCalled) {
 			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
 			// Simply call processConfigBeanDefinitions lazily at this point then.
