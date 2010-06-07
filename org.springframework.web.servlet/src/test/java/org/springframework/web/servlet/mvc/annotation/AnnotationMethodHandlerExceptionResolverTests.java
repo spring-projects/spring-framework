@@ -78,6 +78,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertEquals("Invalid view name returned", "Y:SocketException", mav.getViewName());
 		assertEquals("Invalid status code returned", 406, response.getStatus());
+		assertEquals("Invalid status reason returned", "This is simply unacceptable!", response.getErrorMessage());
 	}
 
 	@Test
@@ -149,7 +150,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		}
 
 		@ExceptionHandler(SocketException.class)
-		@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+		@ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "This is simply unacceptable!")
 		public String handleSocketException(Exception ex, HttpServletResponse response) {
 			return "Y:" + ClassUtils.getShortName(ex.getClass());
 		}
