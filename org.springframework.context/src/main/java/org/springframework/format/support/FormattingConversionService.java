@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionService;
@@ -35,6 +36,7 @@ import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
+import org.springframework.util.StringValueResolver;
 
 /**
  * A {@link org.springframework.core.convert.ConversionService} implementation
@@ -44,7 +46,22 @@ import org.springframework.format.Printer;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class FormattingConversionService extends GenericConversionService implements FormatterRegistry {
+public class FormattingConversionService extends GenericConversionService
+		implements FormatterRegistry, EmbeddedValueResolverAware {
+
+	private StringValueResolver embeddedValueResolver;
+
+	private final Map<FieldFormatterKey, GenericConverter> cachedPrinters =
+			new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
+
+	private final Map<FieldFormatterKey, GenericConverter> cachedParsers =
+			new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
+
+
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
 
 	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
 		addConverter(new PrinterConverter(fieldType, formatter, this));
@@ -61,16 +78,14 @@ public class FormattingConversionService extends GenericConversionService implem
 		final Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
 				GenericTypeResolver.resolveTypeArgument(annotationFormatterFactory.getClass(), AnnotationFormatterFactory.class);
 		if (annotationType == null) {
-			throw new IllegalArgumentException(
-					"Unable to extract parameterized Annotation type argument from AnnotationFormatterFactory ["
-							+ annotationFormatterFactory.getClass().getName()
-							+ "]; does the factory parameterize the <A extends Annotation> generic type?");
-		}		
-		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
+			throw new IllegalArgumentException("Unable to extract parameterized Annotation type argument from AnnotationFormatterFactory [" +
+					annotationFormatterFactory.getClass().getName() + "]; does the factory parameterize the <A extends Annotation> generic type?");
+		}
+		if (this.embeddedValueResolver != null && annotationFormatterFactory instanceof EmbeddedValueResolverAware) {
+			((EmbeddedValueResolverAware) annotationFormatterFactory).setEmbeddedValueResolver(this.embeddedValueResolver);
+		}
 
-		final Map<FieldFormatterKey, GenericConverter> cachedPrinters = new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
-		final Map<FieldFormatterKey, GenericConverter> cachedParsers = new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
-		
+		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 		for (final Class<?> fieldType : fieldTypes) {
 			addConverter(new ConditionalGenericConverter() {
 				public Set<ConvertiblePair> getConvertibleTypes() {
@@ -119,6 +134,7 @@ public class FormattingConversionService extends GenericConversionService implem
 		}
 	}
 
+
 	private static final class FieldFormatterKey {
 		
 		private final Annotation annotation;
@@ -147,10 +163,10 @@ public class FormattingConversionService extends GenericConversionService implem
 		}
 		
 		public int hashCode() {
-			return this.annotation.hashCode() + this.fieldType.hashCode();
+			return this.annotation.hashCode() + 29 * this.fieldType.hashCode();
 		}
-		
 	}
+
 
 	private static class PrinterConverter implements GenericConverter {
 
@@ -191,6 +207,7 @@ public class FormattingConversionService extends GenericConversionService implem
 		}
 	}
 
+
 	private static class ParserConverter implements GenericConverter {
 
 		private Class<?> fieldType;
@@ -230,7 +247,6 @@ public class FormattingConversionService extends GenericConversionService implem
 		public String toString() {
 			return String.class.getName() + " -> " + this.fieldType.getName() + ": " + this.parser;
 		}
-
 	}
 	
 }

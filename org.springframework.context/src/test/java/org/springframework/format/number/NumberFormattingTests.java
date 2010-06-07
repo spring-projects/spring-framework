@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.format.number;
 
 import java.math.BigDecimal;
-import java.util.Locale;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.After;
 import static org.junit.Assert.*;
@@ -31,6 +31,7 @@ import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.util.StringValueResolver;
 import org.springframework.validation.DataBinder;
 
 /**
@@ -46,6 +47,16 @@ public class NumberFormattingTests {
 	@Before
 	public void setUp() {
 		ConversionServiceFactory.addDefaultConverters(conversionService);
+		conversionService.setEmbeddedValueResolver(new StringValueResolver() {
+			public String resolveStringValue(String strVal) {
+				if ("${pattern}".equals(strVal)) {
+					return "#,##.00";
+				}
+				else {
+					return strVal;
+				}
+			}
+		});
 		conversionService.addFormatterForFieldType(Number.class, new NumberFormatter());
 		conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
 		LocaleContextHolder.setLocale(Locale.US);
@@ -154,7 +165,7 @@ public class NumberFormattingTests {
 		@NumberFormat(style=Style.PERCENT)
 		private BigDecimal percent;
 
-		@NumberFormat(pattern="#,##.00")
+		@NumberFormat(pattern="${pattern}")
 		private BigDecimal pattern;
 
 		@NumberFormat(pattern="#,##.00")

@@ -22,11 +22,14 @@ import java.security.PrivilegedAction;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.util.StringValueResolver;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
@@ -86,6 +89,10 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 	
 	private void invokeAwareInterfaces(Object bean) {
+		if (bean instanceof EmbeddedValueResolverAware) {
+			((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(
+					new EmbeddedValueResolver(this.applicationContext.getBeanFactory()));
+		}
 		if (bean instanceof ResourceLoaderAware) {
 			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
 		}
@@ -102,6 +109,20 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
+	}
+
+
+	private static class EmbeddedValueResolver implements StringValueResolver {
+
+		private final ConfigurableBeanFactory beanFactory;
+
+		public EmbeddedValueResolver(ConfigurableBeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
+		public String resolveStringValue(String strVal) {
+			return this.beanFactory.resolveEmbeddedValue(strVal);
+		}
 	}
 
 }

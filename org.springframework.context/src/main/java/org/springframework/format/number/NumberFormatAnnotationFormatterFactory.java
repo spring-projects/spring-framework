@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Formatter;
 import org.springframework.format.Parser;
@@ -29,6 +30,7 @@ import org.springframework.format.Printer;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Formats fields annotated with the {@link NumberFormat} annotation.
@@ -37,46 +39,52 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see NumberFormat
  */
-public final class NumberFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<NumberFormat> {
+public class NumberFormatAnnotationFormatterFactory
+		implements AnnotationFormatterFactory<NumberFormat>, EmbeddedValueResolverAware {
 
 	private final Set<Class<?>> fieldTypes;
 
+	private StringValueResolver embeddedValueResolver;
+
 
 	public NumberFormatAnnotationFormatterFactory() {
-		this.fieldTypes = Collections.unmodifiableSet(createFieldTypes());
+		Set<Class<?>> rawFieldTypes = new HashSet<Class<?>>(7);
+		rawFieldTypes.add(Short.class);
+		rawFieldTypes.add(Integer.class);
+		rawFieldTypes.add(Long.class);
+		rawFieldTypes.add(Float.class);
+		rawFieldTypes.add(Double.class);
+		rawFieldTypes.add(BigDecimal.class);
+		rawFieldTypes.add(BigInteger.class);
+		this.fieldTypes = Collections.unmodifiableSet(rawFieldTypes);
 	}
 
-
-	public Set<Class<?>> getFieldTypes() {
+	public final Set<Class<?>> getFieldTypes() {
 		return this.fieldTypes;
 	}
 
+
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
+	protected String resolveEmbeddedValue(String value) {
+		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
+	}
+
+
 	public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
-		return configureFormatterFrom(annotation, fieldType);
+		return configureFormatterFrom(annotation);
 	}
 	
 	public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
-		return configureFormatterFrom(annotation, fieldType);
+		return configureFormatterFrom(annotation);
 	}
 
 
-	// internal helpers
-	
-	private Set<Class<?>> createFieldTypes() {
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(7);
-		fieldTypes.add(Short.class);
-		fieldTypes.add(Integer.class);
-		fieldTypes.add(Long.class);
-		fieldTypes.add(Float.class);
-		fieldTypes.add(Double.class);
-		fieldTypes.add(BigDecimal.class);
-		fieldTypes.add(BigInteger.class);
-		return fieldTypes;
-	}
-
-	private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
+	private Formatter<Number> configureFormatterFrom(NumberFormat annotation) {
 		if (StringUtils.hasLength(annotation.pattern())) {
-			return new NumberFormatter(annotation.pattern());
+			return new NumberFormatter(resolveEmbeddedValue(annotation.pattern()));
 		}
 		else {
 			Style style = annotation.style();

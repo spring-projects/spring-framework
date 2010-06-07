@@ -335,7 +335,6 @@ public class JodaTimeFormattingTests {
 		@DateTimeFormat
 		private DateTime dateTimeAnnotatedDefault;
 
-		@DateTimeFormat(style="S-")
 		private Long millisAnnotated;
 
 		@DateTimeFormat(pattern="M/d/yy h:mm a")
@@ -480,11 +479,12 @@ public class JodaTimeFormattingTests {
 			this.millis = millis;
 		}
 
+		@DateTimeFormat(style="S-")
 		public Long getMillisAnnotated() {
 			return millisAnnotated;
 		}
 
-		public void setMillisAnnotated(Long millisAnnotated) {
+		public void setMillisAnnotated(@DateTimeFormat(style="S-") Long millisAnnotated) {
 			this.millisAnnotated = millisAnnotated;
 		}
 
