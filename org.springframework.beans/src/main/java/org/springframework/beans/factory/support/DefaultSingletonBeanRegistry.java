@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -363,11 +363,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param dependentBeanName the name of the dependent bean
 	 */
 	public void registerDependentBean(String beanName, String dependentBeanName) {
+		String canonicalName = canonicalName(beanName);
 		synchronized (this.dependentBeanMap) {
-			Set<String> dependentBeans = this.dependentBeanMap.get(beanName);
+			Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
 			if (dependentBeans == null) {
 				dependentBeans = new LinkedHashSet<String>(8);
-				this.dependentBeanMap.put(beanName, dependentBeans);
+				this.dependentBeanMap.put(canonicalName, dependentBeans);
 			}
 			dependentBeans.add(dependentBeanName);
 		}
@@ -377,7 +378,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				dependenciesForBean = new LinkedHashSet<String>(8);
 				this.dependenciesForBeanMap.put(dependentBeanName, dependenciesForBean);
 			}
-			dependenciesForBean.add(beanName);
+			dependenciesForBean.add(canonicalName);
 		}
 	}
 
@@ -455,7 +456,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		removeSingleton(beanName);
 
 		// Destroy the corresponding DisposableBean instance.
-		DisposableBean disposableBean = null;
+		DisposableBean disposableBean;
 		synchronized (this.disposableBeans) {
 			disposableBean = (DisposableBean) this.disposableBeans.remove(beanName);
 		}
