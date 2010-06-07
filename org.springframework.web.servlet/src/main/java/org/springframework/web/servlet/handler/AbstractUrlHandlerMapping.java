@@ -210,7 +210,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				HandlerExecutionChain chain;
 				if (handler instanceof HandlerExecutionChain) {
 					chain = (HandlerExecutionChain) handler;
-				} else {
+				}
+				else {
 					chain = new HandlerExecutionChain(handler);
 				}
 				chain.addInterceptors(mappedInterceptors.toArray(new HandlerInterceptor[mappedInterceptors.size()]));
@@ -436,7 +437,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		private final String pathWithinMapping;
 
-		private PathExposingHandlerInterceptor(String bestMatchingPattern, String pathWithinMapping) {
+		public PathExposingHandlerInterceptor(String bestMatchingPattern, String pathWithinMapping) {
 			this.bestMatchingPattern = bestMatchingPattern;
 			this.pathWithinMapping = pathWithinMapping;
 		}
