@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
 
 /**
@@ -32,6 +33,7 @@ public final class AopNamespaceHandlerProxyTargetClassTests extends AopNamespace
 	public void testIsClassProxy() {
 		ITestBean bean = getTestBean();
 		assertTrue("Should be a CGLIB proxy", AopUtils.isCglibProxy(bean));
+		assertTrue("Should expose proxy", ((Advised) bean).isExposeProxy());
 	}
 
 }
