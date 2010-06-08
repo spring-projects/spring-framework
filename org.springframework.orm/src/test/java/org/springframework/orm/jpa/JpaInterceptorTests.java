@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -65,6 +64,7 @@ public class JpaInterceptorTests extends TestCase {
 
 	public void testInterceptorWithNewEntityManager() throws PersistenceException {
 		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
+		managerControl.expectAndReturn(entityManager.isOpen(), true);
 		entityManager.close();
 
 		factoryControl.replay();
@@ -85,6 +85,7 @@ public class JpaInterceptorTests extends TestCase {
 
 	public void testInterceptorWithNewEntityManagerAndLazyFlush() throws PersistenceException {
 		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
+		managerControl.expectAndReturn(entityManager.isOpen(), true);
 		entityManager.close();
 
 		factoryControl.replay();
@@ -181,6 +182,7 @@ public class JpaInterceptorTests extends TestCase {
 		
 		PersistenceException exception = new PersistenceException();
 		managerControl.setThrowable(exception, 1);
+		managerControl.expectAndReturn(entityManager.isOpen(), true);
 		entityManager.close();
 		
 		factoryControl.replay();
@@ -208,6 +210,7 @@ public class JpaInterceptorTests extends TestCase {
 		
 		PersistenceException exception = new PersistenceException();
 		managerControl.setThrowable(exception, 1);
+		managerControl.expectAndReturn(entityManager.isOpen(), true);
 		entityManager.close();
 		
 		factoryControl.replay();

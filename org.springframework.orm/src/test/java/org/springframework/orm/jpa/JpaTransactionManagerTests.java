@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.jpa;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -77,6 +76,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		tx.begin();
+		managerControl.expectAndReturn(manager.isOpen(), true);
 		manager.close();
 	}
 
@@ -448,6 +448,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
 		managerControl.expectAndReturn(manager.getTransaction(), tx, 5);
 		manager.flush();
+		managerControl.expectAndReturn(manager.isOpen(), true);
 		manager.close();
 
 		factoryControl.replay();
@@ -613,6 +614,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
 		managerControl.expectAndReturn(manager.getTransaction(), tx, 2);
 		manager.flush();
+		managerControl.expectAndReturn(manager.isOpen(), true);
 		manager.close();
 		txControl.expectAndReturn(tx.getRollbackOnly(), false);
 		tx.commit();
@@ -679,6 +681,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		tx2.begin();
 		tx2.commit();
 		manager2.flush();
+		managerControl2.expectAndReturn(manager2.isOpen(), true);
 		manager2.close();
 
 		factoryControl.replay();
@@ -731,6 +734,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		txControl.reset();
 
 		manager.flush();
+		managerControl.expectAndReturn(manager.isOpen(), true);
 		manager.close();
 
 		factoryControl.replay();
@@ -773,6 +777,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		txControl.reset();
 
 		manager.flush();
+		managerControl.expectAndReturn(manager.isOpen(), true);
 		manager.close();
 
 		factoryControl.replay();
@@ -1049,6 +1054,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		txControl.reset();
 		managerControl.reset();
 
+		managerControl.expectAndReturn(manager.isOpen(), true);
 		manager.close();
 
 		factoryControl.replay();

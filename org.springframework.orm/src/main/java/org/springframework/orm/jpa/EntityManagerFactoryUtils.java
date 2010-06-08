@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.transaction.support.ResourceHolder;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -328,7 +327,9 @@ public abstract class EntityManagerFactoryUtils {
 		if (em != null) {
 			logger.debug("Closing JPA EntityManager");
 			try {
-				em.close();
+				if (em.isOpen()) {
+					em.close();
+				}
 			}
 			catch (PersistenceException ex) {
 				logger.debug("Could not close JPA EntityManager", ex);
