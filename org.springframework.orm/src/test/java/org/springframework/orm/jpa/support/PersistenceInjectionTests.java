@@ -573,6 +573,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		EntityManager em = (EntityManager) emC.getMock();
 		emfMc.expectAndReturn(mockEmf.createEntityManager(props), em);
 		emC.expectAndReturn(em.getDelegate(), new Object());
+		emC.expectAndReturn(em.isOpen(), true);
 		em.close();
 
 		emfMc.replay();
@@ -602,6 +603,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		// only one call made  - the first EM definition wins (in this case the one w/ the properties)
 		emfMc.expectAndReturn(mockEmf.createEntityManager(props), em);
 		emC.expectAndReturn(em.getDelegate(), new Object(), 2);
+		emC.expectAndReturn(em.isOpen(), true);
 		em.close();
 
 		emfMc.replay();
@@ -639,6 +641,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		// only one call made  - the first EM definition wins (in this case the one w/o the properties)
 		emfMc.expectAndReturn(mockEmf.createEntityManager(), em);
 		emC.expectAndReturn(em.getDelegate(), new Object(), 2);
+		emC.expectAndReturn(em.isOpen(), true);
 		em.close();
 
 		emfMc.replay();
@@ -832,6 +835,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		public static boolean closed;
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if ("isOpen".equals(method.getName())) {
+				return true;
+			}
 			if ("close".equals(method.getName())) {
 				closed = true;
 				return null;
