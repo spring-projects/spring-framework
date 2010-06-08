@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.TypeDescriptor;
@@ -88,6 +89,7 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void testFormatFieldForAnnotation() throws Exception {
+		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 		doTestFormatFieldForAnnotation(Model.class);
 	}
 
@@ -102,6 +104,22 @@ public class FormattingConversionServiceTests {
 		context.getBeanFactory().registerSingleton("ppc", ppc);
 		context.refresh();
 		context.getBeanFactory().initializeBean(formattingService, "formattingService");
+		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class);
+	}
+
+	@Test
+	public void testFormatFieldForAnnotationWithPlaceholdersAndFactoryBean() throws Exception {
+		GenericApplicationContext context = new GenericApplicationContext();
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.setProperty("dateStyle", "S-");
+		props.setProperty("datePattern", "M/d/yy");
+		ppc.setProperties(props);
+		context.registerBeanDefinition("formattingService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
+		context.getBeanFactory().registerSingleton("ppc", ppc);
+		context.refresh();
+		formattingService = context.getBean("formattingService", FormattingConversionService.class);
 		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class);
 	}
 
@@ -116,7 +134,6 @@ public class FormattingConversionServiceTests {
 				return source.toDate();
 			}
 		});
-		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 
 		String formatted = (String) formattingService.convert(new LocalDate(2009, 10, 31).toDateTimeAtCurrentTime()
 				.toDate(), new TypeDescriptor(modelClass.getField("date")), TypeDescriptor.valueOf(String.class));
