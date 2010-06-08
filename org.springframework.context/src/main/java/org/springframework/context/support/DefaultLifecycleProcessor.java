@@ -152,7 +152,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @param beanName the name of the bean to start
 	 */
 	private void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName) {
-		Lifecycle bean = lifecycleBeans.get(beanName);
+		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null && !this.equals(bean)) {
 			String[] dependenciesForBean = this.beanFactory.getDependenciesForBean(beanName);
 			for (String dependency : dependenciesForBean) {
@@ -172,7 +172,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					logger.debug("Successfully started bean '" + beanName + "'");
 				}
 			}
-			lifecycleBeans.remove(beanName);
 		}
 	}
 
@@ -207,7 +206,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private void doStop(Map<String, ? extends Lifecycle> lifecycleBeans, final String beanName,
 			final CountDownLatch latch, final Set<String> countDownBeanNames) {
 
-		Lifecycle bean = lifecycleBeans.get(beanName);
+		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null) {
 			String[] dependentBeans = this.beanFactory.getDependentBeans(beanName);
 			for (String dependentBean : dependentBeans) {
@@ -250,7 +249,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					logger.warn("Failed to stop bean '" + beanName + "'", ex);
 				}
 			}
-			lifecycleBeans.remove(beanName);
 		}
 	}
 
