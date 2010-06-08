@@ -22,7 +22,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -971,22 +969,8 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, ClassLoader classLoader) {
-		Assert.notNull(clazz, "Class must not be null");
-		if (clazz.isInterface()) {
-			return new Class[] {clazz};
-		}
-		List<Class<?>> interfaces = new ArrayList<Class<?>>();
-		while (clazz != null) {
-			Class<?>[] ifcs = clazz.getInterfaces();
-			for (Class<?> ifc : ifcs) {
-				if (!interfaces.contains(ifc) &&
-						(classLoader == null || isVisible(ifc, classLoader))) {
-					interfaces.add(ifc);
-				}
-			}
-			clazz = clazz.getSuperclass();
-		}
-		return interfaces.toArray(new Class[interfaces.size()]);
+		Set<Class> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
+		return ifcs.toArray(new Class[ifcs.size()]);
 	}
 
 	/**
@@ -1022,16 +1006,14 @@ public abstract class ClassUtils {
 	 */
 	public static Set<Class> getAllInterfacesForClassAsSet(Class clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (clazz.isInterface()) {
+		if (clazz.isInterface() && isVisible(clazz, classLoader)) {
 			return Collections.singleton(clazz);
 		}
 		Set<Class> interfaces = new LinkedHashSet<Class>();
 		while (clazz != null) {
-			for (int i = 0; i < clazz.getInterfaces().length; i++) {
-				Class<?> ifc = clazz.getInterfaces()[i];
-				if (classLoader == null || isVisible(ifc, classLoader)) {
-					interfaces.add(ifc);
-				}
+			Class<?>[] ifcs = clazz.getInterfaces();
+			for (Class<?> ifc : ifcs) {
+				interfaces.addAll(getAllInterfacesForClassAsSet(ifc, classLoader));
 			}
 			clazz = clazz.getSuperclass();
 		}
