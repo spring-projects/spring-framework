@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.FormatterRegistry;
@@ -33,6 +34,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.datetime.joda.JodaTimeFormattingConfigurer;
 import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * A factory for a {@link FormattingConversionService} that installs default
@@ -46,12 +48,14 @@ import org.springframework.util.ClassUtils;
  * @since 3.0
  */
 public class FormattingConversionServiceFactoryBean
-		implements FactoryBean<FormattingConversionService>, InitializingBean {
+		implements FactoryBean<FormattingConversionService>, EmbeddedValueResolverAware, InitializingBean {
 
 	private static final boolean jodaTimePresent = ClassUtils.isPresent(
 			"org.joda.time.LocalDate", FormattingConversionService.class.getClassLoader());
 
 	private Set<?> converters;
+
+	private StringValueResolver embeddedValueResolver;
 
 	private FormattingConversionService conversionService;
 
@@ -66,8 +70,13 @@ public class FormattingConversionServiceFactoryBean
 		this.converters = converters;
 	}
 
+	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
+		this.embeddedValueResolver = embeddedValueResolver;
+	}
+
 	public void afterPropertiesSet() {
 		this.conversionService = new FormattingConversionService();
+		this.conversionService.setEmbeddedValueResolver(this.embeddedValueResolver);
 		ConversionServiceFactory.addDefaultConverters(this.conversionService);
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
 		installFormatters(this.conversionService);
