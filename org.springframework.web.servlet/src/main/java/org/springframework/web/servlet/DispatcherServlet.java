@@ -198,13 +198,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
 	/**
-	 * Name of the class path resource (relative to the DispatcherServlet class) that defines DispatcherServlet's default
-	 * strategy names.
+	 * Name of the class path resource (relative to the DispatcherServlet class)
+	 * that defines DispatcherServlet's default strategy names.
 	 */
 	private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
 
+
 	/** Additional logger to use when no mapped handler is found for a request. */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
+
+	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private static final Properties defaultStrategies;
 
@@ -686,7 +689,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
-			String requestUri = new UrlPathHelper().getRequestUri(request);
+			String requestUri = urlPathHelper.getRequestUri(request);
 			logger.debug("DispatcherServlet with name '" + getServletName() + "' processing " + request.getMethod() +
 					" request for [" + requestUri + "]");
 		}
@@ -838,7 +841,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Override
 	protected long getLastModified(HttpServletRequest request) {
 		if (logger.isDebugEnabled()) {
-			String requestUri = new UrlPathHelper().getRequestUri(request);
+			String requestUri = urlPathHelper.getRequestUri(request);
 			logger.debug(
 					"DispatcherServlet with name '" + getServletName() + "' determining Last-Modified value for [" +
 							requestUri + "]");
@@ -854,7 +857,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 			long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
 			if (logger.isDebugEnabled()) {
-				String requestUri = new UrlPathHelper().getRequestUri(request);
+				String requestUri = urlPathHelper.getRequestUri(request);
 				logger.debug("Last-Modified value for [" + requestUri + "] is: " + lastModified);
 			}
 			return lastModified;
@@ -958,7 +961,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {
-			String requestUri = new UrlPathHelper().getRequestUri(request);
+			String requestUri = urlPathHelper.getRequestUri(request);
 			pageNotFoundLogger.warn("No mapping found for HTTP request with URI [" + requestUri +
 					"] in DispatcherServlet with name '" + getServletName() + "'");
 		}
