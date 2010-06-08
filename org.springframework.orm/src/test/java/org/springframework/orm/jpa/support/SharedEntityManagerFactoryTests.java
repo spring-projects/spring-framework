@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 
 package org.springframework.orm.jpa.support;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.easymock.MockControl;
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -46,6 +43,7 @@ public class SharedEntityManagerFactoryTests {
 		mockEm.contains(o);
 		emMc.setReturnValue(false, 1);
 
+		emMc.expectAndReturn(mockEm.isOpen(), true);
 		mockEm.close();
 		emMc.setVoidCallable(1);
 		emMc.replay();

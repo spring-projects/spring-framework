@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -155,13 +154,13 @@ public class JpaTemplateTests extends TestCase {
 		template.afterPropertiesSet();
 
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
+		managerControl.expectAndReturn(manager.isOpen(), true);
 		manager.close();
 
 		managerControl.replay();
 		factoryControl.replay();
 
 		template.execute(new JpaCallback() {
-
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				assertSame(em, manager);
 				return null;
