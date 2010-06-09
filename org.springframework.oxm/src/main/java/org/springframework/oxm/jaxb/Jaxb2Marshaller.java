@@ -177,7 +177,7 @@ public class Jaxb2Marshaller
 	 * Set multiple JAXB context paths. The given array of context paths is converted to a
 	 * colon-delimited string, as supported by JAXB.
 	 */
-	public void setContextPaths(String[] contextPaths) {
+	public void setContextPaths(String... contextPaths) {
 		Assert.notEmpty(contextPaths, "'contextPaths' must not be empty");
 		this.contextPath = StringUtils.arrayToDelimitedString(contextPaths, ":");
 	}
@@ -193,7 +193,8 @@ public class Jaxb2Marshaller
 	 * Set the list of Java classes to be recognized by a newly created JAXBContext.
 	 * Setting this property or {@link #setContextPath "contextPath"} is required.
 	 */
-	public void setClassesToBeBound(Class<?>[] classesToBeBound) {
+	public void setClassesToBeBound(Class<?>... classesToBeBound) {
+		Assert.notEmpty(classesToBeBound, "'classesToBeBound' must not be empty");
 		this.classesToBeBound = classesToBeBound;
 	}
 

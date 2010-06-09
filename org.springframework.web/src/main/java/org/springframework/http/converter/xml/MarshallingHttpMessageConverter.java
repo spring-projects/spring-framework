@@ -20,6 +20,7 @@ import java.io.IOException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -110,7 +111,11 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws IOException {
 		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
 		try {
-			return this.unmarshaller.unmarshal(source);
+			Object result = this.unmarshaller.unmarshal(source);
+			if (!clazz.isInstance(result)) {
+				throw new TypeMismatchException(result, clazz);
+			}
+			return result;
 		}
 		catch (UnmarshallingFailureException ex) {
 			throw new HttpMessageNotReadableException("Could not read [" + clazz + "]", ex);
