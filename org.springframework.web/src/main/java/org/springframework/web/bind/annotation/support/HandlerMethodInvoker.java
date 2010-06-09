@@ -26,7 +26,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -94,6 +93,8 @@ import org.springframework.web.multipart.MultipartRequest;
  * @see #invokeHandlerMethod
  */
 public class HandlerMethodInvoker {
+
+	private static final String MODEL_KEY_PREFIX_STALE = SessionAttributeStore.class.getName() + ".STALE.";
 
 	/** We'll create a lot of these objects, so we don't want a new logger every time. */
 	private static final Log logger = LogFactory.getLog(HandlerMethodInvoker.class);
@@ -197,28 +198,36 @@ public class HandlerMethodInvoker {
 		// Expose model attributes as session attributes, if required.
 		// Expose BindingResults for all attributes, making custom editors available.
 		Map<String, Object> model = (mavModel != null ? mavModel : implicitModel);
-		try {
-			for (String attrName : new HashSet<String>(model.keySet())) {
-				Object attrValue = model.get(attrName);
-				boolean isSessionAttr =
-						this.methodResolver.isSessionAttribute(attrName, (attrValue != null ? attrValue.getClass() : null));
-				if (isSessionAttr && !this.sessionStatus.isComplete()) {
-					this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
-				}
-				if (!attrName.startsWith(BindingResult.MODEL_KEY_PREFIX) &&
-						(isSessionAttr || isBindingCandidate(attrValue))) {
-					String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
-					if (mavModel != null && !model.containsKey(bindingResultKey)) {
-						WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
-						initBinder(handler, attrName, binder, webRequest);
-						mavModel.put(bindingResultKey, binder.getBindingResult());
+		if (model != null) {
+			try {
+				String[] originalAttrNames = model.keySet().toArray(new String[model.size()]);
+				for (String attrName : originalAttrNames) {
+					Object attrValue = model.get(attrName);
+					boolean isSessionAttr = this.methodResolver.isSessionAttribute(
+							attrName, (attrValue != null ? attrValue.getClass() : null));
+					if (isSessionAttr) {
+						if (this.sessionStatus.isComplete()) {
+							implicitModel.put(MODEL_KEY_PREFIX_STALE + attrName, Boolean.TRUE);
+						}
+						else if (!implicitModel.containsKey(MODEL_KEY_PREFIX_STALE + attrName)) {
+							this.sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
+						}
+					}
+					if (!attrName.startsWith(BindingResult.MODEL_KEY_PREFIX) &&
+							(isSessionAttr || isBindingCandidate(attrValue))) {
+						String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
+						if (mavModel != null && !model.containsKey(bindingResultKey)) {
+							WebDataBinder binder = createBinder(webRequest, attrValue, attrName);
+							initBinder(handler, attrName, binder, webRequest);
+							mavModel.put(bindingResultKey, binder.getBindingResult());
+						}
 					}
 				}
 			}
-		}
-		catch (InvocationTargetException ex) {
-			// User-defined @InitBinder method threw an exception...
-			ReflectionUtils.rethrowException(ex.getTargetException());
+			catch (InvocationTargetException ex) {
+				// User-defined @InitBinder method threw an exception...
+				ReflectionUtils.rethrowException(ex.getTargetException());
+			}
 		}
 	}
 
