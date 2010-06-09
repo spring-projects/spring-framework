@@ -70,11 +70,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
@@ -83,6 +86,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.portlet.DispatcherPortlet;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -129,6 +133,11 @@ public class Portlet20AnnotationControllerTests {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
+	@Test
+	public void adaptedHandleMethods4() throws Exception {
+		doTestAdaptedHandleMethods(MyAdaptedController4.class);
+	}
+
 	private void doTestAdaptedHandleMethods(final Class controllerClass) throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
@@ -145,12 +154,22 @@ public class Portlet20AnnotationControllerTests {
 		portlet.processAction(actionRequest, actionResponse);
 		assertEquals("value", actionResponse.getRenderParameter("test"));
 
-		MockRenderRequest request = new MockRenderRequest(PortletMode.EDIT);
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		request.setSession(actionRequest.getPortletSession());
+		request.setParameters(actionResponse.getRenderParameterMap());
+		request.addParameter("name", "name1");
+		request.addParameter("age", "value2");
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("test-name1-typeMismatch", response.getContentAsString());
+		assertNull(request.getPortletSession().getAttribute("testBean"));
+
+		request = new MockRenderRequest(PortletMode.EDIT);
 		request.addParameter("param1", "value1");
 		request.addParameter("param2", "2");
 		request.addProperty("header1", "10");
 		request.setCookies(new Cookie("cookie1", "3"));
-		MockRenderResponse response = new MockRenderResponse();
+		response = new MockRenderResponse();
 		portlet.render(request, response);
 		assertEquals("test-value1-2-10-3", response.getContentAsString());
 
@@ -160,13 +179,6 @@ public class Portlet20AnnotationControllerTests {
 		response = new MockRenderResponse();
 		portlet.render(request, response);
 		assertEquals("test-name1-2", response.getContentAsString());
-
-		request = new MockRenderRequest(PortletMode.VIEW);
-		request.addParameter("name", "name1");
-		request.addParameter("age", "value2");
-		response = new MockRenderResponse();
-		portlet.render(request, response);
-		assertEquals("test-name1-typeMismatch", response.getContentAsString());
 	}
 
 	@Test
@@ -572,6 +584,7 @@ public class Portlet20AnnotationControllerTests {
 
 		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
 		request.setParameters(actionResponse.getRenderParameterMap());
+		request.setSession(actionRequest.getPortletSession());
 		response = new MockRenderResponse();
 		portlet.render(request, response);
 		assertEquals("myLargeView-value", response.getContentAsString());
@@ -583,6 +596,7 @@ public class Portlet20AnnotationControllerTests {
 
 		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
 		request.setParameters(actionResponse.getRenderParameterMap());
+		request.setSession(actionRequest.getPortletSession());
 		response = new MockRenderResponse();
 		portlet.render(request, response);
 		assertEquals("myLargeView-details", response.getContentAsString());
@@ -726,6 +740,43 @@ public class Portlet20AnnotationControllerTests {
 
 		@RenderMapping
 		public void myHandle(TestBean tb, Errors errors, RenderResponse response) throws IOException {
+			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
+		}
+	}
+
+
+	@Controller
+	@SessionAttributes("testBean")
+	private static class MyAdaptedController4 {
+
+		@RequestMapping("VIEW")
+		@ActionMapping
+		public void myHandle(Model model, ActionResponse response, SessionStatus status) {
+			TestBean tb = new TestBean();
+			tb.setJedi(true);
+			model.addAttribute("testBean", tb);
+			status.setComplete();
+			response.setRenderParameter("test", "value");
+		}
+
+		@RequestMapping("EDIT")
+		@RenderMapping
+		public void myHandle(@RequestParam("param1") String p1, int param2, RenderResponse response,
+				@RequestHeader("header1") String h1, @CookieValue("cookie1") String c1) throws IOException {
+			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + h1 + "-" + c1);
+		}
+
+		@RequestMapping("HELP")
+		@RenderMapping
+		public void myHandle(@ModelAttribute("tb") TestBean tb, RenderResponse response) throws IOException {
+			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
+		}
+
+		@RequestMapping("VIEW")
+		@RenderMapping
+		public void myHandle(@ModelAttribute("testBean") TestBean tb, Errors errors, RenderResponse response, PortletSession session) throws IOException {
+			assertTrue(tb.isJedi());
+			assertNull(session.getAttribute("testBean"));
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}
 	}

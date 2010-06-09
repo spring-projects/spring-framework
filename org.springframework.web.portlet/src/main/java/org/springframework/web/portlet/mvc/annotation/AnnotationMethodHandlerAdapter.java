@@ -123,7 +123,10 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		implements HandlerAdapter, Ordered, BeanFactoryAware {
 
-	private static final String IMPLICIT_MODEL_ATTRIBUTE = "org.springframework.web.portlet.mvc.ImplicitModel";
+	public static final String IMPLICIT_MODEL_SESSION_ATTRIBUTE =
+			AnnotationMethodHandlerAdapter.class.getName() + ".IMPLICIT_MODEL";
+
+	public static final String IMPLICIT_MODEL_RENDER_PARAMETER = "implicitModel";
 
 
 	private WebBindingInitializer webBindingInitializer;
@@ -303,10 +306,15 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		if (response instanceof MimeResponse) {
 			MimeResponse mimeResponse = (MimeResponse) response;
 			// Detect implicit model from associated action phase.
-			if (request.getParameter(IMPLICIT_MODEL_ATTRIBUTE) != null) {
+			if (response instanceof RenderResponse) {
 				PortletSession session = request.getPortletSession(false);
 				if (session != null) {
-					implicitModel = (ExtendedModelMap) session.getAttribute(IMPLICIT_MODEL_ATTRIBUTE);
+					if (request.getParameter(IMPLICIT_MODEL_RENDER_PARAMETER) != null) {
+						implicitModel = (ExtendedModelMap) session.getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+					}
+					else {
+						session.removeAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+					}
 				}
 			}
 			if (handler.getClass().getAnnotation(SessionAttributes.class) != null) {
@@ -356,8 +364,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		if (response instanceof ActionResponse && !implicitModel.isEmpty()) {
 			ActionResponse actionResponse = (ActionResponse) response;
 			try {
-				actionResponse.setRenderParameter(IMPLICIT_MODEL_ATTRIBUTE, Boolean.TRUE.toString());
-				request.getPortletSession().setAttribute(IMPLICIT_MODEL_ATTRIBUTE, implicitModel);
+				actionResponse.setRenderParameter(IMPLICIT_MODEL_RENDER_PARAMETER, Boolean.TRUE.toString());
+				request.getPortletSession().setAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE, implicitModel);
 			}
 			catch (IllegalStateException ex) {
 				// Probably sendRedirect called... no need to expose model to render phase.
