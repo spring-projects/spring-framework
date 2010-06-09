@@ -142,7 +142,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	@Test(expected = XmlMappingException.class)
 	public void marshalInvalidClass() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-		marshaller.setClassesToBeBound(new Class[]{FlightType.class});
+		marshaller.setClassesToBeBound(FlightType.class);
 		marshaller.afterPropertiesSet();
 		Result result = new StreamResult(new StringWriter());
 		Flights flights = new Flights();
@@ -158,7 +158,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void supportsClassesToBeBound() throws Exception {
 		marshaller = new Jaxb2Marshaller();
-		marshaller.setClassesToBeBound(new Class[]{Flights.class, FlightType.class});
+		marshaller.setClassesToBeBound(Flights.class, FlightType.class);
 		marshaller.afterPropertiesSet();
 		testSupports();
 	}
@@ -239,7 +239,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void supportsXmlRootElement() throws Exception {
 		marshaller = new Jaxb2Marshaller();
-		marshaller.setClassesToBeBound(new Class[]{DummyRootElement.class, DummyType.class});
+		marshaller.setClassesToBeBound(DummyRootElement.class, DummyType.class);
 		marshaller.afterPropertiesSet();
 		assertTrue("Jaxb2Marshaller does not support XmlRootElement class", marshaller.supports(DummyRootElement.class));
 		assertTrue("Jaxb2Marshaller does not support XmlRootElement generic type", marshaller.supports((Type)DummyRootElement.class));
@@ -252,7 +252,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void marshalAttachments() throws Exception {
 		marshaller = new Jaxb2Marshaller();
-		marshaller.setClassesToBeBound(new Class[]{BinaryObject.class});
+		marshaller.setClassesToBeBound(BinaryObject.class);
 		marshaller.setMtomEnabled(true);
 		marshaller.afterPropertiesSet();
 		MimeContainer mimeContainer = createMock(MimeContainer.class);
