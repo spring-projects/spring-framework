@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
 import javax.activation.FileTypeMap;
 import javax.mail.Address;
 import javax.mail.Message;
@@ -381,8 +380,29 @@ public class JavaMailSenderTests extends TestCase {
 		}
 		catch (MailSendException ex) {
 			// expected
+			ex.printStackTrace();
 			assertTrue(ex.getFailedMessages() != null);
-			assertTrue(ex.getFailedMessages().isEmpty());
+			assertEquals(1, ex.getFailedMessages().size());
+			assertSame(simpleMessage1, ex.getFailedMessages().keySet().iterator().next());
+			assertSame(ex.getCause(), ex.getFailedMessages().values().iterator().next());
+		}
+	}
+
+	public void testFailedMailServerClose() throws Exception {
+		MockJavaMailSender sender = new MockJavaMailSender();
+		sender.setHost("");
+		sender.setUsername("username");
+		sender.setPassword("password");
+		SimpleMailMessage simpleMessage1 = new SimpleMailMessage();
+		try {
+			sender.send(simpleMessage1);
+			fail("Should have thrown MailSendException");
+		}
+		catch (MailSendException ex) {
+			// expected
+			ex.printStackTrace();
+			assertTrue(ex.getFailedMessages() != null);
+			assertEquals(0, ex.getFailedMessages().size());
 		}
 	}
 
@@ -515,6 +535,9 @@ public class JavaMailSenderTests extends TestCase {
 
 		@Override
 		public synchronized void close() throws MessagingException {
+			if ("".equals(connectedHost)) {
+				throw new MessagingException("close failure");
+			}
 			this.closeCalled = true;
 		}
 
@@ -531,7 +554,7 @@ public class JavaMailSenderTests extends TestCase {
 			if (message.getSentDate() == null) {
 				throw new MessagingException("No sentDate specified");
 			}
-			if (message.getSubject() != null && message.getSubject().indexOf("custom") != -1) {
+			if (message.getSubject() != null && message.getSubject().contains("custom")) {
 				assertEquals(new Date(2005, 3, 1), message.getSentDate());
 			}
 			this.sentMessages.add(message);

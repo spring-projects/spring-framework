@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,13 +60,27 @@ public class MailSendException extends MailException {
 	 * messages that failed as keys, and the thrown exceptions as values.
 	 * <p>The messages should be the same that were originally passed
 	 * to the invoked send method.
+	 * @param msg the detail message
+	 * @param cause the root cause from the mail API in use
+	 * @param failedMessages Map of failed messages as keys and thrown
+	 * exceptions as values
+	 */
+	public MailSendException(String msg, Throwable cause, Map<Object, Exception> failedMessages) {
+		super(msg, cause);
+		this.failedMessages = new LinkedHashMap<Object, Exception>(failedMessages);
+		this.messageExceptions = failedMessages.values().toArray(new Exception[failedMessages.size()]);
+	}
+
+	/**
+	 * Constructor for registration of failed messages, with the
+	 * messages that failed as keys, and the thrown exceptions as values.
+	 * <p>The messages should be the same that were originally passed
+	 * to the invoked send method.
 	 * @param failedMessages Map of failed messages as keys and thrown
 	 * exceptions as values
 	 */
 	public MailSendException(Map<Object, Exception> failedMessages) {
-		super(null);
-		this.failedMessages = new LinkedHashMap<Object, Exception>(failedMessages);
-		this.messageExceptions = failedMessages.values().toArray(new Exception[failedMessages.size()]);
+		this(null, null, failedMessages);
 	}
 
 
@@ -111,7 +125,12 @@ public class MailSendException extends MailException {
 			return super.getMessage();
 		}
 		else {
-			StringBuilder sb = new StringBuilder("Failed messages: ");
+			StringBuilder sb = new StringBuilder();
+			String baseMessage = super.getMessage();
+			if (baseMessage != null) {
+				sb.append(baseMessage).append(". ");
+			}
+			sb.append("Failed messages: ");
 			for (int i = 0; i < this.messageExceptions.length; i++) {
 				Exception subEx = this.messageExceptions[i];
 				sb.append(subEx.toString());
@@ -129,8 +148,8 @@ public class MailSendException extends MailException {
 			return super.toString();
 		}
 		else {
-			StringBuilder sb = new StringBuilder(getClass().getName());
-			sb.append("; nested exceptions (").append(this.messageExceptions.length).append(") are:");
+			StringBuilder sb = new StringBuilder(super.toString());
+			sb.append("; message exceptions (").append(this.messageExceptions.length).append(") are:");
 			for (int i = 0; i < this.messageExceptions.length; i++) {
 				Exception subEx = this.messageExceptions[i];
 				sb.append('\n').append("Failed message ").append(i + 1).append(": ");
@@ -146,7 +165,7 @@ public class MailSendException extends MailException {
 			super.printStackTrace(ps);
 		}
 		else {
-			ps.println(getClass().getName() + "; nested exception details (" +
+			ps.println(super.toString() + "; message exception details (" +
 					this.messageExceptions.length + ") are:");
 			for (int i = 0; i < this.messageExceptions.length; i++) {
 				Exception subEx = this.messageExceptions[i];
@@ -162,7 +181,7 @@ public class MailSendException extends MailException {
 			super.printStackTrace(pw);
 		}
 		else {
-			pw.println(getClass().getName() + "; nested exception details (" +
+			pw.println(super.toString() + "; message exception details (" +
 					this.messageExceptions.length + ") are:");
 			for (int i = 0; i < this.messageExceptions.length; i++) {
 				Exception subEx = this.messageExceptions[i];
