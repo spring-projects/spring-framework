@@ -724,6 +724,20 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testAliasCircle() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerAlias("test", "test2");
+		lbf.registerAlias("test2", "test3");
+		try {
+			lbf.registerAlias("test3", "test");
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+	}
+
+	@Test
 	public void testBeanDefinitionOverriding() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
