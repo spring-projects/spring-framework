@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.activation.FileTypeMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -383,40 +382,60 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 */
 	protected void doSend(MimeMessage[] mimeMessages, Object[] originalMessages) throws MailException {
 		Map<Object, Exception> failedMessages = new LinkedHashMap<Object, Exception>();
+
+		Transport transport;
 		try {
-			Transport transport = getTransport(getSession());
+			transport = getTransport(getSession());
 			transport.connect(getHost(), getPort(), getUsername(), getPassword());
-			try {
-				for (int i = 0; i < mimeMessages.length; i++) {
-					MimeMessage mimeMessage = mimeMessages[i];
-					try {
-						if (mimeMessage.getSentDate() == null) {
-							mimeMessage.setSentDate(new Date());
-						}
-						String messageId = mimeMessage.getMessageID();
-						mimeMessage.saveChanges();
-						if (messageId != null) {
-							// Preserve explicitly specified message id...
-							mimeMessage.setHeader(HEADER_MESSAGE_ID, messageId);
-						}
-						transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
-					}
-					catch (MessagingException ex) {
-						Object original = (originalMessages != null ? originalMessages[i] : mimeMessage);
-						failedMessages.put(original, ex);
-					}
-				}
-			}
-			finally {
-				transport.close();
-			}
 		}
 		catch (AuthenticationFailedException ex) {
 			throw new MailAuthenticationException(ex);
 		}
 		catch (MessagingException ex) {
-			throw new MailSendException("Mail server connection failed", ex);
+			// Effectively, all messages failed...
+			for (int i = 0; i < mimeMessages.length; i++) {
+				Object original = (originalMessages != null ? originalMessages[i] : mimeMessages[i]);
+				failedMessages.put(original, ex);
+			}
+			throw new MailSendException("Mail server connection failed", ex, failedMessages);
 		}
+
+		try {
+			for (int i = 0; i < mimeMessages.length; i++) {
+				MimeMessage mimeMessage = mimeMessages[i];
+				try {
+					if (mimeMessage.getSentDate() == null) {
+						mimeMessage.setSentDate(new Date());
+					}
+					String messageId = mimeMessage.getMessageID();
+					mimeMessage.saveChanges();
+					if (messageId != null) {
+						// Preserve explicitly specified message id...
+						mimeMessage.setHeader(HEADER_MESSAGE_ID, messageId);
+					}
+					transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
+				}
+				catch (MessagingException ex) {
+					Object original = (originalMessages != null ? originalMessages[i] : mimeMessage);
+					failedMessages.put(original, ex);
+				}
+			}
+		}
+		finally {
+			try {
+				transport.close();
+			}
+			catch (MessagingException ex) {
+				if (!failedMessages.isEmpty()) {
+					throw new MailSendException("Failed to close server connection after message failures", ex,
+							failedMessages);
+				}
+				else {
+					throw new MailSendException("Failed to close server connection after message sending", ex);
+				}
+			}
+		}
+
 		if (!failedMessages.isEmpty()) {
 			throw new MailSendException(failedMessages);
 		}
