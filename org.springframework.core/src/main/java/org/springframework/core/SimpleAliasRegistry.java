@@ -55,6 +55,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 							name + "': It is already registered for name '" + registeredName + "'.");
 				}
 			}
+			checkForAliasCircle(name, alias);
 			this.aliasMap.put(alias, name);
 		}
 	}
@@ -128,6 +129,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 								"') for name '" + resolvedName + "': It is already registered for name '" +
 								registeredName + "'.");
 					}
+					checkForAliasCircle(resolvedName, resolvedAlias);
 					this.aliasMap.remove(alias);
 					this.aliasMap.put(resolvedAlias, resolvedName);
 				}
@@ -155,6 +157,22 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		}
 		while (resolvedName != null);
 		return canonicalName;
+	}
+
+	/**
+	 * Check whether the given name points back to given alias as an alias
+	 * in the other direction, catching a circular reference upfront and
+	 * throwing a corresponding IllegalStateException.
+	 * @param name the candidate name
+	 * @param alias the candidate alias
+	 * @see #registerAlias
+	 */
+	protected void checkForAliasCircle(String name, String alias) {
+		if (alias.equals(canonicalName(name))) {
+			throw new IllegalStateException("Cannot register alias '" + alias +
+					"' for name '" + name + "': Circular reference - '" +
+					name + "' is a direct or indirect alias for '" + alias + "' already");
+		}
 	}
 
 }
