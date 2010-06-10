@@ -13,9 +13,11 @@ Changes in version 3.0.3 (2010-06-14)
 * added default InputSourceEditor for SAX InputSource construction with a URL String as system id
 * CachedIntrospectionResults only caches GenericTypeAwarePropertyDescriptors if fully safe
 * revised BeanWrapper's exception wrapping to consistently handle ConversionExceptions
+* DefaultListableBeanFactory checks for alias circle on registerAlias (avoiding endless loop)
 * ConversionService is able to apply Converters to interface-based array elements
 * a context ConversionService is able to override an ApplicationContext's resource editors
 * refined LifecycleProcessor exception handling, properly wrapping a start exception from a bean
+* revised DefaultLifecycleProcessor's handling of circular dependencies to avoid stack overflow
 * fixed constructor argument caching for prototypes with multiple constructor matches
 * specific detection of CGLIB subclasses in order to properly handle CGLIB interfaces
 * registerDependentBean resolves to the canonical bean name in order to handle alias references
@@ -36,12 +38,15 @@ Changes in version 3.0.3 (2010-06-14)
 * AsyncAnnotationBeanPostProcessor consistently adds @Async processing as first Advisor in the chain
 * ScheduledTaskRegistrar (as used for @Scheduled processing) properly shuts down its default executor
 * CronTrigger defensively protects itself against accidental re-fires if a task runs too early
+* MailSendException includes all messages as failed messages in case of a connect failure
 * added support for JAX-WS 2.1 WebServiceFeatures to JaxWsPortClientInterceptor/PortProxyFactoryBean
 * added XmlAwareFormHttpMessageConverter, taking over the 3.0.2-introduced XML multipart support
 * ServletContextResourcePatternResolver handles "/WEB-INF/lib/*.jar!/**/context.xml" style patterns
 * fixed MVC mapping regression for servlet url-pattern "/" case on servers other than WebSphere
 * MVC mappings properly apply even to welcome file entries that forward to a DispatcherServlet
 * fixed @ExceptionHandler resolution in case of multiple matches at different inheritance levels
+* revised Portlet SessionStatus.setComplete() to avoid re-exposure of attributes in render phase
+* shortened Portlet MVC's implicit model render parameter name to "implicitModel"
 * added convenient "checkRefresh" bean property to TilesConfigurer
 * TilesConfigurer's "definitionsFactoryClass" property applies common Tiles DefinitionsFactory setup
 * JSP FormTag calculates proper default form action even when using a rewrite filter on WebSphere
