@@ -31,6 +31,7 @@ import javax.servlet.jsp.JspFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tiles.TilesApplicationContext;
+import org.apache.tiles.TilesContainer;
 import org.apache.tiles.TilesException;
 import org.apache.tiles.awareness.TilesApplicationContextAware;
 import org.apache.tiles.context.AbstractTilesApplicationContextFactory;
@@ -54,6 +55,7 @@ import org.apache.tiles.impl.mgmt.CachingTilesContainer;
 import org.apache.tiles.locale.LocaleResolver;
 import org.apache.tiles.preparer.BasicPreparerFactory;
 import org.apache.tiles.preparer.PreparerFactory;
+import org.apache.tiles.renderer.RendererFactory;
 import org.apache.tiles.servlet.context.ServletUtil;
 import org.apache.tiles.startup.BasicTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
@@ -533,6 +535,16 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				Object baefValue = baefCtor.newInstance(evaluator);
 				Method setter = container.getClass().getMethod("setAttributeEvaluatorFactory", aef);
 				setter.invoke(container, baefValue);
+				Method getRequestContextFactory = BasicTilesContainer.class.getDeclaredMethod("getRequestContextFactory");
+				getRequestContextFactory.setAccessible(true);
+				Method createRendererFactory = BasicTilesContainerFactory.class.getDeclaredMethod("createRendererFactory",
+						TilesApplicationContext.class, TilesRequestContextFactory.class, TilesContainer.class, aef);
+				createRendererFactory.setAccessible(true);
+				BasicTilesContainerFactory tcf = new BasicTilesContainerFactory();
+				RendererFactory rendererFactory = (RendererFactory) createRendererFactory.invoke(
+						tcf, container.getApplicationContext(), getRequestContextFactory.invoke(container),
+						container, baefValue);
+				container.setRendererFactory(rendererFactory);
 			}
 			catch (Exception ex) {
 				throw new IllegalStateException("Cannot activate ELAttributeEvaluator", ex);
