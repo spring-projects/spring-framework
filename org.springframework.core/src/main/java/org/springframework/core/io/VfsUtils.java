@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,29 +32,27 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility for detecting the JBoss VFS version available in the classpath.
- * JBoss AS 5+ uses VFS 2.x (package <code>org.jboss.virtual</code>) while JBoss AS 6+ uses
- * VFS 3.x (package <code>org.jboss.vfs</code>).
- * 
- * <p/>
- * Thanks go to Marius Bogoevici for the initial patch. 
+ * JBoss AS 5+ uses VFS 2.x (package <code>org.jboss.virtual</code>) while
+ * JBoss AS 6+ uses VFS 3.x (package <code>org.jboss.vfs</code>).
+ *
+ * <p>Thanks go to Marius Bogoevici for the initial patch.
  *
  * <b>Note:</b> This is an internal class and should not be used outside the framework.
- * 
+ *
  * @author Costin Leau
+ * @since 3.0.3
  */
 public abstract class VfsUtils {
 
-	private static final Log log = LogFactory.getLog(VfsUtils.class);
+	private static final Log logger = LogFactory.getLog(VfsUtils.class);
 
 	private static final String VFS2_PKG = "org.jboss.virtual.";
 	private static final String VFS3_PKG = "org.jboss.vfs.";
 	private static final String VFS_NAME = "VFS";
 
-	private static enum VFS_VER {
-		V2, V3
-	}
+	private static enum VFS_VER { V2, V3 }
 
-	private static VFS_VER version = null;
+	private static VFS_VER version;
 
 	private static Method VFS_METHOD_GET_ROOT_URL = null;
 	private static Method VFS_METHOD_GET_ROOT_URI = null;
@@ -71,7 +69,6 @@ public abstract class VfsUtils {
 	protected static Class<?> VIRTUAL_FILE_VISITOR_INTERFACE;
 	protected static Method VIRTUAL_FILE_METHOD_VISIT;
 
-
 	private static Method VFS_UTILS_METHOD_IS_NESTED_FILE = null;
 	private static Method VFS_UTILS_METHOD_GET_COMPATIBLE_URI = null;
 	private static Field VISITOR_ATTRIBUTES_FIELD_RECURSE = null;
@@ -79,33 +76,33 @@ public abstract class VfsUtils {
 
 	static {
 		ClassLoader loader = VfsUtils.class.getClassLoader();
+		String pkg;
+		Class<?> vfsClass;
 
-		String pkg = "";
-
-		Class<?> vfsClass = null;
-
-		// check JBoss 6
+		// check for JBoss 6
 		try {
 			vfsClass = loader.loadClass(VFS3_PKG + VFS_NAME);
 			version = VFS_VER.V3;
 			pkg = VFS3_PKG;
 
-			if (log.isDebugEnabled())
-				log.debug("JBoss VFS packages for JBoss AS 6 found");
-		} catch (ClassNotFoundException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("JBoss VFS packages for JBoss AS 6 found");
+			}
+		}
+		catch (ClassNotFoundException ex) {
 			// fallback to JBoss 5
-			if (log.isDebugEnabled())
-				log.debug("JBoss VFS packages for JBoss AS 6 not found; falling back to JBoss AS 5 packages");
+			if (logger.isDebugEnabled())
+				logger.debug("JBoss VFS packages for JBoss AS 6 not found; falling back to JBoss AS 5 packages");
 			try {
 				vfsClass = loader.loadClass(VFS2_PKG + VFS_NAME);
 
 				version = VFS_VER.V2;
 				pkg = VFS2_PKG;
 
-				if (log.isDebugEnabled())
-					log.debug("JBoss VFS packages for JBoss AS 5 found");
+				if (logger.isDebugEnabled())
+					logger.debug("JBoss VFS packages for JBoss AS 5 found");
 			} catch (ClassNotFoundException ex1) {
-				log.error("JBoss VFS packages (for both JBoss AS 5 and 6) were not found - JBoss VFS support disabled");
+				logger.error("JBoss VFS packages (for both JBoss AS 5 and 6) were not found - JBoss VFS support disabled");
 				throw new IllegalStateException("Cannot detect JBoss VFS packages", ex1);
 			}
 		}
@@ -144,8 +141,8 @@ public abstract class VfsUtils {
 
 			Class<?> visitorAttributesClass = loader.loadClass(pkg + "VisitorAttributes");
 			VISITOR_ATTRIBUTES_FIELD_RECURSE = ReflectionUtils.findField(visitorAttributesClass, "RECURSE");
-
-		} catch (ClassNotFoundException ex) {
+		}
+		catch (ClassNotFoundException ex) {
 			throw new IllegalStateException("Could not detect the JBoss VFS infrastructure", ex);
 		}
 	}
@@ -153,13 +150,15 @@ public abstract class VfsUtils {
 	protected static Object invokeVfsMethod(Method method, Object target, Object... args) throws IOException {
 		try {
 			return method.invoke(target, args);
-		} catch (InvocationTargetException ex) {
+		}
+		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
 			if (targetEx instanceof IOException) {
 				throw (IOException) targetEx;
 			}
 			ReflectionUtils.handleInvocationTargetException(ex);
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			ReflectionUtils.handleReflectionException(ex);
 		}
 
@@ -169,7 +168,8 @@ public abstract class VfsUtils {
 	static boolean exists(Object vfsResource) {
 		try {
 			return (Boolean) invokeVfsMethod(VIRTUAL_FILE_METHOD_EXISTS, vfsResource);
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			return false;
 		}
 	}
@@ -177,7 +177,8 @@ public abstract class VfsUtils {
 	static boolean isReadable(Object vfsResource) {
 		try {
 			return ((Long) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_SIZE, vfsResource) > 0);
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			return false;
 		}
 	}
@@ -201,7 +202,8 @@ public abstract class VfsUtils {
 	static String getName(Object vfsResource) {
 		try {
 			return (String) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_NAME, vfsResource);
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			throw new IllegalStateException("Cannot get resource name", ex);
 		}
 	}
@@ -221,7 +223,8 @@ public abstract class VfsUtils {
 			}
 			try {
 				return new File((URI) invokeVfsMethod(VFS_UTILS_METHOD_GET_COMPATIBLE_URI, null, vfsResource));
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 				throw new NestedIOException("Failed to obtain File reference for " + vfsResource, ex);
 			}
 		}

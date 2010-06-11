@@ -33,6 +33,7 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -645,10 +646,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	private static class VfsResourceMatchingDelegate {
 
-		public static Set<Resource> findMatchingResources(Resource rootResource, String locationPattern, PathMatcher pathMatcher) throws IOException {
+		public static Set<Resource> findMatchingResources(
+				Resource rootResource, String locationPattern, PathMatcher pathMatcher) throws IOException {
 			Object root = VfsPatternUtils.findRoot(rootResource.getURL());
-			PatternVirtualFileVisitor visitor = new PatternVirtualFileVisitor(VfsPatternUtils.getPath(root),
-					locationPattern, pathMatcher);
+			PatternVirtualFileVisitor visitor =
+					new PatternVirtualFileVisitor(VfsPatternUtils.getPath(root), locationPattern, pathMatcher);
 			VfsPatternUtils.visit(root, visitor);
 			return visitor.getResources();
 		}
@@ -673,7 +675,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			this.pathMatcher = pathMatcher;
 			this.rootPath = (rootPath.length() == 0 || rootPath.endsWith("/") ? rootPath : rootPath + "/");
 		}
-
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
@@ -701,8 +702,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		public void visit(Object vfsResource) {
-			if (this.pathMatcher.match(this.subPattern, VfsPatternUtils.getPath(vfsResource).substring(
-					this.rootPath.length()))) {
+			if (this.pathMatcher.match(this.subPattern,
+					VfsPatternUtils.getPath(vfsResource).substring(this.rootPath.length()))) {
 				this.resources.add(new VfsResource(vfsResource));
 			}
 		}
@@ -727,4 +728,5 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return sb.toString();
 		}
 	}
+
 }

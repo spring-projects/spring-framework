@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 
 /**
  * VFS based {@link Resource} implementation.
+ * Supports the corresponding VFS API versions on JBoss AS 5.x as well as 6.x.
  *
  * @author Ales Justin
  * @author Juergen Hoeller
@@ -39,53 +40,58 @@ public class VfsResource extends AbstractResource {
 
 	private final Object resource;
 
+
 	public VfsResource(Object resources) {
 		Assert.notNull(resources, "VirtualFile must not be null");
 		this.resource = resources;
 	}
 
+
 	public boolean exists() {
-		return VfsUtils.exists(resource);
+		return VfsUtils.exists(this.resource);
 	}
 
 	public boolean isReadable() {
-		return VfsUtils.isReadable(resource);
+		return VfsUtils.isReadable(this.resource);
 	}
 
 	public long lastModified() throws IOException {
-		return VfsUtils.getLastModified(resource);
+		return VfsUtils.getLastModified(this.resource);
 	}
 
 	public InputStream getInputStream() throws IOException {
-		return VfsUtils.getInputStream(resource);
+		return VfsUtils.getInputStream(this.resource);
 	}
 
 	public URL getURL() throws IOException {
 		try {
-			return VfsUtils.getURL(resource);
-		} catch (Exception ex) {
+			return VfsUtils.getURL(this.resource);
+		}
+		catch (Exception ex) {
 			throw new NestedIOException("Failed to obtain URL for file " + this.resource, ex);
 		}
 	}
 
 	public URI getURI() throws IOException {
 		try {
-			return VfsUtils.getURI(resource);
-		} catch (Exception ex) {
+			return VfsUtils.getURI(this.resource);
+		}
+		catch (Exception ex) {
 			throw new NestedIOException("Failed to obtain URI for " + this.resource, ex);
 		}
 	}
 
 	public File getFile() throws IOException {
-		return VfsUtils.getFile(resource);
+		return VfsUtils.getFile(this.resource);
 	}
 
 	public Resource createRelative(String relativePath) throws IOException {
 		if (!relativePath.startsWith(".") && relativePath.contains("/")) {
 			try {
-				return new VfsResource(VfsUtils.getChild(resource, relativePath));
-			} catch (IOException ex) {
-				// fall back to #getRelative
+				return new VfsResource(VfsUtils.getChild(this.resource, relativePath));
+			}
+			catch (IOException ex) {
+				// fall back to getRelative
 			}
 		}
 
@@ -93,7 +99,7 @@ public class VfsResource extends AbstractResource {
 	}
 
 	public String getFilename() {
-		return VfsUtils.getName(resource);
+		return VfsUtils.getName(this.resource);
 	}
 
 	public String getDescription() {
@@ -109,4 +115,5 @@ public class VfsResource extends AbstractResource {
 	public int hashCode() {
 		return this.resource.hashCode();
 	}
+
 }
