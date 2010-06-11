@@ -391,7 +391,20 @@ public class NotVeryUsefulAspect {
       introduction (inter-type) declarations.</para>
 
       <note>
-        <title>Advising aspects</title>
+        <title>Autodetecting aspects through component scanning</title>
+
+        <para>You may register aspect classes as regular beans in your Spring
+        XML configuration, or autodetect them throuch classpath scanning -
+        just like any other Spring-managed bean. However, note that the
+        <emphasis>@Aspect</emphasis> annotation is <emphasis>not</emphasis>
+        sufficient for autodetection in the classpath: For that purpose,
+        you need to add a separate <emphasis>@Component</emphasis> annotation
+        (or alternatively a custom stereotype annotation that qualifies,
+        as per the rules of Spring's component scanner).</para>
+      </note>
+
+      <note>
+        <title>Advising aspects with other aspects?</title>
 
         <para>In Spring AOP, it is <emphasis>not</emphasis> possible to have
         aspects themselves be the target of advice from other aspects. The
