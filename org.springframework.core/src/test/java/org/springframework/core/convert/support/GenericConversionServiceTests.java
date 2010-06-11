@@ -82,6 +82,18 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void sourceTypeIsVoid() {
+		GenericConversionService conversionService = new GenericConversionService();
+		assertFalse(conversionService.canConvert(void.class, String.class));
+	}
+
+	@Test
+	public void targetTypeIsVoid() {
+		GenericConversionService conversionService = new GenericConversionService();
+		assertFalse(conversionService.canConvert(String.class, void.class));
+	}
+
+	@Test
 	public void convertNull() {
 		assertNull(conversionService.convert(null, Integer.class));
 	}
