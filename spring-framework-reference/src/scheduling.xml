@@ -553,6 +553,17 @@ public void doSomething() {
 			and must not expect any arguments. If the method needs to interact with
 			other objects from the Application Context, then those would typically
 			have been provided through dependency injection.</para>
+
+			<note>
+				<para>Make sure that you are not initializing multiple instances
+				of the same @Scheduled annotation class at runtime, unless you do
+				want to schedule callbacks to each such instance. Related to this,
+				make sure that you do not use @Configurable on bean classes which
+				are annotated with @Scheduled and registered as regular Spring beans
+				with the container: You would get double initialization otherwise,
+				once through the container and once through the @Configurable aspect,
+				with the consequence of each @Scheduled method being invoked twice.</para>
+			</note>
 		</section>
 
 		<section id="scheduling-annotation-support-async">

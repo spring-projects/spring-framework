@@ -2959,6 +2959,16 @@ public class Account {
 
 &lt;/bean&gt;</programlisting>
 
+      <note>
+        <para>Do not activate <interfacename>@Configurable</interfacename>
+        processing through the bean configurer aspect unless you really
+        mean to rely on its semantics at runtime. In particular, make sure
+        that you do not use <interfacename>@Configurable</interfacename>
+        on bean classes which are registered as regular Spring beans with
+        the container: You would get double initialization otherwise, once
+        through the container and once through the aspect.</para>
+      </note>
+
       <section id="aop-configurable-testing">
         <title>Unit testing <interfacename>@Configurable</interfacename>
         objects</title>
