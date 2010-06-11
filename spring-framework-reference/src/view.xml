@@ -1973,17 +1973,17 @@ public class HomePage extends AbstractExcelView {
 
         // Go to the first sheet
         // getSheetAt: only if wb is created from an existing document
-        //sheet = wb.getSheetAt( 0 );
+        // sheet = wb.getSheetAt(0);
         sheet = wb.createSheet("Spring");
-        sheet.setDefaultColumnWidth((short)12);
+        sheet.setDefaultColumnWidth((short) 12);
 
         // write a text at A1
-        cell = getCell( sheet, 0, 0 );
-        setText(cell,"Spring-Excel test");
+        cell = getCell(sheet, 0, 0);
+        setText(cell, "Spring-Excel test");
 
-        List words = (List ) model.get("wordList");
+        List words = (List) model.get("wordList");
         for (int i=0; i &lt; words.size(); i++) {
-            cell = getCell( sheet, 2+i, 0 );
+            cell = getCell(sheet, 2+i, 0);
             setText(cell, (String) words.get(i));
 
         }
@@ -1997,7 +1997,7 @@ public class HomePage extends AbstractExcelView {
 
 // imports omitted for brevity
 
-public class HomePage extends AbstractExcelView {
+public class HomePage extends AbstractJExcelView {
 
     protected void buildExcelDocument(Map model,
         WritableWorkbook wb,
@@ -2005,13 +2005,13 @@ public class HomePage extends AbstractExcelView {
         HttpServletResponse response)
     throws Exception {
 			
-        WritableSheet sheet = wb.createSheet("Spring");
+        WritableSheet sheet = wb.createSheet("Spring", 0);
 
-        sheet.addCell(new Label(0, 0, "Spring-Excel test");
+        sheet.addCell(new Label(0, 0, "Spring-Excel test"));
 		
-        List words  = (List)model.get("wordList");
-        for (int i = -; i &lt; words.size(); i++) {
-            sheet.addCell(new Label(2+i, 0, (String)words.get(i));
+        List words = (List) model.get("wordList");
+        for (int i = 0; i &lt; words.size(); i++) {
+            sheet.addCell(new Label(2+i, 0, (String) words.get(i)));
         }
     }
 }</programlisting>
