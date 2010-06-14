@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,6 +274,30 @@ public abstract class CollectionUtils {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Find the common element type of the given Collection, if any.
+	 * @param collection the Collection to check
+	 * @return the common element type, or <code>null</code> if no clear
+	 * common type has been found (or the collection was empty)
+	 */
+	public static Class<?> findCommonElementType(Collection collection) {
+		if (isEmpty(collection)) {
+			return null;
+		}
+		Class<?> candidate = null;
+		for (Object val : collection) {
+			if (val != null) {
+				if (candidate == null) {
+					candidate = val.getClass();
+				}
+				else if (candidate != val.getClass()) {
+					return null;
+				}
+			}
+		}
+		return candidate;
 	}
 
 	/**
