@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -54,8 +53,6 @@ import org.springframework.util.ClassUtils;
  * @since 3.0
  */
 public class GenericConversionService implements ConversionService, ConverterRegistry {
-
-	private static final Log logger = LogFactory.getLog(GenericConversionService.class);
 
 	private static final GenericConverter NO_OP_CONVERTER = new GenericConverter() {
 		public Set<ConvertiblePair> getConvertibleTypes() {
@@ -81,11 +78,16 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	};
 
+
+	private static final Log logger = LogFactory.getLog(GenericConversionService.class);
+
 	private final Map<Class<?>, Map<Class<?>, MatchableConverters>> converters =
 			new HashMap<Class<?>, Map<Class<?>, MatchableConverters>>(36);
 
-	private final Map<ConverterCacheKey, GenericConverter> converterCache = new ConcurrentHashMap<ConverterCacheKey, GenericConverter>();
-	
+	private final Map<ConverterCacheKey, GenericConverter> converterCache =
+			new ConcurrentHashMap<ConverterCacheKey, GenericConverter>();
+
+
 	// implementing ConverterRegistry
 
 	public void addConverter(Converter<?, ?> converter) {
@@ -119,6 +121,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		invalidateCache();
 	}
 
+
 	// implementing ConversionService
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
@@ -132,26 +135,20 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		assertNotNull(sourceType, targetType);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Checking if I can convert " + sourceType + " to " + targetType);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Checking if I can convert " + sourceType + " to " + targetType);
 		}		
 		if (sourceType == TypeDescriptor.NULL || targetType == TypeDescriptor.NULL) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Yes, I can convert");
-			}
+			logger.trace("Yes, I can convert");
 			return true;
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Yes, I can convert");
-			}
+			logger.trace("Yes, I can convert");
 			return true;
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No, I cannot convert");
-			}
+			logger.trace("No, I cannot convert");
 			return false;
 		}
 	}
@@ -170,31 +167,18 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return result;
 		}
 		if (targetType == TypeDescriptor.NULL) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Converted to null");
-			}
+			logger.debug("Converted to null");
 			return null;
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter == null) {
-			ConverterNotFoundException e = new ConverterNotFoundException(sourceType, targetType);
-			if (logger.isDebugEnabled()) {
-				logger.debug(e);
-			}
-			throw e;
+			throw new ConverterNotFoundException(sourceType, targetType);
 		}
-		try {
-			Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Converted to " + StylerUtils.style(result));
-			}
-			return result;
-		} catch (ConversionException e) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(e);
-			}
-			throw e;
+		Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Converted to " + StylerUtils.style(result));
 		}
+		return result;
 	}
 
 	public String toString() {
@@ -215,12 +199,14 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return builder.toString();
 	}
 
+
 	// subclassing hooks
 
 	/**
-	 * Hook method to convert a null source.
-	 * Default implementation returns <code>null</code>.
-	 * Throws a {@link ConversionFailedException} if the targetType is a primitive type, as null cannot be assigned to a primitive type. 
+	 * Template method to convert a null source.
+	 * <p>Default implementation returns <code>null</code>.
+	 * Throws a {@link ConversionFailedException} if the targetType is a primitive type,
+	 * as <code>null</code> cannot be assigned to a primitive type.
 	 * Subclasses may override to return custom null objects for specific target types.
 	 * @param sourceType the sourceType to convert from
 	 * @param targetType the targetType to convert to
@@ -247,10 +233,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 */
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		ConverterCacheKey key = new ConverterCacheKey(sourceType, targetType);
-		GenericConverter converter = converterCache.get(key);
+		GenericConverter converter = this.converterCache.get(key);
 		if (converter != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Matched cached converter " + converter);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Matched cached converter " + converter);
 			}
 			return converter != NO_MATCH ? converter : null; 
 		}
@@ -260,7 +246,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				if (logger.isTraceEnabled()) {
 					logger.trace("Caching under " + key);
 				}
-				converterCache.put(key, converter);
+				this.converterCache.put(key, converter);
 				return converter;
 			}
 			converter = getDefaultConverter(sourceType, targetType);
@@ -268,13 +254,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				if (logger.isTraceEnabled()) {
 					logger.trace("Caching under " + key);
 				}
-				converterCache.put(key, converter);
+				this.converterCache.put(key, converter);
 				return converter;				
 			}
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching NO_MATCH under " + key);
 			}
-			converterCache.put(key, NO_MATCH);
+			this.converterCache.put(key, NO_MATCH);
 			return null;
 		}
 	}
@@ -290,9 +276,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	 */
 	protected GenericConverter getDefaultConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.isAssignableTo(targetType)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Matched default NO_OP_CONVERTER");
-			}
+			logger.trace("Matched default NO_OP_CONVERTER");
 			return NO_OP_CONVERTER;
 		}
 		else {
@@ -471,7 +455,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-	private GenericConverter matchConverter(MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
+	private GenericConverter matchConverter(
+			MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
+
 		if (matchable == null) {
 			return null;
 		}
@@ -566,20 +552,20 @@ public class GenericConversionService implements ConversionService, ConverterReg
 						logger.trace("Matching " + conditional);
 					}
 					if (conditional.matches(sourceType, targetType)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Matched converter " + conditional);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Matched converter " + conditional);
 						}
 						return conditional;
 					}
 					else {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Did not match converter " + conditional);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Did not match converter " + conditional);
 						}
 					}
 				}
 			}
-			if (this.defaultConverter != null && logger.isDebugEnabled()) {
-				logger.debug("Matched converter " + this.defaultConverter);
+			if (this.defaultConverter != null && logger.isTraceEnabled()) {
+				logger.trace("Matched converter " + this.defaultConverter);
 			}			
 			return this.defaultConverter;
 		}
@@ -587,7 +573,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		public String toString() {
 			if (this.conditionalConverters != null) {
 				StringBuilder builder = new StringBuilder();
-				for (Iterator<ConditionalGenericConverter> it = this.conditionalConverters.iterator(); it.hasNext(); ) {
+				for (Iterator<ConditionalGenericConverter> it = this.conditionalConverters.iterator(); it.hasNext();) {
 					builder.append(it.next());
 					if (it.hasNext()) {
 						builder.append(", ");
@@ -603,7 +589,8 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			}
 		}
 	}
-	
+
+
 	private static final class ConverterCacheKey {
 
 		private final TypeDescriptor sourceType;
@@ -615,20 +602,23 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			this.targetType = targetType;
 		}
 		
-		public boolean equals(Object o) {
-			if (!(o instanceof ConverterCacheKey)) {
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof ConverterCacheKey)) {
 				return false;
 			}
-			ConverterCacheKey key = (ConverterCacheKey) o;
-			return sourceType.equals(key.sourceType) && targetType.equals(key.targetType);
+			ConverterCacheKey otherKey = (ConverterCacheKey) other;
+			return this.sourceType.equals(otherKey.sourceType) && this.targetType.equals(otherKey.targetType);
 		}
 		
 		public int hashCode() {
-			return sourceType.hashCode() * 29 + targetType.hashCode();
+			return this.sourceType.hashCode() * 29 + this.targetType.hashCode();
 		}
 		
 		public String toString() {
-			return "[ConverterCacheKey sourceType = " + sourceType + ", targetType = " + targetType + "]";
+			return "ConverterCacheKey [sourceType = " + this.sourceType + ", targetType = " + this.targetType + "]";
 		}
 	}
 

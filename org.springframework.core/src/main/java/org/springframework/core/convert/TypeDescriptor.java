@@ -26,6 +26,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -34,7 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  * @author Andy Clement
  * @author Juergen Hoeller
- * @since 3.0 
+ * @since 3.0
  */
 public class TypeDescriptor {
 
@@ -44,7 +45,7 @@ public class TypeDescriptor {
 	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
 
 	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
-	
+
 	static {
 		typeDescriptorCache.put(boolean.class, new TypeDescriptor(boolean.class));
 		typeDescriptorCache.put(Boolean.class, new TypeDescriptor(Boolean.class));
@@ -75,13 +76,13 @@ public class TypeDescriptor {
 	private Object value;
 
 	private TypeDescriptor elementType;
-	
+
 	private TypeDescriptor mapKeyType;
-	
+
 	private TypeDescriptor mapValueType;
 
 	private Annotation[] annotations;
-	
+
 
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
@@ -248,15 +249,15 @@ public class TypeDescriptor {
 	 * Return the element type as a type descriptor.
 	 */
 	public synchronized TypeDescriptor getElementTypeDescriptor() {
-		if (elementType == null) {
-			elementType = forElementType(resolveElementType());
+		if (this.elementType == null) {
+			this.elementType = forElementType(resolveElementType());
 		}
-		return elementType;
+		return this.elementType;
 	}
 
 	/**
-	 * Return the element type as a type descriptor; if the element type is null (cannot be determined),
-	 * the type descriptor is derived from the element argument.
+	 * Return the element type as a type descriptor. If the element type is null
+	 * (cannot be determined), the type descriptor is derived from the element argument.
 	 * @param element the element
 	 * @return the element type descriptor
 	 */
@@ -273,7 +274,7 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Is this descriptor for a map where the key type and value type are known? 
+	 * Is this descriptor for a map where the key type and value type are known?
 	 */
 	public boolean isMapEntryTypeKnown() {
 		return (isMap() && getMapKeyType() != null && getMapValueType() != null);
@@ -291,14 +292,15 @@ public class TypeDescriptor {
 	 * Returns map key type as a type descriptor.
 	 */
 	public synchronized TypeDescriptor getMapKeyTypeDescriptor() {
-		if (mapKeyType == null) {
-			mapKeyType = forElementType(resolveMapKeyType());			
+		if (this.mapKeyType == null) {
+			this.mapKeyType = forElementType(resolveMapKeyType());
 		}
-		return mapKeyType;
+		return this.mapKeyType;
 	}
 
 	/**
-	 * Return the map key type as a type descriptor; if the key type is null (cannot be determined), the type descriptor is derived from the key argument.
+	 * Return the map key type as a type descriptor. If the key type is null
+	 * (cannot be determined), the type descriptor is derived from the key argument.
 	 * @param key the key
 	 * @return the map key type descriptor
 	 */
@@ -306,7 +308,7 @@ public class TypeDescriptor {
 		TypeDescriptor keyType = getMapKeyTypeDescriptor();
 		return keyType != TypeDescriptor.NULL ? keyType : TypeDescriptor.forObject(key);
 	}
-	
+
 	/**
 	 * Determine the generic value type of the wrapped Map parameter/field, if any.
 	 * @return the generic type, or <code>null</code> if none
@@ -314,19 +316,19 @@ public class TypeDescriptor {
 	public Class<?> getMapValueType() {
 		return getMapValueTypeDescriptor().getType();
 	}
-	
+
 	/**
 	 * Returns map value type as a type descriptor.
 	 */
 	public synchronized TypeDescriptor getMapValueTypeDescriptor() {
 		if (this.mapValueType == null) {
-			mapValueType = forElementType(resolveMapValueType());
+			this.mapValueType = forElementType(resolveMapValueType());
 		}
 		return this.mapValueType;
 	}
 
 	/**
-	 * Return the map value type as a type descriptor; if the value type is null
+	 * Return the map value type as a type descriptor. If the value type is null
 	 * (cannot be determined), the type descriptor is derived from the value argument.
 	 * @param value the value
 	 * @return the map value type descriptor
@@ -355,7 +357,7 @@ public class TypeDescriptor {
 				return annotation;
 			}
 		}
-		return null;		
+		return null;
 	}
 
 	/**
@@ -423,14 +425,14 @@ public class TypeDescriptor {
 					ObjectUtils.nullSafeEquals(getMapValueType(), td.getMapValueType());
 		}
 		else {
-			return annotatedTypeEquals; 
+			return annotatedTypeEquals;
 		}
 	}
-	
+
 	public int hashCode() {
 		return getType().hashCode();
 	}
-	
+
 	/**
 	 * A textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages
 	 */
@@ -459,7 +461,7 @@ public class TypeDescriptor {
 			}
 			else if (isCollection()) {
 				Class<?> elementType = getElementType();
-				builder.append("<").append(elementType != null ? ClassUtils.getQualifiedName(elementType) : "?").append(">");				
+				builder.append("<").append(elementType != null ? ClassUtils.getQualifiedName(elementType) : "?").append(">");
 			}
 			builder.append("]");
 			return builder.toString();
@@ -468,7 +470,7 @@ public class TypeDescriptor {
 
 
 	// internal helpers
-	
+
 	private Class<?> resolveElementType() {
 		if (isArray()) {
 			return getType().getComponentType();
@@ -478,9 +480,9 @@ public class TypeDescriptor {
 		}
 		else {
 			return null;
-		}				
+		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Class<?> resolveCollectionElementType() {
 		if (this.field != null) {
@@ -490,17 +492,14 @@ public class TypeDescriptor {
 			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
 		}
 		else if (this.value instanceof Collection) {
-			Collection coll = (Collection) this.value;
-			if (!coll.isEmpty()) {
-				Object elem = coll.iterator().next();
-				if (elem != null) {
-					return elem.getClass();
-				}
+			Class<?> elementType = CollectionUtils.findCommonElementType((Collection) this.value);
+			if (elementType != null) {
+				return elementType;
 			}
 		}
-		return (this.type != null ? GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type) : null);
+        return (this.type != null ? GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type) : null);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Class<?> resolveMapKeyType() {
 		if (this.field != null) {
@@ -510,12 +509,9 @@ public class TypeDescriptor {
 			return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
 		}
 		else if (this.value instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) this.value;
-			if (!map.isEmpty()) {
-				Object key = map.keySet().iterator().next();
-				if (key != null) {
-					return key.getClass();
-				}
+			Class<?> keyType = CollectionUtils.findCommonElementType(((Map<?, ?>) this.value).keySet());
+			if (keyType != null) {
+				return keyType;
 			}
 		}
 		return (this.type != null && isMap() ? GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type) : null);
@@ -530,17 +526,14 @@ public class TypeDescriptor {
 			return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
 		}
 		else if (this.value instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) this.value;
-			if (!map.isEmpty()) {
-				Object val = map.values().iterator().next();
-				if (val != null) {
-					return val.getClass();
-				}
+			Class<?> valueType = CollectionUtils.findCommonElementType(((Map<?, ?>) this.value).values());
+			if (valueType != null) {
+				return valueType;
 			}
 		}
 		return (isMap() && this.type != null ? GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type) : null);
 	}
-	
+
 	private Annotation[] resolveAnnotations() {
 		if (this.field != null) {
 			return this.field.getAnnotations();
