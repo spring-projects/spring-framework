@@ -3,11 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.3 (2010-06-14)
+Changes in version 3.0.3 (2010-06-15)
 -------------------------------------
 
-* clarified that Spring's Jackson support requires Jackson 1.3 or higher
 * Spring autodetects JodaTime 1.3 or higher (as required), ignoring older JodaTime versions
+* clarified that Spring's Jackson support requires Jackson 1.3 or higher
+* JPA 2.0 support tested and supported with Hibernate 3.5.2 and OpenJPA 2.0.0 GA as well
 * revised VFS support for Spring's component scanning to work on JBoss AS 6.0.0 M3 as well
 * fixed URIEditor's URI construction to consider fragment as well
 * added default InputSourceEditor for SAX InputSource construction with a URL String as system id
@@ -15,6 +16,8 @@ Changes in version 3.0.3 (2010-06-14)
 * revised BeanWrapper's exception wrapping to consistently handle ConversionExceptions
 * DefaultListableBeanFactory checks for alias circle on registerAlias (avoiding endless loop)
 * ConversionService is able to apply Converters to interface-based array elements
+* ConversionService fully supports conversion from String to MediaType now (through 'valueOf')
+* revised exception handling in ObjectToObjectConverter, avoiding InvocationTargetExceptions
 * a context ConversionService is able to override an ApplicationContext's resource editors
 * refined LifecycleProcessor exception handling, properly wrapping a start exception from a bean
 * revised DefaultLifecycleProcessor's handling of circular dependencies to avoid stack overflow
