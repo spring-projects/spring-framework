@@ -40,7 +40,7 @@ public final class ConversionFailedException extends ConversionException {
 	 * @param cause the cause of the conversion failure
 	 */
 	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
-		super("Unable to convert value " + value + " from type '" + sourceType.getName() +
+		super("Unable to convert value \"" + value + "\" from type '" + sourceType.getName() +
 				"' to type '" + targetType.getName() + "'", cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;

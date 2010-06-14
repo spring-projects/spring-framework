@@ -37,14 +37,14 @@ import org.springframework.util.StringUtils;
 /**
  * Represents an Internet Media Type, as defined in the HTTP specification.
  *
- * <p>Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}. Also has functionality to
- * parse media types from a string using {@link #parseMediaType(String)}, or multiple comma-separated media types using
- * {@link #parseMediaTypes(String)}.
+ * <p>Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}.
+ * Also has functionality to parse media types from a string using {@link #parseMediaType(String)},
+ * or multiple comma-separated media types using {@link #parseMediaTypes(String)}.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @see <a href="http://tools.ietf.org/html/rfc2616#section-3.7">HTTP 1.1, section 3.7</a>
  * @since 3.0
+ * @see <a href="http://tools.ietf.org/html/rfc2616#section-3.7">HTTP 1.1, section 3.7</a>
  */
 public class MediaType implements Comparable<MediaType> {
 
@@ -118,6 +118,7 @@ public class MediaType implements Comparable<MediaType> {
 	 *  */
 	public final static MediaType TEXT_XML;
 
+
 	private static final BitSet TOKEN;
 
 	private static final String WILDCARD_TYPE = "*";
@@ -184,11 +185,10 @@ public class MediaType implements Comparable<MediaType> {
 		TEXT_XML = new MediaType("text","xml");
 	}
 
+
 	/**
 	 * Create a new {@link MediaType} for the given primary type.
-	 *
 	 * <p>The {@linkplain #getSubtype() subtype} is set to <code>&#42;</code>, parameters empty.
-	 *
 	 * @param type the primary type
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
@@ -197,8 +197,8 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Create a new {@link MediaType} for the given primary type and subtype. <p>The parameters are empty.
-	 *
+	 * Create a new {@link MediaType} for the given primary type and subtype.
+	 * <p>The parameters are empty.
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
@@ -209,7 +209,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Create a new {@link MediaType} for the given type, subtype, and character set.
-	 *
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param charSet the character set
@@ -232,9 +231,8 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Copy-constructor that copies the type and subtype of the given {@link MediaType}, and allows for different
-	 * parameter.
-	 *
+	 * Copy-constructor that copies the type and subtype of the given {@link MediaType},
+	 * and allows for different parameter.
 	 * @param other the other media type
 	 * @param parameters the parameters, may be <code>null</code>
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
@@ -245,7 +243,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Create a new {@link MediaType} for the given type, subtype, and parameters.
-	 *
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param parameters the parameters, may be <code>null</code>
@@ -275,7 +272,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Checks the given token string for illegal characters, as defined in RFC 2616, section 2.2.
-	 *
 	 * @throws IllegalArgumentException in case of illegal characters
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
@@ -295,7 +291,8 @@ public class MediaType implements Comparable<MediaType> {
 		if (PARAM_QUALITY_FACTOR.equals(attribute)) {
 			value = unquote(value);
 			double d = Double.parseDouble(value);
-			Assert.isTrue(d >= 0D && d <= 1D, "Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
+			Assert.isTrue(d >= 0D && d <= 1D,
+					"Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
 		}
 		else if (PARAM_CHARSET.equals(attribute)) {
 			value = unquote(value);
@@ -317,24 +314,29 @@ public class MediaType implements Comparable<MediaType> {
 		return isQuotedString(s) ? s.substring(1, s.length() - 1) : s;
 	}
 
-	/** Return the primary type. */
+	/**
+	 * Return the primary type.
+	 */
 	public String getType() {
 		return this.type;
 	}
 
-	/** Indicate whether the {@linkplain #getType() type} is the wildcard character <code>&#42;</code> or not. */
+	/**
+	 * Indicate whether the {@linkplain #getType() type} is the wildcard character <code>&#42;</code> or not.
+	 */
 	public boolean isWildcardType() {
 		return WILDCARD_TYPE.equals(type);
 	}
 
-	/** Return the subtype. */
+	/**
+	 * Return the subtype.
+	 */
 	public String getSubtype() {
 		return this.subtype;
 	}
 
 	/**
 	 * Indicate whether the {@linkplain #getSubtype() subtype} is the wildcard character <code>&#42;</code> or not.
-	 *
 	 * @return whether the subtype is <code>&#42;</code>
 	 */
 	public boolean isWildcardSubtype() {
@@ -343,7 +345,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Return the character set, as indicated by a <code>charset</code> parameter, if any.
-	 *
 	 * @return the character set; or <code>null</code> if not available
 	 */
 	public Charset getCharSet() {
@@ -352,8 +353,8 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Return the quality value, as indicated by a <code>q</code> parameter, if any. Defaults to <code>1.0</code>.
-	 *
+	 * Return the quality value, as indicated by a <code>q</code> parameter, if any.
+	 * Defaults to <code>1.0</code>.
 	 * @return the quality factory
 	 */
 	public double getQualityValue() {
@@ -363,7 +364,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Return a generic parameter value, given a parameter name.
-	 *
 	 * @param name the parameter name
 	 * @return the parameter value; or <code>null</code> if not present
 	 */
@@ -373,10 +373,8 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Indicate whether this {@link MediaType} includes the given media type.
-	 *
 	 * <p>For instance, {@code text/*} includes {@code text/plain}, {@code text/html}, and {@code application/*+xml}
 	 * includes {@code application/soap+xml}, etc. This method is non-symmetic.
-	 *
 	 * @param other the reference media type with which to compare
 	 * @return <code>true</code> if this media type includes the given media type; <code>false</code> otherwise
 	 */
@@ -410,10 +408,8 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Indicate whether this {@link MediaType} is compatible with the given media type.
-	 *
-	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa. In
-	 * effect, this method is similar to {@link #includes(MediaType)}, except that it's symmetric.
-	 *
+	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa.
+	 * In effect, this method is similar to {@link #includes(MediaType)}, except that it's symmetric.
 	 * @param other the reference media type with which to compare
 	 * @return <code>true</code> if this media type is compatible with the given media type; <code>false</code> otherwise
 	 */
@@ -449,7 +445,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Compares this {@link MediaType} to another alphabetically.
-	 *
 	 * @param other media type to compare to
 	 * @see #sortBySpecificity(List)
 	 */
@@ -527,7 +522,7 @@ public class MediaType implements Comparable<MediaType> {
 		appendTo(this.parameters, builder);
 	}
 
-	private static void appendTo(Map<String, String> map, StringBuilder builder) {
+	private void appendTo(Map<String, String> map, StringBuilder builder) {
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			builder.append(';');
 			builder.append(entry.getKey());
@@ -536,9 +531,19 @@ public class MediaType implements Comparable<MediaType> {
 		}
 	}
 
+
+	/**
+	 * Parse the given String value into a {@link MediaType} object,
+	 * with this method name following the 'valueOf' naming convention
+	 * (as supported by {@link org.springframework.core.convert.ConversionService}.
+	 * @see #parseMediaType(String)
+	 */
+	public static MediaType valueOf(String value) {
+		return parseMediaType(value);
+	}
+
 	/**
 	 * Parse the given String into a single {@link MediaType}.
-	 *
 	 * @param mediaType the string to parse
 	 * @return the media type
 	 * @throws IllegalArgumentException if the string cannot be parsed
@@ -581,9 +586,8 @@ public class MediaType implements Comparable<MediaType> {
 
 
 	/**
-	 * Parse the given, comma-seperated string into a list of {@link MediaType} objects. <p>This method can be used to
-	 * parse an Accept or Content-Type header.
-	 *
+	 * Parse the given, comma-seperated string into a list of {@link MediaType} objects.
+	 * <p>This method can be used to parse an Accept or Content-Type header.
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
 	 * @throws IllegalArgumentException if the string cannot be parsed
@@ -602,9 +606,7 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Return a string representation of the given list of {@link MediaType} objects.
-	 *
 	 * <p>This method can be used to for an {@code Accept} or {@code Content-Type} header.
-	 *
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
 	 * @throws IllegalArgumentException if the String cannot be parsed
@@ -623,7 +625,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Sorts the given list of {@link MediaType} objects by specificity.
-	 *
 	 * <p>Given two media types:
 	 * <ol>
 	 *   <li>if either media type has a {@linkplain #isWildcardType() wildcard type}, then the media type without the
@@ -639,14 +640,12 @@ public class MediaType implements Comparable<MediaType> {
 	 *   <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
 	 *   media type with the most parameters is ordered before the other.</li>
 	 * </ol>
-	 *
 	 * <p>For example:
 	 * <blockquote>audio/basic &lt; audio/* &lt; *&#047;*</blockquote>
 	 * <blockquote>audio/* &lt; audio/*;q=0.7; audio/*;q=0.3</blockquote>
 	 * <blockquote>audio/basic;level=1 &lt; audio/basic</blockquote>
 	 * <blockquote>audio/basic == text/html</blockquote>
 	 * <blockquote>audio/basic == audio/wave</blockquote>
-	 *
 	 * @param mediaTypes the list of media types to be sorted
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-14.1">HTTP 1.1, section 14.1</a>
 	 */
@@ -659,7 +658,6 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Sorts the given list of {@link MediaType} objects by quality value.
-	 *
 	 * <p>Given two media types:
 	 * <ol>
 	 *   <li>if the two media types have different {@linkplain #getQualityValue() quality value}, then the media type
@@ -675,7 +673,6 @@ public class MediaType implements Comparable<MediaType> {
 	 *   <li>if the two media types have a different amount of {@linkplain #getParameter(String) parameters}, then the
 	 *   media type with the most parameters is ordered before the other.</li>
 	 * </ol>
-	 *
 	 * @param mediaTypes the list of media types to be sorted
 	 * @see #getQualityValue()
 	 */
@@ -685,6 +682,7 @@ public class MediaType implements Comparable<MediaType> {
 			Collections.sort(mediaTypes, QUALITY_VALUE_COMPARATOR);
 		}
 	}
+
 
 	static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new Comparator<MediaType>() {
 
@@ -714,7 +712,8 @@ public class MediaType implements Comparable<MediaType> {
 					int qualityComparison = Double.compare(quality2, quality1);
 					if (qualityComparison != 0) {
 						return qualityComparison;  // audio/*;q=0.7 < audio/*;q=0.3
-					} else {
+					}
+					else {
 						int paramsSize1 = mediaType1.parameters.size();
 						int paramsSize2 = mediaType2.parameters.size();
 						return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
@@ -723,6 +722,7 @@ public class MediaType implements Comparable<MediaType> {
 			}
 		}
 	};
+
 
 	static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = new Comparator<MediaType>() {
 
@@ -751,7 +751,8 @@ public class MediaType implements Comparable<MediaType> {
 				}
 				else if (!mediaType1.getSubtype().equals(mediaType2.getSubtype())) { // audio/basic == audio/wave
 					return 0;
-				} else {
+				}
+				else {
 					int paramsSize1 = mediaType1.parameters.size();
 					int paramsSize2 = mediaType2.parameters.size();
 					return (paramsSize2 < paramsSize1 ? -1 : (paramsSize2 == paramsSize1 ? 0 : 1)); // audio/basic;level=1 < audio/basic
@@ -759,4 +760,5 @@ public class MediaType implements Comparable<MediaType> {
 			}
 		}
 	};
+
 }

@@ -26,7 +26,13 @@ import java.util.Random;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-/** @author Arjen Poutsma */
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.ConversionServiceFactory;
+
+/**
+ * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ */
 public class MediaTypeTests {
 
 	@Test
@@ -480,10 +486,14 @@ public class MediaTypeTests {
 		for (int i = 0; i < result.size(); i++) {
 			assertSame("Invalid media type at " + i, expected.get(i), result.get(i));
 		}
-
 	}
 
-
-
+	@Test
+	public void testWithConversionService() {
+		ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		assertTrue(conversionService.canConvert(String.class, MediaType.class));
+		MediaType mediaType = MediaType.parseMediaType("application/xml");
+		assertEquals(mediaType, conversionService.convert("application/xml", MediaType.class));
+	}
 
 }

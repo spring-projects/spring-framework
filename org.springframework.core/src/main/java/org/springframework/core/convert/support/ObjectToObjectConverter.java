@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,37 +54,27 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
 		Class<?> targetClass = targetType.getObjectType();
-		Object target;
 		Method method = getValueOfMethodOn(targetClass, sourceClass);
-		if (method != null) {
-			ReflectionUtils.makeAccessible(method);
-			target = ReflectionUtils.invokeMethod(method, null, source);
-		}
-		else {
-			Constructor<?> constructor = getConstructor(targetClass, sourceClass);
-			if (constructor != null) {
-				try {
-					target = constructor.newInstance(source);
-				}
-				catch (IllegalArgumentException ex) {
-					throw new ConversionFailedException(sourceType, targetType, source, ex);
-				}
-				catch (InstantiationException ex) {
-					throw new ConversionFailedException(sourceType, targetType, source, ex);
-				}
-				catch (IllegalAccessException ex) {
-					throw new ConversionFailedException(sourceType, targetType, source, ex);
-				}
-				catch (InvocationTargetException ex) {
-					throw new ConversionFailedException(sourceType, targetType, source, ex);
-				}
+		try {
+			if (method != null) {
+				ReflectionUtils.makeAccessible(method);
+				return method.invoke(null, source);
 			}
 			else {
-				throw new IllegalStateException("No static valueOf(" + sourceClass.getName() +
-						") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
+				Constructor<?> constructor = getConstructor(targetClass, sourceClass);
+				if (constructor != null) {
+					return constructor.newInstance(source);
+				}
 			}
 		}
-		return target;
+		catch (InvocationTargetException ex) {
+			throw new ConversionFailedException(sourceType, targetType, source, ex.getTargetException());
+		}
+		catch (Throwable ex) {
+			throw new ConversionFailedException(sourceType, targetType, source, ex);
+		}
+		throw new IllegalStateException("No static valueOf(" + sourceClass.getName() +
+				") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
 	}
 
 
