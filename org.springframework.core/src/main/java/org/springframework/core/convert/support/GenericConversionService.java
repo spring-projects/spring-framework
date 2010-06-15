@@ -172,7 +172,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter == null) {
-			throw new ConverterNotFoundException(sourceType, targetType);
+			if (targetType.getType().isInstance(source)) {
+				logger.debug("No converter found - returning assignable source object as-is");
+				return source;
+			}
+			else {
+				throw new ConverterNotFoundException(sourceType, targetType);
+			}
 		}
 		Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
 		if (logger.isDebugEnabled()) {
