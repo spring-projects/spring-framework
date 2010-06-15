@@ -19,13 +19,18 @@ package org.springframework.core.annotation;
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
+import java.io.Serializable;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.junit.Test;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils.ParameterAnnotation;
 
 /**
  * @author Rod Johnson
@@ -364,7 +369,8 @@ public class AnnotationUtilsTests {
 
 		void foo(String foo, @MyAnnotation("foo") Long bar);
 
-		void bar(@MyAnnotation("first") String first, String second, @MyAnnotation("third") Serializable third);
+		void bar(@MyAnnotation("first") String first, String second,
+				@Transactional @MyAnnotation("third") Serializable third);
 	}
 }
 
