@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -61,9 +62,23 @@ public class PropertiesConversionSpelTests {
 		assertEquals("123", result);
 	}
 
-	@Test // questionable, but this passes with 3.0.2.RELEASE
+	@Test
 	public void mapWithNonStringValue() {
 		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("x", "1");
+		map.put("y", 2);
+		map.put("z", "3");
+		map.put("a", new UUID(1, 1));
+		Expression expression = parser.parseExpression("foo(#props)");
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("props", map);
+		String result = expression.getValue(context, new TestBean(), String.class);
+		assertEquals("1null3", result);
+	}
+
+	@Test
+	public void customMapWithNonStringValue() {
+		CustomMap map = new CustomMap();
 		map.put("x", "1");
 		map.put("y", 2);
 		map.put("z", "3");
@@ -81,6 +96,11 @@ public class PropertiesConversionSpelTests {
 		public String foo(Properties props) {
 			return props.getProperty("x") + props.getProperty("y") + props.getProperty("z");
 		}
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class CustomMap extends HashMap<String, Object> {
 	}
 
 }
