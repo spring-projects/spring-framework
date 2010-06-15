@@ -18,8 +18,10 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.BridgeMethodResolver;
@@ -41,6 +43,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Mark Fisher
+ * @author Oliver Gierke
  * @since 2.0
  * @see java.lang.reflect.Method#getAnnotations()
  * @see java.lang.reflect.Method#getAnnotation(Class)
@@ -373,4 +376,201 @@ public abstract class AnnotationUtils {
 		}
 	}
 
+	/**
+	 * Returns a {@link ParameterAnnotation} instance for the first parameter with the given annotation.
+	 * @param <T>
+	 * @param method the {@link Method} whose parameters shall be inspected
+	 * @param annotationType the annotation typed the parameter shall carry
+	 * @return
+	 */
+	public static <T extends Annotation> ParameterAnnotation<T> getParameterAnnotation(Method method,
+			Class<T> annotationType) {
+
+		List<ParameterAnnotation<T>> annotations = getParameterAnnotations(method, annotationType);
+		return annotations.isEmpty() ? null : annotations.get(0);
+	}
+
+	/**
+	 * Returns all {@link ParameterAnnotation}s for parameters with the given annotation.
+	 * @param <T>
+	 * @param method the {@link Method} whose parameters shall be scanned for annotations
+	 * @param annotationType the annotation type the paramter shall carry
+	 * @return
+	 */
+	public static <T extends Annotation> List<ParameterAnnotation<T>> getParameterAnnotations(Method method,
+			Class<T> annotationType) {
+
+		return getParameterAnnotations(method, new AnnotationTypeFilter<T>(annotationType));
+	}
+
+	/**
+	 * Returns the {@link ParameterAnnotation} for a parameter of the given type that carries an annotation of the given
+	 * type.
+	 * @param <T>
+	 * @param method the {@link Method} that shall be scanned for parameters carrying the annotation
+	 * @param annotationType the annotation type that shall be discovered
+	 * @param parameterType the parameter type that shall be considered
+	 * @return
+	 */
+	public static <T extends Annotation> ParameterAnnotation<T> getParameterAnnotation(Method method,
+			Class<T> annotationType, final Class<?> parameterType) {
+
+		List<ParameterAnnotation<T>> annotations = getParameterAnnotations(method, annotationType, parameterType);
+		return annotations.isEmpty() ? null : annotations.get(0);
+	}
+
+	/**
+	 * Returns all {@link ParameterAnnotation}s for parameters of the given type that carry an annotation of the given
+	 * type.
+	 * @param <T>
+	 * @param method the {@link Method} that shall be scanned for parameters carrying the annotation
+	 * @param annotationType the annotation type that shall be discovered
+	 * @param parameterType the parameter type that shall be considered
+	 * @return
+	 */
+	public static <T extends Annotation> List<ParameterAnnotation<T>> getParameterAnnotations(Method method,
+			Class<T> annotationType, final Class<?> parameterType) {
+
+		return getParameterAnnotations(method, new AnnotationTypeFilter<T>(annotationType) {
+
+			@Override
+			public boolean matches(ParameterAnnotation<?> parameterAnnotation) {
+				return super.matches(parameterAnnotation)
+						&& parameterType.equals(parameterAnnotation.getParameterType());
+			}
+		});
+	}
+
+	/**
+	 * Returns all {@link ParameterAnnotation}s for parameters of the given method that match the given
+	 * {@link ParameterAnnotationFilter}.
+	 * @see ParameterAnnotationFilter
+	 * @param <T>
+	 * @param method the {@link Method} that shall be scanned for annotated parameters
+	 * @param filter a {@link ParameterAnnotationFilter} to apply criterias on the {@link ParameterAnnotation}s to be
+	 * returned
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Annotation> List<ParameterAnnotation<T>> getParameterAnnotations(Method method,
+			ParameterAnnotationFilter filter) {
+
+		List<ParameterAnnotation<T>> result = new ArrayList<ParameterAnnotation<T>>();
+
+		Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+
+		for (int i = 0; i < parameterAnnotations.length; i++) {
+			for (Annotation annotation : parameterAnnotations[i]) {
+
+				ParameterAnnotation<T> parameterAnnotation = new ParameterAnnotation<T>((T) annotation, i,
+						parameterTypes[i]);
+
+				if (filter.matches(parameterAnnotation)) {
+					result.add(parameterAnnotation);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Allows filtering {@link ParameterAnnotation} instances.
+	 * @see AnnotationUtils#getParameterAnnotations(Method, ParameterAnnotationFilter)
+	 */
+	public interface ParameterAnnotationFilter {
+		boolean matches(ParameterAnnotation<?> annotation);
+	}
+
+	/**
+	 * {@link ParameterAnnotationFilter} that matches all {@link ParameterAnnotation}s that have the given annotation
+	 * type.
+	 */
+	public static class AnnotationTypeFilter<T extends Annotation> implements ParameterAnnotationFilter {
+
+		private final Class<T> annotationType;
+
+		public AnnotationTypeFilter(Class<T> annotationType) {
+			this.annotationType = annotationType;
+		}
+
+		public boolean matches(ParameterAnnotation<?> parameterAnnotation) {
+			return annotationType.equals(parameterAnnotation.getAnnotation().annotationType());
+		}
+	}
+
+	/**
+	 * Captures an annotation for a method parameter as well as some meta information about the parameter.
+	 */
+	public static class ParameterAnnotation<T extends Annotation> {
+
+		private final T annotation;
+		private final int parameterIndex;
+		private final Class<?> parameterType;
+
+		ParameterAnnotation(T annotation, int parameterIndex, Class<?> parameterType) {
+			Assert.notNull(annotation);
+			Assert.notNull(parameterType);
+			this.annotation = annotation;
+			this.parameterIndex = parameterIndex;
+			this.parameterType = parameterType;
+		}
+
+		/**
+		 * Returns the annotation bound to the parameter.
+		 * @return the annotation
+		 */
+		public T getAnnotation() {
+			return annotation;
+		}
+
+		/**
+		 * Returns the method parameter index in the list of parameters.
+		 * @return the parameterIndex
+		 */
+		public int getParameterIndex() {
+			return parameterIndex;
+		}
+
+		/**
+		 * Returns the type of the method parameter the annotation is bound to.
+		 * @return the parameterType
+		 */
+		public Class<?> getParameterType() {
+			return parameterType;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			if (!(obj instanceof ParameterAnnotation<?>)) {
+				return false;
+			}
+
+			ParameterAnnotation<?> that = (ParameterAnnotation<?>) obj;
+			return this.annotation.equals(that.annotation) && this.parameterType.equals(that.parameterType)
+					&& this.parameterIndex == that.parameterIndex;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + annotation.hashCode();
+			result = 31 * result + parameterType.hashCode();
+			return 31 * result + (parameterIndex ^ parameterIndex >>> 32);
+		}
+	}
 }

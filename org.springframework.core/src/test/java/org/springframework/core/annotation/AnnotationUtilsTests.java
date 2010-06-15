@@ -204,6 +204,45 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
+	@Test
+	public void testDetectsParameterAnnotation() throws Exception {
+
+		Method method = InterfaceWithAnnotatedMethodParameters.class.getMethod("foo", String.class, Long.class);
+		ParameterAnnotation<MyAnnotation> parameterAnnotation = getParameterAnnotation(method, MyAnnotation.class);
+		assertParameterAnnotationWith(parameterAnnotation, "foo", 1, Long.class);
+
+		List<ParameterAnnotation<MyAnnotation>> parameterAnnotations = getParameterAnnotations(method,
+				MyAnnotation.class);
+		assertNotNull(parameterAnnotations);
+		assertEquals(1, parameterAnnotations.size());
+		assertEquals(parameterAnnotation, parameterAnnotations.get(0));
+	}
+
+	@Test
+	public void testDetectsFirstParameterAnnotationForMultipleOnes() throws Exception {
+
+		Method method = InterfaceWithAnnotatedMethodParameters.class.getMethod("bar", String.class, String.class,
+				Serializable.class);
+		ParameterAnnotation<MyAnnotation> parameterAnnotation = getParameterAnnotation(method, MyAnnotation.class);
+		assertParameterAnnotationWith(parameterAnnotation, "first", 0, String.class);
+
+		List<ParameterAnnotation<MyAnnotation>> parameterAnnotations = getParameterAnnotations(method,
+				MyAnnotation.class);
+		assertNotNull(parameterAnnotations);
+		assertEquals(2, parameterAnnotations.size());
+		assertEquals(parameterAnnotation, parameterAnnotations.get(0));
+		assertParameterAnnotationWith(parameterAnnotations.get(1), "third", 2, Serializable.class);
+	}
+
+	private void assertParameterAnnotationWith(ParameterAnnotation<MyAnnotation> parameterAnnotation, String value,
+			int index, Class<?> parameterType) {
+		assertNotNull(parameterAnnotation);
+		assertEquals(index, parameterAnnotation.getParameterIndex());
+		assertNotNull(parameterAnnotation.getAnnotation());
+		assertEquals(value, parameterAnnotation.getAnnotation().value());
+		assertEquals(parameterType, parameterAnnotation.getParameterType());
+	}
+
 	public static interface AnnotatedInterface {
 
 		@Order(0)
@@ -321,10 +360,23 @@ public class AnnotationUtilsTests {
 		}
 	}
 
+	public static interface InterfaceWithAnnotatedMethodParameters {
+
+		void foo(String foo, @MyAnnotation("foo") Long bar);
+
+		void bar(@MyAnnotation("first") String first, String second, @MyAnnotation("third") Serializable third);
+	}
 }
 
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @interface Transactional {
-	
+
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+@interface MyAnnotation {
+
+	String value() default "";
 }
