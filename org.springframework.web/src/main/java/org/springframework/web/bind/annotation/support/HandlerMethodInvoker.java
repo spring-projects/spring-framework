@@ -862,7 +862,7 @@ public class HandlerMethodInvoker {
 		return value;
 	}
 
-	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest) throws Exception {
+	protected Object resolveStandardArgument(Class<?> parameterType, NativeWebRequest webRequest) throws Exception {
 		if (WebRequest.class.isAssignableFrom(parameterType)) {
 			return webRequest;
 		}

@@ -85,6 +85,7 @@ import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestScope;
+import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
@@ -582,17 +583,28 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		@Override
-		protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest)
+		protected Object resolveStandardArgument(Class<?> parameterType, NativeWebRequest webRequest)
 				throws Exception {
 
 			PortletRequest request = webRequest.getNativeRequest(PortletRequest.class);
 			PortletResponse response = webRequest.getNativeResponse(PortletResponse.class);
 
-			if (PortletRequest.class.isAssignableFrom(parameterType)) {
-				return request;
+			if (PortletRequest.class.isAssignableFrom(parameterType) ||
+					MultipartRequest.class.isAssignableFrom(parameterType)) {
+				Object nativeRequest = webRequest.getNativeRequest(parameterType);
+				if (nativeRequest == null) {
+					throw new IllegalStateException(
+							"Current request is not of type [" + parameterType.getName() + "]: " + request);
+				}
+				return nativeRequest;
 			}
 			else if (PortletResponse.class.isAssignableFrom(parameterType)) {
-				return response;
+				Object nativeResponse = webRequest.getNativeResponse(parameterType);
+				if (nativeResponse == null) {
+					throw new IllegalStateException(
+							"Current response is not of type [" + parameterType.getName() + "]: " + response);
+				}
+				return nativeResponse;
 			}
 			else if (PortletSession.class.isAssignableFrom(parameterType)) {
 				return request.getPortletSession();
