@@ -3,6 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.4 (2010-07-15)
+-------------------------------------
+
+* OSGi manifest version range accepts EHCache 2.x as well
+* Jaxb2Marshaller's "marshallerProperties" Map accepts any value type
+* DispatcherServlet applies view name translation to error views as well
+* @MVC handler methods reliably resolve MultipartRequest arguments with HiddenHttpMethodFilter
+* @CookieValue returns decoded cookie value in a Servlet environment (analogous to @RequestParam)
+* mvc:annotation-driven reliably detects JSR-303 and JAXB2 in an OSGi environment as well
+
+
 Changes in version 3.0.3 (2010-06-15)
 -------------------------------------
 
