@@ -103,6 +103,7 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -770,16 +771,27 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@Override
-		protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest) throws Exception {
+		protected Object resolveStandardArgument(Class<?> parameterType, NativeWebRequest webRequest) throws Exception {
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 
-			if (ServletRequest.class.isAssignableFrom(parameterType)) {
-				return request;
+			if (ServletRequest.class.isAssignableFrom(parameterType) ||
+					MultipartRequest.class.isAssignableFrom(parameterType)) {
+				Object nativeRequest = webRequest.getNativeRequest(parameterType);
+				if (nativeRequest == null) {
+					throw new IllegalStateException(
+							"Current request is not of type [" + parameterType.getName() + "]: " + request);
+				}
+				return nativeRequest;
 			}
 			else if (ServletResponse.class.isAssignableFrom(parameterType)) {
 				this.responseArgumentUsed = true;
-				return response;
+				Object nativeResponse = webRequest.getNativeResponse(parameterType);
+				if (nativeResponse == null) {
+					throw new IllegalStateException(
+							"Current response is not of type [" + parameterType.getName() + "]: " + response);
+				}
+				return nativeResponse;
 			}
 			else if (HttpSession.class.isAssignableFrom(parameterType)) {
 				return request.getSession();
