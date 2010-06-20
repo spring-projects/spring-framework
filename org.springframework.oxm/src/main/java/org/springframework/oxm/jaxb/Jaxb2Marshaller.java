@@ -16,7 +16,7 @@
 
 package org.springframework.oxm.jaxb;
 
-import java.awt.Image;
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,9 +132,9 @@ public class Jaxb2Marshaller
 
 	private Map<String, ?> jaxbContextProperties;
 
-	private Map<String, Object> marshallerProperties;
+	private Map<String, ?> marshallerProperties;
 
-	private Map<String, Object> unmarshallerProperties;
+	private Map<String, ?> unmarshallerProperties;
 
 	private Marshaller.Listener marshallerListener;
 
@@ -158,20 +158,6 @@ public class Jaxb2Marshaller
 
 	private boolean lazyInit = false;
 
-	/**
-	 * Returns the JAXB context path.
-	 */
-	public String getContextPath() {
-		return contextPath;
-	}
-
-	/**
-	 * Set a JAXB context path.
-	 */
-	public void setContextPath(String contextPath) {
-		Assert.hasText(contextPath, "'contextPath' must not be null");
-		this.contextPath = contextPath;
-	}
 
 	/**
 	 * Set multiple JAXB context paths. The given array of context paths is converted to a
@@ -183,10 +169,18 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Returns the list of Java classes to be recognized by a newly created JAXBContext.
+	 * Set a JAXB context path.
 	 */
-	public Class<?>[] getClassesToBeBound() {
-		return classesToBeBound;
+	public void setContextPath(String contextPath) {
+		Assert.hasText(contextPath, "'contextPath' must not be null");
+		this.contextPath = contextPath;
+	}
+
+	/**
+	 * Return the JAXB context path.
+	 */
+	public String getContextPath() {
+		return this.contextPath;
 	}
 
 	/**
@@ -196,6 +190,13 @@ public class Jaxb2Marshaller
 	public void setClassesToBeBound(Class<?>... classesToBeBound) {
 		Assert.notEmpty(classesToBeBound, "'classesToBeBound' must not be empty");
 		this.classesToBeBound = classesToBeBound;
+	}
+
+	/**
+	 * Return the list of Java classes to be recognized by a newly created JAXBContext.
+	 */
+	public Class<?>[] getClassesToBeBound() {
+		return this.classesToBeBound;
 	}
 
 	/**
@@ -216,7 +217,7 @@ public class Jaxb2Marshaller
 	 * @see javax.xml.bind.Marshaller#JAXB_NO_NAMESPACE_SCHEMA_LOCATION
 	 * @see javax.xml.bind.Marshaller#JAXB_SCHEMA_LOCATION
 	 */
-	public void setMarshallerProperties(Map<String, Object> properties) {
+	public void setMarshallerProperties(Map<String, ?> properties) {
 		this.marshallerProperties = properties;
 	}
 
@@ -226,7 +227,7 @@ public class Jaxb2Marshaller
 	 * @param properties the properties
 	 * @see javax.xml.bind.Unmarshaller#setProperty(String,Object)
 	 */
-	public void setUnmarshallerProperties(Map<String, Object> properties) {
+	public void setUnmarshallerProperties(Map<String, ?> properties) {
 		this.unmarshallerProperties = properties;
 	}
 
@@ -293,15 +294,12 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Set whether to lazily initialize the {@link JAXBContext} for this marshaller.
-	 * Default is {@code false} to initialize on startup; can be switched to
-	 * {@code true}.
-	 * <p>Early initialization just applies if <code>afterPropertiesSet()</code> is called.
-	 * @see #afterPropertiesSet()
+	 * Default is {@code false} to initialize on startup; can be switched to {@code true}.
+	 * <p>Early initialization just applies if {@link #afterPropertiesSet()} is called.
 	 */
 	public void setLazyInit(boolean lazyInit) {
 		this.lazyInit = lazyInit;
 	}
-
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
@@ -315,7 +313,7 @@ public class Jaxb2Marshaller
 		else if (!StringUtils.hasLength(getContextPath()) && ObjectUtils.isEmpty(getClassesToBeBound())) {
 			throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' is required");
 		}
-		if (!lazyInit) {
+		if (!this.lazyInit) {
 			getJaxbContext();
 		}
 		if (!ObjectUtils.isEmpty(this.schemaResources)) {
@@ -407,16 +405,16 @@ public class Jaxb2Marshaller
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
 					Class<?> classArgument = (Class<?>) typeArgument;
-					if (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument)) {
-						return true;
-					}
-					return supportsInternal(classArgument, false);
-				} else if (typeArgument instanceof GenericArrayType) {
+					return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
+							supportsInternal(classArgument, false));
+				}
+				else if (typeArgument instanceof GenericArrayType) {
 					GenericArrayType arrayType = (GenericArrayType) typeArgument;
 					return arrayType.getGenericComponentType().equals(Byte.TYPE);
 				}
 			}
-		} else if (genericType instanceof Class) {
+		}
+		else if (genericType instanceof Class) {
 			Class<?> clazz = (Class<?>) genericType;
 			return supportsInternal(clazz, true);
 		}
@@ -445,12 +443,11 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Checks whether the given type is a primitive wrapper type.
-	 *
-	 * @see section 8.5.1 of the JAXB2 spec
+	 * Compare section 8.5.1 of the JAXB2 spec.
 	 */
 	private boolean isPrimitiveWrapper(Class<?> clazz) {
 		return Boolean.class.equals(clazz) ||
-			Byte.class.equals(clazz) ||
+				Byte.class.equals(clazz) ||
 				Short.class.equals(clazz) ||
 				Integer.class.equals(clazz) ||
 				Long.class.equals(clazz) ||
@@ -460,8 +457,7 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Checks whether the given type is a standard class.
-
-	 * @see section 8.5.2 of the JAXB2 spec
+	 * Compare section 8.5.2 of the JAXB2 spec.
 	 */
 	private boolean isStandardClass(Class<?> clazz) {
 		return String.class.equals(clazz) ||
@@ -673,6 +669,7 @@ public class Jaxb2Marshaller
 		}
 	}
 
+
 	private static class Jaxb2AttachmentMarshaller extends AttachmentMarshaller {
 
 		private final MimeContainer mimeContainer;
@@ -806,4 +803,3 @@ public class Jaxb2Marshaller
 	}
 
 }
-
