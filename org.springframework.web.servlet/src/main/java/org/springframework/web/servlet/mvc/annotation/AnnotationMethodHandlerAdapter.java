@@ -748,7 +748,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				return cookieValue;
 			}
 			else if (cookieValue != null) {
-				return cookieValue.getValue();
+				return urlPathHelper.decodeRequestString(servletRequest, cookieValue.getValue());
 			}
 			else {
 				return null;
