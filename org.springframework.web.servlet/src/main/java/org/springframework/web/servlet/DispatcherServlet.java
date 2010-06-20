@@ -996,12 +996,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return a corresponding ModelAndView to forward to
 	 * @throws Exception if no error ModelAndView found
 	 */
-	protected ModelAndView processHandlerException(HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler,
-			Exception ex) throws Exception {
+	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
+			Object handler, Exception ex) throws Exception {
 
-		// Check registerer HandlerExceptionResolvers...
+		// Check registered HandlerExceptionResolvers...
 		ModelAndView exMv = null;
 		for (HandlerExceptionResolver handlerExceptionResolver : this.handlerExceptionResolvers) {
 			exMv = handlerExceptionResolver.resolveException(request, response, handler, ex);
@@ -1013,9 +1011,12 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (exMv.isEmpty()) {
 				return null;
 			}
+			// We might still need view name translation for a plain error model...
+			if (!exMv.hasView()) {
+				exMv.setViewName(getDefaultViewName(request));
+			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv,
-						ex);
+				logger.debug("Handler execution resulted in exception - forwarding to resolved error view: " + exMv, ex);
 			}
 			WebUtils.exposeErrorRequestAttributes(request, ex, getServletName());
 			return exMv;
