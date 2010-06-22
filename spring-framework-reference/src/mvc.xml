@@ -1092,7 +1092,7 @@ public class RelativePathUriTemplateController {
         <example>
           <title>Invalid ordering of BindingResult and @ModelAttribute</title>
 
-          <programlisting lang="java">@RequestMapping(method = RequestMethod.POST)
+          <programlisting language="java">@RequestMapping(method = RequestMethod.POST)
 public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>,
     Model model, <emphasis role="bold">BindingResult result</emphasis>) { … }</programlisting>
 
@@ -1101,7 +1101,7 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
           <interfacename>BindingResult</interfacename>. To get this working
           you have to reorder the parameters as follows:</para>
 
-          <programlisting lang="java">@RequestMapping(method = RequestMethod.POST)
+          <programlisting language="java">@RequestMapping(method = RequestMethod.POST)
 public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>,
     <emphasis role="bold">BindingResult result</emphasis>, Model model) { … }</programlisting>
         </example>
