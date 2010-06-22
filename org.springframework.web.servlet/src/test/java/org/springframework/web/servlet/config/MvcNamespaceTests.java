@@ -16,15 +16,21 @@
 
 package org.springframework.web.servlet.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Date;
 import java.util.Locale;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;
@@ -46,14 +52,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
+import org.springframework.web.servlet.resources.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
 /**
@@ -195,6 +204,34 @@ public class MvcNamespaceTests {
 		assertEquals(5, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
 
+	}
+	
+	@Test
+	public void testResources() throws Exception {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
+		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-resources.xml", getClass()));
+		assertEquals(2, appContext.getBeanDefinitionCount());
+		appContext.refresh();
+
+		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
+		assertNotNull(adapter);
+
+		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		assertNotNull(mapping);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/resources/foo.css");
+		request.setMethod("GET");
+		
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertTrue(chain.getHandler() instanceof ResourceHttpRequestHandler);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		for (HandlerInterceptor interceptor : chain.getInterceptors()) {
+			interceptor.preHandle(request, response, chain.getHandler());
+		}
+		ModelAndView mv = adapter.handle(request, response, chain.getHandler());
+		assertNull(mv);
 	}
 
 	@Test
