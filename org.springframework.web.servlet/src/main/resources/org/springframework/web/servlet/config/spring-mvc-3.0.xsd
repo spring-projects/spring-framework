@@ -49,6 +49,16 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="resources">
+		<xsd:annotation>
+			<xsd:documentation
+				source="java:org.springframework.web.servlet.resources.ResourceHttpRequestHandler"><![CDATA[
+	Configures support for efficiently serving static resources such as images, js, and, css files.
+	By default, registers a handler mapped to /resources/** capable of serving all resources located in the ${webappRoot}/resources directory. 
+			]]></xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+
 	<xsd:element name="interceptors">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
