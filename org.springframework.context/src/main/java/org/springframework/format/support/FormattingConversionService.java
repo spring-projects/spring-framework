@@ -234,8 +234,9 @@ public class FormattingConversionService extends GenericConversionService
 			Object result;
 			try {
 				result = this.parser.parse(text, LocaleContextHolder.getLocale());
-			} catch (ParseException e) {
-				throw new IllegalArgumentException("Unable to parse '" + text + "'", e);
+			}
+			catch (ParseException ex) {
+				throw new IllegalArgumentException("Unable to parse '" + text + "'", ex);
 			}
 			TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
 			if (!resultType.isAssignableTo(targetType)) {
