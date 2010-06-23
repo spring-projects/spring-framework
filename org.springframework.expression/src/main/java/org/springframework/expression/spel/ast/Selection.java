@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents selection over a map or collection. For example: {1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'} returns
- * [2, 4, 6, 8, 10]
- * 
- * Basically a subset of the input data is returned based on the evaluation of the expression supplied as selection
- * criteria.
- * 
+ * Represents selection over a map or collection.
+ * For example: {1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'} returns [2, 4, 6, 8, 10]
+ *
+ * <p>Basically a subset of the input data is returned based on the
+ * evaluation of the expression supplied as selection criteria.
+ *
  * @author Andy Clement
  * @author Mark Fisher
  * @since 3.0
@@ -112,13 +112,13 @@ public class Selection extends SpelNodeImpl {
 			int idx = 0;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType())));
+					state.pushActiveContextObject(new TypedValue(element, op.getTypeDescriptor().getElementTypeDescriptor()));
 					state.enterScope("index", idx);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST) {
-								return new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
+								return new TypedValue(element, op.getTypeDescriptor().getElementTypeDescriptor());
 							}
 							result.add(element);
 						}
@@ -136,7 +136,7 @@ public class Selection extends SpelNodeImpl {
 				return TypedValue.NULL;
 			}
 			if (variant == LAST) {
-				return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
+				return new TypedValue(result.get(result.size() - 1), op.getTypeDescriptor().getElementTypeDescriptor());
 			}
 			if (operand instanceof Collection) {
 				return new TypedValue(result,op.getTypeDescriptor());
