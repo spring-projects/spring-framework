@@ -117,4 +117,13 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 		return anns;
 	}
 
+	public TypeDescriptor forElementType(Class<?> elementType) {
+		if (elementType == null) {
+			return TypeDescriptor.UNKNOWN;
+		}
+		else {
+			return new PropertyTypeDescriptor(this.propertyDescriptor, getMethodParameter(), elementType);
+		}
+	}
+
 }

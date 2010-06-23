@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,6 @@
  */
 
 package org.springframework.core.convert.support;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -39,7 +33,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -509,7 +505,7 @@ public class DefaultConversionTests {
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
-		List<Integer> bar = (List<Integer>) conversionService.convert(foo, TypeDescriptor.valueOf(LinkedHashSet.class),
+		List<Integer> bar = (List<Integer>) conversionService.convert(foo, TypeDescriptor.forObject(foo),
 				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(new Integer(1), bar.get(0));
 		assertEquals(new Integer(2), bar.get(1));
@@ -544,7 +540,7 @@ public class DefaultConversionTests {
 		map.put("3", "3");
 		Collection values = map.values();
 		List<Integer> bar = (List<Integer>) conversionService.convert(values,
-				TypeDescriptor.valueOf(values.getClass()), new TypeDescriptor(getClass().getField("genericList")));
+				TypeDescriptor.forObject(values), new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(3, bar.size());
 		assertEquals(new Integer(1), bar.get(0));
 		assertEquals(new Integer(2), bar.get(1));
@@ -558,8 +554,8 @@ public class DefaultConversionTests {
 		Map<String, String> foo = new HashMap<String, String>();
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
-		Map<String, FooEnum> map = (Map<String, FooEnum>) conversionService.convert(foo, TypeDescriptor
-				.valueOf(Map.class), new TypeDescriptor(getClass().getField("genericMap")));
+		Map<String, FooEnum> map = (Map<String, FooEnum>) conversionService.convert(foo,
+				TypeDescriptor.forObject(foo), new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(FooEnum.BAR, map.get(1));
 		assertEquals(FooEnum.BAZ, map.get(2));
 	}
