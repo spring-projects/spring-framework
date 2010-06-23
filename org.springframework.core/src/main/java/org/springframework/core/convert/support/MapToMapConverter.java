@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,13 +59,20 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Map<?, ?> sourceMap = (Map<?, ?>) source;
+		if (sourceMap.isEmpty()) {
+			return sourceMap;
+		}
 		Map targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
 		for (Object entry : sourceMap.entrySet()) {
 			Map.Entry sourceMapEntry = (Map.Entry) entry;
 			Object sourceKey = sourceMapEntry.getKey();
 			Object sourceValue = sourceMapEntry.getValue();
-			Object targetKey = this.conversionService.convert(sourceKey, sourceType.getMapKeyTypeDescriptor(sourceKey), targetType.getMapKeyTypeDescriptor(sourceKey));
-			Object targetValue = this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor(sourceValue), targetType.getMapValueTypeDescriptor(sourceValue));
+			Object targetKey = this.conversionService.convert(sourceKey,
+					sourceType.getMapKeyTypeDescriptor(sourceKey),
+					targetType.getMapKeyTypeDescriptor(sourceKey));
+			Object targetValue = this.conversionService.convert(sourceValue,
+					sourceType.getMapValueTypeDescriptor(sourceValue),
+					targetType.getMapValueTypeDescriptor(sourceValue));
 			targetMap.put(targetKey, targetValue);
 		}
 		return targetMap;

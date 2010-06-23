@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -226,6 +227,57 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testListOfList() {
+		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		List<List<String>> list = Collections.singletonList(Collections.singletonList("Foo"));
+		assertNotNull(service.convert(list, String.class));
+	}
+
+	@Test
+	public void testEmptyList() {
+		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		List list = Collections.emptyList();
+		List result = service.convert(list, List.class);
+		assertSame(list, result);
+		result = service.convert(list, list.getClass());
+		assertSame(list, result);
+	}
+
+	@Test
+	public void testEmptyMap() {
+		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		Map map = Collections.emptyMap();
+		Map result = service.convert(map, Map.class);
+		assertSame(map, result);
+		result = service.convert(map, map.getClass());
+		assertSame(map, result);
+	}
+
+	@Test
+	public void testStringToString() {
+		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		String value = "myValue";
+		String result = service.convert(value, String.class);
+		assertSame(value, result);
+	}
+
+	@Test
+	public void testStringToObject() {
+		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		String value = "myValue";
+		Object result = service.convert(value, Object.class);
+		assertSame(value, result);
+	}
+
+	@Test
+	public void testIgnoreCopyConstructor() {
+		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		WithCopyConstructor value = new WithCopyConstructor();
+		Object result = service.convert(value, WithCopyConstructor.class);
+		assertSame(value, result);
+	}
+
+	@Test
 	public void testPerformance1() {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 		StopWatch watch = new StopWatch("integer->string conversionPerformance");
@@ -296,6 +348,7 @@ public class GenericConversionServiceTests {
 	
 	public static Map<String, Integer> map;
 
+
 	private interface MyBaseInterface {
 
 	}
@@ -315,6 +368,16 @@ public class GenericConversionServiceTests {
 
 		public String convert(MyBaseInterface source) {
 			return "RESULT";
+		}
+	}
+
+
+	public static class WithCopyConstructor {
+
+		public WithCopyConstructor() {
+		}
+
+		public WithCopyConstructor(WithCopyConstructor value) {
 		}
 	}
 
