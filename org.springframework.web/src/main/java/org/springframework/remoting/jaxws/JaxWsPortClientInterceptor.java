@@ -43,8 +43,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link org.aopalliance.intercept.MethodInterceptor}  for accessing a
- * specific port of a JAX-WS service.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a specific
+ * port of a JAX-WS service. Compatible with JAX-WS 2.0, 2.1 and 2.2.
  *
  * <p>Uses either {@link LocalJaxWsServiceFactory}'s facilities underneath,
  * or takes an explicit reference to an existing JAX-WS Service instance
@@ -515,7 +515,6 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 				throw new IllegalArgumentException("Unknown WebServiceFeature specification type: " + feature.getClass());
 			}
 		}
-
 	}
 
 }
