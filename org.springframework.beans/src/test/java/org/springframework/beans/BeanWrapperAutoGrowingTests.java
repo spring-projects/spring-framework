@@ -1,15 +1,32 @@
+/*
+ * Copyright 2002-2010 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.beans;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
+import java.util.Map;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Keith Donald
+ * @author Juergen Hoeller
+ */
 public class BeanWrapperAutoGrowingTests {
 
 	Bean bean = new Bean();
@@ -112,6 +129,20 @@ public class BeanWrapperAutoGrowingTests {
 		wrapper.getPropertyValue("listNotParameterized[0]");
 	}
 
+	@Test
+	public void getPropertyValueAutoGrowMap() {
+		assertNotNull(wrapper.getPropertyValue("map[A]"));
+		assertEquals(1, bean.getMap().size());
+		assertTrue(bean.getMap().get("A") instanceof Bean);
+	}
+
+	@Test
+	public void setPropertyValueAutoGrowMap() {
+		wrapper.setPropertyValue("map[A].prop", "test");
+		assertEquals("test", bean.getMap().get("A").getProp());
+	}
+
+
 	public static class Bean {
 
 		private String prop;
@@ -129,6 +160,8 @@ public class BeanWrapperAutoGrowingTests {
 		private List<List<Bean>> multiList;
 
 		private List listNotParameterized;
+
+		private Map<String, Bean> map;
 
 		public String getProp() {
 			return prop;
@@ -182,8 +215,7 @@ public class BeanWrapperAutoGrowingTests {
 			return nestedNoConstructor;
 		}
 
-		public void setNestedNoConstructor(
-				NestedNoDefaultConstructor nestedNoConstructor) {
+		public void setNestedNoConstructor(NestedNoDefaultConstructor nestedNoConstructor) {
 			this.nestedNoConstructor = nestedNoConstructor;
 		}
 
@@ -195,11 +227,20 @@ public class BeanWrapperAutoGrowingTests {
 			this.listNotParameterized = listNotParameterized;
 		}
 
-	}
+		public Map<String, Bean> getMap() {
+			return map;
+		}
 
-	public static class NestedNoDefaultConstructor {
-		private NestedNoDefaultConstructor() {
-
+		public void setMap(Map<String, Bean> map) {
+			this.map = map;
 		}
 	}
+
+
+	public static class NestedNoDefaultConstructor {
+
+		private NestedNoDefaultConstructor() {
+		}
+	}
+
 }
