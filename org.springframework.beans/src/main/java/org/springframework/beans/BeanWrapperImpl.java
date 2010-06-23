@@ -596,7 +596,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 	
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
-		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(tokens.actualName);		
+		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(tokens.actualName);
 		Object defaultValue = newValue(pd.getPropertyType(), tokens.canonicalName);
 		return new PropertyValue(tokens.canonicalName, defaultValue);
 	}
@@ -615,13 +615,14 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					return Array.newInstance(componentType, 0);
 				}
 			}
+			else if (Collection.class.isAssignableFrom(type)) {
+				return CollectionFactory.createCollection(type, 16);
+			}
+			else if (Map.class.isAssignableFrom(type)) {
+				return CollectionFactory.createMap(type, 16);
+			}
 			else {
-				if (Collection.class.isAssignableFrom(type)) {
-					return CollectionFactory.createCollection(type, 16);
-				}
-				else {
-					return type.newInstance();
-				}
+				return type.newInstance();
 			}
 		}
 		catch (Exception ex) {
@@ -791,6 +792,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType);
 						// Pass full property name and old value in here, since we want full
 						// conversion ability for map values.
+						growMapIfNecessary(map, convertedMapKey, indexedPropertyName, pd, i + 1);
 						value = map.get(convertedMapKey);
 					}
 					else {
@@ -844,7 +846,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			return array;
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void growCollectionIfNecessary(
 			Collection collection, int index, String name, PropertyDescriptor pd, int nestingLevel) {
@@ -861,7 +863,22 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 		}
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	private void growMapIfNecessary(
+			Map map, Object key, String name, PropertyDescriptor pd, int nestingLevel) {
+
+		if (!this.autoGrowNestedPaths) {
+			return;
+		}
+		if (!map.containsKey(key)) {
+			Class valueType = GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod(), nestingLevel);
+			if (valueType != null) {
+				map.put(key, newValue(valueType, name));
+			}
+		}
+	}
+
 	@Override
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
 		BeanWrapperImpl nestedBw;
