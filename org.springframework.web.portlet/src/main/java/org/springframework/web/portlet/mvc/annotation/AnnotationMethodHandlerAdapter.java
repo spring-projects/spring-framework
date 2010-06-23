@@ -48,6 +48,7 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+import javax.portlet.StateAwareResponse;
 import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
 import javax.servlet.http.Cookie;
@@ -346,6 +347,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		return invokeHandlerMethod(request, response, handler, implicitModel);
 	}
 
+	@SuppressWarnings("unchecked")
 	private ModelAndView invokeHandlerMethod(
 			PortletRequest request, PortletResponse response, Object handler, ExtendedModelMap implicitModel)
 			throws Exception {
@@ -362,11 +364,21 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);
 
 		// Expose implicit model for subsequent render phase.
-		if (response instanceof ActionResponse && !implicitModel.isEmpty()) {
-			ActionResponse actionResponse = (ActionResponse) response;
+		if (response instanceof StateAwareResponse && !implicitModel.isEmpty()) {
+			StateAwareResponse stateResponse = (StateAwareResponse) response;
+			Map<?, ?> modelToStore = implicitModel;
 			try {
-				actionResponse.setRenderParameter(IMPLICIT_MODEL_RENDER_PARAMETER, Boolean.TRUE.toString());
-				request.getPortletSession().setAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE, implicitModel);
+				stateResponse.setRenderParameter(IMPLICIT_MODEL_RENDER_PARAMETER, Boolean.TRUE.toString());
+				if (response instanceof EventResponse) {
+					// Update the existing model, if any, when responding to an event -
+					// whereas we're replacing the model in case of an action response.
+					Map existingModel = (Map) request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+					if (existingModel != null) {
+						existingModel.putAll(implicitModel);
+						modelToStore = existingModel;
+					}
+				}
+				request.getPortletSession().setAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE, modelToStore);
 			}
 			catch (IllegalStateException ex) {
 				// Probably sendRedirect called... no need to expose model to render phase.
