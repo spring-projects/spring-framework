@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,8 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 			if (i > 0) {
 				string.append(DELIMITER);
 			}
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType);
+			Object targetElement = this.conversionService.convert(
+					sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType);
 			string.append(targetElement);
 			i++;
 		}

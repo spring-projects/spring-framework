@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,14 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
+		if (sourceCollection.isEmpty()) {
+			return sourceCollection;
+		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor(sourceElement));
+			Object targetElement = this.conversionService.convert(sourceElement,
+					sourceType.getElementTypeDescriptor(sourceElement),
+					targetType.getElementTypeDescriptor(sourceElement));
 			target.add(targetElement);
 		}
 		return target;

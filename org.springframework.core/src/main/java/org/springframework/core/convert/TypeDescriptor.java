@@ -39,8 +39,11 @@ import org.springframework.util.ObjectUtils;
  */
 public class TypeDescriptor {
 
-	/** Constant defining an 'unknown type' TypeDescriptor */
+	/** Constant defining a TypeDescriptor for a <code>null</code> value */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
+
+	/** Constant defining a TypeDescriptor for 'unknown type' */
+	public static final TypeDescriptor UNKNOWN = new TypeDescriptor(Object.class);
 
 	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
 
@@ -140,7 +143,7 @@ public class TypeDescriptor {
 	 * Create a new descriptor for the type of the given value.
 	 * <p>Use this constructor when a conversion point comes from a source such as a Map or
 	 * Collection, where no additional context is available but elements can be introspected.
-	 * @param type the actual type to wrap
+	 * @param value the value to determine the actual type from
 	 */
 	private TypeDescriptor(Object value) {
 		Assert.notNull(value, "Value must not be null");
@@ -263,7 +266,7 @@ public class TypeDescriptor {
 	 */
 	public TypeDescriptor getElementTypeDescriptor(Object element) {
 		TypeDescriptor elementType = getElementTypeDescriptor();
-		return (elementType != TypeDescriptor.NULL ? elementType : forObject(element));
+		return (elementType != TypeDescriptor.UNKNOWN ? elementType : forObject(element));
 	}
 
 	/**
@@ -306,7 +309,7 @@ public class TypeDescriptor {
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor(Object key) {
 		TypeDescriptor keyType = getMapKeyTypeDescriptor();
-		return keyType != TypeDescriptor.NULL ? keyType : TypeDescriptor.forObject(key);
+		return (keyType != TypeDescriptor.UNKNOWN ? keyType : TypeDescriptor.forObject(key));
 	}
 
 	/**
@@ -335,7 +338,7 @@ public class TypeDescriptor {
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor(Object value) {
 		TypeDescriptor valueType = getMapValueTypeDescriptor();
-		return (valueType != TypeDescriptor.NULL ? valueType : TypeDescriptor.forObject(value));
+		return (valueType != TypeDescriptor.UNKNOWN ? valueType : TypeDescriptor.forObject(value));
 	}
 
 	/**
@@ -390,11 +393,8 @@ public class TypeDescriptor {
 	 * @return the type descriptor
 	 */
 	public TypeDescriptor forElementType(Class<?> elementType) {
-		if (getType().equals(elementType)) {
-			return this;
-		}
-		else if (elementType == null) {
-			return TypeDescriptor.NULL;
+		if (elementType == null) {
+			return TypeDescriptor.UNKNOWN;
 		}
 		else if (this.methodParameter != null) {
 			return new TypeDescriptor(this.methodParameter, elementType);
@@ -408,21 +408,21 @@ public class TypeDescriptor {
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof TypeDescriptor)) {
-			return false;
-		}
-		TypeDescriptor td = (TypeDescriptor) obj;
-		if (this == td) {
+		if (this == obj) {
 			return true;
 		}
+		if (!(obj instanceof TypeDescriptor) || obj == TypeDescriptor.NULL) {
+			return false;
+		}
+		TypeDescriptor other = (TypeDescriptor) obj;
 		boolean annotatedTypeEquals =
-				getType().equals(td.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), td.getAnnotations());
+				getType().equals(other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
 		if (isCollection()) {
-			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(), td.getElementType());
+			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(), other.getElementType());
 		}
 		else if (isMap()) {
-			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(), td.getMapKeyType()) &&
-					ObjectUtils.nullSafeEquals(getMapValueType(), td.getMapValueType());
+			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(), other.getMapKeyType()) &&
+					ObjectUtils.nullSafeEquals(getMapValueType(), other.getMapValueType());
 		}
 		else {
 			return annotatedTypeEquals;
@@ -430,7 +430,7 @@ public class TypeDescriptor {
 	}
 
 	public int hashCode() {
-		return getType().hashCode();
+		return (this == TypeDescriptor.NULL ? 0 : getType().hashCode());
 	}
 
 	/**

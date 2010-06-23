@@ -244,7 +244,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			if (logger.isTraceEnabled()) {
 				logger.trace("Matched cached converter " + converter);
 			}
-			return converter != NO_MATCH ? converter : null; 
+			return (converter != NO_MATCH ? converter : null);
 		}
 		else {
 			converter = findConverterForClassPair(sourceType, targetType);
@@ -394,6 +394,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	private GenericConverter getMatchingConverterForTarget(TypeDescriptor sourceType, TypeDescriptor targetType,
 			Map<Class<?>, MatchableConverters> converters) {
+
 		Class<?> targetObjectType = targetType.getObjectType();
 		if (targetObjectType.isInterface()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();

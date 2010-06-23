@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.core.convert.ConversionFailedException;
@@ -41,15 +40,6 @@ abstract class ConversionUtils {
 		}
 	}
 
-	public static TypeDescriptor getElementType(Collection<?> collection) {
-		for (Object element : collection) {
-			if (element != null) {
-				return TypeDescriptor.valueOf(element.getClass());
-			}
-		}
-		return TypeDescriptor.NULL;
-	}
-	
 	public static TypeDescriptor[] getMapEntryTypes(Map<?, ?> sourceMap) {
 		Class<?> keyType = null;
 		Class<?> valueType = null;
