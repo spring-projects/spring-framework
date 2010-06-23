@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.transaction.jta.SimpleTransactionFactory;
 import org.springframework.transaction.jta.TransactionFactory;
 
 /**
- * Abstract base implementation of the JCA 1.5
+ * Abstract base implementation of the JCA 1.5/1.6
  * {@link javax.resource.spi.endpoint.MessageEndpointFactory} interface,
  * providing transaction management capabilities as well as ClassLoader
  * exposure for endpoint invocations.
@@ -128,10 +128,22 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	}
 
 	/**
-	 * This implementation delegates to {@link #createEndpointInternal()},
+	 * The standard JCA 1.5 version of <code>createEndpoint</code>.
+	 * <p>This implementation delegates to {@link #createEndpointInternal()},
 	 * initializing the endpoint's XAResource before the endpoint gets invoked.
 	 */
 	public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
+		AbstractMessageEndpoint endpoint = createEndpointInternal();
+		endpoint.initXAResource(xaResource);
+		return endpoint;
+	}
+
+	/**
+	 * The alternative JCA 1.6 version of <code>createEndpoint</code>.
+	 * <p>This implementation delegates to {@link #createEndpointInternal()},
+	 * ignoring the specified timeout. It is only here for JCA 1.6 compliance.
+	 */
+	public MessageEndpoint createEndpoint(XAResource xaResource, long timeout) throws UnavailableException {
 		AbstractMessageEndpoint endpoint = createEndpointInternal();
 		endpoint.initXAResource(xaResource);
 		return endpoint;
