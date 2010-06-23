@@ -6,12 +6,22 @@ http://www.springsource.org
 Changes in version 3.0.4 (2010-07-15)
 -------------------------------------
 
+* support for Hibernate Validator 4.1 and EclipseLink 2.1
 * OSGi manifest version range accepts EHCache 2.x as well
+* ConversionService is able to deal with empty collections and nested collections (fixed regression)
+* ConversionService properly handles nested Resource arrays in Map values (fixed regression)
+* ConversionService does not accidentally use copy constructor for same type 
+* BeanWrapper/DataBinder's "autoGrowNestedPaths" works for Maps as well
 * Jaxb2Marshaller's "marshallerProperties" Map accepts any value type
-* DispatcherServlet applies view name translation to error views as well
+* Spring's MessageEndpointFactory classes are now JCA 1.6 compliant as well
+* AbstractJaxWsServiceExporter supports "bindingType" bean property, overriding @BindingType
+* AbstractJaxWsServiceExporter supports "webServiceFeatures" bean property on JAX-WS 2.2
+* added "validationMessageSource" property to LocalValidatorFactoryBean, for Spring-based messages
+* DispatcherServlet applies default view name translation to error views as well
+* mvc:annotation-driven reliably detects JSR-303 and JAXB2 in an OSGi environment as well
 * @MVC handler methods reliably resolve MultipartRequest arguments with HiddenHttpMethodFilter
 * @CookieValue returns decoded cookie value in a Servlet environment (analogous to @RequestParam)
-* mvc:annotation-driven reliably detects JSR-303 and JAXB2 in an OSGi environment as well
+* Portlet @MVC's implicit render model will be updated at the end of the event phase
 
 
 Changes in version 3.0.3 (2010-06-15)
