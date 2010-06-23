@@ -460,7 +460,7 @@ class TypeConverterDelegate {
 			Collection original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		boolean originalAllowed = requiredType.isInstance(original);
-		if (!originalAllowed && !Collection.class.isAssignableFrom(requiredType)) {
+		if (!originalAllowed && !Collection.class.isAssignableFrom(requiredType) || original.isEmpty()) {
 			return original;
 		}
 
@@ -542,7 +542,7 @@ class TypeConverterDelegate {
 			Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		boolean originalAllowed = requiredType.isInstance(original);
-		if (!originalAllowed && !Map.class.isAssignableFrom(requiredType)) {
+		if (!originalAllowed && !Map.class.isAssignableFrom(requiredType) || original.isEmpty()) {
 			return original;
 		}
 
