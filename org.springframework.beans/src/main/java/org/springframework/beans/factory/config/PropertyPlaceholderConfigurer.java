@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,8 +208,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	}
 
 	/**
-	 * Set whether to ignore unresolvable placeholders. Default is "false":
-	 * An exception will be thrown if a placeholder cannot be resolved.
+	 * Set whether to ignore unresolvable placeholders.
+	 * <p>Default is "false": An exception will be thrown if a placeholder fails
+	 * to resolve. Switch this flag to "true" in order to preserve the placeholder
+	 * String as-is in such a case, leaving it up to other placeholder configurers
+	 * to resolve it.
 	 */
 	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
