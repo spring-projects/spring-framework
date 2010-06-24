@@ -125,8 +125,9 @@ public class UriTemplate {
 		StringBuffer buffer = new StringBuffer();
 		int i = 0;
 		while (matcher.find()) {
-			String uriVariable = uriVariableValues[i++].toString();
-			matcher.appendReplacement(buffer, Matcher.quoteReplacement(uriVariable));
+			Object uriVariable = uriVariableValues[i++];
+			String replacement = Matcher.quoteReplacement(uriVariable != null ? uriVariable.toString() : "");
+			matcher.appendReplacement(buffer, replacement);
 		}
 		matcher.appendTail(buffer);
 		return encodeUri(buffer.toString());

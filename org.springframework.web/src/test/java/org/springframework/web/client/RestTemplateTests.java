@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,6 +83,21 @@ public class RestTemplateTests {
 
 		verifyMocks();
 	}
+	
+	@Test
+	public void varArgsNullTemplateVariable() throws Exception {
+		expect(requestFactory.createRequest(new URI("http://example.com/-foo"), HttpMethod.GET))
+				.andReturn(request);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		response.close();
+
+		replayMocks();
+
+		template.execute("http://example.com/{first}-{last}", HttpMethod.GET, null, null, null, "foo");
+
+		verifyMocks();
+	}
 
 	@Test
 	public void mapTemplateVariables() throws Exception {
@@ -95,6 +111,24 @@ public class RestTemplateTests {
 
 		Map<String, String> vars = Collections.singletonMap("hotel", "42");
 		template.execute("http://example.com/hotels/{hotel}/bookings/{hotel}", HttpMethod.GET, null, null, vars);
+
+		verifyMocks();
+	}
+
+	@Test
+	public void mapNullTemplateVariable() throws Exception {
+		expect(requestFactory.createRequest(new URI("http://example.com/-foo"), HttpMethod.GET))
+				.andReturn(request);
+		expect(request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		response.close();
+
+		replayMocks();
+
+		Map<String, String> vars = new HashMap<String, String>(2);
+		vars.put("first", null);
+		vars.put("last", "foo");
+		template.execute("http://example.com/{first}-{last}", HttpMethod.GET, null, null, vars);
 
 		verifyMocks();
 	}
