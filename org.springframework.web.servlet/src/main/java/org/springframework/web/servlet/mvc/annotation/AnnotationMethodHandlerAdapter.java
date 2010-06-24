@@ -174,9 +174,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	private ModelAndViewResolver[] customModelAndViewResolvers;
 
-	private HttpMessageConverter<?>[] messageConverters =
-			new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
+	private HttpMessageConverter<?>[] messageConverters;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
@@ -191,6 +189,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	public AnnotationMethodHandlerAdapter() {
 		// no restriction of HTTP methods by default
 		super(false);
+
+		// See SPR-7316
+		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
+		stringHttpMessageConverter.setWriteAcceptCharset(false);
+		messageConverters = new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), stringHttpMessageConverter,
+				new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
 	}
 
 
