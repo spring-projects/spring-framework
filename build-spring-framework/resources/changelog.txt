@@ -10,7 +10,8 @@ Changes in version 3.0.4 (2010-07-15)
 * OSGi manifest version range accepts EHCache 2.x as well
 * ConversionService is able to deal with empty collections and nested collections (fixed regression)
 * ConversionService properly handles nested Resource arrays in Map values (fixed regression)
-* ConversionService does not accidentally use copy constructor for same type 
+* ConversionService does not accidentally use copy constructor for same type
+* SpEL 'select last' operator now works consistently with maps
 * BeanWrapper/DataBinder's "autoGrowNestedPaths" works for Maps as well
 * Jaxb2Marshaller's "marshallerProperties" Map accepts any value type
 * Spring's MessageEndpointFactory classes are now JCA 1.6 compliant as well
