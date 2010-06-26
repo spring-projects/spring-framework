@@ -42,6 +42,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Andy Clement
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 3.0
  */
 public class Selection extends SpelNodeImpl {
@@ -73,7 +74,6 @@ public class Selection extends SpelNodeImpl {
 			Object lastKey = null;
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
-					lastKey = entry.getKey();
 					TypedValue kvpair = new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class));
 					state.pushActiveContextObject(kvpair);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
@@ -84,6 +84,7 @@ public class Selection extends SpelNodeImpl {
 								return new TypedValue(result);
 							}
 							result.put(entry.getKey(),entry.getValue());
+							lastKey = entry.getKey();
 						}
 					} else {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),

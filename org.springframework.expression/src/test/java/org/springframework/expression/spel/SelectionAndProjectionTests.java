@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,21 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.Test;
-
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * @author Mark Fisher
+ * @author Sam Brannen
+ * 
  * @since 3.0
  */
 public class SelectionAndProjectionTests {
@@ -140,6 +144,44 @@ public class SelectionAndProjectionTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	public void selectionWithMap() {
+		EvaluationContext context = new StandardEvaluationContext(new MapTestBean());
+		ExpressionParser parser = new SpelExpressionParser();
+		Expression exp = parser.parseExpression("colors.?[key.startsWith('b')]");
+
+		Map<String, String> colorsMap = (Map<String, String>) exp.getValue(context);
+		assertEquals(3, colorsMap.size());
+		assertTrue(colorsMap.containsKey("beige"));
+		assertTrue(colorsMap.containsKey("blue"));
+		assertTrue(colorsMap.containsKey("brown"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void selectFirstItemInMap() {
+		EvaluationContext context = new StandardEvaluationContext(new MapTestBean());
+		ExpressionParser parser = new SpelExpressionParser();
+
+		Expression exp = parser.parseExpression("colors.^[key.startsWith('b')]");
+		Map<String, String> colorsMap = (Map<String, String>) exp.getValue(context);
+		assertEquals(1, colorsMap.size());
+		assertEquals("beige", colorsMap.keySet().iterator().next());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void selectLastItemInMap() {
+		EvaluationContext context = new StandardEvaluationContext(new MapTestBean());
+		ExpressionParser parser = new SpelExpressionParser();
+
+		Expression exp = parser.parseExpression("colors.$[key.startsWith('b')]");
+		Map<String, String> colorsMap = (Map<String, String>) exp.getValue(context);
+		assertEquals(1, colorsMap.size());
+		assertEquals("brown", colorsMap.keySet().iterator().next());
+	}
+
+	@Test
 	public void projectionWithList() throws Exception {
 		Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
@@ -169,6 +211,23 @@ public class SelectionAndProjectionTests {
 		assertEquals(new Integer(7), array[2]);
 	}
 
+	static class MapTestBean {
+
+		private final Map<String, String> colors = new TreeMap<String, String>();
+
+		MapTestBean() {
+			// colors.put("black", "schwarz");
+			colors.put("red", "rot");
+			colors.put("brown", "braun");
+			colors.put("blue", "blau");
+			colors.put("yellow", "gelb");
+			colors.put("beige", "beige");
+		}
+
+		public Map<String, String> getColors() {
+			return colors;
+		}
+	}
 
 	static class ListTestBean {
 
@@ -185,9 +244,8 @@ public class SelectionAndProjectionTests {
 		}
 	}
 
-
 	static class ArrayTestBean {
-		
+
 		private final int[] ints = new int[10];
 
 		private final Integer[] integers = new Integer[10];
@@ -207,7 +265,6 @@ public class SelectionAndProjectionTests {
 			return integers;
 		}
 	}
-
 
 	static class IntegerTestBean {
 
@@ -234,15 +291,13 @@ public class SelectionAndProjectionTests {
 			for (int i = 0; i < 3; i++) {
 				if (i == 1) {
 					array[i] = new IntegerTestBean(5.9f);
-				}
-				else {
+				} else {
 					array[i] = new IntegerTestBean(i + 5);
 				}
 			}
 			return array;
 		}
 	}
-
 
 	static class IntegerWrapper {
 
