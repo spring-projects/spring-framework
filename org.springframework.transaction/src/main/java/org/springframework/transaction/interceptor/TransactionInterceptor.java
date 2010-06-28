@@ -98,7 +98,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		final TransactionAttribute txAttr =
 				getTransactionAttributeSource().getTransactionAttribute(invocation.getMethod(), targetClass);
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
-		final String joinpointIdentification = methodIdentification(invocation.getMethod());
+		final String joinpointIdentification = methodIdentification(invocation.getMethod(), targetClass);
 
 		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.

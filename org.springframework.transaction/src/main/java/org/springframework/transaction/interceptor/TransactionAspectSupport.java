@@ -270,7 +270,25 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		// If the transaction attribute is null, the method is non-transactional.
 		TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
 		PlatformTransactionManager tm = determineTransactionManager(txAttr);
-		return createTransactionIfNecessary(tm, txAttr, methodIdentification(method));
+		return createTransactionIfNecessary(tm, txAttr, methodIdentification(method, targetClass));
+	}
+
+	/**
+	 * Convenience method to return a String representation of this Method
+	 * for use in logging. Can be overridden in subclasses to provide a
+	 * different identifier for the given method.
+	 * @param method the method we're interested in
+	 * @param targetClass class the method is on
+	 * @return log message identifying this method
+	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
+	 */
+	protected String methodIdentification(Method method, Class targetClass) {
+		String simpleMethodId = methodIdentification(method);
+		if (simpleMethodId != null) {
+			return simpleMethodId;
+		}
+		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+		return ClassUtils.getQualifiedMethodName(specificMethod);
 	}
 
 	/**
@@ -279,10 +297,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * different identifier for the given method.
 	 * @param method the method we're interested in
 	 * @return log message identifying this method
-	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
+	 * @deprecated in favor of {@link #methodIdentification(Method, Class)}
 	 */
+	@Deprecated
 	protected String methodIdentification(Method method) {
-		return ClassUtils.getQualifiedMethodName(method);
+		return null;
 	}
 
 	/**
