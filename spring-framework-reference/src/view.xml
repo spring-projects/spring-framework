@@ -1410,6 +1410,17 @@ recommend sticking to 'spring' --&gt;
               </row>
 
               <row>
+                <entry><emphasis role="bold">formCheckbox</emphasis> (a single
+                checkbox)</entry>
+
+                <entry><literal>#springFormCheckbox($path
+                $attributes)</literal></entry>
+
+                <entry><literal>&lt;@spring.formCheckbox path,
+                attributes/&gt;</literal></entry>
+              </row>
+
+              <row>
                 <entry><emphasis role="bold">showErrors</emphasis> (simplify
                 display of validation errors for the bound field)</entry>
 
