@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,12 @@ import javax.validation.ValidatorContext;
 import javax.validation.ValidatorFactory;
 import javax.validation.spi.ValidationProvider;
 
+import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 
@@ -92,6 +95,25 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 */
 	public void setMessageInterpolator(MessageInterpolator messageInterpolator) {
 		this.messageInterpolator = messageInterpolator;
+	}
+
+	/**
+	 * Specify a custom Spring MessageSource for resolving validation messages,
+	 * instead of relying on JSR-303's default "ValidationMessages.properties" bundle
+	 * in the classpath. This may refer to a Spring context's shared "messageSource" bean,
+	 * or to some special MessageSource setup for validation purposes only.
+	 * <p><b>NOTE:</b> This feature requires Hibernate Validator 4.1 or higher on the classpath.
+	 * You may nevertheless use a different validation provider but Hibernate Validator's
+	 * {@link ResourceBundleMessageInterpolator} class must be accessible during configuration.
+	 * <p>Specify either this property or {@link #setMessageInterpolator "messageInterpolator"},
+	 * not both. If you would like to build a custom MessageInterpolator, consider deriving from
+	 * Hibernate Validator's {@link ResourceBundleMessageInterpolator} and passing in a
+	 * Spring {@link MessageSourceResourceBundleLocator} when constructing your interpolator.
+	 * @see ResourceBundleMessageInterpolator
+	 * @see MessageSourceResourceBundleLocator
+	 */
+	public void setValidationMessageSource(MessageSource messageSource) {
+		this.messageInterpolator = HibernateValidatorDelegate.buildMessageInterpolator(messageSource);
 	}
 
 	/**
@@ -160,8 +182,11 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				Validation.byProvider(this.providerClass).configure() :
 				Validation.byDefaultProvider().configure());
 
-		configuration.messageInterpolator(new LocaleContextMessageInterpolator(
-				this.messageInterpolator, configuration.getDefaultMessageInterpolator()));
+		MessageInterpolator targetInterpolator = this.messageInterpolator;
+		if (targetInterpolator == null) {
+			targetInterpolator = configuration.getDefaultMessageInterpolator();
+		}
+		configuration.messageInterpolator(new LocaleContextMessageInterpolator(targetInterpolator));
 
 		if (this.traversableResolver != null) {
 			configuration.traversableResolver(this.traversableResolver);
@@ -214,6 +239,17 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
 		return this.validatorFactory.getConstraintValidatorFactory();
+	}
+
+
+	/**
+	 * Inner class to avoid a hard-coded Hibernate Validator 4.1 dependency.
+	 */
+	private static class HibernateValidatorDelegate {
+
+		public static MessageInterpolator buildMessageInterpolator(MessageSource messageSource) {
+			return new ResourceBundleMessageInterpolator(new MessageSourceResourceBundleLocator(messageSource));
+		}
 	}
 
 }
