@@ -890,8 +890,8 @@ TR: OK. Added to diagram.--></para>
         framework for configuration and management purposes. It's efficient
         and well-established, and in fact it's what we use at runtime when we
         build and test Spring. Spring also provides some utilities for
-        configuring and initializing Log4j, so it have an optional compile
-        time dependency on Log4j in some modules.</para>
+        configuring and initializing Log4j, so it has an optional compile-time
+        dependency on Log4j in some modules.</para>
 
         <para>To make Log4j work with the default JCL dependency
         (<code>commons-logging</code>) all you need to do is put Log4j on the
