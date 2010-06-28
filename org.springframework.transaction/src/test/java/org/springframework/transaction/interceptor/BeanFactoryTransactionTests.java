@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,20 +57,20 @@ public class BeanFactoryTransactionTests extends TestCase {
 	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory1");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
-		doTestGetsAreNotTransactional(testBean, ITestBean.class);
+		doTestGetsAreNotTransactional(testBean);
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() throws NoSuchMethodException {
 		this.factory.preInstantiateSingletons();
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2DynamicProxy");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
-		doTestGetsAreNotTransactional(testBean, ITestBean.class);
+		doTestGetsAreNotTransactional(testBean);
 	}
 	
 	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(testBean));
-		doTestGetsAreNotTransactional(testBean, TestBean.class);
+		doTestGetsAreNotTransactional(testBean);
 	}
 	
 	public void testProxyFactory2Lazy() throws NoSuchMethodException {
@@ -103,14 +103,14 @@ public class BeanFactoryTransactionTests extends TestCase {
 		txnCounter.counter = 0;
 		preCounter.counter = 0;
 		postCounter.counter = 0;
-		doTestGetsAreNotTransactional(testBean, TestBean.class);
+		doTestGetsAreNotTransactional(testBean);
 		// Can't assert it's equal to 4 as the pointcut may be optimized and only invoked once
 		assertTrue(0 < txnCounter.counter && txnCounter.counter <= 4);
 		assertEquals(4, preCounter.counter);
 		assertEquals(4, postCounter.counter);
 	}
 
-	private void doTestGetsAreNotTransactional(final ITestBean testBean, final Class proxyClass) {
+	private void doTestGetsAreNotTransactional(final ITestBean testBean) {
 		// Install facade
 		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
@@ -132,7 +132,8 @@ public class BeanFactoryTransactionTests extends TestCase {
 					throw new IllegalStateException("getTransaction should not get invoked more than once");
 				}
 				invoked = true;
-				if (!((definition.getName().indexOf(proxyClass.getName()) != -1) &&
+				System.out.println(definition.getName());
+				if (!((definition.getName().indexOf(TestBean.class.getName()) != -1) &&
 						(definition.getName().indexOf("setAge") != -1))) {
 					throw new IllegalStateException(
 							"transaction name should contain class and method name: " + definition.getName());
