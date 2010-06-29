@@ -4518,19 +4518,19 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     <title>Annotation-based container configuration</title>
 
     <sidebar>
-      <title>Are annotations better then XML for configuring Spring?</title>
+      <title>Are annotations better than XML for configuring Spring?</title>
 
-      <para>The introduction of annotation based configurations raised the
-      question of whether this approach is better or not then XML. The short
-      answer is <emphasis>it depends.</emphasis>. The long answer is that each
-      approach has it's pros and cons and usually it's up to the developer to
+      <para>The introduction of annotation-based configurations raised the
+      question of whether this approach is 'better' than XML. The short
+      answer is <emphasis>it depends</emphasis>. The long answer is that each
+      approach has its pros and cons, and usually it is up to the developer to
       decide which strategy suits her better. Due to the way they are defined,
-      annotations provide a lot of context in their declaration leading to
-      shorter, more concise configurations. However XML excels at wiring up
-      components without touching their source code or recompile them. Some
-      prefer having the wiring close to the source while others argue that
-      annotated classes are no longer POJOs and further more that the
-      configuration becomes decentralized and harder to control.</para>
+      annotations provide a lot of context in their declaration, leading to
+      shorter and more concise configuration. However, XML excels at wiring up
+      components without touching their source code or recompiling them. Some
+      developers prefer having the wiring close to the source while others
+      argue that annotated classes are no longer POJOs and, furthermore, that
+      the configuration becomes decentralized and harder to control.</para>
 
       <para>No matter the choice, Spring can accommodate both styles and even
       mix them together. It's worth pointing out that through its <link
