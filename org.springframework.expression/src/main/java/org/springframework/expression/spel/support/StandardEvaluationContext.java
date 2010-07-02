@@ -115,12 +115,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.constructorResolvers = constructorResolvers;
 	}
 
-	private void ensureConstructorResolversInitialized() {
-		if (this.constructorResolvers == null) {
-			this.constructorResolvers = new ArrayList<ConstructorResolver>();
-			this.constructorResolvers.add(new ReflectiveConstructorResolver());
-		}
-	}
 
 	public void addMethodResolver(MethodResolver resolver) {
 		ensureMethodResolversInitialized();
@@ -149,12 +143,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.methodResolvers = methodResolvers;
 	}
 	
-	private void ensureMethodResolversInitialized() {
-		if (this.methodResolvers == null) {
-			this.methodResolvers = new ArrayList<MethodResolver>();
-			this.methodResolvers.add(reflectiveMethodResolver=new ReflectiveMethodResolver());
-		}
-	}
 
 	public void addPropertyAccessor(PropertyAccessor accessor) {
 		ensurePropertyAccessorsInitialized();
@@ -174,12 +162,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.propertyAccessors = propertyAccessors;
 	}
 
-	private void ensurePropertyAccessorsInitialized() {
-		if (this.propertyAccessors == null) {
-			this.propertyAccessors = new ArrayList<PropertyAccessor>();
-			this.propertyAccessors.add(new ReflectivePropertyAccessor());
-		}
-	}
 
 	public void setTypeLocator(TypeLocator typeLocator) {
 		Assert.notNull(typeLocator, "TypeLocator must not be null");
@@ -250,6 +232,48 @@ public class StandardEvaluationContext implements EvaluationContext {
 	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
 		ensureMethodResolversInitialized();
 		reflectiveMethodResolver.registerMethodFilter(type,filter);
+	}
+
+	private void ensurePropertyAccessorsInitialized() {
+		if (this.propertyAccessors == null) {
+			initializePropertyAccessors();
+		}
+	}
+
+	private synchronized void initializePropertyAccessors() {
+		if (this.propertyAccessors == null) {
+			List<PropertyAccessor> defaultAccessors = new ArrayList<PropertyAccessor>();
+			defaultAccessors.add(new ReflectivePropertyAccessor());
+			this.propertyAccessors = defaultAccessors;
+		}
+	}
+
+	private void ensureMethodResolversInitialized() {
+		if (this.methodResolvers == null) {
+			initializeMethodResolvers();
+		}
+	}
+
+	private synchronized void initializeMethodResolvers() {
+		if (this.methodResolvers == null) {
+			List<MethodResolver> defaultResolvers = new ArrayList<MethodResolver>();
+			defaultResolvers.add(reflectiveMethodResolver = new ReflectiveMethodResolver());
+			this.methodResolvers = defaultResolvers;
+		}
+	}
+
+	private void ensureConstructorResolversInitialized() {
+		if (this.constructorResolvers == null) {
+			initializeConstructorResolvers();
+		}
+	}
+
+	private synchronized void initializeConstructorResolvers() {
+		if (this.constructorResolvers == null) {
+			List<ConstructorResolver> defaultResolvers = new ArrayList<ConstructorResolver>();
+			defaultResolvers.add(new ReflectiveConstructorResolver());
+			this.constructorResolvers = defaultResolvers;
+		}
 	}
 
 }
