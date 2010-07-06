@@ -17,13 +17,12 @@
 package org.springframework.expression.spel.standard;
 
 import junit.framework.Assert;
-import org.junit.Test;
 
+import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ExpressionException;
 import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
@@ -111,16 +110,6 @@ public class SpelParserTests {
 
 	@Test
 	public void generalExpressions() throws Exception {
-		try {
-			SpelExpressionParser parser = new SpelExpressionParser();
-			parser.parseRaw("new String[3]");
-			Assert.fail();
-		} catch (ParseException e) {
-			Assert.assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessage.MISSING_CONSTRUCTOR_ARGS,spe.getMessageCode());
-			Assert.assertEquals(10,spe.getPosition());
-		}
 		try {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String");

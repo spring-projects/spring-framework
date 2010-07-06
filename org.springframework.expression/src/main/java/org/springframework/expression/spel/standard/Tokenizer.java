@@ -96,6 +96,12 @@ class Tokenizer {
 				case ']':
 					pushCharToken(TokenKind.RSQUARE);
 					break;
+				case '{':
+					pushCharToken(TokenKind.LCURLY);
+					break;
+				case '}':
+					pushCharToken(TokenKind.RCURLY);
+					break;
 				case '@':
 					pushCharToken(TokenKind.BEAN_REF);
 					break;

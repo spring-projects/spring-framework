@@ -95,6 +95,15 @@ public enum SpelMessage {
 	NO_BEAN_RESOLVER_REGISTERED(Kind.ERROR,1057,"No bean resolver registered in the context to resolve access to bean ''{0}''"),//
 	EXCEPTION_DURING_BEAN_RESOLUTION(Kind.ERROR, 1058, "A problem occurred when trying to resolve bean ''{0}'':''{1}''"), // 
 	INVALID_BEAN_REFERENCE(Kind.ERROR,1059,"@ can only be followed by an identifier or a quoted name"),//
+	TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION(Kind.ERROR, 1060,
+			"Expected the type of the new array to be specified as a String but found ''{0}''"), //
+	INCORRECT_ELEMENT_TYPE_FOR_ARRAY(Kind.ERROR, 1061,
+			"The array of type ''{0}'' cannot have an element of type ''{1}'' inserted"), //
+	MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED(Kind.ERROR, 1062,
+			"Using an initializer to build a multi-dimensional array is not currently supported"), //
+	MISSING_ARRAY_DIMENSION(Kind.ERROR, 1063, "A required array dimension has not been specified"), //
+	INITIALIZER_LENGTH_INCORRECT(
+			Kind.ERROR, 1064, "array initializer size does not match array dimensions"), //
 	;
 
 	private Kind kind;

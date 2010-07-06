@@ -61,8 +61,12 @@ public class StandardTypeComparator implements TypeComparator {
 			}
 		}
 
-		if (left instanceof Comparable) {
-			return ((Comparable) left).compareTo(right);
+		try {
+			if (left instanceof Comparable) {
+				return ((Comparable) left).compareTo(right);
+			}
+		} catch (ClassCastException cce) {
+			throw new SpelEvaluationException(cce, SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 		}
 		
 		throw new SpelEvaluationException(SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());

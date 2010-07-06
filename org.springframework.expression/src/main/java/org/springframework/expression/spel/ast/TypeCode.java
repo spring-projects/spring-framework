@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.expression.spel.ast;
 
+/**
+ * Captures primitive types and their corresponding class objects, plus one special entry that represents all reference
+ * (non-primitive) types.
+ * 
+ * @author Andy Clement
+ */
 public enum TypeCode {
 
 	OBJECT(Object.class), BOOLEAN(Boolean.TYPE), BYTE(Byte.TYPE), CHAR(Character.TYPE), //
@@ -31,15 +36,26 @@ public enum TypeCode {
 		return type;
 	}
 
-//	public static TypeCode forClass(Class<?> c) {
-//		TypeCode[] allValues = TypeCode.values();
-//		for (int i = 0; i < allValues.length; i++) {
-//			TypeCode typeCode = allValues[i];
-//			if (c == typeCode.getType()) {
-//				return typeCode;
-//			}
-//		}
-//		return OBJECT;
-//	}
+	public static TypeCode forName(String name) {
+		String searchingFor = name.toUpperCase();
+		TypeCode[] tcs = values();
+		for (int i = 1; i < tcs.length; i++) {
+			if (tcs[i].name().equals(searchingFor)) {
+				return tcs[i];
+			}
+		}
+		return TypeCode.OBJECT;
+	}
+
+	public static TypeCode forClass(Class<?> c) {
+		TypeCode[] allValues = TypeCode.values();
+		for (int i = 0; i < allValues.length; i++) {
+			TypeCode typeCode = allValues[i];
+			if (c == typeCode.getType()) {
+				return typeCode;
+			}
+		}
+		return OBJECT;
+	}
 
 }

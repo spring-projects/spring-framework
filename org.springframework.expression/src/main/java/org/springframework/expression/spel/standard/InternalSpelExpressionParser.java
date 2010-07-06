@@ -36,6 +36,7 @@ import org.springframework.expression.spel.ast.Elvis;
 import org.springframework.expression.spel.ast.FunctionReference;
 import org.springframework.expression.spel.ast.Identifier;
 import org.springframework.expression.spel.ast.Indexer;
+import org.springframework.expression.spel.ast.InlineList;
 import org.springframework.expression.spel.ast.Literal;
 import org.springframework.expression.spel.ast.MethodReference;
 import org.springframework.expression.spel.ast.NullLiteral;
@@ -454,6 +455,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return pop();
 		} else if (maybeEatProjection(false) || maybeEatSelection(false) || maybeEatIndexer()) {
 			return pop();
+		} else if (maybeEatInlineList()) {
+			return pop();
 		} else {
 			return null;
 		}
@@ -523,6 +526,29 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		SpelNodeImpl expr = eatExpression();
 		eatToken(TokenKind.RSQUARE);
 		constructedNodes.push(new Projection(nullSafeNavigation, toPos(t), expr));
+		return true;
+	}
+	
+	// list = LCURLY (element (COMMA element)*) RCURLY
+	private boolean maybeEatInlineList() {
+		Token t = peekToken();
+		if (!peekToken(TokenKind.LCURLY,true)) {
+			return false;
+		}
+		SpelNodeImpl expr = null;
+		Token closingCurly = peekToken();
+		if (peekToken(TokenKind.RCURLY,true)) {
+			// empty list '[]'
+			expr = new InlineList(toPos(t.startpos,closingCurly.endpos));
+		} else {
+			List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
+			do {
+				listElements.add(eatExpression());
+			} while (peekToken(TokenKind.COMMA,true));	
+			closingCurly = eatToken(TokenKind.RCURLY);
+			expr = new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+		}
+		constructedNodes.push(expr);
 		return true;
 	}
 	
@@ -599,13 +625,32 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId();
 			List<SpelNodeImpl> nodes = new ArrayList<SpelNodeImpl>();
 			nodes.add(possiblyQualifiedConstructorName);
-			eatConstructorArgs(nodes);
-			push(new ConstructorReference(toPos(newToken),nodes.toArray(new SpelNodeImpl[nodes.size()]))); // TODO  correct end position?
+			if (peekToken(TokenKind.LSQUARE)) {
+				// array initializer
+				List<SpelNodeImpl> dimensions = new ArrayList<SpelNodeImpl>();
+				while (peekToken(TokenKind.LSQUARE,true)) {
+					if (!peekToken(TokenKind.RSQUARE)) {
+						dimensions.add(eatExpression());
+					} else {
+						dimensions.add(null);
+					}
+					eatToken(TokenKind.RSQUARE);
+				}
+				if (maybeEatInlineList()) {
+					nodes.add(pop());
+				}
+				push(new ConstructorReference(toPos(newToken), dimensions.toArray(new SpelNodeImpl[dimensions.size()]),
+						nodes.toArray(new SpelNodeImpl[nodes.size()])));
+			} else {
+				// regular constructor invocation
+				eatConstructorArgs(nodes);
+				// TODO correct end position?
+				push(new ConstructorReference(toPos(newToken), nodes.toArray(new SpelNodeImpl[nodes.size()])));
+			}
 			return true;
 		}
 		return false;
 	}
-
 
 	private void push(SpelNodeImpl newNode) {
 		constructedNodes.push(newNode);
@@ -691,7 +736,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	private Token eatToken(TokenKind expectedKind) {
-		Assert.isTrue(moreTokens());
 		Token t = nextToken();
 		if (t==null) {
 			raiseInternalException( expressionString.length(), SpelMessage.OOD);
