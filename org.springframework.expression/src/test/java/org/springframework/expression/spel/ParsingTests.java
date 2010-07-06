@@ -432,7 +432,12 @@ public class ParsingTests {
 	public void testTypeReferences02() {
 		parseCheck("T(String)");
 	}
-
+	
+	@Test
+	public void testInlineList1() {
+		parseCheck("{1,2,3,4}");
+	}
+	
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the same
 	 * as the original expression.

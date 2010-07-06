@@ -338,14 +338,17 @@ public abstract class ExpressionTestCase {
 			}
 		}
 	}
-	
+
+	public static String stringValueOf(Object value) {
+		return stringValueOf(value, false);
+	}
 	/**
 	 * Produce a nice string representation of the input object.
 	 *
 	 * @param value object to be formatted
 	 * @return a nice string
 	 */
-	public static String stringValueOf(Object value) {
+	public static String stringValueOf(Object value, boolean isNested) {
 		// do something nice for arrays
 		if (value == null) {
 			return "null";
@@ -378,9 +381,27 @@ public abstract class ExpressionTestCase {
 					throw new RuntimeException("Please implement support for type " + primitiveType.getName()
 							+ " in ExpressionTestCase.stringValueOf()");
 				}
+			} else if (value.getClass().getComponentType().isArray()) {
+				List<Object> l = Arrays.asList((Object[]) value);
+				if (!isNested) {
+					sb.append(value.getClass().getComponentType().getName());
+				}
+				sb.append("[").append(l.size()).append("]{");
+				int i = 0;
+				for (Object object : l) {
+					if (i > 0) {
+						sb.append(",");
+					}
+					i++;
+					sb.append(stringValueOf(object, true));
+				}
+				sb.append("}");
 			} else {
 				List<Object> l = Arrays.asList((Object[]) value);
-				sb.append(value.getClass().getComponentType().getName()).append("[").append(l.size()).append("]{");
+				if (!isNested) {
+					sb.append(value.getClass().getComponentType().getName());
+				}
+				sb.append("[").append(l.size()).append("]{");
 				int i = 0;
 				for (Object object : l) {
 					if (i > 0) {
