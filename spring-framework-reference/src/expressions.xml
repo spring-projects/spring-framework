@@ -84,6 +84,18 @@
       <listitem>
         <para>Calling constructors</para>
       </listitem>
+      
+      <listitem>
+        <para>Bean references</para>
+      </listitem>
+      
+      <listitem>
+        <para>Array construction</para>
+      </listitem>
+	
+	  <listitem>
+        <para>Inline lists</para>
+      </listitem>
 
       <listitem>
         <para>Ternary operator</para>
@@ -563,7 +575,42 @@ parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
 
 </programlisting>
     </section>
+    <section>
+      <title>Inline lists</title>
 
+      <para>Lists can be expressed directly in an expression using {} notation.
+      </para>
+
+      <programlisting lang="" language="java">
+// evaluates to a Java list containing the four numbers
+List numbers = (List) parser.parseExpression("{1,2,3,4}").getValue(context); 
+
+List listOfLists = (List) parser.parseExpression("{{'a','b'},{'x','y'}}").getValue(context); 
+</programlisting>
+      <para>{} by itself means an empty list.  For performance reasons, if the
+      list is itself entirely composed of fixed literals then a constant list is created
+      to represent the expression, rather than building a new list on each evaluation.</para>
+	</section>
+	
+	<section>
+      <title>Array construction</title>
+
+      <para>Arrays can be built using the familiar Java syntax, optionally
+      supplying an initializer to have the array populated at construction time.
+      </para>
+
+      <programlisting lang="" language="java">int[] numbers1 = (int[]) parser.parseExpression("new int[4]").getValue(context); 
+
+// Array with initializer
+int[] numbers2 = (int[]) parser.parseExpression("new int[]{1,2,3}").getValue(context); 
+
+// Multi dimensional array
+int[][] numbers3 = (int[][]) parser.parseExpression("new int[4][5]").getValue(context); 
+</programlisting>
+      <para>It is not currently allowed to supply an initializer when constructing
+      a multi-dimensional array.</para>
+	</section>
+	
     <section>
       <title>Methods</title>
 
@@ -858,6 +905,19 @@ String helloWorldReversed =
           parser.parseExpression("#reverseString('hello')").getValue(context, String.class);</programlisting>
     </section>
 
+    <section>
+    	<title>Bean references</title>
+    	<para>If the evaluation context has been configured with a bean resolver it is possible to
+    	lookup beans from an expression using the (@) symbol.
+    	</para>
+      <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
+StandardEvaluationContext context = new StandardEvaluationContext();
+context.setBeanResolver(new MyBeanResolver());
+
+// This will end up calling resolve(context,"foo") on MyBeanResolver during evaluation
+Object bean = parser.parseExpression("@foo").getValue(context);</programlisting>
+    </section>
+    
     <section>
       <title>Ternary Operator (If-Then-Else)</title>
 
