@@ -44,6 +44,7 @@ import javax.portlet.WindowState;
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -136,10 +137,11 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 						}
 						else {
 							Method oldMappedMethod = resolverMethods.get(handledException);
-							throw new IllegalStateException(
-									"Ambiguous exception handler mapped for " + handledException + "]: {" +
-											oldMappedMethod + ", " + method + "}.");
-
+							if (!oldMappedMethod.equals(method)) {
+								throw new IllegalStateException(
+										"Ambiguous exception handler mapped for " + handledException + "]: {" +
+												oldMappedMethod + ", " + method + "}.");
+							}
 						}
 					}
 				}
@@ -160,7 +162,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	@SuppressWarnings("unchecked")
 	protected List<Class<? extends Throwable>> getHandledExceptions(Method method) {
 		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
-		ExceptionHandler exceptionHandler = method.getAnnotation(ExceptionHandler.class);
+		ExceptionHandler exceptionHandler = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
 		if (exceptionHandler != null) {
 			if (!ObjectUtils.isEmpty(exceptionHandler.value())) {
 				result.addAll(Arrays.asList(exceptionHandler.value()));
