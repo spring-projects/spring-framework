@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.servlet.view.velocity;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -126,7 +125,7 @@ public class VelocityToolboxView extends VelocityView {
 		// Velocity Tools 1.3: a class-level "init(Object)" method.
 		Method initMethod = ClassUtils.getMethodIfAvailable(tool.getClass(), "init", Object.class);
 		if (initMethod != null) {
-			ReflectionUtils.invokeMethod(initMethod, tool, new Object[] {velocityContext});
+			ReflectionUtils.invokeMethod(initMethod, tool, velocityContext);
 		}
 	}
 
