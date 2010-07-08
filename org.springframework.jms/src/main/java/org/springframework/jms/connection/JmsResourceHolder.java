@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,9 +183,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			catch (TransactionInProgressException ex) {
 				// Ignore -> can only happen in case of a JTA transaction.
 			}
-			catch (javax.jms.IllegalStateException ex) {
-				// Ignore -> can only happen in case of a JTA transaction.
-			}
+			// Let IllegalStateException through: It might point out an unexpectedly closed session.
 		}
 	}
 
