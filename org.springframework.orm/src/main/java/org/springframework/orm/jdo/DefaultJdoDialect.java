@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jdo;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.jdo.JDOException;
@@ -34,6 +35,8 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Default implementation of the {@link JdoDialect} interface.
@@ -65,6 +68,10 @@ import org.springframework.transaction.TransactionException;
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
 public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTranslator {
+
+	// JDO 3.0 setTimeoutMillis method available?
+	private static final Method setTimeoutMillisMethod =
+			ClassUtils.getMethodIfAvailable(Query.class, "setTimeoutMillis", Integer.class);
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -181,13 +188,19 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	}
 
 	/**
-	 * This implementation sets the JPA 2.0 query hints "javax.persistence.lock.timeout"
-	 * and "javax.persistence.query.timeout", assuming that JDO 2.1 providers are often
+	 * This implementation applies a JDO 3.0 query timeout, if available. Otherwise,
+	 * it sets the JPA 2.0 query hints "javax.persistence.lock.timeout" and
+	 * "javax.persistence.query.timeout", assuming that JDO providers are often
 	 * JPA providers as well.
 	 */
 	public void applyQueryTimeout(Query query, int remainingTimeInSeconds) throws JDOException {
-		query.addExtension("javax.persistence.lock.timeout", remainingTimeInSeconds);
-		query.addExtension("javax.persistence.query.timeout", remainingTimeInSeconds);
+		if (setTimeoutMillisMethod != null) {
+			ReflectionUtils.invokeMethod(setTimeoutMillisMethod, query, remainingTimeInSeconds);
+		}
+		else {
+			query.addExtension("javax.persistence.lock.timeout", remainingTimeInSeconds);
+			query.addExtension("javax.persistence.query.timeout", remainingTimeInSeconds);
+		}
 	}
 
 
