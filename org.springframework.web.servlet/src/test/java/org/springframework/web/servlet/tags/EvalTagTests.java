@@ -19,11 +19,13 @@ package org.springframework.web.servlet.tags;
 import java.math.BigDecimal;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockPageContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * @author Keith Donald
@@ -95,6 +97,19 @@ public class EvalTagTests extends AbstractTagTests {
 	// SPR-6923
 	public void testNestedPropertyWithAttributeName() throws Exception {
 		tag.setExpression("bean.bean");
+		tag.setVar("foo");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("not the bean object", context.getAttribute("foo"));
+	}
+
+	public void testAccessUsingBeanSyntax() throws Exception {
+		GenericApplicationContext wac = (GenericApplicationContext)
+				context.getRequest().getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		wac.getDefaultListableBeanFactory().registerSingleton("bean2", context.getRequest().getAttribute("bean"));
+		tag.setExpression("@bean2.bean");
 		tag.setVar("foo");
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);

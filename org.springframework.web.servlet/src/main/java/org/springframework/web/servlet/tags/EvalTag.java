@@ -21,6 +21,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.el.VariableResolver;
 
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -58,12 +59,6 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	private boolean javaScriptEscape = false;
 
-
-	@Override
-	public void setPageContext(PageContext pageContext) {
-		super.setPageContext(pageContext);
-		this.evaluationContext = createEvaluationContext(pageContext);
-	}
 
 	/**
 	 * Set the expression to evaluate.
@@ -105,6 +100,9 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	@Override
 	public int doEndTag() throws JspException {
+		if (this.evaluationContext == null) {
+			this.evaluationContext = createEvaluationContext(pageContext);
+		}
 		if (this.var == null) {
 			try {
 				String result = this.expression.getValue(this.evaluationContext, String.class);
@@ -123,10 +121,10 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		return EVAL_PAGE;
 	}
 
-
 	private EvaluationContext createEvaluationContext(PageContext pageContext) {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.addPropertyAccessor(new JspPropertyAccessor(pageContext));
+		context.setBeanResolver(new BeanFactoryResolver(getRequestContext().getWebApplicationContext()));
 		ConversionService conversionService = getConversionService(pageContext);
 		if (conversionService != null) {
 			context.setTypeConverter(new StandardTypeConverter(conversionService));

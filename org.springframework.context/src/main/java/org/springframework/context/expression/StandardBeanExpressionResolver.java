@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 				sec.addPropertyAccessor(new BeanFactoryAccessor());
 				sec.addPropertyAccessor(new MapAccessor());
+				sec.setBeanResolver(new BeanFactoryResolver(evalContext.getBeanFactory()));
 				sec.setTypeLocator(new StandardTypeLocator(evalContext.getBeanFactory().getBeanClassLoader()));
 				ConversionService conversionService = evalContext.getBeanFactory().getConversionService();
 				if (conversionService != null) {
