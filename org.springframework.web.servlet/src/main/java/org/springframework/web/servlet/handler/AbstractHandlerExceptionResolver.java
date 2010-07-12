@@ -34,9 +34,17 @@ import org.springframework.web.servlet.ModelAndView;
  * and the {@link Ordered} implementation.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public abstract class AbstractHandlerExceptionResolver implements HandlerExceptionResolver, Ordered {
+
+	private static final String HEADER_PRAGMA = "Pragma";
+
+	private static final String HEADER_EXPIRES = "Expires";
+
+	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
+
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -49,6 +57,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private Log warnLogger;
 
+	private boolean preventResponseCaching = false;
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -59,38 +69,52 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Specify the set of handlers that this exception resolver should apply to. The exception mappings and the default
-	 * error view will only apply to the specified handlers. <p>If no handlers and handler classes are set, the exception
-	 * mappings and the default error view will apply to all handlers. This means that a specified default error view will
-	 * be used as fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be ignored in this
-	 * case.
+	 * Specify the set of handlers that this exception resolver should apply to.
+	 * The exception mappings and the default error view will only apply to the specified handlers.
+	 * <p>If no handlers and handler classes are set, the exception mappings and the default error
+	 * view will apply to all handlers. This means that a specified default error view will be used
+	 * as fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be
+	 * ignored in this case.
 	 */
 	public void setMappedHandlers(Set mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
 	}
 
 	/**
-	 * Specify the set of classes that this exception resolver should apply to. The exception mappings and the default
-	 * error view will only apply to handlers of the specified type; the specified types may be interfaces and superclasses
-	 * of handlers as well. <p>If no handlers and handler classes are set, the exception mappings and the default error
-	 * view will apply to all handlers. This means that a specified default error view will be used as fallback for all
-	 * exceptions; any further HandlerExceptionResolvers in the chain will be ignored in this case.
+	 * Specify the set of classes that this exception resolver should apply to.
+	 * The exception mappings and the default error view will only apply to handlers of the
+	 * specified type; the specified types may be interfaces and superclasses of handlers as well.
+	 * <p>If no handlers and handler classes are set, the exception mappings and the default error
+	 * view will apply to all handlers. This means that a specified default error view will be used
+	 * as fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be
+	 * ignored in this case.
 	 */
 	public void setMappedHandlerClasses(Class[] mappedHandlerClasses) {
 		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
 	/**
-	 * Set the log category for warn logging. The name will be passed to the underlying logger implementation through
-	 * Commons Logging, getting interpreted as log category according to the logger's configuration. <p>Default is no warn
-	 * logging. Specify this setting to activate warn logging into a specific category. Alternatively, override the {@link
-	 * #logException} method for custom logging.
+	 * Set the log category for warn logging. The name will be passed to the underlying logger
+	 * implementation through Commons Logging, getting interpreted as log category according
+	 * to the logger's configuration.
+	 * <p>Default is no warn logging. Specify this setting to activate warn logging into a specific
+	 * category. Alternatively, override the {@link #logException} method for custom logging.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
 	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {
 		this.warnLogger = LogFactory.getLog(loggerName);
+	}
+
+	/**
+	 * Specify whether to prevent HTTP response caching for any view resolved
+	 * by this HandlerExceptionResolver.
+	 * <p>Default is "false". Switch this to "true" in order to automatically
+	 * generate HTTP response headers that suppress response caching.
+	 */
+	public void setPreventResponseCaching(boolean preventResponseCaching) {
+		this.preventResponseCaching = preventResponseCaching;
 	}
 
 
@@ -108,6 +132,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 				logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
 			}
 			logException(ex, request);
+			prepareResponse(ex, response);
 			return doResolveException(request, response, handler, ex);
 		}
 		else {
@@ -170,6 +195,34 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
 		return "Handler execution resulted in exception";
 	}
+
+	/**
+	 * Prepare the response for the exceptional case.
+	 * <p>The default implementation prevents the response from being cached,
+	 * if the {@link #setPreventResponseCaching "preventResponseCaching"} property
+	 * has been set to "true".
+	 * @param ex the exception that got thrown during handler execution
+	 * @param response current HTTP response
+	 * @see #preventCaching
+	 */
+	protected void prepareResponse(Exception ex, HttpServletResponse response) {
+		if (this.preventResponseCaching) {
+			preventCaching(response);
+		}
+	}
+
+	/**
+	 * Prevents the response from being cached, through setting corresponding
+	 * HTTP headers. See <code>http://www.mnot.net/cache_docs</code>.
+	 * @param response current HTTP response
+	 */
+	protected void preventCaching(HttpServletResponse response) {
+		response.setHeader(HEADER_PRAGMA, "no-cache");
+		response.setDateHeader(HEADER_EXPIRES, 1L);
+		response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
+		response.addHeader(HEADER_CACHE_CONTROL, "no-store");
+	}
+
 
 	/**
 	 * Actually resolve the given exception that got thrown during on handler execution,
