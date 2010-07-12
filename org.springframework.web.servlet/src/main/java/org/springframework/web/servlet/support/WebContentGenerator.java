@@ -216,7 +216,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	protected final void checkAndPrepare(
 			HttpServletRequest request, HttpServletResponse response, boolean lastModified)
-	    throws ServletException {
+			throws ServletException {
 
 		checkAndPrepare(request, response, this.cacheSeconds, lastModified);
 	}
@@ -234,7 +234,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	protected final void checkAndPrepare(
 			HttpServletRequest request, HttpServletResponse response, int cacheSeconds, boolean lastModified)
-	    throws ServletException {
+			throws ServletException {
 
 		// Check whether we should support the request method.
 		String method = request.getMethod();

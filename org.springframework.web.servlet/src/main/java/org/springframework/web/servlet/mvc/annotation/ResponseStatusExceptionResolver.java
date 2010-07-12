@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver HandlerExceptionResolver}
  * interface that uses the {@link ResponseStatus @ResponseStatus} annotation to map exceptions to HTTP status codes.
+ *
  * <p>This exception resolver is enabled by default in the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * @author Arjen Poutsma
@@ -36,10 +37,9 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	@Override
-	protected ModelAndView doResolveException(HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler,
-			Exception ex) {
+	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
+			Object handler, Exception ex) {
+
 		ResponseStatus responseStatus = AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class);
 		if (responseStatus != null) {
 			try {
@@ -56,20 +56,17 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * Template method that handles {@link ResponseStatus @ResponseStatus} annotation. <p>Default implementation send a
 	 * response error using {@link HttpServletResponse#sendError(int)}, or {@link HttpServletResponse#sendError(int,
 	 * String)} if the annotation has a {@linkplain ResponseStatus#reason() reason}. Returns an empty ModelAndView.
-	 *
 	 * @param responseStatus the annotation
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of the exception (for example,
-	 * if multipart resolution failed)
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of the exception
+	 * (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
 	 */
-	protected ModelAndView resolveResponseStatus(ResponseStatus responseStatus,
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler,
-			Exception ex) throws Exception {
+	protected ModelAndView resolveResponseStatus(ResponseStatus responseStatus, HttpServletRequest request,
+			HttpServletResponse response, Object handler, Exception ex) throws Exception {
+
 		int statusCode = responseStatus.value().value();
 		String reason = responseStatus.reason();
 		if (!StringUtils.hasLength(reason)) {
@@ -80,4 +77,5 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 		}
 		return new ModelAndView();
 	}
+
 }

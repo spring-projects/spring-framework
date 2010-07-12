@@ -847,8 +847,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			// Invoke custom resolvers if present...
 			if (customModelAndViewResolvers != null) {
 				for (ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
-					ModelAndView mav = mavResolver
-							.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
+					ModelAndView mav = mavResolver.resolveModelAndView(
+							handlerMethod, handlerType, returnValue, implicitModel, webRequest);
 					if (mav != ModelAndViewResolver.UNRESOLVED) {
 						return mav;
 					}
