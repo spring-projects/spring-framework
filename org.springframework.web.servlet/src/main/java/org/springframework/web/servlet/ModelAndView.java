@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,7 @@ public class ModelAndView {
 	/** Model Map */
 	private ModelMap model;
 
-	/**
-	 * Indicates whether or not this instance has been cleared with a call to {@link #clear()}.
-	 */
+	/** Indicates whether or not this instance has been cleared with a call to {@link #clear()} */
 	private boolean cleared = false;
 
 
@@ -302,4 +300,5 @@ public class ModelAndView {
 		sb.append("; model is ").append(this.model);
 		return sb.toString();
 	}
+
 }
