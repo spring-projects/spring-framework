@@ -789,7 +789,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						Class<?> mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
-						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType);
+						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType,
+								new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), mapKeyType));
 						// Pass full property name and old value in here, since we want full
 						// conversion ability for map values.
 						growMapIfNecessary(map, convertedMapKey, indexedPropertyName, pd, i + 1);
@@ -946,6 +947,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						"in indexed property path '" + propertyName + "': returned null");
 			}
 			else if (propValue.getClass().isArray()) {
+				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 				Class requiredType = propValue.getClass().getComponentType();
 				int arrayIndex = Integer.parseInt(key);
 				Object oldValue = null;
@@ -953,7 +955,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (isExtractOldValueForEditor()) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
-					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType);
+					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
+							new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), requiredType));
 					Array.set(propValue, arrayIndex, convertedValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -971,7 +974,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (isExtractOldValueForEditor() && index < list.size()) {
 					oldValue = list.get(index);
 				}
-				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType);
+				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
+						new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), requiredType));
 				if (index < list.size()) {
 					list.set(index, convertedValue);
 				}
@@ -999,7 +1003,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				Map map = (Map) propValue;
 				// IMPORTANT: Do not pass full property name in here - property editors
 				// must not kick in for map keys but rather only for map values.
-				Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType);
+				Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType,
+						new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), mapKeyType));
 				Object oldValue = null;
 				if (isExtractOldValueForEditor()) {
 					oldValue = map.get(convertedMapKey);

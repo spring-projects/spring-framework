@@ -31,6 +31,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -99,7 +102,7 @@ public class FormattingConversionServiceTests {
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("dateStyle", "S-");
-		props.setProperty("datePattern", "M/d/yy");
+		props.setProperty("datePattern", "M-d-yy");
 		ppc.setProperties(props);
 		context.getBeanFactory().registerSingleton("ppc", ppc);
 		context.refresh();
@@ -114,7 +117,7 @@ public class FormattingConversionServiceTests {
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
 		Properties props = new Properties();
 		props.setProperty("dateStyle", "S-");
-		props.setProperty("datePattern", "M/d/yy");
+		props.setProperty("datePattern", "M-d-yy");
 		ppc.setProperties(props);
 		context.registerBeanDefinition("formattingService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
 		context.getBeanFactory().registerSingleton("ppc", ppc);
@@ -148,12 +151,28 @@ public class FormattingConversionServiceTests {
 		dates.add(new LocalDate(2009, 11, 2).toDateTimeAtCurrentTime().toDate());
 		formatted = (String) formattingService.convert(dates,
 				new TypeDescriptor(modelClass.getField("dates")), TypeDescriptor.valueOf(String.class));
-		assertEquals("10/31/09,11/1/09,11/2/09", formatted);
-		dates = (List<Date>) formattingService.convert("10/31/09,11/1/09,11/2/09",
+		assertEquals("10-31-09,11-1-09,11-2-09", formatted);
+		dates = (List<Date>) formattingService.convert("10-31-09,11-1-09,11-2-09",
 				TypeDescriptor.valueOf(String.class), new TypeDescriptor(modelClass.getField("dates")));
 		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(dates.get(0)));
 		assertEquals(new LocalDate(2009, 11, 1), new LocalDate(dates.get(1)));
 		assertEquals(new LocalDate(2009, 11, 2), new LocalDate(dates.get(2)));
+
+		Object model = BeanUtils.instantiate(modelClass);
+		BeanWrapper accessor = PropertyAccessorFactory.forBeanPropertyAccess(model);
+		accessor.setConversionService(formattingService);
+		accessor.setPropertyValue("dates", "10-31-09,11-1-09,11-2-09");
+		dates = (List<Date>) accessor.getPropertyValue("dates");
+		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(dates.get(0)));
+		assertEquals(new LocalDate(2009, 11, 1), new LocalDate(dates.get(1)));
+		assertEquals(new LocalDate(2009, 11, 2), new LocalDate(dates.get(2)));
+		accessor.setPropertyValue("dates[0]", "10-30-09");
+		accessor.setPropertyValue("dates[1]", "10-1-09");
+		accessor.setPropertyValue("dates[2]", "10-2-09");
+		dates = (List<Date>) accessor.getPropertyValue("dates");
+		assertEquals(new LocalDate(2009, 10, 30), new LocalDate(dates.get(0)));
+		assertEquals(new LocalDate(2009, 10, 1), new LocalDate(dates.get(1)));
+		assertEquals(new LocalDate(2009, 10, 2), new LocalDate(dates.get(2)));
 	}
 	
 	@Test
@@ -190,20 +209,27 @@ public class FormattingConversionServiceTests {
 	}
 
 
-	private static class Model {
+	public static class Model {
 
 		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(style="S-")
 		public Date date;
 		
 		@SuppressWarnings("unused")
-		@org.springframework.format.annotation.DateTimeFormat(pattern="M/d/yy")
+		@org.springframework.format.annotation.DateTimeFormat(pattern="M-d-yy")
 		public List<Date> dates;
 
+		public List<Date> getDates() {
+			return dates;
+		}
+
+		public void setDates(List<Date> dates) {
+			this.dates = dates;
+		}
 	}
 
 
-	private static class ModelWithPlaceholders {
+	public static class ModelWithPlaceholders {
 
 		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(style="${dateStyle}")
@@ -213,6 +239,13 @@ public class FormattingConversionServiceTests {
 		@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
 		public List<Date> dates;
 
+		public List<Date> getDates() {
+			return dates;
+		}
+
+		public void setDates(List<Date> dates) {
+			this.dates = dates;
+		}
 	}
 
 }
