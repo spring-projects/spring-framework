@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ import java.util.List;
 public interface EvaluationContext {
 
 	/**
-	 * @return the default root context object against which unqualified properties/methods/etc should be resolved.  This can be overridden when evaluating an expression.
+	 * @return the default root context object against which unqualified properties/methods/etc
+	 * should be resolved. This can be overridden when evaluating an expression.
 	 */
 	TypedValue getRootObject();
 
@@ -68,13 +69,13 @@ public interface EvaluationContext {
 	TypeComparator getTypeComparator();
 
 	/**
-	 * @return an operator overloader that may support mathematical operations between more than the standard set of
-	 * types
+	 * @return an operator overloader that may support mathematical operations
+	 * between more than the standard set of types
 	 */
 	OperatorOverloader getOperatorOverloader();
 
 	/**
-	 * @return a bean resolver that can lookup named beans
+	 * @return a bean resolver that can look up beans by name
 	 */
 	BeanResolver getBeanResolver();
 
