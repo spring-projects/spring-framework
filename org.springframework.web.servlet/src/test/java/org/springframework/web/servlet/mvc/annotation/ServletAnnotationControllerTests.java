@@ -1315,7 +1315,24 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("text", response.getContentAsString());
 	}
-	
+
+	@Test
+	public void negatedContentTypeHeaders() throws ServletException, IOException {
+		initServlet(NegatedContentTypeHeadersController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/something");
+		request.addHeader("Content-Type", "application/pdf");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("pdf", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/something");
+		request.addHeader("Content-Type", "text/html");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("non-pdf", response.getContentAsString());
+	}
+
 	@Test
 	public void acceptHeaders() throws ServletException, IOException {
 		initServlet(AcceptHeadersController.class);
@@ -2429,6 +2446,21 @@ public class ServletAnnotationControllerTests {
 		public void handleHtml(Writer writer) throws IOException {
 			writer.write("text");
 		}
+	}
+
+	@Controller
+	public static class NegatedContentTypeHeadersController {
+
+		@RequestMapping(value = "/something", headers = "content-type=application/pdf")
+		public void handlePdf(Writer writer) throws IOException {
+			writer.write("pdf");
+		}
+
+		@RequestMapping(value = "/something", headers = "content-type!=application/pdf")
+		public void handleNonPdf(Writer writer) throws IOException {
+			writer.write("non-pdf");
+		}
+
 	}
 
 	@Controller

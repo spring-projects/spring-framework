@@ -252,7 +252,8 @@ public @interface RequestMapping {
 	 * The parameters of the mapped request, narrowing the primary mapping.
 	 * <p>Same format for any environment: a sequence of "myParam=myValue" style
 	 * expressions, with a request only mapped if each such parameter is found
-	 * to have the given value. "myParam" style expressions are also supported,
+	 * to have the given value. Expressions can be negated by using the "!=" operator,
+	 * as in "myParam!=myValue". "myParam" style expressions are also supported,
 	 * with such parameters having to be present in the request (allowed to have
 	 * any value). Finally, "!myParam" style expressions indicate that the
 	 * specified parameter is <i>not</i> supposed to be present in the request.
@@ -275,7 +276,8 @@ public @interface RequestMapping {
 	 * The headers of the mapped request, narrowing the primary mapping.
 	 * <p>Same format for any environment: a sequence of "My-Header=myValue" style
 	 * expressions, with a request only mapped if each such header is found
-	 * to have the given value. "My-Header" style expressions are also supported,
+	 * to have the given value. Expressions can be negated by using the "!=" operator,
+	 * as in "My-Header!=myValue". "My-Header" style expressions are also supported,
 	 * with such headers having to be present in the request (allowed to have
 	 * any value). Finally, "!My-Header" style expressions indicate that the
 	 * specified header is <i>not</i> supposed to be present in the request.
