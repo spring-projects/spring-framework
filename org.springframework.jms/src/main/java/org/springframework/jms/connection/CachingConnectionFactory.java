@@ -314,18 +314,30 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			}
 			else {
 				this.transactionOpen = true;
-				if ((methodName.equals("createProducer") || methodName.equals("createSender") ||
-						methodName.equals("createPublisher")) && isCacheProducers()) {
+				if (isCacheProducers() && (methodName.equals("createProducer") ||
+						methodName.equals("createSender") || methodName.equals("createPublisher"))) {
+					// Destination argument being null is ok for a producer
 					return getCachedProducer((Destination) args[0]);
 				}
-				else if ((methodName.equals("createConsumer") || methodName.equals("createReceiver") ||
-						methodName.equals("createSubscriber")) && isCacheConsumers()) {
-					return getCachedConsumer((Destination) args[0], (args.length > 1 ? (String) args[1] : null),
-							(args.length > 2 && (Boolean) args[2]), null);
-				}
-				else if (methodName.equals("createDurableSubscriber") && isCacheConsumers()) {
-					return getCachedConsumer((Destination) args[0], (args.length > 2 ? (String) args[2] : null),
-							(args.length > 3 && (Boolean) args[3]), (String) args[1]);
+				else if (isCacheConsumers()) {
+					// let raw JMS invocation throw an exception if Destination (i.e. args[0]) is null
+					if ((methodName.equals("createConsumer") || methodName.equals("createReceiver") ||
+							methodName.equals("createSubscriber"))) {
+						if (args[0] != null) {
+							return getCachedConsumer((Destination) args[0],
+									(args.length > 1 ? (String) args[1] : null),
+									(args.length > 2 && (Boolean) args[2]),
+									null);
+						}
+					}
+					else if (methodName.equals("createDurableSubscriber")) {
+						if (args[0] != null) {
+							return getCachedConsumer((Destination) args[0],
+									(args.length > 2 ? (String) args[2] : null),
+									(args.length > 3 && (Boolean) args[3]),
+									(String) args[1]);
+						}
+					}
 				}
 			}
 			try {
@@ -337,7 +349,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		private MessageProducer getCachedProducer(Destination dest) throws JMSException {
-			DestinationCacheKey cacheKey = new DestinationCacheKey(dest);
+			DestinationCacheKey cacheKey = (dest != null ? new DestinationCacheKey(dest) : null);
 			MessageProducer producer = this.cachedProducers.get(cacheKey);
 			if (producer != null) {
 				if (logger.isTraceEnabled()) {
@@ -439,6 +451,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		private String destinationString;
 
 		public DestinationCacheKey(Destination destination) {
+			Assert.notNull(destination, "Destination must not be null");
 			this.destination = destination;
 		}
 
