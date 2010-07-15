@@ -341,6 +341,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 						TransactionSynchronizationManager.unbindResource(getConnectionFactory());
 					}
 				}
+				// Indicate that a message has been received.
 				return true;
 			}
 			else {
@@ -349,6 +350,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 							"session [" + sessionToUse + "] did not receive a message");
 				}
 				noMessageReceived(invoker, sessionToUse);
+				// Nevertheless call commit, in order to reset the transaction timeout (if any).
+				commitIfNecessary(session, message);
+				// Indicate that no message has been received.
 				return false;
 			}
 		}
@@ -416,9 +420,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	}
 
 	/**
-	 * Template method that gets called right <i>no</i> message has been received,
-	 * before attempting to process it. Allows subclasses to react to the event
-	 * of an actual incoming message, for example marking .
+	 * Template method that gets called when <i>no</i> message has been received,
+	 * before returning to the receive loop again. Allows subclasses to react to
+	 * the event of no incoming message, for example marking the invoker as idle.
 	 * @param invoker the invoker object (passed through)
 	 * @param session the receiving JMS Session
 	 */

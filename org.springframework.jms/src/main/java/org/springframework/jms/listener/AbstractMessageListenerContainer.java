@@ -575,7 +575,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 				JmsUtils.commitIfNecessary(session);
 			}
 		}
-		else if (isClientAcknowledge(session)) {
+		else if (message != null && isClientAcknowledge(session)) {
 			message.acknowledge();
 		}
 	}
