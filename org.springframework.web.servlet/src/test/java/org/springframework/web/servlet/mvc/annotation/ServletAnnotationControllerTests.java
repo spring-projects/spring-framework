@@ -1212,6 +1212,7 @@ public class ServletAnnotationControllerTests {
 		request = new MockHttpServletRequest("PUT", "/bar");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
+		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
 		assertEquals(404, response.getStatus());
 	}
 
@@ -2716,7 +2717,9 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/bar")
 		public ResponseEntity<String> bar() {
-			return new ResponseEntity<String>(new HttpHeaders(), HttpStatus.NOT_FOUND);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.set("MyResponseHeader", "MyValue");
+			return new ResponseEntity<String>(responseHeaders, HttpStatus.NOT_FOUND);
 		}
 
 	}

@@ -938,6 +938,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (body != null) {
 				writeWithMessageConverters(body, inputMessage, outputMessage);
 			}
+			else {
+				// flush headers
+				outputMessage.getBody();
+			}
 		}
 
 		@SuppressWarnings("unchecked")
