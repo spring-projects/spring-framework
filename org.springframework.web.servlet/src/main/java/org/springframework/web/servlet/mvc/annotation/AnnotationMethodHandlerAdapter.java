@@ -507,41 +507,30 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			Set<String> allowedMethods = new LinkedHashSet<String>(7);
 			String resolvedMethodName = null;
 			for (Method handlerMethod : getHandlerMethods()) {
-				RequestMappingInfo mappingInfo = new RequestMappingInfo();
-				RequestMapping mapping = AnnotationUtils.findAnnotation(handlerMethod, RequestMapping.class);
-				mappingInfo.paths = mapping.value();
-				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(), getTypeLevelMapping().method())) {
-					mappingInfo.methods = mapping.method();
-				}
-				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(), getTypeLevelMapping().params())) {
-					mappingInfo.params = mapping.params();
-				}
-				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(), getTypeLevelMapping().headers())) {
-					mappingInfo.headers = mapping.headers();
-				}
+				RequestMappingInfo mappingInfo = createRequestMappingInfo(handlerMethod);
 				boolean match = false;
-				if (mappingInfo.paths.length > 0) {
-					List<String> matchedPaths = new ArrayList<String>(mappingInfo.paths.length);
-					for (String mappedPattern : mappingInfo.paths) {
-						if (!hasTypeLevelMapping() && !mappedPattern.startsWith("/")) {
-							mappedPattern = "/" + mappedPattern;
+				if (mappingInfo.hasPatterns()) {
+					List<String> matchingPatterns = new ArrayList<String>(mappingInfo.patterns.length);
+					for (String pattern : mappingInfo.patterns) {
+						if (!hasTypeLevelMapping() && !pattern.startsWith("/")) {
+							pattern = "/" + pattern;
 						}
-						String matchedPattern = getMatchedPattern(mappedPattern, lookupPath, request);
-						if (matchedPattern != null) {
+						String combinedPattern = getCombinedPattern(pattern, lookupPath, request);
+						if (combinedPattern != null) {
 							if (mappingInfo.matches(request)) {
 								match = true;
-								matchedPaths.add(matchedPattern);
+								matchingPatterns.add(combinedPattern);
 							}
 							else {
-								for (RequestMethod requestMethod : mappingInfo.methods) {
-									allowedMethods.add(requestMethod.toString());
+								if (!mappingInfo.matchesRequestMethod(request)) {
+									allowedMethods.addAll(mappingInfo.methodNames());
 								}
 								break;
 							}
 						}
 					}
-					Collections.sort(matchedPaths, pathComparator);
-					mappingInfo.matchedPaths = matchedPaths;
+					Collections.sort(matchingPatterns, pathComparator);
+					mappingInfo.matchedPatterns = matchingPatterns;
 				}
 				else {
 					// No paths specified: parameter match sufficient.
@@ -551,15 +540,15 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						match = false;
 					}
 					else {
-						for (RequestMethod requestMethod : mappingInfo.methods) {
-							allowedMethods.add(requestMethod.toString());
+						if (!mappingInfo.matchesRequestMethod(request)) {
+							allowedMethods.addAll(mappingInfo.methodNames());
 						}
 					}
 				}
 				if (match) {
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
 					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
-						if (methodNameResolver != null && mappingInfo.paths.length == 0) {
+						if (methodNameResolver != null && mappingInfo.patterns.length == 0) {
 							if (!oldMappedMethod.getName().equals(handlerMethod.getName())) {
 								if (resolvedMethodName == null) {
 									resolvedMethodName = methodNameResolver.getHandlerMethodName(request);
@@ -594,7 +583,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						new RequestMappingInfoComparator(pathComparator, request);
 				Collections.sort(matches, requestMappingInfoComparator);
 				RequestMappingInfo bestMappingMatch = matches.get(0);
-				String bestMatchedPath = bestMappingMatch.bestMatchedPath();
+				String bestMatchedPath = bestMappingMatch.bestMatchedPattern();
 				if (bestMatchedPath != null) {
 					extractHandlerMethodUriTemplates(bestMatchedPath, lookupPath, request);
 				}
@@ -605,21 +594,38 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 					throw new HttpRequestMethodNotSupportedException(request.getMethod(),
 							StringUtils.toStringArray(allowedMethods));
 				}
-				else {
-					throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(),
-							request.getParameterMap());
-				}
+				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(),
+						request.getParameterMap());
 			}
 		}
 
+		private RequestMappingInfo createRequestMappingInfo(Method handlerMethod) {
+			RequestMappingInfo mappingInfo = new RequestMappingInfo();
+			RequestMapping mapping = AnnotationUtils.findAnnotation(handlerMethod, RequestMapping.class);
+			mappingInfo.patterns = mapping.value();
+			if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(), getTypeLevelMapping().method())) {
+				mappingInfo.methods = mapping.method();
+			}
+			if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(), getTypeLevelMapping().params())) {
+				mappingInfo.params = mapping.params();
+			}
+			if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(), getTypeLevelMapping().headers())) {
+				mappingInfo.headers = mapping.headers();
+			}
+			return mappingInfo;
+		}
+
 		/**
-		 * Determines the matched pattern for the given methodLevelPattern and path.
-		 * <p>Uses the following algorithm: <ol> <li>If there is a type-level mapping with path information, it is {@linkplain
-		 * PathMatcher#combine(String, String) combined} with the method-level pattern. <li>If there is a {@linkplain
-		 * HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern} in the request, it is combined with the
-		 * method-level pattern. <li>Otherwise,
+		 * Determines the combined pattern for the given methodLevelPattern and path.
+		 * <p>Uses the following algorithm: <ol>
+		 * <li>If there is a type-level mapping with path information, it is {@linkplain
+		 * PathMatcher#combine(String, String) combined} with the method-level pattern.</li>
+		 * <li>If there is a {@linkplain HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern} in the
+		 * request, it is combined with the method-level pattern.</li>
+		 * <li>Otherwise, the method-level pattern is returned.</li>
+		 * </ol>
 		 */
-		private String getMatchedPattern(String methodLevelPattern, String lookupPath, HttpServletRequest request) {
+		private String getCombinedPattern(String methodLevelPattern, String lookupPath, HttpServletRequest request) {
 			if (hasTypeLevelMapping() && (!ObjectUtils.isEmpty(getTypeLevelMapping().value()))) {
 				String[] typeLevelPatterns = getTypeLevelMapping().value();
 				for (String typeLevelPattern : typeLevelPatterns) {
@@ -978,9 +984,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 */
 	static class RequestMappingInfo {
 
-		String[] paths = new String[0];
+		String[] patterns = new String[0];
 
-		List<String> matchedPaths = Collections.emptyList();
+		List<String> matchedPatterns = Collections.emptyList();
 
 		RequestMethod[] methods = new RequestMethod[0];
 
@@ -988,27 +994,68 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		String[] headers = new String[0];
 
-		public String bestMatchedPath() {
-			return (!this.matchedPaths.isEmpty() ? this.matchedPaths.get(0) : null);
+		public boolean hasPatterns() {
+			return patterns.length > 0;
+		}
+
+		public String bestMatchedPattern() {
+			return (!this.matchedPatterns.isEmpty() ? this.matchedPatterns.get(0) : null);
 		}
 
 		public boolean matches(HttpServletRequest request) {
-			return ServletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
-					ServletAnnotationMappingUtils.checkParameters(this.params, request) &&
-					ServletAnnotationMappingUtils.checkHeaders(this.headers, request);
+			return matchesRequestMethod(request) && matchesParameters(request) && matchesHeaders(request);
+		}
+
+		public boolean matchesHeaders(HttpServletRequest request) {
+			return ServletAnnotationMappingUtils.checkHeaders(this.headers, request);
+		}
+
+		public boolean matchesParameters(HttpServletRequest request) {
+			return ServletAnnotationMappingUtils.checkParameters(this.params, request);
+		}
+
+		public boolean matchesRequestMethod(HttpServletRequest request) {
+			return ServletAnnotationMappingUtils.checkRequestMethod(this.methods, request);
+		}
+
+		public Set<String> methodNames() {
+			Set<String> methodNames = new LinkedHashSet<String>(methods.length);
+			for (RequestMethod method : methods) {
+				methodNames.add(method.name());
+			}
+			return methodNames;
 		}
 
 		@Override
 		public boolean equals(Object obj) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (Arrays.equals(this.paths, other.paths) && Arrays.equals(this.methods, other.methods) &&
+			return (Arrays.equals(this.patterns, other.patterns) && Arrays.equals(this.methods, other.methods) &&
 					Arrays.equals(this.params, other.params) && Arrays.equals(this.headers, other.headers));
 		}
 
 		@Override
 		public int hashCode() {
-			return (Arrays.hashCode(this.paths) * 23 + Arrays.hashCode(this.methods) * 29 +
+			return (Arrays.hashCode(this.patterns) * 23 + Arrays.hashCode(this.methods) * 29 +
 					Arrays.hashCode(this.params) * 31 + Arrays.hashCode(this.headers));
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append(Arrays.asList(patterns));
+			if (methods.length > 0) {
+				builder.append(',');
+				builder.append(Arrays.asList(methods));
+			}
+			if (headers.length > 0) {
+				builder.append(',');
+				builder.append(Arrays.asList(headers));
+			}
+			if (params.length > 0) {
+				builder.append(',');
+				builder.append(Arrays.asList(params));
+			}
+			return builder.toString();
 		}
 	}
 
@@ -1017,7 +1064,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * Comparator capable of sorting {@link RequestMappingInfo}s (RHIs) so that sorting a list with this comparator will
 	 * result in:
 	 * <ul>
-	 * <li>RHIs with {@linkplain RequestMappingInfo#matchedPaths better matched paths} take prescedence
+	 * <li>RHIs with {@linkplain RequestMappingInfo#matchedPatterns better matched paths} take prescedence
 	 * over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String) path
 	 * pattern comparator}.) Typically, this means that patterns without wild cards and uri templates will be ordered
 	 * before those without.</li>
@@ -1039,7 +1086,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		public int compare(RequestMappingInfo info1, RequestMappingInfo info2) {
-			int pathComparison = pathComparator.compare(info1.bestMatchedPath(), info2.bestMatchedPath());
+			int pathComparison = pathComparator.compare(info1.bestMatchedPattern(), info2.bestMatchedPattern());
 			if (pathComparison != 0) {
 				return pathComparison;
 			}
