@@ -1071,7 +1071,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void requestBodyResponseBody() throws ServletException, IOException {
-		initServlet(RequestBodyController.class);
+		initServlet(RequestResponseBodyController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
 		String requestBody = "Hello World";
@@ -1090,7 +1090,7 @@ public class ServletAnnotationControllerTests {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestResponseBodyController.class));
 				RootBeanDefinition converterDef = new RootBeanDefinition(StringHttpMessageConverter.class);
 				converterDef.getPropertyValues().add("supportedMediaTypes", new MediaType("text", "plain"));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
@@ -1116,7 +1116,7 @@ public class ServletAnnotationControllerTests {
 
 	@Test
 	public void responseBodyWildCardMediaType() throws ServletException, IOException {
-		initServlet(RequestBodyController.class);
+		initServlet(RequestResponseBodyController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
 		String requestBody = "Hello World";
@@ -1134,7 +1134,7 @@ public class ServletAnnotationControllerTests {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestResponseBodyController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("messageConverters", new ByteArrayHttpMessageConverter());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
@@ -1150,14 +1150,13 @@ public class ServletAnnotationControllerTests {
 		request.addHeader("Content-Type", "application/pdf");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("Invalid response status code", HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE,
-				response.getStatus());
+		assertEquals(415, response.getStatus());
 		assertNotNull("No Accept response header set", response.getHeader("Accept"));
 	}
 
 	@Test
 	public void responseBodyNoAcceptHeader() throws ServletException, IOException {
-		initServlet(RequestBodyController.class);
+		initServlet(RequestResponseBodyController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
 		String requestBody = "Hello World";
@@ -1175,7 +1174,7 @@ public class ServletAnnotationControllerTests {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestResponseBodyController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("messageConverters", new NotReadableMessageConverter());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
@@ -1226,7 +1225,7 @@ public class ServletAnnotationControllerTests {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestBodyController.class));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(RequestResponseBodyController.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				List<HttpMessageConverter> messageConverters = new ArrayList<HttpMessageConverter>();
 				messageConverters.add(new StringHttpMessageConverter());
@@ -1314,6 +1313,12 @@ public class ServletAnnotationControllerTests {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("text", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/something");
+		request.addHeader("Content-Type", "application/xml");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(404, response.getStatus());
 	}
 
 	@Test
@@ -2340,7 +2345,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Controller
-	public static class RequestBodyController {
+	public static class RequestResponseBodyController {
 
 		@RequestMapping(value = "/something", method = RequestMethod.PUT)
 		@ResponseBody
