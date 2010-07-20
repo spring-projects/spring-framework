@@ -16,6 +16,8 @@
 
 package org.springframework.scheduling.support;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,13 +25,11 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
 import org.springframework.scheduling.TriggerContext;
 
 /**
@@ -470,17 +470,49 @@ public class CronTriggerTests {
 
 	@Test
 	public void testSpecificDate() throws Exception {
-		CronTrigger trigger = new CronTrigger("* * * 3 10 *", timeZone);
+		CronTrigger trigger = new CronTrigger("* * * 3 11 *", timeZone);
 		calendar.set(Calendar.DAY_OF_MONTH, 2);
-		calendar.set(Calendar.MONTH, 10);
+		calendar.set(Calendar.MONTH, 9);
 		Date date = calendar.getTime();
 		TriggerContext context1 = getTriggerContext(date);
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MONTH, 10); // 10=November
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
 		calendar.add(Calendar.SECOND, 1);
+		TriggerContext context2 = getTriggerContext(date);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+	}
+
+	@Test(expected=IllegalStateException.class)
+	public void testNonExistentSpecificDate() throws Exception {
+		// TODO: maybe try and detect this as a special case in parser?
+		CronTrigger trigger = new CronTrigger("0 0 0 31 6 *", timeZone);
+		calendar.set(Calendar.DAY_OF_MONTH, 10);
+		calendar.set(Calendar.MONTH, 2);
+		Date date = calendar.getTime();
+		TriggerContext context1 = getTriggerContext(date);
+		trigger.nextExecutionTime(context1);
+		// new CronTrigger("0 0 0 30 1 ?", timeZone);
+	}
+
+	@Test
+	public void testLeapYearSpecificDate() throws Exception {
+		CronTrigger trigger = new CronTrigger("0 0 0 29 2 *", timeZone);
+		calendar.set(Calendar.YEAR, 2007);
+		calendar.set(Calendar.DAY_OF_MONTH, 10);
+		calendar.set(Calendar.MONTH, 1); // 2=February
+		Date date = calendar.getTime();
+		TriggerContext context1 = getTriggerContext(date);
+		calendar.set(Calendar.YEAR, 2008);
+		calendar.set(Calendar.DAY_OF_MONTH, 29);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		calendar.add(Calendar.YEAR, 4);
 		TriggerContext context2 = getTriggerContext(date);
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
 	}
@@ -559,14 +591,14 @@ public class CronTriggerTests {
 
 	@Test
 	public void testMonthNames() throws Exception {
-		CronTrigger trigger1 = new CronTrigger("* * * * 0-11 *", timeZone);
+		CronTrigger trigger1 = new CronTrigger("* * * * 1-12 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * FEB,JAN,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC *", timeZone);
 		assertEquals(trigger1, trigger2);
 	}
 
 	@Test
 	public void testMonthNamesMixedCase() throws Exception {
-		CronTrigger trigger1 = new CronTrigger("* * * * 1 *", timeZone);
+		CronTrigger trigger1 = new CronTrigger("* * * * 2 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * Feb *", timeZone);
 		assertEquals(trigger1, trigger2);
 	}
@@ -613,6 +645,21 @@ public class CronTriggerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testMonthInvalid() throws Exception {
+		new CronTrigger("0 0 0 25 13 ?", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testMonthInvalidTooSmall() throws Exception {
+		new CronTrigger("0 0 0 25 0 ?", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testDayOfMonthInvalid() throws Exception {
+		new CronTrigger("0 0 0 32 12 ?", timeZone);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testMonthRangeInvalid() throws Exception {
 		new CronTrigger("* * * * 11-13 *", timeZone);
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.scheduling.support;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collections;
@@ -115,12 +116,12 @@ public class CronSequenceGenerator {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
 
-		doNext(calendar);
+		doNext(calendar, calendar.get(Calendar.YEAR));
 
 		return calendar.getTime();
 	}
 
-	private void doNext(Calendar calendar) {
+	private void doNext(Calendar calendar, int dot) {
 		List<Integer> resets = new ArrayList<Integer>();
 
 		int second = calendar.get(Calendar.SECOND);
@@ -134,42 +135,43 @@ public class CronSequenceGenerator {
 		int updateMinute = findNext(this.minutes, minute, calendar, Calendar.MINUTE, Calendar.HOUR_OF_DAY, resets);
 		if (minute == updateMinute) {
 			resets.add(Calendar.MINUTE);
-		}
-		else {
-			doNext(calendar);
+		} else {
+			doNext(calendar, dot);
 		}
 
 		int hour = calendar.get(Calendar.HOUR_OF_DAY);
 		int updateHour = findNext(this.hours, hour, calendar, Calendar.HOUR_OF_DAY, Calendar.DAY_OF_WEEK, resets);
 		if (hour == updateHour) {
 			resets.add(Calendar.HOUR_OF_DAY);
-		}
-		else {
-			doNext(calendar);
+		} else {
+			doNext(calendar, dot);
 		}
 
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 		int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-		int updateDayOfMonth = findNextDay(calendar, this.daysOfMonth, dayOfMonth, daysOfWeek, dayOfWeek, 366, resets);
+		int updateDayOfMonth = findNextDay(calendar, this.daysOfMonth, dayOfMonth, daysOfWeek, dayOfWeek, resets);
 		if (dayOfMonth == updateDayOfMonth) {
 			resets.add(Calendar.DAY_OF_MONTH);
-		}
-		else {
-			doNext(calendar);
+		} else {
+			doNext(calendar, dot);
 		}
 
 		int month = calendar.get(Calendar.MONTH);
 		int updateMonth = findNext(this.months, month, calendar, Calendar.MONTH, Calendar.YEAR, resets);
 		if (month != updateMonth) {
-			doNext(calendar);
+			if (calendar.get(Calendar.YEAR) - dot > 4) {
+				throw new IllegalStateException("Invalid cron expression led to runaway search for next trigger");
+			}
+			doNext(calendar, dot);
 		}
 
 	}
 
 	private int findNextDay(Calendar calendar, BitSet daysOfMonth, int dayOfMonth, BitSet daysOfWeek, int dayOfWeek,
-			int max, List<Integer> resets) {
+			List<Integer> resets) {
 
 		int count = 0;
+		int max = 366;
 		// the DAY_OF_WEEK values in java.util.Calendar start with 1 (Sunday),
 		// but in the cron pattern, they start with 0, so we subtract 1 here
 		while ((!daysOfMonth.get(dayOfMonth) || !daysOfWeek.get(dayOfWeek - 1)) && count++ < max) {
@@ -178,7 +180,7 @@ public class CronSequenceGenerator {
 			dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 			reset(calendar, resets);
 		}
-		if (count > max) {
+		if (count >= max) {
 			throw new IllegalStateException("Overflow in day for expression=" + this.expression);
 		}
 		return dayOfMonth;
@@ -201,7 +203,7 @@ public class CronSequenceGenerator {
 		// roll over if needed
 		if (nextValue == -1) {
 			calendar.add(nextField, 1);
-			calendar.set(field, 0);
+			reset(calendar, Arrays.asList(field));
 			nextValue = bits.nextSetBit(0);
 		}
 		if (nextValue != value) {
@@ -216,7 +218,7 @@ public class CronSequenceGenerator {
 	 */
 	private void reset(Calendar calendar, List<Integer> fields) {
 		for (int field : fields) {
-			calendar.set(field, 0);
+			calendar.set(field, field == Calendar.DAY_OF_MONTH ? 1 : 0);
 		}
 	}
 
@@ -231,11 +233,11 @@ public class CronSequenceGenerator {
 			throw new IllegalArgumentException(String.format(""
 					+ "cron expression must consist of 6 fields (found %d in %s)", fields.length, expression));
 		}
-		setNumberHits(this.seconds, fields[0], 60);
-		setNumberHits(this.minutes, fields[1], 60);
-		setNumberHits(this.hours, fields[2], 24);
-		setDaysOfMonth(this.daysOfMonth, fields[3], 31);
-		setNumberHits(this.months, replaceOrdinals(fields[4], "JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC"), 12);
+		setNumberHits(this.seconds, fields[0], 0, 60);
+		setNumberHits(this.minutes, fields[1], 0, 60);
+		setNumberHits(this.hours, fields[2], 0, 24);
+		setDaysOfMonth(this.daysOfMonth, fields[3]);
+		setMonths(this.months, fields[4]);
 		setDays(this.daysOfWeek, replaceOrdinals(fields[5], "SUN,MON,TUE,WED,THU,FRI,SAT"), 8);
 		if (this.daysOfWeek.get(7)) {
 			// Sunday can be represented as 0 or 7
@@ -258,7 +260,8 @@ public class CronSequenceGenerator {
 		return value;
 	}
 
-	private void setDaysOfMonth(BitSet bits, String field, int max) {
+	private void setDaysOfMonth(BitSet bits, String field) {
+		int max = 31;
 		// Days of month start with 1 (in Cron and Calendar) so add one
 		setDays(bits, field, max + 1);
 		// ... and remove it from the front
@@ -269,23 +272,36 @@ public class CronSequenceGenerator {
 		if (field.contains("?")) {
 			field = "*";
 		}
-		setNumberHits(bits, field, max);
+		setNumberHits(bits, field, 0, max);
 	}
 
-	private void setNumberHits(BitSet bits, String value, int max) {
+	private void setMonths(BitSet bits, String value) {
+		int max = 12;
+		value = replaceOrdinals(value, "FOO,JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC");
+		BitSet months = new BitSet(13);
+		// Months start with 1 in Cron and 0 in Calendar, so push the values first into a longer bit set
+		setNumberHits(months, value, 1, max + 1);
+		// ... and then rotate it to the front of the months
+		for (int i = 1; i <= max; i++) {
+			if (months.get(i)) {
+				bits.set(i - 1);
+			}
+		}
+	}
+
+	private void setNumberHits(BitSet bits, String value, int min, int max) {
 		String[] fields = StringUtils.delimitedListToStringArray(value, ",");
 		for (String field : fields) {
 			if (!field.contains("/")) {
 				// Not an incrementer so it must be a range (possibly empty)
-				int[] range = getRange(field, max);
+				int[] range = getRange(field, min, max);
 				bits.set(range[0], range[1] + 1);
-			}
-			else {
+			} else {
 				String[] split = StringUtils.delimitedListToStringArray(field, "/");
 				if (split.length > 2) {
 					throw new IllegalArgumentException("Incrementer has more than two fields: " + field);
 				}
-				int[] range = getRange(split[0], max);
+				int[] range = getRange(split[0], min, max);
 				if (!split[0].contains("-")) {
 					range[1] = max - 1;
 				}
@@ -297,17 +313,16 @@ public class CronSequenceGenerator {
 		}
 	}
 
-	private int[] getRange(String field, int max) {
+	private int[] getRange(String field, int min, int max) {
 		int[] result = new int[2];
 		if (field.contains("*")) {
-			result[0] = 0;
+			result[0] = min;
 			result[1] = max - 1;
 			return result;
 		}
 		if (!field.contains("-")) {
 			result[0] = result[1] = Integer.valueOf(field);
-		}
-		else {
+		} else {
 			String[] split = StringUtils.delimitedListToStringArray(field, "-");
 			if (split.length > 2) {
 				throw new IllegalArgumentException("Range has more than two fields: " + field);
@@ -318,6 +333,9 @@ public class CronSequenceGenerator {
 		if (result[0] >= max || result[1] >= max) {
 			throw new IllegalArgumentException("Range exceeds maximum (" + max + "): " + field);
 		}
+		if (result[0] < min || result[1] < min) {
+			throw new IllegalArgumentException("Range less than minimum (" + min + "): " + field);
+		}
 		return result;
 	}
 
@@ -327,16 +345,15 @@ public class CronSequenceGenerator {
 			return false;
 		}
 		CronSequenceGenerator cron = (CronSequenceGenerator) obj;
-		return cron.months.equals(this.months) && cron.daysOfMonth.equals(this.daysOfMonth) &&
-				cron.daysOfWeek.equals(this.daysOfWeek) && cron.hours.equals(this.hours) &&
-				cron.minutes.equals(this.minutes) && cron.seconds.equals(this.seconds);
+		return cron.months.equals(this.months) && cron.daysOfMonth.equals(this.daysOfMonth)
+				&& cron.daysOfWeek.equals(this.daysOfWeek) && cron.hours.equals(this.hours)
+				&& cron.minutes.equals(this.minutes) && cron.seconds.equals(this.seconds);
 	}
 
 	@Override
 	public int hashCode() {
-		return 37 + 17 * this.months.hashCode() + 29 * this.daysOfMonth.hashCode() +
-				37 * this.daysOfWeek.hashCode() + 41 * this.hours.hashCode() +
-				53 * this.minutes.hashCode() + 61 * this.seconds.hashCode();
+		return 37 + 17 * this.months.hashCode() + 29 * this.daysOfMonth.hashCode() + 37 * this.daysOfWeek.hashCode()
+				+ 41 * this.hours.hashCode() + 53 * this.minutes.hashCode() + 61 * this.seconds.hashCode();
 	}
 
 	@Override
