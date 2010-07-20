@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.ObjectUtils;
+
 /**
  * Base class for message source implementations, providing support infrastructure
  * such as {@link java.text.MessageFormat} handling but not implementing concrete
@@ -37,6 +39,8 @@ import org.apache.commons.logging.LogFactory;
  * @since 2.5.5
  */
 public abstract class MessageSourceSupport {
+
+	private static final MessageFormat INVALID_MESSAGE_FORMAT = new MessageFormat("");
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -79,26 +83,58 @@ public abstract class MessageSourceSupport {
 
 
 	/**
+	 * Render the given default message String. The default message is
+	 * passed in as specified by the caller and can be rendered into
+	 * a fully formatted default message shown to the user.
+	 * <p>The default implementation passes the String to <code>formatMessage</code>,
+	 * resolving any argument placeholders found in them. Subclasses may override
+	 * this method to plug in custom processing of default messages.
+	 * @param defaultMessage the passed-in default message String
+	 * @param args array of arguments that will be filled in for params within
+	 * the message, or <code>null</code> if none.
+	 * @param locale the Locale used for formatting
+	 * @return the rendered default message (with resolved arguments)
+	 * @see #formatMessage(String, Object[], java.util.Locale)
+	 */
+	protected String renderDefaultMessage(String defaultMessage, Object[] args, Locale locale) {
+		return formatMessage(defaultMessage, args, locale);
+	}
+
+	/**
 	 * Format the given message String, using cached MessageFormats.
 	 * By default invoked for passed-in default messages, to resolve
 	 * any argument placeholders found in them.
 	 * @param msg the message to format
 	 * @param args array of arguments that will be filled in for params within
-	 * the message, or <code>null</code> if none.
+	 * the message, or <code>null</code> if none
 	 * @param locale the Locale used for formatting
 	 * @return the formatted message (with resolved arguments)
 	 */
 	protected String formatMessage(String msg, Object[] args, Locale locale) {
-		if (msg == null || (!this.alwaysUseMessageFormat && (args == null || args.length == 0))) {
+		if (msg == null || (!this.alwaysUseMessageFormat && ObjectUtils.isEmpty(args))) {
 			return msg;
 		}
 		MessageFormat messageFormat;
 		synchronized (this.cachedMessageFormats) {
 			messageFormat = this.cachedMessageFormats.get(msg);
 			if (messageFormat == null) {
-				messageFormat = createMessageFormat(msg, locale);
+				try {
+					messageFormat = createMessageFormat(msg, locale);
+				}
+				catch (IllegalArgumentException ex) {
+					// invalid message format - probably not intended for formatting,
+					// rather using a message structure with no arguments involved
+					if (this.alwaysUseMessageFormat) {
+						throw ex;
+					}
+					// silently proceed with raw message if format not enforced
+					messageFormat = INVALID_MESSAGE_FORMAT;
+				}
 				this.cachedMessageFormats.put(msg, messageFormat);
 			}
+		}
+		if (messageFormat == INVALID_MESSAGE_FORMAT) {
+			return msg;
 		}
 		synchronized (messageFormat) {
 			return messageFormat.format(resolveArguments(args, locale));
@@ -126,25 +162,6 @@ public abstract class MessageSourceSupport {
 	 */
 	protected Object[] resolveArguments(Object[] args, Locale locale) {
 		return args;
-	}
-
-
-	/**
-	 * Render the given default message String. The default message is
-	 * passed in as specified by the caller and can be rendered into
-	 * a fully formatted default message shown to the user.
-	 * <p>The default implementation passes the String to <code>formatMessage</code>,
-	 * resolving any argument placeholders found in them. Subclasses may override
-	 * this method to plug in custom processing of default messages.
-	 * @param defaultMessage the passed-in default message String
-	 * @param args array of arguments that will be filled in for params within
-	 * the message, or <code>null</code> if none.
-	 * @param locale the Locale used for formatting
-	 * @return the rendered default message (with resolved arguments)
-	 * @see #formatMessage(String, Object[], java.util.Locale)
-	 */
-	protected String renderDefaultMessage(String defaultMessage, Object[] args, Locale locale) {
-		return formatMessage(defaultMessage, args, locale);
 	}
 
 }
