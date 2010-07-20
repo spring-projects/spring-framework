@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,8 +148,9 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 				return msg;
 			}
 		}
-		if (resolvable.getDefaultMessage() != null) {
-			return renderDefaultMessage(resolvable.getDefaultMessage(), resolvable.getArguments(), locale);
+		String defaultMessage = resolvable.getDefaultMessage();
+		if (defaultMessage != null) {
+			return renderDefaultMessage(defaultMessage, resolvable.getArguments(), locale);
 		}
 		if (codes.length > 0) {
 			String fallback = getDefaultMessage(codes[0]);
@@ -254,25 +255,6 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 			return code;
 		}
 		return null;
-	}
-
-	/**
-	 * Render the given default message String. The default message is passed in
-	 * as specified by the caller and can be rendered into a fully formatted
-	 * default message shown to the user.
-	 * <p>The default implementation passes the String to {@link #formatMessage},
-	 * resolving any argument placeholders found in them. Subclasses may override
-	 * this method to plug in custom processing of default messages.
-	 * @param defaultMessage the passed-in default message String
-	 * @param args array of arguments that will be filled in for params within
-	 * the message, or <code>null</code> if none.
-	 * @param locale the Locale used for formatting
-	 * @return the rendered default message (with resolved arguments)
-	 * @see #formatMessage(String, Object[], java.util.Locale)
-	 */
-	@Override
-	protected String renderDefaultMessage(String defaultMessage, Object[] args, Locale locale) {
-		return formatMessage(defaultMessage, args, locale);
 	}
 
 
