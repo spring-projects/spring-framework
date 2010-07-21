@@ -3,3 +3,4 @@ integration-repo
 ivy-cache
 spring-build
 jmx.log
+.springBeans
