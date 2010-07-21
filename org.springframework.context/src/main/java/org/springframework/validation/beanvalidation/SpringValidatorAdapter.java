@@ -16,9 +16,12 @@
 
 package org.springframework.validation.beanvalidation;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import javax.validation.ConstraintViolation;
 import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
@@ -42,6 +45,14 @@ import org.springframework.validation.Validator;
  * @since 3.0
  */
 public class SpringValidatorAdapter implements Validator, javax.validation.Validator {
+
+	private static final Set<String> internalAnnotationAttributes = new HashSet<String>(3);
+
+	static {
+		internalAnnotationAttributes.add("message");
+		internalAnnotationAttributes.add("groups");
+		internalAnnotationAttributes.add("payload");
+	}
 
 	private javax.validation.Validator targetValidator;
 
@@ -95,8 +106,11 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 	/**
 	 * Return FieldError arguments for a validation error on the given field.
 	 * Invoked for each violated constraint.
-	 * <p>The default implementation returns a single argument of type
-	 * DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes.
+	 * <p>The default implementation returns a first argument indicating the field name
+	 * (of type DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes).
+	 * Afterwards, it adds all actual constraint annotation attributes (i.e. excluding
+	 * "message", "groups" and "payload") in alphabetical order of their attribute names.
+	 * <p>Can be overridden to e.g. add further attributes from the constraint descriptor.
 	 * @param objectName the name of the target object
 	 * @param field the field that caused the binding error
 	 * @param descriptor the JSR-303 constraint descriptor
@@ -109,7 +123,16 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 		List<Object> arguments = new LinkedList<Object>();
 		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
 		arguments.add(new DefaultMessageSourceResolvable(codes, field));
-		arguments.addAll(descriptor.getAttributes().values());
+		// Using a TreeMap for alphabetical ordering of attribute names
+		Map<String, Object> attributesToExpose = new TreeMap<String, Object>();
+		for (Map.Entry<String, Object> entry : descriptor.getAttributes().entrySet()) {
+			String attributeName = entry.getKey();
+			Object attributeValue = entry.getValue();
+			if (!internalAnnotationAttributes.contains(attributeName)) {
+				attributesToExpose.put(attributeName, attributeValue);
+			}
+		}
+		arguments.addAll(attributesToExpose.values());
 		return arguments.toArray(new Object[arguments.size()]);
 	}
 

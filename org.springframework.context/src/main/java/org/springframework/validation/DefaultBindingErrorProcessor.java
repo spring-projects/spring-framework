@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,8 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 	/**
 	 * Return FieldError arguments for a binding error on the given field.
 	 * Invoked for each missing required field and each type mismatch.
-	 * <p>The default implementation returns a single argument of type
-	 * DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes.
+	 * <p>The default implementation returns a single argument indicating the field name
+	 * (of type DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes).
 	 * @param objectName the name of the target object
 	 * @param field the field that caused the binding error
 	 * @return the Object array that represents the FieldError arguments
