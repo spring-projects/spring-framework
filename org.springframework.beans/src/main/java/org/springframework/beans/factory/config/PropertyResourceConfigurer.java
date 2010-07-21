@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 		while (propertyNames.hasMoreElements()) {
 			String propertyName = (String) propertyNames.nextElement();
 			String propertyValue = props.getProperty(propertyName);
-			String convertedValue = convertPropertyValue(propertyValue);
+			String convertedValue = convertProperty(propertyName, propertyValue);
 			if (!ObjectUtils.nullSafeEquals(propertyValue, convertedValue)) {
 				props.setProperty(propertyName, convertedValue);
 			}
@@ -100,8 +100,21 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	}
 
 	/**
-	 * Convert the given property value from the properties source
-	 * to the value that should be applied.
+	 * Convert the given property from the properties source to the value
+	 * which should be applied.
+	 * <p>The default implementation calls {@link #convertPropertyValue(String)}.
+	 * @param propertyName the name of the property that the value is defined for
+	 * @param propertyValue the original value from the properties source
+	 * @return the converted value, to be used for processing
+	 * @see #convertPropertyValue(String)
+	 */
+	protected String convertProperty(String propertyName, String propertyValue) {
+		return convertPropertyValue(propertyValue);
+	}
+
+	/**
+	 * Convert the given property value from the properties source to the value
+	 * which should be applied.
 	 * <p>The default implementation simply returns the original value.
 	 * Can be overridden in subclasses, for example to detect
 	 * encrypted values and decrypt them accordingly.
@@ -111,14 +124,16 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	 * @see #setProperties
 	 * @see #setLocations
 	 * @see #setLocation
+	 * @see #convertProperty(String, String)
 	 */
 	protected String convertPropertyValue(String originalValue) {
 		return originalValue;
 	}
 
+
 	/**
 	 * Apply the given Properties to the given BeanFactory.
-	 * @param beanFactory	the BeanFactory used by the application context
+	 * @param beanFactory the BeanFactory used by the application context
 	 * @param props the Properties to apply
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
