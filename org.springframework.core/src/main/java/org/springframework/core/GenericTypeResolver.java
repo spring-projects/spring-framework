@@ -107,7 +107,7 @@ public abstract class GenericTypeResolver {
 	 * the given target class which is assumed to implement the generic interface
 	 * and possibly declare a concrete type for its type variable.
 	 * @param clazz the target class to check against
-	 * @param genericIfc the generic interface to resolve the type argument from
+	 * @param genericIfc the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of the argument, or <code>null</code> if not resolvable
 	 */
 	public static Class<?> resolveTypeArgument(Class clazz, Class genericIfc) {
@@ -127,7 +127,7 @@ public abstract class GenericTypeResolver {
 	 * target class which is assumed to implement the generic interface and possibly
 	 * declare concrete types for its type variables.
 	 * @param clazz the target class to check against
-	 * @param genericIfc the generic interface to resolve the type argument from
+	 * @param genericIfc the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or <code>null</code> if not resolvable
 	 */
@@ -137,26 +137,20 @@ public abstract class GenericTypeResolver {
 
 	private static Class[] doResolveTypeArguments(Class ownerClass, Class classToIntrospect, Class genericIfc) {
 		while (classToIntrospect != null) {
-			Type[] ifcs = classToIntrospect.getGenericInterfaces();
-			for (Type ifc : ifcs) {
-				if (ifc instanceof ParameterizedType) {
-					ParameterizedType paramIfc = (ParameterizedType) ifc;
-					Type rawType = paramIfc.getRawType();
-					if (genericIfc.equals(rawType)) {
-						Type[] typeArgs = paramIfc.getActualTypeArguments();
-						Class[] result = new Class[typeArgs.length];
-						for (int i = 0; i < typeArgs.length; i++) {
-							Type arg = typeArgs[i];
-							result[i] = extractClass(ownerClass, arg);
-						}
+			if (genericIfc.isInterface()) {
+				Type[] ifcs = classToIntrospect.getGenericInterfaces();
+				for (Type ifc : ifcs) {
+					Class[] result = doResolveTypeArguments(ownerClass, ifc, genericIfc);
+					if (result != null) {
 						return result;
 					}
-					else if (genericIfc.isAssignableFrom((Class) rawType)) {
-						return doResolveTypeArguments(ownerClass, (Class) rawType, genericIfc);
-					}
 				}
-				else if (genericIfc.isAssignableFrom((Class) ifc)) {
-					return doResolveTypeArguments(ownerClass, (Class) ifc, genericIfc);
+			}
+			else {
+				Class[] result = doResolveTypeArguments(
+						ownerClass, classToIntrospect.getGenericSuperclass(), genericIfc);
+				if (result != null) {
+					return result;
 				}
 			}
 			classToIntrospect = classToIntrospect.getSuperclass();
@@ -164,11 +158,43 @@ public abstract class GenericTypeResolver {
 		return null;
 	}
 	
+	private static Class[] doResolveTypeArguments(Class ownerClass, Type ifc, Class genericIfc) {
+		if (ifc instanceof ParameterizedType) {
+			ParameterizedType paramIfc = (ParameterizedType) ifc;
+			Type rawType = paramIfc.getRawType();
+			if (genericIfc.equals(rawType)) {
+				Type[] typeArgs = paramIfc.getActualTypeArguments();
+				Class[] result = new Class[typeArgs.length];
+				for (int i = 0; i < typeArgs.length; i++) {
+					Type arg = typeArgs[i];
+					result[i] = extractClass(ownerClass, arg);
+				}
+				return result;
+			}
+			else if (genericIfc.isAssignableFrom((Class) rawType)) {
+				return doResolveTypeArguments(ownerClass, (Class) rawType, genericIfc);
+			}
+		}
+		else if (genericIfc.isAssignableFrom((Class) ifc)) {
+			return doResolveTypeArguments(ownerClass, (Class) ifc, genericIfc);
+		}
+		return null;
+	}
+
 	/**
 	 * Extract a class instance from given Type.
 	 */
 	private static Class extractClass(Class ownerClass, Type arg) {
-		if (arg instanceof TypeVariable) {
+		if (arg instanceof ParameterizedType) {
+			return extractClass(ownerClass, ((ParameterizedType) arg).getRawType());
+		}
+		else if (arg instanceof GenericArrayType) {
+			GenericArrayType gat = (GenericArrayType) arg;
+			Type gt = gat.getGenericComponentType();
+			Class<?> componentClass = extractClass(ownerClass, gt);
+			return Array.newInstance(componentClass, 0).getClass();
+		}
+		else if (arg instanceof TypeVariable) {
 			TypeVariable tv = (TypeVariable) arg;
 			arg = getTypeVariableMap(ownerClass).get(tv);
 			if (arg == null) {
@@ -177,12 +203,6 @@ public abstract class GenericTypeResolver {
 			else {
 				arg = extractClass(ownerClass, arg);
 			}
-		}
-		else if (arg instanceof GenericArrayType) {
-			GenericArrayType gat = (GenericArrayType) arg;
-			Type gt = gat.getGenericComponentType();
-			Class<?> componentClass = extractClass(ownerClass, gt);
-			arg = Array.newInstance(componentClass, 0).getClass();
 		}
 		return (arg instanceof Class ? (Class) arg : Object.class);
 	}
