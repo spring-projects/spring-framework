@@ -247,7 +247,7 @@ public interface RestOperations {
 	 * @see HttpEntity
 	 * @since 3.0.2
 	 */
-	<T> HttpEntity<T> postForEntity(String url, Object request, Class<T> responseType, Map<String, ?> uriVariables)
+	<T> ResponseEntity<T> postForEntity(String url, Object request, Class<T> responseType, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**

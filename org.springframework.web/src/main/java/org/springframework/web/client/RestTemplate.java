@@ -302,7 +302,7 @@ public class RestTemplate extends HttpAccessor implements RestOperations {
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <T> HttpEntity<T> postForEntity(String url,
+	public <T> ResponseEntity<T> postForEntity(String url,
 										   Object request,
 										   Class<T> responseType,
 										   Map<String, ?> uriVariables)
