@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.util;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,8 +53,7 @@ public class WeakReferenceMonitor {
 	private static final ReferenceQueue<Object> handleQueue = new ReferenceQueue<Object>();
 
 	// All tracked entries (WeakReference => ReleaseListener)
-	private static final Map<Reference, ReleaseListener> trackedEntries =
-			Collections.synchronizedMap(new HashMap<Reference, ReleaseListener>());
+	private static final Map<Reference, ReleaseListener> trackedEntries = new HashMap<Reference, ReleaseListener>();
 
 	// Thread polling handleQueue, lazy initialized
 	private static Thread monitoringThread = null;
@@ -87,12 +85,12 @@ public class WeakReferenceMonitor {
 	 * @param entry the associated entry
 	 */
 	private static void addEntry(Reference ref, ReleaseListener entry) {
-		// Add entry, the key is given reference.
-		trackedEntries.put(ref, entry);
-
-		// Start monitoring thread lazily.
 		synchronized (WeakReferenceMonitor.class) {
-			if (!isMonitoringThreadRunning()) {
+			// Add entry, the key is given reference.
+			trackedEntries.put(ref, entry);
+
+			// Start monitoring thread lazily.
+			if (monitoringThread == null) {
 				monitoringThread = new Thread(new MonitoringProcess(), WeakReferenceMonitor.class.getName());
 				monitoringThread.setDaemon(true);
 				monitoringThread.start();
@@ -106,15 +104,25 @@ public class WeakReferenceMonitor {
 	 * @return entry object associated with given reference
 	 */
 	private static ReleaseListener removeEntry(Reference reference) {
-		return trackedEntries.remove(reference);
+		synchronized (WeakReferenceMonitor.class) {
+			return trackedEntries.remove(reference);
+		}
 	}
 
 	/**
-	 * Check if monitoring thread is currently running.
+	 * Check whether to keep the monitoring thread alive,
+	 * i.e. whether there are still entries being tracked.
 	 */
-	private static boolean isMonitoringThreadRunning() {
+	private static boolean keepMonitoringThreadAlive() {
 		synchronized (WeakReferenceMonitor.class) {
-			return (monitoringThread != null);
+			if (!trackedEntries.isEmpty()) {
+				return true;
+			}
+			else {
+				logger.debug("No entries left to track - stopping reference monitor thread");
+				monitoringThread = null;
+				return false;
+			}
 		}
 	}
 
@@ -126,28 +134,28 @@ public class WeakReferenceMonitor {
 
 		public void run() {
 			logger.debug("Starting reference monitor thread");
-			try {
-				// Check if there are any tracked entries left.
-				while (!trackedEntries.isEmpty()) {
-					try {
-						Reference reference = handleQueue.remove();
-						// Stop tracking this reference.
-						ReleaseListener entry = removeEntry(reference);
-						if (entry != null) {
-							// Invoke listener callback.
+			// Check if there are any tracked entries left.
+			while (keepMonitoringThreadAlive()) {
+				try {
+					Reference reference = handleQueue.remove();
+					// Stop tracking this reference.
+					ReleaseListener entry = removeEntry(reference);
+					if (entry != null) {
+						// Invoke listener callback.
+						try {
 							entry.released();
 						}
-					}
-					catch (InterruptedException ex) {
-						logger.debug("Reference monitor thread interrupted", ex);
-						break;
+						catch (Throwable ex) {
+							logger.warn("Reference release listener threw exception", ex);
+						}
 					}
 				}
-			}
-			finally {
-				logger.debug("Stopping reference monitor thread");
-				synchronized (WeakReferenceMonitor.class) {
-					monitoringThread = null;
+				catch (InterruptedException ex) {
+					synchronized (WeakReferenceMonitor.class) {
+						monitoringThread = null;
+					}
+					logger.debug("Reference monitor thread interrupted", ex);
+					break;
 				}
 			}
 		}
