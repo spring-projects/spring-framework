@@ -35,6 +35,9 @@ abstract class ConversionUtils {
 		try {
 			return converter.convert(source, sourceType, targetType);
 		}
+		catch (ConversionFailedException ex) {
+			throw ex;
+		}
 		catch (Exception ex) {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}

@@ -16,24 +16,18 @@
 
 package org.springframework.web.servlet.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Date;
 import java.util.Locale;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -120,7 +114,7 @@ public class MvcNamespaceTests {
 		assertTrue(handler.recordedValidationError);
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected=TypeMismatchException.class)
 	public void testCustomConversionService() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml", getClass()));
