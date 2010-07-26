@@ -1495,11 +1495,11 @@ URI location = template.postForLocation(uri, booking, "1");
         <title>Dealing with request and response headers</title>
 
         <para>Besides the methods described above, the <classname>RestTemplate</classname>
-        also has the <methodname>execute</methodname> method, which can be
+        also has the <methodname>exchange</methodname> method, which can be
         used for arbitrary HTTP method execution based on the <classname>HttpEntity</classname>
         class.</para>
 
-        <para>Perhaps most importantly, the <methodname>execute</methodname> 
+        <para>Perhaps most importantly, the <methodname>exchange</methodname> 
         method can be used to add request headers and read response headers.
         For example:</para>
 
