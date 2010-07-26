@@ -3,31 +3,40 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.4 (2010-07-23)
+Changes in version 3.0.4 (2010-07-30)
 -------------------------------------
 
-* support for Hibernate Validator 4.1 and EclipseLink 2.1
+* support for Hibernate Validator 4.1, EclipseLink 2.1, EHCache 2.2
 * OSGi manifest version range accepts EHCache 2.x as well
 * ConversionService is able to deal with empty collections and nested collections (fixed regression)
 * ConversionService properly handles nested Resource arrays in Map values (fixed regression)
 * ConversionService does not accidentally use copy constructor for same type
+* fixed double ConversionFailedException nesting for ObjectToObjectConverter invocations
 * BeanWrapper preserves annotation information for individual array/list/map elements
 * SpEL 'select last' operator now works consistently with maps
 * BeanWrapper/DataBinder's "autoGrowNestedPaths" works for Maps as well
 * Jaxb2Marshaller's "marshallerProperties" Map accepts any value type
+* fixed WeakReferenceMonitor to never stop its monitoring thread if an entry has been registered
+* fixed CronTrigger to correctly parse month parts expressed as numbers (1-12 instead of 0-11)
 * JmsResourceHolder does not ignore IllegalStateException from locally synchronized transaction
+* fixed JMS CachingConnectionFactory to correctly cache a producer without fixed destination as well
+* DefaultMessageListenerContainer triggers Session commit even if no message has been received
 * Spring's MessageEndpointFactory classes are now JCA 1.6 compliant as well
 * AbstractJaxWsServiceExporter supports "bindingType" bean property, overriding @BindingType
 * AbstractJaxWsServiceExporter supports "webServiceFeatures" bean property on JAX-WS 2.2
+* HibernateJpaDialect correctly closes borrowed connections even for nested JDBC executions 
 * DefaultJdoDialect supports JDO 3.0 query timeout facility (as supported by DataNucleus 2.1)
 * transaction names based on method id from most specific method (target class instead of interface)
-* added "validationMessageSource" property to LocalValidatorFactoryBean, for Spring-based messages
+* added "validationMessageSource" to LocalValidatorFactoryBean, for Spring-based validation messages
+* Spring field error arguments include actually declared annotation attributes in alphabetical order
+* JSR-303 Pattern message resolvable through Spring MessageSource (despite special characters) 
 * DispatcherServlet applies default view name translation to error views as well
 * mvc:annotation-driven reliably detects JSR-303 and JAXB2 in an OSGi environment as well
 * @MVC handler methods reliably resolve MultipartRequest arguments with HiddenHttpMethodFilter
+* fixed @PathVariable regression in combination with ConversionService usage on DataBinder
 * @CookieValue returns decoded cookie value in a Servlet environment (analogous to @RequestParam)
-@ @ExceptionHandler works for inherited method and CGLIB proxies on Portlet controllers as well
 * MVC HandlerExceptionResolvers prevent caching for exception views if preventResponseCaching=true
+* @ExceptionHandler works for inherited method and CGLIB proxies on Portlet controllers as well
 * Portlet @MVC's implicit render model will be updated at the end of the event phase
 * JSP EvalTag resolves "@myBeanName" references in expressions against the WebApplicationContext
 
