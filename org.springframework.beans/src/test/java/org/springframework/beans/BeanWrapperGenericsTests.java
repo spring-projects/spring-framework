@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.Assert;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import test.beans.GenericBean;
@@ -46,7 +45,7 @@ import org.springframework.core.io.UrlResource;
  * @author Chris Beams
  * @since 18.01.2006
  */
-public final class BeanWrapperGenericsTests {
+public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericSet() {
@@ -455,9 +454,9 @@ public final class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
-		Assert.assertEquals(new Integer(10), gb.getGenericProperty());
-		Assert.assertEquals(new Integer(20), gb.getGenericListProperty().get(0));
-		Assert.assertEquals(new Integer(30), gb.getGenericListProperty().get(1));
+		assertEquals(new Integer(10), gb.getGenericProperty());
+		assertEquals(new Integer(20), gb.getGenericListProperty().get(0));
+		assertEquals(new Integer(30), gb.getGenericListProperty().get(1));
 	}
 
 	@Test
@@ -466,9 +465,9 @@ public final class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
-		Assert.assertEquals(new Integer(10), gb.getGenericProperty().iterator().next());
-		Assert.assertEquals(new Integer(20), gb.getGenericListProperty().get(0).iterator().next());
-		Assert.assertEquals(new Integer(30), gb.getGenericListProperty().get(1).iterator().next());
+		assertEquals(new Integer(10), gb.getGenericProperty().iterator().next());
+		assertEquals(new Integer(20), gb.getGenericListProperty().get(0).iterator().next());
+		assertEquals(new Integer(30), gb.getGenericListProperty().get(1).iterator().next());
 	}
 
 	@Test
@@ -476,7 +475,15 @@ public final class BeanWrapperGenericsTests {
 		Bar bar = new Bar();
 		BeanWrapper bw = new BeanWrapperImpl(bar);
 		bw.setPropertyValue("version", "10");
-		Assert.assertEquals(10.0, bar.getVersion());
+		assertEquals(new Double(10.0), bar.getVersion());
+	}
+
+	@Test
+	public void testSettingLongPropertyWithGenericInterface() {
+		Promotion bean = new Promotion();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.setPropertyValue("id", "10");
+		assertEquals(new Long(10), bean.getId());
 	}
 
 
@@ -593,5 +600,26 @@ public final class BeanWrapperGenericsTests {
 		}
 	}
 
+
+	public interface ObjectWithId<T extends Comparable<T>> {
+
+	  T getId();
+
+	  void setId(T aId);
+	}
+
+
+	public class Promotion implements ObjectWithId<Long> {
+
+	  private Long id;
+
+	  public Long getId() {
+		  return id;
+	  }
+
+	  public void setId(Long aId) {
+		  this.id = aId;
+	  }
+	}
 
 }
