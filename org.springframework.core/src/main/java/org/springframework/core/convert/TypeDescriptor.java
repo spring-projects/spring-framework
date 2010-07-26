@@ -43,7 +43,7 @@ public class TypeDescriptor {
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
 	/** Constant defining a TypeDescriptor for 'unknown type' */
-	public static final TypeDescriptor UNKNOWN = new TypeDescriptor(Object.class);
+	private static final TypeDescriptor UNKNOWN = new TypeDescriptor(Object.class);
 
 	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
 
