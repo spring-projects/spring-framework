@@ -57,7 +57,9 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	public void initConversion(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService must not be null");
 		this.conversionService = conversionService;
-		getPropertyAccessor().setConversionService(conversionService);
+		if (getTarget() != null) {
+			getPropertyAccessor().setConversionService(conversionService);
+		}
 	}
 
 	/**
