@@ -1,17 +1,23 @@
 package org.springframework.web.servlet.resources;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.zip.GZIPOutputStream;
 
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,101 +32,112 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
+import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 
-public class ResourceHttpRequestHandler implements HttpRequestHandler {
+/**
+ * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance 
+ * (according to the guidelines of Page Speed, YSlow, etc.) by adding far future cache expiration headers 
+ * and gzip compressing the resources if supported by the client.
+ * 
+ * <p>TODO - expand the docs further
+ * 
+ * @author Keith Donald
+ * @author Jeremy Grelle
+ * @since 3.0.4
+ */
+public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModified {
 
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
-	private Resource resourceDirectory;
+	private final List<Resource> resourcePaths;
 	
 	private int maxAge = 31556926;
 	
 	private FileMediaTypeMap fileMediaTypeMap = new DefaultFileMediaTypeMap();
+
+	private boolean gzipEnabled = true;
 	
-	public ResourceHttpRequestHandler(Resource resourceDirectory) {
-		Assert.notNull(resourceDirectory, "The resource directory may not be null");
-		this.resourceDirectory = resourceDirectory;
+	private int minGzipSize = 150;
+	
+	private int maxGzipSize = 500000;
+	
+	public ResourceHttpRequestHandler(List<Resource> resourcePaths) {
+		Assert.notNull(resourcePaths, "Resource paths must not be null");
+		this.resourcePaths = resourcePaths;
 	}
 	
-	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
 		if (!"GET".equals(request.getMethod())) {
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(),
 					new String[] {"GET"}, "ResourceHttpRequestHandler only supports GET requests");
 		}
-		List<Resource> resources = getResources(request);
-		if (resources.size() == 0) {
+		URLResource resource = getResource(request);
+		if (resource == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		boolean notModified = checkNotModified(resources, request, response);
-		if (notModified) {
-			return;
+		prepareResponse(resource, response);
+		writeResponse(resource, request, response);
+	}
+	
+	public long getLastModified(HttpServletRequest request) {
+		try {
+			Resource resource = getResource(request);
+			if (resource == null) {
+				return -1;
+			}
+			return resource.lastModified();
+		} catch (Exception e) {
+			return -1;
 		}
-		prepareResponse(resources, response);
-		writeResponse(resources, response);
+	}
+	
+	public void setGzipEnabled(boolean gzipEnabled) {
+		this.gzipEnabled = gzipEnabled;
 	}
 
-	private List<Resource> getResources(HttpServletRequest request) throws ServletException, IOException {
+	public void setMinGzipSize(int minGzipSize) {
+		this.minGzipSize = minGzipSize;
+	}
+
+	public void setMaxGzipSize(int maxGzipSize) {
+		this.maxGzipSize = maxGzipSize;
+	}
+
+	private URLResource getResource(HttpServletRequest request) {
 		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (path == null) {
 			throw new IllegalStateException("Required request attribute '" + HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");			
 		}
-		String[] resourceElements = path.split(",");
-		if (resourceElements.length == 1 && resourceElements[0].length() == 0) {
-			throw new NoSuchRequestHandlingMethodException(request);
+		if (path.contains("WEB-INF") || path.contains("META-INF")) {
+			return null;
 		}
-		List<Resource> resources = new ArrayList<Resource>();
-		String[] dirAndFilename = splitDirectoryAndFilename(resourceElements[0]);
-		String dir = dirAndFilename[0];
-		String filename = dirAndFilename[1];
-		Resource parent = dir != null ? this.resourceDirectory.createRelative(dir) : this.resourceDirectory;
-		addResource(parent, filename, resources);
-		if (resourceElements.length > 1) {
-			for (int i = 1; i < resourceElements.length; i++) {
-				addResource(parent, resourceElements[i], resources);
-			}					
-		}
-		return resources;
-	}
-	
-	private boolean checkNotModified(List<Resource> resources,HttpServletRequest request, HttpServletResponse response) throws IOException {
-		long lastModifiedTimestamp = -1;
-		long ifModifiedSince = request.getDateHeader("If-Modified-Since");			
-		for (Resource resource : resources) {
-			long resourceLastModified = resource.lastModified();
-			if (resourceLastModified > lastModifiedTimestamp) {
-				lastModifiedTimestamp = resourceLastModified;
-			}				
-		}
-		boolean notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
-		if (notModified) {
-			response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-		} else {
-			response.setDateHeader("Last-Modified", lastModifiedTimestamp);
-		}
-		return notModified;
-	}
-	
-	private void prepareResponse(List<Resource> resources, HttpServletResponse response) {
-		MediaType mediaType = null;
-		int contentLength = 0;
-		for (Resource resource : resources) {
+		for (Resource resourcePath : this.resourcePaths) {
+			Resource resource;
 			try {
-				File file = resource.getFile();
-				if (mediaType == null) {
-					mediaType = fileMediaTypeMap.getMediaType(file.getName());
+				resource = resourcePath.createRelative(path);
+				if (isValidFile(resource)) {
+					return new URLResource(resource);
 				}
-				contentLength += file.length();				
 			} catch (IOException e) {
-				
+				//Resource not found
+				return null;
 			}
 		}
+		return null;
+	}
+	
+	private void prepareResponse(URLResource resource, HttpServletResponse response) throws IOException {
+		MediaType mediaType = null;
+		if (mediaType == null) {
+			mediaType = fileMediaTypeMap.getMediaType(resource.getFilename());
+		}		
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
-		response.setContentLength(contentLength);
+		response.setContentLength(resource.getContentLength());
+		response.setDateHeader("Last-Modified", resource.lastModified());
 		if (this.maxAge > 0) {
 			// HTTP 1.0 header
 			response.setDateHeader("Expires", System.currentTimeMillis() + this.maxAge * 1000L);
@@ -129,53 +146,43 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
 		}
 	}
 	
-	private void writeResponse(List<Resource> resources, HttpServletResponse response) throws IOException {
-		for (Resource resource : resources) {
-			InputStream in = null;
+	private void writeResponse(URLResource resource, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		OutputStream out = selectOutputStream(resource, request, response);
+		try {
+			InputStream in = resource.getInputStream();
 			try {
-				in = resource.getInputStream();
+				byte[] buffer = new byte[1024];
 				int bytesRead = -1;
-				byte[] buffer = new byte[4096];
 				while ((bytesRead = in.read(buffer)) != -1) {
-					response.getOutputStream().write(buffer, 0, bytesRead);
+					out.write(buffer, 0, bytesRead);
 				}
-			} catch (IOException e) {
-				
 			} finally {
 				if (in != null) {
-					try {
-						in.close();
-					} catch (IOException e) {
-						
-					}
+					in.close();
 				}
 			}
-		}
-	}
-	
-	private String[] splitDirectoryAndFilename(String firstResourceElement) {
-		int index = firstResourceElement.lastIndexOf("/");
-		String dir;
-		if (index == -1) {
-			dir = null;
-		} else {
-			dir = firstResourceElement.substring(0, index + 1);
-		}
-		String filename = firstResourceElement.substring(index + 1, firstResourceElement.length());
-		return new String[] { dir, filename };
-	}
-	
-	private void addResource(Resource parent, String name, List<Resource> resources) throws IOException {
-		if (name.length() > 0) {
-			Resource resource = parent.createRelative(name);
-			if (isAllowed(resource)) {
-				resources.add(resource);
+		} finally {
+			if (out != null) {
+				out.close();
 			}
 		}
 	}
 	
-	private boolean isAllowed(Resource resource) throws IOException {
-		return resource.exists() && resource.getFile().isFile();
+	private OutputStream selectOutputStream(URLResource resource, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		String acceptEncoding = request.getHeader("Accept-Encoding");
+		boolean isGzipEligible = resource.getContentLength() >= this.minGzipSize && resource.getContentLength() <= this.maxGzipSize;
+		if (this.gzipEnabled && isGzipEligible && StringUtils.hasText(acceptEncoding)
+				&& acceptEncoding.indexOf("gzip") > -1 
+				&& response.getContentType().startsWith("text/")){
+			return new GZIPResponseStream(response);
+		} else {
+			return response.getOutputStream();
+		}
+	}
+	
+	private boolean isValidFile(Resource resource) throws IOException {
+		return resource.exists() && StringUtils.hasText(resource.getFilename());
 	}
 		
 	// TODO promote to top-level and make reusable
@@ -259,5 +266,136 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler {
 			}
 		}
 	}
+	
+	private class GZIPResponseStream extends ServletOutputStream {
 
+		private ByteArrayOutputStream byteStream = null;
+
+		private GZIPOutputStream gzipStream = null;
+
+		private boolean closed = false;
+
+		private HttpServletResponse response = null;
+
+		private ServletOutputStream servletStream = null;
+
+		public GZIPResponseStream(HttpServletResponse response) throws IOException {
+			super();
+			closed = false;
+			this.response = response;
+			this.servletStream = response.getOutputStream();
+			byteStream = new ByteArrayOutputStream();
+			gzipStream = new GZIPOutputStream(byteStream);
+		}
+
+		public void close() throws IOException {
+			if (closed) {
+				throw new IOException("This output stream has already been closed");
+			}
+			gzipStream.finish();
+			byte[] bytes = byteStream.toByteArray();
+			response.setContentLength(bytes.length);
+			response.addHeader("Content-Encoding", "gzip");
+			servletStream.write(bytes);
+			servletStream.flush();
+			servletStream.close();
+			closed = true;
+		}
+
+		public void flush() throws IOException {
+			if (closed) {
+				throw new IOException("Cannot flush a closed output stream");
+			}
+			gzipStream.flush();
+		}
+
+		public void write(int b) throws IOException {
+			if (closed) {
+				throw new IOException("Cannot write to a closed output stream");
+			}
+			gzipStream.write((byte) b);
+		}
+
+		public void write(byte b[]) throws IOException {
+			write(b, 0, b.length);
+		}
+
+		public void write(byte b[], int off, int len) throws IOException {
+			if (closed) {
+				throw new IOException("Cannot write to a closed output stream");
+			}
+			gzipStream.write(b, off, len);
+		}
+	}
+	
+	private static class URLResource implements Resource {
+		
+		private final Resource wrapped;
+		
+		private final long lastModified;
+		
+		private final int contentLength;
+		
+		public URLResource(Resource wrapped) throws IOException {
+			this.wrapped = wrapped;
+			URLConnection connection = null;
+			try {
+				connection = wrapped.getURL().openConnection();
+				this.lastModified = connection.getLastModified();
+				this.contentLength = connection.getContentLength();
+			} finally {
+				if (connection != null) {
+					connection.getInputStream().close();
+				}
+			}
+		}
+		
+		public int getContentLength() {
+			return this.contentLength;
+		}
+		
+		public long lastModified() throws IOException {
+			return this.lastModified;
+		}
+
+		public Resource createRelative(String relativePath) throws IOException {
+			return wrapped.createRelative(relativePath);
+		}
+
+		public boolean exists() {
+			return wrapped.exists();
+		}
+
+		public String getDescription() {
+			return wrapped.getDescription();
+		}
+
+		public File getFile() throws IOException {
+			return wrapped.getFile();
+		}
+
+		public String getFilename() {
+			return wrapped.getFilename();
+		}
+
+		public URI getURI() throws IOException {
+			return wrapped.getURI();
+		}
+
+		public URL getURL() throws IOException {
+			return wrapped.getURL();
+		}
+
+		public boolean isOpen() {
+			return wrapped.isOpen();
+		}
+
+		public boolean isReadable() {
+			return wrapped.isReadable();
+		}
+
+		public InputStream getInputStream() throws IOException {
+			return wrapped.getInputStream();
+		}		
+	}
 }
