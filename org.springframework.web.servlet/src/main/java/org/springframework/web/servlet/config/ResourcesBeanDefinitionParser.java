@@ -1,9 +1,11 @@
 package org.springframework.web.servlet.config;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -34,11 +36,12 @@ public class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		registerHandlerAdapterIfNecessary(parserContext, source);
 		BeanDefinition handlerMappingDef = registerHandlerMappingIfNecessary(parserContext, source);
 
-		String resourceDirectory = "/resources/";
+		List<String> resourcePaths = new ManagedList<String>();
+		resourcePaths.add("/");
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getConstructorArgumentValues().addIndexedArgumentValue(0, resourceDirectory);
+		resourceHandlerDef.getConstructorArgumentValues().addIndexedArgumentValue(0, resourcePaths);
 		
 		Map<String, BeanDefinition> urlMap = getUrlMap(handlerMappingDef);
 		String resourceRequestPath = "/resources/**";
