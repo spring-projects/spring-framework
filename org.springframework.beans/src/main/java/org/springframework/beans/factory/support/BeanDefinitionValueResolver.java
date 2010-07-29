@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -338,9 +338,7 @@ class BeanDefinitionValueResolver {
 		Object resolved = Array.newInstance(elementType, ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			Array.set(resolved, i,
-			    resolveValueIfNecessary(
-							argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
-							ml.get(i)));
+			    resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}
@@ -352,9 +350,7 @@ class BeanDefinitionValueResolver {
 		List<Object> resolved = new ArrayList<Object>(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
-			    resolveValueIfNecessary(
-							argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX,
-							ml.get(i)));
+			    resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}
@@ -366,8 +362,7 @@ class BeanDefinitionValueResolver {
 		Set<Object> resolved = new LinkedHashSet<Object>(ms.size());
 		int i = 0;
 		for (Object m : ms) {
-			resolved.add(resolveValueIfNecessary(
-					argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + i + BeanWrapper.PROPERTY_KEY_SUFFIX, m));
+			resolved.add(resolveValueIfNecessary(new KeyedArgName(argName, i), m));
 			i++;
 		}
 		return resolved;
@@ -381,11 +376,32 @@ class BeanDefinitionValueResolver {
 		for (Map.Entry entry : mm.entrySet()) {
 			Object resolvedKey = resolveValueIfNecessary(argName, entry.getKey());
 			Object resolvedValue = resolveValueIfNecessary(
-					argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + entry.getKey() +
-							BeanWrapper.PROPERTY_KEY_SUFFIX, entry.getValue());
+					new KeyedArgName(argName, entry.getKey()), entry.getValue());
 			resolved.put(resolvedKey, resolvedValue);
 		}
 		return resolved;
+	}
+
+
+	/**
+	 * Holder class used for delayed toString building.
+	 */
+	private static class KeyedArgName {
+
+		private final Object argName;
+
+		private final Object key;
+
+		public KeyedArgName(Object argName, Object key) {
+			this.argName = argName;
+			this.key = key;
+		}
+
+		@Override
+		public String toString() {
+			return this.argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX +
+					this.key + BeanWrapper.PROPERTY_KEY_SUFFIX;
+		}
 	}
 
 }

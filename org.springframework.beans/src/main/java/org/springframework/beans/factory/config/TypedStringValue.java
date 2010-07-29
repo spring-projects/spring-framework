@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class TypedStringValue implements BeanMetadataElement {
 
 	private String value;
 
-	private Object targetType;
+	private volatile Object targetType;
 
 	private Object source;
 
@@ -110,10 +110,11 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * Return the type to convert to.
 	 */
 	public Class getTargetType() {
-		if (!(this.targetType instanceof Class)) {
+		Object targetTypeValue = this.targetType;
+		if (!(targetTypeValue instanceof Class)) {
 			throw new IllegalStateException("Typed String value does not carry a resolved target type");
 		}
-		return (Class) this.targetType;
+		return (Class) targetTypeValue;
 	}
 
 	/**
@@ -128,11 +129,12 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * Return the type to convert to.
 	 */
 	public String getTargetTypeName() {
-		if (this.targetType instanceof Class) {
-			return ((Class) this.targetType).getName();
+		Object targetTypeValue = this.targetType;
+		if (targetTypeValue instanceof Class) {
+			return ((Class) targetTypeValue).getName();
 		}
 		else {
-			return (String) this.targetType;
+			return (String) targetTypeValue;
 		}
 	}
 
