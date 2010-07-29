@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +17,7 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -31,8 +33,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 
 /**
@@ -46,7 +48,7 @@ import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
  * @author Jeremy Grelle
  * @since 3.0.4
  */
-public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModified {
+public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletContextAware {
 
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
@@ -54,7 +56,11 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 	
 	private int maxAge = 31556926;
 	
-	private FileMediaTypeMap fileMediaTypeMap = new DefaultFileMediaTypeMap();
+	private static final String defaultMediaTypes = "image/*,text/css,text/javascript,text/html";
+	
+	private List<MediaType> allowedMediaTypes = new ArrayList<MediaType>();
+	
+	private FileMediaTypeMap fileMediaTypeMap;
 
 	private boolean gzipEnabled = true;
 	
@@ -63,34 +69,41 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 	private int maxGzipSize = 500000;
 	
 	public ResourceHttpRequestHandler(List<Resource> resourcePaths) {
-		Assert.notNull(resourcePaths, "Resource paths must not be null");
-		this.resourcePaths = resourcePaths;
+		this(resourcePaths, defaultMediaTypes);
 	}
 	
+	public ResourceHttpRequestHandler(List<Resource> resourcePaths, String allowedMediaTypes) {
+		this(resourcePaths, allowedMediaTypes, false);
+	}
+	
+	public ResourceHttpRequestHandler(List<Resource> resourcePaths, String allowedMediaTypes, boolean overrideDefaultMediaTypes) {
+		Assert.notNull(resourcePaths, "Resource paths must not be null");
+		validateResourcePaths(resourcePaths);
+		this.resourcePaths = resourcePaths;
+		if (StringUtils.hasText(allowedMediaTypes)) {
+			this.allowedMediaTypes.addAll(MediaType.parseMediaTypes(allowedMediaTypes));
+		}
+		if (!overrideDefaultMediaTypes) {
+			this.allowedMediaTypes.addAll(MediaType.parseMediaTypes(defaultMediaTypes));
+		}
+		MediaType.sortBySpecificity(this.allowedMediaTypes);
+	}
+
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
 		if (!"GET".equals(request.getMethod())) {
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(),
 					new String[] {"GET"}, "ResourceHttpRequestHandler only supports GET requests");
 		}
 		URLResource resource = getResource(request);
-		if (resource == null) {
+		if (resource == null || !isResourceAllowed(resource)) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+		if (checkNotModified(resource, request, response)) {
 			return;
 		}
 		prepareResponse(resource, response);
 		writeResponse(resource, request, response);
-	}
-	
-	public long getLastModified(HttpServletRequest request) {
-		try {
-			Resource resource = getResource(request);
-			if (resource == null) {
-				return -1;
-			}
-			return resource.lastModified();
-		} catch (Exception e) {
-			return -1;
-		}
 	}
 	
 	public void setGzipEnabled(boolean gzipEnabled) {
@@ -103,6 +116,21 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 
 	public void setMaxGzipSize(int maxGzipSize) {
 		this.maxGzipSize = maxGzipSize;
+	}
+	
+	public void setServletContext(ServletContext servletContext) {
+		this.fileMediaTypeMap = new DefaultFileMediaTypeMap(servletContext);
+	}
+	
+	private boolean checkNotModified(Resource resource,HttpServletRequest request, HttpServletResponse response) throws IOException {
+		long ifModifiedSince = request.getDateHeader("If-Modified-Since");					
+		boolean notModified = ifModifiedSince >= (resource.lastModified() / 1000 * 1000);
+		if (notModified) {
+			response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+		} else {
+			response.setDateHeader("Last-Modified", resource.lastModified());
+		}
+		return notModified;
 	}
 
 	private URLResource getResource(HttpServletRequest request) {
@@ -118,7 +146,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 			try {
 				resource = resourcePath.createRelative(path);
 				if (isValidFile(resource)) {
-					return new URLResource(resource);
+					return new URLResource(resource, fileMediaTypeMap.getMediaType(resource.getFilename()));
 				}
 			} catch (IOException e) {
 				//Resource not found
@@ -129,13 +157,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 	}
 	
 	private void prepareResponse(URLResource resource, HttpServletResponse response) throws IOException {
-		MediaType mediaType = null;
-		if (mediaType == null) {
-			mediaType = fileMediaTypeMap.getMediaType(resource.getFilename());
-		}		
-		if (mediaType != null) {
-			response.setContentType(mediaType.toString());
-		}
+		response.setContentType(resource.getMediaType().toString());
 		response.setContentLength(resource.getContentLength());
 		response.setDateHeader("Last-Modified", resource.lastModified());
 		if (this.maxAge > 0) {
@@ -146,6 +168,15 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 		}
 	}
 	
+	private boolean isResourceAllowed(URLResource resource) {
+		for(MediaType allowedType : allowedMediaTypes) {
+			if (allowedType.includes(resource.getMediaType())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void writeResponse(URLResource resource, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		OutputStream out = selectOutputStream(resource, request, response);
 		try {
@@ -184,9 +215,15 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 	private boolean isValidFile(Resource resource) throws IOException {
 		return resource.exists() && StringUtils.hasText(resource.getFilename());
 	}
+	
+	private void validateResourcePaths(List<Resource> resourcePaths) {
+		for (Resource path : resourcePaths) {
+			Assert.isTrue(path.exists(), path.getDescription() + " is not a valid resource location as it does not exist.");
+			Assert.isTrue(!StringUtils.hasText(path.getFilename()), path.getDescription()+" is not a valid resource location.  Resource paths must end with a '/'.");
+		}		
+	}
 		
 	// TODO promote to top-level and make reusable
-	// TODO check ServletContext.getMimeType(String) first
 	
 	public interface FileMediaTypeMap {
 		MediaType getMediaType(String fileName);
@@ -197,9 +234,13 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 		private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ContentNegotiatingViewResolver.class.getClassLoader());
 
-		private boolean useJaf = true;
-
 		private ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
+		
+		private final ServletContext servletContext;
+		
+		public DefaultFileMediaTypeMap(ServletContext servletContext) {
+			this.servletContext = servletContext;
+		}
 
 		public MediaType getMediaType(String filename) {
 			String extension = StringUtils.getFilenameExtension(filename);
@@ -208,7 +249,13 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 			}
 			extension = extension.toLowerCase(Locale.ENGLISH);
 			MediaType mediaType = this.mediaTypes.get(extension);
-			if (mediaType == null && useJaf && jafPresent) {
+			if (mediaType == null) {
+				String mimeType = servletContext.getMimeType(filename);
+				if (StringUtils.hasText(mimeType)) {
+					mediaType = MediaType.parseMediaType(mimeType);
+				}
+			}
+			if (mediaType == null && jafPresent) {
 				mediaType = ActivationMediaTypeFactory.getMediaType(filename);
 				if (mediaType != null) {
 					this.mediaTypes.putIfAbsent(extension, mediaType);
@@ -336,13 +383,16 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 		
 		private final int contentLength;
 		
-		public URLResource(Resource wrapped) throws IOException {
+		private final MediaType mediaType;
+		
+		public URLResource(Resource wrapped, MediaType mediaType) throws IOException {
 			this.wrapped = wrapped;
 			URLConnection connection = null;
 			try {
 				connection = wrapped.getURL().openConnection();
 				this.lastModified = connection.getLastModified();
 				this.contentLength = connection.getContentLength();
+				this.mediaType = mediaType;
 			} finally {
 				if (connection != null) {
 					connection.getInputStream().close();
@@ -354,6 +404,10 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, LastModif
 			return this.contentLength;
 		}
 		
+		public MediaType getMediaType() {
+			return mediaType;
+		}
+
 		public long lastModified() throws IOException {
 			return this.lastModified;
 		}
