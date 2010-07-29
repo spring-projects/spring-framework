@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jmx.export.assembler;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-
 import javax.management.Descriptor;
 import javax.management.MBeanParameterInfo;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
@@ -115,7 +114,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean in the bean factory
 	 */
-	public boolean includeBean(Class beanClass, String beanName) {
+	public boolean includeBean(Class<?> beanClass, String beanName) {
 		return (this.attributeSource.getManagedResource(getClassToExpose(beanClass)) != null);
 	}
 
