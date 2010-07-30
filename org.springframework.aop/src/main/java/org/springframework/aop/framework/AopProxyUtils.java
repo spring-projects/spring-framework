@@ -21,6 +21,7 @@ import java.util.Arrays;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.Assert;
 
@@ -61,6 +62,9 @@ public abstract class AopProxyUtils {
 				}
 			}
 			current = nested;
+		}
+		if (result == null) {
+			result = (AopUtils.isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
 		}
 		return result;
 	}
