@@ -5,6 +5,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
-	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/" />
+	<mvc:default-servlet-handler default-servlet-name="custom" />
 
 </beans>

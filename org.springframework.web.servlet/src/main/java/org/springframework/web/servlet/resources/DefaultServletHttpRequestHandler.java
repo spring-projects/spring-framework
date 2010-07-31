@@ -23,10 +23,10 @@ import org.springframework.web.context.ServletContextAware;
  * can be matched.  
  * 
  * <p>Requests are handled by forwarding through the {@link RequestDispatcher} obtained via the name specified through the 
- * {@code fileServletName} property.  In most cases, the {@code fileServletName} does not need to be set explicitly, as the 
+ * {@code defaultServletName} property.  In most cases, the {@code defaultServletName} does not need to be set explicitly, as the 
  * handler checks at initialization time for the presence of the default Servlet of one of the known containers.  However, if 
  * running in a container where the default Servlet's name is not known, or where it has been customized via configuration, the 
- * {@code fileServletName} will need to be set explicitly.
+ * {@code defaultServletName} will need to be set explicitly.
  * 
  * @author Jeremy Grelle
  * @since 3.0.4
@@ -55,40 +55,40 @@ public class DefaultServletHttpRequestHandler implements InitializingBean, HttpR
 	
 	private ServletContext servletContext;
 	
-	private String fileServletName;
+	private String defaultServletName;
 	
 	/**
 	 * If the {@code filedServletName} property has not been explicitly set, attempts to locate the default Servlet using the 
 	 * known common container-specific names.
 	 */
 	public void afterPropertiesSet() throws Exception {
-		if (!StringUtils.hasText(this.fileServletName)) {
+		if (!StringUtils.hasText(this.defaultServletName)) {
 			if (this.servletContext.getNamedDispatcher(COMMON_DEFAULT_SERVLET_NAME) != null) {
-				this.fileServletName = COMMON_DEFAULT_SERVLET_NAME;
+				this.defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
 			} else if (this.servletContext.getNamedDispatcher(RESIN_DEFAULT_SERVLET_NAME) != null) {
-				this.fileServletName = RESIN_DEFAULT_SERVLET_NAME;
+				this.defaultServletName = RESIN_DEFAULT_SERVLET_NAME;
 			} else if (this.servletContext.getNamedDispatcher(WEBLOGIC_DEFAULT_SERVLET_NAME) != null) {
-				this.fileServletName = WEBLOGIC_DEFAULT_SERVLET_NAME;
+				this.defaultServletName = WEBLOGIC_DEFAULT_SERVLET_NAME;
 			} else if (this.servletContext.getNamedDispatcher(WEBSPHERE_DEFAULT_SERVLET_NAME) != null) {
-				this.fileServletName = WEBSPHERE_DEFAULT_SERVLET_NAME;
+				this.defaultServletName = WEBSPHERE_DEFAULT_SERVLET_NAME;
 			}
-			Assert.hasText(this.fileServletName, "Unable to locate the default servlet for serving static content.  Please set the 'fileServletName' property explicitly.");
+			Assert.hasText(this.defaultServletName, "Unable to locate the default servlet for serving static content.  Please set the 'defaultServletName' property explicitly.");
 		}		
 	}
 	
 	public void handleRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		RequestDispatcher rd = this.servletContext.getNamedDispatcher(this.fileServletName);
-		Assert.notNull(rd, "A RequestDispatcher could not be located for the servlet name '"+this.fileServletName+"'");
+		RequestDispatcher rd = this.servletContext.getNamedDispatcher(this.defaultServletName);
+		Assert.notNull(rd, "A RequestDispatcher could not be located for the servlet name '"+this.defaultServletName+"'");
 		rd.forward(request, response);
 	}
 	
 	/**
 	 * Set the name of the default Servlet to be forwarded to for static resource requests.
-	 * @param fileServletName The name of the Servlet to use for static resources.
+	 * @param defaultServletName The name of the Servlet to use for static resources.
 	 */
-	public void setDefaultServletName(String fileServletName) {
-		this.fileServletName = fileServletName;
+	public void setDefaultServletName(String defaultServletName) {
+		this.defaultServletName = defaultServletName;
 	}
 
 	/**
