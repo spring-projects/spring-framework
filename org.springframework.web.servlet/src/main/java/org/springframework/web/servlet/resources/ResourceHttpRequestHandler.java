@@ -1,6 +1,5 @@
 package org.springframework.web.servlet.resources;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,18 +7,15 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.zip.GZIPOutputStream;
 
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,8 +35,7 @@ import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 
 /**
  * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance 
- * (according to the guidelines of Page Speed, YSlow, etc.) by adding far future cache expiration headers 
- * and gzip compressing the resources if supported by the client.
+ * (according to the guidelines of Page Speed, YSlow, etc.) by adding far future cache expiration headers.
  * 
  * <p>TODO - expand the docs further
  * 
@@ -54,39 +49,14 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 
 	private final List<Resource> resourcePaths;
 	
-	private int maxAge = 31556926;
-	
-	private static final String defaultMediaTypes = "image/*,text/css,text/javascript,text/html";
-	
-	private List<MediaType> allowedMediaTypes = new ArrayList<MediaType>();
+	private final int maxAge = 31556926;
 	
 	private FileMediaTypeMap fileMediaTypeMap;
-
-	private boolean gzipEnabled = true;
-	
-	private int minGzipSize = 150;
-	
-	private int maxGzipSize = 500000;
 	
 	public ResourceHttpRequestHandler(List<Resource> resourcePaths) {
-		this(resourcePaths, defaultMediaTypes);
-	}
-	
-	public ResourceHttpRequestHandler(List<Resource> resourcePaths, String allowedMediaTypes) {
-		this(resourcePaths, allowedMediaTypes, false);
-	}
-	
-	public ResourceHttpRequestHandler(List<Resource> resourcePaths, String allowedMediaTypes, boolean overrideDefaultMediaTypes) {
 		Assert.notNull(resourcePaths, "Resource paths must not be null");
 		validateResourcePaths(resourcePaths);
 		this.resourcePaths = resourcePaths;
-		if (StringUtils.hasText(allowedMediaTypes)) {
-			this.allowedMediaTypes.addAll(MediaType.parseMediaTypes(allowedMediaTypes));
-		}
-		if (!overrideDefaultMediaTypes) {
-			this.allowedMediaTypes.addAll(MediaType.parseMediaTypes(defaultMediaTypes));
-		}
-		MediaType.sortBySpecificity(this.allowedMediaTypes);
 	}
 
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
@@ -95,7 +65,7 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 					new String[] {"GET"}, "ResourceHttpRequestHandler only supports GET requests");
 		}
 		URLResource resource = getResource(request);
-		if (resource == null || !isResourceAllowed(resource)) {
+		if (resource == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -104,18 +74,6 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 		}
 		prepareResponse(resource, response);
 		writeResponse(resource, request, response);
-	}
-	
-	public void setGzipEnabled(boolean gzipEnabled) {
-		this.gzipEnabled = gzipEnabled;
-	}
-
-	public void setMinGzipSize(int minGzipSize) {
-		this.minGzipSize = minGzipSize;
-	}
-
-	public void setMaxGzipSize(int maxGzipSize) {
-		this.maxGzipSize = maxGzipSize;
 	}
 	
 	public void setServletContext(ServletContext servletContext) {
@@ -167,18 +125,9 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 			response.setHeader("Cache-Control", "max-age=" + this.maxAge);
 		}
 	}
-	
-	private boolean isResourceAllowed(URLResource resource) {
-		for(MediaType allowedType : allowedMediaTypes) {
-			if (allowedType.includes(resource.getMediaType())) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	private void writeResponse(URLResource resource, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		OutputStream out = selectOutputStream(resource, request, response);
+		OutputStream out = response.getOutputStream();
 		try {
 			InputStream in = resource.getInputStream();
 			try {
@@ -199,19 +148,6 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 		}
 	}
 	
-	private OutputStream selectOutputStream(URLResource resource, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
-		String acceptEncoding = request.getHeader("Accept-Encoding");
-		boolean isGzipEligible = resource.getContentLength() >= this.minGzipSize && resource.getContentLength() <= this.maxGzipSize;
-		if (this.gzipEnabled && isGzipEligible && StringUtils.hasText(acceptEncoding)
-				&& acceptEncoding.indexOf("gzip") > -1 
-				&& response.getContentType().startsWith("text/")){
-			return new GZIPResponseStream(response);
-		} else {
-			return response.getOutputStream();
-		}
-	}
-	
 	private boolean isValidFile(Resource resource) throws IOException {
 		return resource.exists() && StringUtils.hasText(resource.getFilename());
 	}
@@ -223,13 +159,11 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 		}		
 	}
 		
-	// TODO promote to top-level and make reusable
-	
-	public interface FileMediaTypeMap {
+	private interface FileMediaTypeMap {
 		MediaType getMediaType(String fileName);
 	}
 	
-	public static class DefaultFileMediaTypeMap implements FileMediaTypeMap {
+	private static class DefaultFileMediaTypeMap implements FileMediaTypeMap {
 
 		private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ContentNegotiatingViewResolver.class.getClassLoader());
@@ -311,67 +245,6 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 				String mediaType = fileTypeMap.getContentType(fileName);
 				return StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null;
 			}
-		}
-	}
-	
-	private class GZIPResponseStream extends ServletOutputStream {
-
-		private ByteArrayOutputStream byteStream = null;
-
-		private GZIPOutputStream gzipStream = null;
-
-		private boolean closed = false;
-
-		private HttpServletResponse response = null;
-
-		private ServletOutputStream servletStream = null;
-
-		public GZIPResponseStream(HttpServletResponse response) throws IOException {
-			super();
-			closed = false;
-			this.response = response;
-			this.servletStream = response.getOutputStream();
-			byteStream = new ByteArrayOutputStream();
-			gzipStream = new GZIPOutputStream(byteStream);
-		}
-
-		public void close() throws IOException {
-			if (closed) {
-				throw new IOException("This output stream has already been closed");
-			}
-			gzipStream.finish();
-			byte[] bytes = byteStream.toByteArray();
-			response.setContentLength(bytes.length);
-			response.addHeader("Content-Encoding", "gzip");
-			servletStream.write(bytes);
-			servletStream.flush();
-			servletStream.close();
-			closed = true;
-		}
-
-		public void flush() throws IOException {
-			if (closed) {
-				throw new IOException("Cannot flush a closed output stream");
-			}
-			gzipStream.flush();
-		}
-
-		public void write(int b) throws IOException {
-			if (closed) {
-				throw new IOException("Cannot write to a closed output stream");
-			}
-			gzipStream.write((byte) b);
-		}
-
-		public void write(byte b[]) throws IOException {
-			write(b, 0, b.length);
-		}
-
-		public void write(byte b[], int off, int len) throws IOException {
-			if (closed) {
-				throw new IOException("Cannot write to a closed output stream");
-			}
-			gzipStream.write(b, off, len);
 		}
 	}
 	

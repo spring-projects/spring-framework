@@ -18,6 +18,8 @@ package org.springframework.web.servlet.config;
 
 import java.util.Date;
 import java.util.Locale;
+
+import javax.servlet.RequestDispatcher;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -28,6 +30,7 @@ import org.junit.Test;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -36,6 +39,7 @@ import org.springframework.format.support.FormattingConversionServiceFactoryBean
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -56,12 +60,14 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
+import org.springframework.web.servlet.resources.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resources.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
 /**
  * @author Keith Donald
  * @author Arjen Poutsma 
+ * @author Jeremy Grelle
  */
 public class MvcNamespaceTests {
 
@@ -70,7 +76,7 @@ public class MvcNamespaceTests {
 	@Before
 	public void setUp() {
 		appContext = new GenericWebApplicationContext();
-		appContext.setServletContext(new MockServletContext());
+		appContext.setServletContext(new TestMockServletContext());
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
@@ -204,14 +210,18 @@ public class MvcNamespaceTests {
 	public void testResources() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-resources.xml", getClass()));
-		assertEquals(2, appContext.getBeanDefinitionCount());
+		assertEquals(3, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
+		
+		ResourceHttpRequestHandler handler = appContext.getBean(ResourceHttpRequestHandler.class);
+		assertNotNull(handler);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
+		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, mapping.getOrder());
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setRequestURI("/resources/foo.css");
@@ -224,6 +234,76 @@ public class MvcNamespaceTests {
 		for (HandlerInterceptor interceptor : chain.getInterceptors()) {
 			interceptor.preHandle(request, response, chain.getHandler());
 		}
+		ModelAndView mv = adapter.handle(request, response, chain.getHandler());
+		assertNull(mv);
+	}
+	
+	@Test
+	public void testResourcesWithOptionalAttributes() throws Exception {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
+		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-resources-optional-attrs.xml", getClass()));
+		assertEquals(3, appContext.getBeanDefinitionCount());
+		appContext.refresh();
+
+		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		assertNotNull(mapping);
+		assertEquals(5, mapping.getOrder());
+	}
+	
+	@Test
+	public void testDefaultServletHandler() throws Exception {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
+		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-default-servlet.xml", getClass()));
+		assertEquals(3, appContext.getBeanDefinitionCount());
+		appContext.refresh();
+
+		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
+		assertNotNull(adapter);
+		
+		DefaultServletHttpRequestHandler handler = appContext.getBean(DefaultServletHttpRequestHandler.class);
+		assertNotNull(handler);
+
+		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		assertNotNull(mapping);
+		assertEquals(Ordered.LOWEST_PRECEDENCE, mapping.getOrder());
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/foo.css");
+		request.setMethod("GET");
+		
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertTrue(chain.getHandler() instanceof DefaultServletHttpRequestHandler);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = adapter.handle(request, response, chain.getHandler());
+		assertNull(mv);
+	}
+	
+	@Test
+	public void testDefaultServletHandlerWithOptionalAtrributes() throws Exception {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
+		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-default-servlet-optional-attrs.xml", getClass()));
+		assertEquals(3, appContext.getBeanDefinitionCount());
+		appContext.refresh();
+
+		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
+		assertNotNull(adapter);
+		
+		DefaultServletHttpRequestHandler handler = appContext.getBean(DefaultServletHttpRequestHandler.class);
+		assertNotNull(handler);
+
+		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		assertNotNull(mapping);
+		assertEquals(Ordered.LOWEST_PRECEDENCE, mapping.getOrder());
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/foo.css");
+		request.setMethod("GET");
+		
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertTrue(chain.getHandler() instanceof DefaultServletHttpRequestHandler);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = adapter.handle(request, response, chain.getHandler());
 		assertNull(mv);
 	}
@@ -393,12 +473,27 @@ public class MvcNamespaceTests {
 		@NotNull
 		private String field;
 
+		@SuppressWarnings("unused")
 		public String getField() {
 			return field;
 		}
 
+		@SuppressWarnings("unused")
 		public void setField(String field) {
 			this.field = field;
+		}
+		
+	}
+	
+	private static class TestMockServletContext extends MockServletContext {
+
+		@Override
+		public RequestDispatcher getNamedDispatcher(String path) {
+			if (path.equals("default") || path.equals("custom")) {
+				return new MockRequestDispatcher("/");
+			} else {
+				return null;
+			}
 		}
 		
 	}

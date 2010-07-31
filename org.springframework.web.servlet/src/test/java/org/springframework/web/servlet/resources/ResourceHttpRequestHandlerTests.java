@@ -62,16 +62,6 @@ public class ResourceHttpRequestHandlerTests {
 	}
 	
 	@Test
-	public void getResourceWithUnknownMediaType() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/test.unknown");
-		request.setMethod("GET");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		handler.handleRequest(request, response);
-		assertEquals(404, response.getStatus());
-	}
-	
-	@Test
 	public void getResourceFromAlternatePath() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/baz.css");
@@ -191,51 +181,6 @@ public class ResourceHttpRequestHandlerTests {
 		List<Resource> resourcePaths = new ArrayList<Resource>();
 		resourcePaths.add(new ClassPathResource("bogus/"));
 		handler = new ResourceHttpRequestHandler(resourcePaths);
-	}
-	
-	@Test
-	public void getResourceOfAddedAllowedMimeType() throws Exception{
-		List<Resource> resourcePaths = new ArrayList<Resource>();
-		resourcePaths.add(new ClassPathResource("test/", getClass()));
-		handler = new ResourceHttpRequestHandler(resourcePaths, "text/plain");
-		handler.setServletContext(new TestServletContext());
-		
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.txt");
-		request.setMethod("GET");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		handler.handleRequest(request, response);
-		assertEquals("text/plain", response.getContentType());
-		assertTrue(((Long)response.getHeader("Expires")) > System.currentTimeMillis() + (31556926 * 1000) - 10000);
-		assertEquals("max-age=31556926", response.getHeader("Cache-Control"));
-		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("test/foo.txt", getClass()).getFile().lastModified());
-	}
-	
-	@Test
-	public void getResourceWithDefaultMimeTypesOverriden() throws Exception{
-		List<Resource> resourcePaths = new ArrayList<Resource>();
-		resourcePaths.add(new ClassPathResource("test/", getClass()));
-		handler = new ResourceHttpRequestHandler(resourcePaths, "text/plain", true);
-		handler.setServletContext(new TestServletContext());
-		
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.txt");
-		request.setMethod("GET");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		handler.handleRequest(request, response);
-		assertEquals("text/plain", response.getContentType());
-		assertTrue(((Long)response.getHeader("Expires")) > System.currentTimeMillis() + (31556926 * 1000) - 10000);
-		assertEquals("max-age=31556926", response.getHeader("Cache-Control"));
-		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("test/foo.txt", getClass()).getFile().lastModified());
-		
-		request = new MockHttpServletRequest();
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
-		request.setMethod("GET");
-		response = new MockHttpServletResponse();
-		handler.handleRequest(request, response);
-		assertEquals(404, response.getStatus());
 	}
 	
 	private static class TestServletContext extends MockServletContext {
