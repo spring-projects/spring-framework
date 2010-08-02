@@ -37,7 +37,23 @@ import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
  * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance 
  * (according to the guidelines of Page Speed, YSlow, etc.) by adding far future cache expiration headers.
  * 
- * <p>TODO - expand the docs further
+ * <p>The constructor takes a list of Spring {@link Resource} locations from which static resources are allowed 
+ * to be served by this handler.  For a given request, the list of locations will be consulted in order for the 
+ * presence of the requested resource, and the first found match will be written to the response, with {@code 
+ * Expires} and {@code Cache-Control} headers set for one year in the future.  The handler also properly evaluates 
+ * the {@code Last-Modified} header (if present) so that a {@code 304} status code will be returned as appropriate, 
+ * avoiding unnecessary overhead for resources that are already cached by the client.  The use of {@code Resource} 
+ * locations allows resource requests to easily be mapped to locations other than the web application root.  For 
+ * example, resources could be served from a classpath location such as "classpath:/META-INF/public-web-resources/", 
+ * allowing convenient packaging and serving of resources such as a JavaScript library from within jar files.
+ * 
+ * <p>To ensure that users with a primed browser cache get the latest changes to application-specific resources 
+ * upon deployment of new versions of the application, it is recommended that a version string is used in the URL 
+ * mapping pattern that selects this handler.  Such patterns can be easily parameterized using Spring EL.  See the 
+ * reference manual for further examples of this approach.  
+ * 
+ * <p>Rather than being directly configured as a bean, this handler will typically be configured through use of 
+ * the <code>&lt;mvc:resources/&gt;</code> Spring configuration tag. 
  * 
  * @author Keith Donald
  * @author Jeremy Grelle
@@ -53,12 +69,28 @@ public class ResourceHttpRequestHandler implements HttpRequestHandler, ServletCo
 	
 	private FileMediaTypeMap fileMediaTypeMap;
 	
+	/**
+	 * Construct a new {@code ResourceHttpRequestHandler} with a {@code List} of {@code Resource} paths to use as 
+	 * sources for serving static resources.
+	 * @param resourcePaths the list of paths from which resources can be served
+	 */
 	public ResourceHttpRequestHandler(List<Resource> resourcePaths) {
 		Assert.notNull(resourcePaths, "Resource paths must not be null");
 		validateResourcePaths(resourcePaths);
 		this.resourcePaths = resourcePaths;
 	}
 
+	/**
+	 * Processes a resource request.
+	 * 
+	 * <p>Checks for the existence of the requested resource in the configured list of locations.  If the resource 
+	 * does not exist, a {@code 404} response will be returned to the client.  If the resource exists, the request will 
+	 * be checked for the presence of the {@code Last-Modified} header, and its value will be compared against the last 
+	 * modified timestamp of the given resource, returning a {@code 304} status code if the {@code Last-Modified} value 
+	 * is greater.  If the resource is newer than the {@code Last-Modified} value, or the header is not present, the 
+	 * content resource of the resource will be written to the response with caching headers set to expire one year in 
+	 * the future.  
+	 */
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
 		if (!"GET".equals(request.getMethod())) {
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(),
