@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.concurrent.Executor;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.handler.HandlerResolver;
+
+import org.springframework.util.Assert;
 
 /**
  * Factory for locally defined JAX-WS {@link javax.xml.ws.Service} references.
@@ -118,6 +120,7 @@ public class LocalJaxWsServiceFactory {
 	 * @see #setWsdlDocumentUrl
 	 */
 	public Service createJaxWsService() {
+		Assert.notNull(this.serviceName, "No service name specified");
 		Service service = (this.wsdlDocumentUrl != null ?
 				Service.create(this.wsdlDocumentUrl, getQName(this.serviceName)) :
 				Service.create(getQName(this.serviceName)));
