@@ -18,8 +18,11 @@ package org.springframework.remoting.jaxws;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.ProtocolException;
@@ -41,6 +44,7 @@ import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a specific
@@ -317,8 +321,13 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * Initialize the JAX-WS port for this interceptor.
 	 */
 	public void prepare() {
-		if (getServiceInterface() == null) {
+		Class<?> ifc = getServiceInterface();
+		if (ifc == null) {
 			throw new IllegalArgumentException("Property 'serviceInterface' is required");
+		}
+		WebService ann = ifc.getAnnotation(WebService.class);
+		if (ann != null) {
+			applyDefaultsFromAnnotation(ann);
 		}
 		Service serviceToUse = getJaxWsService();
 		if (serviceToUse == null) {
@@ -328,6 +337,52 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		Object stub = getPortStub(serviceToUse, (getPortName() != null ? this.portQName : null));
 		preparePortStub(stub);
 		this.portStub = stub;
+	}
+
+	/**
+	 * Initialize this client interceptor's properties from the given WebService annotation,
+	 * if necessary and possible (i.e. if "wsdlDocumentUrl", "namespaceUri", "serviceName"
+	 * and "portName" haven't been set but corresponding values are declared at the
+	 * annotation level of the specified service interface).
+	 * @param ann the WebService annotation found on the specified service interface
+	 */
+	protected void applyDefaultsFromAnnotation(WebService ann) {
+		if (getWsdlDocumentUrl() == null) {
+			String wsdl = ann.wsdlLocation();
+			if (StringUtils.hasText(wsdl)) {
+				try {
+					setWsdlDocumentUrl(new URL(wsdl));
+				}
+				catch (MalformedURLException ex) {
+					throw new IllegalStateException(
+							"Encountered invalid @Service wsdlLocation value [" + wsdl + "]", ex);
+				}
+			}
+		}
+		if (getNamespaceUri() == null) {
+			String ns = ann.targetNamespace();
+			if (StringUtils.hasText(ns)) {
+				setNamespaceUri(ns);
+			}
+		}
+		if (getServiceName() == null) {
+			String sn = ann.serviceName();
+			if (StringUtils.hasText(sn)) {
+				setServiceName(sn);
+			}
+		}
+		if (getPortName() == null) {
+			String pn = ann.portName();
+			if (StringUtils.hasText(pn)) {
+				setPortName(pn);
+			}
+			else {
+				String nm = ann.name();
+				if (StringUtils.hasText(nm)) {
+					setPortName(nm);
+				}
+			}
+		}
 	}
 
 	/**
@@ -477,7 +532,6 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 			throw new RemoteProxyFailureException("Invocation of stub method failed: " + method, ex);
 		}
 	}
-
 
 	/**
 	 * Inner class in order to avoid a hard-coded JAX-WS 2.1 dependency.
