@@ -4654,7 +4654,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         <para>JSR 330's @Inject annotation can be used in place of Spring's
         <interfacename>@Autowired</interfacename> in the examples below.
         <interfacename>@Inject</interfacename> does not have a required
-        property unlike Spring's <interfacename>@Autowire</interfacename>
+        property unlike Spring's <interfacename>@Autowired</interfacename>
         annotation which has a <literal>required</literal> property to
         indicate if the value being injected is optional. This behavior is
         enabled automatically if you have the JSR 330 JAR on the
@@ -6352,9 +6352,9 @@ jdbc.password=</programlisting> <programlisting language="java">public static vo
           minimum. <programlisting language="java">@Configuration
 @ImportResource("classpath:/com/acme/properties-config.xml")
 public class AppConfig {
-    private @Value("${jdbcProperties.url}") String url;
-    private @Value("${jdbcProperties.username}") String username;
-    private @Value("${jdbcProperties.password}") String password;
+    private @Value("${jdbc.url}") String url;
+    private @Value("${jdbc.username}") String username;
+    private @Value("${jdbc.password}") String password;
 
     public @Bean DataSource dataSource() {
         return new DriverManagerDataSource(url, username, password);
