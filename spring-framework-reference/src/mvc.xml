@@ -3414,7 +3414,30 @@ application.version=1.0.0]]>
 	<spring:param name="applicationVersion" value="${applicationVersion}"/>
 </spring:url>
 
-<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript" > </script>]]>
+<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"> </script>]]>
+  		</programlisting>
+  	</section>
+  	<section id="mvc-default-servlet-handler">
+  		<title>mvc:default-servlet-handler</title>
+  		<para>
+  			This tag allows for mapping the <code>DispatcherServlet</code> to "/" (thus overriding the mapping of the container's default Servlet), 
+  			while still allowing static resource requests to be handled by the container's default Servlet.  It configures a 
+  			<code>DefaultServletHttpHandler</code> with a URL mapping (given a lowest precedence order) of "/**".  This handler will 
+  			forward all requests to the default Servlet.  To enable this feature using the default setup, simply include the tag in the form: 
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<mvc:default-servlet-handler/>]]>
+  		</programlisting>
+  		<para>
+  			The caveat to overriding the "/" Servlet mapping is that the <code>RequestDispatcher</code> for the default Servlet must be 
+  			retrieved by name rather than by path.  The <code>DefaultServletHttpHandler</code> will attempt to auto-detect the default 
+  			Servlet for the container at startup time, using a list of known names for most of the major Servlet containers (including Tomcat, 
+  			Jetty, Glassfish, JBoss, Resin, WebLogic, and WebSphere).  If the default Servlet has been custom configured 
+  			with a different name, or if a different Servlet container is being used where the default Servlet name is unknown, then the 
+  			default Servlet's name must be explicitly provided as in the following example:
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/>]]>
   		</programlisting>
   	</section>
   </section>
