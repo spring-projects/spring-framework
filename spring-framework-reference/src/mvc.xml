@@ -3354,6 +3354,69 @@ public class SimpleController {
 <mvc:view-controller path="/" view-name="home"/>]]>
 		</programlisting>  		
   	</section>
+  	<section id="mvc-static-resources">
+  		<title>mvc:resources</title>
+  		<para>
+  			This tag allows static resource requests following a particular URL pattern to be served by a <classname>ResourceHttpRequestHandler</classname> from 
+  			any of a list of <classname>Resource</classname> locations.  This provides a convenient way to serve static resources from locations other than the 
+  			web application root, including locations on the classpath, and the resources are served with far future expiration headers (1 year, as recommended by 
+  			optimization tools such as Page Speed and YSlow) so that they will be more efficiently utilized by the client.  For example, to serve resource requests 
+  			with a URL pattern of <code>/resources/**</code> from a <code>public-resources</code> directory within the web application root, the tag would be used 
+  			as follows: 
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<mvc:resources mapping="/resources/**" location="/public-resources/"/>]]>
+  		</programlisting>
+  		<para>
+  			The <code>mapping</code> attribute must be an Ant pattern that can be used by <classname>SimpleUrlHandlerMapping</classname>, and the <code>location</code> 
+  			attribute must specify one or more valid resource directory locations.  Multiple resource locations may be specified using a comma-seperated list of values. 
+  			The locations specified will be checked in the specified order for the presence of the resource for any given request.  For example, to enable the serving 
+  			of resources from both the web application root and from a known path of <code>/META-INF/public-web-resources/</code> in any jar on the classpath, the tag 
+  			would be specified as: 
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/public-web-resources/"/>]]>
+  		</programlisting>
+  		<para>
+  			When serving resources that may change when a new version of the application is deployed, it is recommended that you incorporate a version string into the 
+  			mapping pattern used to request the resources, so that you may force clients to request the newly deployed version of your application's resources.  Such a 
+  			version string can be parameterized and accessed using SpEL so that it may be easily managed in a single place when deploying new versions.
+  		</para>
+  		<para>  
+  			As an example, let's consider an application that uses a performance-optimized custom build (as recommended) of the Dojo JavaScript library in production, and that the build is generally 
+  			deployed within the web application at a path of <code>/public-resources/dojo/dojo.js</code>.  Since different parts of Dojo may be incorporated into the 
+  			custom build for each new version of the application, the client web browsers need to be forced to re-download that custom-built <code>dojo.js</code> resource 
+  			any time a new version of the application is deployed.  A simple way to achieve this would be to manage the version of the application in a properties file, 
+  			such as:          
+  		</para>
+  		<programlisting><![CDATA[
+application.version=1.0.0]]>
+  		</programlisting>
+  		<para>
+  			and then to make the properties file's values accessible to SpEL as a bean using the <code>util:properties</code> tag:
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<util:properties id="applicationProps" location="/WEB-INF/spring/application.properties"/>]]>
+  		</programlisting>
+  		<para>
+  			With the application version now accessible via SpEL, we can incorporate this into the use of the <code>resources</code> tag:
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<mvc:resources mapping="/resources-#{applicationProps['application.version']}/**" location="/public-resources/"/>]]>
+  		</programlisting>
+  		<para>
+  			and finally, to request the resource with the proper URL, we can take advantage of the Spring JSP tags:
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<spring:eval expression="@applicationProps['application.version']" var="applicationVersion"/>
+
+<spring:url value="/resources-{applicationVersion}" var="resourceUrl">
+	<spring:param name="applicationVersion" value="${applicationVersion}"/>
+</spring:url>
+
+<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript" > </script>]]>
+  		</programlisting>
+  	</section>
   </section>
   <section id="mvc-resources">
     <title>More Spring Web MVC Resources</title>
