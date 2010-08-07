@@ -627,7 +627,7 @@
           and components very simple, and <emphasis
           role="bold">delegate</emphasis> as much logic as possible out to
           HiveMind [or Spring, or whatever] services. Listener methods should
-          ideally do little more than marshall together the correct information
+          ideally do little more than marshal together the correct information
           and pass it over to a service.</emphasis>
         </quote>
     </para>

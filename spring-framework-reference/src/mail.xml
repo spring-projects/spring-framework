@@ -210,7 +210,7 @@ sender.send(message);]]></programlisting>
 		<section id="mail-javamail-mime-attachments">
 			<title>Sending attachments and inline resources</title>
 			<para>Multipart email messages allow for both attachments and inline resources.
-			Examples of inline resources would be be images or a stylesheet you want to use
+			Examples of inline resources would be images or a stylesheet you want to use
 			in your message, but that you don't want displayed as an attachment.</para>
 			<section id="mail-javamail-mime-attachments-attachment">
 				<title>Attachments</title>
@@ -268,7 +268,7 @@ sender.send(message);]]></programlisting>
 		</section>
 		<section id="mail-templates">
 			<title>Creating email content using a templating library</title>
-			<para>The code in the previous examples explicitly has been creating the
+			<para>The code in the previous examples explicitly created the
 			content of the email message, using methods calls such as
 			<methodname>message.setText(..)</methodname>. This is fine for
 			simple cases, and it is okay in the context of the aforementioned

@@ -403,14 +403,14 @@ public class JmsQueueSender {
     to create a text message from the supplied <classname>Session</classname>
     object. The <classname>JmsTemplate</classname> is constructed by passing a
     reference to a <classname>ConnectionFactory</classname>. As an alternative,
-    a zero argument constructor and <property>connectionFactory</property> /
+    a zero argument constructor and <property>connectionFactory</property>
     is provided and can be used for constructing the instance in JavaBean style
     (using a BeanFactory or plain Java code). Alternatively, consider deriving
     from Spring's <classname>JmsGatewaySupport</classname> convenience base class,
     which provides pre-built bean properties for JMS configuration.</para>
 
     <para>The method <methodname>send(String destinationName, MessageCreator
-    creator)</methodname> lets you send to a message using the string name of
+    creator)</methodname> lets you send a message using the string name of
     the destination. If these names are registered in JNDI, you should set the
     <property>destinationResolver</property> property of the template to an
     instance of <classname>JndiDestinationResolver</classname>.</para>
@@ -444,7 +444,7 @@ public class JmsQueueSender {
       <para>The sandbox currently includes a
       <classname>MapMessageConverter</classname> which uses reflection to
       convert between a JavaBean and a <classname>MapMessage</classname>.
-      Other popular implementations choices you might implement yourself are
+      Other popular implementation choices you might implement yourself are
       Converters that use an existing XML marshalling package, such as JAXB,
       Castor, XMLBeans, or XStream, to create a
       <interfacename>TextMessage</interfacename> representing the
@@ -500,7 +500,7 @@ public class JmsQueueSender {
       <interfacename>ProducerCallback</interfacename> expose the JMS
       <interfacename>Session</interfacename> and
       <interfacename>Session</interfacename> /
-      <interfacename>MessageProducer</interfacename> pair respectfully. The
+      <interfacename>MessageProducer</interfacename> pair respectively. The
       <methodname>execute()</methodname> methods on
       <classname>JmsTemplate</classname> execute these callback
       methods.</para>
@@ -589,7 +589,7 @@ public class ExampleListener implements MessageListener {
 
       <para>The <interfacename>SessionAwareMessageListener</interfacename>
       interface is a Spring-specific interface that provides a similar
-      contract the JMS <interfacename>MessageListener</interfacename>
+      contract to the JMS <interfacename>MessageListener</interfacename>
       interface, but also provides the message handling method with access to
       the JMS <interfacename>Session</interfacename> from which the
       <interfacename>Message</interfacename> was received.</para>

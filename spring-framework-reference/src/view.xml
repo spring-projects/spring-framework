@@ -29,7 +29,7 @@
     <note>
       <para>
         Setting up your application to use JSTL is a common source of error,
-        mainly cause by confusion over the different servlet spec., JSP and JSTL
+        mainly caused by confusion over the different servlet spec., JSP and JSTL
         version numbers, what they mean and how to declare the taglibs correctly. 
         The article
         <ulink url="http://www.mularien.com/blog/2008/04/24/how-to-reference-and-use-jstl-in-your-web-application/">
@@ -760,7 +760,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
         <para>A key principle of REST is the use of the Uniform Interface.
         This means that all resources (URLs) can be manipulated using the same
-        four HTTP methods: GET, PUT, POST, and DELETE. For each methods, the
+        four HTTP methods: GET, PUT, POST, and DELETE. For each method, the
         HTTP specification defines the exact semantics. For instance, a GET
         should always be a safe operation, meaning that is has no side
         effects, and a PUT or DELETE should be idempotent, meaning that you
@@ -986,7 +986,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 
     <para><ulink url="http://velocity.apache.org">Velocity</ulink> and <ulink
     url="http://www.freemarker.org">FreeMarker</ulink> are two templating
-    languages that can both be used as view technologies within Spring MVC
+    languages that can be used as view technologies within Spring MVC
     applications. The languages are quite similar and serve similar needs and
     so are considered together in this section. For semantic and syntactic
     differences between the two languages, see the <ulink
@@ -999,8 +999,8 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       class="libraryfile">velocity-1.x.x.jar</filename> or <filename
       class="libraryfile">freemarker-2.x.jar</filename> in order to work with
       Velocity or FreeMarker respectively and <filename
-      class="libraryfile">commons-collections.jar</filename> needs also to be
-      available for Velocity. Typically they are included in the
+      class="libraryfile">commons-collections.jar</filename> is required for
+      Velocity. Typically they are included in the
       <literal>WEB-INF/lib</literal> folder where they are guaranteed to be
       found by a Java EE server and added to the classpath for your application.
       It is of course assumed that you already have the <filename
@@ -2593,7 +2593,7 @@ simpleReport.reportDataKey=myBeanData</programlisting>
     response content as XML. The object to be marshalled can be set explicitly
     using <classname>MarhsallingView</classname>'s
     <property>modelKey</property> bean property. Alternatively, the view will
-    iterate over all model properties and marhsall only those types that are
+    iterate over all model properties and marshal only those types that are
     supported by the <interfacename>Marshaller</interfacename>. For more
     information on the functionality in the
     <classname>org.springframework.oxm</classname> package refer to the

@@ -354,10 +354,9 @@ TR:REVISED, PLS REVIEW-->
   &lt;property name="password" value="${jdbc.password}" /&gt;
 &lt;/bean&gt;</programlisting>
 
-    <para>The related <interfacename>The
-    PlatformTransactionManager</interfacename> bean definition will then have
-    a reference to the <interfacename>DataSource</interfacename> definition.
-    It will look like this:</para>
+    <para>The related <interfacename>PlatformTransactionManager</interfacename>
+    bean definition will then have a reference to the
+    <interfacename>DataSource</interfacename> definition. It will look like this:</para>
 
     <programlisting language="xml">&lt;bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
   &lt;property name="dataSource" ref="dataSource"/&gt;
@@ -629,7 +628,7 @@ TR: REVISED, PLS REVIEW - rewrote this to hoefully make it more clear--></para>
         <para>The Spring Framework enables you to customize transactional
         behavior, by using AOP. For example, you can insert custom behavior in
         the case of transaction rollback. You can also add arbitrary advice,
-        along with the transactional advice. With EJB CMT, cannot influence
+        along with the transactional advice. With EJB CMT, you cannot influence
         the container's transaction management except with
         <methodname>setRollbackOnly()</methodname>.</para>
       </listitem>
@@ -1858,7 +1857,7 @@ TR: REVISED, PLS REVIEW - changed it back; it's not just settings, the section d
         <para>When the propagation setting is
         <literal>PROPAGATION_REQUIRED</literal>, a
         <emphasis>logical</emphasis> transaction scope is created for each
-        method that to which the setting is applied. Each such logical
+        method upon which the setting is applied. Each such logical
         transaction scope can determine rollback-only status individually,
         with an outer transaction scope being logically independent from the
         inner transaction scope. Of course, in case of standard
@@ -2137,7 +2136,7 @@ TR: REVISED, PLS REVIEW. changed to 'desired'; seems clear that the desired orde
       the aspect. The simplest way to configure the transaction management
       aspect is to use the <literal>&lt;tx:annotation-driven/&gt;</literal>
       element and specify the <literal>mode</literal> attribute to
-      <literal>asepctj</literal> as described in <xref
+      <literal>aspectj</literal> as described in <xref
       linkend="transaction-declarative-annotations" />. Because we're focusing
       here on applications running outside of a Spring container, we'll show
       you how to do it programmatically.</para>

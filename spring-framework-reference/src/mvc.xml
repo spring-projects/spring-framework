@@ -820,7 +820,7 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ow
         <!-- MLP: Bev Review -->
         <para>The matching of method parameter names to URI Template variable
         names can only be done if your code is compiled with debugging
-        enabled. If you do have not debugging enabled, you must specify the
+        enabled. If you do not have debugging enabled, you must specify the
         name of the URI Template variable name in the @PathVariable annotation
         in order to bind the resolved value of the variable name to a method
         parameter. For example:</para>
@@ -1176,8 +1176,9 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
             <listitem>
               <para>A <classname>HttpEntity&lt;?&gt;</classname> or
               <classname>ResponseEntity&lt;?&gt;</classname> object
-              to access to the Servlet reponse HTTP headers and contents. The entity body will
-              be converted to the response stream using
+              to provide access to the Servlet reponse HTTP headers and
+              contents. The entity body will be converted to the response
+              stream using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
               linkend="mvc-ann-httpentity" />.</para>
             </listitem>
@@ -2241,7 +2242,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       representation of the current resource regardless of the logical view
       name. The <literal>Accept</literal> header may include wildcards, for
       example text/*, in which case a <classname>View</classname> whose
-      Context-Type was text/xml is a compatible match.</para>
+      Content-Type was text/xml is a compatible match.</para>
 
       <para>To support the resolution of a view based on a file extension, use
       the <classname>ContentNegotiatingViewResolver </classname>bean property
@@ -2760,7 +2761,7 @@ public class FileUpoadController {
       <literal>web.xml</literal>. However, they provide a more flexible way to
       handle exceptions. They provide information about which handler was
       executing when the exception was thrown. Furthermore, a programmatic way
-      of handling exception gives you more options for responding
+      of handling exceptions gives you more options for responding
       appropriately before the request is forwarded to another URL (the same
       end result as when you use the servlet specific exception
       mappings).</para>

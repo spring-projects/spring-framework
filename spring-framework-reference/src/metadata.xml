@@ -38,7 +38,7 @@ public class PetStoreImpl implements PetStoreFacade, OrderService {</programlist
     from program source code, some important enterprise settings - notably
     transaction characteristics - arguably belong in program source.</para>
 
-    <para>Spring uses Java 5 annotations thoughout the framework and across a
+    <para>Spring uses Java 5 annotations throughout the framework and across a
     wide range of features such as DI, MVC, and AOP and supports standardized
     annotations such as @PreDestroy and @PostConstruct specified by JSR-250, and
     @Inject specified by JSR-330. This chapter describes the @Required annotation
