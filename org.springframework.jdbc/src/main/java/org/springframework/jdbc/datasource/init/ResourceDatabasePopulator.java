@@ -254,15 +254,19 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
-			if ((c == delim || c == '\n') && !inLiteral) {
-				if (sb.length() > 0) {
-					statements.add(sb.toString());
-					sb = new StringBuilder();
+			if (!inLiteral) {
+				if (c == delim) {
+					if (sb.length() > 0) {
+						statements.add(sb.toString());
+						sb = new StringBuilder();
+					}
+					continue;
+				}
+				else if (c == '\n' || c == '\t') {
+					continue;
 				}
 			}
-			else {
-				sb.append(c);
-			}
+			sb.append(c);
 		}
 		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
