@@ -2027,9 +2027,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
       <para>If a specific view resolver does not result in a view, Spring
       examines the context for other view resolvers. If additional view
-      resolvers exist, Spring continues to inspect them. <!--So what happens after Spring inspects them?-->If
-      they do not exist, Spring throws an
-      <classname>Exception</classname>.</para>
+      resolvers exist, Spring continues to inspect them until a view is
+      resolved. If no view resolver returns a view, Spring throws a
+      <classname>ServletException</classname>.</para>
 
       <para>The contract of a view resolver specifies that a view resolver
       <emphasis>can</emphasis> return null to indicate the view could not be
