@@ -1442,8 +1442,8 @@ String result =
 
       <para>using a <literal>Map&lt;String,String&gt;</literal>.</para>
 
-      <para>To create an instance of <classname>RestTemplate</classname> you
-      can simply call the default constructor. This will use standard Java
+      <para>To create an instance of <classname>RestTemplate</classname> you can
+      simply call the default no-arg constructor. This will use standard Java
       classes from the <literal>java.net</literal> package as the underlying
       implementation to create HTTP requests. This can be overridden by
       specifying an implementation of

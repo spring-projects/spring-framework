@@ -2072,7 +2072,7 @@ support=support@example.co.uk</programlisting>
 
               <entry><para>Chooses <emphasis>constructor</emphasis> or
               <emphasis>byType</emphasis> through introspection of the bean
-              class. If a default constructor is found, the
+              class. If a default no-arg constructor is found, the
               <emphasis>byType</emphasis> mode is applied.</para></entry>
             </row>
           </tbody>
