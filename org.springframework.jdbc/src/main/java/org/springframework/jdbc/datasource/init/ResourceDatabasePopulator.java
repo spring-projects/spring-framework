@@ -239,10 +239,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Split an SQL script into separate statements delimited with the provided delimiter character. Each individual
-	 * statement will be added to the provided <code>List</code>.
+	 * Split an SQL script into separate statements delimited with the provided delimiter character.
+	 * Each individual statement will be added to the provided <code>List</code>.
 	 * @param script the SQL script
-	 * @param delim character delimiting each statement - typically a ';' character
+	 * @param delim character delimiting each statement (typically a ';' character)
 	 * @param statements the List that will contain the individual statements
 	 */
 	private void splitSqlScript(String script, char delim, List<String> statements) {
@@ -250,20 +250,21 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
+			char c = content[i];
+			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
-			if (content[i] == delim && !inLiteral) {
+			if ((c == delim || c == '\n') && !inLiteral) {
 				if (sb.length() > 0) {
 					statements.add(sb.toString());
 					sb = new StringBuilder();
 				}
 			}
 			else {
-				sb.append(content[i]);
+				sb.append(c);
 			}
 		}
-		if (sb.length() > 0) {
+		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
 		}
 	}
