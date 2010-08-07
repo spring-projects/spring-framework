@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,19 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.EventPortlet;
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
+import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
+import javax.portlet.ResourceServingPortlet;
+import javax.portlet.UnavailableException;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
@@ -39,6 +47,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.context.PortletConfigAware;
 import org.springframework.web.portlet.context.PortletContextAware;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * {@link Controller} implementation that wraps a portlet instance which it manages
@@ -71,7 +80,8 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * @since 2.0
  */
 public class PortletWrappingController extends AbstractController
-	implements BeanNameAware, InitializingBean, DisposableBean, PortletContextAware, PortletConfigAware {
+		implements ResourceAwareController, EventAwareController,
+		BeanNameAware, InitializingBean, DisposableBean, PortletContextAware, PortletConfigAware {
 
 	private boolean useSharedPortletConfig = true;
 
@@ -174,6 +184,61 @@ public class PortletWrappingController extends AbstractController
 
 		this.portletInstance.render(request, response);
 		return null;
+	}
+
+	public ModelAndView handleResourceRequest(
+			ResourceRequest request, ResourceResponse response) throws Exception {
+
+		if (!(this.portletInstance instanceof ResourceServingPortlet)) {
+			throw new UnavailableException("Cannot handle resource request - target portlet [" +
+					this.portletInstance.getClass() + " does not implement ResourceServingPortlet");
+		}
+		ResourceServingPortlet resourcePortlet = (ResourceServingPortlet) this.portletInstance;
+
+		// Delegate to PortletContentGenerator for checking and preparing.
+		checkAndPrepare(request, response);
+
+		// Execute in synchronized block if required.
+		if (isSynchronizeOnSession()) {
+			PortletSession session = request.getPortletSession(false);
+			if (session != null) {
+				Object mutex = PortletUtils.getSessionMutex(session);
+				synchronized (mutex) {
+					resourcePortlet.serveResource(request, response);
+					return null;
+				}
+			}
+		}
+
+		resourcePortlet.serveResource(request, response);
+		return null;
+	}
+
+	public void handleEventRequest(
+			EventRequest request, EventResponse response) throws Exception {
+
+		if (!(this.portletInstance instanceof EventPortlet)) {
+			logger.debug("Ignoring event request for non-event target portlet: " + this.portletInstance.getClass());
+			return;
+		}
+		EventPortlet eventPortlet = (EventPortlet) this.portletInstance;
+
+		// Delegate to PortletContentGenerator for checking and preparing.
+		check(request, response);
+
+		// Execute in synchronized block if required.
+		if (isSynchronizeOnSession()) {
+			PortletSession session = request.getPortletSession(false);
+			if (session != null) {
+				Object mutex = PortletUtils.getSessionMutex(session);
+				synchronized (mutex) {
+					eventPortlet.processEvent(request, response);
+					return;
+				}
+			}
+		}
+
+		eventPortlet.processEvent(request, response);
 	}
 
 
