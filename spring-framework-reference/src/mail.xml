@@ -303,9 +303,9 @@ sender.send(message);]]></programlisting>
 				create your email template(s), you will need to have the Velocity libraries
 				available on your classpath. You will also need to create one or more Velocity templates
 				for the email content that your application needs. Find below the Velocity
-				template that this example will be using... as you can see it is HTML-based,
-				and since it is plain text it can be created using your favorite HTML editor
-				without recourse to having to know Java.</para>
+				template that this example will be using. As you can see it is HTML-based,
+				and since it is plain text it can be created using your favorite HTML
+				or text editor.</para>
 				<programlisting language="xml"><lineannotation># in the <literal>com/foo/package</literal></lineannotation><![CDATA[
 <html>
 <body>
