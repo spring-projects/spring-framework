@@ -10,7 +10,7 @@
     <para>Java 5 introduced source-level metadata called annotations to
     program elements, usually, classes and/or methods</para>
 
-    <para>For example we might add metadata at the class level using the
+    <para>For example we might add metadata at the class level using
     Spring's @Transactional annotation that is used to support Spring's
     declarative transaction management features.</para>
 
@@ -32,18 +32,18 @@ public class PetStoreImpl implements PetStoreFacade, OrderService {</programlist
   . . . 
 }</programlisting>
 
-    <para>The value of using annoations has been broadly embrassed by the JEE
-    community. For example, it's much less verbose than the traditional XML
+    <para>The value of using annoations has been broadly embraced by the Java
+    community. For example, it's much less verbose than traditional XML
     deployment descriptors. While it is desirable to externalize some things
     from program source code, some important enterprise settings - notably
-    transaction characteristics - arguably belong in program source. </para>
+    transaction characteristics - arguably belong in program source.</para>
 
-    <para>Spring uses Java 5 annotations thoughout the framework across a wide
-    range of features such as DI, MVC, and AOP and supports JEE standard
-    annotations such as @PreDestroy and @PostConstruct defined by JSR-250.
-    This chapter describes the @Required attribute and provides links to other
-    parts the documentation where the various attributes are described in more
-    detail.</para>
+    <para>Spring uses Java 5 annotations thoughout the framework and across a
+    wide range of features such as DI, MVC, and AOP and supports standardized
+    annotations such as @PreDestroy and @PostConstruct specified by JSR-250, and
+    @Inject specified by JSR-330. This chapter describes the @Required annotation
+    and provides links to other parts of the documentation where the various
+    annotations are described in more detail.</para>
   </section>
 
   <section id="metadata-annotations">
@@ -98,10 +98,9 @@ public class PetStoreImpl implements PetStoreFacade, OrderService {</programlist
       <programlisting>Exception in thread "main" java.lang.IllegalArgumentException:
     Property 'movieFinder' is required for bean 'movieLister'.</programlisting>
 
-      <para>There is one last little (small, tiny) piece of Spring
-      configuration that is required to actually <emphasis>'switch
-      on'</emphasis> this behavior. Simply annotating the
-      <emphasis>'setter'</emphasis> properties of your classes is not enough
+      <para>There is one last bit of Spring configuration that is required to
+      actually <emphasis>'switch on'</emphasis> this behavior. Simply annotating
+      the <emphasis>'setter'</emphasis> properties of your classes is not enough
       to get this behavior. You need to enable a component that is aware of
       the <interfacename>@Required</interfacename> annotation and that can
       process it appropriately.</para>
