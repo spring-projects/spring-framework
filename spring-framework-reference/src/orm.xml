@@ -675,7 +675,7 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
     &lt;property name="sessionFactory" ref="mySessionFactory2"/&gt;
   &lt;/bean&gt;
 
-  &lt;bean id"myProductService" class="product.ProductServiceImpl"&gt;
+  &lt;bean id="myProductService" class="product.ProductServiceImpl"&gt;
     &lt;property name="productDao" ref="myProductDao"/&gt;
     &lt;property name="inventoryDao" ref="myInventoryDao"/&gt;
   &lt;/bean&gt;
