@@ -1031,6 +1031,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param mv the ModelAndView to render
 	 * @param request current HTTP servlet request
 	 * @param response current HTTP servlet response
+	 * @throws ServletException if view is missing or cannot be resolved
 	 * @throws Exception if there's a problem rendering the view
 	 */
 	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
