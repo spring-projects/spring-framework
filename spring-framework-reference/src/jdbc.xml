@@ -479,11 +479,14 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
 
         <para>An alternative to explicit configuration is to use
         component-scanning and annotation support for dependency injection. In
-        this case you annotate the setter method for the
-        <classname>DataSource</classname> with the
-        <interfacename>@Autowired</interfacename> annotation.<!--Re preceding sentence, I don't see @Autowired in next two examples. TR: OK AS IS. Made it *bold*--></para>
+        this case you annotate the class with
+        <interfacename>@Repository</interfacename> (which makes it a candidate
+        for component-scanning) and annotate the
+        <classname>DataSource</classname> setter method with
+        <interfacename>@Autowired</interfacename>.<!--Re preceding sentence, I don't see @Autowired in next two examples. TR: OK AS IS. Made it *bold*--></para>
 
-        <para><programlisting language="java">public class JdbcCorporateEventDao implements CorporateEventDao {
+        <para><programlisting language="java"><emphasis role="bold">@Repository</emphasis>
+public class JdbcCorporateEventDao implements CorporateEventDao {
 
     private JdbcTemplate jdbcTemplate;
 
