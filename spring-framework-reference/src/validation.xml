@@ -108,9 +108,9 @@ public class Person {
         <classname>Customer</classname> objects, and so a distinct
         <classname>AddressValidator</classname> has been implemented. If you want your
         <classname>CustomerValidator</classname> to reuse the logic contained within the
-        <classname>AddressValidator</classname> class without recourse to copy-n-paste you can
-        dependency-inject or instantiate an <classname>AddressValidator</classname> within your
-        <classname>CustomerValidator</classname>, and use it like so:</para>
+        <classname>AddressValidator</classname> class without resorting to copy-and-paste,
+        you can dependency-inject or instantiate an <classname>AddressValidator</classname>
+        within your <classname>CustomerValidator</classname>, and use it like so:</para>
         <programlisting language="java"><![CDATA[public class CustomerValidator implements Validator {
 
    private final Validator addressValidator;
