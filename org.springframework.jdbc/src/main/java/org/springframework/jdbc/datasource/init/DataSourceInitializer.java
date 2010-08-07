@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * Used to populate a database during initialization.
+ *
  * @author Dave Syer
  * @since 3.0
  * @see DatabasePopulator
@@ -38,6 +39,25 @@ public class DataSourceInitializer implements InitializingBean {
 
 	private boolean enabled = true;
 
+
+	/**
+	 * The {@link DataSource} to populate when this component is initialized.
+	 * Mandatory with no default.
+	 * @param dataSource the DataSource
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	/**
+	 * The {@link DatabasePopulator} to use to populate the data source.
+	 * Mandatory with no default.
+	 * @param databasePopulator the database populator to use.
+	 */
+	public void setDatabasePopulator(DatabasePopulator databasePopulator) {
+		this.databasePopulator = databasePopulator;
+	}
+
 	/**
 	 * Flag to explicitly enable or disable the database populator.
 	 * @param enabled true if the database populator will be called on startup
@@ -46,30 +66,14 @@ public class DataSourceInitializer implements InitializingBean {
 		this.enabled = enabled;
 	}
 
-	/**
-	 * The {@link DatabasePopulator} to use to populate the data source.  Mandatory with no default.
-	 * @param databasePopulator the database populator to use.
-	 */
-	public void setDatabasePopulator(DatabasePopulator databasePopulator) {
-		this.databasePopulator = databasePopulator;
-	}
 
 	/**
-	 * The {@link DataSource} to populate when this component is initialized.  Mandatory with no default.
-	 * @param dataSource the DataSource
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	/**
-	 * Use the populator to set up data in the data source.  Both properties are mandatory with no defaults. 
-	 * @see InitializingBean#afterPropertiesSet()
+	 * Use the populator to set up data in the data source.
 	 */
 	public void afterPropertiesSet() throws Exception {
-		if (enabled) {
-			Assert.state(dataSource != null, "DataSource must be provided");
-			Assert.state(databasePopulator != null, "DatabasePopulator must be provided");
+		if (this.enabled) {
+			Assert.state(this.dataSource != null, "DataSource must be provided");
+			Assert.state(this.databasePopulator != null, "DatabasePopulator must be provided");
 			try {
 				Connection connection = this.dataSource.getConnection();
 				try {
@@ -89,4 +93,5 @@ public class DataSourceInitializer implements InitializingBean {
 			}
 		}
 	}
+
 }
