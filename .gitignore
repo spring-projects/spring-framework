@@ -4,3 +4,4 @@ ivy-cache
 spring-build
 jmx.log
 .springBeans
+.DS_Store
