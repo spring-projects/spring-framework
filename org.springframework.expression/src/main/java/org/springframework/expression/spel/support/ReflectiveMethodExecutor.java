@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,14 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Method method;
+
+	private final Integer varargsPosition;
 
 	// When the method was found, we will have determined if arguments need to be converted for it
 	// to be invoked. Conversion won't be cheap so let's only do it if necessary.
@@ -41,6 +44,13 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 
 	public ReflectiveMethodExecutor(Method theMethod, int[] argumentsRequiringConversion) {
 		this.method = theMethod;
+		if (theMethod.isVarArgs()) {
+			Class[] paramTypes = theMethod.getParameterTypes();
+			this.varargsPosition = paramTypes.length - 1;
+		}
+		else {
+			this.varargsPosition = null;
+		}
 		this.argsRequiringConversion = argumentsRequiringConversion;
 	}
 
@@ -48,15 +58,17 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		try {
 			if (this.argsRequiringConversion != null && arguments != null) {
-				ReflectionHelper.convertArguments(this.method.getParameterTypes(), this.method.isVarArgs(),
-						context.getTypeConverter(), this.argsRequiringConversion, arguments);
+				ReflectionHelper.convertArguments(
+						context.getTypeConverter(), arguments, this.method,
+						this.argsRequiringConversion, this.varargsPosition);
 			}
 			if (this.method.isVarArgs()) {
 				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.method);
-			return new TypedValue(this.method.invoke(target, arguments), new TypeDescriptor(new MethodParameter(method,-1)));
-		} catch (Exception ex) {
+			return new TypedValue(this.method.invoke(target, arguments), new TypeDescriptor(new MethodParameter(this.method, -1)));
+		}
+		catch (Exception ex) {
 			throw new AccessException("Problem invoking method: " + this.method, ex);
 		}
 	}

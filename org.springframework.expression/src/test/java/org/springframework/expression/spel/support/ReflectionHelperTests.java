@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.expression.spel;
+
+package org.springframework.expression.spel.support;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.ExpressionTestCase;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.SpelUtilities;
 import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.expression.spel.support.ReflectionHelper;
-import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKind;
 
 /**
@@ -41,7 +42,7 @@ import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKin
  * 
  * @author Andy Clement
  */
-public class HelperTests extends ExpressionTestCase {
+public class ReflectionHelperTests extends ExpressionTestCase {
 
 	@Test
 	public void testFormatHelperForClassName() {
@@ -199,63 +200,68 @@ public class HelperTests extends ExpressionTestCase {
 		checkMatch2(new Class[]{Integer.class,Integer.class,Integer.class},new Class[]{Integer.class,String[].class},tc,ArgsMatchKind.REQUIRES_CONVERSION,1,2);
 		// what happens on (Integer,String) passed to (Integer[]) ?
 	}
-	
+
 	@Test
 	public void testConvertArguments() throws Exception {
 		StandardTypeConverter tc = new StandardTypeConverter();
+		Method oneArg = TestInterface.class.getMethod("oneArg", String.class);
+		Method twoArg = TestInterface.class.getMethod("twoArg", String.class, String[].class);
 
 		// basic conversion int>String
 		Object[] args = new Object[]{3};
-		ReflectionHelper.convertArguments(new Class[]{String.class}, false, tc, new int[]{0}, args);
+		ReflectionHelper.convertArguments(tc, args, oneArg, new int[]{0}, null);
 		checkArguments(args, "3");
 
 		// varargs but nothing to convert
 		args = new Object[]{3};
-		ReflectionHelper.convertArguments(new Class[]{String.class,String[].class}, false, tc, new int[]{0}, args);
+		ReflectionHelper.convertArguments(tc, args, twoArg, new int[]{0}, 1);
 		checkArguments(args, "3");
 
 		// varargs with nothing needing conversion
 		args = new Object[]{3,"abc","abc"};
-		ReflectionHelper.convertArguments(new Class[]{String.class,String[].class}, true, tc, new int[]{0,1,2}, args);
+		ReflectionHelper.convertArguments(tc, args, twoArg, new int[]{0,1,2}, 1);
 		checkArguments(args, "3","abc","abc");
 
 		// varargs with conversion required
 		args = new Object[]{3,false,3.0d};
-		ReflectionHelper.convertArguments(new Class[]{String.class,String[].class}, true, tc, new int[]{0,1,2}, args);
+		ReflectionHelper.convertArguments(tc, args, twoArg, new int[]{0,1,2}, 1);
 		checkArguments(args, "3","false","3.0");
 	}
 
 	@Test
-	public void testConvertArguments2() throws EvaluationException {
+	public void testConvertArguments2() throws Exception {
 		StandardTypeConverter tc = new StandardTypeConverter();
+		Method oneArg = TestInterface.class.getMethod("oneArg", String.class);
+		Method twoArg = TestInterface.class.getMethod("twoArg", String.class, String[].class);
 
 		// Simple conversion: int to string
 		Object[] args = new Object[]{3};
-		ReflectionHelper.convertAllArguments(new Class[]{String.class}, false, tc, args);
+		ReflectionHelper.convertAllArguments(tc, args, oneArg);
 		checkArguments(args,"3");
 
 		// varargs conversion
 		args = new Object[]{3,false,3.0f};
-		ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class}, true, tc, args);
+		ReflectionHelper.convertAllArguments(tc, args, twoArg);
 		checkArguments(args,"3","false","3.0");
 
 		// varargs conversion but no varargs
 		args = new Object[]{3};
-		ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class}, true, tc, args);
+		ReflectionHelper.convertAllArguments(tc, args, twoArg);
 		checkArguments(args,"3");
 
 		// missing converter
 		args = new Object[]{3,false,3.0f};
 		try {
-			ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class}, true, null, args);
+			ReflectionHelper.convertAllArguments(null, args, twoArg);
 			Assert.fail("Should have failed because no converter supplied");
-		} catch (SpelEvaluationException se) {
+		}
+		catch (SpelEvaluationException se) {
 			Assert.assertEquals(SpelMessage.TYPE_CONVERSION_ERROR,se.getMessageCode());
 		}
 		
 		// null value
 		args = new Object[]{3,null,3.0f};
-		ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class}, true, tc, args);
+		ReflectionHelper.convertAllArguments(tc, args, twoArg);
 		checkArguments(args,"3",null,"3.0");
 	}
 	
@@ -486,4 +492,13 @@ public class HelperTests extends ExpressionTestCase {
 	private void checkArgument(Object expected, Object actual) {
 		Assert.assertEquals(expected,actual);
 	}
+
+
+	public interface TestInterface {
+
+		void oneArg(String arg1);
+
+		void twoArg(String arg1, String... arg2);
+	}
+
 }
