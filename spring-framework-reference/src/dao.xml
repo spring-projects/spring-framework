@@ -81,9 +81,12 @@ public class SomeMovieFinder implements MovieFinder {
 
 }</programlisting>
 
-    <para>Any DAO or repository need to access to a persistence resource,
-    depending on the persistence technology used. The easiest way to
-    accomplish this is to have this resource dependency injected using one of
+    <para>Any DAO or repository implementation will need to access to a
+    persistence resource, depending on the persistence technology used; for
+    example, a JDBC-based repository will need access to a JDBC
+    <interfacename>DataSource</interfacename>; a JPA-based repository will need
+    access to an <interfacename>EntityManager</interfacename>. The easiest way
+    to accomplish this is to have this resource dependency injected using one of
     the <interfacename>@Autowired,</interfacename>
     <interfacename>@Resource</interfacename> or
     <interfacename>@PersistenceContext</interfacename> annotations. Here is an
