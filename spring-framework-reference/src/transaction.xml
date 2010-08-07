@@ -731,16 +731,16 @@ TR: OK AS IS. images don't show up in the editor, but they do show up in the gen
       <title>Example of declarative transaction implementation</title>
 
       <para>Consider the following interface, and its attendant
-      implementation. This example uses the rote <classname>Foo</classname>
-      and <classname>Bar</classname> tropes so that you can concentrate on the
-      transaction usage without focusing on the domain model. For the purposes
-      of this example, the fact that the
+      implementation. This example uses <classname>Foo</classname> and
+      <classname>Bar</classname> classes as placeholders so that you can
+      concentrate on the transaction usage without focusing on a particular
+      domain model. For the purposes of this example, the fact that the
       <classname>DefaultFooService</classname> class throws
       <exceptionname>UnsupportedOperationException</exceptionname> instances
       in the body of each implemented method is good; it allows you to see
       transactions created and then rolled back in response to the
-      <exceptionname>UnsupportedOperationException</exceptionname>
-      instance.</para>
+      <exceptionname>UnsupportedOperationException</exceptionname> instance.
+      </para>
 
       <programlisting language="java"><lineannotation>// the service interface that we want to make transactional</lineannotation>
 
