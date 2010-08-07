@@ -607,19 +607,19 @@
     </para>
 
     <para>While Spring has its own <link linkend="mvc">powerful web
-    layer</link>, there are a number of unique advantages to building a Java EE
-    application using a combination of Tapestry for the web user interface and
-    the Spring container for the lower layers. This section of the web
-    integration chapter attempts to detail a few best practices for combining
-    these two frameworks.</para>
+    layer</link>, there are a number of unique advantages to building an
+    enterprise Java application using a combination of Tapestry for the web
+    user interface and the Spring container for the lower layers. This section
+    of the web integration chapter attempts to detail a few best practices for
+    combining these two frameworks.</para>
 
-    <para>A <emphasis>typical</emphasis> layered Java EE application built with
-    Tapestry and Spring will consist of a top user interface (UI) layer built
-    with Tapestry, and a number of lower layers, all wired together by one or
-    more Spring containers. Tapestry's own reference documentation contains
-    the following snippet of best practice advice. (Text that the author of
-    this Spring section has added is contained within <literal>[]</literal>
-    brackets.)</para>
+    <para>A <emphasis>typical</emphasis> layered enterprise Java application
+    built with Tapestry and Spring will consist of a top user interface (UI)
+    layer built with Tapestry, and a number of lower layers, all wired together
+    by one or more Spring containers. Tapestry's own reference documentation
+    contains the following snippet of best practice advice. (Text that the
+    author of this Spring section has added is contained within
+    <literal>[]</literal> brackets.)</para>
     
     <para>
         <quote>
@@ -1092,7 +1092,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         are coming from, and in fact it is easy to slip in another implementation,
         for example, during testing. This inversion of control is one of the prime
         goals and benefits of the Spring Framework, and we have managed to extend
-        it all the way up the Java EE stack in this Tapestry application.</para>
+        it throughout the stack in this Tapestry application.</para>
       </section>
     </section>
 

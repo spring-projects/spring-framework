@@ -466,7 +466,7 @@ public class Client {
         </section>
         <section id="xsd-config-body-schemas-jee">
             <title>The <literal>jee</literal> schema</title>
-            <para>The <literal>jee</literal> tags deal with JEE (Java Enterprise Edition)-related
+            <para>The <literal>jee</literal> tags deal with Java EE (Java Enterprise Edition)-related
             configuration issues, such as looking up a JNDI object and defining EJB references.</para>
             <para>To use the tags in the <literal>jee</literal> schema, you need to have
             the following preamble at the top of your Spring XML configuration file;
