@@ -169,7 +169,7 @@ TR: OK AS IS - I think it's fine as is - the concepts apply to both programmatic
         management?</title>
 
         <para>The Spring Framework's transaction management support changes
-        traditional rules as to when a enterprise Java application requires
+        traditional rules as to when an enterprise Java application requires
         an application server.</para>
 
         <para>In particular, you do not need an application server simply for
