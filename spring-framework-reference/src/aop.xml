@@ -74,9 +74,9 @@
         <listitem>
           <para><emphasis>Aspect</emphasis>: a modularization of a concern
           that cuts across multiple classes. Transaction management is a good
-          example of a crosscutting concern in Java EE applications. In Spring
-          AOP, aspects are implemented using regular classes (the <link
-          linkend="aop-schema">schema-based approach</link>) or regular
+          example of a crosscutting concern in enterprise Java applications.
+          In Spring AOP, aspects are implemented using regular classes (the
+          <link linkend="aop-schema">schema-based approach</link>) or regular
           classes annotated with the <interfacename>@Aspect</interfacename>
           annotation (the <link
           linkend="aop-ataspectj"><interfacename>@AspectJ</interfacename>
@@ -211,7 +211,7 @@
 
       <para>Spring AOP is implemented in pure Java. There is no need for a
       special compilation process. Spring AOP does not need to control the
-      class loader hierarchy, and is thus suitable for use in a Java EE web
+      class loader hierarchy, and is thus suitable for use in a Servlet
       container or application server.</para>
 
       <para>Spring AOP currently supports only method execution join points
@@ -235,8 +235,8 @@
       efficiently with Spring AOP, such as advise very fine-grained objects
       (such as domain objects typically): AspectJ is the best choice in such
       cases. However, our experience is that Spring AOP provides an excellent
-      solution to most problems in Java EE applications that are amenable to
-      AOP.</para>
+      solution to most problems in enterprise Java applications that are
+      amenable to AOP.</para>
 
       <para>Spring AOP will never strive to compete with AspectJ to provide a
       comprehensive AOP solution. We believe that both proxy-based frameworks

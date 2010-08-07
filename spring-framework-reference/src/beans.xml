@@ -5206,8 +5206,8 @@ public @interface MovieQualifier {
 
       <para>Spring also supports injection using the JSR-250
       <interfacename>@Resource</interfacename> annotation on fields or bean
-      property setter methods. This is a common pattern in Java EE 5 and Java
-      6, for example, in JSF 1.2 managed beans or JAX-WS 2.0 endpoints. Spring
+      property setter methods. This is a common pattern in Java EE 5 and 6,
+      for example in JSF 1.2 managed beans or JAX-WS 2.0 endpoints. Spring
       supports this pattern for Spring-managed objects as well.</para>
 
       <para><interfacename>@Resource</interfacename> takes a name attribute,
