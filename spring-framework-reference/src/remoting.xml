@@ -1063,7 +1063,11 @@ public class AccountServiceEndpoint {
     Spring Framework is pretty basic - it sends and receives on the
     <interfacename>same thread</interfacename> and in the <emphasis>same
     non-transactional</emphasis> <interfacename>Session</interfacename>, and
-    as such throughput will be very implementation dependent.</para>
+    as such throughput will be very implementation dependent. Note that
+    these single-threaded and non-transactional constraints apply only to
+    Spring's JMS <emphasis role="bold">remoting</emphasis> support. See
+    <xref linkend="jms"/> for information on Spring's rich support for
+    JMS-based <emphasis role="bold">messaging</emphasis>.</para>
 
     <para>The following interface is used on both the server and the client
     side.</para>
