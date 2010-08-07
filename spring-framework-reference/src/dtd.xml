@@ -246,7 +246,7 @@
 
 	5. "autodetect"
 	Chooses "constructor" or "byType" through introspection of the bean class.
-	If a default constructor is found, "byType" gets applied.
+	If a default no-arg constructor is found, "byType" gets applied.
 
 	The latter two are similar to PicoContainer and make bean factories simple to
 	configure for small namespaces, but doesn't work as well as standard Spring
