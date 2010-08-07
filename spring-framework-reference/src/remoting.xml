@@ -1545,7 +1545,7 @@ String body = response.getBody();</programlisting>
       // Return the list of MediaType objects supported by this converter.
       List&lt;MediaType&gt; getSupportedMediaTypes();
 
-      // Read an object of the given type form the given input message, and returns it.
+      // Read an object of the given type from the given input message, and returns it.
       T read(Class&lt;T&gt; clazz, HttpInputMessage inputMessage) throws IOException,
                                                                    HttpMessageNotReadableException;
 
