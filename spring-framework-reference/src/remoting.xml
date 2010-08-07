@@ -394,8 +394,8 @@ public class AccountServiceImpl implements AccountService {
       <title>Exposing the service object</title>
 
       <para>Setting up the HTTP invoker infrastructure for a service object
-      much resembles the way you would do using Hessian or Burlap. Just as
-      Hessian support provides the
+      resembles closely the way you would do the same using Hessian or Burlap.
+      Just as Hessian support provides the
       <classname>HessianServiceExporter</classname>, Spring's HttpInvoker
       support provides the
       <classname>org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter</classname>.</para>
@@ -1280,7 +1280,7 @@ public class Client {
     <classname>RestTemplate</classname>'s behavior is customized by providing
     callback methods and configuring the
     <interfacename>HttpMessageConverter</interfacename> used to marshal
-    objects into the HTTP request body and to unmarshall any response back
+    objects into the HTTP request body and to unmarshal any response back
     into an object. As it is common to use XML as a message format, Spring
     provides a <classname>MarshallingHttpMessageConverter</classname> that
     uses the Object-to-XML framework that is part of the

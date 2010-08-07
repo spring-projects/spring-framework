@@ -592,8 +592,8 @@ List userList service.getUsernameList();
         always adequate, however. It is sometimes desirable to introduce an
         alias for a bean that is defined elsewhere. This is commonly the case
         in large systems where configuration is split amongst each subsystem,
-        each subsystem having its own set of object defintions. In XML-based
-        configuration metadata, you can use of the
+        each subsystem having its own set of object definitions. In XML-based
+        configuration metadata, you can use the
         <literal>&lt;alias/&gt;</literal> element to accomplish this.</para>
 
         <programlisting language="xml">&lt;alias name="fromName" alias="toName"/&gt;</programlisting>
@@ -1994,14 +1994,14 @@ support=support@example.co.uk</programlisting>
             during development, without negating the option of switching to
             explicit wiring when the code base becomes more stable.</para>
           </listitem>
-        </itemizedlist><footnote>
-          <para>See <xref linkend="beans-factory-collaborators" /></para>
-        </footnote> When using XML-based configuration metadata, you specify
-      autowire mode for a bean definition with the <literal>autowire</literal>
-      attribute of the <literal>&lt;bean/&gt;</literal> element. The
-      autowiring functionality has five modes. You specify autowiring
-      <emphasis>per</emphasis> bean and thus can choose which ones to
-      autowire.</para>
+        </itemizedlist>
+      When using XML-based configuration metadata<footnote><para>See
+      <xref linkend="beans-factory-collaborators" /></para></footnote>, you
+      specify autowire mode for a bean definition with the
+      <literal>autowire</literal> attribute of the
+      <literal>&lt;bean/&gt;</literal> element. The autowiring functionality has
+      five modes. You specify autowiring <emphasis>per</emphasis> bean and thus
+      can choose which ones to autowire.</para>
 
       <table id="beans-factory-autowiring-modes-tbl">
         <title>Autowiring modes</title>
@@ -4544,9 +4544,9 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
 
     <para>An alternative to XML setups is provided by annotation-based
     configuration which rely on the bytecode metadata for wiring up components
-    instead on angle-bracket declarations. Instead of using XML to describe a
+    instead of angle-bracket declarations. Instead of using XML to describe a
     bean wiring, the developer moves the configuration into the component
-    class itself by using annotations on relevant class, method or field
+    class itself by using annotations on the relevant class, method, or field
     declaration. As mentioned in <xref
     linkend="beans-factory-extension-bpp-examples-rabpp" />, using a
     <interfacename>BeanPostProcessor</interfacename> in conjunction with

@@ -829,7 +829,7 @@ public Actor findActor(String specialty, int age) {
           </note>
 
           <listitem>
-            <para>Any a custom translation implemented by a subclass. Normally
+            <para>Any custom translation implemented by a subclass. Normally
             the provided concrete
             <classname>SQLErrorCodeSQLExceptionTranslator</classname> is used
             so this rule does not apply. It only applies if you have actually
@@ -1715,7 +1715,7 @@ END;</programlisting>The <code>in_id</code> parameter contains the
       <para>The <classname>SimpleJdbcCall</classname> is declared in a similar
       manner to the <classname>SimpleJdbcInsert</classname>. You should
       instantiate and configure the class in the initialization method of your
-      data access layer. Compared to the StoredProcdedure class, you don't
+      data access layer. Compared to the StoredProcedure class, you don't
       have to create a subclass and you don't have to declare parameters that
       can be looked up in the database metadata. <!--Reword preceding: You need not subclass *what?* and you declare *what* in init method? TR: Revised, pplease review.-->Following
       is an example of a SimpleJdbcCall configuration using the above stored
@@ -2134,7 +2134,7 @@ public Customer getCustomer(Long id) {
       <para>The method in this example retrieves the customer with the id that
       is passed in as the only parameter. Since we only want one object
       returned we simply call the convenience method <code>findObject</code>
-      with the id as parameter. If we instead had a query the returned a list
+      with the id as parameter. If we had instead a query that returned a list
       of objects and took additional parameters then we would use one of the
       execute methods that takes an array of parameter values passed in as
       varargs.</para>
@@ -2476,9 +2476,9 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       of these approaches use an implementation of the
       <classname>LobHandler</classname> interface for the actual management of
       the LOB data. The <classname>LobHandler</classname> provides access to a
-      <classname>LobCreator</classname><!--a LobCreator *what*? Say what it is. TR: Revised.-->class,
-      through the <classname>getLobCreator</classname> method, used for
-      creating new LOB objects to be inserted.</para>
+      <classname>LobCreator</classname> class, through the
+      <classname>getLobCreator</classname> method, used for creating new LOB
+      objects to be inserted.</para>
 
       <para>The <classname>LobCreator/LobHandler</classname> provides the
       following support for LOB input and output:</para>
@@ -2577,14 +2577,14 @@ clobReader.close();</programlisting>
 
           <callout arearefs="jdbc.lobhandler.setBlob">
             <para>Using the method
-            <classname>setBlobAsBinartStream</classname>, pass in the contents
+            <classname>setBlobAsBinaryStream</classname>, pass in the contents
             of the BLOB.</para>
           </callout>
         </calloutlist>
       </programlistingco>
 
       <para>Now it's time to read the LOB data from the database. Again, you
-      use a <code>JdbcTempate</code> with the same instance variable
+      use a <code>JdbcTemplate</code> with the same instance variable
       <code>l</code><code>obHandler </code>and a reference to a
       <classname>DefaultLobHandler</classname>.</para>
 
@@ -2892,7 +2892,7 @@ public class DataAccessUnitTestTemplate {
 
       <para>If you want to initialize a database and you can provide a
       reference to a DataSource bean, use the
-      <literal>initialize-datasource</literal> tag in the
+      <literal>initialize-database</literal> tag in the
       <literal>spring-jdbc</literal> namespace:</para>
 
       <programlisting>&lt;jdbc:initialize-database data-source="dataSource"&gt;
@@ -2916,11 +2916,12 @@ public class DataAccessUnitTestTemplate {
       the tables first and then inserts the data - the first step will fail if
       the tables already exist.</para>
 
-      <para>However, to get more control the creation and deletion of existing
-      data the XML namespace provides a couple more options. The first is flag
-      to switch the initialization on and off. This can be set according to
-      the environment (e.g. to pull a boolean value from system properties or
-      an environment bean), e.g.<programlisting>&lt;jdbc:initialize-database data-source="dataSource" 
+      <para>However, to get more control over the creation and deletion of
+      existing data, the XML namespace provides a couple more options. The
+      first is flag to switch the initialization on and off. This can be set
+      according to the environment (e.g. to pull a boolean value from system
+      properties or an environment bean), e.g.
+      <programlisting>&lt;jdbc:initialize-database data-source="dataSource"
     <emphasis role="bold">enabled="#{systemProperties.INITIALIZE_DATABASE}"</emphasis>&gt;
   &lt;jdbc:script location="..."/&gt;
 &lt;/jdbc:initialize-database&gt;</programlisting></para>

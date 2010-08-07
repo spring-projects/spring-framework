@@ -573,7 +573,7 @@ public class Application {
             <para>
                 The <classname>JibxMarshaller</classname> class implements both the 
                 <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename> interface.
-                To operate, it requires the name of the class to marshall in, which you can set using the
+                To operate, it requires the name of the class to marshal in, which you can set using the
                 <property>targetClass</property> property. Optionally, you can set the binding name using the
                 <property>bindingName</property> property. In the next sample, we bind the 
                 <classname>Flights</classname> class:

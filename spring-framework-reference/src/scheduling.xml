@@ -726,7 +726,7 @@ public class ExampleJob extends QuartzJobBean {
 			<title>Wiring up jobs using triggers and the <classname>SchedulerFactoryBean</classname></title>
 			<para>
 				We've created job details and jobs. We've also reviewed the convenience bean
-				that allows to you invoke a method on a specific object. Of course, we still need
+				that allows you to invoke a method on a specific object. Of course, we still need
 				to schedule the jobs themselves. This is done using triggers and a 
 				<classname>SchedulerFactoryBean</classname>. Several triggers are available
 				within Quartz. Spring offers two subclassed triggers with convenient defaults:

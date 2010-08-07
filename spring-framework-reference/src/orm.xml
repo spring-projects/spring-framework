@@ -1367,7 +1367,7 @@ TR: REVISED, PLS REVIEW.-->The factory bean uses the JPA
         configuration and is appropriate for environments where fine-grained
         customization is required. The
         <classname>LocalContainerEntityManagerFactoryBean</classname> creates
-        a <interfacename>PersistenceUnitInfo</interfacename> instance<!--A PersistenceUnitInfo *what*? TR: REVISED, PLS REVIEW. Added *instance*. -->based
+        a <interfacename>PersistenceUnitInfo</interfacename> instance based
         on the <literal>persistence.xml</literal> file, the supplied
         <literal>dataSourceLookup</literal> strategy, and the specified
         <literal>loadTimeWeaver</literal>. It is thus possible to work with
@@ -1467,7 +1467,7 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
         applied only <emphasis>per class loader</emphasis> and not per
         VM.</para>
 
-        <para>Refer to the section <xref linkend="aop-aj-ltw-spring" /> in the AOP chapter for more insight regarding the 
+        <para>Refer to <xref linkend="aop-aj-ltw-spring" /> in the AOP chapter for more insight regarding the 
         <interfacename>LoadTimeWeaver</interfacename> implementations and their setup, either generic or customized to 
         various platforms (such as Tomcat, WebLogic, OC4J, GlassFish, Resin and JBoss).</para>
 		

@@ -519,7 +519,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <literal>add(int, int)</literal>, when using the
       <classname>MetadataMBeanInfoAssembler</classname>.</para>
 
-      <para>The configuration below shouws how you configure the
+      <para>The configuration below shows how you configure the
       <classname>MBeanExporter</classname> to use the
       <classname>MetadataMBeanInfoAssembler</classname>:</para>
       <programlisting language="xml"><![CDATA[<beans>

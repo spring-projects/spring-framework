@@ -279,7 +279,8 @@ public void setMyComponent(MyComponent myComponent) {
       </para>
       <para>
         Consider an example Stateless Session bean which actually delegates
-        the implementation to a plain java service object. We have the business	interface:
+        the implementation to a plain java service object. We have the business
+        interface:
       </para>
       <programlisting language="java"><![CDATA[public interface MyComponent {
     public void myMethod(...);
@@ -335,24 +336,27 @@ public void setMyComponent(MyComponent myComponent) {
         passivated and reactivated as part of their lifecycle, and which use a
         non-serializable container instance (which is the normal case) will have
         to manually call <literal>unloadBeanFactory()</literal> and
-        <literal>loadBeanFactory</literal> from <literal>ejbPassivate</literal>
-        and <literal>ejbActivate</literal>, respectively, to unload and reload the
+        <literal>loadBeanFactory()</literal> from <literal>ejbPassivate()</literal>
+        and <literal>ejbActivate()</literal>, respectively, to unload and reload the
         BeanFactory on passivation and activation, since it can not be saved by
         the EJB container.
       </para>
       <para>
-        The default behavior of the <classname>ContextJndiBeanFactoryLocator</classname>
-        classes which is to load an <classname>ApplicationContext</classname> for the
-        use of the EJB is adequate for some situations. However, it is problematic when
-        the <classname>ApplicationContext</classname> is loading a number
-        of beans, or the initialization of those beans is time consuming or memory
-        intensive (such as a Hibernate <classname>SessionFactory</classname> initialization, for
-        example), since every EJB will have their own copy. In this case, the user
-        may want to override the default <classname>ContextJndiBeanFactoryLocator</classname>
-        usage and use another <classname>BeanFactoryLocator</classname> variant, such as the
-        <classname>ContextSingletonBeanFactoryLocator</classname> which can load and use a
-        shared container to be used by multiple EJBs or other clients. Doing this is relatively
-        simple, by adding code similar to this to the EJB:
+        The default behavior of the
+        <classname>ContextJndiBeanFactoryLocator</classname> class is to load an
+        <classname>ApplicationContext</classname> for use by an EJB, and is
+        adequate for some situations. However, it is problematic when the
+        <classname>ApplicationContext</classname> is loading a number of beans,
+        or the initialization of those beans is time consuming or memory
+        intensive (such as a Hibernate <classname>SessionFactory</classname>
+        initialization, for example), since every EJB will have their own copy.
+        In this case, the user may want to override the default
+        <classname>ContextJndiBeanFactoryLocator</classname> usage and use
+        another <classname>BeanFactoryLocator</classname> variant, such as the
+        <classname>ContextSingletonBeanFactoryLocator</classname> which can load
+        and use a shared container to be used by multiple EJBs or other clients.
+        Doing this is relatively simple, by adding code similar to this to the
+        EJB:
       </para>
       <programlisting language="java"><![CDATA[   /**
     * Override default BeanFactoryLocator implementation

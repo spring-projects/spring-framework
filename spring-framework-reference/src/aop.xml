@@ -468,8 +468,8 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
           <classname>IllegalArgumentException</classname> being thrown.</para>
 
           <para>The set of pointcut designators supported by Spring AOP may be
-          extended in future releases both to support more of the AspectJ
-          pointcut designators.</para>
+          extended in future releases to support more of the AspectJ pointcut
+          designators.</para>
         </sidebar>
 
         <itemizedlist>
