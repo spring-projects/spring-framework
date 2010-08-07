@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,14 @@ import org.springframework.util.ReflectionUtils;
  * A simple ConstructorExecutor implementation that runs a constructor using reflective invocation.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 class ReflectiveConstructorExecutor implements ConstructorExecutor {
 
 	private final Constructor<?> ctor;
+
+	private final Integer varargsPosition;
 
 	// When the constructor was found, we will have determined if arguments need to be converted for it
 	// to be invoked. Conversion won't be cheap so let's only do it if necessary.
@@ -42,23 +45,27 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 
 	public ReflectiveConstructorExecutor(Constructor<?> ctor, int[] argsRequiringConversion) {
 		this.ctor = ctor;
+		if (ctor.isVarArgs()) {
+			Class[] paramTypes = ctor.getParameterTypes();
+			this.varargsPosition = paramTypes.length - 1;
+		}
+		else {
+			this.varargsPosition = null;
+		}
 		this.argsRequiringConversion = argsRequiringConversion;
 	}
 
 	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
-			if (argsRequiringConversion != null && arguments != null) {
-				ReflectionHelper.convertArguments(this.ctor.getParameterTypes(),
-						this.ctor.isVarArgs(), context.getTypeConverter(),
-						this.argsRequiringConversion, arguments);
+			if (this.argsRequiringConversion != null && arguments != null) {
+				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments,
+						this.ctor, this.argsRequiringConversion, this.varargsPosition);
 			}
 			if (this.ctor.isVarArgs()) {
-				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(
-						this.ctor.getParameterTypes(), arguments);
+				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.ctor.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.ctor);
-			return new TypedValue(this.ctor.newInstance(arguments),
-					TypeDescriptor.valueOf(this.ctor.getDeclaringClass()));
+			return new TypedValue(this.ctor.newInstance(arguments), TypeDescriptor.valueOf(this.ctor.getDeclaringClass()));
 		}
 		catch (Exception ex) {
 			throw new AccessException("Problem invoking constructor: " + this.ctor, ex);

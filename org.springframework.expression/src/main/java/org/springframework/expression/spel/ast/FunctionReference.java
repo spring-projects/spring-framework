@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -37,9 +36,10 @@ import org.springframework.util.ReflectionUtils;
  * function definition in an expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
  * "#isEven(37)". Functions may also be static java methods, registered in the context prior to invocation of the
  * expression.
- * 
- * Functions are very simplistic, the arguments are not part of the definition (right now), so the names must be unique.
- * 
+ *
+ * <p>Functions are very simplistic, the arguments are not part of the definition (right now),
+ * so the names must be unique.
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -65,7 +65,8 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		try {
 			return executeFunctionJLRMethod(state, (Method) o.getValue());
-		} catch (SpelEvaluationException se) {
+		}
+		catch (SpelEvaluationException se) {
 			se.setPosition(getStartPosition());
 			throw se;
 		}
@@ -79,42 +80,37 @@ public class FunctionReference extends SpelNodeImpl {
 	 * @return the return value of the invoked Java method
 	 * @throws EvaluationException if there is any problem invoking the method
 	 */
-	private TypedValue executeFunctionJLRMethod(ExpressionState state, Method m) throws EvaluationException {
+	private TypedValue executeFunctionJLRMethod(ExpressionState state, Method method) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);
 
-		if (!m.isVarArgs() && m.getParameterTypes().length != functionArgs.length) {
-			throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, functionArgs.length, m
-					.getParameterTypes().length);
+		if (!method.isVarArgs() && method.getParameterTypes().length != functionArgs.length) {
+			throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
+					functionArgs.length, method.getParameterTypes().length);
 		}
 		// Only static methods can be called in this way
-		if (!Modifier.isStatic(m.getModifiers())) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_MUST_BE_STATIC, m
+		if (!Modifier.isStatic(method.getModifiers())) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_MUST_BE_STATIC, method
 					.getDeclaringClass().getName()
-					+ "." + m.getName(), name);
+					+ "." + method.getName(), name);
 		}
 
 		// Convert arguments if necessary and remap them for varargs if required
 		if (functionArgs != null) {
 			TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-			ReflectionHelper.convertAllArguments(m.getParameterTypes(), m.isVarArgs(), converter, functionArgs);
+			ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		}
-		if (m.isVarArgs()) {
-			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(), functionArgs);
+		if (method.isVarArgs()) {
+			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
 		}
 
 		try {
-			ReflectionUtils.makeAccessible(m);
-			Object result = m.invoke(m.getClass(), functionArgs);
-			return new TypedValue(result, new TypeDescriptor(new MethodParameter(m,-1)));
-		} catch (IllegalArgumentException e) {
-			throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL, name, e
-					.getMessage());
-		} catch (IllegalAccessException e) {
-			throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL, name, e
-					.getMessage());
-		} catch (InvocationTargetException e) {
-			throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL, name, e
-					.getMessage());
+			ReflectionUtils.makeAccessible(method);
+			Object result = method.invoke(method.getClass(), functionArgs);
+			return new TypedValue(result, new TypeDescriptor(new MethodParameter(method,-1)));
+		}
+		catch (Exception ex) {
+			throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,
+					this.name, ex.getMessage());
 		}
 	}
 
