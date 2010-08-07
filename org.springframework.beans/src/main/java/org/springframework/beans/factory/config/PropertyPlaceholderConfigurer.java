@@ -140,6 +140,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	private BeanFactory beanFactory;
 
+
 	/**
 	 * Set the prefix that a placeholder string starts with.
 	 * The default is "${".
@@ -156,6 +157,16 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 */
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.placeholderSuffix = placeholderSuffix;
+	}
+
+	/**
+	 * Specify the separating character between the placeholder variable
+	 * and the associated default value, or <code>null</code> if no such
+	 * special character should be processed as a value separator.
+	 * The default is ":".
+	 */
+	public void setValueSeparator(String valueSeparator) {
+		this.valueSeparator = valueSeparator;
 	}
 
 	/**
@@ -254,6 +265,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
+
 
 	@Override
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
