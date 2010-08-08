@@ -1,15 +1,29 @@
-package org.springframework.web.servlet.resources;
+/*
+ * Copyright 2002-2010 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -18,6 +32,10 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
 
+/**
+ * @author Keith Donald
+ * @author Jeremy Grelle
+ */
 public class ResourceHttpRequestHandlerTests {
 
 	private ResourceHttpRequestHandler handler;
@@ -27,7 +45,9 @@ public class ResourceHttpRequestHandlerTests {
 		List<Resource> resourcePaths = new ArrayList<Resource>();
 		resourcePaths.add(new ClassPathResource("test/", getClass()));
 		resourcePaths.add(new ClassPathResource("testalternatepath/", getClass()));
-		handler = new ResourceHttpRequestHandler(resourcePaths);
+		handler = new ResourceHttpRequestHandler();
+		handler.setLocations(resourcePaths);
+		handler.setCacheSeconds(3600);
 		handler.setServletContext(new TestServletContext());
 	}
 	
@@ -40,23 +60,23 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals("text/css", response.getContentType());
 		assertEquals(17, response.getContentLength());
-		assertTrue(((Long)response.getHeader("Expires")) > System.currentTimeMillis() + (31556926 * 1000) - 10000);
-		assertEquals("max-age=31556926", response.getHeader("Cache-Control"));
+		assertTrue(((Long)response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
 		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("test/foo.css", getClass()).getFile().lastModified());
 		assertEquals("h1 { color:red; }", response.getContentAsString());
 	}
 	
 	@Test
-	public void getResourceWithJafProvidedMediaType() throws Exception {
+	public void getResourceWithHtmlMediaType() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.html");
 		request.setMethod("GET");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 		assertEquals("text/html", response.getContentType());
-		assertTrue(((Long)response.getHeader("Expires")) > System.currentTimeMillis() + (31556926 * 1000) - 10000);
-		assertEquals("max-age=31556926", response.getHeader("Cache-Control"));
+		assertTrue(((Long)response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
 		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("test/foo.html", getClass()).getFile().lastModified());
 	}
@@ -70,8 +90,8 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals("text/css", response.getContentType());
 		assertEquals(17, response.getContentLength());
-		assertTrue(((Long)response.getHeader("Expires")) > System.currentTimeMillis() + (31556926 * 1000) - 10000);
-		assertEquals("max-age=31556926", response.getHeader("Cache-Control"));
+		assertTrue(((Long)response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
 		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("testalternatepath/baz.css", getClass()).getFile().lastModified());
 		assertEquals("h1 { color:red; }", response.getContentAsString());
@@ -168,30 +188,22 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals(404, response.getStatus());
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void invalidPath() throws Exception {		
-		List<Resource> resourcePaths = new ArrayList<Resource>();
-		resourcePaths.add(new ClassPathResource("testalternatepath", getClass()));
-		handler = new ResourceHttpRequestHandler(resourcePaths);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void pathDoesNotExist() throws Exception {		
-		List<Resource> resourcePaths = new ArrayList<Resource>();
-		resourcePaths.add(new ClassPathResource("bogus/"));
-		handler = new ResourceHttpRequestHandler(resourcePaths);
-	}
-	
+
+
 	private static class TestServletContext extends MockServletContext {
+
 		@Override
 		public String getMimeType(String filePath) {
-			if(filePath.endsWith(".css")) {
+			if (filePath.endsWith(".css")) {
 				return "text/css";
-			} else if (filePath.endsWith(".js")) {
+			}
+			else if (filePath.endsWith(".js")) {
 				return "text/javascript";
 			}
-			return null;
+			else {
+				return super.getMimeType(filePath);
+			}
 		}
 	}
+
 }

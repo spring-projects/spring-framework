@@ -1,7 +1,25 @@
+/*
+ * Copyright 2002-2010 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.servlet.config;
 
 import java.util.List;
 import java.util.Map;
+
+import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -14,8 +32,7 @@ import org.springframework.core.Ordered;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
-import org.springframework.web.servlet.resources.ResourceHttpRequestHandler;
-import org.w3c.dom.Element;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
@@ -27,7 +44,7 @@ import org.w3c.dom.Element;
  * @author Jeremy Grelle
  * @since 3.0.4
  */
-public class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefinitionParser implements BeanDefinitionParser {
+class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
 	public void doParse(Element element, ParserContext parserContext) {
@@ -76,7 +93,7 @@ public class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBea
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getConstructorArgumentValues().addIndexedArgumentValue(0, locations);
+		resourceHandlerDef.getPropertyValues().add("locations", locations);
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
 		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));	
