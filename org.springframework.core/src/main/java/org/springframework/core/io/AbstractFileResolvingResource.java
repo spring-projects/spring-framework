@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.core.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.springframework.util.ResourceUtils;
 
@@ -78,6 +80,70 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			return VfsResourceDelegate.getResource(uri).getFile();
 		}
 		return ResourceUtils.getFile(uri, getDescription());
+	}
+
+
+	@Override
+	public boolean exists() {
+		try {
+			URL url = getURL();
+			if (ResourceUtils.isFileURL(url)) {
+				// Proceed with file system resolution...
+				return getFile().exists();
+			}
+			else {
+				// Try a URL connection content-length header...
+				URLConnection con = url.openConnection();
+				con.setUseCaches(false);
+				if (con instanceof HttpURLConnection) {
+					((HttpURLConnection) con).setRequestMethod("HEAD");
+				}
+				boolean doesExist = (con.getContentLength() >= 0);
+				if (!doesExist && con instanceof HttpURLConnection) {
+					((HttpURLConnection) con).disconnect();
+				}
+				return doesExist;
+			}
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
+	@Override
+	public int contentLength() throws IOException {
+		URL url = getURL();
+		if (ResourceUtils.isFileURL(url)) {
+			// Proceed with file system resolution...
+			return super.contentLength();
+		}
+		else {
+			// Try a URL connection content-length header...
+			URLConnection con = url.openConnection();
+			con.setUseCaches(false);
+			if (con instanceof HttpURLConnection) {
+				((HttpURLConnection) con).setRequestMethod("HEAD");
+			}
+			return con.getContentLength();
+		}
+	}
+
+	@Override
+	public long lastModified() throws IOException {
+		URL url = getURL();
+		if (ResourceUtils.isFileURL(url) || ResourceUtils.isJarURL(url)) {
+			// Proceed with file system resolution...
+			return super.lastModified();
+		}
+		else {
+			// Try a URL connection last-modified header...
+			URLConnection con = url.openConnection();
+			con.setUseCaches(false);
+			if (con instanceof HttpURLConnection) {
+				((HttpURLConnection) con).setRequestMethod("HEAD");
+			}
+			return con.getLastModified();
+		}
 	}
 
 

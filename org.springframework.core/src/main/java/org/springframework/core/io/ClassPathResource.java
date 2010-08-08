@@ -125,6 +125,23 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 
 	/**
+	 * This implementation checks for the resolution of a resource URL.
+	 * @see java.lang.ClassLoader#getResource(String)
+	 * @see java.lang.Class#getResource(String)
+	 */
+	@Override
+	public boolean exists() {
+		URL url;
+		if (this.clazz != null) {
+			url = this.clazz.getResource(this.path);
+		}
+		else {
+			url = this.classLoader.getResource(this.path);
+		}
+		return (url != null);
+	}
+
+	/**
 	 * This implementation opens an InputStream for the given class path resource.
 	 * @see java.lang.ClassLoader#getResourceAsStream(String)
 	 * @see java.lang.Class#getResourceAsStream(String)
