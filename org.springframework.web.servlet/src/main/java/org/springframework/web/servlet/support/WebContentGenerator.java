@@ -103,6 +103,14 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 	}
 
+	/**
+	 * Create a new WebContentGenerator.
+	 * @param supportedMethods the supported HTTP methods for this content generator
+	 */
+	public WebContentGenerator(String... supportedMethods) {
+		this.supportedMethods = new HashSet<String>(Arrays.asList(supportedMethods));
+	}
+
 
 	/**
 	 * Set the HTTP methods that this content generator should support.
