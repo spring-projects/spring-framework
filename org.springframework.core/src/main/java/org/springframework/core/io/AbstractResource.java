@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,15 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This implementation checks the timestamp of the underlying File,
 	 * if available.
+	 * @see #getFile()
+	 */
+	public int contentLength() throws IOException {
+		return (int) getFile().length();
+	}
+
+	/**
+	 * This implementation checks the timestamp of the underlying File,
+	 * if available.
 	 * @see #getFileForLastModifiedCheck()
 	 */
 	public long lastModified() throws IOException {
@@ -142,10 +151,10 @@ public abstract class AbstractResource implements Resource {
 
 	/**
 	 * This implementation always throws IllegalStateException,
-	 * assuming that the resource does not carry a filename.
+	 * assuming that the resource does not have a filename.
 	 */
 	public String getFilename() throws IllegalStateException {
-		throw new IllegalStateException(getDescription() + " does not carry a filename");
+		throw new IllegalStateException(getDescription() + " does not have a filename");
 	}
 
 

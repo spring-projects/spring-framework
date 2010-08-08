@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,6 +244,17 @@ public abstract class ResourceUtils {
 					"because it does not reside in the file system: " + resourceUri);
 		}
 		return new File(resourceUri.getSchemeSpecificPart());
+	}
+
+	/**
+	 * Determine whether the given URL points to a resource in the file system,
+	 * that is, has protocol "file" or "vfs".
+	 * @param url the URL to check
+	 * @return whether the URL has been identified as a file system URL
+	 */
+	public static boolean isFileURL(URL url) {
+		String protocol = url.getProtocol();
+		return (URL_PROTOCOL_FILE.equals(protocol) || protocol.startsWith(URL_PROTOCOL_VFS));
 	}
 
 	/**

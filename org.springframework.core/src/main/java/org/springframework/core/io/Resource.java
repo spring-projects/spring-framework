@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,13 @@ public interface Resource extends InputStreamSource {
 	 * file path, i.e. if the resource is not available in a file system
 	 */
 	File getFile() throws IOException;
+
+	/**
+	 * Determine the content length for this resource.
+	 * @throws IOException if the resource cannot be resolved
+	 * (in the file system or as some other known physical resource type)
+	 */
+	int contentLength() throws IOException;
 
 	/**
 	 * Determine the last-modified timestamp for this resource.
