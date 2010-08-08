@@ -3,28 +3,36 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.4 (2010-07-30)
+Changes in version 3.0.4 (2010-08-11)
 -------------------------------------
 
-* support for Hibernate Validator 4.1, EclipseLink 2.1, EHCache 2.2
+* support for Hibernate Core 3.6, Hibernate Validator 4.1, EclipseLink 2.1, EHCache 2.2
 * OSGi manifest version range accepts EHCache 2.x as well
+* added "contentLength()" method to Resource abstraction
+* URL-based Resource variants introspect "last-modified" and "content-length" response headers
+* refined "exists()" check for UrlResource (HEAD request) and ClassPathResource (URL resolution)
 * ConversionService is able to deal with empty collections and nested collections (fixed regression)
 * ConversionService properly handles nested Resource arrays in Map values (fixed regression)
 * ConversionService does not accidentally use copy constructor for same type
 * fixed double ConversionFailedException nesting for ObjectToObjectConverter invocations
 * BeanWrapper preserves annotation information for individual array/list/map elements
+* SpEL passes full collection type context (generics, annotations) to ConversionService
 * SpEL 'select last' operator now works consistently with maps
 * BeanWrapper/DataBinder's "autoGrowNestedPaths" works for Maps as well
-* Jaxb2Marshaller's "marshallerProperties" Map accepts any value type
+* fixed concurrency issue in TypedStringValue, showing for nested typed Maps in prototype beans 
 * fixed WeakReferenceMonitor to never stop its monitoring thread if an entry has been registered
 * fixed CronTrigger to correctly parse month parts expressed as numbers (1-12 instead of 0-11)
+* TaskExecutorFactoryBean (as used by task:executor) exposes full ThreadPoolTaskExecutor type
 * JmsResourceHolder does not ignore IllegalStateException from locally synchronized transaction
 * fixed JMS CachingConnectionFactory to correctly cache a producer without fixed destination as well
 * DefaultMessageListenerContainer triggers Session commit even if no message has been received
+* DefaultMessageListenerContainer supports client id setting even for non-shared Connections
 * Spring's MessageEndpointFactory classes are now JCA 1.6 compliant as well
 * AbstractJaxWsServiceExporter supports "bindingType" bean property, overriding @BindingType
 * AbstractJaxWsServiceExporter supports "webServiceFeatures" bean property on JAX-WS 2.2
-* HibernateJpaDialect correctly closes borrowed connections even for nested JDBC executions 
+* JaxWsPortProxyFactoryBean takes "wsdlDocumentUrl", "namespaceUri" etc defaults from @WebService
+* Jaxb2Marshaller's "marshallerProperties" Map accepts any value type
+* HibernateJpaDialect correctly closes borrowed connections even for nested JDBC executions
 * DefaultJdoDialect supports JDO 3.0 query timeout facility (as supported by DataNucleus 2.1)
 * transaction names based on method id from most specific method (target class instead of interface)
 * added "validationMessageSource" to LocalValidatorFactoryBean, for Spring-based validation messages
@@ -38,7 +46,10 @@ Changes in version 3.0.4 (2010-07-30)
 * MVC HandlerExceptionResolvers prevent caching for exception views if preventResponseCaching=true
 * @ExceptionHandler works for inherited method and CGLIB proxies on Portlet controllers as well
 * Portlet @MVC's implicit render model will be updated at the end of the event phase
+* Portlet AbstractController consistently uses session mutex if "synchronizeOnSession" is active
+* PortletWrappingController supports Portlet 2.0 resource and event requests as well
 * JSP EvalTag resolves "@myBeanName" references in expressions against the WebApplicationContext
+* added support for static resource serving: ResourceHttpRequestHandler, mvc:resources
 
 
 Changes in version 3.0.3 (2010-06-15)
