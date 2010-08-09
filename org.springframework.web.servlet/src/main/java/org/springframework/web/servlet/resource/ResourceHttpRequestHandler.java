@@ -148,7 +148,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
-		response.setContentLength(resource.contentLength());
+		long length = resource.contentLength();
+		if (length > Integer.MAX_VALUE) {
+			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
+		}
+		response.setContentLength((int) length);
 		FileCopyUtils.copy(resource.getInputStream(), response.getOutputStream());
 	}
 
