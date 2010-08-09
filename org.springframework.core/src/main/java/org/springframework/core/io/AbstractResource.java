@@ -112,8 +112,8 @@ public abstract class AbstractResource implements Resource {
 	 * if available.
 	 * @see #getFile()
 	 */
-	public int contentLength() throws IOException {
-		return (int) getFile().length();
+	public long contentLength() throws IOException {
+		return getFile().length();
 	}
 
 	/**

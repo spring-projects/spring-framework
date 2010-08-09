@@ -96,7 +96,7 @@ public interface Resource extends InputStreamSource {
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
 	 */
-	int contentLength() throws IOException;
+	long contentLength() throws IOException;
 
 	/**
 	 * Determine the last-modified timestamp for this resource.
