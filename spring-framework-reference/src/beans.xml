@@ -482,13 +482,6 @@ List userList service.getUsernameList();
           </row>
 
           <row>
-            <entry>dependency checking mode</entry>
-
-            <entry><para> <xref linkend="beans-factory-dependencies" />
-            </para></entry>
-          </row>
-
-          <row>
             <entry>lazy-initialization mode</entry>
 
             <entry><para> <xref linkend="beans-factory-lazy-init" />
@@ -2052,10 +2045,7 @@ support=support@example.co.uk</programlisting>
               one exists, a fatal exception is thrown, which indicates that
               you may not use <emphasis>byType</emphasis> autowiring for that
               bean. If there are no matching beans, nothing happens; the
-              property is not set. If this is not desirable, setting the
-              <literal>dependency-check="objects"</literal> attribute value
-              specifies that an error should be thrown in this
-              case.</para></entry>
+              property is not set.</para></entry>
             </row>
 
             <row>
@@ -2067,14 +2057,6 @@ support=support@example.co.uk</programlisting>
               error is raised.</para></entry>
             </row>
 
-            <row>
-              <entry>autodetect</entry>
-
-              <entry><para>Chooses <emphasis>constructor</emphasis> or
-              <emphasis>byType</emphasis> through introspection of the bean
-              class. If a default no-arg constructor is found, the
-              <emphasis>byType</emphasis> mode is applied.</para></entry>
-            </row>
           </tbody>
         </tgroup>
       </table>
@@ -2201,83 +2183,6 @@ support=support@example.co.uk</programlisting>
 
         <!--Last paragraph unclear to me. Is my edit ok? Revise as necessary.-->
       </section>
-    </section>
-
-    <section id="beans-factory-dependencies">
-      <title>Checking for dependencies</title>
-
-      <!-- MLP: Beverly to review paragraph -->
-
-      <para>The Spring IoC container can check for unresolved dependencies of
-      a bean deployed into the container. When enabling checking for
-      unresolved dependencies all JavaBean properties of the bean must have
-      explicit values set for them in the bean definition or have their values
-      set via autowiring.<!--Please revise preceding sentence, wording doesn't track.--></para>
-
-      <para>This feature is useful when you want to ensure that all properties
-      (or all properties of a certain type) are set on a bean. A bean class
-      often has default values for many properties, or some properties do not
-      apply to all usage scenarios, so this feature is of limited use. You can
-      enable dependency checking per bean, just as with the autowiring
-      functionality. The default is to <emphasis>not</emphasis> check
-      dependencies. In XML-based configuration metadata, you specify
-      dependency checking via the <literal>dependency-check</literal>
-      attribute in a bean definition, which can have the following
-      values.</para>
-
-      <table id="beans-factory-dependency-check-modes-tbl">
-        <title>Dependency checking modes</title>
-
-        <tgroup cols="2">
-          <colspec colname="c1" colwidth="1*" />
-
-          <colspec colname="c2" colwidth="5*" />
-
-          <thead>
-            <row>
-              <entry>Mode</entry>
-
-              <entry>Explanation</entry>
-            </row>
-          </thead>
-
-          <tbody>
-            <row>
-              <entry>none</entry>
-
-              <entry><para>(Default) No dependency checking. Properties of the
-              bean that have no value specified for them are not
-              set.</para></entry>
-            </row>
-
-            <row>
-              <entry>simple</entry>
-
-              <entry><para>Dependency checking for primitive types and
-              collections (everything except collaborators).</para></entry>
-            </row>
-
-            <row>
-              <entry>object</entry>
-
-              <entry><para>Dependency checking for collaborators
-              only.</para></entry>
-            </row>
-
-            <row>
-              <entry>all</entry>
-
-              <entry><para>Dependency checking for collaborators, primitive
-              types, and collections.</para></entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
-
-      <para>If you use Java 5 and thus have access to source-level
-      annotations, you may find <literal><xref
-      linkend="metadata-annotations-required" /></literal> to be of
-      interest.</para>
     </section>
 
     <section id="beans-factory-method-injection">
