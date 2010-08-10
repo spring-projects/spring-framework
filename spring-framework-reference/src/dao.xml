@@ -45,7 +45,7 @@
     <classname>JDOExceptions</classname> itself, preferably via delegating to
     <classname>SessionFactoryUtils</classname>'
     <methodname>convertHibernateAccessException(..)</methodname> or
-    <methodname>convertJdoAccessException</methodname> methods respectively.
+    <methodname>convertJdoAccessException()</methodname> methods respectively.
     These methods convert the exceptions to ones that are compatible with the
     exceptions in the <literal>org.springframework.dao</literal> exception
     hierarchy. As <classname>JDOExceptions</classname> are unchecked, they can

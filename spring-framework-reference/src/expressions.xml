@@ -290,11 +290,11 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
 
       <para>The <classname>StandardEvaluationContext</classname> is where you
       may specify the root object to evaluate against via the method
-      <methodname>setRootObject</methodname> or passing the root object into
+      <methodname>setRootObject()</methodname> or passing the root object into
       the constructor. You can also specify variables and functions that
       will be used in the expression using the methods
-      <methodname>setVariable</methodname> and
-      <methodname>registerFunction</methodname>. The use of variables and
+      <methodname>setVariable()</methodname> and
+      <methodname>registerFunction()</methodname>. The use of variables and
       functions are described in the language reference sections <link
       linkend="expressions-ref-variables">Variables</link> and <link lang=""
       linkend="expressions-ref-functions">Functions</link>. The

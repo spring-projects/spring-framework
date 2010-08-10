@@ -104,7 +104,7 @@ public interface Marshaller {
                 </informaltable>
                 <note>
                     <para>
-                        Although the <methodname>marshal</methodname> method accepts a plain object as its first 
+                        Although the <methodname>marshal()</methodname> method accepts a plain object as its first 
                         parameter, most <classname>Marshaller</classname> implementations cannot handle arbitrary 
                         objects. Instead, an object class must be mapped in a mapping file, marked with an annotation,
                         registered with the marshaller, or have a common base class. Refer to the further sections
@@ -218,9 +218,9 @@ public class Settings {
         </para>
         <para>
             The application class uses this bean to store its settings. Besides a main method, the class has two
-            methods: <methodname>saveSettings</methodname> saves the settings bean to a file named
-            <filename>settings.xml</filename>, and <methodname>loadSettings</methodname> loads these settings again. A
-            <methodname>main</methodname> method constructs a Spring application context, and calls these two methods.
+            methods: <methodname>saveSettings()</methodname> saves the settings bean to a file named
+            <filename>settings.xml</filename>, and <methodname>loadSettings()</methodname> loads these settings again. A
+            <methodname>main()</methodname> method constructs a Spring application context, and calls these two methods.
             <programlisting language="java"><![CDATA[
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

@@ -1036,7 +1036,7 @@ public class ExecuteAnUpdate {
     <section id="jdbc-auto-genereted-keys">
       <title>Retrieving auto-generated keys</title>
 
-      <para>An <methodname>update</methodname> convenience method supports<!--Give name of this method. Also indicate *what* is acquiring the primary keys. TR: Changed to *retrieval*. 
+      <para>An <methodname>update()</methodname> convenience method supports<!--Give name of this method. Also indicate *what* is acquiring the primary keys. TR: Changed to *retrieval*. 
 The name of the method is *update*.--> the retrieval of primary keys generated
       by the database. This support is part of the JDBC 3.0 standard; see
       Chapter 13.6 of the specification for details. The method takes a

@@ -431,8 +431,8 @@
       <classname>ConnectionFactory</classname> interface,
       <classname>SingleConnectionFactory102</classname>, based on the JMS
       1.0.2 API that will return the same <classname>Connection</classname> on
-      all <methodname>createConnection</methodname> calls and ignore calls to
-      <methodname>close</methodname>. You will need to set the boolean
+      all <methodname>createConnection()</methodname> calls and ignore calls to
+      <methodname>close()</methodname>. You will need to set the boolean
       property <property>pubSubDomain</property> to indicate which messaging
       domain is used as <classname>SingleConnectionFactory102</classname> will
       always explicitly differentiate between a
