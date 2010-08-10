@@ -71,7 +71,6 @@ public class DatabasePopulatorTests {
 		assertTestDatabaseCreated();
 	}
 
-	@Ignore("Disabled until SPR-7449 is resolved")
 	@Test
 	public void scriptWithEolBetweenTokens() throws Exception {
 		databasePopulator.addScript(resourceLoader.getResource("users-schema.sql"));

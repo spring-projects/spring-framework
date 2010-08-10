@@ -263,7 +263,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					continue;
 				}
 				else if (c == '\n' || c == '\t') {
-					continue;
+					c = ' ';
 				}
 			}
 			sb.append(c);
