@@ -7048,86 +7048,122 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
         </tgroup>
       </table>
 
-      <para>You can also implement custom events. Simply call the
-      <methodname>publishEvent()</methodname> method on the
-      <interfacename>ApplicationContext</interfacename>, specifying a
-      parameter that is an instance of your custom event class that implements
-      <classname>ApplicationEvent</classname>. Event listeners receive events
-      synchronously. This means the <methodname>publishEvent()</methodname>
-      method blocks until all listeners have finished processing the event.
-      (It is possible to supply an alternate event publishing strategy through
-      an <interfacename>ApplicationEventMulticaster</interfacename>
-      implementation). Furthermore, when a listener receives an event, it
-      operates inside the transaction context of the publisher, if a
-      transaction context is available.<!--Explain what is showing in the first and second examples?--></para>
+      <para>You can also create and publish your own custom events. This example
+      demonstrates a simple class that extends Spring's
+      <classname>ApplicationEvent</classname> base class:</para>
 
-      <para>This example shows the bean definitions used to configure an
-      <interfacename>ApplicationContext</interfacename>:</para>
+      <programlisting language="java">public class BlackListEvent extends ApplicationEvent {
+    private final String address;
+    private final String test;
 
-      <programlisting language="xml">&lt;bean id="emailer" class="example.EmailBean"&gt;
-  &lt;property name="blackList"&gt;
-    &lt;list&gt;
-      &lt;value&gt;black@list.org&lt;/value&gt;
-      &lt;value&gt;white@list.org&lt;/value&gt;
-      &lt;value&gt;john@doe.org&lt;/value&gt;
-    &lt;/list&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;
+    public BlackListEvent(Object source, String address, String test) {
+        super(source);
+        this.address = address;
+        this.test = test;
+    }
 
-&lt;bean id="blackListListener" class="example.BlackListNotifier"&gt;
-  &lt;property name="notificationAddress" value="spam@list.org"/&gt;
-&lt;/bean&gt;</programlisting>
+    <lineannotation>// accessor and other methods...</lineannotation>
+}</programlisting>
 
-      <para>This example shows the implementation of the classes refered to in
-      the previous bean definitions:</para>
+      <para>To publish a custom <classname>ApplicationEvent</classname>, call
+      the <methodname>publishEvent()</methodname> method on an
+      <interfacename>ApplicationEventPublisher</interfacename>. Typically this
+      is done by creating a class that implements
+      <interfacename>ApplicationEventPublisherAware</interfacename> and
+      registering it as a Spring bean. The following example demonstrates such a
+      class:</para>
 
-      <programlisting language="java">public class EmailBean implements ApplicationContextAware {
+      <programlisting language="java"><![CDATA[public class EmailService implements ApplicationEventPublisherAware {
 
-    private List blackList;
-    private ApplicationContext ctx;
+    private List<String> blackList;
+    private ApplicationEventPublisher publisher;
 
-    public void setBlackList(List blackList) {
+    public void setBlackList(List<String> blackList) {
         this.blackList = blackList;
     }
 
-    public void setApplicationContext(ApplicationContext ctx) {
-        this.ctx = ctx;
+    public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
     }
 
     public void sendEmail(String address, String text) {
         if (blackList.contains(address)) {
-            BlackListEvent event = new BlackListEvent(address, text);
-            ctx.publishEvent(event);
+            BlackListEvent event = new BlackListEvent(this, address, text);
+            publisher.publishEvent(event);
             return;
         }
-        <lineannotation>// send email...</lineannotation>
+        ]]><lineannotation>// send email...</lineannotation><![CDATA[
     }
-}</programlisting>
+}]]></programlisting>
 
-      <programlisting language="java">public class BlackListNotifier implements ApplicationListener {
+      <para>At configuration time, the Spring container will detect that
+      <classname>EmailService</classname> implements
+      <interfacename>ApplicationEventPublisherAware</interfacename> and will
+      automatically call
+      <methodname>setApplicationEventPublisher()</methodname>. In reality, the
+      parameter passed in will be the Spring container itself; you're simply
+      interacting with the application context via its
+      <interfacename>ApplicationEventPublisher</interfacename>
+      interface.</para>
+
+      <para>To receive the custom <classname>ApplicationEvent</classname>,
+      create a class that implements
+      <interfacename>ApplicationListener</interfacename> and register it as a
+      Spring bean. The following example demonstrates such a class:</para>
+
+      <programlisting language="java"><![CDATA[public class BlackListNotifier implements ApplicationListener<BlackListEvent> {
 
     private String notificationAddress;
-    
+
     public void setNotificationAddress(String notificationAddress) {
         this.notificationAddress = notificationAddress;
     }
 
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof BlackListEvent) {
-            <lineannotation>// notify appropriate person...</lineannotation>
-        }
+    public void onApplicationEvent(BlackListEvent event) {
+]]><lineannotation>        // notify appropriate parties via notificationAddress...</lineannotation><![CDATA[
     }
-}</programlisting>
+}]]></programlisting>
 
-      <!-- MLP: Beverly to review paragraph -->
+      <para>Notice that <interfacename>ApplicationListener</interfacename> is
+      generically parameterized with the type of your custom event,
+      <classname>BlackListEvent</classname>. This means that the
+      <methodname>onApplicationEvent()</methodname> method can remain
+      type-safe, avoiding any need for downcasting. You may register as many
+      event listeners as you wish, but note that by default event listeners
+      receive events synchronously. This means the
+      <methodname>publishEvent()</methodname> method blocks until all
+      listeners have finished processing the event. One advantage of this
+      synchronous and single-threaded approach is that when a listener
+      receives an event, it operates inside the transaction context of the
+      publisher if a transaction context is available. If another strategy for
+      event publication becomes necessary, refer to the JavaDoc for Spring's
+      <interfacename>ApplicationEventMulticaster</interfacename>
+      interface.</para>
 
-      <para>When the sendEmail method is called, if there are any emails that
-      should be blacklisted, a custom event of the type BlackListEvent is
-      published to the application context. The BlackListNotifier class which
-      implements the interface ApplicationListener is registered as a
-      subscriber to the application context and will receive the
-      BlackListEvent. In order to access properties specific to
-      BlackListEvent, the listener must perform a downcast.</para>
+      <para>The following example demonstrates the bean definitions used to
+      register and configure each of the classes above:</para>
+      <programlisting language="xml"><![CDATA[<bean id="emailService" class="example.EmailService">
+    <property name="blackList">
+        <list>
+            <value>black@list.org</value>
+            <value>white@list.org</value>
+            <value>john@doe.org</value>
+        </list>
+    </property>
+</bean>
+
+<bean id="blackListNotifier" class="example.BlackListNotifier">
+    <property name="notificationAddress" value="spam@list.org"/>
+</bean>]]></programlisting>
+
+        <para>Putting it all together, when the <methodname>sendEmail()</methodname>
+        method of the <literal>emailService</literal> bean is called, if there
+        are any emails that should be blacklisted, a custom event of type
+        <classname>BlackListEvent</classname> is published. The
+        <literal>blackListNotifier</literal> bean is registered as an
+        <interfacename>ApplicationListener</interfacename> and thus receives the
+        <classname>BlackListEvent</classname>, at which point it can notify
+        appropriate parties.</para>
     </section>
 
     <section id="context-functionality-resources">
