@@ -1399,9 +1399,9 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       <para>The names of <classname>RestTemplate</classname> methods follow a
       naming convention, the first part indicates what HTTP method is being
       invoked and the second part indicates what is returned. For example, the
-      method <methodname>getForObject</methodname> will perform a GET, convert
+      method <methodname>getForObject()</methodname> will perform a GET, convert
       the HTTP response into an object type of your choice and return that
-      object. The method <methodname>postForLocation</methodname> will do a
+      object. The method <methodname>postForLocation()</methodname> will do a
       POST, converting the given object into a HTTP request and return the
       response HTTP Location header where the newly created object can be
       found. In case of an exception processing the HTTP request, an exception
@@ -1414,13 +1414,13 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       <interfacename>HttpMessageConverter</interfacename> instances.
       Converters for the main mime types are registered by default, but you
       can also write your own converter and register it via the
-      <methodname>messageConverters</methodname> bean property. The default
+      <methodname>messageConverters()</methodname> bean property. The default
       converter instances registered with the template are
       <classname>ByteArrayHttpMessageConverter</classname>,
       <classname>StringHttpMessageConverter</classname>,
       <classname>FormHttpMessageConverter</classname> and
       <classname>SourceHttpMessageConverter</classname>. You can override
-      these defaults using the <methodname>messageConverters</methodname> bean
+      these defaults using the <methodname>messageConverters()</methodname> bean
       property as would be required if using the
       <classname>MarshallingHttpMessageConverter</classname> or 
       <classname>MappingJacksonHttpMessageConverter</classname>.</para>
@@ -1499,11 +1499,11 @@ URI location = template.postForLocation(uri, booking, "1");
         <title>Dealing with request and response headers</title>
 
         <para>Besides the methods described above, the <classname>RestTemplate</classname>
-        also has the <methodname>exchange</methodname> method, which can be
+        also has the <methodname>exchange()</methodname> method, which can be
         used for arbitrary HTTP method execution based on the <classname>HttpEntity</classname>
         class.</para>
 
-        <para>Perhaps most importantly, the <methodname>exchange</methodname> 
+        <para>Perhaps most importantly, the <methodname>exchange()</methodname> 
         method can be used to add request headers and read response headers.
         For example:</para>
 
@@ -1527,9 +1527,9 @@ String body = response.getBody();</programlisting>
       <title>HTTP Message Conversion</title>
 
       <para>Objects passed to and returned from the methods
-      <methodname>getForObject</methodname>,
-      <methodname>postForLocation</methodname>, and
-      <methodname>put</methodname> are converted to HTTP requests and from
+      <methodname>getForObject()</methodname>,
+      <methodname>postForLocation()</methodname>, and
+      <methodname>put()</methodname> are converted to HTTP requests and from
       HTTP responses by <interfacename>HttpMessageConverters</interfacename>.
       The <interfacename>HttpMessageConverter</interfacename> interface is
       shown below to give you a better feel for its functionality</para>

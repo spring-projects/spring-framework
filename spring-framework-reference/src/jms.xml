@@ -160,8 +160,8 @@
         <classname>ConnectionFactory</classname> interface,
         <classname>SingleConnectionFactory</classname>, that will return the
         same <classname>Connection</classname> on all
-        <methodname>createConnection</methodname> calls and ignore calls to
-        <methodname>close.</methodname> This is useful for testing and
+        <methodname>createConnection()</methodname> calls and ignore calls to
+        <methodname>close()</methodname>. This is useful for testing and
         standalone environments so that the same connection can be used for
         multiple <classname>JmsTemplate</classname> calls that may span any
         number of transactions. <classname>SingleConnectionFactory</classname>
@@ -284,7 +284,7 @@
         <para>This message listener container is the simpler of the two
         standard flavors. It creates a fixed number of JMS sessions and
         consumers at startup, registers the listener using the standard JMS
-        <methodname>MessageConsumer.setMessageListener</methodname> method,
+        <methodname>MessageConsumer.setMessageListener()</methodname> method,
         and leaves it up the JMS provider to perform listener callbacks.
         This variant does not allow for dynamic adaption to runtime demands or
         for participation in externally managed transactions. Compatibility-wise,
@@ -425,8 +425,8 @@ public class JmsQueueSender {
       <para>In order to facilitate the sending of domain model objects, the
       <classname>JmsTemplate</classname> has various send methods that take a
       Java object as an argument for a message's data content. The overloaded
-      methods <methodname>convertAndSend</methodname> and
-      <methodname>receiveAndConvert</methodname> in
+      methods <methodname>convertAndSend()</methodname> and
+      <methodname>receiveAndConvert()</methodname> in
       <classname>JmsTemplate</classname> delegate the conversion process to an
       instance of the <literal>MessageConverter</literal> interface. This
       interface defines a simple contract to convert between Java objects and

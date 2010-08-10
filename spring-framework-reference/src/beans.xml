@@ -370,11 +370,11 @@ PetStoreServiceImpl service = context.getBean("petStore", PetStoreServiceImpl.cl
 List userList service.getUsernameList();
 </programlisting>
 
-      <para>You use <methodname>getBean</methodname> to retrieve instances of
+      <para>You use <methodname>getBean()</methodname> to retrieve instances of
       your beans. The <interfacename>ApplicationContext</interfacename>
       interface has a few other methods for retrieving beans, but ideally your
       application code should never use them. Indeed, your application code
-      should have no calls to the <methodname>getBean</methodname> method at
+      should have no calls to the <methodname>getBean()</methodname> method at
       all, and thus no dependency on Spring APIs at all. For example, Spring's
       integration with web frameworks provides for dependency injection for
       various web framework classes such as controllers and JSF-managed
@@ -512,7 +512,7 @@ List userList service.getUsernameList();
     <interfacename>ApplicationContext</interfacename> implementations also
     permit the registration of existing objects that are created outside the
     container, by users. This is done by accessing the ApplicationContext's
-    BeanFactory via the method <methodname>getBeanFactory</methodname> which
+    BeanFactory via the method <methodname>getBeanFactory()</methodname> which
     returns the BeanFactory implementation
     <classname>DefaultListableBeanFactory</classname>.
     <classname>DefaultListableBeanFactory</classname> supports this
@@ -4408,7 +4408,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       <interfacename>FactoryBean</interfacename> instance itself, not the bean
       it produces, you preface the bean id with the ampersand symbol
       <literal>&amp;</literal> (without quotes) when calling the
-      <methodname>getBean</methodname> method of the
+      <methodname>getBean()</methodname> method of the
       <interfacename>ApplicationContext</interfacename>. So for a given
       <interfacename>FactoryBean</interfacename> with an id of
       <literal>myBean</literal>, invoking <literal>getBean("myBean")</literal>
@@ -5525,9 +5525,9 @@ public class FactoryMethodComponent {
 }</programlisting>
 
       <para>This class is a Spring component that has application-specific
-      code contained in its <methodname>doWork</methodname> method. However,
+      code contained in its <methodname>doWork()</methodname> method. However,
       it also contributes a bean definition that has a factory method
-      referring to the method <methodname>publicInstance</methodname>. The
+      referring to the method <methodname>publicInstance()</methodname>. The
       <literal>@Bean</literal> annotation identifies the factory method and
       other bean definition properties, such as a qualifier value through the
       <classname>@Qualifier</classname> annotation. Other method level
