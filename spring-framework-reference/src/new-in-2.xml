@@ -503,7 +503,7 @@
           <xref linkend="beans-annotation-config"/>
         </listitem>
         <listitem>
-          <xref linkend="metadata-annotations-required"/>
+          <xref linkend="beans-required-annotation"/>
         </listitem>
         <listitem>
           <xref linkend="transaction-declarative-annotations"/>

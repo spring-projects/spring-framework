@@ -765,7 +765,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			<section id="xsd-config-body-schemas-context-ac">
 				<title><literal>&lt;annotation-config/&gt;</literal></title>
 				<para>Activates the Spring infrastructure for various annotations to be detected in bean classes:
-				Spring's <link linkend="metadata-annotations-required"><interfacename>@Required</interfacename></link>
+				Spring's <link linkend="beans-required-annotation"><interfacename>@Required</interfacename></link>
 				and <link linkend="beans-annotation-config"><interfacename>@Autowired</interfacename></link>, as well as
 				JSR 250's <interfacename>@PostConstruct</interfacename>, <interfacename>@PreDestroy</interfacename> and
 				<interfacename>@Resource</interfacename> (if available), and JPA's

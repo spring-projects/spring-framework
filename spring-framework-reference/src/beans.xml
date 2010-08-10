@@ -4106,8 +4106,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         <para>Using callback interfaces or annotations in conjunction with a
         custom <interfacename>BeanPostProcessor</interfacename> implementation
         is a common means of extending the Spring IoC container. An example is
-        shown in <xref linkend="metadata-annotations-required" /> which
-        demonstrates the usage of a custom
+        Spring's <classname>RequiredAnnotationBeanPostProcessor</classname> -- a
         <interfacename>BeanPostProcessor</interfacename> implementation that
         ships with the Spring distribution which ensures that JavaBean
         properties on beans that are marked with an (arbitrary) annotation are
@@ -4458,7 +4457,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     annotations is a common means of extending the Spring IoC container. For
     example, Spring 2.0 introduced the possibility of enforcing required
     properties with the <link
-    linkend="metadata-annotations-required">@Required</link> annotation. As of
+    linkend="beans-required-annotation">@Required</link> annotation. As of
     Spring 2.5, it is now possible to follow that same general approach to
     drive Spring's dependency injection. Essentially, the
     <interfacename>@Autowired</interfacename> annotation provides the same
