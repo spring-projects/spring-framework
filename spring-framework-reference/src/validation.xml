@@ -929,10 +929,10 @@ public interface ConverterFactory<S, R> {
 
 }]]></programlisting>
 
-      <para> Parameterize S to be type you are converting from and R to be base
-        type defining the <emphasis>range</emphasis> of classes you can convert
-        to. Then implement getConverter(Class&lt;T&gt;), where T is a subclass
-        of R. </para>
+      <para> Parameterize S to be the type you are converting from and R to be
+        the base type defining the <emphasis>range</emphasis> of classes you can
+        convert to. Then implement getConverter(Class&lt;T&gt;), where T is a
+        subclass of R. </para>
 
       <para> Consider the <classname>StringToEnum</classname> ConverterFactory
         as an example: </para>
