@@ -536,10 +536,7 @@ public class AccountServiceImpl implements AccountService {
     url="http://www.springframework.org/spring-ws">Spring Web
     Services</ulink>, a solution for contract-first, document-driven web
     services - highly recommended for building modern, future-proof web
-    services. Last but not least, <ulink
-    url="http://xfire.codehaus.org">XFire</ulink> also allows you to export
-    Spring-managed beans as a web service, through built-in Spring
-    support.</para>
+    services.</para>
 
     <section id="remoting-web-services-jaxrpc-export">
       <title>Exposing servlet-based web services using JAX-RPC</title>
@@ -994,64 +991,6 @@ public class AccountServiceEndpoint {
       cannot (easily) use plain Java interfaces and implementation classes as
       JAX-WS endpoint artifacts; you need to annotate them accordingly first.
       Check the JAX-WS documentation for details on those requirements.</para>
-    </section>
-
-    <section id="remoting-web-services-xfire">
-      <title>Exposing web services using XFire</title>
-
-      <para>XFire is a lightweight SOAP library, hosted by Codehaus. Exposing
-      XFire is done using a XFire context that is shipping with XFire itself in
-      combination with a RemoteExporter-style bean you have to add to your
-      <interfacename>WebApplicationContext</interfacename>. As with all
-      methods that allow you to expose service, you have to create a
-      <classname>DispatcherServlet</classname> with a corresponding
-      <interfacename>WebApplicationContext</interfacename> containing the
-      services you will be exposing:</para>
-
-      <programlisting language="xml">&lt;servlet&gt;
-    &lt;servlet-name&gt;xfire&lt;/servlet-name&gt;
-    &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
-&lt;/servlet&gt;</programlisting>
-
-      <para>You also have to link in the XFire configuration. This is done by
-      adding a context file to the <literal>contextConfigLocations</literal>
-      context parameter picked up by the
-      <classname>ContextLoaderListener</classname> (or
-      <classname>ContextLoaderServlet</classname> for that matter).</para>
-
-      <programlisting language="xml">&lt;context-param&gt;
-    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
-    &lt;param-value&gt;classpath:org/codehaus/xfire/spring/xfire.xml&lt;/param-value&gt;
-&lt;/context-param&gt;
-
-&lt;listener&gt;
-    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
-&lt;/listener&gt;</programlisting>
-
-      <para>After you added a servlet mapping (mapping <literal>/*</literal>
-      to the XFire servlet declared above) you only have to add one extra bean
-      to expose the service using XFire. Add for example the following
-      configuration in your <filename>'xfire-servlet.xml'</filename>
-      file:</para>
-
-      <programlisting language="xml">&lt;beans&gt;
-
-    &lt;bean name="/Echo" class="org.codehaus.xfire.spring.remoting.XFireExporter"&gt;
-        &lt;property name="serviceInterface" value="org.codehaus.xfire.spring.Echo"/&gt;
-        &lt;property name="serviceBean"&gt;
-            &lt;bean class="org.codehaus.xfire.spring.EchoImpl"/&gt;
-        &lt;/property&gt;
-        <lineannotation>&lt;!-- the XFire bean is defined in the <filename>xfire.xml</filename> file --&gt;</lineannotation>
-        &lt;property name="xfire" ref="xfire"/&gt;
-  &lt;/bean&gt;
-
-&lt;/beans&gt;</programlisting>
-
-      <para>XFire handles the rest. It introspects your service interface and
-      generates a WSDL from it. Parts of this documentation have been taken
-      from the XFire site; for more detailed information on XFire Spring
-      integration, navigate to <ulink
-      url="http://docs.codehaus.org/display/XFIRE/Spring">http://docs.codehaus.org/display/XFIRE/Spring</ulink>.</para>
     </section>
   </section>
 
