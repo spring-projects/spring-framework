@@ -58,8 +58,7 @@
 
     <para>Let's consider a small data object:</para>
 
-    <programlisting language="java"><![CDATA[
-public class Person {
+    <programlisting language="java"><![CDATA[public class Person {
 
   private String name;
   private int age;
@@ -819,7 +818,8 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
     </property>
 </bean>
 
-<bean id="customPropertyEditorRegistrar" class="com.foo.editors.spring.CustomPropertyEditorRegistrar"/>]]></programlisting>
+<bean id="customPropertyEditorRegistrar"
+      class="com.foo.editors.spring.CustomPropertyEditorRegistrar"/>]]></programlisting>
 
           <para>Finally, and in a bit of a departure from the focus of this
             chapter, for those of you using <link linkend="mvc">Spring's MVC web
@@ -878,8 +878,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
       <para> The SPI to implement type conversion logic is simple and strongly
         typed: </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.core.convert.converter;
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.converter;
 
 public interface Converter<S, T> {
 
@@ -901,15 +900,15 @@ public interface Converter<S, T> {
         Consider <classname>StringToInteger</classname> as an example Converter
         implementation: </para>
 
-      <programlisting language="java">package org.springframework.core.convert.support;
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.support;
 
-final class StringToInteger implements Converter&lt;String, Integer&gt; {
+final class StringToInteger implements Converter<String, Integer> {
 
     public Integer convert(String source) {
         return Integer.valueOf(source);
     }
 
-}</programlisting>
+}]]></programlisting>
     </section>
 
     <section id="core-convert-ConverterFactory-SPI">
@@ -920,8 +919,7 @@ final class StringToInteger implements Converter&lt;String, Integer&gt; {
         java.lang.Enum objects, implement
         <interfacename>ConverterFactory</interfacename>: </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.core.convert.converter;
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.converter;
 
 public interface ConverterFactory<S, R> {
 
@@ -937,8 +935,7 @@ public interface ConverterFactory<S, R> {
       <para> Consider the <classname>StringToEnum</classname> ConverterFactory
         as an example: </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.core.convert.support;
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.support;
 
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
@@ -973,8 +970,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
         a field annotation, or generic information declared on a field
         signature. </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.core.convert.converter;
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.converter;
 
 public interface GenericConverter {
 
@@ -982,8 +978,7 @@ public interface GenericConverter {
 
     Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
-}]]>
-            </programlisting>
+}]]></programlisting>
 
       <para> To implement a GenericConverter, have getConvertibleTypes() return
         the supported source-&gt;target type pairs. Then implement
@@ -1017,8 +1012,7 @@ public interface GenericConverter {
           ConditionalGenericConverter is an subinterface of GenericConverter
           that allows you to define such custom matching criteria: </para>
 
-        <programlisting language="java"><![CDATA[
-public interface ConditionalGenericConverter extends GenericConverter {
+        <programlisting language="java"><![CDATA[public interface ConditionalGenericConverter extends GenericConverter {
 
     boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
 
@@ -1040,8 +1034,7 @@ public interface ConditionalGenericConverter extends GenericConverter {
         conversion logic at runtime. Converters are often executed behind this
         facade interface: </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.core.convert;
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert;
 
 public interface ConversionService {
 
@@ -1087,8 +1080,8 @@ public interface ConversionService {
 
       <para> To register a default ConversionService with Spring, add the
         following bean definition with id <code>conversionService</code>: </para>
-      <programlisting language="xml"><![CDATA[
-<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean" />]]>
+      <programlisting language="xml"><![CDATA[<bean id="conversionService"
+      class="org.springframework.context.support.ConversionServiceFactoryBean"/>]]>
       </programlisting>
 
       <para> A default ConversionService can convert between strings, numbers,
@@ -1098,11 +1091,11 @@ public interface ConversionService {
         either of the Converter, ConverterFactory, or GenericConverter
         interfaces. </para>
 
-      <programlisting language="xml"><![CDATA[
-<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+      <programlisting language="xml"><![CDATA[<bean id="conversionService"
+      class="org.springframework.context.support.ConversionServiceFactoryBean">
     <property name="converters">
         <list>
-            <bean class="example.MyCustomConverter" />
+            <bean class="example.MyCustomConverter"/>
         </list>
     </property>
 </bean>]]></programlisting>
@@ -1124,8 +1117,7 @@ public interface ConversionService {
       <para> To work with a ConversionService instance programatically, simply
         inject a reference to it like you would for any other bean: </para>
 
-      <programlisting language="java"><![CDATA[
-@Service
+      <programlisting language="java"><![CDATA[@Service
 public class MyService {
 
     @Autowired
@@ -1178,27 +1170,24 @@ public class MyService {
 
       <para> The Formatter SPI to implement field formatting logic is simple and
         strongly typed: </para>
-      <programlisting language="java"><![CDATA[
-package org.springframework.format;
+
+      <programlisting language="java"><![CDATA[package org.springframework.format;
 
 public interface Formatter<T> extends Printer<T>, Parser<T> {
-}]]>
-            </programlisting>
+}]]></programlisting>
 
       <para> Where Formatter extends from the Printer and Parser building-block
         interfaces: </para>
-      <programlisting language="java"><![CDATA[
-public interface Printer<T> {
+
+      <programlisting language="java"><![CDATA[public interface Printer<T> {
     String print(T fieldValue, Locale locale);
-}]]>
-      </programlisting>
-      <programlisting language="java"><![CDATA[
-import java.text.ParseException;
+}]]></programlisting>
+
+      <programlisting language="java"><![CDATA[import java.text.ParseException;
 
 public interface Parser<T> {
     T parse(String clientValue, Locale locale) throws ParseException;
-}]]>
-      </programlisting>
+}]]></programlisting>
 
       <para> To create your own Formatter, simply implement the Formatter
         interface above. Parameterize T to be the type of object you wish to
@@ -1225,8 +1214,7 @@ public interface Parser<T> {
       <para> Consider <classname>DateFormatter</classname> as an example
         <interfacename>Formatter</interfacename> implementation: </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.format.datetime;
+      <programlisting language="java"><![CDATA[package org.springframework.format.datetime;
 
 public final class DateFormatter implements Formatter<Date> {
 
@@ -1270,8 +1258,7 @@ public final class DateFormatter implements Formatter<Date> {
         or annotation. To bind an Annotation to a formatter, implement
         AnnotationFormatterFactory: </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.format;
+      <programlisting language="java"><![CDATA[package org.springframework.format;
 
 public interface AnnotationFormatterFactory<A extends Annotation> {
 
@@ -1296,12 +1283,13 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
         the @NumberFormat Annotation to a formatter. This annotation allows
         either a number style or pattern to be specified: </para>
 
-      <programlisting language="java"><![CDATA[
-public final class NumberFormatAnnotationFormatterFactory implements AnnotationFormatterFactory<NumberFormat> {
+      <programlisting language="java"><![CDATA[public final class NumberFormatAnnotationFormatterFactory
+        implements AnnotationFormatterFactory<NumberFormat> {
 
     public Set<Class<?>> getFieldTypes() {
         return new HashSet<Class<?>>(asList(new Class<?>[] {
-            Short.class, Integer.class, Long.class, Float.class, Double.class, BigDecimal.class, BigInteger.class }));
+            Short.class, Integer.class, Long.class, Float.class,
+            Double.class, BigDecimal.class, BigInteger.class }));
     }
 
     public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
@@ -1312,7 +1300,8 @@ public final class NumberFormatAnnotationFormatterFactory implements AnnotationF
         return configureFormatterFrom(annotation, fieldType);
     }
 
-    private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
+    private Formatter<Number> configureFormatterFrom(NumberFormat annotation,
+                                                     Class<?> fieldType) {
         if (!annotation.pattern().isEmpty()) {
             return new NumberFormatter(annotation.pattern());
         } else {
@@ -1330,8 +1319,7 @@ public final class NumberFormatAnnotationFormatterFactory implements AnnotationF
 
       <para> To trigger formatting, simply annotate fields with @NumberFormat: </para>
 
-      <programlisting language="java"><![CDATA[
-public class MyModel {
+      <programlisting language="java"><![CDATA[public class MyModel {
 
     @NumberFormat(style=Style.CURRENCY)
     private BigDecimal decimal;
@@ -1350,8 +1338,7 @@ public class MyModel {
         <para> The example below uses @DateTimeFormat to format a java.util.Date
           as a ISO Date (yyyy-MM-dd): </para>
 
-        <programlisting language="java"><![CDATA[
-public class MyModel {
+        <programlisting language="java"><![CDATA[public class MyModel {
 
     @DateTimeFormat(iso=ISO.DATE)
     private Date date;
@@ -1373,8 +1360,7 @@ public class MyModel {
 
       <para> Review the FormatterRegistry SPI below: </para>
 
-      <programlisting language="java"><![CDATA[
-package org.springframework.format;
+      <programlisting language="java"><![CDATA[package org.springframework.format;
 
 public interface FormatterRegistry {
 
@@ -1412,8 +1398,7 @@ public interface FormatterRegistry {
       <para> To rely on default formatting rules, no custom configuration is
         required in your Spring MVC config XML: </para>
 
-      <programlisting language="xml"><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1425,8 +1410,7 @@ public interface FormatterRegistry {
 
     <mvc:annotation-driven/>
 
-</beans>
-]]></programlisting>
+</beans>]]></programlisting>
 
       <para> With this one-line of configuation, default formatters for Numbers
         and Date types will be installed, including support for the
@@ -1436,8 +1420,7 @@ public interface FormatterRegistry {
 
       <para> To inject a ConversionService instance with custom formatters and
         converters registered, set the conversion-service attribute: </para>
-      <programlisting language="xml"><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1447,9 +1430,10 @@ public interface FormatterRegistry {
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
-    <mvc:annotation-driven conversion-service="conversionService" />
+    <mvc:annotation-driven conversion-service="conversionService"/>
 
-    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
+    <bean id="conversionService"
+          class="org.springframework.format.support.FormattingConversionServiceFactoryBean"/>
 
 </beans>
 ]]></programlisting>
@@ -1482,8 +1466,7 @@ public interface FormatterRegistry {
       <para> To illustrate, consider a simple PersonForm model with two
         properties: </para>
 
-      <programlisting language="java"><![CDATA[
-public class PersonForm {
+      <programlisting language="java"><![CDATA[public class PersonForm {
     private String name;
     private int age;
 }]]></programlisting>
@@ -1491,8 +1474,7 @@ public class PersonForm {
       <para> JSR-303 allows you to define declarative validation constraints
         against such properties: </para>
 
-      <programlisting language="java"><![CDATA[
-public class PersonForm {
+      <programlisting language="java"><![CDATA[public class PersonForm {
 
     @NotNull
     @Size(max=64)
@@ -1528,9 +1510,8 @@ public class PersonForm {
       <para> Use the <classname>LocalValidatorFactoryBean</classname> to
         configure a default JSR-303 Validator as a Spring bean: </para>
 
-      <programlisting language="xml"><![CDATA[
-<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />]]>
-      </programlisting>
+      <programlisting language="xml"><![CDATA[<bean id="validator"
+      class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>]]></programlisting>
 
       <para> The basic configuration above will trigger JSR-303 to initialize
         using its default bootstrap mechanism. A JSR-303 provider, such as
@@ -1550,22 +1531,19 @@ public class PersonForm {
         <para> Inject a reference to <code>javax.validation.Validator</code> if
           you prefer to work with the JSR-303 API directly: </para>
 
-        <programlisting language="java">
-import javax.validation.Validator;
+        <programlisting language="java"><![CDATA[import javax.validation.Validator;
 
 @Service
 public class MyService {
 
     @Autowired
-    private Validator validator;
-</programlisting>
+    private Validator validator;]]></programlisting>
 
         <para> Inject a reference to
           <code>org.springframework.validation.Validator</code> if your bean
           requires the Spring Validation API: </para>
 
-        <programlisting language="java"><![CDATA[
-import org.springframework.validation.Validator;
+        <programlisting language="java"><![CDATA[import org.springframework.validation.Validator;
 
 @Service
 public class MyService {
@@ -1600,15 +1578,13 @@ public class MyService {
           followed by an associated <code>ConstraintValidator</code>
           implementation that uses Spring for dependency injection: </para>
 
-        <programlisting language="java"><![CDATA[
-@Target({ElementType.METHOD, ElementType.FIELD})
+        <programlisting language="java"><![CDATA[@Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=MyConstraintValidator.class)
 public @interface MyConstraint {
 }]]></programlisting>
 
-        <programlisting language="java"><![CDATA[
-import javax.validation.ConstraintValidator;
+        <programlisting language="java"><![CDATA[import javax.validation.ConstraintValidator;
 
 public class MyConstraintValidator implements ConstraintValidator {
 
@@ -1656,8 +1632,7 @@ binder.bind(propertyValues);
 binder.validate();
 
 <lineannotation>// get BindingResult that includes any validation errors</lineannotation>
-BindingResult results = binder.getBindingResult();
-</programlisting>
+BindingResult results = binder.getBindingResult();</programlisting>
     </section>
 
     <section id="validation-mvc">
@@ -1697,8 +1672,7 @@ public class MyController {
           callback. This allows you to configure a Validator instance per
           @Controller class: </para>
 
-        <programlisting language="java"><![CDATA[
-@Controller
+        <programlisting language="java"><![CDATA[@Controller
 public class MyController {
 
     @InitBinder
@@ -1716,8 +1690,7 @@ public class MyController {
           instance across all @Controllers. This can be achieved easily by using
           the Spring MVC namespace: </para>
 
-        <programlisting language="xml"><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?>
+        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1746,8 +1719,7 @@ public class MyController {
         <para> The Spring MVC configuration required to enable JSR-303 support
           is shown below: </para>
 
-        <programlisting language="xml"><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?>
+        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
