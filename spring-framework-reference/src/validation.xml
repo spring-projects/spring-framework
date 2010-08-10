@@ -1106,6 +1106,16 @@ public interface ConversionService {
         </list>
     </property>
 </bean>]]></programlisting>
+
+      <para>It is also common to use a ConversionService within a Spring MVC
+        application. See <xref linkend="format-configuring-FormatterRegistry"/>
+        for details on use with
+        <literal>&lt;mvc:annotation-driven/&gt;</literal>.</para>
+
+      <para>In certain situations you may wish to apply formatting during
+        conversion. See <xref linkend="format-FormatterRegistry-SPI"/> for
+        details on using
+        <classname>FormattingConversionServiceFactoryBean</classname>.</para>
     </section>
 
     <section id="core-convert-programmatic-usage">
