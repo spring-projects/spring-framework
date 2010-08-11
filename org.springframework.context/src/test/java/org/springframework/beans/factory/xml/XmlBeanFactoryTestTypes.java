@@ -738,7 +738,7 @@ class SingleSimpleTypeConstructorBean {
 		this.singleBoolean = singleBoolean;
 	}
 
-	public SingleSimpleTypeConstructorBean(String testString, boolean secondBoolean) {
+	protected SingleSimpleTypeConstructorBean(String testString, boolean secondBoolean) {
 		this.testString = testString;
 		this.secondBoolean = secondBoolean;
 	}

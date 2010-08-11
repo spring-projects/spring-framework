@@ -172,10 +172,7 @@ class ConstructorResolver {
 					break;
 				}
 				if (paramTypes.length < minNrOfArgs) {
-					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-							minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
-							beanName + "' " +
-							"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
+					continue;
 				}
 
 				ArgumentsHolder argsHolder;
@@ -245,8 +242,9 @@ class ConstructorResolver {
 			}
 
 			if (constructorToUse == null) {
-				throw new BeanCreationException(
-						mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+						"Could not resolve matching constructor " +
+						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
 			}
 			else if (ambiguousConstructors != null && !mbd.isLenientConstructorResolution()) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
@@ -663,16 +661,16 @@ class ConstructorResolver {
 				// We found a potential match - let's give it a try.
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
-				ConstructorArgumentValues.ValueHolder sourceHolder =
-						(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();
 				Object originalValue = valueHolder.getValue();
-				Object sourceValue = sourceHolder.getValue();
 				Object convertedValue;
 				if (valueHolder.isConverted()) {
 					convertedValue = valueHolder.getConvertedValue();
 					args.preparedArguments[paramIndex] = convertedValue;
 				}
 				else {
+					ConstructorArgumentValues.ValueHolder sourceHolder =
+							(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();
+					Object sourceValue = sourceHolder.getValue();
 					try {
 						convertedValue = converter.convertIfNecessary(originalValue, paramType,
 								MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
