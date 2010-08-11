@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
@@ -45,7 +47,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @since 3.0
- * @see org.springframework.web.servlet.view.json.BindingJacksonJsonView
+ * @see org.springframework.web.servlet.view.json.MappingJacksonJsonView
  */
 public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
@@ -129,7 +131,12 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 		JavaType javaType = getJavaType(clazz);
-		return this.objectMapper.readValue(inputMessage.getBody(), javaType);
+		try {
+			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
+		}
+		catch (JsonParseException ex) {
+			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
+		}
 	}
 
 	@Override
@@ -139,10 +146,15 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		JsonEncoding encoding = getEncoding(outputMessage.getHeaders().getContentType());
 		JsonGenerator jsonGenerator =
 				this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
-		if (this.prefixJson) {
-			jsonGenerator.writeRaw("{} && ");
+		try {
+			if (this.prefixJson) {
+				jsonGenerator.writeRaw("{} && ");
+			}
+			this.objectMapper.writeValue(jsonGenerator, o);
 		}
-		this.objectMapper.writeValue(jsonGenerator, o);
+		catch (JsonGenerationException ex) {
+			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
+		}
 	}
 
 	private JsonEncoding getEncoding(MediaType contentType) {
