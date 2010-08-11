@@ -43,8 +43,8 @@ import org.springframework.util.ClassUtils;
 abstract class AutowireUtils {
 
 	/**
-	 * Sort the given constructors, preferring public constructors and "greedy" ones
-	 * with a maximum of arguments. The result will contain public constructors first,
+	 * Sort the given constructors, preferring public constructors and "greedy" ones with
+	 * a maximum number of arguments. The result will contain public constructors first,
 	 * with decreasing number of arguments, then non-public constructors, again with
 	 * decreasing number of arguments.
 	 * @param constructors the constructor array to sort
