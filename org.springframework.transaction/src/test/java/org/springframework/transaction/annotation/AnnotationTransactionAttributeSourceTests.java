@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,26 @@ public class AnnotationTransactionAttributeSourceTests {
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute actual = atas.getTransactionAttribute(classMethod, TestBean1.class);
 		
+		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
+		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+	}
+
+	/**
+	 * Test the important case where the invocation is on a proxied interface method
+	 * but the attribute is defined on the target class.
+	 */
+	@Test
+	public void testTransactionAttributeDeclaredOnCglibClassMethod() throws Exception {
+		Method classMethod = ITestBean.class.getMethod("getAge", (Class[]) null);
+		TestBean1 tb = new TestBean1();
+		ProxyFactory pf = new ProxyFactory(tb);
+		pf.setProxyTargetClass(true);
+		Object proxy = pf.getProxy();
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute actual = atas.getTransactionAttribute(classMethod, proxy.getClass());
+
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());

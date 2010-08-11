@@ -80,7 +80,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return TransactionAttribute for this method, or <code>null</code> if the method
 	 * is not transactional
 	 */
-	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
+	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		Object cached = this.attributeCache.get(cacheKey);
@@ -119,7 +119,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @param targetClass the target class (may be <code>null</code>)
 	 * @return the cache key (never <code>null</code>)
 	 */
-	protected Object getCacheKey(Method method, Class targetClass) {
+	protected Object getCacheKey(Method method, Class<?> targetClass) {
 		return new DefaultCacheKey(method, targetClass);
 	}
 
@@ -128,15 +128,17 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * {@link #getTransactionAttribute} is effectively a caching decorator for this method.
 	 * @see #getTransactionAttribute
 	 */
-	private TransactionAttribute computeTransactionAttribute(Method method, Class targetClass) {
+	private TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
 		}
 
+		// Ignore CGLIB subclasses - introspect the actual user class.
+		Class<?> userClass = ClassUtils.getUserClass(targetClass);
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
-		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+		Method specificMethod = ClassUtils.getMostSpecificMethod(method, userClass);
 		// If we are dealing with method with generic parameters, find the original method.
 		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
@@ -181,7 +183,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return all transaction attribute associated with this class
 	 * (or <code>null</code> if none)
 	 */
-	protected abstract TransactionAttribute findTransactionAttribute(Class clazz);
+	protected abstract TransactionAttribute findTransactionAttribute(Class<?> clazz);
 
 
 	/**
