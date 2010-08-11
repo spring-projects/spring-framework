@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,25 +27,25 @@ import java.util.Map;
  * @author Juergen Hoeller
  */
 public class MapTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource {
-	
-	/** Map from Method or Clazz to TransactionAttribute */
-	private final Map attributeMap = new HashMap();
-	
-	public void register(Method m, TransactionAttribute txAtt) {
-		this.attributeMap.put(m, txAtt);
+
+	private final Map<Object, TransactionAttribute> attributeMap = new HashMap<Object, TransactionAttribute>();
+
+
+	public void register(Method method, TransactionAttribute txAtt) {
+		this.attributeMap.put(method, txAtt);
 	}
-	
+
 	public void register(Class clazz, TransactionAttribute txAtt) {
 		this.attributeMap.put(clazz, txAtt);
 	}
 
 
 	protected TransactionAttribute findTransactionAttribute(Method method) {
-		return (TransactionAttribute) this.attributeMap.get(method);
+		return this.attributeMap.get(method);
 	}
 
 	protected TransactionAttribute findTransactionAttribute(Class clazz) {
-		return (TransactionAttribute) this.attributeMap.get(clazz);
+		return this.attributeMap.get(clazz);
 	}
 
 }
