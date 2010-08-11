@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,10 +29,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.util.WebUtils;
-import org.springframework.web.servlet.View;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.View;
+import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
@@ -207,25 +207,34 @@ public class RedirectView extends AbstractUrlBasedView {
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 
+		String encoding = getEncoding(request);
+
 		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
 		if (this.contextRelative && getUrl().startsWith("/")) {
 			// Do not apply context path to relative URLs.
-			targetUrl.append(request.getContextPath());
+			targetUrl.append(UriUtils.encodePath(request.getContextPath(), encoding));
+			targetUrl.append(UriUtils.encodePath(getUrl(), encoding));
 		}
-		targetUrl.append(getUrl());
+		else {
+			targetUrl.append(UriUtils.encodeUri(getUrl(), encoding));
+		}
 		if (this.exposeModelAttributes) {
-			String enc = this.encodingScheme;
-			if (enc == null) {
-				enc = request.getCharacterEncoding();
-			}
-			if (enc == null) {
-				enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
-			}
-			appendQueryProperties(targetUrl, model, enc);
+			appendQueryProperties(targetUrl, model, encoding);
 		}
 
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
+	}
+
+	private String getEncoding(HttpServletRequest request) {
+		String enc = this.encodingScheme;
+		if (enc == null) {
+			enc = request.getCharacterEncoding();
+		}
+		if (enc == null) {
+			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
+		}
+		return enc;
 	}
 
 	/**
@@ -271,8 +280,8 @@ public class RedirectView extends AbstractUrlBasedView {
 				else {
 					targetUrl.append('&');
 				}
-				String encodedKey = urlEncode(entry.getKey(), encodingScheme);
-				String encodedValue = (value != null ? urlEncode(value.toString(), encodingScheme) : "");
+				String encodedKey = UriUtils.encodeQueryParam(entry.getKey(), encodingScheme);
+				String encodedValue = (value != null ? UriUtils.encodeQueryParam(value.toString(), encodingScheme) : "");
 				targetUrl.append(encodedKey).append('=').append(encodedValue);
 			}
 		}
@@ -280,7 +289,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		// Append anchor fragment, if any, to end of URL.
 		if (fragment != null) {
 			targetUrl.append(fragment);
-		}
+	}
 	}
 
 	/**
@@ -361,20 +370,6 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	protected boolean isEligibleValue(Object value) {
 		return (value != null && BeanUtils.isSimpleValueType(value.getClass()));
-	}
-
-	/**
-	 * URL-encode the given input String with the given encoding scheme.
-	 * <p>The default implementation uses <code>URLEncoder.encode(input, enc)</code>.
-	 * @param input the unencoded input String
-	 * @param encodingScheme the encoding scheme
-	 * @return the encoded output String
-	 * @throws UnsupportedEncodingException if thrown by the JDK URLEncoder
-	 * @see java.net.URLEncoder#encode(String, String)
-	 * @see java.net.URLEncoder#encode(String)
-	 */
-	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
-		return (input != null ? URLEncoder.encode(input, encodingScheme) : null);
 	}
 
 	/**
