@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 /**
  * @author Arjen Poutsma
@@ -154,6 +155,15 @@ public class MappingJacksonHttpMessageConverterTests {
 		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(utf16));
 		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
 	}
+
+	@Test(expected = HttpMessageNotReadableException.class)
+	public void readInvalidJson() throws IOException {
+		String body = "FooBar";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+		converter.read(MyBean.class, inputMessage);
+	}
+
 
 
 	public static class MyBean {
