@@ -7163,6 +7163,18 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
         <interfacename>ApplicationListener</interfacename> and thus receives the
         <classname>BlackListEvent</classname>, at which point it can notify
         appropriate parties.</para>
+
+        <note>
+          <para>Spring's eventing mechanism is designed for simple communication
+          between Spring beans within the same application context. However, for
+          more sophisticated enterprise integration needs, the separately-maintained
+          <ulink
+          url="http://springsource.org/spring-integration">Spring Integration</ulink>
+          project provides complete support for building lightweight, <ulink
+          url="http://www.enterpriseintegrationpatterns.com">pattern-oriented</ulink>,
+          event-driven architectures that build upon the well-known Spring
+          programming model.</para>
+        </note>
     </section>
 
     <section id="context-functionality-resources">
