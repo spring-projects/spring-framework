@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,18 @@ public class HandlerExecutionChain {
 	 */
 	@Override
 	public String toString() {
-		return String.valueOf(this.handler);
+		if (this.handler == null) {
+			return "HandlerExecutionChain with no handler";
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append("HandlerExecutionChain with handler [").append(this.handler).append("]");
+		if (!CollectionUtils.isEmpty(this.interceptorList)) {
+			sb.append(" and ").append(this.interceptorList.size()).append(" interceptor");
+			if (this.interceptorList.size() > 1) {
+				sb.append("s");
+			}
+		}
+		return sb.toString();
 	}
 
 }
