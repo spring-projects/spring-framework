@@ -46,6 +46,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -165,9 +166,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see #setDetectAllViewResolvers
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
-
-	/** Request attribute to hold the currently chosen HandlerExecutionChain. Only used for internal optimizations. */
-	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE = DispatcherServlet.class.getName() + ".HANDLER";
 
 	/**
 	 * Request attribute to hold the current web application context. Otherwise only the global web app context is
@@ -750,10 +748,27 @@ public class DispatcherServlet extends FrameworkServlet {
 				processedRequest = checkMultipart(request);
 
 				// Determine handler for the current request.
-				mappedHandler = getHandler(processedRequest, false);
+				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
 					noHandlerFound(processedRequest, response);
 					return;
+				}
+
+				// Determine handler adapter for the current request.
+				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+
+                // Process last-modified header, if supported by the handler.
+				String method = request.getMethod();
+				boolean isGet = "GET".equals(method);
+				if (isGet || "HEAD".equals(method)) {
+					long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+					if (logger.isDebugEnabled()) {
+						String requestUri = urlPathHelper.getRequestUri(request);
+						logger.debug("Last-Modified value for [" + requestUri + "] is: " + lastModified);
+					}
+					if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
+						return;
+					}
 				}
 
 				// Apply preHandle methods of registered interceptors.
@@ -770,7 +785,6 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Actually invoke the handler.
-				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				// Do we need view name translation?
@@ -835,41 +849,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Override HttpServlet's <code>getLastModified</code> method to evaluate the Last-Modified value
-	 * of the mapped handler.
-	 */
-	@Override
-	protected long getLastModified(HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-			String requestUri = urlPathHelper.getRequestUri(request);
-			logger.debug(
-					"DispatcherServlet with name '" + getServletName() + "' determining Last-Modified value for [" +
-							requestUri + "]");
-		}
-		try {
-			HandlerExecutionChain mappedHandler = getHandler(request, true);
-			if (mappedHandler == null || mappedHandler.getHandler() == null) {
-				// Ignore -> will reappear on doService.
-				logger.debug("No handler found in getLastModified");
-				return -1;
-			}
-
-			HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
-			long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
-			if (logger.isDebugEnabled()) {
-				String requestUri = urlPathHelper.getRequestUri(request);
-				logger.debug("Last-Modified value for [" + requestUri + "] is: " + lastModified);
-			}
-			return lastModified;
-		}
-		catch (Exception ex) {
-			// Ignore -> will reappear on doService.
-			logger.debug("Exception thrown in getLastModified", ex);
-			return -1;
-		}
-	}
-
-	/**
 	 * Build a LocaleContext for the given request, exposing the request's primary locale as current locale.
 	 * <p>The default implementation uses the dispatcher's LocaleResolver to obtain the current locale,
 	 * which might change during a request.
@@ -882,7 +861,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
 			}
-
 			@Override
 			public String toString() {
 				return getLocale().toString();
@@ -925,28 +903,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Return the HandlerExecutionChain for this request. Try all handler mappings in order.
 	 * @param request current HTTP request
-	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
 	 * @return the HandlerExceutionChain, or <code>null</code> if no handler could be found
 	 */
-	protected HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
-		HandlerExecutionChain handler = (HandlerExecutionChain) request.getAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
-		if (handler != null) {
-			if (!cache) {
-				request.removeAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
-			}
-			return handler;
-		}
-
+	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		for (HandlerMapping hm : this.handlerMappings) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(
 						"Testing handler map [" + hm + "] in DispatcherServlet with name '" + getServletName() + "'");
 			}
-			handler = hm.getHandler(request);
+			HandlerExecutionChain handler = hm.getHandler(request);
 			if (handler != null) {
-				if (cache) {
-					request.setAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE, handler);
-				}
 				return handler;
 			}
 		}

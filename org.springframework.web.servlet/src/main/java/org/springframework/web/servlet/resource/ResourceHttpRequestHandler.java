@@ -28,30 +28,33 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
  * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance 
- * (according to the guidelines of Page Speed, YSlow, etc.) by adding far future cache expiration headers.
+ * (according to the guidelines of Page Speed, YSlow, etc.) by allowing for flexible cache settings
+ * ({@link #setCacheSeconds "cacheSeconds" property}, last-modified support).
  *
- * <p>The constructor takes a list of Spring {@link Resource} locations from which static resources are allowed 
- * to be served by this handler. For a given request, the list of locations will be consulted in order for the
- * presence of the requested resource, and the first found match will be written to the response, with {@code 
- * Expires} and {@code Cache-Control} headers set for one year in the future. The handler also properly evaluates
- * the {@code Last-Modified} header (if present) so that a {@code 304} status code will be returned as appropriate, 
- * avoiding unnecessary overhead for resources that are already cached by the client. The use of {@code Resource}
- * locations allows resource requests to easily be mapped to locations other than the web application root. For
+ * <p>The {@link #setLocations "locations" property takes a list of Spring {@link Resource} locations
+ * from which static resources are allowed  to be served by this handler. For a given request, the
+ * list of locations will be consulted in order for the presence of the requested resource, and the
+ * first found match will be written to the response, with {@code Expires} and {@code Cache-Control}
+ * headers set as configured. The handler also properly evaluates the {@code Last-Modified} header
+ * (if present) so that a {@code 304} status code will be returned as appropriate, avoiding unnecessary
+ * overhead for resources that are already cached by the client. The use of {@code Resource} locations
+ * allows resource requests to easily be mapped to locations other than the web application root. For
  * example, resources could be served from a classpath location such as "classpath:/META-INF/public-web-resources/", 
  * allowing convenient packaging and serving of resources such as a JavaScript library from within jar files.
  *
- * <p>To ensure that users with a primed browser cache get the latest changes to application-specific resources 
- * upon deployment of new versions of the application, it is recommended that a version string is used in the URL 
- * mapping pattern that selects this handler.  Such patterns can be easily parameterized using Spring EL. See the
- * reference manual for further examples of this approach.  
+ * <p>To ensure that users with a primed browser cache get the latest changes to application-specific
+ * resources upon deployment of new versions of the application, it is recommended that a version string
+ * is used in the URL  mapping pattern that selects this handler. Such patterns can be easily parameterized
+ * using Spring EL. See the reference manual for further examples of this approach.
  *
- * <p>Rather than being directly configured as a bean, this handler will typically be configured through use of 
- * the <code>&lt;mvc:resources/&gt;</code> Spring configuration tag. 
+ * <p>Rather than being directly configured as a bean, this handler will typically be configured
+ * through use of the <code>&lt;mvc:resources/&gt;</code> XML configuration element.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
@@ -64,7 +67,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 
 	public ResourceHttpRequestHandler() {
-		super(METHOD_GET);
+		super(METHOD_GET, METHOD_HEAD);
 	}
 
 	/**
@@ -98,13 +101,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		if (checkNotModified(resource, request, response)) {
+		setHeaders(resource, response);
+		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified()) ||
+				METHOD_HEAD.equals(request.getMethod())) {
 			return;
 		}
-		writeResponse(resource, response);
+		writeContent(resource, response);
 	}
 
-	private Resource getResource(HttpServletRequest request) {
+	protected Resource getResource(HttpServletRequest request) {
 		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (path == null) {
 			throw new IllegalStateException("Required request attribute '" +
@@ -128,22 +133,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		return null;
 	}
 
-	private boolean checkNotModified(Resource resource,HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
-
-		long ifModifiedSince = request.getDateHeader("If-Modified-Since");
-		long lastModified = resource.lastModified();
-		boolean notModified = ifModifiedSince >= (lastModified / 1000 * 1000);
-		if (notModified) {
-			response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-		}
-		else {
-			response.setDateHeader("Last-Modified", lastModified);
-		}
-		return notModified;
-	}
-
-	private void writeResponse(Resource resource, HttpServletResponse response) throws IOException {
+	protected void setHeaders(Resource resource, HttpServletResponse response) throws IOException {
 		MediaType mediaType = getMediaType(resource);
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
@@ -153,12 +143,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
 		}
 		response.setContentLength((int) length);
-		FileCopyUtils.copy(resource.getInputStream(), response.getOutputStream());
 	}
 
 	protected MediaType getMediaType(Resource resource) {
 		String mimeType = getServletContext().getMimeType(resource.getFilename());
 		return (StringUtils.hasText(mimeType) ? MediaType.parseMediaType(mimeType) : null);
+	}
+
+	protected void writeContent(Resource resource, HttpServletResponse response) throws IOException {
+		FileCopyUtils.copy(resource.getInputStream(), response.getOutputStream());
 	}
 
 }
