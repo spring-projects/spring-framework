@@ -52,9 +52,18 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("foo", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
+		assertEquals("foo", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
-	
+
+	public void testPrintNullAsEmptyString() throws Exception {
+		tag.setExpression("bean.null");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
+	}
+
 	public void testPrintFormattedScopedAttributeResult() throws Exception {
 		tag.setExpression("bean.formattable");
 		int action = tag.doStartTag();
@@ -63,7 +72,7 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_PAGE, action);
 		assertEquals("25%", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
-	
+
 	public void testPrintHtmlEscapedAttributeResult() throws Exception {
 		tag.setExpression("bean.html()");
 		tag.setHtmlEscape("true");
@@ -71,7 +80,7 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, action);
-		assertEquals("&lt;p&gt;", ((MockHttpServletResponse)context.getResponse()).getContentAsString());
+		assertEquals("&lt;p&gt;", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
 	}
 
 	public void testPrintJavaScriptEscapedAttributeResult() throws Exception {
@@ -133,10 +142,15 @@ public class EvalTagTests extends AbstractTagTests {
 		public String html() {
 			return "<p>";
 		}
+
 		public String getBean() {
 			return "not the bean object";
 		}
 		
+		public Object getNull() {
+			return null;
+		}
+
 		public String js() {
 			return "function foo() { alert(\"hi\") }";
 		}

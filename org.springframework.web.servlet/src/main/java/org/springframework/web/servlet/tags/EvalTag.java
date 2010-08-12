@@ -32,6 +32,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
@@ -103,20 +104,21 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		if (this.evaluationContext == null) {
 			this.evaluationContext = createEvaluationContext(pageContext);
 		}
-		if (this.var == null) {
+		if (this.var != null) {
+			Object result = this.expression.getValue(this.evaluationContext);
+			pageContext.setAttribute(this.var, result, this.scope);
+		}
+		else {
 			try {
 				String result = this.expression.getValue(this.evaluationContext, String.class);
-				result = isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result;
-				result = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result;
+				result = ObjectUtils.getDisplayString(result);
+				result = (isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result);
+				result = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result);
 				pageContext.getOut().print(result);
 			}
 			catch (IOException ex) {
 				throw new JspException(ex);
 			}
-		}
-		else {
-			Object result = this.expression.getValue(this.evaluationContext);
-			pageContext.setAttribute(this.var, result, this.scope);
 		}
 		return EVAL_PAGE;
 	}
