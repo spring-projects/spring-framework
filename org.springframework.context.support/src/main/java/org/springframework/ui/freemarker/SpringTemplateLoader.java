@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2010 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,9 +31,6 @@ import org.springframework.core.io.ResourceLoader;
  * FreeMarker TemplateLoader adapter that loads via a Spring ResourceLoader.
  * Used by FreeMarkerConfigurationFactory for any resource loader path that
  * cannot be resolved to a java.io.File.
- *
- * <p>Note that this loader does not allow for modification detection:
- * Use FreeMarker's default TemplateLoader for java.io.File resources.
  *
  * @author Juergen Hoeller
  * @since 14.03.2004
@@ -89,7 +86,17 @@ public class SpringTemplateLoader implements TemplateLoader {
 
 
 	public long getLastModified(Object templateSource) {
-		return -1;
+		Resource resource = (Resource) templateSource;
+		try {
+			return resource.lastModified();
+		}
+		catch (IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not obtain last-modified timestamp for FreeMarker template in " +
+						resource + ": " + ex);
+			}
+			return -1;
+		}
 	}
 
 	public void closeTemplateSource(Object templateSource) throws IOException {
