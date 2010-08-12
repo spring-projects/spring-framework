@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.4 (2010-08-11)
+Changes in version 3.0.4 (2010-08-16)
 -------------------------------------
 
 * support for Hibernate Core 3.6, Hibernate Validator 4.1, EclipseLink 2.1, EHCache 2.2
@@ -16,10 +16,11 @@ Changes in version 3.0.4 (2010-08-11)
 * ConversionService does not accidentally use copy constructor for same type
 * fixed double ConversionFailedException nesting for ObjectToObjectConverter invocations
 * BeanWrapper preserves annotation information for individual array/list/map elements
+* Spring's constructor resolution consistently finds non-public multi-arg constructors 
 * SpEL passes full collection type context (generics, annotations) to ConversionService
 * SpEL 'select last' operator now works consistently with maps
 * BeanWrapper/DataBinder's "autoGrowNestedPaths" works for Maps as well
-* fixed concurrency issue in TypedStringValue, showing for nested typed Maps in prototype beans 
+* fixed concurrency issue in TypedStringValue, showing for nested typed Maps in prototype beans
 * fixed WeakReferenceMonitor to never stop its monitoring thread if an entry has been registered
 * fixed CronTrigger to correctly parse month parts expressed as numbers (1-12 instead of 0-11)
 * TaskExecutorFactoryBean (as used by task:executor) exposes full ThreadPoolTaskExecutor type
@@ -32,6 +33,7 @@ Changes in version 3.0.4 (2010-08-11)
 * AbstractJaxWsServiceExporter supports "webServiceFeatures" bean property on JAX-WS 2.2
 * JaxWsPortProxyFactoryBean takes "wsdlDocumentUrl", "namespaceUri" etc defaults from @WebService
 * Jaxb2Marshaller's "marshallerProperties" Map accepts any value type
+* SpringTemplateLoader for FreeMarker supports last-modified timestamp through Resource abstraction
 * HibernateJpaDialect correctly closes borrowed connections even for nested JDBC executions
 * DefaultJdoDialect supports JDO 3.0 query timeout facility (as supported by DataNucleus 2.1)
 * transaction names based on method id from most specific method (target class instead of interface)
@@ -48,8 +50,10 @@ Changes in version 3.0.4 (2010-08-11)
 * Portlet @MVC's implicit render model will be updated at the end of the event phase
 * Portlet AbstractController consistently uses session mutex if "synchronizeOnSession" is active
 * PortletWrappingController supports Portlet 2.0 resource and event requests as well
+* fixed JSP EvalTag to render null result as empty String instead of "null" String
 * JSP EvalTag resolves "@myBeanName" references in expressions against the WebApplicationContext
 * added support for static resource serving: ResourceHttpRequestHandler, mvc:resources
+* revised DispatcherServlet's last-modified handling to properly work with scoped controllers
 
 
 Changes in version 3.0.3 (2010-06-15)
