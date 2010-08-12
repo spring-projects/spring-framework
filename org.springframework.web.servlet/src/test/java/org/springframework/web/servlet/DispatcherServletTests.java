@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.ServletConfigAwareBean;
 import org.springframework.web.context.ServletContextAwareBean;
@@ -206,9 +205,9 @@ public class DispatcherServletTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		assertEquals(98, simpleDispatcherServlet.getLastModified(request));
 		simpleDispatcherServlet.service(request, response);
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
+		assertEquals(new Long(98), response.getHeader("Last-Modified"));
 	}
 
 	public void testUnknownRequest() throws Exception {
@@ -269,7 +268,6 @@ public class DispatcherServletTests extends TestCase {
 		request.addPreferredLocale(Locale.CANADA);
 		request.addUserRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		assertEquals(99, complexDispatcherServlet.getLastModified(request));
 		complexDispatcherServlet.service(request, response);
 
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
@@ -282,6 +280,7 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue(request.getAttribute("test3") != null);
 		assertTrue(request.getAttribute("test3x") != null);
 		assertTrue(request.getAttribute("test3y") != null);
+		assertEquals(new Long(99), response.getHeader("Last-Modified"));
 	}
 
 	public void testExistingMultipartRequest() throws Exception {
@@ -823,6 +822,7 @@ public class DispatcherServletTests extends TestCase {
 
 		servlet.destroy();
 	}
+
 
 	public static class ControllerFromParent implements Controller {
 
