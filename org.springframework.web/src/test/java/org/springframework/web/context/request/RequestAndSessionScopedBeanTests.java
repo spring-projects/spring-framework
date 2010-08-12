@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,23 @@ package org.springframework.web.context.request;
 
 import javax.servlet.http.HttpServletRequest;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class RequestAndSessionScopedProxyTests extends TestCase {
+public class RequestAndSessionScopedBeanTests {
 
+	@Test
 	public void testPutBeanInRequest() throws Exception {
 		String targetBeanName = "target";
 
@@ -73,6 +73,7 @@ public class RequestAndSessionScopedProxyTests extends TestCase {
 		}
 	}
 	
+	@Test
 	public void testPutBeanInSession() throws Exception {
 		String targetBeanName = "target";
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -97,6 +98,8 @@ public class RequestAndSessionScopedProxyTests extends TestCase {
 		catch (BeanCreationException ex) {
 			// expected
 		}
+
+
 	}
 
 }
