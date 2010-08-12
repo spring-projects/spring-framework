@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public interface WebRequest extends RequestAttributes {
 	/**
 	 * Return the request header of the given name, or <code>null</code> if none.
 	 * <p>Retrieves the first header value in case of a multi-value header.
+	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeader(String)
 	 */
 	String getHeader(String headerName);
@@ -43,14 +44,15 @@ public interface WebRequest extends RequestAttributes {
 	 * Return the request header values for the given header name,
 	 * or <code>null</code> if none.
 	 * <p>A single-value header will be exposed as an array with a single element.
+	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
 	 */
 	String[] getHeaderValues(String headerName);
 
 	/**
 	 * Return a Iterator over request header names.
-	 * @see javax.servlet.http.HttpServletRequest#getHeaderNames()
 	 * @since 3.0
+	 * @see javax.servlet.http.HttpServletRequest#getHeaderNames()
 	 */
 	Iterator<String> getHeaderNames();
 

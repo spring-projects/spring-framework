@@ -186,7 +186,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			long ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
 			this.notModified = (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
 			if (this.response != null) {
-				if (this.notModified) {
+				if (this.notModified && "GET".equals(getRequest().getMethod())) {
 					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
