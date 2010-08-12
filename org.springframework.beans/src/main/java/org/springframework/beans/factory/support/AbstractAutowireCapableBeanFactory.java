@@ -1095,9 +1095,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				pvs.add(propertyName, bean);
 				registerDependentBean(propertyName, beanName);
 				if (logger.isDebugEnabled()) {
-					logger.debug(
-							"Added autowiring by name from bean name '" + beanName + "' via property '" + propertyName +
-									"' to bean named '" + propertyName + "'");
+					logger.debug("Added autowiring by name from bean name '" + beanName +
+							"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
 				}
 			}
 			else {
@@ -1147,9 +1146,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					for (String autowiredBeanName : autowiredBeanNames) {
 						registerDependentBean(autowiredBeanName, beanName);
 						if (logger.isDebugEnabled()) {
-							logger.debug(
-									"Autowiring by type from bean name '" + beanName + "' via property '" + propertyName +
-											"' to bean named '" + autowiredBeanName + "'");
+							logger.debug("Autowiring by type from bean name '" + beanName + "' via property '" +
+									propertyName + "' to bean named '" + autowiredBeanName + "'");
 						}
 					}
 					autowiredBeanNames.clear();
