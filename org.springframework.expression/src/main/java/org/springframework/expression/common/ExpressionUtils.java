@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,7 @@ public abstract class ExpressionUtils {
 	 * @throws EvaluationException if there is a problem during conversion or conversion of the value to the specified
 	 * type is not supported
 	 */
-	public static <T> T convert(EvaluationContext context, Object value, Class<T> targetType)
-			throws EvaluationException {
+	public static <T> T convert(EvaluationContext context, Object value, Class<T> targetType) throws EvaluationException {
 		// TODO remove this function over time and use the one it delegates to
 		return convertTypedValue(context,new TypedValue(value,TypeDescriptor.forObject(value)),targetType);
 	}
@@ -61,7 +60,6 @@ public abstract class ExpressionUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T convertTypedValue(EvaluationContext context, TypedValue typedValue, Class<T> targetType) {
 		Object value = typedValue.getValue();
-		
 		if (targetType == null || ClassUtils.isAssignableValue(targetType, value)) {
 			return (T) value;
 		}
