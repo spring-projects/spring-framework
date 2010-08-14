@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert;
 
+import org.springframework.util.ObjectUtils;
+
 /**
  * Exception to be thrown when an actual type conversion attempt fails.
  *
@@ -40,8 +42,8 @@ public final class ConversionFailedException extends ConversionException {
 	 * @param cause the cause of the conversion failure
 	 */
 	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
-		super("Unable to convert value \"" + value + "\" from type '" + sourceType.getName() +
-				"' to type '" + targetType.getName() + "'", cause);
+		super("Unable to convert value \"" + ObjectUtils.nullSafeToString(value) + "\" from type '" +
+				sourceType.getName() + "' to type '" + targetType.getName() + "'", cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 		this.value = value;
