@@ -32,6 +32,7 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.StopWatch;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Keith Donald
@@ -217,6 +218,26 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testStringArrayToIntegerArray() {
+		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		conversionService.addConverter(new MyStringArrayToIntegerArrayConverter());
+		Integer[] converted = conversionService.convert(new String[] {"x1", "z3"}, Integer[].class);
+		assertEquals(2, converted.length);
+		assertEquals(1, converted[0].intValue());
+		assertEquals(3, converted[1].intValue());
+	}
+
+	@Test
+	public void testStringToIntegerArray() {
+		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		conversionService.addConverter(new MyStringToIntegerArrayConverter());
+		Integer[] converted = conversionService.convert("x1,z3", Integer[].class);
+		assertEquals(2, converted.length);
+		assertEquals(1, converted[0].intValue());
+		assertEquals(3, converted[1].intValue());
+	}
+
+	@Test
 	public void testWildcardMap() throws Exception {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 		Map<String, String> input = new LinkedHashMap<String, String>();
@@ -368,6 +389,31 @@ public class GenericConversionServiceTests {
 
 		public String convert(MyBaseInterface source) {
 			return "RESULT";
+		}
+	}
+
+
+	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]>	{
+
+		public Integer[] convert(String[] source) {
+			Integer[] result = new Integer[source.length];
+			for (int i = 0; i < source.length; i++) {
+				result[i] = Integer.parseInt(source[i].substring(1));
+			}
+			return result;
+		}
+	}
+
+
+	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
+
+		public Integer[] convert(String source) {
+			String[] srcArray = StringUtils.commaDelimitedListToStringArray(source);
+			Integer[] result = new Integer[srcArray.length];
+			for (int i = 0; i < srcArray.length; i++) {
+				result[i] = Integer.parseInt(srcArray[i].substring(1));
+			}
+			return result;
 		}
 	}
 

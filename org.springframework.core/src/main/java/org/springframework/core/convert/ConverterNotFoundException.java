@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ public final class ConverterNotFoundException extends ConversionException {
 	 * @param message a descriptive message
 	 */
 	public ConverterNotFoundException(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		super("No converter found capable of converting from [" + sourceType.getName() + "] to [" + targetType.getName() + "]");
+		super("No converter found capable of converting from '" + sourceType.getName() +
+				"' to '" + targetType.getName() + "'");
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 	}
