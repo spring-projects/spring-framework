@@ -432,7 +432,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Perform the given callback operation on all matching methods of the given
-	 * class and superclasses.
+	 * class and superclasses (or given interface and super-interfaces).
 	 * <p>The same named method occurring on subclass and superclass will appear
 	 * twice, unless excluded by the specified {@link MethodFilter}.
 	 * @param clazz class to start looking at
@@ -443,24 +443,27 @@ public abstract class ReflectionUtils {
 			throws IllegalArgumentException {
 
 		// Keep backing up the inheritance hierarchy.
-		Class<?> targetClass = clazz;
-		do {
-			Method[] methods = targetClass.getDeclaredMethods();
-			for (Method method : methods) {
-				if (mf != null && !mf.matches(method)) {
-					continue;
-				}
-				try {
-					mc.doWith(method);
-				}
-				catch (IllegalAccessException ex) {
-					throw new IllegalStateException("Shouldn't be illegal to access method '" + method.getName()
-							+ "': " + ex);
-				}
+		Method[] methods = clazz.getDeclaredMethods();
+		for (Method method : methods) {
+			if (mf != null && !mf.matches(method)) {
+				continue;
 			}
-			targetClass = targetClass.getSuperclass();
+			try {
+				mc.doWith(method);
+			}
+			catch (IllegalAccessException ex) {
+				throw new IllegalStateException("Shouldn't be illegal to access method '" + method.getName()
+						+ "': " + ex);
+			}
 		}
-		while (targetClass != null);
+		if (clazz.getSuperclass() != null) {
+			doWithMethods(clazz.getSuperclass(), mc, mf);
+		}
+		else if (clazz.isInterface()) {
+			for (Class<?> superIfc : clazz.getInterfaces()) {
+				doWithMethods(superIfc, mc, mf);
+			}
+		}
 	}
 
 	/**

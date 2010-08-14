@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,9 +119,9 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class[] ifcs) {
 		A annotation = null;
 		for (Class<?> iface : ifcs) {
-			Method equivalentMethod = null;
+			Method equivalentMethod;
 			try {
-				equivalentMethod = iface.getDeclaredMethod(method.getName(), method.getParameterTypes());
+				equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
 				annotation = getAnnotation(equivalentMethod, annotationType);
 			}
 			catch (NoSuchMethodException e) {
@@ -338,7 +338,7 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>default value</em> of a named Annotation attribute, given an annotation instance.
 	 * @param annotation the annotation instance from which to retrieve the default value
 	 * @param attributeName the name of the attribute value to retrieve
-	 * @return the default value of the named attribute, or <code>null</code> if not found.
+	 * @return the default value of the named attribute, or <code>null</code> if not found
 	 * @see #getDefaultValue(Class, String)
 	 */
 	public static Object getDefaultValue(Annotation annotation, String attributeName) {
