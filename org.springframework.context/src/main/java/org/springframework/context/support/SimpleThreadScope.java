@@ -47,7 +47,7 @@ public class SimpleThreadScope implements Scope {
 
 	private static final Log logger = LogFactory.getLog(SimpleThreadScope.class);
 
-	private static final ThreadLocal<Map<String, Object>> threadScope =
+	private final ThreadLocal<Map<String, Object>> threadScope =
 			new NamedThreadLocal<Map<String, Object>>("SimpleThreadScope") {
 				@Override
 				protected Map<String, Object> initialValue() {
