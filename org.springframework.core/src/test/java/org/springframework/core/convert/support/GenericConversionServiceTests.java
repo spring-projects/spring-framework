@@ -31,6 +31,8 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.DescriptiveResource;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -218,6 +220,16 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testStringArrayToResourceArray() {
+		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		conversionService.addConverter(new MyStringArrayToResourceArrayConverter());
+		Resource[] converted = conversionService.convert(new String[] {"x1", "z3"}, Resource[].class);
+		assertEquals(2, converted.length);
+		assertEquals("1", converted[0].getDescription());
+		assertEquals("3", converted[1].getDescription());
+	}
+
+	@Test
 	public void testStringArrayToIntegerArray() {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 		conversionService.addConverter(new MyStringArrayToIntegerArrayConverter());
@@ -389,6 +401,18 @@ public class GenericConversionServiceTests {
 
 		public String convert(MyBaseInterface source) {
 			return "RESULT";
+		}
+	}
+
+
+	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]>	{
+
+		public Resource[] convert(String[] source) {
+			Resource[] result = new Resource[source.length];
+			for (int i = 0; i < source.length; i++) {
+				result[i] = new DescriptiveResource(source[i].substring(1));
+			}
+			return result;
 		}
 	}
 
