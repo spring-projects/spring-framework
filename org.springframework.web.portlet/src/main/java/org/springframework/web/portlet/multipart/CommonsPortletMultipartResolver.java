@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	public void cleanupMultipart(MultipartActionRequest request) {
 		if (request != null) {
 			try {
-				cleanupFileItems(request.getFileMap().values());
+				cleanupFileItems(request.getMultiFileMap());
 			}
 			catch (Throwable ex) {
 				logger.warn("Failed to perform multipart cleanup for portlet request", ex);

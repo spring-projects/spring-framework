@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.web.multipart.commons;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.nio.charset.Charset;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -32,12 +31,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
-import org.springframework.http.MediaType;
 
 /**
  * Base class for multipart resolvers that use Jakarta Commons FileUpload
@@ -271,14 +270,16 @@ public abstract class CommonsFileUploadSupport {
 	 * @param multipartFiles Collection of MultipartFile instances
 	 * @see org.apache.commons.fileupload.FileItem#delete()
 	 */
-	protected void cleanupFileItems(Collection<MultipartFile> multipartFiles) {
-		for (MultipartFile file : multipartFiles) {
-			if (file instanceof CommonsMultipartFile) {
-				CommonsMultipartFile cmf = (CommonsMultipartFile) file;
-				cmf.getFileItem().delete();
-				if (logger.isDebugEnabled()) {
-					logger.debug("Cleaning up multipart file [" + cmf.getName() + "] with original filename [" +
-							cmf.getOriginalFilename() + "], stored " + cmf.getStorageDescription());
+	protected void cleanupFileItems(MultiValueMap<String, MultipartFile> multipartFiles) {
+		for (List<MultipartFile> files : multipartFiles.values()) {
+			for (MultipartFile file : files) {
+				if (file instanceof CommonsMultipartFile) {
+					CommonsMultipartFile cmf = (CommonsMultipartFile) file;
+					cmf.getFileItem().delete();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Cleaning up multipart file [" + cmf.getName() + "] with original filename [" +
+								cmf.getOriginalFilename() + "], stored " + cmf.getStorageDescription());
+					}
 				}
 			}
 		}
