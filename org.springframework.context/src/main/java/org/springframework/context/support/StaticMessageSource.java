@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,25 +36,44 @@ import org.springframework.util.Assert;
 public class StaticMessageSource extends AbstractMessageSource {
 
 	/** Map from 'code + locale' keys to message Strings */
-	private final Map<String, MessageFormat> messages = new HashMap<String, MessageFormat>();
+	private final Map<String, String> messages = new HashMap<String, String>();
+
+	private final Map<String, MessageFormat> cachedMessageFormats = new HashMap<String, MessageFormat>();
 
 
 	@Override
-	protected MessageFormat resolveCode(String code, Locale locale) {
+	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		return this.messages.get(code + "_" + locale.toString());
+	}
+
+	@Override
+	protected MessageFormat resolveCode(String code, Locale locale) {
+		String key = code + "_" + locale.toString();
+		String msg = this.messages.get(key);
+		if (msg == null) {
+			return null;
+		}
+		synchronized (this.cachedMessageFormats) {
+			MessageFormat messageFormat = this.cachedMessageFormats.get(key);
+			if (messageFormat == null) {
+				messageFormat = createMessageFormat(msg, locale);
+				this.cachedMessageFormats.put(key, messageFormat);
+			}
+			return messageFormat;
+		}
 	}
 
 	/**
 	 * Associate the given message with the given code.
 	 * @param code the lookup code
-   * @param locale the locale that the message should be found within
+	 * @param locale the locale that the message should be found within
 	 * @param msg the message associated with this lookup code
 	 */
 	public void addMessage(String code, Locale locale, String msg) {
 		Assert.notNull(code, "Code must not be null");
 		Assert.notNull(locale, "Locale must not be null");
 		Assert.notNull(msg, "Message must not be null");
-		this.messages.put(code + "_" + locale.toString(), createMessageFormat(msg, locale));
+		this.messages.put(code + "_" + locale.toString(), msg);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added message [" + msg + "] for code [" + code + "] and Locale [" + locale + "]");
 		}
