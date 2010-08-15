@@ -23,36 +23,36 @@
 		<xsd:attribute name="location" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-The location of the properties file to resolve placeholders against, as a Spring
-resource location: a URL, a "classpath:" pseudo URL, or a relative file path.
-Multiple locations may be specified, separated by commas. If neither location nor properties-ref is
-specified, placeholders will be resolved against system properties.
+	The location of the properties file to resolve placeholders against, as a Spring
+	resource location: a URL, a "classpath:" pseudo URL, or a relative file path.
+	Multiple locations may be specified, separated by commas. If neither location nor properties-ref is
+	specified, placeholders will be resolved against system properties.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="properties-ref" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.util.Properties"><![CDATA[
-The bean name of a Java Properties object that will be used for property substitution.
-If neither location nor properties-ref is specified, placeholders will be resolved against system properties.
+	The bean name of a Java Properties object that will be used for property substitution.
+	If neither location nor properties-ref is specified, placeholders will be resolved against system properties.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="file-encoding" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-Specifies the encoding to use for parsing properties files.  Default is none,
-using the java.util.Properties default encoding.  Only applies to classic
-properties files, not to XML files.
+	Specifies the encoding to use for parsing properties files.  Default is none,
+	using the java.util.Properties default encoding.  Only applies to classic
+	properties files, not to XML files.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="order" type="xsd:integer">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-Specifies the order for this placeholder configurer.  If more than one is present in a context
-the order can be important since the first one to be match a placeholder will win.  Often used
-in conjunction with 
+	Specifies the order for this placeholder configurer.  If more than one is present in a context
+	the order can be important since the first one to be match a placeholder will win.  Often used
+	in conjunction with
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -60,9 +60,9 @@ in conjunction with
 			default="false">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-Specifies if failure to find the property resource location should be ignored.  Default
-is "false", meaning that if there is no file in the location specified an exception will
-be raised at runtime.
+	Specifies if failure to find the property resource location should be ignored.  Default
+	is "false", meaning that if there is no file in the location specified an exception will
+	be raised at runtime.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -70,10 +70,10 @@ be raised at runtime.
 			default="false">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-Specifies if failure to find the property value to replace a key should be ignored.  Default
-is "false", meaning that this placeholder configurer will raise an exception if it cannot resolve
-a key.  Set to "true" to allow the configurer to pass on the key to any others in 
-the context that have not yet visited the key in question.
+	Specifies if failure to find the property value to replace a key should be ignored.  Default
+	is "false", meaning that this placeholder configurer will raise an exception if it cannot resolve
+	a key.  Set to "true" to allow the configurer to pass on the key to any others in
+	the context that have not yet visited the key in question.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -81,8 +81,8 @@ the context that have not yet visited the key in question.
 			default="false">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-Specifies whether local properties override properties from files.  Default
-is "false": Properties from files override local defaults.
+	Specifies whether local properties override properties from files.  Default
+	is "false": Properties from files override local defaults.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
