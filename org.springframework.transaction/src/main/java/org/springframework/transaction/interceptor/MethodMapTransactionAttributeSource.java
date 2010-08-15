@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public class MethodMapTransactionAttributeSource
 	 * @param mappedName mapped method name
 	 * @param attr attribute associated with the method
 	 */
-	public void addTransactionalMethod(Class clazz, String mappedName, TransactionAttribute attr) {
+	public void addTransactionalMethod(Class<?> clazz, String mappedName, TransactionAttribute attr) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(mappedName, "Mapped name must not be null");
 		String name = clazz.getName() + '.'  + mappedName;
@@ -204,7 +204,7 @@ public class MethodMapTransactionAttributeSource
 	}
 
 
-	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
+	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		if (this.eagerlyInitialized) {
 			return this.transactionAttributeMap.get(method);
 		}
