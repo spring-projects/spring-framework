@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ abstract class SelectedValueComparator {
 			}
 		}
 		catch (ClassCastException ex) {
-			// Probably from a  - ignore.
+			// Probably from a TreeSet - ignore.
 		}
 		return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus);
 	}
@@ -181,7 +181,7 @@ abstract class SelectedValueComparator {
 		else if (editor != null && candidate instanceof String) {
 			// Try PE-based comparison (PE should *not* be allowed to escape creating thread)
 			String candidateAsString = (String) candidate;
-			Object candidateAsValue = null;
+			Object candidateAsValue;
 			if (convertedValueCache != null && convertedValueCache.containsKey(editor)) {
 				candidateAsValue = convertedValueCache.get(editor);
 			}

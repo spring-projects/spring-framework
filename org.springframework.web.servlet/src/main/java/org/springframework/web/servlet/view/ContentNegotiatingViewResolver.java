@@ -135,6 +135,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private List<ViewResolver> viewResolvers;
 
+
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -312,7 +313,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 		if (this.defaultContentType != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Requested media types is " + defaultContentType + " (based on defaultContentType property)");
+				logger.debug("Requested media types is " + this.defaultContentType +
+						" (based on defaultContentType property)");
 			}
 			return Collections.singletonList(this.defaultContentType);
 		}
@@ -323,9 +325,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	/**
 	 * Determines the {@link MediaType} for the given filename.
-	 * <p>The default implementation will check the {@linkplain #setMediaTypes(Map) media types} property first for a
-	 * defined mapping. If not present, and if the Java Activation Framework can be found on the class path, it will call
-	 * {@link FileTypeMap#getContentType(String)}
+	 * <p>The default implementation will check the {@linkplain #setMediaTypes(Map) media types}
+	 * property first for a defined mapping. If not present, and if the Java Activation Framework
+	 * can be found on the classpath, it will call {@link FileTypeMap#getContentType(String)}
 	 * <p>This method can be overriden to provide a different algorithm.
 	 * @param filename the current request file name (i.e. {@code hotels.html})
 	 * @return the media type, if any
@@ -337,7 +339,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 		extension = extension.toLowerCase(Locale.ENGLISH);
 		MediaType mediaType = this.mediaTypes.get(extension);
-		if (mediaType == null && useJaf && jafPresent) {
+		if (mediaType == null && this.useJaf && jafPresent) {
 			mediaType = ActivationMediaTypeFactory.getMediaType(filename);
 			if (mediaType != null) {
 				this.mediaTypes.putIfAbsent(extension, mediaType);
@@ -361,18 +363,14 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
 		Assert.isInstanceOf(ServletRequestAttributes.class, attrs);
-
 		List<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
-
 		List<View> candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);
-
 		View bestView = getBestView(candidateViews, requestedMediaTypes);
-
 		if (bestView != null) {
 			return bestView;
 		}
 		else {
-			if (useNotAcceptableStatusCode) {
+			if (this.useNotAcceptableStatusCode) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("No acceptable view found; returning 406 (Not Acceptable) status code");
 				}
@@ -389,8 +387,8 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private List<View> getCandidateViews(String viewName, Locale locale, List<MediaType> requestedMediaTypes)
 			throws Exception {
-		List<View> candidateViews = new ArrayList<View>();
 
+		List<View> candidateViews = new ArrayList<View>();
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
 			if (view != null) {
@@ -408,7 +406,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 			}
 		}
-
 		if (!CollectionUtils.isEmpty(this.defaultViews)) {
 			candidateViews.addAll(this.defaultViews);
 		}
@@ -451,6 +448,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		return bestView;
 
 	}
+
 
 	/**
 	 * Inner class to avoid hard-coded JAF dependency.
@@ -501,6 +499,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 	}
 
+
 	private static final View NOT_ACCEPTABLE_VIEW = new View() {
 
 		public String getContentType() {
@@ -512,4 +511,5 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		}
 	};
+
 }
