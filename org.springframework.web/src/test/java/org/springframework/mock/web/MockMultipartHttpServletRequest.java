@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.mock.web.portlet;
+package org.springframework.mock.web;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,22 +25,23 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.portlet.multipart.MultipartActionRequest;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
  * Mock implementation of the
- * {@link org.springframework.web.portlet.multipart.MultipartActionRequest} interface.
+ * {@link org.springframework.web.multipart.MultipartHttpServletRequest} interface.
  *
  * <p>Useful for testing application controllers that access multipart uploads.
- * The {@link org.springframework.mock.web.MockMultipartFile} can be used to
- * populate these mock requests with files.
+ * The {@link org.springframework.mock.web.MockMultipartFile} can be used to populate these mock requests
+ * with files.
  *
  * @author Juergen Hoeller
+ * @author Eric Crampton
  * @author Arjen Poutsma
  * @since 2.0
  * @see org.springframework.mock.web.MockMultipartFile
  */
-public class MockMultipartActionRequest extends MockActionRequest implements MultipartActionRequest {
+public class MockMultipartHttpServletRequest extends MockHttpServletRequest implements MultipartHttpServletRequest {
 
 	private final MultiValueMap<String, MultipartFile> multipartFiles =
 			new LinkedMultiValueMap<String, MultipartFile>();

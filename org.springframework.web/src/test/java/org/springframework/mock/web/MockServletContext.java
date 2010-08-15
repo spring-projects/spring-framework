@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,8 @@ public class MockServletContext implements ServletContext {
 
 	private String contextPath = "";
 
+	private int minorVersion = 5;
+
 	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
 
 	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
@@ -96,8 +98,6 @@ public class MockServletContext implements ServletContext {
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 	private String servletContextName = "MockServletContext";
-
-	private int minorVersion = 5;
 
 
 	/**
@@ -182,8 +182,15 @@ public class MockServletContext implements ServletContext {
 		return 2;
 	}
 
+	public void setMinorVersion(int minorVersion) {
+		if (minorVersion < 3 || minorVersion > 5) {
+			throw new IllegalArgumentException("Only Servlet minor versions between 3 and 5 are supported");
+		}
+		this.minorVersion = minorVersion;
+	}
+
 	public int getMinorVersion() {
-		return minorVersion;
+		return this.minorVersion;
 	}
 
 	public String getMimeType(String filePath) {
@@ -342,11 +349,6 @@ public class MockServletContext implements ServletContext {
 		return this.servletContextName;
 	}
 
-	public void setMinorVersion(int minorVersion) {
-		if (minorVersion <3 || minorVersion > 5)
-			throw new IllegalArgumentException("Only Servlet minor versions between 3 and 5 are supported");
-		this.minorVersion = minorVersion;
-	}
 
 	/**
 	 * Inner factory class used to just introduce a Java Activation Framework
@@ -358,4 +360,5 @@ public class MockServletContext implements ServletContext {
 			return FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
 		}
 	}
+
 }
