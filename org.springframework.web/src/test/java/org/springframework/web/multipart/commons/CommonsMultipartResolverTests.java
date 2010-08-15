@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.mock.web.PassThroughFilterChain;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -59,7 +60,6 @@ import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.util.WebUtils;
-import org.springframework.util.MultiValueMap;
 
 /**
  * @author Juergen Hoeller
@@ -218,15 +218,19 @@ public class CommonsMultipartResolverTests {
 
 	private void doTestBinding(MockCommonsMultipartResolver resolver, MockHttpServletRequest originalRequest,
 			MultipartHttpServletRequest request) throws UnsupportedEncodingException {
+
 		MultipartTestBean1 mtb1 = new MultipartTestBean1();
 		assertEquals(null, mtb1.getField1());
 		assertEquals(null, mtb1.getField2());
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(mtb1, "mybean");
 		binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
 		binder.bind(request);
-		CommonsMultipartFile file1 = (CommonsMultipartFile) request.getFile("field1");
+		List<MultipartFile> file1List = request.getFiles("field1");
+		CommonsMultipartFile file1a = (CommonsMultipartFile) file1List.get(0);
+		CommonsMultipartFile file1b = (CommonsMultipartFile) file1List.get(1);
 		CommonsMultipartFile file2 = (CommonsMultipartFile) request.getFile("field2");
-		assertEquals(file1, mtb1.getField1());
+		assertEquals(file1a, mtb1.getField1()[0]);
+		assertEquals(file1b, mtb1.getField1()[1]);
 		assertEquals(new String(file2.getBytes()), new String(mtb1.getField2()));
 
 		MultipartTestBean2 mtb2 = new MultipartTestBean2();
@@ -236,25 +240,27 @@ public class CommonsMultipartResolverTests {
 		binder.registerCustomEditor(String.class, "field1", new StringMultipartFileEditor());
 		binder.registerCustomEditor(String.class, "field2", new StringMultipartFileEditor("UTF-16"));
 		binder.bind(request);
-		assertEquals(new String(file1.getBytes()), mtb2.getField1());
+		assertEquals(new String(file1a.getBytes()), mtb2.getField1()[0]);
+		assertEquals(new String(file1b.getBytes()), mtb2.getField1()[1]);
 		assertEquals(new String(file2.getBytes(), "UTF-16"), mtb2.getField2());
 
 		resolver.cleanupMultipart(request);
-		assertTrue(((MockFileItem) file1.getFileItem()).deleted);
+		assertTrue(((MockFileItem) file1a.getFileItem()).deleted);
+		assertTrue(((MockFileItem) file1b.getFileItem()).deleted);
 		assertTrue(((MockFileItem) file2.getFileItem()).deleted);
 
 		resolver.setEmpty(true);
 		request = resolver.resolveMultipart(originalRequest);
 		binder.setBindEmptyMultipartFiles(false);
-		String firstBound = mtb2.getField1();
+		String firstBound = mtb2.getField2();
 		binder.bind(request);
-		assertTrue(mtb2.getField1().length() > 0);
-		assertEquals(firstBound, mtb2.getField1());
+		assertTrue(mtb2.getField2().length() > 0);
+		assertEquals(firstBound, mtb2.getField2());
 
 		request = resolver.resolveMultipart(originalRequest);
 		binder.setBindEmptyMultipartFiles(true);
 		binder.bind(request);
-		assertTrue(mtb2.getField1().length() == 0);
+		assertTrue(mtb2.getField2().length() == 0);
 	}
 
 	@Test
@@ -480,14 +486,14 @@ public class CommonsMultipartResolverTests {
 
 	public class MultipartTestBean1 {
 
-		private MultipartFile field1;
+		private MultipartFile[] field1;
 		private byte[] field2;
 
-		public void setField1(MultipartFile field1) {
+		public void setField1(MultipartFile[] field1) {
 			this.field1 = field1;
 		}
 
-		public MultipartFile getField1() {
+		public MultipartFile[] getField1() {
 			return field1;
 		}
 
@@ -503,14 +509,14 @@ public class CommonsMultipartResolverTests {
 
 	public class MultipartTestBean2 {
 
-		private String field1;
+		private String[] field1;
 		private String field2;
 
-		public void setField1(String field1) {
+		public void setField1(String[] field1) {
 			this.field1 = field1;
 		}
 
-		public String getField1() {
+		public String[] getField1() {
 			return field1;
 		}
 
