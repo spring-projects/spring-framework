@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 
 	/**
-	 * The SimpleJdbcTemplate that this base class manages, available to
-	 * subclasses.
+	 * The SimpleJdbcTemplate that this base class manages, available to subclasses.
 	 */
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
 
@@ -99,9 +98,7 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	}
 
 	/**
-	 * Specify the encoding for SQL scripts, if different from the platform
-	 * encoding.
-	 * 
+	 * Specify the encoding for SQL scripts, if different from the platform encoding.
 	 * @see #executeSqlScript
 	 */
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
@@ -110,7 +107,6 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 
 	/**
 	 * Count the rows in the given table.
-	 * 
 	 * @param tableName table name to count rows in
 	 * @return the number of rows in the table
 	 */
@@ -121,7 +117,6 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	/**
 	 * Convenience method for deleting all rows from the specified tables. Use
 	 * with caution outside of a transaction!
-	 * 
 	 * @param names the names of the tables from which to delete
 	 * @return the total number of rows deleted from all specified tables
 	 */
@@ -131,11 +126,9 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 
 	/**
 	 * Execute the given SQL script. Use with caution outside of a transaction!
-	 * <p>
-	 * The script will normally be loaded by classpath. There should be one
+	 * <p>The script will normally be loaded by classpath. There should be one
 	 * statement per line. Any semicolons will be removed. <b>Do not use this
 	 * method to execute DDL if you expect rollback.</b>
-	 * 
 	 * @param sqlResourcePath the Spring resource path for the SQL script
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
@@ -143,7 +136,6 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	 * and continueOnError was <code>false</code>
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
-
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
 		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, new EncodedResource(resource,
 			this.sqlScriptEncoding), continueOnError);
