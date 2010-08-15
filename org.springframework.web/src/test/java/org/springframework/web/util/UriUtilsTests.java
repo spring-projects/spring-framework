@@ -21,8 +21,10 @@ import java.io.UnsupportedEncodingException;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-/** @author Arjen Poutsma */
-public class UriUtilsTest {
+/**
+ * @author Arjen Poutsma
+ */
+public class UriUtilsTests {
 
 	private static final String ENC = "UTF-8";
 
