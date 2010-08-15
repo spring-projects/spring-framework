@@ -435,6 +435,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 		@Override
 		protected boolean isHandlerMethod(Method method) {
+			if (this.mappings.containsKey(method)) {
+				return true;
+			}
 			RequestMappingInfo mappingInfo = new RequestMappingInfo();
 			RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			ActionMapping actionMapping = AnnotationUtils.findAnnotation(method, ActionMapping.class);
@@ -460,8 +463,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 					mappingInfo.phase = determineDefaultPhase(method);
 				}
 			}
-			this.mappings.put(method, mappingInfo);
-			return (mappingInfo.phase != null);
+			if (mappingInfo.phase != null) {
+				this.mappings.put(method, mappingInfo);
+				return true;
+			}
+			return false;
 		}
 
 		public Method resolveHandlerMethod(PortletRequest request) throws PortletException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 package org.springframework.web.bind.annotation.support;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -70,14 +70,17 @@ public class HandlerMethodResolver {
 	 * Initialize a new HandlerMethodResolver for the specified handler type.
 	 * @param handlerType the handler class to introspect
 	 */
-	public void init(Class<?> handlerType) {
-		Class<?>[] handlerTypes =
-				Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[] {handlerType};
-		for (final Class<?> currentHandlerType : handlerTypes) {
+	public void init(final Class<?> handlerType) {
+		Set<Class<?>> handlerTypes = new LinkedHashSet<Class<?>>();
+		handlerTypes.add(handlerType);
+		handlerTypes.addAll(Arrays.asList(handlerType.getInterfaces()));
+		for (Class<?> currentHandlerType : handlerTypes) {
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
-					Method specificMethod = ClassUtils.getMostSpecificMethod(method, currentHandlerType);
-					if (isHandlerMethod(method)) {
+					Method specificMethod = ClassUtils.getMostSpecificMethod(method, handlerType);
+					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+					if (isHandlerMethod(specificMethod) &&
+							(bridgedMethod == specificMethod || !isHandlerMethod(bridgedMethod))) {
 						handlerMethods.add(specificMethod);
 					}
 					else if (method.isAnnotationPresent(InitBinder.class)) {
@@ -87,7 +90,7 @@ public class HandlerMethodResolver {
 						modelAttributeMethods.add(specificMethod);
 					}
 				}
-			}, ReflectionUtils.NON_BRIDGED_METHODS);
+			}, ReflectionUtils.USER_DECLARED_METHODS);
 		}
 		this.typeLevelMapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
 		SessionAttributes sessionAttributes = AnnotationUtils.findAnnotation(handlerType, SessionAttributes.class);

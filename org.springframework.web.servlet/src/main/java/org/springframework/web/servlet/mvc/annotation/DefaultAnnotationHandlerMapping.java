@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.mvc.annotation;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -165,8 +165,9 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		}
 
 		final Set<String> urls = new LinkedHashSet<String>();
-		Class<?>[] handlerTypes =
-				Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[]{handlerType};
+		Set<Class<?>> handlerTypes = new LinkedHashSet<Class<?>>();
+		handlerTypes.add(handlerType);
+		handlerTypes.addAll(Arrays.asList(handlerType.getInterfaces()));
 		for (Class<?> currentHandlerType : handlerTypes) {
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
@@ -187,7 +188,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 						}
 					}
 				}
-			}, ReflectionUtils.NON_BRIDGED_METHODS);
+			}, ReflectionUtils.USER_DECLARED_METHODS);
 		}
 		return StringUtils.toStringArray(urls);
 	}

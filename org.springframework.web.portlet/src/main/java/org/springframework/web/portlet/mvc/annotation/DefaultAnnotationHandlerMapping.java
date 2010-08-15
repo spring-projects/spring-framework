@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.portlet.ClientDataRequest;
@@ -145,71 +146,76 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	 * @return <code>true</code> if at least 1 handler method has been registered;
 	 * <code>false</code> otherwise
 	 */
-	protected boolean detectHandlerMethods(Class handlerType, final String beanName, final RequestMapping typeMapping) {
+	protected boolean detectHandlerMethods(Class<?> handlerType, final String beanName, final RequestMapping typeMapping) {
 		final Set<Boolean> handlersRegistered = new HashSet<Boolean>(1);
-		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
-			public void doWith(Method method) {
-				boolean mappingFound = false;
-				String[] modeKeys = new String[0];
-				String[] params = new String[0];
-				String resourceId = null;
-				String eventName = null;
-				for (Annotation ann : method.getAnnotations()) {
-					if (AnnotationUtils.findAnnotation(ann.getClass(), Mapping.class) != null) {
-						mappingFound = true;
-						if (ann instanceof RequestMapping) {
-							RequestMapping rm = (RequestMapping) ann;
-							modeKeys = rm.value();
-							params = StringUtils.mergeStringArrays(params, rm.params());
-						}
-						else if (ann instanceof ResourceMapping) {
-							ResourceMapping rm = (ResourceMapping) ann;
-							resourceId = rm.value();
-						}
-						else if (ann instanceof EventMapping) {
-							EventMapping em = (EventMapping) ann;
-							eventName = em.value();
-						}
-						else {
-							String[] specificParams = (String[]) AnnotationUtils.getValue(ann, "params");
-							params = StringUtils.mergeStringArrays(params, specificParams);
+		Set<Class<?>> handlerTypes = new LinkedHashSet<Class<?>>();
+		handlerTypes.add(handlerType);
+		handlerTypes.addAll(Arrays.asList(handlerType.getInterfaces()));
+		for (Class<?> currentHandlerType : handlerTypes) {
+			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
+				public void doWith(Method method) {
+					boolean mappingFound = false;
+					String[] modeKeys = new String[0];
+					String[] params = new String[0];
+					String resourceId = null;
+					String eventName = null;
+					for (Annotation ann : method.getAnnotations()) {
+						if (AnnotationUtils.findAnnotation(ann.getClass(), Mapping.class) != null) {
+							mappingFound = true;
+							if (ann instanceof RequestMapping) {
+								RequestMapping rm = (RequestMapping) ann;
+								modeKeys = rm.value();
+								params = StringUtils.mergeStringArrays(params, rm.params());
+							}
+							else if (ann instanceof ResourceMapping) {
+								ResourceMapping rm = (ResourceMapping) ann;
+								resourceId = rm.value();
+							}
+							else if (ann instanceof EventMapping) {
+								EventMapping em = (EventMapping) ann;
+								eventName = em.value();
+							}
+							else {
+								String[] specificParams = (String[]) AnnotationUtils.getValue(ann, "params");
+								params = StringUtils.mergeStringArrays(params, specificParams);
+							}
 						}
 					}
-				}
-				if (mappingFound) {
-					if (modeKeys.length == 0) {
+					if (mappingFound) {
+						if (modeKeys.length == 0) {
+							if (typeMapping != null) {
+								modeKeys = typeMapping.value();
+							}
+							else {
+								throw new IllegalStateException(
+										"No portlet mode mappings specified - neither at type nor at method level");
+							}
+						}
 						if (typeMapping != null) {
-							modeKeys = typeMapping.value();
+							if (!PortletAnnotationMappingUtils.validateModeMapping(modeKeys, typeMapping.value())) {
+								throw new IllegalStateException("Mode mappings conflict between method and type level: " +
+										Arrays.asList(modeKeys) + " versus " + Arrays.asList(typeMapping.value()));
+							}
+							params = StringUtils.mergeStringArrays(typeMapping.params(), params);
+						}
+						PortletRequestMappingPredicate predicate;
+						if (resourceId != null) {
+							predicate = new ResourceMappingPredicate(resourceId);
+						}
+						else if (eventName != null) {
+							predicate = new EventMappingPredicate(eventName);
 						}
 						else {
-							throw new IllegalStateException(
-									"No portlet mode mappings specified - neither at type nor at method level");
+							predicate = new ParameterMappingPredicate(params);
 						}
-					}
-					if (typeMapping != null) {
-						if (!PortletAnnotationMappingUtils.validateModeMapping(modeKeys, typeMapping.value())) {
-							throw new IllegalStateException("Mode mappings conflict between method and type level: " +
-									Arrays.asList(modeKeys) + " versus " + Arrays.asList(typeMapping.value()));
+						for (String modeKey : modeKeys) {
+							registerHandler(new PortletMode(modeKey), beanName, predicate);
+							handlersRegistered.add(Boolean.TRUE);
 						}
-						params = StringUtils.mergeStringArrays(typeMapping.params(), params);
-					}
-					PortletRequestMappingPredicate predicate;
-					if (resourceId != null) {
-						predicate = new ResourceMappingPredicate(resourceId);
-					}
-					else if (eventName != null) {
-						predicate = new EventMappingPredicate(eventName);
-					}
-					else {
-						predicate = new ParameterMappingPredicate(params);
-					}
-					for (String modeKey : modeKeys) {
-						registerHandler(new PortletMode(modeKey), beanName, predicate);
-						handlersRegistered.add(Boolean.TRUE);
 					}
 				}
-			}
-		});
+			}, ReflectionUtils.USER_DECLARED_METHODS);
+		}
 		return !handlersRegistered.isEmpty();
 	}
 

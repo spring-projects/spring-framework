@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -496,8 +497,34 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 */
 	private class ServletHandlerMethodResolver extends HandlerMethodResolver {
 
+		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
+
 		private ServletHandlerMethodResolver(Class<?> handlerType) {
 			init(handlerType);
+		}
+
+		@Override
+		protected boolean isHandlerMethod(Method method) {
+			if (this.mappings.containsKey(method)) {
+				return true;
+			}
+			RequestMapping mapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+			if (mapping != null) {
+				RequestMappingInfo mappingInfo = new RequestMappingInfo();
+				mappingInfo.patterns = mapping.value();
+				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(), getTypeLevelMapping().method())) {
+					mappingInfo.methods = mapping.method();
+				}
+				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(), getTypeLevelMapping().params())) {
+					mappingInfo.params = mapping.params();
+				}
+				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(), getTypeLevelMapping().headers())) {
+					mappingInfo.headers = mapping.headers();
+				}
+				this.mappings.put(method, mappingInfo);
+				return true;
+			}
+			return false;
 		}
 
 		public Method resolveHandlerMethod(HttpServletRequest request) throws ServletException {
@@ -507,7 +534,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			Set<String> allowedMethods = new LinkedHashSet<String>(7);
 			String resolvedMethodName = null;
 			for (Method handlerMethod : getHandlerMethods()) {
-				RequestMappingInfo mappingInfo = createRequestMappingInfo(handlerMethod);
+				RequestMappingInfo mappingInfo = this.mappings.get(handlerMethod);
 				boolean match = false;
 				if (mappingInfo.hasPatterns()) {
 					List<String> matchingPatterns = new ArrayList<String>(mappingInfo.patterns.length);
@@ -597,22 +624,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(),
 						request.getParameterMap());
 			}
-		}
-
-		private RequestMappingInfo createRequestMappingInfo(Method handlerMethod) {
-			RequestMappingInfo mappingInfo = new RequestMappingInfo();
-			RequestMapping mapping = AnnotationUtils.findAnnotation(handlerMethod, RequestMapping.class);
-			mappingInfo.patterns = mapping.value();
-			if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(), getTypeLevelMapping().method())) {
-				mappingInfo.methods = mapping.method();
-			}
-			if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(), getTypeLevelMapping().params())) {
-				mappingInfo.params = mapping.params();
-			}
-			if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(), getTypeLevelMapping().headers())) {
-				mappingInfo.headers = mapping.headers();
-			}
-			return mappingInfo;
 		}
 
 		/**
