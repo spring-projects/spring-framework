@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,11 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.multipart.support.StringMultipartFileEditor;
 
 /**
  * @author Juergen Hoeller
@@ -188,6 +191,46 @@ public class WebRequestDataBinderTests {
 	}
 
 	@Test
+	public void testMultipartFileAsString() {
+		TestBean target = new TestBean();
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+		binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
+
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("name", "Juergen".getBytes()));
+		binder.bind(new ServletWebRequest(request));
+		assertEquals("Juergen", target.getName());
+	}
+
+	@Test
+	public void testMultipartFileAsStringArray() {
+		TestBean target = new TestBean();
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+		binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
+
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("stringArray", "Juergen".getBytes()));
+		binder.bind(new ServletWebRequest(request));
+		assertEquals(1, target.getStringArray().length);
+		assertEquals("Juergen", target.getStringArray()[0]);
+	}
+
+	@Test
+	public void testMultipartFilesAsStringArray() {
+		TestBean target = new TestBean();
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+		binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
+
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("stringArray", "Juergen".getBytes()));
+		request.addFile(new MockMultipartFile("stringArray", "Eva".getBytes()));
+		binder.bind(new ServletWebRequest(request));
+		assertEquals(2, target.getStringArray().length);
+		assertEquals("Juergen", target.getStringArray()[0]);
+		assertEquals("Eva", target.getStringArray()[1]);
+	}
+
+	@Test
 	public void testNoPrefix() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("forname", "Tony");
@@ -213,26 +256,6 @@ public class WebRequestDataBinderTests {
 		doTestTony(pvs);
 	}
 
-	@Test
-	public void testNoParameters() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertTrue("Found no parameters", pvs.getPropertyValues().length == 0);
-	}
-
-	@Test
-	public void testMultipleValuesForParameter() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		String[] original = new String[] {"Tony", "Rod"};
-		request.addParameter("forname", original);
-
-		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertTrue("Found 1 parameter", pvs.getPropertyValues().length == 1);
-		assertTrue("Found array value", pvs.getPropertyValue("forname").getValue() instanceof String[]);
-		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
-		assertEquals("Correct values", Arrays.asList(values), Arrays.asList(original));
-	}
-
 	/**
 	 * Must contain: forname=Tony surname=Blair age=50
 	 */
@@ -256,6 +279,26 @@ public class WebRequestDataBinderTests {
 			m.remove(pv.getName());
 		}
 		assertTrue("Map size is 0", m.size() == 0);
+	}
+
+	@Test
+	public void testNoParameters() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
+		assertTrue("Found no parameters", pvs.getPropertyValues().length == 0);
+	}
+
+	@Test
+	public void testMultipleValuesForParameter() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		String[] original = new String[] {"Tony", "Rod"};
+		request.addParameter("forname", original);
+
+		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
+		assertTrue("Found 1 parameter", pvs.getPropertyValues().length == 1);
+		assertTrue("Found array value", pvs.getPropertyValue("forname").getValue() instanceof String[]);
+		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
+		assertEquals("Correct values", Arrays.asList(values), Arrays.asList(original));
 	}
 
 

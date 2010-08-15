@@ -103,7 +103,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 		if (request instanceof NativeWebRequest) {
 			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
-				bindMultipartFiles(multipartRequest.getFileMap(), mpvs);
+				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 			}
 		}
 		doBind(mpvs);
