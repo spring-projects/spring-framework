@@ -261,7 +261,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		boolean first = (getUrl().indexOf('?') < 0);
 		for (Map.Entry<String, Object> entry : queryProperties(model).entrySet()) {
 			Object rawValue = entry.getValue();
-			Iterator valueIter = null;
+			Iterator valueIter;
 			if (rawValue != null && rawValue.getClass().isArray()) {
 				valueIter = Arrays.asList(ObjectUtils.toObjectArray(rawValue)).iterator();
 			}
@@ -398,14 +398,18 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Determines the status code to use for HTTP 1.1 compatible requests.
 	 * <p>The default implemenetation returns the {@link #setStatusCode(HttpStatus) statusCode}
-	 * property if set, or the value of the {@link #RESPONSE_STATUS_ATTRIBUTE} attribute. If neither are
-	 * set, it defaults to {@link HttpStatus#SEE_OTHER} (303).
+	 * property if set, or the value of the {@link #RESPONSE_STATUS_ATTRIBUTE} attribute.
+	 * If neither are set, it defaults to {@link HttpStatus#SEE_OTHER} (303).
 	 * @param request the request to inspect
-	 * @return the response
+	 * @param response the servlet response
+	 * @param targetUrl the target URL
+	 * @return the response status
 	 */
-	protected HttpStatus getHttp11StatusCode(HttpServletRequest request, HttpServletResponse response, String targetUrl) {
-		if (statusCode != null) {
-			return statusCode;
+	protected HttpStatus getHttp11StatusCode(
+			HttpServletRequest request, HttpServletResponse response, String targetUrl) {
+
+		if (this.statusCode != null) {
+			return this.statusCode;
 		}
 		HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
 		if (attributeStatusCode != null) {
