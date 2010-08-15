@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,6 @@ public interface MultipartRequest {
 	 * Return a {@link java.util.Map} of the multipart files contained in this request.
 	 * @return a map containing the parameter names as keys, and the
 	 * {@link MultipartFile} objects as values
-	 * @see MultipartFile
 	 */
 	Map<String, MultipartFile> getFileMap();
 
@@ -72,7 +71,6 @@ public interface MultipartRequest {
 	 * Return a {@link MultiValueMap} of the multipart files contained in this request.
 	 * @return a map containing the parameter names as keys, and a list of
 	 * {@link MultipartFile} objects as values
-	 * @see MultipartFile
 	 * @since 3.0
 	 */
 	MultiValueMap<String, MultipartFile> getMultiFileMap();

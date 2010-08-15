@@ -78,6 +78,7 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 
 /**
@@ -153,7 +154,7 @@ public class HandlerMethodInvoker {
 				if (debug) {
 					logger.debug("Invoking model attribute method: " + attributeMethodToInvoke);
 				}
-				String attrName = AnnotationUtils.findAnnotation(attributeMethodToInvoke, ModelAttribute.class).value();
+				String attrName = AnnotationUtils.findAnnotation(attributeMethod, ModelAttribute.class).value();
 				if (!"".equals(attrName) && implicitModel.containsAttribute(attrName)) {
 					continue;
 				}
@@ -381,7 +382,7 @@ public class HandlerMethodInvoker {
 				boolean debug = logger.isDebugEnabled();
 				for (Method initBinderMethod : initBinderMethods) {
 					Method methodToInvoke = BridgeMethodResolver.findBridgedMethod(initBinderMethod);
-					String[] targetNames = AnnotationUtils.findAnnotation(methodToInvoke, InitBinder.class).value();
+					String[] targetNames = AnnotationUtils.findAnnotation(initBinderMethod, InitBinder.class).value();
 					if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
 						Object[] initBinderArgs =
 								resolveInitBinderArguments(handler, methodToInvoke, binder, webRequest);
@@ -481,15 +482,25 @@ public class HandlerMethodInvoker {
 		Object paramValue = null;
 		MultipartRequest multipartRequest = webRequest.getNativeRequest(MultipartRequest.class);
 		if (multipartRequest != null) {
-			paramValue = multipartRequest.getFile(paramName);
+			List<MultipartFile> files = multipartRequest.getFiles(paramName);
+			if (!files.isEmpty()) {
+				if (files.size() == 1 && !paramType.isArray() && !Collection.class.isAssignableFrom(paramType)) {
+					paramValue = files.get(0);
+				}
+				else {
+					paramValue = files;
+				}
+			}
 		}
 		if (paramValue == null) {
 			String[] paramValues = webRequest.getParameterValues(paramName);
-			if (paramValues != null && !paramType.isArray()) {
-				paramValue = (paramValues.length == 1 ? paramValues[0] : paramValues);
-			}
-			else {
-				paramValue = paramValues;
+			if (paramValues != null) {
+				if (paramValues.length == 1 && !paramType.isArray() && !Collection.class.isAssignableFrom(paramType)) {
+					paramValue = paramValues[0];
+				}
+				else {
+					paramValue = paramValues;
+				}
 			}
 		}
 		if (paramValue == null) {

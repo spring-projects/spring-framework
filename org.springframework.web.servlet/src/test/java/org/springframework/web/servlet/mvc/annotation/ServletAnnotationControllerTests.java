@@ -86,6 +86,8 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -119,6 +121,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -1699,6 +1702,43 @@ public class ServletAnnotationControllerTests {
 		assertEquals("test-{foo=bar}", response.getContentAsString());
 	}
 
+	@Test
+	public void multipartFileAsSingleString() throws Exception {
+		initServlet(MultipartController.class);
+
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.setRequestURI("/singleString");
+		request.addFile(new MockMultipartFile("content", "Juergen".getBytes()));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Juergen", response.getContentAsString());
+	}
+
+	@Test
+	public void multipartFileAsStringArray() throws Exception {
+		initServlet(MultipartController.class);
+
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.setRequestURI("/stringArray");
+		request.addFile(new MockMultipartFile("content", "Juergen".getBytes()));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Juergen", response.getContentAsString());
+	}
+
+	@Test
+	public void multipartFilesAsStringArray() throws Exception {
+		initServlet(MultipartController.class);
+
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.setRequestURI("/stringArray");
+		request.addFile(new MockMultipartFile("content", "Juergen".getBytes()));
+		request.addFile(new MockMultipartFile("content", "Eva".getBytes()));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Juergen,Eva", response.getContentAsString());
+	}
+
 
 	/*
 	 * Controllers
@@ -2920,6 +2960,25 @@ public class ServletAnnotationControllerTests {
 			}
 		}
 
+	}
+
+	@Controller
+	public static class MultipartController {
+
+		@InitBinder
+		public void initBinder(WebDataBinder binder) {
+			binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
+		}
+
+		@RequestMapping("/singleString")
+		public void processMultipart(@RequestParam("content") String content, HttpServletResponse response) throws IOException {
+			response.getWriter().write(content);
+		}
+
+		@RequestMapping("/stringArray")
+		public void processMultipart(@RequestParam("content") String[] content, HttpServletResponse response) throws IOException {
+			response.getWriter().write(StringUtils.arrayToCommaDelimitedString(content));
+		}
 	}
 
 }
