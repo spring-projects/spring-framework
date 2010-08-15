@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,12 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link javax.servlet.Filter} that generates an <code>ETag</code> value based on the content on the response. This
- * ETag is compared to the <code>If-None-Match</code> header of the request. If these headers are equal, the resonse
- * content is not sent, but rather a 304 "Not Modified" status.
+ * {@link javax.servlet.Filter} that generates an <code>ETag</code> value based on the content on the response.
+ * This ETag is compared to the <code>If-None-Match</code> header of the request. If these headers are equal,
+ * the response content is not sent, but rather a <code>304 "Not Modified"</code> status instead.
  *
- * <p>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View}) is
- * still rendered. As such, this filter only saves bandwidth, not server performance.
+ * <p>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View})
+ * is still rendered. As such, this filter only saves bandwidth, not server performance.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -48,6 +48,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private static String HEADER_ETAG = "ETag";
 
 	private static String HEADER_IF_NONE_MATCH = "If-None-Match";
+
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -96,27 +97,22 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 	/**
 	 * Indicates whether the given request and response are eligible for ETag generation.
-	 *
-	 * <p>Default implementation returns {@code true} for response status codes in the {@code 2xx} series.
-	 *
+	 * <p>The default implementation returns {@code true} for response status codes in the {@code 2xx} series.
 	 * @param request the HTTP request
 	 * @param response the HTTP response
 	 * @param responseStatusCode the HTTP response status code
 	 * @param responseBody the response body
 	 * @return {@code true} if eligible for ETag generation; {@code false} otherwise
 	 */
-	protected boolean isEligibleForEtag(HttpServletRequest request,
-			HttpServletResponse response,
-			int responseStatusCode,
-			byte[] responseBody) {
+	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
+			int responseStatusCode, byte[] responseBody) {
+
 		return (responseStatusCode >= 200 && responseStatusCode < 300);
 	}
 
 	/**
 	 * Generate the ETag header value from the given response body byte array.
-	 *
 	 * <p>The default implementation generates an MD5 hash.
-	 *
 	 * @param bytes the response bdoy as byte array
 	 * @return the ETag header value
 	 * @see org.springframework.util.DigestUtils
@@ -128,10 +124,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		return builder.toString();
 	}
 
+
 	/**
-	 * {@link HttpServletRequest} wrapper that buffers all content written to the {@linkplain #getOutputStream() output
-	 * stream} and {@linkplain #getWriter() writer}, and allows this content to be retrieved via a {@link #toByteArray()
-	 * byte array}.
+	 * {@link HttpServletRequest} wrapper that buffers all content written to the
+	 * {@linkplain #getOutputStream() output stream} and {@linkplain #getWriter() writer},
+	 * and allows this content to be retrieved via a {@link #toByteArray() byte array}.
 	 */
 	private static class ShallowEtagResponseWrapper extends HttpServletResponseWrapper {
 
@@ -216,7 +213,6 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			public void write(byte[] b, int off, int len) throws IOException {
 				content.write(b, off, len);
 			}
-
 		}
 
 		private class ResponsePrintWriter extends PrintWriter {
@@ -242,9 +238,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 				super.write(c);
 				super.flush();
 			}
-
 		}
-
 	}
 
 }
