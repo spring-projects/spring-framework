@@ -622,4 +622,16 @@ public abstract class ReflectionUtils {
 		}
 	};
 
+
+	/**
+	 * Pre-built MethodFilter that matches all non-bridge methods
+	 * which are not declared on <code>java.lang.Object</code>.
+	 */
+	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
+
+		public boolean matches(Method method) {
+			return (!method.isBridge() && method.getDeclaringClass() != Object.class);
+		}
+	};
+
 }

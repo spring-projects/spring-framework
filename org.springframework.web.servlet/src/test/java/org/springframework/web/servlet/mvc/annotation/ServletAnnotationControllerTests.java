@@ -175,6 +175,27 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void emptyValueMapping() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(ControllerWithEmptyValueMapping.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setContextPath("/foo");
+		request.setServletPath("");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test", response.getContentAsString());
+	}
+
+	@Test
 	public void customAnnotationController() throws Exception {
 		initServlet(CustomAnnotationController.class);
 
@@ -382,6 +403,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPage");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
+		assertEquals("page1", request.getAttribute("viewName"));
 		HttpSession session = request.getSession();
 		assertTrue(session.getAttribute("object1") != null);
 		assertTrue(session.getAttribute("object2") != null);
@@ -392,6 +414,7 @@ public class ServletAnnotationControllerTests {
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
+		assertEquals("page2", request.getAttribute("viewName"));
 		assertTrue(session.getAttribute("object1") != null);
 		assertTrue(session.getAttribute("object2") != null);
 		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
@@ -419,6 +442,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPage");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
+		assertEquals("page1", request.getAttribute("viewName"));
 		HttpSession session = request.getSession();
 		assertTrue(session.getAttribute("object1") != null);
 		assertTrue(session.getAttribute("object2") != null);
@@ -429,10 +453,86 @@ public class ServletAnnotationControllerTests {
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
+		assertEquals("page2", request.getAttribute("viewName"));
 		assertTrue(session.getAttribute("object1") != null);
 		assertTrue(session.getAttribute("object2") != null);
 		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
 		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+	}
+
+	@Test
+	public void parameterizedAnnotatedInterface() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyParameterizedControllerImpl.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(ModelExposingViewResolver.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPage");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("page1", request.getAttribute("viewName"));
+		HttpSession session = request.getSession();
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("testBeanList"));
+
+		request = new MockHttpServletRequest("POST", "/myPage");
+		request.setSession(session);
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("page2", request.getAttribute("viewName"));
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("testBeanList"));
+	}
+
+	@Test
+	public void parameterizedAnnotatedInterfaceWithOverriddenMappingsInImpl() throws Exception {
+		@SuppressWarnings("serial") DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller",
+						new RootBeanDefinition(MyParameterizedControllerImplWithOverriddenMappings.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(ModelExposingViewResolver.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPage");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("page1", request.getAttribute("viewName"));
+		HttpSession session = request.getSession();
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("testBeanList"));
+
+		request = new MockHttpServletRequest("POST", "/myPage");
+		request.setSession(session);
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("page2", request.getAttribute("viewName"));
+		assertTrue(session.getAttribute("object1") != null);
+		assertTrue(session.getAttribute("object2") != null);
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object1"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("object2"));
+		assertTrue(((Map) session.getAttribute("model")).containsKey("testBeanList"));
 	}
 
 	@Test
@@ -1599,6 +1699,7 @@ public class ServletAnnotationControllerTests {
 		assertEquals("test-{foo=bar}", response.getContentAsString());
 	}
 
+
 	/*
 	 * Controllers
 	 */
@@ -1624,6 +1725,20 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Controller
+	private static class ControllerWithEmptyValueMapping {
+
+		@RequestMapping("")
+		public void myPath2(HttpServletResponse response) throws IOException {
+			response.getWriter().write("test");
+		}
+
+		@RequestMapping("/bar")
+		public void myPath3(HttpServletResponse response) throws IOException {
+			response.getWriter().write("testX");
+		}
+	}
+
+	@Controller
 	private static class MyAdaptedController {
 
 		@RequestMapping("/myPath1.do")
@@ -1632,10 +1747,8 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") String p1,
-				@RequestParam("param2") int p2,
-				@RequestHeader("header1") long h1,
-				@CookieValue("cookie1") Cookie c1,
+		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2,
+				@RequestHeader("header1") long h1, @CookieValue("cookie1") Cookie c1,
 				HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2 + "-" + h1 + "-" + c1.getValue());
 		}
@@ -1661,11 +1774,8 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") String p1,
-				int param2,
-				HttpServletResponse response,
-				@RequestHeader("header1") String h1,
-				@CookieValue("cookie1") String c1) throws IOException {
+		public void myHandle(@RequestParam("param1") String p1, int param2, HttpServletResponse response,
+				@RequestHeader("header1") String h1, @CookieValue("cookie1") String c1) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + h1 + "-" + c1);
 		}
 
@@ -1684,11 +1794,8 @@ public class ServletAnnotationControllerTests {
 	private static class MyAdaptedControllerBase<T> {
 
 		@RequestMapping("/myPath2.do")
-		public void myHandle(@RequestParam("param1") T p1,
-				int param2,
-				@RequestHeader Integer header1,
-				@CookieValue int cookie1,
-				HttpServletResponse response) throws IOException {
+		public void myHandle(@RequestParam("param1") T p1, int param2, @RequestHeader Integer header1,
+				@CookieValue int cookie1, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1 + "-" + cookie1);
 		}
 
@@ -1712,11 +1819,8 @@ public class ServletAnnotationControllerTests {
 		}
 
 		@Override
-		public void myHandle(@RequestParam("param1") String p1,
-				int param2,
-				@RequestHeader Integer header1,
-				@CookieValue int cookie1,
-				HttpServletResponse response) throws IOException {
+		public void myHandle(@RequestParam("param1") String p1, int param2, @RequestHeader Integer header1,
+				@CookieValue int cookie1, HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + param2 + "-" + header1 + "-" + cookie1);
 		}
 
@@ -1768,13 +1872,13 @@ public class ServletAnnotationControllerTests {
 		public String get(Model model) {
 			model.addAttribute("object1", new Object());
 			model.addAttribute("object2", new Object());
-			return "myPage";
+			return "page1";
 		}
 
 		@RequestMapping(method = RequestMethod.POST)
 		public String post(@ModelAttribute("object1") Object object1) {
 			//do something with object1
-			return "myPage";
+			return "page2";
 
 		}
 	}
@@ -1796,14 +1900,79 @@ public class ServletAnnotationControllerTests {
 		public String get(Model model) {
 			model.addAttribute("object1", new Object());
 			model.addAttribute("object2", new Object());
-			return "myPage";
+			return "page1";
 		}
 
 		public String post(@ModelAttribute("object1") Object object1) {
 			//do something with object1
-			return "myPage";
+			return "page2";
 		}
 	}
+
+	@RequestMapping("/myPage")
+	@SessionAttributes({"object1", "object2"})
+	public interface MyParameterizedControllerIfc<T> {
+
+		@ModelAttribute("testBeanList")
+		List<TestBean> getTestBeans();
+
+		@RequestMapping(method = RequestMethod.GET)
+		String get(Model model);
+	}
+
+	public interface MyEditableParameterizedControllerIfc<T> extends MyParameterizedControllerIfc<T> {
+
+		@RequestMapping(method = RequestMethod.POST)
+		String post(@ModelAttribute("object1") T object);
+	}
+
+	@Controller
+	public static class MyParameterizedControllerImpl implements MyEditableParameterizedControllerIfc<TestBean> {
+
+		public List<TestBean> getTestBeans() {
+			List<TestBean> list = new LinkedList<TestBean>();
+			list.add(new TestBean("tb1"));
+			list.add(new TestBean("tb2"));
+			return list;
+		}
+
+		public String get(Model model) {
+			model.addAttribute("object1", new TestBean());
+			model.addAttribute("object2", new TestBean());
+			return "page1";
+		}
+
+		public String post(TestBean object) {
+			//do something with object1
+			return "page2";
+		}
+	}
+
+	@Controller
+	public static class MyParameterizedControllerImplWithOverriddenMappings implements MyEditableParameterizedControllerIfc<TestBean> {
+
+		@ModelAttribute("testBeanList")
+		public List<TestBean> getTestBeans() {
+			List<TestBean> list = new LinkedList<TestBean>();
+			list.add(new TestBean("tb1"));
+			list.add(new TestBean("tb2"));
+			return list;
+		}
+
+		@RequestMapping(method = RequestMethod.GET)
+		public String get(Model model) {
+			model.addAttribute("object1", new TestBean());
+			model.addAttribute("object2", new TestBean());
+			return "page1";
+		}
+
+		@RequestMapping(method = RequestMethod.POST)
+		public String post(@ModelAttribute("object1") TestBean object1) {
+			//do something with object1
+			return "page2";
+		}
+	}
+
 	@Controller
 	public static class MyFormController {
 
@@ -2191,15 +2360,15 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-	private static class ModelExposingViewResolver implements ViewResolver {
+	public static class ModelExposingViewResolver implements ViewResolver {
 
-		public View resolveViewName(String viewName, Locale locale) throws Exception {
+		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new View() {
 				public String getContentType() {
 					return null;
 				}
-
 				public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+					request.setAttribute("viewName", viewName);
 					request.getSession().setAttribute("model", model);
 				}
 			};
