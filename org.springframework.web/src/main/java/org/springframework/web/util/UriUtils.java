@@ -417,7 +417,8 @@ public abstract class UriUtils {
 	private static byte[] encode(byte[] source, BitSet notEncoded) {
 		Assert.notNull(source, "'source' must not be null");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length * 2);
-		for (byte b : source) {
+		for (int i = 0; i < source.length; i++) {
+			int b = source[i];
 			if (b < 0) {
 				b += 256;
 			}
