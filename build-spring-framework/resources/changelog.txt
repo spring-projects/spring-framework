@@ -42,7 +42,9 @@ Changes in version 3.0.4 (2010-08-16)
 * JSR-303 Pattern message resolvable through Spring MessageSource (despite special characters) 
 * DispatcherServlet applies default view name translation to error views as well
 * mvc:annotation-driven reliably detects JSR-303 and JAXB2 in an OSGi environment as well
+* revised @MVC handler method resolution with respect to handler methods on generic interfaces
 * @MVC handler methods reliably resolve MultipartRequest arguments with HiddenHttpMethodFilter
+* WebDataBinder and @MVC request params detect and introspect MultipartFile arrays as well
 * fixed @PathVariable regression in combination with ConversionService usage on DataBinder
 * @CookieValue returns decoded cookie value in a Servlet environment (analogous to @RequestParam)
 * MVC HandlerExceptionResolvers prevent caching for exception views if preventResponseCaching=true
@@ -54,6 +56,7 @@ Changes in version 3.0.4 (2010-08-16)
 * JSP EvalTag resolves "@myBeanName" references in expressions against the WebApplicationContext
 * added support for static resource serving: ResourceHttpRequestHandler, mvc:resources
 * revised DispatcherServlet's last-modified handling to properly work with scoped controllers
+* MockMultipartHttpServletRequest pre-defines method "POST" and content type "multipart/form-data"
 
 
 Changes in version 3.0.3 (2010-06-15)
