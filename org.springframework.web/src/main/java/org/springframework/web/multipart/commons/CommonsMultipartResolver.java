@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.springframework.util.Assert;
@@ -184,7 +184,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
 		if (request != null) {
 			try {
-				cleanupFileItems(request.getFileMap().values());
+				cleanupFileItems(request.getMultiFileMap());
 			}
 			catch (Throwable ex) {
 				logger.warn("Failed to perform multipart cleanup for servlet request", ex);
