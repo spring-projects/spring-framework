@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@ package org.springframework.mock.web;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -44,7 +43,14 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  */
 public class MockMultipartHttpServletRequest extends MockHttpServletRequest implements MultipartHttpServletRequest {
 
-	private final MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<String, MultipartFile>();
+	private final MultiValueMap<String, MultipartFile> multipartFiles =
+			new LinkedMultiValueMap<String, MultipartFile>();
+
+
+	public MockMultipartHttpServletRequest() {
+		setMethod("POST");
+		setContentType("multipart/form-data");
+	}
 
 
 	/**
@@ -58,7 +64,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	}
 
 	public Iterator<String> getFileNames() {
-		return getFileMap().keySet().iterator();
+		return this.multipartFiles.keySet().iterator();
 	}
 
 	public MultipartFile getFile(String name) {
@@ -73,13 +79,14 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 		else {
 			return Collections.emptyList();
 		}
-	}	
+	}
 
 	public Map<String, MultipartFile> getFileMap() {
-		return Collections.unmodifiableMap(this.multipartFiles.toSingleValueMap());
+		return this.multipartFiles.toSingleValueMap();
 	}
 
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
-		return new LinkedMultiValueMap<String, MultipartFile>(Collections.unmodifiableMap(this.multipartFiles));
+		return new LinkedMultiValueMap<String, MultipartFile>(this.multipartFiles);
 	}
+
 }

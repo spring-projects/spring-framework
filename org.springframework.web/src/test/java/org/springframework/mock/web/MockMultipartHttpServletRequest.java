@@ -32,14 +32,14 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  * {@link org.springframework.web.multipart.MultipartHttpServletRequest} interface.
  *
  * <p>Useful for testing application controllers that access multipart uploads.
- * The {@link org.springframework.mock.web.MockMultipartFile} can be used to populate these mock requests
+ * The {@link MockMultipartFile} can be used to populate these mock requests
  * with files.
  *
  * @author Juergen Hoeller
  * @author Eric Crampton
  * @author Arjen Poutsma
  * @since 2.0
- * @see org.springframework.mock.web.MockMultipartFile
+ * @see MockMultipartFile
  */
 public class MockMultipartHttpServletRequest extends MockHttpServletRequest implements MultipartHttpServletRequest {
 
@@ -47,9 +47,15 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 			new LinkedMultiValueMap<String, MultipartFile>();
 
 
+	public MockMultipartHttpServletRequest() {
+		setMethod("POST");
+		setContentType("multipart/form-data");
+	}
+
+
 	/**
 	 * Add a file to this request. The parameter name from the multipart
-	 * form is taken from the {@link org.springframework.web.multipart.MultipartFile#getName()}.
+	 * form is taken from the {@link MultipartFile#getName()}.
 	 * @param file multipart file to be added
 	 */
 	public void addFile(MultipartFile file) {

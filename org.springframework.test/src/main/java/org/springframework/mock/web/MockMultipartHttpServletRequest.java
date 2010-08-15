@@ -47,6 +47,12 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 			new LinkedMultiValueMap<String, MultipartFile>();
 
 
+	public MockMultipartHttpServletRequest() {
+		setMethod("POST");
+		setContentType("multipart/form-data");
+	}
+
+
 	/**
 	 * Add a file to this request. The parameter name from the multipart
 	 * form is taken from the {@link MultipartFile#getName()}.
