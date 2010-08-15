@@ -63,12 +63,14 @@ public class ResourceHttpMessageConverter implements HttpMessageConverter<Resour
 
 	public Resource read(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
+
 		byte[] body = FileCopyUtils.copyToByteArray(inputMessage.getBody());
 		return new ByteArrayResource(body);
 	}
 
 	public void write(Resource resource, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 			contentType = getContentType(resource);
@@ -87,19 +89,16 @@ public class ResourceHttpMessageConverter implements HttpMessageConverter<Resour
 	private MediaType getContentType(Resource resource) {
 		if (jafPresent) {
 			return ActivationMediaTypeFactory.getMediaType(resource);
-		} else {
+		}
+		else {
 			return MediaType.APPLICATION_OCTET_STREAM;
 		}
 	}
 
-	 protected Long getContentLength(Resource resource, MediaType contentType) {
-		try {
-			return resource.getFile().length();
-		}
-		catch (IOException e) {
-			return null;
-		}
+	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
+		return resource.contentLength();
 	}
+
 
 	/**
 	 * Inner class to avoid hard-coded JAF dependency.
@@ -140,7 +139,7 @@ public class ResourceHttpMessageConverter implements HttpMessageConverter<Resour
 
 		public static MediaType getMediaType(Resource resource) {
 			String mediaType = fileTypeMap.getContentType(resource.getFilename());
-			return StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null;
+			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
 		}
 	}
 
