@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,8 +153,8 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 			fileTypeMap = new MimetypesFileTypeMap();
 		}
 		if (mappings != null) {
-			for (int i = 0; i < mappings.length; i++) {
-				fileTypeMap.addMimeTypes(mappings[i]);
+			for (String mapping : mappings) {
+				fileTypeMap.addMimeTypes(mapping);
 			}
 		}
 		return fileTypeMap;
