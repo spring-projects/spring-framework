@@ -283,8 +283,6 @@ public class UrlPathHelper {
 	/**
 	 * Return the query string part of the given request's URL. If this is a forwarded request,
 	 * correctly resolves to the query string of the original request.
-	 * <p>Relies on the Servlet 2.4 'forward' attributes. These attributes may be set by
-	 * other components when running in a Servlet 2.3 environment.
 	 * @param request current HTTP request
 	 * @return the query string
 	 */

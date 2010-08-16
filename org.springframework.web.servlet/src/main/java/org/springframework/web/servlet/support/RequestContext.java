@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -415,9 +415,6 @@ public class RequestContext {
 	 * <p><b>Note this implementation will correctly resolve to the URI of any
 	 * originating root request in the presence of a forwarded request. However, this
 	 * can only work when the Servlet 2.4 'forward' request attributes are present.
-	 * For use in a Servlet 2.3 environment, you can rely on
-	 * {@link org.springframework.web.servlet.view.InternalResourceView}
-	 * to add these prior to dispatching the request.</b>
 	 * <p>Delegates to the UrlPathHelper for decoding.
 	 * @see #getQueryString
 	 * @see org.springframework.web.util.UrlPathHelper#getOriginatingRequestUri
@@ -434,9 +431,6 @@ public class RequestContext {
 	 * <p><b>Note this implementation will correctly resolve to the query string of any
 	 * originating root request in the presence of a forwarded request. However, this
 	 * can only work when the Servlet 2.4 'forward' request attributes are present.
-	 * For use in a Servlet 2.3 environment, you can rely on
-	 * {@link org.springframework.web.servlet.view.InternalResourceView}
-	 * to add these prior to dispatching the request.</b>
 	 * <p>Delegates to the UrlPathHelper for decoding.
 	 * @see #getRequestUri
 	 * @see org.springframework.web.util.UrlPathHelper#getOriginatingQueryString
