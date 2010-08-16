@@ -96,17 +96,43 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			throws ServletException, IOException {
 
 		checkAndPrepare(request, response, true);
+
+		// check whether a matching resource exists
 		Resource resource = getResource(request);
 		if (resource == null) {
+			logger.debug("No matching resource found - returning 404");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		setHeaders(resource, response);
-		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified()) ||
-				METHOD_HEAD.equals(request.getMethod())) {
+
+		// check the resource's media type
+		MediaType mediaType = getMediaType(resource);
+		if (mediaType != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Determined media type [" + mediaType + "] for " + resource);
+			}
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No media type found for " + resource + " - returning 404");
+			}
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		writeContent(resource, response);
+
+		// header phase
+		setHeaders(response, resource, mediaType);
+		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
+			logger.debug("Resource not modified - returning 304");
+			return;
+		}
+
+		// content phase
+		if (METHOD_HEAD.equals(request.getMethod())) {
+			logger.trace("HEAD request - skipping content");
+			return;
+		}
+		writeContent(response, resource);
 	}
 
 	protected Resource getResource(HttpServletRequest request) {
@@ -115,42 +141,72 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			throw new IllegalStateException("Required request attribute '" +
 					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
 		}
+
 		if (!StringUtils.hasText(path) || path.contains("WEB-INF") || path.contains("META-INF")) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring invalid resource path [" + path + "]");
+			}
 			return null;
 		}
-		for (Resource resourcePath : this.locations) {
+
+		for (Resource location : this.locations) {
 			try {
-				Resource resource = resourcePath.createRelative(path);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Trying relative path [" + path + "] against base location: " + location);
+				}
+				Resource resource = location.createRelative(path);
 				if (resource.exists() && resource.isReadable()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found matching resource: " + resource);
+					}
 					return resource;
+				}
+				else if (logger.isTraceEnabled()) {
+					logger.trace("Relative resource doesn't exist or isn't readable: " + resource);
 				}
 			}
 			catch (IOException ex) {
-				// resource not found
-				return null;
+				logger.debug("Failed to create relative resource - trying next resource location", ex);
 			}
 		}
 		return null;
 	}
 
-	protected void setHeaders(Resource resource, HttpServletResponse response) throws IOException {
-		MediaType mediaType = getMediaType(resource);
-		if (mediaType != null) {
-			response.setContentType(mediaType.toString());
-		}
-		long length = resource.contentLength();
-		if (length > Integer.MAX_VALUE) {
-			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
-		}
-		response.setContentLength((int) length);
-	}
-
+	/**
+	 * Determine an appropriate media type for the given resource.
+	 * @param resource the resource to check
+	 * @return the corresponding media type, or <code>null</code> if none found
+	 */
 	protected MediaType getMediaType(Resource resource) {
 		String mimeType = getServletContext().getMimeType(resource.getFilename());
 		return (StringUtils.hasText(mimeType) ? MediaType.parseMediaType(mimeType) : null);
 	}
 
-	protected void writeContent(Resource resource, HttpServletResponse response) throws IOException {
+	/**
+	 * Set headers on the given servlet response.
+	 * Called for GET requests as well as HEAD requests.
+	 * @param response current servlet response
+	 * @param resource the identified resource (never <code>null</code>)
+	 * @param mediaType the resource's media type (never <code>null</code>)
+	 * @throws IOException in case of errors while setting the headers
+	 */
+	protected void setHeaders(HttpServletResponse response, Resource resource, MediaType mediaType) throws IOException {
+		long length = resource.contentLength();
+		if (length > Integer.MAX_VALUE) {
+			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
+		}
+		response.setContentLength((int) length);
+		response.setContentType(mediaType.toString());
+	}
+
+	/**
+	 * Write the actual content out to the given servlet response,
+	 * streaming the resource's content.
+	 * @param response current servlet response
+	 * @param resource the identified resource (never <code>null</code>)
+	 * @throws IOException in case of errors while writing the content
+	 */
+	protected void writeContent(HttpServletResponse response, Resource resource) throws IOException {
 		FileCopyUtils.copy(resource.getInputStream(), response.getOutputStream());
 	}
 
