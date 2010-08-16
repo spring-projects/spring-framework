@@ -10,8 +10,7 @@
 
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
+			<xsd:documentation source="java:org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"><![CDATA[
 	Configures the annotation-driven Spring MVC Controller programming model.
 	Note that, with Spring 3.0, this tag works in Servlet MVC only!
 			]]></xsd:documentation>
@@ -54,41 +53,49 @@
 			<xsd:documentation
 				source="java:org.springframework.web.servlet.resource.ResourceHttpRequestHandler"><![CDATA[
 	Configures a handler for serving static resources such as images, js, and, css files with cache headers optimized for efficient 
-	loading in a web browser.  Allows resources to be served out of any path that is reachable via Spring's Resource handling.
+	loading in a web browser. Allows resources to be served out of any path that is reachable via Spring's Resource handling.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="mapping" use="required" type="xsd:string">
 				<xsd:annotation>
-					<xsd:documentation>
-						<![CDATA[
-	The URL mapping pattern, within the current Sevlet context, to use for serving resources from this handler, such as "/resources/**"								
-]]>
-					</xsd:documentation>
+					<xsd:documentation><![CDATA[
+	The URL mapping pattern, within the current Servlet context, to use for serving resources from this handler, such as "/resources/**"
+					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="location" use="required" type="xsd:string">
 				<xsd:annotation>
-					<xsd:documentation>
-						<![CDATA[
-	The resource location from which to serve static content, specified at a Spring Resource pattern. Each location must point to a valid directory.  
-	Multiple locations may be specified as a comma-seperated list, and the locations will be checked for a given resource in the order specified.  For example, 
-	a value of "/, classpath:/META-INF/public-web-resources/" will allow resources to be served both from the web app root and from any JAR on the classpath 
-	that contains a /META-INF/public-web-resources/ directory, with resources in the web app root taking precedence.  								
-]]>
-					</xsd:documentation>
+					<xsd:documentation><![CDATA[
+	The resource location from which to serve static content, specified at a Spring Resource pattern.
+	Each location must point to a valid directory. Multiple locations may be specified as a comma-separated list,
+	and the locations will be checked for a given resource in the order specified. For example, a value of
+	"/, classpath:/META-INF/public-web-resources/" will allow resources to be served both from the web app
+	root and from any JAR on the classpath  that contains a /META-INF/public-web-resources/ directory,
+	with resources in the web app root taking precedence.
+					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="mapping-order" type="xsd:string">
+			<xsd:attribute name="cache-period" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation>
 						<![CDATA[
-	Specifies the order of the HandlerMapping for the resource handler.  The default order is Ordered.LOWEST_PRECEDENCE - 1.  								
-]]>
-					</xsd:documentation>
+	Specifies the cache period for the resources served by this resource handler, in seconds.
+	The default is to not send any cache headers but rather to rely on last-modified timestamps only.
+	Set this to 0 in order to send cache headers that prevent caching, or to a positive number of
+	seconds in order to send cache headers with the given max-age value.
+					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-		</xsd:complexType>		
+			<xsd:attribute name="order" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation>
+						<![CDATA[
+	Specifies the order of the HandlerMapping for the resource handler. The default order is Ordered.LOWEST_PRECEDENCE - 1.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
 	</xsd:element>
 	
 	<xsd:element name="default-servlet-handler">
