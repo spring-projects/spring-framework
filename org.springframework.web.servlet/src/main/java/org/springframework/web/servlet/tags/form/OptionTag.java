@@ -151,7 +151,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
 		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
 		String label = getLabelValue(value);
-		renderOption(value,  label, tagWriter);
+		renderOption(value, label, tagWriter);
 	}
 
 	@Override
@@ -232,7 +232,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	private String getLabelValue(Object resolvedValue) throws JspException {
 		String label = getLabel();
 		Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
-		return  getDisplayString(labelObj, getBindStatus().getEditor());
+		return getDisplayString(labelObj, getBindStatus().getEditor());
 	}
 
 	private void assertUnderSelectTag() {
