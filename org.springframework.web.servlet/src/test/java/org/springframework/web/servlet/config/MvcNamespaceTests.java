@@ -203,7 +203,6 @@ public class MvcNamespaceTests {
 		chain = mapping.getHandler(request);
 		assertEquals(5, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
-
 	}
 	
 	@Test
@@ -465,7 +464,6 @@ public class MvcNamespaceTests {
 		public void validate(Object target, Errors errors) {
 			this.validatorInvoked = true;
 		}
-		
 	}
 	
 	private static class TestBean {
@@ -482,7 +480,6 @@ public class MvcNamespaceTests {
 		public void setField(String field) {
 			this.field = field;
 		}
-		
 	}
 	
 	private static class TestMockServletContext extends MockServletContext {
@@ -495,7 +492,6 @@ public class MvcNamespaceTests {
 				return null;
 			}
 		}
-		
 	}
 
 }

@@ -16,14 +16,12 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
-import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -54,7 +52,7 @@ class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefini
 	
 	private void registerResourceMappings(ParserContext parserContext, Element element, Object source) {
 		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
-		if (!StringUtils.hasText(resourceHandlerName)) {
+		if (resourceHandlerName == null) {
 			return;
 		}
 		
@@ -71,8 +69,9 @@ class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefini
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 		
-		String mappingOrder = element.getAttribute("mapping-order");
-		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(mappingOrder) ? mappingOrder : Ordered.LOWEST_PRECEDENCE - 1);
+		String order = element.getAttribute("order");
+		// use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
+		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
 		
 		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
@@ -83,20 +82,23 @@ class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefini
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
 			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
-	        return "";
+	        return null;
 		}		
-		String[] locationPatterns = locationAttr.split(",\\s*");
-		List<String> locations = new ManagedList<String>();
-		for (String location : locationPatterns) {
-			locations.add(location);
-		}
+
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getPropertyValues().add("locations", locations);
+		resourceHandlerDef.getPropertyValues().add("locations", StringUtils.commaDelimitedListToStringArray(locationAttr));
+
+		String cacheSeconds = element.getAttribute("cache-period");
+		if (StringUtils.hasText(cacheSeconds)) {
+			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
+		}
+
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
 		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));	
 		return beanName;
 	}
+
 }
