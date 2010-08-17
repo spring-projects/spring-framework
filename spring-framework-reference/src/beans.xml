@@ -4149,7 +4149,13 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         <emphasis>instances</emphasis> (the objects that are created from the
         configuration metadata), then you instead need to use a
         <interfacename>BeanPostProcessor</interfacename> (described above in
-        <xref linkend="beans-factory-extension-bpp" />.</para>
+        <xref linkend="beans-factory-extension-bpp"/>.  While it is technically
+        possible to work with bean instances within a
+        <interfacename>BeanFactoryPostProcessor</interfacename> (e.g. using
+        <methodname>BeanFactory.getBean()</methodname>), doing so causes
+        premature bean instantiation, violating the usual containter lifecycle.
+        This may cause negative side effects such as bypassing bean post
+        processing.</para>
 
         <para>Also, <literal>BeanFactoryPostProcessors</literal> are scoped
         <emphasis>per-container</emphasis>. This is only relevant if you are
