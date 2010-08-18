@@ -504,8 +504,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
 		resolveBeanClass(mbd, beanName);
-		if (mbd.isFactoryMethodUnique && mbd.resolvedConstructorOrFactoryMethod == null) {
-			new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
+		if (mbd.isFactoryMethodUnique) {
+			boolean resolve;
+			synchronized (mbd.constructorArgumentLock) {
+				resolve = (mbd.resolvedConstructorOrFactoryMethod == null);
+			}
+			if (resolve) {
+				new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
+			}
 		}
 		return getAutowireCandidateResolver().isAutowireCandidate(
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);
