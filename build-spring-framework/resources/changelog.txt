@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.4 (2010-08-16)
+Changes in version 3.0.4 (2010-08-18)
 -------------------------------------
 
 * support for Hibernate Core 3.6, Hibernate Validator 4.1, EclipseLink 2.1, EHCache 2.2
@@ -16,7 +16,8 @@ Changes in version 3.0.4 (2010-08-16)
 * ConversionService does not accidentally use copy constructor for same type
 * fixed double ConversionFailedException nesting for ObjectToObjectConverter invocations
 * BeanWrapper preserves annotation information for individual array/list/map elements
-* Spring's constructor resolution consistently finds non-public multi-arg constructors 
+* Spring's constructor resolution consistently finds non-public multi-arg constructors
+* revised constructor argument caching for highly concurrent creation scenarios
 * SpEL passes full collection type context (generics, annotations) to ConversionService
 * SpEL 'select last' operator now works consistently with maps
 * BeanWrapper/DataBinder's "autoGrowNestedPaths" works for Maps as well
