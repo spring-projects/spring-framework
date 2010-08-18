@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<section id="beans-factory-scopes">
+  <title>Bean scopes</title>
+
+  <para>When you create a bean definition, you create a
+    <emphasis>recipe</emphasis> for creating actual instances of the class
+    defined by that bean definition. The idea that a bean definition is a recipe
+    is important, because it means that, as with a class, you can create many
+    object instances from a single recipe.</para>
+
+  <para>You can control not only the various dependencies and configuration
+    values that are to be plugged into an object that is created from a
+    particular bean definition, but also the <firstterm>scope</firstterm> of the
+    objects created from a particular bean definition. This approach is powerful
+    and flexible in that you can <emphasis>choose</emphasis> the scope of the
+    objects you create through configuration instead of having to bake in the
+    scope of an object at the Java class level. Beans can be defined to be
+    deployed in one of a number of scopes: out of the box, the Spring Framework
+    supports five scopes, three of which are available only if you use a
+    web-aware <interfacename>ApplicationContext</interfacename>.</para>
+
+  <para>The following scopes are supported out of the box. You can also create
+    <link linkend="beans-factory-scopes-custom">a custom scope.</link></para>
+
+  <table id="beans-factory-scopes-tbl">
+    <title>Bean scopes</title>
+
+    <tgroup cols="2">
+      <thead>
+        <row>
+          <entry align="center">Scope</entry>
+
+          <entry align="center">Description</entry>
+        </row>
+      </thead>
+
+      <tbody>
+        <row>
+          <entry><para> <link linkend="beans-factory-scopes-singleton"
+            >singleton</link> </para></entry>
+
+          <entry><para>(Default) Scopes a single bean definition to a single
+            object instance per Spring IoC container.</para></entry>
+        </row>
+
+        <row>
+          <entry><para> <link linkend="beans-factory-scopes-prototype"
+            >prototype</link> </para></entry>
+
+          <entry><para>Scopes a single bean definition to any number of object
+            instances.</para></entry>
+        </row>
+
+        <row>
+          <entry><para> <link linkend="beans-factory-scopes-request"
+            >request</link> </para></entry>
+
+          <entry><para>Scopes a single bean definition to the lifecycle of a
+            single HTTP request; that is, each HTTP request has its own instance
+            of a bean created off the back of a single bean definition. Only
+            valid in the context of a web-aware Spring
+            <interfacename>ApplicationContext</interfacename>.</para></entry>
+        </row>
+
+        <row>
+          <entry><para> <link linkend="beans-factory-scopes-session"
+            >session</link> </para></entry>
+
+          <entry><para>Scopes a single bean definition to the lifecycle of an
+            HTTP <interfacename>Session</interfacename>. Only valid in the
+            context of a web-aware Spring
+            <interfacename>ApplicationContext</interfacename>.</para></entry>
+        </row>
+
+        <row>
+          <entry><para> <link linkend="beans-factory-scopes-global-session"
+            >global session</link> </para></entry>
+
+          <entry><para>Scopes a single bean definition to the lifecycle of a
+            global HTTP <interfacename>Session</interfacename>. Typically only
+            valid when used in a portlet context. Only valid in the context of a
+            web-aware Spring
+            <interfacename>ApplicationContext</interfacename>.</para></entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </table>
+
+  <note>
+    <title>Thread-scoped beans</title>
+
+    <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is available,
+      but is not registered by default. For more information, see the
+      documentation for <ulink
+      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/SimpleThreadScope.html"
+      >SimpleThreadScope</ulink>. For instructions on how to register this or
+      any other custom scope, see <xref
+      linkend="beans-factory-scopes-custom-using"/>.</para>
+  </note>
+
+  <section id="beans-factory-scopes-singleton">
+    <title>The singleton scope</title>
+
+    <para>Only one <emphasis>shared</emphasis> instance of a singleton bean is
+      managed, and all requests for beans with an id or ids matching that bean
+      definition result in that one specific bean instance being returned by the
+      Spring container.</para>
+
+    <para>To put it another way, when you define a bean definition and it is
+      scoped as a singleton, the Spring IoC container creates <emphasis>exactly
+      one</emphasis> instance of the object defined by that bean definition.
+      This single instance is stored in a cache of such singleton beans, and
+      <emphasis>all subsequent requests and references</emphasis> for that named
+      bean return the cached object.</para>
+
+    <para><mediaobject>
+      <imageobject role="fo">
+        <imagedata align="center" fileref="images/singleton.png" format="PNG"/>
+      </imageobject>
+
+      <imageobject role="html">
+        <imagedata align="center" fileref="images/singleton.png" format="PNG"/>
+      </imageobject>
+      </mediaobject></para>
+
+    <para>Spring's concept of a singleton bean differs from the Singleton
+      pattern as defined in the Gang of Four (GoF) patterns book. The GoF
+      Singleton hard-codes the scope of an object such that one <emphasis>and
+      only one</emphasis> instance of a particular class is created<emphasis>
+      per <classname>ClassLoader</classname></emphasis>. The scope of the Spring
+      singleton is best described as <emphasis>per container and per
+      bean</emphasis>. This means that if you define one bean for a particular
+      class in a single Spring container, then the Spring container creates one
+      <emphasis>and only one</emphasis> instance of the class defined by that
+      bean definition. <emphasis>The singleton scope is the default scope in
+      Spring</emphasis>. To define a bean as a singleton in XML, you would
+      write, for example:</para>
+
+    <programlisting language="xml">&lt;bean id="accountService" class="com.foo.DefaultAccountService"/&gt;
+
+<lineannotation>&lt;!-- the following is equivalent, though redundant (singleton scope is the default) --&gt;</lineannotation>
+&lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/&gt;</programlisting>
+  </section>
+
+  <section id="beans-factory-scopes-prototype">
+    <title>The prototype scope</title>
+
+    <para>The non-singleton, prototype scope of bean deployment results in the
+      <emphasis>creation of a new bean instance</emphasis> every time a request
+      for that specific bean is made. That is, the bean is injected into another
+      bean or you request it through a <literal>getBean()</literal> method call
+      on the container. As a rule, use the prototype scope for all stateful
+      beans and the singleton scope for stateless beans.</para>
+
+    <para>The following diagram illustrates the Spring prototype scope.
+      <emphasis>A data access object (DAO) is not typically configured as a
+      prototype, because a typical DAO does not hold any conversational state;
+      it was just easier for this author to reuse the core of the singleton
+      diagram.</emphasis><!--First it says diagram illustrates scope, but then says it's not typical of a prototype scope. Why not use realistic one? --></para>
+
+    <para><mediaobject>
+      <imageobject role="fo">
+        <imagedata align="center" fileref="images/prototype.png" format="PNG"/>
+      </imageobject>
+
+      <imageobject role="html">
+        <imagedata align="center" fileref="images/prototype.png" format="PNG"/>
+      </imageobject>
+      </mediaobject></para>
+
+    <para>The following example defines a bean as a prototype in XML:</para>
+
+    <programlisting language="xml"><lineannotation>&lt;!-- using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation>
+&lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/&gt;</programlisting>
+
+    <para>In contrast to the other scopes, Spring does not manage the complete
+      lifecycle of a prototype bean: the container instantiates, configures, and
+      otherwise assembles a prototype object, and hands it to the client, with
+      no further record of that prototype instance. Thus, although
+      <emphasis>initialization</emphasis> lifecycle callback methods are called
+      on all objects regardless of scope, in the case of prototypes, configured
+      <emphasis>destruction</emphasis> lifecycle callbacks are
+      <emphasis>not</emphasis> called. The client code must clean up
+      prototype-scoped objects and release expensive resources that the
+      prototype bean(s) are holding. To get the Spring container to release
+      resources held by prototype-scoped beans, try using a custom <link
+      linkend="beans-factory-extension-bpp">bean post-processor</link>, which
+      holds a reference to beans that need to be cleaned up.</para>
+
+    <para>In some respects, the Spring container's role in regard to a
+      prototype-scoped bean is a replacement for the Java <literal>new</literal>
+      operator. All lifecycle management past that point must be handled by the
+      client. (For details on the lifecycle of a bean in the Spring container,
+      see <xref linkend="beans-factory-lifecycle"/>.)</para>
+  </section>
+
+  <section id="beans-factory-scopes-sing-prot-interaction">
+    <title>Singleton beans with prototype-bean dependencies</title>
+
+    <para>When you use singleton-scoped beans with dependencies on prototype
+      beans, be aware that <emphasis>dependencies are resolved at instantiation
+      time</emphasis>. Thus if you dependency-inject a prototype-scoped bean
+      into a singleton-scoped bean, a new prototype bean is instantiated and
+      then dependency-injected into the singleton bean. The prototype instance
+      is the sole instance that is ever supplied to the singleton-scoped
+      bean.</para>
+
+    <para>However, suppose you want the singleton-scoped bean to acquire a new
+      instance of the prototype-scoped bean repeatedly at runtime. You cannot
+      dependency-inject a prototype-scoped bean into your singleton bean,
+      because that injection occurs only <emphasis>once</emphasis>, when the
+      Spring container is instantiating the singleton bean and resolving and
+      injecting its dependencies. If you need a new instance of a prototype bean
+      at runtime more than once, see <xref
+      linkend="beans-factory-method-injection"/></para>
+  </section>
+
+  <section id="beans-factory-scopes-other">
+    <title>Request, session, and global session scopes</title>
+
+    <para>The <literal>request</literal>, <literal>session</literal>, and
+      <literal>global session</literal> scopes are <emphasis>only</emphasis>
+      available if you use a web-aware Spring
+      <interfacename>ApplicationContext</interfacename> implementation (such as
+      <classname>XmlWebApplicationContext</classname>). If you use these scopes
+      with regular Spring IoC containers such as the
+      <classname>ClassPathXmlApplicationContext</classname>, you get an
+      <classname>IllegalStateException</classname> complaining about an unknown
+      bean scope.</para>
+
+    <section id="beans-factory-scopes-other-web-configuration">
+      <title>Initial web configuration</title>
+
+      <para>To support the scoping of beans at the <literal>request</literal>,
+        <literal>session</literal>, and <literal>global session</literal> levels
+        (web-scoped beans), some minor initial configuration is required before
+        you define your beans. (This initial setup is <emphasis>not</emphasis>
+        required for the standard scopes, singleton and prototype.)</para>
+
+      <para>How you accomplish this initial setup depends on your particular
+        Servlet environment..</para>
+
+      <para>If you access scoped beans within Spring Web MVC, in effect, within
+        a request that is processed by the Spring
+        <classname>DispatcherServlet</classname>, or
+        <classname>DispatcherPortlet</classname>, then no special setup is
+        necessary: <classname>DispatcherServlet</classname> and
+        <classname>DispatcherPortlet</classname> already expose all relevant
+        state.</para>
+
+      <para>If you use a Servlet 2.4+ web container, with requests processed
+        outside of Spring's DispatcherServlet (for example, when using JSF or
+        Struts), you need to add the following
+        <interfacename>javax.servlet.ServletRequestListener</interfacename> to
+        the declarations in your web applications <literal>web.xml</literal>
+        file:</para>
+
+      <programlisting language="xml">&lt;web-app&gt;
+...
+&lt;listener&gt;
+  &lt;listener-class&gt;
+      org.springframework.web.context.request.RequestContextListener
+  &lt;/listener-class&gt;
+&lt;/listener&gt;
+...
+&lt;/web-app&gt;</programlisting>
+
+      <para>If you use an older web container (Servlet 2.3), use the provided
+        <interfacename>javax.servlet.Filter</interfacename> implementation. The
+        following snippet of XML configuration must be included in the
+        <literal>web.xml</literal> file of your web application if you want to
+        access web-scoped beans in requests outside of Spring's
+        DispatcherServlet on a Servlet 2.3 container. (The filter mapping
+        depends on the surrounding web application configuration, so you must
+        change it as appropriate.)</para>
+
+      <programlisting language="xml">&lt;web-app&gt;
+..
+&lt;filter&gt;
+  &lt;filter-name&gt;requestContextFilter&lt;/filter-name&gt;
+  &lt;filter-class&gt;org.springframework.web.filter.RequestContextFilter&lt;/filter-class&gt;
+&lt;/filter&gt;
+&lt;filter-mapping&gt;
+  &lt;filter-name&gt;requestContextFilter&lt;/filter-name&gt;
+  &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+&lt;/filter-mapping&gt;
+...
+&lt;/web-app&gt;</programlisting>
+
+      <para><classname>DispatcherServlet</classname>,
+        <classname>RequestContextListener</classname> and
+        <classname>RequestContextFilter</classname> all do exactly the same
+        thing, namely bind the HTTP request object to the
+        <classname>Thread</classname> that is servicing that request. This makes
+        beans that are request- and session-scoped available further down the
+        call chain.</para>
+    </section>
+
+    <section id="beans-factory-scopes-request">
+      <title>Request scope</title>
+
+      <para>Consider the following bean definition:</para>
+
+      <programlisting language="xml">&lt;bean id="loginAction" class="com.foo.LoginAction" scope="request"/&gt;</programlisting>
+
+      <para>The Spring container creates a new instance of the
+        <classname>LoginAction</classname> bean by using the
+        <literal>loginAction</literal> bean definition for each and every HTTP
+        request. That is, the <literal>loginAction</literal> bean is scoped at
+        the HTTP request level. You can change the internal state of the
+        instance that is created as much as you want, because other instances
+        created from the same <literal>loginAction</literal> bean definition
+        will not see these changes in state; they are particular to an
+        individual request. When the request completes processing, the bean that
+        is scoped to the request is discarded.</para>
+    </section>
+
+    <section id="beans-factory-scopes-session">
+      <title>Session scope</title>
+
+      <para>Consider the following bean definition:</para>
+
+      <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;</programlisting>
+
+      <para>The Spring container creates a new instance of the
+        <classname>UserPreferences</classname> bean by using the
+        <literal>userPreferences</literal> bean definition for the lifetime of a
+        single HTTP <interfacename>Session</interfacename>. In other words, the
+        <literal>userPreferences</literal> bean is effectively scoped at the
+        HTTP <interfacename>Session</interfacename> level. As with
+        <literal>request-scoped</literal> beans, you can change the internal
+        state of the instance that is created as much as you want, knowing that
+        other HTTP <interfacename>Session</interfacename> instances that are
+        also using instances created from the same
+        <literal>userPreferences</literal> bean definition do not see these
+        changes in state, because they are particular to an individual HTTP
+        <interfacename>Session</interfacename>. When the HTTP
+        <interfacename>Session</interfacename> is eventually discarded, the bean
+        that is scoped to that particular HTTP
+        <interfacename>Session</interfacename> is also discarded.</para>
+    </section>
+
+    <section id="beans-factory-scopes-global-session">
+      <title>Global session scope</title>
+
+      <para>Consider the following bean definition:</para>
+
+      <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/&gt;</programlisting>
+
+      <para>The <literal>global session</literal> scope is similar to the
+        standard HTTP <interfacename>Session</interfacename> scope (<link
+        linkend="beans-factory-scopes-session">described above</link>), and
+        applies only in the context of portlet-based web applications. The
+        portlet specification defines the notion of a global
+        <interfacename>Session</interfacename> that is shared among all portlets
+        that make up a single portlet web application. Beans defined at the
+        <literal>global session</literal> scope are scoped (or bound) to the
+        lifetime of the global portlet
+        <interfacename>Session</interfacename>.</para>
+
+      <para>If you write a standard Servlet-based web application and you define
+        one or more beans as having <literal>global session</literal> scope, the
+        standard HTTP <interfacename>Session</interfacename> scope is used, and
+        no error is raised.</para>
+    </section>
+
+    <section id="beans-factory-scopes-other-injection">
+      <title>Scoped beans as dependencies</title>
+
+      <para>The Spring IoC container manages not only the instantiation of your
+        objects (beans), but also the wiring up of collaborators (or
+        dependencies). If you want to inject (for example) an HTTP request
+        scoped bean into another bean, you must inject an AOP proxy in place of
+        the scoped bean. That is, you need to inject a proxy object that exposes
+        the same public interface as the scoped object but that can also
+        retrieve the real, target object from the relevant scope (for example,
+        an HTTP request) and delegate method calls onto the real object.</para>
+
+      <note>
+        <para>You <emphasis>do not</emphasis> need to use the
+          <literal>&lt;aop:scoped-proxy/&gt;</literal> in conjunction with beans
+          that are scoped as <literal>singletons</literal> or
+          <literal>prototypes</literal>. If you try to create a scoped proxy for
+          a singleton bean, the
+          <exceptionname>BeanCreationException</exceptionname> is raised.</para>
+      </note>
+
+      <para>The configuration in the following example is only one line, but it
+        is important to understand the <quote>why</quote> as well as the
+        <quote>how</quote> behind it.</para>
+
+      <!--What is this example supposed to show?-->
+
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:aop="http://www.springframework.org/schema/aop"
+     xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
+
+  <lineannotation>&lt;!-- an HTTP <interfacename>Session</interfacename>-scoped bean exposed as a proxy --&gt;</lineannotation>
+  &lt;bean id="userPreferences" class="com.foo.UserPreferences" <emphasis role="bold">scope="session"</emphasis>&gt;
+
+        <lineannotation>&lt;!-- this next element effects the proxying of the surrounding bean --&gt;</lineannotation>
+        <emphasis role="bold">&lt;aop:scoped-proxy/&gt;</emphasis>
+  &lt;/bean&gt;
+
+  <lineannotation>&lt;!-- a singleton-scoped bean <emphasis role="bold">injected with a proxy to the above bean</emphasis> --&gt;</lineannotation>
+  &lt;bean id="userService" class="com.foo.SimpleUserService"&gt;
+
+      <lineannotation>&lt;!-- a reference to the <emphasis role="bold">proxied</emphasis> <literal>userPreferences</literal> bean --&gt;</lineannotation>
+      &lt;property name="userPreferences" ref="userPreferences"/&gt;
+
+  &lt;/bean&gt;
+&lt;/beans&gt;
+</programlisting>
+
+      <para>To create such a proxy, you insert a child
+        <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a scoped bean
+        definition.
+        <!--To create what such proxy? Is the proxy created above? Also, below added an x-ref that seems relevant.-->(If
+        you choose class-based proxying, you also need the CGLIB library in your
+        classpath. See <xref
+        linkend="beans-factory-scopes-other-injection-proxies"/> and <xref
+        linkend="xsd-config"/>.) Why do definitions of beans scoped at the
+        <literal>request</literal>, <literal>session</literal>,
+        <literal>globalSession</literal> and custom-scope levels require the
+        <literal>&lt;aop:scoped-proxy/&gt;</literal> element ? Let's examine the
+        following singleton bean definition and contrast it with what you need
+        to define for the aforementioned scopes. (The following
+        <literal>userPreferences</literal> bean definition as it stands is
+        <emphasis>incomplete.)</emphasis></para>
+
+      <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/&gt;
+
+&lt;bean id="userManager" class="com.foo.UserManager"&gt;
+  &lt;property name="userPreferences" ref="userPreferences"/&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>In the preceding example, the singleton bean
+        <literal>userManager</literal> is injected with a reference to the HTTP
+        <interfacename>Session</interfacename>-scoped bean
+        <literal>userPreferences</literal>. The salient point here is that the
+        <literal>userManager</literal> bean is a singleton: it will be
+        instantiated <emphasis>exactly once</emphasis> per container, and its
+        dependencies (in this case only one, the
+        <literal>userPreferences</literal> bean) are also injected only once.
+        This means that the <literal>userManager</literal> bean will only
+        operate on the exact same <literal>userPreferences</literal> object,
+        that is, the one that it was originally injected with.</para>
+
+      <!-- MLP: Beverly to review paragraph -->
+
+      <para>This is <emphasis>not</emphasis> the behavior you want when
+        injecting a shorter-lived scoped bean into a longer-lived scoped bean,
+        for example injecting an HTTP
+        <interfacename>Session</interfacename>-scoped collaborating bean as a
+        dependency into singleton bean. Rather, you need a single
+        <literal>userManager</literal> object, and for the lifetime of an HTTP
+        <interfacename>Session</interfacename>, you need a
+        <literal>userPreferences</literal> object that is specific to said HTTP
+        <interfacename>Session</interfacename>. Thus the container creates an
+        object that exposes the exact same public interface as the
+        <classname>UserPreferences</classname> class (ideally an object that
+        <emphasis>is a</emphasis> <classname>UserPreferences</classname>
+        instance) which can fetch the real
+        <classname>UserPreferences</classname> object from the scoping mechanism
+        (HTTP request, <interfacename>Session</interfacename>, etc.). The
+        container injects this proxy object into the
+        <literal>userManager</literal> bean, which is unaware that this
+        <classname>UserPreferences</classname> reference is a proxy. In this
+        example, when a <interfacename>UserManager</interfacename> instance
+        invokes a method on the dependency-injected
+        <classname>UserPreferences</classname> object, it actually is invoking a
+        method on the proxy. The proxy then fetches the real
+        <classname>UserPreferences</classname> object from (in this case) the
+        HTTP <interfacename>Session</interfacename>, and delegates the method
+        invocation onto the retrieved real
+        <classname>UserPreferences</classname> object.</para>
+
+      <para>Thus you need the following, correct and complete, configuration
+        when injecting <literal>request-</literal>, <literal>session-</literal>,
+        and <literal>globalSession-scoped</literal> beans into collaborating
+        objects:</para>
+
+      <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"&gt;
+  <emphasis role="bold"><literal>&lt;aop:scoped-proxy/&gt;</literal></emphasis>
+&lt;/bean&gt;
+
+&lt;bean id="userManager" class="com.foo.UserManager"&gt;
+  &lt;property name="userPreferences" ref="userPreferences"/&gt;
+&lt;/bean&gt;</programlisting>
+
+      <section id="beans-factory-scopes-other-injection-proxies">
+        <title>Choosing the type of proxy to create</title>
+
+        <para>By default, when the Spring container creates a proxy for a bean
+          that is marked up with the
+          <literal>&lt;aop:scoped-proxy/&gt;</literal> element, <emphasis>a
+          CGLIB-based class proxy is created</emphasis>. This means that you
+          need to have the CGLIB library in the classpath of your
+          application.</para>
+
+        <para><emphasis>Note: CGLIB proxies only intercept public method
+          calls!</emphasis> Do not call non-public methods on such a proxy; they
+          will not be delegated to the scoped target object.</para>
+
+        <para>Alternatively, you can configure the Spring container to create
+          standard JDK interface-based proxies for such scoped beans, by
+          specifying <literal>false</literal> for the value of the
+          <literal>proxy-target-class</literal> attribute of the
+          <literal>&lt;aop:scoped-proxy/&gt;</literal> element. Using JDK
+          interface-based proxies means that you do not need additional
+          libraries in your application classpath to effect such proxying.
+          However, it also means that the class of the scoped bean must
+          implement at least one interface, and <emphasis>that all</emphasis>
+          collaborators into which the scoped bean is injected must reference
+          the bean through one of its interfaces.</para>
+
+        <programlisting language="xml"><lineannotation>&lt;!-- <classname>DefaultUserPreferences</classname> implements the <interfacename>UserPreferences</interfacename> interface --&gt;</lineannotation>
+&lt;bean id="userPreferences" class="com.foo.DefaultUserPreferences" scope="session"&gt;
+  &lt;aop:scoped-proxy <emphasis role="bold">proxy-target-class="false"<literal/></emphasis>/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="userManager" class="com.foo.UserManager"&gt;
+  &lt;property name="userPreferences" ref="userPreferences"/&gt;
+&lt;/bean&gt;</programlisting>
+
+        <para>For more detailed information about choosing class-based or
+          interface-based proxying, see <xref linkend="aop-proxying"/>.</para>
+      </section>
+    </section>
+  </section>
+
+  <section id="beans-factory-scopes-custom">
+    <title>Custom scopes</title>
+
+    <para>As of Spring 2.0, the bean scoping mechanism is extensible. You can
+      define your own scopes, or even redefine existing scopes, although the
+      latter is considered bad practice and you <emphasis>cannot</emphasis>
+      override the built-in <literal>singleton</literal> and
+      <literal>prototype</literal> scopes.</para>
+
+    <section id="beans-factory-scopes-custom-creating">
+      <title>Creating a custom scope</title>
+
+      <para>To integrate your custom scope(s) into the Spring container, you
+        need to implement the
+        <interfacename>org.springframework.beans.factory.config.Scope</interfacename>
+        interface, which is described in this section. For an idea of how to
+        implement your own scopes, see the <interfacename>Scope</interfacename>
+        implementations that are supplied with the Spring Framework itself and
+        the <ulink
+        url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/Scope.html"
+        >Scope Javadoc</ulink>, which explains the methods you need to implement
+        in more detail.</para>
+
+      <para>The <literal>Scope</literal> interface has four methods to get
+        objects from the scope, remove them from the scope, and allow them to be
+        destroyed.</para>
+
+      <para>The following method returns the object from the underlying scope.
+        The session scope implementation, for example, returns the
+        session-scoped bean (and if it does not exist, the method returns a new
+        instance of the bean, after having bound it to the session for future
+        reference).<!--How can it return a a new instance of a bean that doesn't exist? Revise to clarify.--></para>
+
+      <programlisting language="java">Object get(String name, ObjectFactory objectFactory)</programlisting>
+
+      <para>The following method removes the object from the underlying scope.
+        The session scope implementation for example, removes the session-scoped
+        bean from the underlying session. The object should be returned, but you
+        can return null if the object with the specified name is not
+        found.</para>
+
+      <programlisting language="java">Object remove(String name)</programlisting>
+
+      <para>The following method registers the callbacks the scope should
+        execute when it is destroyed or when the specified object in the scope
+        is destroyed. Refer to the Javadoc or a Spring scope implementation for
+        more information on destruction callbacks.</para>
+
+      <programlisting language="java">void registerDestructionCallback(String name, Runnable destructionCallback)</programlisting>
+
+      <para>The following method obtains the conversation identifier for the
+        underlying scope. This identifier is different for each scope. For a
+        session scoped implementation, this identifier can be the session
+        identifier.</para>
+
+      <programlisting language="java">String getConversationId()</programlisting>
+    </section>
+
+    <section id="beans-factory-scopes-custom-using">
+      <title>Using a custom scope</title>
+
+      <para>After you write and test one or more custom
+        <interfacename>Scope</interfacename> implementations, you need to make
+        the Spring container aware of your new scope(s). The following method is
+        the central method to register a new
+        <interfacename>Scope</interfacename> with the Spring container:</para>
+
+      <programlisting language="java">void registerScope(String scopeName, Scope scope);</programlisting>
+
+      <para>This method is declared on the
+        <interfacename>ConfigurableBeanFactory</interfacename> interface, which
+        is available on most of the concrete
+        <interfacename>ApplicationContext</interfacename> implementations that
+        ship with Spring via the BeanFactory property.</para>
+
+      <para>The first argument to the <methodname>registerScope(..)</methodname>
+        method is the unique name associated with a scope; examples of such
+        names in the Spring container itself are <literal>singleton</literal>
+        and <literal>prototype</literal>. The second argument to the
+        <methodname>registerScope(..)</methodname> method is an actual instance
+        of the custom <interfacename>Scope</interfacename> implementation that
+        you wish to register and use.</para>
+
+      <para>Suppose that you write your custom
+        <interfacename>Scope</interfacename> implementation, and then register
+        it as below.</para>
+
+      <note>
+        <para>The example below uses <literal>SimpleThreadScope</literal> which
+          is included with Spring, but not registered by default. The
+          instructions would be the same for your own custom
+          <literal>Scope</literal> implementations.</para>
+      </note>
+
+      <programlisting language="java">
+Scope threadScope = new SimpleThreadScope();
+beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope);</programlisting>
+
+      <para>You then create bean definitions that adhere to the scoping rules of
+        your custom <interfacename>Scope</interfacename>:</para>
+
+      <programlisting language="xml">&lt;bean id="..." class="..." scope="thread"&gt;</programlisting>
+
+      <para>With a custom <interfacename>Scope</interfacename> implementation,
+        you are not limited to programmatic registration of the scope. You can
+        also do the <interfacename>Scope</interfacename> registration
+        declaratively, using the <classname>CustomScopeConfigurer</classname>
+        class:</para>
+
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:aop="http://www.springframework.org/schema/aop"
+     xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
+
+  &lt;bean class="org.springframework.beans.factory.config.CustomScopeConfigurer"&gt;
+      &lt;property name="scopes"&gt;
+          &lt;map&gt;<emphasis role="bold">
+              &lt;entry key="thread"&gt;
+                  &lt;bean class="org.springframework.context.support.SimpleThreadScope"/&gt;
+              &lt;/entry&gt;</emphasis>
+          &lt;/map&gt;
+      &lt;/property&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="bar" class="x.y.Bar" scope="thread"&gt;
+      &lt;property name="name" value="Rick"/&gt;
+      &lt;aop:scoped-proxy/&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="foo" class="x.y.Foo"&gt;
+      &lt;property name="bar" ref="bar"/&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <note>
+        <para>When you place &lt;aop:scoped-proxy/&gt; in a
+          <interfacename>FactoryBean</interfacename> implementation, it is the
+          factory bean itself that is scoped, not the object returned from
+          <methodname>getObject()</methodname>.</para>
+      </note>
+    </section>
+  </section>
+</section>
