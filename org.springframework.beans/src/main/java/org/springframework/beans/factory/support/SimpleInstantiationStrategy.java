@@ -45,27 +45,30 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
-			Constructor<?> constructorToUse = (Constructor<?>) beanDefinition.resolvedConstructorOrFactoryMethod;
-			if (constructorToUse == null) {
-				final Class clazz = beanDefinition.getBeanClass();
-				if (clazz.isInterface()) {
-					throw new BeanInstantiationException(clazz, "Specified class is an interface");
-				}
-				try {
-					if (System.getSecurityManager() != null) {
-						constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>() {
-							public Constructor run() throws Exception {
-								return clazz.getDeclaredConstructor((Class[]) null);
-							}
-						});
+			Constructor<?> constructorToUse;
+			synchronized (beanDefinition.constructorArgumentLock) {
+				constructorToUse = (Constructor<?>) beanDefinition.resolvedConstructorOrFactoryMethod;
+				if (constructorToUse == null) {
+					final Class clazz = beanDefinition.getBeanClass();
+					if (clazz.isInterface()) {
+						throw new BeanInstantiationException(clazz, "Specified class is an interface");
 					}
-					else {
-						constructorToUse =	clazz.getDeclaredConstructor((Class[]) null);
+					try {
+						if (System.getSecurityManager() != null) {
+							constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>() {
+								public Constructor run() throws Exception {
+									return clazz.getDeclaredConstructor((Class[]) null);
+								}
+							});
+						}
+						else {
+							constructorToUse =	clazz.getDeclaredConstructor((Class[]) null);
+						}
+						beanDefinition.resolvedConstructorOrFactoryMethod = constructorToUse;
 					}
-					beanDefinition.resolvedConstructorOrFactoryMethod = constructorToUse;
-				}
-				catch (Exception ex) {
-					throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+					catch (Exception ex) {
+						throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+					}
 				}
 			}
 			return BeanUtils.instantiateClass(constructorToUse);

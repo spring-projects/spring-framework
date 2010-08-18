@@ -117,13 +117,19 @@ class ConstructorResolver {
 			argsToUse = explicitArgs;
 		}
 		else {
-			constructorToUse = (Constructor) mbd.resolvedConstructorOrFactoryMethod;
-			if (constructorToUse != null) {
-				// Found a cached constructor...
-				argsToUse = mbd.resolvedConstructorArguments;
-				if (argsToUse == null) {
-					argsToUse = resolvePreparedArguments(beanName, mbd, bw, constructorToUse);
+			Object[] argsToResolve = null;
+			synchronized (mbd.constructorArgumentLock) {
+				constructorToUse = (Constructor) mbd.resolvedConstructorOrFactoryMethod;
+				if (constructorToUse != null && mbd.constructorArgumentsResolved) {
+					// Found a cached constructor...
+					argsToUse = mbd.resolvedConstructorArguments;
+					if (argsToUse == null) {
+						argsToResolve = mbd.preparedConstructorArguments;
+					}
 				}
+			}
+			if (argsToResolve != null) {
+				argsToUse = resolvePreparedArguments(beanName, mbd, bw, constructorToUse, argsToResolve);
 			}
 		}
 
@@ -254,8 +260,7 @@ class ConstructorResolver {
 			}
 
 			if (explicitArgs == null) {
-				mbd.resolvedConstructorOrFactoryMethod = constructorToUse;
-				argsHolderToUse.storeCache(mbd);
+				argsHolderToUse.storeCache(mbd, constructorToUse);
 			}
 		}
 
@@ -312,7 +317,9 @@ class ConstructorResolver {
 				}
 			}
 		}
-		mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+		synchronized (mbd.constructorArgumentLock) {
+			mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+		}
 	}
 
 	/**
@@ -371,13 +378,19 @@ class ConstructorResolver {
 			argsToUse = explicitArgs;
 		}
 		else {
-			factoryMethodToUse = (Method) mbd.resolvedConstructorOrFactoryMethod;
-			if (factoryMethodToUse != null) {
-				// Found a cached factory method...
-				argsToUse = mbd.resolvedConstructorArguments;
-				if (argsToUse == null && mbd.preparedConstructorArguments != null) {
-					argsToUse = resolvePreparedArguments(beanName, mbd, bw, factoryMethodToUse);
+			Object[] argsToResolve = null;
+			synchronized (mbd.constructorArgumentLock) {
+				factoryMethodToUse = (Method) mbd.resolvedConstructorOrFactoryMethod;
+				if (factoryMethodToUse != null && mbd.constructorArgumentsResolved) {
+					// Found a cached factory method...
+					argsToUse = mbd.resolvedConstructorArguments;
+					if (argsToUse == null) {
+						argsToResolve = mbd.preparedConstructorArguments;
+					}
 				}
+			}
+			if (argsToResolve != null) {
+				argsToUse = resolvePreparedArguments(beanName, mbd, bw, factoryMethodToUse, argsToResolve);
 			}
 		}
 
@@ -536,8 +549,7 @@ class ConstructorResolver {
 			}
 
 			if (explicitArgs == null) {
-				mbd.resolvedConstructorOrFactoryMethod = factoryMethodToUse;
-				argsHolderToUse.storeCache(mbd);
+				argsHolderToUse.storeCache(mbd, factoryMethodToUse);
 			}
 		}
 
@@ -734,11 +746,10 @@ class ConstructorResolver {
 	 * Resolve the prepared arguments stored in the given bean definition.
 	 */
 	private Object[] resolvePreparedArguments(
-			String beanName, RootBeanDefinition mbd, BeanWrapper bw, Member methodOrCtor) {
+			String beanName, RootBeanDefinition mbd, BeanWrapper bw, Member methodOrCtor, Object[] argsToResolve) {
 
 		Class[] paramTypes = (methodOrCtor instanceof Method ?
 				((Method) methodOrCtor).getParameterTypes() : ((Constructor) methodOrCtor).getParameterTypes());
-		Object[] argsToResolve = mbd.preparedConstructorArguments;
 		TypeConverter converter = (this.beanFactory.getCustomTypeConverter() != null ?
 				this.beanFactory.getCustomTypeConverter() : bw);
 		BeanDefinitionValueResolver valueResolver =
@@ -789,11 +800,11 @@ class ConstructorResolver {
 	 */
 	private static class ArgumentsHolder {
 
-		public Object rawArguments[];
+		public final Object rawArguments[];
 
-		public Object arguments[];
+		public final Object arguments[];
 
-		public Object preparedArguments[];
+		public final Object preparedArguments[];
 
 		public boolean resolveNecessary = false;
 
@@ -833,14 +844,17 @@ class ConstructorResolver {
 			return Integer.MAX_VALUE - 1024;
 		}
 
-		public void storeCache(RootBeanDefinition mbd) {
-			if (this.resolveNecessary) {
-				mbd.preparedConstructorArguments = this.preparedArguments;
+		public void storeCache(RootBeanDefinition mbd, Object constructorOrFactoryMethod) {
+			synchronized (mbd.constructorArgumentLock) {
+				mbd.resolvedConstructorOrFactoryMethod = constructorOrFactoryMethod;
+				mbd.constructorArgumentsResolved = true;
+				if (this.resolveNecessary) {
+					mbd.preparedConstructorArguments = this.preparedArguments;
+				}
+				else {
+					mbd.resolvedConstructorArguments = this.arguments;
+				}
 			}
-			else {
-				mbd.resolvedConstructorArguments = this.arguments;
-			}
-			mbd.constructorArgumentsResolved = true;
 		}
 	}
 

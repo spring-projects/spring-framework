@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,16 +59,18 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	boolean isFactoryMethodUnique;
 
 	/** Package-visible field for caching the resolved constructor or factory method */
-	volatile Object resolvedConstructorOrFactoryMethod;
-
-	/** Package-visible field for caching fully resolved constructor arguments */
-	volatile Object[] resolvedConstructorArguments;
-
-	/** Package-visible field for caching partly prepared constructor arguments */
-	volatile Object[] preparedConstructorArguments;
+	Object resolvedConstructorOrFactoryMethod;
 
 	/** Package-visible field that marks the constructor arguments as resolved */
-	volatile boolean constructorArgumentsResolved = false;
+	boolean constructorArgumentsResolved = false;
+
+	/** Package-visible field for caching fully resolved constructor arguments */
+	Object[] resolvedConstructorArguments;
+
+	/** Package-visible field for caching partly prepared constructor arguments */
+	Object[] preparedConstructorArguments;
+
+	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
 	volatile Boolean beforeInstantiationResolved;
@@ -77,6 +79,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	boolean postProcessed = false;
 
 	final Object postProcessingLock = new Object();
+
 
 	/**
 	 * Create a new RootBeanDefinition, to be configured through its bean
@@ -264,8 +267,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @return the factory method, or <code>null</code> if not found or not resolved yet
 	 */
 	public Method getResolvedFactoryMethod() {
-		Object candidate = this.resolvedConstructorOrFactoryMethod;
-		return (candidate instanceof Method ? (Method) candidate : null);
+		synchronized (this.constructorArgumentLock) {
+			Object candidate = this.resolvedConstructorOrFactoryMethod;
+			return (candidate instanceof Method ? (Method) candidate : null);
+		}
 	}
 
 
