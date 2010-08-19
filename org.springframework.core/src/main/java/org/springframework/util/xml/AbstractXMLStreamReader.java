@@ -149,7 +149,8 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	public String getAttributeValue(String namespaceURI, String localName) {
 		for (int i = 0; i < getAttributeCount(); i++) {
 			QName name = getAttributeName(i);
-			if (name.getNamespaceURI().equals(namespaceURI) && name.getLocalPart().equals(localName)) {
+			if (name.getLocalPart().equals(localName) &&
+					(namespaceURI == null || name.getNamespaceURI().equals(namespaceURI))) {
 				return getAttributeValue(i);
 			}
 		}
