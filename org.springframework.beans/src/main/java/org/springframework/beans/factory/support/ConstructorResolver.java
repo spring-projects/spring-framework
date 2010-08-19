@@ -44,7 +44,6 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -515,13 +514,13 @@ class ConstructorResolver {
 			}
 
 			if (factoryMethodToUse == null) {
-				boolean hasArgs  = resolvedValues.getArgumentCount() > 0;
+				boolean hasArgs = (resolvedValues.getArgumentCount() > 0);
 				String argDesc = "";
 				if (hasArgs) {
 					List<String> argTypes = new ArrayList<String>();
 					for (ValueHolder value : resolvedValues.getIndexedArgumentValues().values()) {
-						String argType = value.getType() != null ?
-								ClassUtils.getShortName(value.getType()) : value.getValue().getClass().getSimpleName();
+						String argType = (value.getType() != null ?
+								ClassUtils.getShortName(value.getType()) : value.getValue().getClass().getSimpleName());
 						argTypes.add(argType);
 					}
 					argDesc = StringUtils.collectionToCommaDelimitedString(argTypes);
@@ -686,15 +685,18 @@ class ConstructorResolver {
 					try {
 						convertedValue = converter.convertIfNecessary(originalValue, paramType,
 								MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
+						// TODO re-enable once race condition has been found (SPR-7423)
+						/*
 						if (originalValue == sourceValue || sourceValue instanceof TypedStringValue) {
 							// Either a converted value or still the original one: store converted value.
 							sourceHolder.setConvertedValue(convertedValue);
 							args.preparedArguments[paramIndex] = convertedValue;
 						}
 						else {
+						*/
 							args.resolveNecessary = true;
 							args.preparedArguments[paramIndex] = sourceValue;
-						}
+						// }
 					}
 					catch (TypeMismatchException ex) {
 						throw new UnsatisfiedDependencyException(
