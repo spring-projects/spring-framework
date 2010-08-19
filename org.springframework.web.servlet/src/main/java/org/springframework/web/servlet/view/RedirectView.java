@@ -208,13 +208,13 @@ public class RedirectView extends AbstractUrlBasedView {
 			throws IOException {
 
 		String encoding = getEncoding(request);
-
+		
 		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
 		if (this.contextRelative && getUrl().startsWith("/")) {
 			// Do not apply context path to relative URLs.
 			targetUrl.append(UriUtils.encodePath(request.getContextPath(), encoding));
-			targetUrl.append(UriUtils.encodePath(getUrl(), encoding));
+			targetUrl.append(UriUtils.encodeUri(getUrl(), encoding));
 		}
 		else {
 			targetUrl.append(UriUtils.encodeUri(getUrl(), encoding));
