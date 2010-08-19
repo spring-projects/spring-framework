@@ -135,6 +135,12 @@ public class RedirectViewTests {
 		String expectedUrlForEncoding = "http://url.somewhere.com/test.htm" + "?" + key + "=" + val + "#myAnchor";
 		doTest(model, url, false, expectedUrlForEncoding);
 	}
+	
+	@Test
+	public void contextRelativeQueryParam() throws Exception {
+		String url = "/test.html?id=1";
+		doTest(new HashMap<String, Object>(), url, true, url);
+	}
 
 	@Test
 	public void twoParams() throws Exception {
