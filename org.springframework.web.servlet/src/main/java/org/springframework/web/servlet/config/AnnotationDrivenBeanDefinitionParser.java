@@ -29,6 +29,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
@@ -170,22 +171,35 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private ManagedList<RootBeanDefinition> getMessageConverters(Object source) {
 		ManagedList<RootBeanDefinition> messageConverters = new ManagedList<RootBeanDefinition>();
 		messageConverters.setSource(source);
-		messageConverters.add(new RootBeanDefinition(ByteArrayHttpMessageConverter.class));
-		messageConverters.add(new RootBeanDefinition(StringHttpMessageConverter.class));
-		messageConverters.add(new RootBeanDefinition(ResourceHttpMessageConverter.class));
-		messageConverters.add(new RootBeanDefinition(SourceHttpMessageConverter.class));
-		messageConverters.add(new RootBeanDefinition(XmlAwareFormHttpMessageConverter.class));
+		messageConverters.add(createConverterBeanDefinition(ByteArrayHttpMessageConverter.class, source));
+
+		RootBeanDefinition stringConverterDef = createConverterBeanDefinition(StringHttpMessageConverter.class, source);
+		stringConverterDef.getPropertyValues().add("writeAcceptCharset", false);
+		messageConverters.add(stringConverterDef);
+
+		messageConverters.add(createConverterBeanDefinition(ResourceHttpMessageConverter.class, source));
+		messageConverters.add(createConverterBeanDefinition(SourceHttpMessageConverter.class, source));
+		messageConverters.add(createConverterBeanDefinition(XmlAwareFormHttpMessageConverter.class, source));
 		if (jaxb2Present) {
-			messageConverters.add(new RootBeanDefinition(Jaxb2RootElementHttpMessageConverter.class));
+			messageConverters.add(createConverterBeanDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
 		}
 		if (jacksonPresent) {
-			messageConverters.add(new RootBeanDefinition(MappingJacksonHttpMessageConverter.class));
+			messageConverters.add(createConverterBeanDefinition(MappingJacksonHttpMessageConverter.class, source));
 		}
 		if (romePresent) {
-			messageConverters.add(new RootBeanDefinition(AtomFeedHttpMessageConverter.class));
-			messageConverters.add(new RootBeanDefinition(RssChannelHttpMessageConverter.class));
+			messageConverters.add(createConverterBeanDefinition(AtomFeedHttpMessageConverter.class, source));
+			messageConverters.add(createConverterBeanDefinition(RssChannelHttpMessageConverter.class, source));
 		}
 		return messageConverters;
+	}
+
+	private RootBeanDefinition createConverterBeanDefinition(Class<? extends HttpMessageConverter> converterClass,
+			Object source) {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(converterClass);
+		beanDefinition.setSource(source);
+		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+
+		return beanDefinition;
 	}
 
 }
