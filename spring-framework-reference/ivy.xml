@@ -16,6 +16,8 @@
 		<artifact name="${ant.project.name}" ext="pdf" type="pdf"/>
 		<artifact name="${ant.project.name}" ext="zip" type="zip"/>
 		<artifact name="${ant.project.name}-single" ext="zip" type="zip"/>
+		<artifact name="license" type="license" ext="txt"/>
+		<artifact name="notice" type="notice" ext="txt"/>
 	</publications>
 
 	<dependencies/>

@@ -15,6 +15,8 @@
 
 	<publications>
 		<artifact name="${ant.project.name}" type="library" ext="libd"/>
+		<artifact name="license" type="license" ext="txt"/>
+		<artifact name="notice" type="notice" ext="txt"/>
 	</publications>
 
 	<dependencies>
