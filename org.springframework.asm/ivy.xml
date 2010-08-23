@@ -17,6 +17,8 @@
 	<publications>
 		<artifact name="${ant.project.name}"/>
 		<artifact name="${ant.project.name}-sources" type="src" ext="jar"/>
+		<artifact name="license" type="license" ext="txt"/>
+		<artifact name="notice" type="notice" ext="txt"/>
 	</publications>
 
 	<dependencies>
