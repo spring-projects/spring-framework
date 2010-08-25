@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +33,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.View;
-import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -207,34 +207,25 @@ public class RedirectView extends AbstractUrlBasedView {
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 
-		String encoding = getEncoding(request);
-		
 		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
 		if (this.contextRelative && getUrl().startsWith("/")) {
 			// Do not apply context path to relative URLs.
-			targetUrl.append(UriUtils.encodePath(request.getContextPath(), encoding));
-			targetUrl.append(UriUtils.encodeUri(getUrl(), encoding));
+			targetUrl.append(request.getContextPath());
 		}
-		else {
-			targetUrl.append(UriUtils.encodeUri(getUrl(), encoding));
-		}
+		targetUrl.append(getUrl());
 		if (this.exposeModelAttributes) {
-			appendQueryProperties(targetUrl, model, encoding);
+			String enc = this.encodingScheme;
+			if (enc == null) {
+				enc = request.getCharacterEncoding();
+			}
+			if (enc == null) {
+				enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
+			}
+			appendQueryProperties(targetUrl, model, enc);
 		}
 
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
-	}
-
-	private String getEncoding(HttpServletRequest request) {
-		String enc = this.encodingScheme;
-		if (enc == null) {
-			enc = request.getCharacterEncoding();
-		}
-		if (enc == null) {
-			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
-		}
-		return enc;
 	}
 
 	/**
@@ -261,7 +252,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		boolean first = (getUrl().indexOf('?') < 0);
 		for (Map.Entry<String, Object> entry : queryProperties(model).entrySet()) {
 			Object rawValue = entry.getValue();
-			Iterator valueIter;
+			Iterator valueIter = null;
 			if (rawValue != null && rawValue.getClass().isArray()) {
 				valueIter = Arrays.asList(ObjectUtils.toObjectArray(rawValue)).iterator();
 			}
@@ -280,8 +271,8 @@ public class RedirectView extends AbstractUrlBasedView {
 				else {
 					targetUrl.append('&');
 				}
-				String encodedKey = UriUtils.encodeQueryParam(entry.getKey(), encodingScheme);
-				String encodedValue = (value != null ? UriUtils.encodeQueryParam(value.toString(), encodingScheme) : "");
+				String encodedKey = urlEncode(entry.getKey(), encodingScheme);
+				String encodedValue = (value != null ? urlEncode(value.toString(), encodingScheme) : "");
 				targetUrl.append(encodedKey).append('=').append(encodedValue);
 			}
 		}
@@ -289,7 +280,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		// Append anchor fragment, if any, to end of URL.
 		if (fragment != null) {
 			targetUrl.append(fragment);
-	}
+		}
 	}
 
 	/**
@@ -373,6 +364,20 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * URL-encode the given input String with the given encoding scheme.
+	 * <p>The default implementation uses <code>URLEncoder.encode(input, enc)</code>.
+	 * @param input the unencoded input String
+	 * @param encodingScheme the encoding scheme
+	 * @return the encoded output String
+	 * @throws UnsupportedEncodingException if thrown by the JDK URLEncoder
+	 * @see java.net.URLEncoder#encode(String, String)
+	 * @see java.net.URLEncoder#encode(String)
+	 */
+	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
+		return (input != null ? URLEncoder.encode(input, encodingScheme) : null);
+	}
+
+	/**
 	 * Send a redirect back to the HTTP client
 	 * @param request current HTTP request (allows for reacting to request method)
 	 * @param response current HTTP response (for sending response headers)
@@ -398,18 +403,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	/**
 	 * Determines the status code to use for HTTP 1.1 compatible requests.
 	 * <p>The default implemenetation returns the {@link #setStatusCode(HttpStatus) statusCode}
-	 * property if set, or the value of the {@link #RESPONSE_STATUS_ATTRIBUTE} attribute.
-	 * If neither are set, it defaults to {@link HttpStatus#SEE_OTHER} (303).
+	 * property if set, or the value of the {@link #RESPONSE_STATUS_ATTRIBUTE} attribute. If neither are
+	 * set, it defaults to {@link HttpStatus#SEE_OTHER} (303).
 	 * @param request the request to inspect
-	 * @param response the servlet response
-	 * @param targetUrl the target URL
-	 * @return the response status
+	 * @return the response
 	 */
-	protected HttpStatus getHttp11StatusCode(
-			HttpServletRequest request, HttpServletResponse response, String targetUrl) {
-
-		if (this.statusCode != null) {
-			return this.statusCode;
+	protected HttpStatus getHttp11StatusCode(HttpServletRequest request, HttpServletResponse response, String targetUrl) {
+		if (statusCode != null) {
+			return statusCode;
 		}
 		HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
 		if (attributeStatusCode != null) {
