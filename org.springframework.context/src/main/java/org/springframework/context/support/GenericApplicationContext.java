@@ -18,6 +18,7 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
@@ -99,7 +100,6 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	public GenericApplicationContext() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.beanFactory.setSerializationId(getId());
 		this.beanFactory.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		this.beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 	}
@@ -153,7 +153,6 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	@Override
 	public void setId(String id) {
 		super.setId(id);
-		this.beanFactory.setSerializationId(id);
 	}
 
 	/**
@@ -243,7 +242,14 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 			throw new IllegalStateException(
 					"GenericApplicationContext does not support multiple refresh attempts: just call 'refresh' once");
 		}
+		this.beanFactory.setSerializationId(getId());
 		this.refreshed = true;
+	}
+
+	@Override
+	protected void cancelRefresh(BeansException ex) {
+		this.beanFactory.setSerializationId(null);
+		super.cancelRefresh(ex);
 	}
 
 	/**
