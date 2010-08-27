@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.easymock.MockControl;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -55,6 +55,8 @@ public class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 		mockControl.setDefaultMatcher(new SaxArgumentMatcher());
 		ContentHandler contentHandlerMock = (ContentHandler) mockControl.getMock();
 
+		contentHandlerMock.setDocumentLocator(null);
+		mockControl.setMatcher(MockControl.ALWAYS_MATCHER);
 		contentHandlerMock.startDocument();
 		contentHandlerMock.startElement("http://springframework.org/spring-ws", "child", "child", new AttributesImpl());
 		contentHandlerMock.endElement("http://springframework.org/spring-ws", "child", "child");
