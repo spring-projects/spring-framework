@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
 
-import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -106,17 +105,6 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 */
 	protected boolean hasNamespacePrefixesFeature() {
 		return this.namespacePrefixesFeature;
-	}
-
-	/**
-	 * Sett the SAX <code>Locator</code> based on the given StAX <code>Location</code>.
-	 * @param location the location
-	 * @see ContentHandler#setDocumentLocator(org.xml.sax.Locator)
-	 */
-	protected void setLocator(Location location) {
-		if (getContentHandler() != null) {
-			getContentHandler().setDocumentLocator(new StaxLocator(location));
-		}
 	}
 
 	/**

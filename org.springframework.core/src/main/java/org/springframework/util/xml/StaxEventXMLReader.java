@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.util.xml;
 
 import java.util.Iterator;
 import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -31,11 +32,13 @@ import javax.xml.stream.events.EntityReference;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.NotationDeclaration;
 import javax.xml.stream.events.ProcessingInstruction;
+import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
 import org.springframework.util.StringUtils;
@@ -86,10 +89,14 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 		while (reader.hasNext() && elementDepth >= 0) {
 			XMLEvent event = reader.nextEvent();
 			if (!event.isStartDocument() && !event.isEndDocument() && !documentStarted) {
-				handleStartDocument();
+				handleStartDocument(event);
 				documentStarted = true;
 			}
 			switch (event.getEventType()) {
+				case XMLStreamConstants.START_DOCUMENT:
+					handleStartDocument(event);
+					documentStarted = true;
+					break;
 				case XMLStreamConstants.START_ELEMENT:
 					elementDepth++;
 					handleStartElement(event.asStartElement());
@@ -107,11 +114,6 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 				case XMLStreamConstants.SPACE:
 				case XMLStreamConstants.CDATA:
 					handleCharacters(event.asCharacters());
-					break;
-				case XMLStreamConstants.START_DOCUMENT:
-					setLocator(event.getLocation());
-					handleStartDocument();
-					documentStarted = true;
 					break;
 				case XMLStreamConstants.END_DOCUMENT:
 					handleEndDocument();
@@ -138,6 +140,51 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 			handleEndDocument();
 		}
 
+	}
+
+	private void handleStartDocument(final XMLEvent event) throws SAXException {
+		if (getContentHandler() != null) {
+			final Location location = event.getLocation();
+			getContentHandler().setDocumentLocator(new Locator2() {
+
+				public int getColumnNumber() {
+					return location.getColumnNumber();
+				}
+
+				public int getLineNumber() {
+					return location.getLineNumber();
+				}
+
+				public String getPublicId() {
+					return location.getPublicId();
+				}
+
+				public String getSystemId() {
+					return location.getSystemId();
+				}
+
+				public String getXMLVersion() {
+					if (event.isStartDocument()) {
+						StartDocument startDocument = (StartDocument) event;
+						String version = startDocument.getVersion();
+						return StringUtils.hasLength(version) ? version : "1.0";
+					}
+					return null;
+				}
+
+				public String getEncoding() {
+					if (event.isStartDocument()) {
+						StartDocument startDocument = (StartDocument) event;
+						if (startDocument.encodingSet()) {
+							return startDocument.getCharacterEncodingScheme();
+						}
+					}
+					return null;
+				}
+			});
+
+			getContentHandler().startDocument();
+		}
 	}
 
 	private void handleStartElement(StartElement startElement) throws SAXException {
@@ -174,12 +221,6 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 		}
 	}
 
-	private void handleEndDocument() throws SAXException {
-		if (getContentHandler() != null) {
-			getContentHandler().endDocument();
-		}
-	}
-
 	private void handleEndElement(EndElement endElement) throws SAXException {
 		if (getContentHandler() != null) {
 			QName qName = endElement.getName();
@@ -194,6 +235,12 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 				getContentHandler().endElement("", "", toQualifiedName(qName));
 			}
 
+		}
+	}
+
+	private void handleEndDocument() throws SAXException {
+		if (getContentHandler() != null) {
+			getContentHandler().endDocument();
 		}
 	}
 
@@ -213,12 +260,6 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 	private void handleProcessingInstruction(ProcessingInstruction pi) throws SAXException {
 		if (getContentHandler() != null) {
 			getContentHandler().processingInstruction(pi.getTarget(), pi.getData());
-		}
-	}
-
-	private void handleStartDocument() throws SAXException {
-		if (getContentHandler() != null) {
-			getContentHandler().startDocument();
 		}
 	}
 
