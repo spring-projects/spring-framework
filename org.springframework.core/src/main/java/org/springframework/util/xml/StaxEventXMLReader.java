@@ -17,6 +17,8 @@
 package org.springframework.util.xml;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventReader;
@@ -60,6 +62,8 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 	private static final String DEFAULT_XML_VERSION = "1.0";
 
 	private final XMLEventReader reader;
+
+	private final Map<String, String> namespaces = new LinkedHashMap<String, String>();
 
 	private String xmlVersion = DEFAULT_XML_VERSION;
 
@@ -199,19 +203,12 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 			if (hasNamespacesFeature()) {
 				for (Iterator i = startElement.getNamespaces(); i.hasNext();) {
 					Namespace namespace = (Namespace) i.next();
-					getContentHandler().startPrefixMapping(namespace.getPrefix(), namespace.getNamespaceURI());
+					startPrefixMapping(namespace.getPrefix(), namespace.getNamespaceURI());
 				}
 				for (Iterator i = startElement.getAttributes(); i.hasNext();){
 					Attribute attribute = (Attribute) i.next();
-					String prefix = attribute.getName().getPrefix();
-					if (prefix == null) {
-						prefix = "";
-					}
-					String namespace = attribute.getName().getNamespaceURI();
-					if (namespace == null) {
-						continue;
-					}
-					getContentHandler().startPrefixMapping(prefix, namespace);
+					QName attributeName = attribute.getName();
+					startPrefixMapping(attributeName.getPrefix(), attributeName.getNamespaceURI());
 				}
 
 				getContentHandler().startElement(qName.getNamespaceURI(), qName.getLocalPart(), toQualifiedName(qName),
@@ -247,7 +244,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 				getContentHandler().endElement(qName.getNamespaceURI(), qName.getLocalPart(), toQualifiedName(qName));
 				for (Iterator i = endElement.getNamespaces(); i.hasNext();) {
 					Namespace namespace = (Namespace) i.next();
-					getContentHandler().endPrefixMapping(namespace.getPrefix());
+					endPrefixMapping(namespace.getPrefix());
 				}
 			}
 			else {

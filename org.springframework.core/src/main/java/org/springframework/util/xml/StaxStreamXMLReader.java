@@ -178,22 +178,14 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 			QName qName = reader.getName();
 			if (hasNamespacesFeature()) {
 				for (int i = 0; i < reader.getNamespaceCount(); i++) {
-					String prefix = reader.getNamespacePrefix(i);
-					if (prefix == null) {
-						prefix = "";
-					}
-					getContentHandler().startPrefixMapping(prefix, reader.getNamespaceURI(i));
+					startPrefixMapping(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
 				}
 				for (int i = 0; i < reader.getAttributeCount(); i++) {
 					String prefix = reader.getAttributePrefix(i);
-					if (prefix == null) {
-						prefix = "";
-					}
 					String namespace = reader.getAttributeNamespace(i);
-					if (namespace == null) {
-						continue;
+					if (StringUtils.hasLength(namespace)) {
+						startPrefixMapping(prefix, namespace);
 					}
-					getContentHandler().startPrefixMapping(prefix, namespace);
 				}
 				getContentHandler().startElement(qName.getNamespaceURI(), qName.getLocalPart(), toQualifiedName(qName),
 						getAttributes());
@@ -214,7 +206,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 					if (prefix == null) {
 						prefix = "";
 					}
-					getContentHandler().endPrefixMapping(prefix);
+					endPrefixMapping(prefix);
 				}
 			}
 			else {

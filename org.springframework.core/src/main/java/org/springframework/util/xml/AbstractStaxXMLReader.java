@@ -16,6 +16,8 @@
 
 package org.springframework.util.xml;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamException;
@@ -54,6 +56,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	private Boolean isStandalone;
 
+	private final Map<String, String> namespaces = new LinkedHashMap<String, String>();
 
 	@Override
 	public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
@@ -169,6 +172,37 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 */
 	protected abstract void parseInternal() throws SAXException, XMLStreamException;
 
+	/**
+	 * Starts the prefix mapping for the given prefix.
+	 * @see org.xml.sax.ContentHandler#startPrefixMapping(String, String)
+	 */
+	protected void startPrefixMapping(String prefix, String namespace) throws SAXException {
+		if (getContentHandler() != null) {
+			if (prefix == null) {
+				prefix = "";
+			}
+			if (!StringUtils.hasLength(namespace)) {
+				return;
+			}
+			if (!namespace.equals(namespaces.get(prefix))) {
+				getContentHandler().startPrefixMapping(prefix, namespace);
+				namespaces.put(prefix, namespace);
+			}
+		}
+	}
+
+	/**
+	 * Ends the prefix mapping for the given prefix.
+	 * @see org.xml.sax.ContentHandler#endPrefixMapping(String)
+	 */
+	protected void endPrefixMapping(String prefix) throws SAXException {
+		if (getContentHandler() != null) {
+			if (namespaces.containsKey(prefix)) {
+				getContentHandler().endPrefixMapping(prefix);
+				namespaces.remove(prefix);
+			}
+		}
+	}
 
 	/**
 	 * Implementation of the <code>Locator</code> interface that is based on a StAX <code>Location</code>.
