@@ -57,7 +57,13 @@ import org.springframework.util.StringUtils;
  */
 class StaxEventXMLReader extends AbstractStaxXMLReader {
 
+	private static final String DEFAULT_XML_VERSION = "1.0";
+
 	private final XMLEventReader reader;
+
+	private String xmlVersion = DEFAULT_XML_VERSION;
+
+	private String encoding;
 
 	/**
 	 * Constructs a new instance of the <code>StaxEventXmlReader</code> that reads from the given
@@ -143,6 +149,17 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 	}
 
 	private void handleStartDocument(final XMLEvent event) throws SAXException {
+		if (event.isStartDocument()) {
+			StartDocument startDocument = (StartDocument) event;
+			String xmlVersion = startDocument.getVersion();
+			if (StringUtils.hasLength(xmlVersion)) {
+				this.xmlVersion = xmlVersion;
+			}
+			if (startDocument.encodingSet()) {
+				this.encoding = startDocument.getCharacterEncodingScheme();
+			}
+		}
+
 		if (getContentHandler() != null) {
 			final Location location = event.getLocation();
 			getContentHandler().setDocumentLocator(new Locator2() {
@@ -164,22 +181,11 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 				}
 
 				public String getXMLVersion() {
-					if (event.isStartDocument()) {
-						StartDocument startDocument = (StartDocument) event;
-						String version = startDocument.getVersion();
-						return StringUtils.hasLength(version) ? version : "1.0";
-					}
-					return null;
+					return xmlVersion;
 				}
 
 				public String getEncoding() {
-					if (event.isStartDocument()) {
-						StartDocument startDocument = (StartDocument) event;
-						if (startDocument.encodingSet()) {
-							return startDocument.getCharacterEncodingScheme();
-						}
-					}
-					return null;
+					return encoding;
 				}
 			});
 
@@ -195,6 +201,19 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					Namespace namespace = (Namespace) i.next();
 					getContentHandler().startPrefixMapping(namespace.getPrefix(), namespace.getNamespaceURI());
 				}
+				for (Iterator i = startElement.getAttributes(); i.hasNext();){
+					Attribute attribute = (Attribute) i.next();
+					String prefix = attribute.getName().getPrefix();
+					if (prefix == null) {
+						prefix = "";
+					}
+					String namespace = attribute.getName().getNamespaceURI();
+					if (namespace == null) {
+						continue;
+					}
+					getContentHandler().startPrefixMapping(prefix, namespace);
+				}
+
 				getContentHandler().startElement(qName.getNamespaceURI(), qName.getLocalPart(), toQualifiedName(qName),
 						getAttributes(startElement));
 			}
