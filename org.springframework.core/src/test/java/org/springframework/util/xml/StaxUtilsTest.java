@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
@@ -31,8 +33,7 @@ import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class StaxUtilsTest {
@@ -49,7 +50,7 @@ public class StaxUtilsTest {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		String expected = "<element/>";
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(expected));
-		StaxSource source = new StaxSource(streamReader);
+		Source source = StaxUtils.createCustomStaxSource(streamReader);
 
 		assertTrue("Not a StAX Source", StaxUtils.isStaxSource(source));
 	}
@@ -75,7 +76,7 @@ public class StaxUtilsTest {
 	public void isStaxResult() throws Exception {
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 		XMLStreamWriter streamWriter = outputFactory.createXMLStreamWriter(new StringWriter());
-		StaxResult result = new StaxResult(streamWriter);
+		Result result = StaxUtils.createCustomStaxResult(streamWriter);
 
 		assertTrue("Not a StAX Result", StaxUtils.isStaxResult(result));
 	}
