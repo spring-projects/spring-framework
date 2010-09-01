@@ -183,7 +183,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
-	 * @return the declared type, or null if this is {@link TypeDescriptor#NULL}.
+	 * @return the declared type, or <code>null</code> if this is {@link TypeDescriptor#NULL}
 	 */
 	public Class<?> getType() {
 		if (this.type != null) {
