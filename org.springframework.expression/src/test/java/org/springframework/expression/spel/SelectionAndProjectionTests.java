@@ -16,15 +16,16 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -35,8 +36,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 /**
  * @author Mark Fisher
  * @author Sam Brannen
- * 
- * @since 3.0
  */
 public class SelectionAndProjectionTests {
 
@@ -68,6 +67,39 @@ public class SelectionAndProjectionTests {
 	public void selectLastItemInList() throws Exception {
 		Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this<5]");
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
+		Object value = expression.getValue(context);
+		assertTrue(value instanceof Integer);
+		assertEquals(4, value);
+	}
+
+	@Test
+	public void selectionWithSet() throws Exception {
+		Expression expression = new SpelExpressionParser().parseRaw("integers.?[#this<5]");
+		EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
+		Object value = expression.getValue(context);
+		assertTrue(value instanceof List);
+		List list = (List) value;
+		assertEquals(5, list.size());
+		assertEquals(0, list.get(0));
+		assertEquals(1, list.get(1));
+		assertEquals(2, list.get(2));
+		assertEquals(3, list.get(3));
+		assertEquals(4, list.get(4));
+	}
+
+	@Test
+	public void selectFirstItemInSet() throws Exception {
+		Expression expression = new SpelExpressionParser().parseRaw("integers.^[#this<5]");
+		EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
+		Object value = expression.getValue(context);
+		assertTrue(value instanceof Integer);
+		assertEquals(0, value);
+	}
+
+	@Test
+	public void selectLastItemInSet() throws Exception {
+		Expression expression = new SpelExpressionParser().parseRaw("integers.$[#this<5]");
+		EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof Integer);
 		assertEquals(4, value);
@@ -196,6 +228,20 @@ public class SelectionAndProjectionTests {
 	}
 
 	@Test
+	public void projectionWithSet() throws Exception {
+		Expression expression = new SpelExpressionParser().parseRaw("#testList.![wrapper.value]");
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("testList", IntegerTestBean.createSet());
+		Object value = expression.getValue(context);
+		assertTrue(value instanceof List);
+		List list = (List) value;
+		assertEquals(3, list.size());
+		assertEquals(5, list.get(0));
+		assertEquals(6, list.get(1));
+		assertEquals(7, list.get(2));
+	}
+
+	@Test
 	public void projectionWithArray() throws Exception {
 		Expression expression = new SpelExpressionParser().parseRaw("#testArray.![wrapper.value]");
 		EvaluationContext context = new StandardEvaluationContext();
@@ -244,6 +290,21 @@ public class SelectionAndProjectionTests {
 		}
 	}
 
+	static class SetTestBean {
+
+		private final Set<Integer> integers = new LinkedHashSet<Integer>();
+
+		SetTestBean() {
+			for (int i = 0; i < 10; i++) {
+				integers.add(i);
+			}
+		}
+
+		public Set<Integer> getIntegers() {
+			return integers;
+		}
+	}
+
 	static class ArrayTestBean {
 
 		private final int[] ints = new int[10];
@@ -284,6 +345,14 @@ public class SelectionAndProjectionTests {
 				list.add(new IntegerTestBean(i + 5));
 			}
 			return list;
+		}
+
+		static Set<IntegerTestBean> createSet() {
+			Set<IntegerTestBean> set = new LinkedHashSet<IntegerTestBean>();
+			for (int i = 0; i < 3; i++) {
+				set.add(new IntegerTestBean(i + 5));
+			}
+			return set;
 		}
 
 		static IntegerTestBean[] createArray() {
