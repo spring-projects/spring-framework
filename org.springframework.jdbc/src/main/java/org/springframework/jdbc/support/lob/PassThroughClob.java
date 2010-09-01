@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,19 @@
 
 package org.springframework.jdbc.support.lob;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
+
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Simple JDBC {@link Clob} adapter that exposes a given String or character stream.
@@ -37,6 +43,8 @@ class PassThroughClob implements Clob {
 
 	private Reader characterStream;
 
+	private InputStream asciiStream;
+
 	private long contentLength;
 
 
@@ -50,13 +58,52 @@ class PassThroughClob implements Clob {
 		this.contentLength = contentLength;
 	}
 
+	public PassThroughClob(InputStream asciiStream, long contentLength) {
+		this.asciiStream = asciiStream;
+		this.contentLength = contentLength;
+	}
+
 
 	public long length() throws SQLException {
 		return this.contentLength;
 	}
 
 	public Reader getCharacterStream() throws SQLException {
-		return (this.content != null ? new StringReader(this.content) : this.characterStream);
+		try {
+			if (this.content != null) {
+				return new StringReader(this.content);
+			}
+			else if (this.characterStream != null) {
+				return this.characterStream;
+			}
+			else {
+				return new InputStreamReader(this.asciiStream, "US-ASCII");
+			}
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new SQLException("US-ASCII encoding not supported: " + ex);
+		}
+	}
+
+	public InputStream getAsciiStream() throws SQLException {
+		try {
+			if (this.content != null) {
+				return new ByteArrayInputStream(this.content.getBytes("US-ASCII"));
+			}
+			else if (this.characterStream != null) {
+				String tempContent = FileCopyUtils.copyToString(this.characterStream);
+				return new ByteArrayInputStream(tempContent.getBytes("US-ASCII"));
+			}
+			else {
+				return this.asciiStream;
+			}
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new SQLException("US-ASCII encoding not supported: " + ex);
+		}
+		catch (IOException ex) {
+			throw new SQLException("Failed to read stream content: " + ex);
+		}
 	}
 
 
@@ -66,10 +113,6 @@ class PassThroughClob implements Clob {
 
 	public Writer setCharacterStream(long pos) throws SQLException {
 		throw new UnsupportedOperationException();
-	}
-
-	public InputStream getAsciiStream() throws SQLException {
-		return null;
 	}
 
 	public OutputStream setAsciiStream(long pos) throws SQLException {
@@ -101,7 +144,7 @@ class PassThroughClob implements Clob {
 	}
 
 	public void free() throws SQLException {
-		throw new UnsupportedOperationException();
+		// no-op
 	}
 
 }
