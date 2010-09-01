@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.ObjectUtils;
  * Represents projection, where a given operation is performed on all elements in some input sequence, returning 
  * a new sequence of the same size. For example:
  * "{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}" returns "[n, y, n, y, n, y, n, y, n, y]"
- * 
+ *
  * @author Andy Clement
  * @author Mark Fisher
  * @since 3.0
@@ -45,8 +45,8 @@ public class Projection extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 	
-	public Projection(boolean nullSafe, int pos,SpelNodeImpl expression) {
-		super(pos,expression);
+	public Projection(boolean nullSafe, int pos, SpelNodeImpl expression) {
+		super(pos, expression);
 		this.nullSafe = nullSafe;
 	}
 
@@ -64,34 +64,36 @@ public class Projection extends SpelNodeImpl {
 		// and value, and they can be referenced in the operation
 		// eg. {'a':'y','b':'n'}.!{value=='y'?key:null}" == ['a', null]
 		if (operand instanceof Map) {
-			Map<?, ?> mapdata = (Map<?, ?>) operand;
+			Map<?, ?> mapData = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
-			for (Map.Entry entry : mapdata.entrySet()) {
+			for (Map.Entry entry : mapData.entrySet()) {
 				try {
-					state.pushActiveContextObject(new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class)));
-					result.add(children[0].getValueInternal(state).getValue());
-				} finally {
+					state.pushActiveContextObject(new TypedValue(entry, TypeDescriptor.valueOf(Map.Entry.class)));
+					result.add(this.children[0].getValueInternal(state).getValue());
+				}
+				finally {
 					state.popActiveContextObject();
 				}
 			}
 			return new TypedValue(result,TypeDescriptor.valueOf(List.class)); // TODO unable to build correct type descriptor
-		} else if (operand instanceof List || operandIsArray) {
-			List<Object> data = new ArrayList<Object>();
-			Collection<?> c = (operand instanceof List) ? (Collection<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
-			data.addAll(c);
+		}
+		else if (operand instanceof Collection || operandIsArray) {
+			Collection<?> data = (operand instanceof Collection ? (Collection<?>) operand :
+					Arrays.asList(ObjectUtils.toObjectArray(operand)));
 			List<Object> result = new ArrayList<Object>();
 			int idx = 0;
 			Class<?> arrayElementType = null;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
+					state.pushActiveContextObject(new TypedValue(element ,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
 					state.enterScope("index", idx);
 					Object value = children[0].getValueInternal(state).getValue();
 					if (value != null && operandIsArray) {
-						arrayElementType = this.determineCommonType(arrayElementType, value.getClass());
+						arrayElementType = determineCommonType(arrayElementType, value.getClass());
 					}
 					result.add(value);
-				} finally {
+				}
+				finally {
 					state.exitScope();
 					state.popActiveContextObject();
 				}
@@ -105,16 +107,21 @@ public class Projection extends SpelNodeImpl {
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 				return new TypedValue(resultArray, op.getTypeDescriptor());
 			}
-			return new TypedValue(result,op.getTypeDescriptor());
-		} else {
+			return new TypedValue(result, op.getTypeDescriptor());
+		}
+		else {
 			if (operand==null) {
-				if (nullSafe) {
+				if (this.nullSafe) {
 					return TypedValue.NULL;
-				} else {					
-					throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
 				}
-			} else {
-				throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
+				else {
+					throw new SpelEvaluationException(getStartPosition(),
+							SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
+				}
+			}
+			else {
+				throw new SpelEvaluationException(getStartPosition(),
+						SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
 			}
 		}
 	}
