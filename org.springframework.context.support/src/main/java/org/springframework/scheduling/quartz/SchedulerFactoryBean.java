@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -496,16 +496,16 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 		finally {
 			if (this.resourceLoader != null) {
-				configTimeResourceLoaderHolder.set(null);
+				configTimeResourceLoaderHolder.remove();
 			}
 			if (this.taskExecutor != null) {
-				configTimeTaskExecutorHolder.set(null);
+				configTimeTaskExecutorHolder.remove();
 			}
 			if (this.dataSource != null) {
-				configTimeDataSourceHolder.set(null);
+				configTimeDataSourceHolder.remove();
 			}
 			if (this.nonTransactionalDataSource != null) {
-				configTimeNonTransactionalDataSourceHolder.set(null);
+				configTimeNonTransactionalDataSourceHolder.remove();
 			}
 		}
 

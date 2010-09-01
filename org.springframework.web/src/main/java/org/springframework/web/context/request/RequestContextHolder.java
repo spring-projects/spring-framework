@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ public abstract class RequestContextHolder  {
 	 * Reset the RequestAttributes for the current thread.
 	 */
 	public static void resetRequestAttributes() {
-		requestAttributesHolder.set(null);
-		inheritableRequestAttributesHolder.set(null);
+		requestAttributesHolder.remove();
+		inheritableRequestAttributesHolder.remove();
 	}
 
 	/**
@@ -80,11 +80,11 @@ public abstract class RequestContextHolder  {
 	public static void setRequestAttributes(RequestAttributes attributes, boolean inheritable) {
 		if (inheritable) {
 			inheritableRequestAttributesHolder.set(attributes);
-			requestAttributesHolder.set(null);
+			requestAttributesHolder.remove();
 		}
 		else {
 			requestAttributesHolder.set(attributes);
-			inheritableRequestAttributesHolder.set(null);
+			inheritableRequestAttributesHolder.remove();
 		}
 	}
 

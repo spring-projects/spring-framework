@@ -735,7 +735,7 @@ public abstract class SessionFactoryUtils {
 			closeSession(session);
 		}
 		if (holderMap.isEmpty()) {
-			deferredCloseHolder.set(null);
+			deferredCloseHolder.remove();
 		}
 	}
 

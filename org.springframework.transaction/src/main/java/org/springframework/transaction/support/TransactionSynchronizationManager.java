@@ -223,7 +223,7 @@ public abstract class TransactionSynchronizationManager {
 		Object value = map.remove(actualKey);
 		// Remove entire ThreadLocal if empty...
 		if (map.isEmpty()) {
-			resources.set(null);
+			resources.remove();
 		}
 		if (value != null && logger.isTraceEnabled()) {
 			logger.trace("Removed value [" + value + "] for key [" + actualKey + "] from thread [" +
@@ -314,7 +314,7 @@ public abstract class TransactionSynchronizationManager {
 			throw new IllegalStateException("Cannot deactivate transaction synchronization - not active");
 		}
 		logger.trace("Clearing transaction synchronization");
-		synchronizations.set(null);
+		synchronizations.remove();
 	}
 
 
