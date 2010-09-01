@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ public abstract class LocaleContextHolder {
 	 * Reset the LocaleContext for the current thread.
 	 */
 	public static void resetLocaleContext() {
-		localeContextHolder.set(null);
-		inheritableLocaleContextHolder.set(null);
+		localeContextHolder.remove();
+		inheritableLocaleContextHolder.remove();
 	}
 
 	/**
@@ -75,11 +75,11 @@ public abstract class LocaleContextHolder {
 	public static void setLocaleContext(LocaleContext localeContext, boolean inheritable) {
 		if (inheritable) {
 			inheritableLocaleContextHolder.set(localeContext);
-			localeContextHolder.set(null);
+			localeContextHolder.remove();
 		}
 		else {
 			localeContextHolder.set(localeContext);
-			inheritableLocaleContextHolder.set(null);
+			inheritableLocaleContextHolder.remove();
 		}
 	}
 

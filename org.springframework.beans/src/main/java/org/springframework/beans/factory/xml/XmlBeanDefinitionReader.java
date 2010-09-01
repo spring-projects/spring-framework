@@ -344,7 +344,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		finally {
 			currentResources.remove(encodedResource);
 			if (currentResources.isEmpty()) {
-				this.resourcesCurrentlyBeingLoaded.set(null);
+				this.resourcesCurrentlyBeingLoaded.remove();
 			}
 		}
 	}
