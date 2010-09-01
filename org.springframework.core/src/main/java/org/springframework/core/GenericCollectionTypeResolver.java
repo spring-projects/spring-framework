@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,7 +268,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * Extract the generic type from the given Type object.
 	 * @param methodParam the method parameter specification
 	 * @param type the Type to check
-	 * @param source the source collection/map Class<?> that we check
+	 * @param source the source collection/map Class that we check
 	 * @param typeIndex the index of the actual type argument
 	 * @param nestingLevel the nesting level of the target type
 	 * @param currentLevel the current nested level
@@ -371,20 +371,20 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Extract the generic type from the given Class<?> object.
-	 * @param clazz the Class<?> to check
+	 * Extract the generic type from the given Class object.
+	 * @param clazz the Class to check
 	 * @param source the expected raw source type (can be <code>null</code>)
 	 * @param typeIndex the index of the actual type argument
 	 * @return the generic type as Class, or <code>null</code> if none
 	 */
-	private static Class<?> extractTypeFromClass(Class clazz, Class<?> source, int typeIndex) {
+	private static Class<?> extractTypeFromClass(Class<?> clazz, Class<?> source, int typeIndex) {
 		return extractTypeFromClass(null, clazz, source, typeIndex, 1, 1);
 	}
 
 	/**
-	 * Extract the generic type from the given Class<?> object.
+	 * Extract the generic type from the given Class object.
 	 * @param methodParam the method parameter specification
-	 * @param clazz the Class<?> to check
+	 * @param clazz the Class to check
 	 * @param source the expected raw source type (can be <code>null</code>)
 	 * @param typeIndex the index of the actual type argument
 	 * @param nestingLevel the nesting level of the target type
@@ -407,7 +407,7 @@ public abstract class GenericCollectionTypeResolver {
 				if (ifc instanceof ParameterizedType) {
 					rawType = ((ParameterizedType) ifc).getRawType();
 				}
-				if (rawType instanceof Class<?> && isIntrospectionCandidate((Class) rawType)) {
+				if (rawType instanceof Class && isIntrospectionCandidate((Class) rawType)) {
 					return extractType(methodParam, ifc, source, typeIndex, nestingLevel, currentLevel);
 				}
 			}
