@@ -350,7 +350,7 @@ public class RequestContext {
 	 * Falls back to <code>false</code> in case of no explicit default given.
 	 */
 	public boolean isDefaultHtmlEscape() {
-		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape);
+		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape.booleanValue());
 	}
 
 	/**
