@@ -48,9 +48,15 @@ import org.springframework.web.util.TagUtils;
  */
 public class EvalTag extends HtmlEscapingAwareTag {
 
-	private final ExpressionParser expressionParser = new SpelExpressionParser();
+	/**
+	 * {@link javax.servlet.jsp.PageContext} attribute for the
+	 * page-level {@link EvaluationContext} instance.
+	 */
+	private static final String EVALUATION_CONTEXT_PAGE_ATTRIBUTE =
+			"org.springframework.web.servlet.tags.EVALUATION_CONTEXT";
 
-	private EvaluationContext evaluationContext;
+
+	private final ExpressionParser expressionParser = new SpelExpressionParser();
 
 	private Expression expression;
 
@@ -101,20 +107,23 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	@Override
 	public int doEndTag() throws JspException {
-		if (this.evaluationContext == null) {
-			this.evaluationContext = createEvaluationContext(pageContext);
+		EvaluationContext evaluationContext =
+				(EvaluationContext) this.pageContext.getAttribute(EVALUATION_CONTEXT_PAGE_ATTRIBUTE);
+		if (evaluationContext == null) {
+			evaluationContext = createEvaluationContext(this.pageContext);
+			this.pageContext.setAttribute(EVALUATION_CONTEXT_PAGE_ATTRIBUTE, evaluationContext);
 		}
 		if (this.var != null) {
-			Object result = this.expression.getValue(this.evaluationContext);
-			pageContext.setAttribute(this.var, result, this.scope);
+			Object result = this.expression.getValue(evaluationContext);
+			this.pageContext.setAttribute(this.var, result, this.scope);
 		}
 		else {
 			try {
-				String result = this.expression.getValue(this.evaluationContext, String.class);
+				String result = this.expression.getValue(evaluationContext, String.class);
 				result = ObjectUtils.getDisplayString(result);
 				result = (isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result);
 				result = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result);
-				pageContext.getOut().print(result);
+				this.pageContext.getOut().print(result);
 			}
 			catch (IOException ex) {
 				throw new JspException(ex);
