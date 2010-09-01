@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * Will convert the Object to the target Collection's parameterized type if necessary.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 final class ObjectToCollectionConverter implements ConditionalGenericConverter {
@@ -54,8 +55,14 @@ final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), 1);
-		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementTypeDescriptor(source));
-		target.add(targetElement);
+		TypeDescriptor elementType = targetType.getElementTypeDescriptor(source);
+		// Avoid potential recursion...
+		if (!Collection.class.isAssignableFrom(elementType.getType())) {
+			target.add(this.conversionService.convert(source, sourceType, elementType));
+		}
+		else {
+			target.add(source);
+		}
 		return target;
 	}
 

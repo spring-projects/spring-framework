@@ -170,9 +170,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			logger.debug("Converted to null");
 			return null;
 		}
+		Assert.isTrue(source == null || sourceType.getObjectType().isInstance(source));
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter == null) {
-			if (source == null || targetType.getType().isInstance(source)) {
+			if (source == null || targetType.getObjectType().isInstance(source)) {
 				logger.debug("No converter found - returning assignable source object as-is");
 				return source;
 			}
