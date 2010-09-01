@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 
 		public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
-		    throws SQLException {
+				throws SQLException {
 
 			if (streamAsLob) {
 				if (content != null) {
@@ -266,17 +266,16 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
-		    throws SQLException {
+				throws SQLException {
 
 			if (streamAsLob || wrapAsLob) {
 				if (asciiStream != null) {
 					try {
-						Reader reader = new InputStreamReader(asciiStream, "US-ASCII");
 						if (streamAsLob) {
-							ps.setClob(paramIndex, reader, contentLength);
+							ps.setClob(paramIndex, new InputStreamReader(asciiStream, "US-ASCII"), contentLength);
 						}
 						else {
-							ps.setClob(paramIndex, new PassThroughClob(reader, contentLength));
+							ps.setClob(paramIndex, new PassThroughClob(asciiStream, contentLength));
 						}
 					}
 					catch (UnsupportedEncodingException ex) {
@@ -298,7 +297,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
-		    throws SQLException {
+				throws SQLException {
 
 			if (streamAsLob) {
 				if (characterStream != null) {

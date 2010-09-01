@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public interface LobCreator {
 	 * @see java.sql.PreparedStatement#setBytes
 	 */
 	void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
-	    throws SQLException;
+			throws SQLException;
 
 	/**
 	 * Set the given content as binary stream on the given statement, using the given
@@ -83,7 +83,7 @@ public interface LobCreator {
 	 */
 	void setBlobAsBinaryStream(
 			PreparedStatement ps, int paramIndex, InputStream contentStream, int contentLength)
-	    throws SQLException;
+			throws SQLException;
 
 	/**
 	 * Set the given content as String on the given statement, using the given
@@ -96,7 +96,7 @@ public interface LobCreator {
 	 * @see java.sql.PreparedStatement#setBytes
 	 */
 	void setClobAsString(PreparedStatement ps, int paramIndex, String content)
-	    throws SQLException;
+			throws SQLException;
 
 	/**
 	 * Set the given content as ASCII stream on the given statement, using the given
@@ -110,7 +110,7 @@ public interface LobCreator {
 	 */
 	void setClobAsAsciiStream(
 			PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
-	    throws SQLException;
+			throws SQLException;
 
 	/**
 	 * Set the given content as character stream on the given statement, using the given
@@ -124,7 +124,7 @@ public interface LobCreator {
 	 */
 	void setClobAsCharacterStream(
 			PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
-	    throws SQLException;
+			throws SQLException;
 
 	/**
 	 * Close this LobCreator session and free its temporarily created BLOBs and CLOBs.
