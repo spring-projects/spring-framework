@@ -28,8 +28,7 @@ import org.springframework.util.MultiValueMap;
  * MediaType contentType = entity.getHeaders().getContentType();
  * HttpStatus statusCode = entity.getStatusCode();
  * </pre>
- * Can also be used in Spring MVC, as a return value from a @Controller method:
- * <p>Can be used in Spring MVC, as a return value from a @Controller method:
+ * <p>Can also be used in Spring MVC, as a return value from a @Controller method:
  * <pre class="code">
  * &#64;RequestMapping("/handle")
  * public ResponseEntity&lt;String&gt; handle() {
@@ -46,6 +45,15 @@ import org.springframework.util.MultiValueMap;
 public class ResponseEntity<T> extends HttpEntity<T> {
 
 	private final HttpStatus statusCode;
+
+	/**
+	 * Create a new {@code ResponseEntity} with the given status code, and no body nor headers.
+	 * @param statusCode the status code
+	 */
+	public ResponseEntity(HttpStatus statusCode) {
+		super();
+		this.statusCode = statusCode;
+	}
 
 	/**
 	 * Create a new {@code ResponseEntity} with the given body and status code, and no headers.

@@ -66,7 +66,7 @@ public class HttpEntity<T> {
 	/**
 	 * Create a new, empty {@code HttpEntity}.
 	 */
-	private HttpEntity() {
+	protected HttpEntity() {
 		this(null, null);
 	}
 
