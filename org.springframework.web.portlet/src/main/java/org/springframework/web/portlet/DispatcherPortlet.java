@@ -1033,7 +1033,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				response.setRenderParameter(paramName, paramValues);
 			}
 		}
-		response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, Boolean.TRUE.toString());
+		response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, ex.toString());
 		request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
 	}
 
