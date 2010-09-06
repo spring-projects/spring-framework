@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,14 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Ordered;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.portlet.bind.PortletRequestBindingException;
 import org.springframework.web.portlet.context.PortletRequestHandledEvent;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
@@ -67,8 +71,6 @@ import org.springframework.web.portlet.multipart.MultipartActionRequest;
 import org.springframework.web.portlet.multipart.PortletMultipartResolver;
 import org.springframework.web.portlet.mvc.Controller;
 import org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * @author Juergen Hoeller
@@ -475,10 +477,10 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 				throw new IllegalStateException("Already resolved");
 			}
 			request.setAttribute("resolved", Boolean.TRUE);
-			MultiValueMap files = new LinkedMultiValueMap();
-			files.set("someFile", "someFile");
-			Map params = new HashMap();
-			params.put("someParam", "someParam");
+			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<String, MultipartFile>();
+			files.set("someFile", new MockMultipartFile("someFile", "someContent".getBytes()));
+			Map<String, String[]> params = new HashMap<String, String[]>();
+			params.put("someParam", new String[] {"someParam"});
 			return new DefaultMultipartActionRequest(request, files, params);
 		}
 
