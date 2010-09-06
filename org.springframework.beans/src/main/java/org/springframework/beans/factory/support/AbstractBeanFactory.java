@@ -373,6 +373,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return !BeanFactoryUtils.isFactoryDereference(name);
 			}
 		}
+		else if (containsSingleton(beanName)) {
+			return true;
+		}
 
 		else {
 			// No singleton instance found -> check bean definition.
@@ -465,6 +468,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						typeToMatch.isAssignableFrom(beanInstance.getClass());
 			}
 		}
+		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
+			// null instance registered
+			return false;
+		}
 
 		else {
 			// No singleton instance found -> check bean definition.
@@ -523,6 +530,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			else {
 				return beanInstance.getClass();
 			}
+		}
+		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
+			// null instance registered
+			return null;
 		}
 
 		else {
@@ -859,6 +870,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object beanInstance = getSingleton(beanName, false);
 		if (beanInstance != null) {
 			return (beanInstance instanceof FactoryBean);
+		}
+		else if (containsSingleton(beanName)) {
+			// null instance registered
+			return false;
 		}
 
 		// No singleton instance found -> check bean definition.
