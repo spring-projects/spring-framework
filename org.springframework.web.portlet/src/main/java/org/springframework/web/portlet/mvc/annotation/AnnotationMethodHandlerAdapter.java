@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.ClientDataRequest;
@@ -152,7 +151,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	private BeanExpressionContext expressionContext;
 
 	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache =
-			new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
+			new HashMap<Class<?>, PortletHandlerMethodResolver>();
 
 
 	/**
@@ -393,12 +392,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 */
 	private PortletHandlerMethodResolver getMethodResolver(Object handler) {
 		Class handlerClass = ClassUtils.getUserClass(handler);
-		PortletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
-		if (resolver == null) {
-			resolver = new PortletHandlerMethodResolver(handlerClass);
-			this.methodResolverCache.put(handlerClass, resolver);
+		synchronized (this.methodResolverCache) {
+			PortletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
+			if (resolver == null) {
+				resolver = new PortletHandlerMethodResolver(handlerClass);
+				this.methodResolverCache.put(handlerClass, resolver);
+			}
+			return resolver;
 		}
-		return resolver;
 	}
 
 
