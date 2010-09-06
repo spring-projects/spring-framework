@@ -86,7 +86,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.portlet.DispatcherPortlet;
 import org.springframework.web.portlet.ModelAndView;
-import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -518,6 +517,17 @@ public class Portlet20AnnotationControllerTests {
 		response = new MockRenderResponse();
 		portlet.render(request, response);
 		assertEquals("myLargeView-value2", response.getContentAsString());
+
+		actionRequest = new MockActionRequest("error");
+		actionResponse = new MockActionResponse();
+		portlet.processAction(actionRequest, actionResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		request.setSession(actionRequest.getPortletSession());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("XXX", response.getContentAsString());
 
 		MockEventRequest eventRequest = new MockEventRequest(new MockEvent("event1"));
 		MockEventResponse eventResponse = new MockEventResponse();
@@ -1029,6 +1039,11 @@ public class Portlet20AnnotationControllerTests {
 			response.setRenderParameter("test", "value2");
 		}
 
+		@ActionMapping("error")
+		public void myError(StateAwareResponse response) {
+			throw new IllegalStateException("XXX");
+		}
+
 		@EventMapping("event1")
 		public void myHandle(EventResponse response) throws IOException {
 			response.setRenderParameter("test", "value3");
@@ -1047,6 +1062,11 @@ public class Portlet20AnnotationControllerTests {
 		@RenderMapping
 		public void myDefaultHandle(Writer writer) throws IOException {
 			writer.write("myView");
+		}
+
+		@ExceptionHandler
+		public void handleException(Exception ex, Writer writer) throws IOException {
+			writer.write(ex.getMessage());
 		}
 
 		@ResourceMapping("resource1")

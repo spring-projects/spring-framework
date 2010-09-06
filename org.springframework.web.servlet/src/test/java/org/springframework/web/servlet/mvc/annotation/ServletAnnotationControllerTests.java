@@ -114,6 +114,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -1769,12 +1770,17 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("")
 		public void myPath2(HttpServletResponse response) throws IOException {
-			response.getWriter().write("test");
+			throw new IllegalStateException("test");
 		}
 
 		@RequestMapping("/bar")
 		public void myPath3(HttpServletResponse response) throws IOException {
 			response.getWriter().write("testX");
+		}
+
+		@ExceptionHandler
+		public void myPath2(Exception ex, HttpServletResponse response) throws IOException {
+			response.getWriter().write(ex.getMessage());
 		}
 	}
 
