@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,13 +170,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * in the <code>org.springframework.web.view</code> package.
 	 */
 	public static final String DEFAULT_VIEW_RENDERER_URL = "/WEB-INF/servlet/view";
-
-	/**
-	 * Request attribute to hold the currently chosen HandlerExecutionChain.
-	 * Only used for internal optimizations.
-	 */
-	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE =
-			DispatcherPortlet.class.getName() + ".HANDLER";
 
 	/**
 	 * Unlike the Servlet version of this class, we have to deal with the
@@ -622,7 +615,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			processedRequest = checkMultipart(request);
 
 			// Determine handler for the current request.
-			mappedHandler = getHandler(processedRequest, false);
+			mappedHandler = getHandler(processedRequest);
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
 				noHandlerFound(processedRequest, response);
 				return;
@@ -701,7 +694,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			ModelAndView mv;
 			try {
 				// Determine handler for the current request.
-				mappedHandler = getHandler(request, false);
+				mappedHandler = getHandler(request);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
 					noHandlerFound(request, response);
 					return;
@@ -807,7 +800,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			ModelAndView mv;
 			try {
 				// Determine handler for the current request.
-				mappedHandler = getHandler(request, false);
+				mappedHandler = getHandler(request);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
 					noHandlerFound(request, response);
 					return;
@@ -896,7 +889,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 		try {
 			// Determine handler for the current request.
-			mappedHandler = getHandler(request, false);
+			mappedHandler = getHandler(request);
 			if (mappedHandler == null || mappedHandler.getHandler() == null) {
 				noHandlerFound(request, response);
 				return;
@@ -973,26 +966,14 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
 	 * @return the HandlerExceutionChain, or null if no handler could be found
 	 */
-	protected HandlerExecutionChain getHandler(PortletRequest request, boolean cache) throws Exception {
-		HandlerExecutionChain handler =
-				(HandlerExecutionChain) request.getAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
-		if (handler != null) {
-			if (!cache) {
-				request.removeAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
-			}
-			return handler;
-		}
-
+	protected HandlerExecutionChain getHandler(PortletRequest request) throws Exception {
 		for (HandlerMapping hm : this.handlerMappings) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(
 						"Testing handler map [" + hm + "] in DispatcherPortlet with name '" + getPortletName() + "'");
 			}
-			handler = hm.getHandler(request);
+			HandlerExecutionChain handler = hm.getHandler(request);
 			if (handler != null) {
-				if (cache) {
-					request.setAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE, handler);
-				}
 				return handler;
 			}
 		}
