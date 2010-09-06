@@ -3,17 +3,21 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.5 (2010-09-09)
+Changes in version 3.0.5 (2010-09-10)
 -------------------------------------
 
 * consistent use of JDK 1.5's ThreadLocal.remove() over ThreadLocal.set(null)
 * ConversionService protects itself against infinite recursion in ObjectToCollectionConverter
+* refined ApplicationContext singleton processing to not fail for manually registered null instances
 * SpEL supports projection on any kind of Collection (not just on Lists and arrays)
 * JDBC bundle uses local ClassLoader as bean ClassLoader for "sql-error-codes.xml" parsing
 * DefaultLobHandler's "wrapAsLob" mode works with PostgreSQL's getAsciiStream() requirement
 * fixed DefaultMessageListenerContainer's no-message commit to work without Session caching as well
 * JaxWsPortClientInterceptor does not fall back to annotation-specified name as portName anymore
+* fixed AnnotationMethodHandlerAdapter's caching to avoid concurrency issues in RequestMappingInfo
 * fixed EvalTag's EvaluationContext caching to properly handle JSP tag caching across requests
+* DispatcherPortlet copies all action parameters to render parameters in case of an action exception
+* Portlet @ExceptionHandler methods allow for writing the response directly (like in the Servlet case)
 
 
 Changes in version 3.0.4 (2010-08-19)
