@@ -19,6 +19,7 @@ package org.springframework.web.portlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -647,7 +648,16 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			// Forward the exception to the render phase to be displayed.
 			try {
-				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, ex.toString());
+				// Copy all parameters unless overridden in the action handler.
+				Enumeration<String> paramNames = request.getParameterNames();
+				while (paramNames.hasMoreElements()) {
+					String paramName = paramNames.nextElement();
+					String[] paramValues = request.getParameterValues(paramName);
+					if (paramValues != null && !response.getRenderParameterMap().containsKey(paramName)) {
+						response.setRenderParameter(paramName, paramValues);
+					}
+				}
+				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, Boolean.TRUE.toString());
 				request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
 				logger.debug("Caught exception during action phase - forwarding to render phase", ex);
 			}
@@ -921,7 +931,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			triggerAfterEventCompletion(mappedHandler, interceptorIndex, request, response, ex);
 			// Forward the exception to the render phase to be displayed.
 			try {
-				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, ex.toString());
+				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, Boolean.TRUE.toString());
 				request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
 				logger.debug("Caught exception during event phase - forwarding to render phase", ex);
 			}
