@@ -74,16 +74,18 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 
 	/**
-	 * Set a custom ArgumentResolvers to use for special method parameter types. Such a custom ArgumentResolver will kick
-	 * in first, having a chance to resolve an argument value before the standard argument handling kicks in.
+	 * Set a custom ArgumentResolvers to use for special method parameter types.
+	 * <p>Such a custom ArgumentResolver will kick in first, having a chance to resolve
+	 * an argument value before the standard argument handling kicks in.
 	 */
 	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
 		this.customArgumentResolvers = new WebArgumentResolver[]{argumentResolver};
 	}
 
 	/**
-	 * Set one or more custom ArgumentResolvers to use for special method parameter types. Any such custom ArgumentResolver
-	 * will kick in first, having a chance to resolve an argument value before the standard argument handling kicks in.
+	 * Set one or more custom ArgumentResolvers to use for special method parameter types.
+	 * <p>Any such custom ArgumentResolver will kick in first, having a chance to resolve
+	 * an argument value before the standard argument handling kicks in.
 	 */
 	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
@@ -366,7 +368,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			return new ModelAndView((String) returnValue);
 		}
 		else if (returnValue == null) {
-			return null;
+			return new ModelAndView();
 		}
 		else {
 			throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
