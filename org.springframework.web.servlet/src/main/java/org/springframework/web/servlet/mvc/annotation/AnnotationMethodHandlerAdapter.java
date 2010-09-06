@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -184,7 +183,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	private BeanExpressionContext expressionContext;
 
 	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
-			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
+			new HashMap<Class<?>, ServletHandlerMethodResolver>();
 
 
 	public AnnotationMethodHandlerAdapter() {
@@ -194,7 +193,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		// See SPR-7316
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false);
-		messageConverters = new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), stringHttpMessageConverter,
+		this.messageConverters = new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), stringHttpMessageConverter,
 				new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
 	}
 
@@ -440,12 +439,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 */
 	private ServletHandlerMethodResolver getMethodResolver(Object handler) {
 		Class handlerClass = ClassUtils.getUserClass(handler);
-		ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
-		if (resolver == null) {
-			resolver = new ServletHandlerMethodResolver(handlerClass);
-			this.methodResolverCache.put(handlerClass, resolver);
+		synchronized (this.methodResolverCache) {
+			ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
+			if (resolver == null) {
+				resolver = new ServletHandlerMethodResolver(handlerClass);
+				this.methodResolverCache.put(handlerClass, resolver);
+			}
+			return resolver;
 		}
-		return resolver;
 	}
 
 
