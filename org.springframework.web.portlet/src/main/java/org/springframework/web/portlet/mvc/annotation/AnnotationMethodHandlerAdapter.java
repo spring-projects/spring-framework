@@ -297,7 +297,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	public void handleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
 		Object returnValue = doHandle(request, response, handler);
 		if (returnValue != null) {
-			throw new IllegalStateException("Invalid action method return value: " + returnValue);
+			throw new IllegalStateException("Invalid event method return value: " + returnValue);
 		}
 	}
 
