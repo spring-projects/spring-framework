@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,16 @@ public interface HandlerExceptionResolver {
 	/**
 	 * Try to resolve the given exception that got thrown during on handler execution,
 	 * returning a ModelAndView that represents a specific error page if appropriate.
-	 * <p>The returned ModelAndView may be {@linkplain ModelAndView#isEmpty() empty} to indicate that the exception has
-	 * been resolved successfully, but that no view should be rendered, for instance by setting a status code.
+	 * <p>The returned ModelAndView may be {@linkplain ModelAndView#isEmpty() empty}
+	 * to indicate that the exception has been resolved successfully but that no view
+	 * should be rendered, for instance by setting a status code.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or <code>null</code> if none chosen at the
 	 * time of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
+	 * @return a corresponding ModelAndView to forward to,
+	 * or <code>null</code> for default processing
 	 */
 	ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);

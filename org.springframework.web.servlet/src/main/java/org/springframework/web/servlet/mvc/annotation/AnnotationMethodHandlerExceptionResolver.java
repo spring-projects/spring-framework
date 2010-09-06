@@ -44,8 +44,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -400,9 +400,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		MediaType.sortByQualityValue(acceptedMediaTypes);
 		HttpOutputMessage outputMessage = new ServletServerHttpResponse(webRequest.getResponse());
 		Class<?> returnValueType = returnValue.getClass();
-		if (messageConverters != null) {
+		if (this.messageConverters != null) {
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
-				for (HttpMessageConverter messageConverter : messageConverters) {
+				for (HttpMessageConverter messageConverter : this.messageConverters) {
 					if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
 						messageConverter.write(returnValue, acceptedMediaType, outputMessage);
 						return new ModelAndView();
