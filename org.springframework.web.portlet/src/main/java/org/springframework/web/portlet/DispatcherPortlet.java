@@ -38,6 +38,7 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+import javax.portlet.StateAwareResponse;
 import javax.portlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
@@ -648,17 +649,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			// Forward the exception to the render phase to be displayed.
 			try {
-				// Copy all parameters unless overridden in the action handler.
-				Enumeration<String> paramNames = request.getParameterNames();
-				while (paramNames.hasMoreElements()) {
-					String paramName = paramNames.nextElement();
-					String[] paramValues = request.getParameterValues(paramName);
-					if (paramValues != null && !response.getRenderParameterMap().containsKey(paramName)) {
-						response.setRenderParameter(paramName, paramValues);
-					}
-				}
-				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, Boolean.TRUE.toString());
-				request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
+				exposeActionException(request, response, ex);
 				logger.debug("Caught exception during action phase - forwarding to render phase", ex);
 			}
 			catch (IllegalStateException ex2) {
@@ -931,8 +922,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			triggerAfterEventCompletion(mappedHandler, interceptorIndex, request, response, ex);
 			// Forward the exception to the render phase to be displayed.
 			try {
-				response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, Boolean.TRUE.toString());
-				request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
+				exposeActionException(request, response, ex);
 				logger.debug("Caught exception during event phase - forwarding to render phase", ex);
 			}
 			catch (IllegalStateException ex2) {
@@ -1025,6 +1015,26 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		throw new PortletException("No adapter for handler [" + handler +
 				"]: Does your handler implement a supported interface like Controller?");
+	}
+
+	/**
+	 * Expose the given action exception to the given response.
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 * @param ex the action exception (may also come from an event phase)
+	 */
+	protected void exposeActionException(PortletRequest request, StateAwareResponse response, Exception ex) {
+		// Copy all parameters unless overridden in the action handler.
+		Enumeration<String> paramNames = request.getParameterNames();
+		while (paramNames.hasMoreElements()) {
+			String paramName = paramNames.nextElement();
+			String[] paramValues = request.getParameterValues(paramName);
+			if (paramValues != null && !response.getRenderParameterMap().containsKey(paramName)) {
+				response.setRenderParameter(paramName, paramValues);
+			}
+		}
+		response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER, Boolean.TRUE.toString());
+		request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE, ex);
 	}
 
 
