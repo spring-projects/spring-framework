@@ -484,23 +484,13 @@ public class HandlerMethodInvoker {
 		if (multipartRequest != null) {
 			List<MultipartFile> files = multipartRequest.getFiles(paramName);
 			if (!files.isEmpty()) {
-				if (files.size() == 1 && !paramType.isArray() && !Collection.class.isAssignableFrom(paramType)) {
-					paramValue = files.get(0);
-				}
-				else {
-					paramValue = files;
-				}
+				paramValue = (files.size() == 1 ? files.get(0) : files);
 			}
 		}
 		if (paramValue == null) {
 			String[] paramValues = webRequest.getParameterValues(paramName);
 			if (paramValues != null) {
-				if (paramValues.length == 1 && !paramType.isArray() && !Collection.class.isAssignableFrom(paramType)) {
-					paramValue = paramValues[0];
-				}
-				else {
-					paramValue = paramValues;
-				}
+				paramValue = (paramValues.length == 1 ? paramValues[0] : paramValues);
 			}
 		}
 		if (paramValue == null) {
