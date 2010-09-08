@@ -143,19 +143,19 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 			getContentHandler().setDocumentLocator(new Locator2() {
 
 				public int getColumnNumber() {
-					return location.getColumnNumber();
+					return location != null ? location.getColumnNumber() : -1;
 				}
 
 				public int getLineNumber() {
-					return location.getLineNumber();
+					return location != null ? location.getLineNumber() : -1;
 				}
 
 				public String getPublicId() {
-					return location.getPublicId();
+					return location != null ? location.getPublicId() : null;
 				}
 
 				public String getSystemId() {
-					return location.getSystemId();
+					return location != null ? location.getSystemId() : null;
 				}
 
 				public String getXMLVersion() {
