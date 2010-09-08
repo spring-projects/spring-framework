@@ -131,13 +131,13 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	 */
 	public int findColumn(String columnLabel) throws InvalidResultSetAccessException {
 		Integer columnIndex = columnLabelMap.get(columnLabel);
-		try {
-			if (columnIndex == null) {
+		if (columnIndex == null) {
+			try {
 				columnIndex = this.resultSet.findColumn(columnLabel);
 			}
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
+			catch (SQLException se) {
+				throw new InvalidResultSetAccessException(se);
+			}
 		}
 		return columnIndex.intValue();
 	}
