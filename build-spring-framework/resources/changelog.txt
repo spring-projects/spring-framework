@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.5 (2010-09-10)
+Changes in version 3.0.5 (2010-09-14)
 -------------------------------------
 
 * consistent use of JDK 1.5's ThreadLocal.remove() over ThreadLocal.set(null)
@@ -15,6 +15,8 @@ Changes in version 3.0.5 (2010-09-10)
 * fixed DefaultMessageListenerContainer's no-message commit to work without Session caching as well
 * JaxWsPortClientInterceptor does not fall back to annotation-specified name as portName anymore
 * fixed AnnotationMethodHandlerAdapter's caching to avoid concurrency issues in RequestMappingInfo
+* fixed @MVC processing of parameter-level annotations to work with interface-based proxies again
+* revised @RequestParam processing to support CSV-to-array/collection binding with ConversionService
 * fixed EvalTag's EvaluationContext caching to properly handle JSP tag caching across requests
 * DispatcherPortlet copies all action parameters to render parameters in case of an action exception
 * Portlet @ExceptionHandler methods allow for writing the response directly (like in the Servlet case)
