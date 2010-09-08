@@ -17,6 +17,7 @@
 package org.springframework.web.bind.annotation.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -72,12 +73,17 @@ public class HandlerMethodResolver {
 	 */
 	public void init(final Class<?> handlerType) {
 		Set<Class<?>> handlerTypes = new LinkedHashSet<Class<?>>();
-		handlerTypes.add(handlerType);
+		Class<?> specificHandlerType = null;
+		if (!Proxy.isProxyClass(handlerType)) {
+			handlerTypes.add(handlerType);
+			specificHandlerType = handlerType;
+		}
 		handlerTypes.addAll(Arrays.asList(handlerType.getInterfaces()));
 		for (Class<?> currentHandlerType : handlerTypes) {
+			final Class<?> targetClass = (specificHandlerType != null ? specificHandlerType : currentHandlerType);
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
-					Method specificMethod = ClassUtils.getMostSpecificMethod(method, handlerType);
+					Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
 					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 					if (isHandlerMethod(specificMethod) &&
 							(bridgedMethod == specificMethod || !isHandlerMethod(bridgedMethod))) {

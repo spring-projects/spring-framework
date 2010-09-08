@@ -1662,10 +1662,44 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handle");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("handle", response.getContentAsString());
+		assertEquals("handle null", response.getContentAsString());
 
+		request = new MockHttpServletRequest("GET", "/handle");
+		request.addParameter("p", "value");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle value", response.getContentAsString());
 	}
-	
+
+	@Test
+	public void requestMappingInterfaceWithProxy() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(IMyControllerImpl.class));
+				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
+				wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
+				wac.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handle");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle null", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/handle");
+		request.addParameter("p", "value");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle value", response.getContentAsString());
+	}
+
 	@Test
 	public void requestMappingBaseClass() throws Exception {
 		initServlet(MyAbstractControllerImpl.class);
@@ -2940,17 +2974,18 @@ public class ServletAnnotationControllerTests {
 
 	}
 
+	@Controller
 	public interface IMyController {
 
 		@RequestMapping("/handle")
-		void handle(Writer writer) throws IOException;
+		void handle(Writer writer, @RequestParam(value="p", required=false) String param) throws IOException;
 	}
 
 	@Controller
 	public static class IMyControllerImpl implements IMyController {
 
-		public void handle(Writer writer) throws IOException {
-			writer.write("handle");
+		public void handle(Writer writer, @RequestParam(value="p", required=false) String param) throws IOException {
+			writer.write("handle " + param);
 		}
 	}
 
