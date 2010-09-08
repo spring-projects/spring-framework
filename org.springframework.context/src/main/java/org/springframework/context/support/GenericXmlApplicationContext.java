@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.core.io.Resource;
  * deliberately override certain bean definitions via an extra configuration file.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
  * @see #load
  * @see XmlBeanDefinitionReader
@@ -67,6 +69,17 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 		refresh();
 	}
 
+	/**
+	 * Create a new GenericXmlApplicationContext, loading bean definitions
+	 * from the given resource locations and automatically refreshing the context.
+	 * @param relativeClass class whose package will be used as a prefix when
+	 * loading each specified resource name
+	 * @param resourceNames relatively-qualified names of resources to load
+	 */
+	public GenericXmlApplicationContext(Class<?> relativeClass, String... resourceNames) {
+		load(relativeClass, resourceNames);
+		refresh();
+	}
 
 	/**
 	 * Set whether to use XML validation. Default is <code>true</code>.
@@ -90,6 +103,20 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 	 */
 	public void load(String... resourceLocations) {
 		this.reader.loadBeanDefinitions(resourceLocations);
+	}
+
+	/**
+	 * Load bean definitions from the given XML resources.
+	 * @param relativeClass class whose package will be used as a prefix when
+	 * loading each specified resource name
+	 * @param resourceNames relatively-qualified names of resources to load
+	 */
+	public void load(Class<?> relativeClass, String... resourceNames) {
+		Resource[] resources = new Resource[resourceNames.length];
+		for (int i = 0; i < resourceNames.length; i++) {
+			resources[i] = new ClassPathResource(resourceNames[i], relativeClass);
+		}
+		this.load(resources);
 	}
 
 }
