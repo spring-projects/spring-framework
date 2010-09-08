@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import junit.framework.Assert;
 
@@ -67,6 +68,82 @@ public class MapAccessTests extends ExpressionTestCase {
 		Expression expr = parser.parseExpression("testMap[#day]");
 		Object value = expr.getValue(ctx, String.class);
 		Assert.assertEquals("samstag", value);
+	}
+
+	@Test
+	public void testGetValue(){
+
+		Map props1= new HashMap<String,String>();
+		props1.put("key1", "value1");
+		props1.put("key2", "value2");
+		props1.put("key3", "value3");
+
+
+		Object bean = new TestBean("name1",new TestBean("name2",null,"Description 2",15,props1),"description 1", 6,props1);
+
+		ExpressionParser parser = new SpelExpressionParser();
+		Expression exp = parser.parseExpression("testBean.properties['key2']");
+		String key= (String)exp.getValue(bean);
+
+		}
+
+	public static class TestBean
+	{
+		private String name;
+		private TestBean testBean;
+		private String description;
+		private Integer priority;
+		private Map properties;
+
+
+		public TestBean() {
+			super();
+		}
+
+		public TestBean(String name, TestBean testBean, String description,Integer priority,Map props) {
+			super();
+			this.name = name;
+			this.testBean = testBean;
+			this.description = description;
+			this.priority=priority;
+			this.properties=props;
+		}
+
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public TestBean getTestBean() {
+			return testBean;
+		}
+		public void setTestBean(TestBean testBean) {
+			this.testBean = testBean;
+		}
+		public String getDescription() {
+			return description;
+		}
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
+
+		public Integer getPriority() {
+			return priority;
+		}
+
+		public void setPriority(Integer priority) {
+			this.priority = priority;
+		}
+
+		public Map getProperties() {
+			return properties;
+		}
+
+		public void setProperties(Map properties) {
+			this.properties = properties;
+		}
 	}
 
 

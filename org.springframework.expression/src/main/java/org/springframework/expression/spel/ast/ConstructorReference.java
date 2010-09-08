@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Array;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -48,14 +49,16 @@ import org.springframework.expression.spel.SpelNode;
  */
 public class ConstructorReference extends SpelNodeImpl {
 
+	private boolean isArrayConstructor = false;
+
+	private SpelNodeImpl[] dimensions;
+
 	// TODO is this caching safe - passing the expression around will mean this executor is also being passed around
 	/**
 	 * The cached executor that may be reused on subsequent evaluations.
 	 */
 	private volatile ConstructorExecutor cachedExecutor;
 
-	private boolean isArrayConstructor = false;
-	private SpelNodeImpl[] dimensions;
 
 	/**
 	 * Create a constructor reference. The first argument is the type, the rest are the parameters to the constructor
@@ -76,40 +79,42 @@ public class ConstructorReference extends SpelNodeImpl {
 		this.dimensions = dimensions;
 	}
 
+
 	/**
 	 * Implements getValue() - delegating to the code for building an array or a simple type.
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		if (isArrayConstructor) {
+		if (this.isArrayConstructor) {
 			return createArray(state);
-		} else {
+		}
+		else {
 			return createNewInstance(state);
 		}
 	}
 
 	/**
 	 * Create a new ordinary object and return it.
-	 * 
 	 * @param state the expression state within which this expression is being evaluated
 	 * @return the new object
 	 * @throws EvaluationException if there is a problem creating the object
 	 */
 	private TypedValue createNewInstance(ExpressionState state) throws EvaluationException {
 		Object[] arguments = new Object[getChildCount() - 1];
-		Class<?>[] argumentTypes = new Class[getChildCount() - 1];
+		List<TypeDescriptor> argumentTypes = new ArrayList<TypeDescriptor>(getChildCount() - 1);
 		for (int i = 0; i < arguments.length; i++) {
-			TypedValue childValue = children[i + 1].getValueInternal(state);
+			TypedValue childValue = this.children[i + 1].getValueInternal(state);
 			Object value = childValue.getValue();
 			arguments[i] = value;
-			argumentTypes[i] = (value == null ? null : value.getClass());
+			argumentTypes.add(TypeDescriptor.forObject(value));
 		}
 
 		ConstructorExecutor executorToUse = this.cachedExecutor;
 		if (executorToUse != null) {
 			try {
 				return executorToUse.execute(state.getEvaluationContext(), arguments);
-			} catch (AccessException ae) {
+			}
+			catch (AccessException ae) {
 				// Two reasons this can occur:
 				// 1. the method invoked actually threw a real exception
 				// 2. the method invoked was not passed the arguments it expected and has become 'stale'
@@ -129,7 +134,7 @@ public class ConstructorReference extends SpelNodeImpl {
 					if (rootCause instanceof RuntimeException) {
 						throw (RuntimeException) rootCause;
 					} else {
-						String typename = (String) children[0].getValueInternal(state).getValue();
+						String typename = (String) this.children[0].getValueInternal(state).getValue();
 						throw new SpelEvaluationException(getStartPosition(), rootCause,
 								SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename, FormatHelper
 										.formatMethodForMessage("", argumentTypes));
@@ -142,13 +147,13 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 
 		// either there was no accessor or it no longer exists
-		String typename = (String) children[0].getValueInternal(state).getValue();
+		String typename = (String) this.children[0].getValueInternal(state).getValue();
 		executorToUse = findExecutorForConstructor(typename, argumentTypes, state);
 		try {
 			this.cachedExecutor = executorToUse;
-			TypedValue result = executorToUse.execute(state.getEvaluationContext(), arguments);
-			return result;
-		} catch (AccessException ae) {
+			return executorToUse.execute(state.getEvaluationContext(), arguments);
+		}
+		catch (AccessException ae) {
 			throw new SpelEvaluationException(getStartPosition(), ae, SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,
 					typename, FormatHelper.formatMethodForMessage("", argumentTypes));
 
@@ -158,14 +163,13 @@ public class ConstructorReference extends SpelNodeImpl {
 	/**
 	 * Go through the list of registered constructor resolvers and see if any can find a constructor that takes the
 	 * specified set of arguments.
-	 * 
 	 * @param typename the type trying to be constructed
 	 * @param argumentTypes the types of the arguments supplied that the constructor must take
 	 * @param state the current state of the expression
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
 	 * @throws SpelEvaluationException if there is a problem locating the constructor
 	 */
-	private ConstructorExecutor findExecutorForConstructor(String typename, Class<?>[] argumentTypes,
+	private ConstructorExecutor findExecutorForConstructor(String typename, List<TypeDescriptor> argumentTypes,
 			ExpressionState state) throws SpelEvaluationException {
 
 		EvaluationContext eContext = state.getEvaluationContext();
@@ -178,10 +182,11 @@ public class ConstructorReference extends SpelNodeImpl {
 					if (cEx != null) {
 						return cEx;
 					}
-				} catch (AccessException ex) {
+				}
+				catch (AccessException ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename, FormatHelper.formatMethodForMessage(
-									"", argumentTypes));
+							SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
+							FormatHelper.formatMethodForMessage("", argumentTypes));
 				}
 			}
 		}
@@ -208,13 +213,11 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	/**
 	 * Create an array and return it.
-	 * 
 	 * @param state the expression state within which this expression is being evaluated
 	 * @return the new array
 	 * @throws EvaluationException if there is a problem creating the array
 	 */
 	private TypedValue createArray(ExpressionState state) throws EvaluationException {
-
 		// First child gives us the array type which will either be a primitive or reference type
 		Object intendedArrayType = getChild(0).getValue(state);
 		if (!(intendedArrayType instanceof String)) {
@@ -223,44 +226,44 @@ public class ConstructorReference extends SpelNodeImpl {
 							.formatClassNameForMessage(intendedArrayType.getClass()));
 		}
 		String type = (String) intendedArrayType;
-		Class<?> componentType = null;
+		Class<?> componentType;
 		TypeCode arrayTypeCode = TypeCode.forName(type);
 		if (arrayTypeCode == TypeCode.OBJECT) {
 			componentType = state.findType(type);
-		} else {
+		}
+		else {
 			componentType = arrayTypeCode.getType();
 		}
-
 		TypeDescriptor td = TypeDescriptor.valueOf(componentType);
-
-		Object newArray = null;
-
+		Object newArray;
 		if (!hasInitializer()) {
 			// Confirm all dimensions were specified (for example [3][][5] is missing the 2nd dimension)
-			for (int i = 0; i < dimensions.length; i++) {
-				if (dimensions[i] == null) {
+			for (SpelNodeImpl dimension : this.dimensions) {
+				if (dimension == null) {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.MISSING_ARRAY_DIMENSION);
 				}
 			}
 			TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
 
 			// Shortcut for 1 dimensional
-			if (dimensions.length == 1) {
-				TypedValue o = dimensions[0].getTypedValue(state);
+			if (this.dimensions.length == 1) {
+				TypedValue o = this.dimensions[0].getTypedValue(state);
 				int arraySize = ExpressionUtils.toInt(typeConverter, o);
 				newArray = Array.newInstance(componentType, arraySize);
-			} else {
+			}
+			else {
 				// Multi-dimensional - hold onto your hat!
-				int[] dims = new int[dimensions.length];
-				for (int d = 0; d < dimensions.length; d++) {
-					TypedValue o = dimensions[d].getTypedValue(state);
+				int[] dims = new int[this.dimensions.length];
+				for (int d = 0; d < this.dimensions.length; d++) {
+					TypedValue o = this.dimensions[d].getTypedValue(state);
 					dims[d] = ExpressionUtils.toInt(typeConverter, o);
 				}
 				newArray = Array.newInstance(componentType, dims);
 			}
-		} else {
+		}
+		else {
 			// There is an initializer
-			if (dimensions.length > 1) {
+			if (this.dimensions.length > 1) {
 				// There is an initializer but this is a multi-dimensional array (e.g. new int[][]{{1,2},{3,4}}) - this
 				// is not currently supported
 				throw new SpelEvaluationException(getStartPosition(),
@@ -269,8 +272,8 @@ public class ConstructorReference extends SpelNodeImpl {
 			TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
 			InlineList initializer = (InlineList) getChild(1);
 			// If a dimension was specified, check it matches the initializer length
-			if (dimensions[0] != null) {
-				TypedValue dValue = dimensions[0].getTypedValue(state);
+			if (this.dimensions[0] != null) {
+				TypedValue dValue = this.dimensions[0].getTypedValue(state);
 				int i = ExpressionUtils.toInt(typeConverter, dValue);
 				if (i != initializer.getChildCount()) {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INITIALIZER_LENGTH_INCORRECT);
@@ -281,27 +284,35 @@ public class ConstructorReference extends SpelNodeImpl {
 			newArray = Array.newInstance(componentType, arraySize);
 			if (arrayTypeCode == TypeCode.OBJECT) {
 				populateReferenceTypeArray(state, newArray, typeConverter, initializer, componentType);
-			} else if (arrayTypeCode == TypeCode.INT) {
+			}
+			else if (arrayTypeCode == TypeCode.INT) {
 				populateIntArray(state, newArray, typeConverter, initializer);
-			} else if (arrayTypeCode == TypeCode.BOOLEAN) {
+			}
+			else if (arrayTypeCode == TypeCode.BOOLEAN) {
 				populateBooleanArray(state, newArray, typeConverter, initializer);
-			} else if (arrayTypeCode == TypeCode.CHAR) {
+			}
+			else if (arrayTypeCode == TypeCode.CHAR) {
 				populateCharArray(state, newArray, typeConverter, initializer);
-			} else if (arrayTypeCode == TypeCode.LONG) {
+			}
+			else if (arrayTypeCode == TypeCode.LONG) {
 				populateLongArray(state, newArray, typeConverter, initializer);
-			} else if (arrayTypeCode == TypeCode.SHORT) {
+			}
+			else if (arrayTypeCode == TypeCode.SHORT) {
 				populateShortArray(state, newArray, typeConverter, initializer);
-			} else if (arrayTypeCode == TypeCode.DOUBLE) {
+			}
+			else if (arrayTypeCode == TypeCode.DOUBLE) {
 				populateDoubleArray(state, newArray, typeConverter, initializer);
-			} else if (arrayTypeCode == TypeCode.FLOAT) {
+			}
+			else if (arrayTypeCode == TypeCode.FLOAT) {
 				populateFloatArray(state, newArray, typeConverter, initializer);
-			} else if (arrayTypeCode == TypeCode.BYTE) {
+			}
+			else if (arrayTypeCode == TypeCode.BYTE) {
 				populateByteArray(state, newArray, typeConverter, initializer);
-			} else {
+			}
+			else {
 				throw new IllegalStateException(arrayTypeCode.name());
 			}
 		}
-
 		return new TypedValue(newArray, td);
 	}
 

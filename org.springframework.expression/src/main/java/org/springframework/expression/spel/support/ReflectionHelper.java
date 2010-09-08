@@ -50,25 +50,25 @@ public class ReflectionHelper {
 	 * @return a MatchInfo object indicating what kind of match it was or null if it was not a match
 	 */
 	static ArgumentsMatchInfo compareArguments(
-			Class[] expectedArgTypes, Class[] suppliedArgTypes, TypeConverter typeConverter) {
+			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
-		Assert.isTrue(expectedArgTypes.length == suppliedArgTypes.length,
+		Assert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),
 				"Expected argument types and supplied argument types should be arrays of same length");
 
 		ArgsMatchKind match = ArgsMatchKind.EXACT;
 		List<Integer> argsRequiringConversion = null;
-		for (int i = 0; i < expectedArgTypes.length && match != null; i++) {
-			Class suppliedArg = suppliedArgTypes[i];
-			Class expectedArg = expectedArgTypes[i];
-			if (expectedArg != suppliedArg) {
+		for (int i = 0; i < expectedArgTypes.size() && match != null; i++) {
+			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
+			TypeDescriptor expectedArg = expectedArgTypes.get(i);
+			if (!expectedArg.equals(suppliedArg)) {
 				// The user may supply null - and that will be ok unless a primitive is expected
-				if (suppliedArg == null) {
+				if (suppliedArg == TypeDescriptor.NULL) {
 					if (expectedArg.isPrimitive()) {
 						match = null;
 					}
 				}
 				else {
-					if (ClassUtils.isAssignable(expectedArg, suppliedArg)) {
+					if (suppliedArg.isAssignableTo(expectedArg)) {
 						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
 							match = ArgsMatchKind.CLOSE;
 						} 
@@ -113,11 +113,11 @@ public class ReflectionHelper {
 	 * @return a MatchInfo object indicating what kind of match it was or null if it was not a match
 	 */
 	static ArgumentsMatchInfo compareArgumentsVarargs(
-			Class[] expectedArgTypes, Class[] suppliedArgTypes, TypeConverter typeConverter) {
+			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
  
-		Assert.isTrue(expectedArgTypes != null && expectedArgTypes.length > 0,
+		Assert.isTrue(expectedArgTypes != null && expectedArgTypes.size() > 0,
 				"Expected arguments must at least include one array (the vargargs parameter)");
-		Assert.isTrue(expectedArgTypes[expectedArgTypes.length - 1].isArray(),
+		Assert.isTrue(expectedArgTypes.get(expectedArgTypes.size() - 1).isArray(),
 				"Final expected argument should be array type (the varargs parameter)");
 		
 		ArgsMatchKind match = ArgsMatchKind.EXACT;
@@ -126,18 +126,18 @@ public class ReflectionHelper {
 		// Check up until the varargs argument:
 
 		// Deal with the arguments up to 'expected number' - 1 (that is everything but the varargs argument)
-		int argCountUpToVarargs = expectedArgTypes.length-1;
+		int argCountUpToVarargs = expectedArgTypes.size() - 1;
 		for (int i = 0; i < argCountUpToVarargs && match != null; i++) {
-			Class suppliedArg = suppliedArgTypes[i];
-			Class<?> expectedArg = expectedArgTypes[i];
-			if (suppliedArg==null) {
+			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
+			TypeDescriptor expectedArg = expectedArgTypes.get(i);
+			if (suppliedArg == TypeDescriptor.NULL) {
 				if (expectedArg.isPrimitive()) {
-					match=null;
+					match = null;
 				}
 			}
 			else {
-				if (expectedArg != suppliedArg) {
-					if (expectedArg.isAssignableFrom(suppliedArg) || ClassUtils.isAssignableValue(expectedArg, suppliedArg)) {
+				if (!expectedArg.equals(suppliedArg)) {
+					if (suppliedArg.isAssignableTo(expectedArg)) {
 						if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
 							match = ArgsMatchKind.CLOSE;
 						}
@@ -160,32 +160,33 @@ public class ReflectionHelper {
 			return null;
 		}
 
-		// Special case: there is one parameter left and it is an array and it matches the varargs expected argument -
-		// that is a match, the caller has already built the array
-		if (suppliedArgTypes.length == expectedArgTypes.length &&
-				expectedArgTypes[expectedArgTypes.length - 1] == suppliedArgTypes[suppliedArgTypes.length - 1]) {
+		if (suppliedArgTypes.size() == expectedArgTypes.size() &&
+				expectedArgTypes.get(expectedArgTypes.size() - 1).equals(
+						suppliedArgTypes.get(suppliedArgTypes.size() - 1))) {
+			// Special case: there is one parameter left and it is an array and it matches the varargs
+			// expected argument - that is a match, the caller has already built the array. Proceed with it.
 		}
 		else {
 			// Now... we have the final argument in the method we are checking as a match and we have 0 or more other
 			// arguments left to pass to it.
-			Class varargsParameterType = expectedArgTypes[expectedArgTypes.length - 1].getComponentType();
+			Class varargsParameterType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementType();
 
 			// All remaining parameters must be of this type or convertable to this type
-			for (int i = expectedArgTypes.length - 1; i < suppliedArgTypes.length; i++) {
-				Class suppliedArg = suppliedArgTypes[i];
-				if (varargsParameterType != suppliedArg) {
-					if (suppliedArg==null) {
+			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
+				TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
+				if (varargsParameterType != suppliedArg.getType()) {
+					if (suppliedArg == TypeDescriptor.NULL) {
 						if (varargsParameterType.isPrimitive()) {
-							match=null;
+							match = null;
 						}
 					}
 					else {
-						if (ClassUtils.isAssignable(varargsParameterType, suppliedArg)) {
+						if (ClassUtils.isAssignable(varargsParameterType, suppliedArg.getType())) {
 							if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
 								match = ArgsMatchKind.CLOSE;
 							}
 						}
-						else if (typeConverter.canConvert(suppliedArg, varargsParameterType)) {
+						else if (typeConverter.canConvert(suppliedArg, TypeDescriptor.valueOf(varargsParameterType))) {
 							if (argsRequiringConversion == null) {
 								argsRequiringConversion = new ArrayList<Integer>();
 							}

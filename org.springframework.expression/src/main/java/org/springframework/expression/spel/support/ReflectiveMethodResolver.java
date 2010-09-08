@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -32,11 +34,9 @@ import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
-
-
 /**
- * A method resolver that uses reflection to locate the method that should be invoked
- * 
+ * A method resolver that uses reflection to locate the method that should be invoked.
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -44,7 +44,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	private static Method[] NO_METHODS = new Method[0];
 
-	private Map<Class<?>,MethodFilter> filters = null;
+	private Map<Class<?>, MethodFilter> filters = null;
 
 	
 	/**
@@ -52,11 +52,12 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * <ol>
 	 * <li>An exact match where the types of the arguments match the types of the constructor
 	 * <li>An in-exact match where the types we are looking for are subtypes of those defined on the constructor
-	 * <li>A match where we are able to convert the arguments into those expected by the constructor, according to the
-	 * registered type converter.
+	 * <li>A match where we are able to convert the arguments into those expected by the constructor,
+	 * according to the registered type converter.
 	 * </ol>
 	 */
-	public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name, Class<?>[] argumentTypes) throws AccessException {
+	public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
+			List<TypeDescriptor> argumentTypes) throws AccessException {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
@@ -87,13 +88,19 @@ public class ReflectiveMethodResolver implements MethodResolver {
 					continue;
 				}
 				if (method.getName().equals(name)) {
+					Class[] paramTypes = method.getParameterTypes();
+					List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
+					for (int i = 0; i < paramTypes.length; i++) {
+						paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, i)));
+					}
 					ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-					if (method.isVarArgs() && argumentTypes.length >= (method.getParameterTypes().length - 1)) {
+					if (method.isVarArgs() && argumentTypes.size() >= (paramTypes.length - 1)) {
 						// *sigh* complicated
-						matchInfo = ReflectionHelper.compareArgumentsVarargs(method.getParameterTypes(), argumentTypes, typeConverter);
-					} else if (method.getParameterTypes().length == argumentTypes.length) {
+						matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
+					}
+					else if (paramTypes.length == argumentTypes.size()) {
 						// name and parameter number match, check the arguments
-						matchInfo = ReflectionHelper.compareArguments(method.getParameterTypes(), argumentTypes, typeConverter);
+						matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 					}
 					if (matchInfo != null) {
 						if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
@@ -131,14 +138,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
-		if (filters==null) {
-			filters = new HashMap<Class<?>,MethodFilter>();
+		if (this.filters == null) {
+			this.filters = new HashMap<Class<?>,MethodFilter>();
 		}
-		if (filter==null) {
-			filters.remove(type);
+		if (filter == null) {
+			this.filters.remove(type);
 		}
 		else {
-			filters.put(type,filter);
+			this.filters.put(type,filter);
 		}
 	}
 

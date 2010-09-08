@@ -17,6 +17,7 @@
 package org.springframework.expression.spel;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import junit.framework.Assert;
 import org.junit.Test;
@@ -302,7 +303,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			}
 		}
 
-		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name, Class<?>[] arguments)
+		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name, List<TypeDescriptor> arguments)
 				throws AccessException {
 			if (name.equals("hasRole")) {
 				return new HasRoleExecutor(context.getTypeConverter());

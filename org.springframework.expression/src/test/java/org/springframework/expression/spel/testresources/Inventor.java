@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.ObjectUtils;
+
 ///CLOVER:OFF
 @SuppressWarnings("unused")
 public class Inventor {
@@ -153,6 +155,17 @@ public class Inventor {
 	
 	public String printDouble(Double d) {
 		return d.toString();
+	}
+
+	public String printDoubles(double[] d) {
+		return ObjectUtils.nullSafeToString(d);
+	}
+
+	public List<String> getDoublesAsStringList() {
+		List<String> result = new ArrayList<String>();
+		result.add("14.35");
+		result.add("15.45");
+		return result;
 	}
 
 	public String joinThreeStrings(String a, String b, String c) {
