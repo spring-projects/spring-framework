@@ -88,7 +88,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p><b>Requires Hibernate 3.2 or later, with Hibernate 3.3 being recommended.</b>
+ * <p><b>Requires Hibernate 3.2 or later; tested with 3.3, 3.5 and 3.6.</b>
  * Note that this factory will use "on_close" as default Hibernate connection
  * release mode, unless in the case of a "jtaTransactionManager" specified,
  * for the reason that this is appropriate for most Spring-based applications
@@ -723,7 +723,12 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 					String[] strategyAndRegion =
 							StringUtils.commaDelimitedListToStringArray(this.entityCacheStrategies.getProperty(className));
 					if (strategyAndRegion.length > 1) {
-						config.setCacheConcurrencyStrategy(className, strategyAndRegion[0], strategyAndRegion[1]);
+						// method signature declares return type as Configuration on Hibernate 3.6
+						// but as void on Hibernate 3.3 and 3.5
+						Method setCacheConcurrencyStrategy = Configuration.class.getMethod(
+								"setCacheConcurrencyStrategy", String.class, String.class, String.class);
+						ReflectionUtils.invokeMethod(setCacheConcurrencyStrategy, config,
+								className, strategyAndRegion[0], strategyAndRegion[1]);
 					}
 					else if (strategyAndRegion.length > 0) {
 						config.setCacheConcurrencyStrategy(className, strategyAndRegion[0]);

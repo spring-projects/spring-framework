@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -428,14 +428,12 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 						registeredClassCache.setProperty(clazz, concurrencyStrategy);
 						return this;
 					}
-
 					public Configuration setCollectionCacheConcurrencyStrategy(String collectionRole, String concurrencyStrategy) {
 						registeredCollectionCache.setProperty(collectionRole, concurrencyStrategy);
 						return this;
 					}
 				};
 			}
-
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -461,16 +459,15 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected Configuration newConfiguration() {
 				return new Configuration() {
+					// changed from return type 'void' to 'Configuration' in Hibernate 3.6
 					public void setCacheConcurrencyStrategy(String clazz, String concurrencyStrategy, String regionName) {
 						registeredClassCache.setProperty(clazz, concurrencyStrategy + "," + regionName);
 					}
-
 					public void setCollectionCacheConcurrencyStrategy(String collectionRole, String concurrencyStrategy, String regionName) {
 						registeredCollectionCache.setProperty(collectionRole, concurrencyStrategy + "," + regionName);
 					}
 				};
 			}
-
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -500,7 +497,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -526,7 +522,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-
 			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
@@ -564,8 +559,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	public void testLocalSessionFactoryBeanWithTypeDefinitions() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("typeDefinitions.xml", getClass()));
 		TypeTestLocalSessionFactoryBean sf = (TypeTestLocalSessionFactoryBean) xbf.getBean("&sessionFactory");
-		TypeDef type1 = (TypeDef) sf.mappings.getTypeDef("type1");
-		TypeDef type2 = (TypeDef) sf.mappings.getTypeDef("type2");
+		// Requires re-compilation when switching to Hibernate 3.5/3.6
+		// since Mappings changed from a class to an interface
+		TypeDef type1 = sf.mappings.getTypeDef("type1");
+		TypeDef type2 = sf.mappings.getTypeDef("type2");
 
 		assertEquals("mypackage.MyTypeClass", type1.getTypeClass());
 		assertEquals(2, type1.getParameters().size());
