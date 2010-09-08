@@ -16,6 +16,7 @@
 
 package org.springframework.util.xml;
 
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
@@ -308,6 +309,14 @@ public abstract class StaxUtils {
 		return new XMLEventStreamReader(eventReader);
 	}
 
+	/**
+	 * Return a {@link XMLStreamWriter} that writes to a {@link XMLEventWriter}.
+	 * @return a stream writer that writes to an event writer
+	 * @since 3.0.5
+	 */
+	public static XMLStreamWriter createEventStreamWriter(XMLEventWriter eventWriter, XMLEventFactory eventFactory) {
+		return new XMLEventStreamWriter(eventWriter, eventFactory);
+	}
 
 	/**
 	 * Inner class to avoid a static JAXP 1.4 dependency.
