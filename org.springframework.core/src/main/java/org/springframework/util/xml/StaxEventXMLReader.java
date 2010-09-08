@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -78,6 +79,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxEventXMLReader(XMLEventReader reader) {
+		Assert.notNull(reader, "'reader' must not be null");
 		try {
 			XMLEvent event = reader.peek();
 			if (event != null && !(event.isStartDocument() || event.isStartElement())) {
