@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package org.springframework.jdbc.support.rowset;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
@@ -33,6 +35,14 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * <p>This implementation wraps a <code>javax.sql.ResultSet</code>,
  * catching any SQLExceptions and translating them to the
  * appropriate Spring {@link InvalidResultSetAccessException}.
+ * 
+ * <p>Note: Since JDBC 4.0 it has been clarified that any methods using a String to identify the column should
+ * be using the column label. The column label is assigned using the ALIAS keyword in the SQL query string. When the 
+ * query doesn't use an ALIAS the default label is the column name. Most JDBC ResultSet implementations follow this 
+ * new pattern but there are some exceptions such as the com.sun.rowset.CachedRowSetImpl which only uses the column
+ * name ignoring any column labels. Since Spring 3.0.5 this class will translate column labels to the correct column 
+ * index to provide better support for the com.sun.rowset.CachedRowSetImpl which is the default implementation used by 
+ * the JdbcTemplate when working with RowSets. 
  *
  * <p>The passed-in ResultSets should already be disconnected if the SqlRowSet
  * is supposed to be usable in a disconnected fashion. This means that
@@ -59,6 +69,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	private final ResultSet resultSet;
 
 	private final SqlRowSetMetaData rowSetMetaData;
+	
+	private final Map<String, Integer> columnLabelMap;
 
 
 	/**
@@ -79,6 +91,22 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);
 		}
+		try {
+			ResultSetMetaData rsmd = resultSet.getMetaData();
+			if (rsmd != null) {
+				int columnCount = rsmd.getColumnCount();
+				this.columnLabelMap = new HashMap<String, Integer>(columnCount);
+				for (int i = 1; i <= columnCount; i++) {
+					columnLabelMap.put(rsmd.getColumnLabel(i), Integer.valueOf(i));
+				}
+			}
+			else {
+				this.columnLabelMap = new HashMap<String, Integer>(0);
+			}
+		} catch (SQLException se) {
+			throw new InvalidResultSetAccessException(se);
+		}
+		
 	}
 
 
@@ -101,13 +129,17 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#findColumn(String)
 	 */
-	public int findColumn(String columnName) throws InvalidResultSetAccessException {
+	public int findColumn(String columnLabel) throws InvalidResultSetAccessException {
+		Integer columnIndex = columnLabelMap.get(columnLabel);
 		try {
-			return this.resultSet.findColumn(columnName);
+			if (columnIndex == null) {
+				columnIndex = this.resultSet.findColumn(columnLabel);
+			}
 		}
 		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);
 		}
+		return columnIndex.intValue();
 	}
 
 
@@ -128,13 +160,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getBigDecimal(String)
 	 */
-	public BigDecimal getBigDecimal(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getBigDecimal(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public BigDecimal getBigDecimal(String columnLabel) throws InvalidResultSetAccessException {
+		return getBigDecimal(findColumn(columnLabel));
 	}
 
 	/**
@@ -152,13 +179,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getBoolean(String)
 	 */
-	public boolean getBoolean(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getBoolean(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public boolean getBoolean(String columnLabel) throws InvalidResultSetAccessException {
+		return getBoolean(findColumn(columnLabel));
 	}
 	
 	/**
@@ -176,13 +198,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getByte(String)
 	 */
-	public byte getByte(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getByte(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public byte getByte(String columnLabel) throws InvalidResultSetAccessException {
+		return getByte(findColumn(columnLabel));
 	}
 	
 	/**
@@ -211,25 +228,15 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getDate(String, java.util.Calendar)
 	 */
-	public Date getDate(String columnName, Calendar cal) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getDate(columnName, cal);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Date getDate(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
+		return getDate(findColumn(columnLabel), cal);
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getDate(String)
 	 */
-	public Date getDate(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getDate(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Date getDate(String columnLabel) throws InvalidResultSetAccessException {
+		return getDate(findColumn(columnLabel));
 	}
 	
 	/**
@@ -247,13 +254,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getDouble(String)
 	 */
-	public double getDouble(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getDouble(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public double getDouble(String columnLabel) throws InvalidResultSetAccessException {
+		return getDouble(findColumn(columnLabel));
 	}
 	
 	/**
@@ -271,13 +273,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getFloat(String)
 	 */
-	public float getFloat(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getFloat(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public float getFloat(String columnLabel) throws InvalidResultSetAccessException {
+		return getFloat(findColumn(columnLabel));
 	}
 	/**
 	 * @see java.sql.ResultSet#getInt(int)
@@ -294,13 +291,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getInt(String)
 	 */
-	public int getInt(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getInt(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public int getInt(String columnLabel) throws InvalidResultSetAccessException {
+		return getInt(findColumn(columnLabel));
 	}
 	
 	/**
@@ -318,19 +310,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getLong(String)
 	 */
-	public long getLong(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getLong(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public long getLong(String columnLabel) throws InvalidResultSetAccessException {
+		return getLong(findColumn(columnLabel));
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getObject(int, java.util.Map)
 	 */
-	public Object getObject(int i, Map map) throws InvalidResultSetAccessException {
+	public Object getObject(int i,  Map<String, Class<?>> map) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSet.getObject(i, map);
 		}
@@ -354,25 +341,15 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getObject(String, java.util.Map)
 	 */
-	public Object getObject(String columnName, Map map) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getObject(columnName, map);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException {
+		return getObject(findColumn(columnLabel), map);
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getObject(String)
 	 */
-	public Object getObject(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getObject(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Object getObject(String columnLabel) throws InvalidResultSetAccessException {
+		return getObject(findColumn(columnLabel));
 	}
 	
 	/**
@@ -390,13 +367,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getShort(String)
 	 */
-	public short getShort(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getShort(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public short getShort(String columnLabel) throws InvalidResultSetAccessException {
+		return getShort(findColumn(columnLabel));
 	}
 	
 	/**
@@ -414,13 +386,8 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getString(String)
 	 */
-	public String getString(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getString(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public String getString(String columnLabel) throws InvalidResultSetAccessException {
+		return getString(findColumn(columnLabel));
 	}
 	
 	/**
@@ -450,25 +417,15 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getTime(String, java.util.Calendar)
 	 */
-	public Time getTime(String columnName, Calendar cal) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getTime(columnName, cal);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Time getTime(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
+		return getTime(findColumn(columnLabel), cal);
 	}
 	
 	/**
 	 * @see java.sql.ResultSet#getTime(String)
 	 */
-	public Time getTime(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getTime(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Time getTime(String columnLabel) throws InvalidResultSetAccessException {
+		return getTime(findColumn(columnLabel));
 	}
 	
 	/**
@@ -498,25 +455,15 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(String, java.util.Calendar)
 	 */
-	public Timestamp getTimestamp(String columnName, Calendar cal) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getTimestamp(columnName, cal);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Timestamp getTimestamp(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
+		return getTimestamp(findColumn(columnLabel), cal);
 	}
 
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(String)
 	 */
-	public Timestamp getTimestamp(String columnName) throws InvalidResultSetAccessException {
-		try {
-			return this.resultSet.getTimestamp(columnName);
-		}
-		catch (SQLException se) {
-			throw new InvalidResultSetAccessException(se);
-		}
+	public Timestamp getTimestamp(String columnLabel) throws InvalidResultSetAccessException {
+		return getTimestamp(findColumn(columnLabel));
 	}
 
 
