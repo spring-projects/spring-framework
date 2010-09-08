@@ -104,6 +104,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -114,7 +115,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
@@ -1716,12 +1716,38 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void regularParameterAsSingleString() throws Exception {
+		initServlet(MultipartController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/singleString");
+		request.setMethod("POST");
+		request.addParameter("content", "Juergen");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Juergen", response.getContentAsString());
+	}
+
+	@Test
 	public void multipartFileAsStringArray() throws Exception {
 		initServlet(MultipartController.class);
 
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.setRequestURI("/stringArray");
 		request.addFile(new MockMultipartFile("content", "Juergen".getBytes()));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Juergen", response.getContentAsString());
+	}
+
+	@Test
+	public void regularParameterAsStringArray() throws Exception {
+		initServlet(MultipartController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/stringArray");
+		request.setMethod("POST");
+		request.addParameter("content", "Juergen");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Juergen", response.getContentAsString());
@@ -1737,7 +1763,49 @@ public class ServletAnnotationControllerTests {
 		request.addFile(new MockMultipartFile("content", "Eva".getBytes()));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("Juergen,Eva", response.getContentAsString());
+		assertEquals("Juergen-Eva", response.getContentAsString());
+	}
+
+	@Test
+	public void regularParametersAsStringArray() throws Exception {
+		initServlet(MultipartController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/stringArray");
+		request.setMethod("POST");
+		request.addParameter("content", "Juergen");
+		request.addParameter("content", "Eva");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("Juergen-Eva", response.getContentAsString());
+	}
+
+	@Test
+	public void parameterCsvAsStringArray() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(CsvController.class));
+				RootBeanDefinition csDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+				wbiDef.getPropertyValues().add("conversionService", csDef);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/integerArray");
+		request.setMethod("POST");
+		request.addParameter("content", "1,2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("1-2", response.getContentAsString());
 	}
 
 
@@ -2983,7 +3051,21 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping("/stringArray")
 		public void processMultipart(@RequestParam("content") String[] content, HttpServletResponse response) throws IOException {
-			response.getWriter().write(StringUtils.arrayToCommaDelimitedString(content));
+			response.getWriter().write(StringUtils.arrayToDelimitedString(content, "-"));
+		}
+	}
+
+	@Controller
+	public static class CsvController {
+
+		@RequestMapping("/singleInteger")
+		public void processCsv(@RequestParam("content") Integer content, HttpServletResponse response) throws IOException {
+			response.getWriter().write(content.toString());
+		}
+
+		@RequestMapping("/integerArray")
+		public void processCsv(@RequestParam("content") Integer[] content, HttpServletResponse response) throws IOException {
+			response.getWriter().write(StringUtils.arrayToDelimitedString(content, "-"));
 		}
 	}
 
