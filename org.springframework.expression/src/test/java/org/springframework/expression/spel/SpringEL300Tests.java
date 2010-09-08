@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.Assert;
-
+import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
@@ -50,11 +51,22 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
 	}
 
-//	@Test
-//	public void testSWF1086() {
-//		evaluate("printDouble(T(java.math.BigDecimal).valueOf(14.35))", "anullc", String.class);
-//	}
+	@Test
+	@Ignore
+	public void testSWF1086() {
+		evaluate("printDouble(T(java.math.BigDecimal).valueOf(14.35))", "anullc", String.class);
+	}
 	
+	@Test
+	public void testDoubleCoercion() {
+		evaluate("printDouble(14.35)", "14.35", String.class);
+	}
+
+	@Test
+	public void testDoubleArrayCoercion() {
+		evaluate("printDoubles(getDoublesAsStringList())", "{14.35, 15.45}", String.class);
+	}
+
 	@Test
 	public void testSPR5899() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());

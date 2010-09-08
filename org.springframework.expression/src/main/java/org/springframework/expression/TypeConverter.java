@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,6 @@ import org.springframework.core.convert.TypeDescriptor;
  * @since 3.0
  */
 public interface TypeConverter {
-
-	/**
-	 * Return true if the type converter can convert the specified type to the desired target type.
-	 * @param sourceType the type to be converted from
-	 * @param targetType the type to be converted to
-	 * @return true if that conversion can be performed
-	 */
-	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 
 	/**
 	 * Return true if the type converter can convert the specified type to the desired target type.

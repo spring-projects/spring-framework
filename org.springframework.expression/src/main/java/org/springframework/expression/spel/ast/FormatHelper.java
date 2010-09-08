@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.util.List;
+
+import org.springframework.core.convert.TypeDescriptor;
+
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.
  * 
@@ -29,15 +33,15 @@ public class FormatHelper {
 	 * @param argumentTypes the types of the arguments to the method
 	 * @return nicely formatted string, eg. foo(String,int)
 	 */
-	public static String formatMethodForMessage(String name, Class<?>... argumentTypes) {
+	public static String formatMethodForMessage(String name, List<TypeDescriptor> argumentTypes) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(name);
 		sb.append("(");
-		for (int i = 0; i < argumentTypes.length; i++) {
+		for (int i = 0; i < argumentTypes.size(); i++) {
 			if (i > 0) {
 				sb.append(",");
 			}
-			sb.append(formatClassNameForMessage(argumentTypes[i]));
+			sb.append(formatClassNameForMessage(argumentTypes.get(i).getType()));
 		}
 		sb.append(")");
 		return sb.toString();

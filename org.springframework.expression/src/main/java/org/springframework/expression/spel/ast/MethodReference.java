@@ -16,8 +16,10 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -38,12 +40,14 @@ public class MethodReference extends SpelNodeImpl {
 
 	private final String name;
 
-	private volatile MethodExecutor cachedExecutor;
 	private final boolean nullSafe;
+
+	private volatile MethodExecutor cachedExecutor;
+
 
 	public MethodReference(boolean nullSafe, String methodName, int pos, SpelNodeImpl... arguments) {
 		super(pos,arguments);
-		name = methodName;
+		this.name = methodName;
 		this.nullSafe = nullSafe;
 	}
 
@@ -58,14 +62,16 @@ public class MethodReference extends SpelNodeImpl {
 			try {
 				state.pushActiveContextObject(state.getRootContextObject());
 				arguments[i] = children[i].getValueInternal(state).getValue();
-			} finally {
+			}
+			finally {
 				state.popActiveContextObject();	
 			}
 		}
 		if (currentContext.getValue() == null) {
-			if (nullSafe) {
+			if (this.nullSafe) {
 				return TypedValue.NULL;
-			} else {
+			}
+			else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
 						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
 			}
@@ -123,20 +129,22 @@ public class MethodReference extends SpelNodeImpl {
 			// User exception was the root cause - exit now
 			if (rootCause instanceof RuntimeException) {
 				throw (RuntimeException)rootCause;
-			} else {
-				throw new ExpressionInvocationTargetException( getStartPosition(), 
-						"A problem occurred when trying to execute method '"+this.name+"' on object of type '"+state.getActiveContextObject().getValue().getClass().getName()+"'",
+			}
+			else {
+				throw new ExpressionInvocationTargetException( getStartPosition(),
+						"A problem occurred when trying to execute method '" + this.name +
+						"' on object of type '" + state.getActiveContextObject().getValue().getClass().getName() + "'",
 						rootCause);
 			}
 		}
 	}
 
-	private Class<?>[] getTypes(Object... arguments) {
-		Class<?>[] argumentTypes = new Class[arguments.length];
-		for (int i = 0; i < arguments.length; i++) {
-			argumentTypes[i] = (arguments[i]==null?null:arguments[i].getClass());
+	private List<TypeDescriptor> getTypes(Object... arguments) {
+		List<TypeDescriptor> descriptors = new ArrayList<TypeDescriptor>(arguments.length);
+		for (Object argument : arguments) {
+			descriptors.add(TypeDescriptor.forObject(argument));
 		}
-		return argumentTypes;
+		return descriptors;
 	}
 
 	@Override
@@ -152,7 +160,7 @@ public class MethodReference extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	private MethodExecutor findAccessorForMethod(String name, Class<?>[] argumentTypes, ExpressionState state)
+	private MethodExecutor findAccessorForMethod(String name, List<TypeDescriptor> argumentTypes, ExpressionState state)
 			throws SpelEvaluationException {
 
 		TypedValue context = state.getActiveContextObject();

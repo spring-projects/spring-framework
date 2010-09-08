@@ -36,6 +36,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Tests invocation of methods.
@@ -324,7 +325,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 	static class DummyMethodResolver implements MethodResolver {
 
 		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
-				Class<?>[] argumentTypes) throws AccessException {
+				List<TypeDescriptor> argumentTypes) throws AccessException {
 			throw new UnsupportedOperationException("Auto-generated method stub");
 		}
 		
