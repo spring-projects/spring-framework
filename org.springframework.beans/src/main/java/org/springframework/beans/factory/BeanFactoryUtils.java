@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,6 +208,11 @@ public abstract class BeanFactoryUtils {
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
+	 * <p><b>Note: Beans of the same name will take precedence at the 'lowest' factory level,
+	 * i.e. such beans will be returned from the lowest factory that they are being found in,
+	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
+	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
+	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @return the Map of matching bean instances, or an empty Map if none
@@ -239,12 +244,16 @@ public abstract class BeanFactoryUtils {
 	 * Return all beans of the given type or subtypes, also picking up beans defined in
 	 * ancestor bean factories if the current bean factory is a HierarchicalBeanFactory.
 	 * The returned Map will only contain beans of this type.
-	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit"
-	 * flag is set, which means that FactoryBeans will get initialized. If the
-	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "allowEagerInit" is not set,
-	 * only raw FactoryBeans will be checked (which doesn't require initialization
-	 * of each FactoryBean).
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
+	 * which means that FactoryBeans will get initialized. If the object created by the
+	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
+	 * type. If "allowEagerInit" is not set, only raw FactoryBeans will be checked
+	 * (which doesn't require initialization of each FactoryBean).
+	 * <p><b>Note: Beans of the same name will take precedence at the 'lowest' factory level,
+	 * i.e. such beans will be returned from the lowest factory that they are being found in,
+	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
+	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
+	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includeNonSingletons whether to include prototype or scoped beans too
@@ -291,6 +300,11 @@ public abstract class BeanFactoryUtils {
 	 * the raw FactoryBean itself will be matched against the type.
 	 * <p>This version of <code>beanOfTypeIncludingAncestors</code> automatically includes
 	 * prototypes and FactoryBeans.
+	 * <p><b>Note: Beans of the same name will take precedence at the 'lowest' factory level,
+	 * i.e. such beans will be returned from the lowest factory that they are being found in,
+	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
+	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
+	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @return the matching bean instance
@@ -315,12 +329,16 @@ public abstract class BeanFactoryUtils {
 	 * defined in ancestor bean factories if the current bean factory is a
 	 * HierarchicalBeanFactory. Useful convenience method when we expect a
 	 * single bean and don't care about the bean name.
-	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit"
-	 * flag is set, which means that FactoryBeans will get initialized. If the
-	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "allowEagerInit" is not set,
-	 * only raw FactoryBeans will be checked (which doesn't require initialization
-	 * of each FactoryBean).
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
+	 * which means that FactoryBeans will get initialized. If the object created by the
+	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
+	 * type. If "allowEagerInit" is not set, only raw FactoryBeans will be checked
+	 * (which doesn't require initialization of each FactoryBean).
+	 * <p><b>Note: Beans of the same name will take precedence at the 'lowest' factory level,
+	 * i.e. such beans will be returned from the lowest factory that they are being found in,
+	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
+	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
+	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @param includeNonSingletons whether to include prototype or scoped beans too
