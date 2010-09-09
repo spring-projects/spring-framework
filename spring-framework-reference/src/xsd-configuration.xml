@@ -845,6 +845,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             using the supplied metadata.</para>
         </section>
     </section>
+    <!-- Commented pending resolution of SPR-7521
     <section id="xsd-config-setup">
         <title>Setting up your IDE</title>
         <para>This final section documents the steps involved in setting up a number of
@@ -1138,4 +1139,5 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             </section>
         </section>
     </section>
+    -->
 </appendix>
