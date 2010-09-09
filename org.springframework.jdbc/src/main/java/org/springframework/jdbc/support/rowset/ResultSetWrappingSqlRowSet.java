@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,33 +33,34 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 /**
  * Default implementation of Spring's {@link SqlRowSet} interface.
  *
- * <p>This implementation wraps a <code>javax.sql.ResultSet</code>,
- * catching any SQLExceptions and translating them to the
- * appropriate Spring {@link InvalidResultSetAccessException}.
- * 
- * <p>Note: Since JDBC 4.0 it has been clarified that any methods using a String to identify the column should
- * be using the column label. The column label is assigned using the ALIAS keyword in the SQL query string. When the 
- * query doesn't use an ALIAS the default label is the column name. Most JDBC ResultSet implementations follow this 
- * new pattern but there are some exceptions such as the com.sun.rowset.CachedRowSetImpl which only uses the column
- * name ignoring any column labels. Since Spring 3.0.5 this class will translate column labels to the correct column 
- * index to provide better support for the com.sun.rowset.CachedRowSetImpl which is the default implementation used by 
- * the JdbcTemplate when working with RowSets. 
+ * <p>This implementation wraps a <code>javax.sql.ResultSet</code>, catching any SQLExceptions
+ * and translating them to the appropriate Spring {@link InvalidResultSetAccessException}.
  *
- * <p>The passed-in ResultSets should already be disconnected if the SqlRowSet
- * is supposed to be usable in a disconnected fashion. This means that
- * you will usually pass in a <code>javax.sql.rowset.CachedRowSet</code>,
- * which implements the ResultSet interface.
+ * <p>The passed-in ResultSets should already be disconnected if the SqlRowSet is supposed
+ * to be usable in a disconnected fashion. This means that you will usually pass in a
+ * <code>javax.sql.rowset.CachedRowSet</code>, which implements the ResultSet interface.
  *
- * <p>Note: This class implements the <code>java.io.Serializable</code>
- * marker interface through the SqlRowSet interface, but is only actually
- * serializable if the disconnected ResultSet/RowSet contained in it is
- * serializable. Most CachedRowSet implementations are actually serializable.
+ * <p>Note: Since JDBC 4.0, it has been clarified that any methods using a String to identify
+ * the column should be using the column label. The column label is assigned using the ALIAS
+ * keyword in the SQL query string. When the query doesn't use an ALIAS, the default label is
+ * the column name. Most JDBC ResultSet implementations follow this new pattern but there are
+ * exceptions such as the <code>com.sun.rowset.CachedRowSetImpl</code> class which only uses
+ * the column name, ignoring any column labels. As of Spring 3.0.5, ResultSetWrappingSqlRowSet
+ * will translate column labels to the correct column index to provide better support for the
+ * <code>com.sun.rowset.CachedRowSetImpl</code> which is the default implementation used by
+ * {@link org.springframework.jdbc.core.JdbcTemplate} when working with RowSets.
+ *
+ * <p>Note: This class implements the <code>java.io.Serializable</code> marker interface
+ * through the SqlRowSet interface, but is only actually serializable if the disconnected
+ * ResultSet/RowSet contained in it is serializable. Most CachedRowSet implementations
+ * are actually serializable, so this should usually work out.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 1.2
  * @see java.sql.ResultSet
  * @see javax.sql.rowset.CachedRowSet
+ * @see org.springframework.jdbc.core.JdbcTemplate#queryForRowSet
  */
 public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 
@@ -97,13 +99,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 				int columnCount = rsmd.getColumnCount();
 				this.columnLabelMap = new HashMap<String, Integer>(columnCount);
 				for (int i = 1; i <= columnCount; i++) {
-					columnLabelMap.put(rsmd.getColumnLabel(i), Integer.valueOf(i));
+					this.columnLabelMap.put(rsmd.getColumnLabel(i), i);
 				}
 			}
 			else {
-				this.columnLabelMap = new HashMap<String, Integer>(0);
+				this.columnLabelMap = Collections.emptyMap();
 			}
-		} catch (SQLException se) {
+		}
+		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);
 		}
 		
@@ -130,16 +133,18 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	 * @see java.sql.ResultSet#findColumn(String)
 	 */
 	public int findColumn(String columnLabel) throws InvalidResultSetAccessException {
-		Integer columnIndex = columnLabelMap.get(columnLabel);
-		if (columnIndex == null) {
+		Integer columnIndex = this.columnLabelMap.get(columnLabel);
+		if (columnIndex != null) {
+			return columnIndex;
+		}
+		else {
 			try {
-				columnIndex = this.resultSet.findColumn(columnLabel);
+				return this.resultSet.findColumn(columnLabel);
 			}
 			catch (SQLException se) {
 				throw new InvalidResultSetAccessException(se);
 			}
 		}
-		return columnIndex.intValue();
 	}
 
 
