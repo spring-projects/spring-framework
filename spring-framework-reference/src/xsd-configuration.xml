@@ -114,7 +114,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 </beans>]]></programlisting>
             <section id="xsd-config-body-schemas-util-constant">
                 <title><literal>&lt;util:constant/&gt;</literal></title>
-                <para>Before...</para>    
+                <para>Before...</para>
                 <programlisting language="xml"><![CDATA[<bean id="..." class="...">
   <property name="isolation">
     <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
@@ -140,18 +140,18 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <section id="xsd-config-body-schemas-util-frfb">
                     <title>Setting a bean property or constructor arg from a field value</title>
                     <para>
-			            <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
-			            is a <interfacename>FactoryBean</interfacename> which retrieves a
-			            <literal>static</literal> or non-static field value. It is typically
-			            used for retrieving <literal>public</literal> <literal>static</literal>
-			            <literal>final</literal> constants, which may then be used to set a
-			            property value or constructor arg for another bean.
-		            </para>
+                        <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
+                        is a <interfacename>FactoryBean</interfacename> which retrieves a
+                        <literal>static</literal> or non-static field value. It is typically
+                        used for retrieving <literal>public</literal> <literal>static</literal>
+                        <literal>final</literal> constants, which may then be used to set a
+                        property value or constructor arg for another bean.
+                    </para>
                     <para>
-			            Find below an example which shows how a <literal>static</literal> field is exposed, by
-			            using the <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)"><literal>staticField</literal></ulink>
-			            property:
-		            </para>
+                        Find below an example which shows how a <literal>static</literal> field is exposed, by
+                        using the <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)"><literal>staticField</literal></ulink>
+                        property:
+                    </para>
                     <programlisting language="xml"><![CDATA[<bean id="myField"
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
   <property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
@@ -161,12 +161,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                     <programlisting language="xml"><![CDATA[<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
     class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>]]></programlisting>
                     <para>
-			            This does mean that there is no longer any choice in what the bean id is (so
-			            any other bean that refers to it will also have to use this longer name),
-			            but this form is very concise to define, and very convenient to use as an
-			            inner bean since the id doesn't have to be specified for the bean
-			            reference:
-		            </para>
+                        This does mean that there is no longer any choice in what the bean id is (so
+                        any other bean that refers to it will also have to use this longer name),
+                        but this form is very concise to define, and very convenient to use as an
+                        inner bean since the id doesn't have to be specified for the bean
+                        reference:
+                    </para>
                     <programlisting language="xml"><![CDATA[<bean id="..." class="...">
   <property name="isolation">
     <bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
@@ -174,20 +174,20 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   </property>
 </bean>]]></programlisting>
                     <para>
-			            It is also possible to access a non-static (instance) field of another bean,
-			            as described in the API documentation for the 
-			            <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
-			            class.
-		            </para>
+                        It is also possible to access a non-static (instance) field of another bean,
+                        as described in the API documentation for the
+                        <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
+                        class.
+                    </para>
                     <para>
-			            Injecting enum values into beans as either property or constructor arguments is very
-			            easy to do in Spring, in that you don't actually have to <emphasis>do</emphasis>
-			            anything or know anything about the Spring internals (or even about classes such
-			            as the <classname>FieldRetrievingFactoryBean</classname>). Let's look at an example
-			            to see how easy injecting an enum value is; consider this JDK 5 enum:
-		            </para>
+                        Injecting enum values into beans as either property or constructor arguments is very
+                        easy to do in Spring, in that you don't actually have to <emphasis>do</emphasis>
+                        anything or know anything about the Spring internals (or even about classes such
+                        as the <classname>FieldRetrievingFactoryBean</classname>). Let's look at an example
+                        to see how easy injecting an enum value is; consider this JDK 5 enum:
+                    </para>
                     <programlisting language="java"><![CDATA[package javax.persistence;
-     
+
 public enum PersistenceContextType {
 
     TRANSACTION,
@@ -201,7 +201,7 @@ public class Client {
 
     private PersistenceContextType persistenceContextType;
 
-    public void setPersistenceContextType(PersistenceContextType type) { 
+    public void setPersistenceContextType(PersistenceContextType type) {
         this.persistenceContextType = type;
     }
 }]]></programlisting>
@@ -210,15 +210,15 @@ public class Client {
     <property name="persistenceContextType" value="TRANSACTION" />
 </bean>]]></programlisting>
                     <para>
-			            This works for classic type-safe emulated enums (on JDK 1.4 and JDK 1.3) as well;
-			            Spring will automatically attempt to match the string property value to a constant
-			            on the enum class.
-		            </para>
+                        This works for classic type-safe emulated enums (on JDK 1.4 and JDK 1.3) as well;
+                        Spring will automatically attempt to match the string property value to a constant
+                        on the enum class.
+                    </para>
                 </section>
             </section>
             <section id="xsd-config-body-schemas-util-property-path">
                 <title><literal>&lt;util:property-path/&gt;</literal></title>
-                <para>Before...</para>    
+                <para>Before...</para>
                 <programlisting language="xml"><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
 <bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age" value="10"/>
@@ -255,12 +255,12 @@ public class Client {
                 <section id="xsd-config-body-schemas-util-property-path-dependency">
                     <title>Using <literal>&lt;util:property-path/&gt;</literal> to set a bean property or constructor-argument</title>
                     <para><classname>PropertyPathFactoryBean</classname> is a
-			        <interfacename>FactoryBean</interfacename> that evaluates a property path on a given
-			        target object. The target object can be specified directly or via a bean
-			        name. This value may then be used in another bean definition as a property
-			        value or constructor argument.</para>
+                    <interfacename>FactoryBean</interfacename> that evaluates a property path on a given
+                    target object. The target object can be specified directly or via a bean
+                    name. This value may then be used in another bean definition as a property
+                    value or constructor argument.</para>
                     <para>Here's an example where a path is used against another bean, by name:</para>
-		            <programlisting language="xml"><![CDATA[// target bean to be referenced by name
+                    <programlisting language="xml"><![CDATA[// target bean to be referenced by name
 <bean id="person" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age" value="10"/>
   <property name="spouse">
@@ -287,28 +287,28 @@ public class Client {
   </property>
   <property name="propertyPath" value="age"/>
 </bean>]]></programlisting>
-		            <para>There is also a shortcut form, where the bean name is the property path.</para>
-		            <programlisting language="xml"><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'person' --&gt;</lineannotation><![CDATA[
+                    <para>There is also a shortcut form, where the bean name is the property path.</para>
+                    <programlisting language="xml"><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'person' --&gt;</lineannotation><![CDATA[
 <bean id="person.age"
     class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
                 <para>This form does mean that there is no choice in the name of the bean.
-		            Any reference to it will also have to use the same id, which is the path.
-		            Of course, if used as an inner bean, there is no need to refer to it at
-		            all:</para>
+                    Any reference to it will also have to use the same id, which is the path.
+                    Of course, if used as an inner bean, there is no need to refer to it at
+                    all:</para>
                     <programlisting language="xml"><![CDATA[<bean id="..." class="...">
   <property name="age">
     <bean id="person.age"
         class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
   </property>
 </bean>]]></programlisting>
-		            <para>The result type may be specifically set in the actual definition.
-			        This is not necessary for most use cases, but can be of use for some.
-			        Please see the Javadocs for more info on this feature.</para>
+                    <para>The result type may be specifically set in the actual definition.
+                    This is not necessary for most use cases, but can be of use for some.
+                    Please see the Javadocs for more info on this feature.</para>
                 </section>
             </section>
             <section id="xsd-config-body-schemas-util-properties">
                 <title><literal>&lt;util:properties/&gt;</literal></title>
-                <para>Before...</para>    
+                <para>Before...</para>
                 <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
 <bean id="jdbcConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
   <property name="location" value="classpath:com/foo/jdbc-production.properties"/>
@@ -324,7 +324,7 @@ public class Client {
             </section>
             <section id="xsd-config-body-schemas-util-list">
                 <title><literal>&lt;util:list/&gt;</literal></title>
-                <para>Before...</para>    
+                <para>Before...</para>
                 <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
 <bean id="emails" class="org.springframework.beans.factory.config.ListFactoryBean">
   <property name="sourceList">
@@ -371,7 +371,7 @@ public class Client {
             </section>
             <section id="xsd-config-body-schemas-util-map">
                 <title><literal>&lt;util:map/&gt;</literal></title>
-                <para>Before...</para>    
+                <para>Before...</para>
                 <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
 <bean id="emails" class="org.springframework.beans.factory.config.MapFactoryBean">
   <property name="sourceMap">
@@ -418,7 +418,7 @@ public class Client {
             </section>
             <section id="xsd-config-body-schemas-util-set">
                 <title><literal>&lt;util:set/&gt;</literal></title>
-                <para>Before...</para>    
+                <para>Before...</para>
                 <programlisting language="xml"><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
 <bean id="emails" class="org.springframework.beans.factory.config.SetFactoryBean">
   <property name="sourceSet">
@@ -646,9 +646,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <section id="xsd-config-body-schemas-jms">
             <title>The <literal>jms</literal> schema</title>
             <para>The <literal>jms</literal> tags deal with configuring JMS-related
-			beans such as Spring's <link linkend="jms-mdp">MessageListenerContainers</link>.
+            beans such as Spring's <link linkend="jms-mdp">MessageListenerContainers</link>.
             These tags are detailed in the section of the <link linkend="jms">JMS chapter</link>
-			entitled <xref linkend="jms-namespace"/>. Please do consult that
+            entitled <xref linkend="jms-namespace"/>. Please do consult that
             chapter for full details on this support and the <literal>jms</literal> tags
             themselves.</para>
             <para>In the interest of completeness, to use the tags in the <literal>jms</literal>
@@ -690,10 +690,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:aop="http://www.springframework.org/schema/aop"
-	   ]]><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis><![CDATA[
-	   xsi:schemaLocation="
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       ]]><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis><![CDATA[
+       xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd</emphasis><![CDATA[
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
@@ -721,9 +721,9 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
             available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
-	   xsi:schemaLocation="
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
+       xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"</emphasis><![CDATA[>
 
@@ -735,70 +735,70 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <section id="xsd-config-body-schemas-context">
             <title>The <literal>context</literal> schema</title>
             <para>The <literal>context</literal> tags deal with <interfacename>ApplicationContext</interfacename>
-			configuration that relates to plumbing - that is, not usually beans that are important to an end-user
-			but rather beans that do a lot of grunt work in Spring, such as <interfacename>BeanfactoryPostProcessors</interfacename>.
+            configuration that relates to plumbing - that is, not usually beans that are important to an end-user
+            but rather beans that do a lot of grunt work in Spring, such as <interfacename>BeanfactoryPostProcessors</interfacename>.
             The following snippet references the correct schema so that the tags in the <literal>context</literal>
-			namespace are available to you.</para>
+            namespace are available to you.</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   ]]><emphasis role="bold">xmlns:context="http://www.springframework.org/schema/context"</emphasis><![CDATA[
-	   xsi:schemaLocation="
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       ]]><emphasis role="bold">xmlns:context="http://www.springframework.org/schema/context"</emphasis><![CDATA[
+       xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
-			<note>
-				<para>The <literal>context</literal> schema was only introduced in Spring 2.5.</para>
-			</note>
-			<section id="xsd-config-body-schemas-context-pphc">
-				<title><literal>&lt;property-placeholder/&gt;</literal></title>
-				<para>This element activates the replacement of <literal>${...}</literal> placeholders, resolved
-				against the specified properties file (as a <link linkend="resources">Spring resource location</link>).
-				This element is a convenience mechanism that sets up a
-				<link linkend="beans-factory-placeholderconfigurer"><classname>PropertyPlaceholderConfigurer</classname></link>
-				for you; if you need more control over the <classname>PropertyPlaceholderConfigurer</classname>, just
-				define one yourself explicitly.</para>
-			</section>
-			<section id="xsd-config-body-schemas-context-ac">
-				<title><literal>&lt;annotation-config/&gt;</literal></title>
-				<para>Activates the Spring infrastructure for various annotations to be detected in bean classes:
-				Spring's <link linkend="beans-required-annotation"><interfacename>@Required</interfacename></link>
-				and <link linkend="beans-annotation-config"><interfacename>@Autowired</interfacename></link>, as well as
-				JSR 250's <interfacename>@PostConstruct</interfacename>, <interfacename>@PreDestroy</interfacename> and
-				<interfacename>@Resource</interfacename> (if available), and JPA's
-				<interfacename>@PersistenceContext</interfacename> and <interfacename>@PersistenceUnit</interfacename>
-				(if available). Alternatively, you can choose to activate the individual
-				<interfacename>BeanPostProcessors</interfacename> for those annotations explictly.</para>
-				<note>
-					<para>This element does <emphasis>not</emphasis> activate processing of Spring's
-					<link linkend="transaction-declarative-annotations"><interfacename>@Transactional</interfacename></link>
-					annotation. Use the
-					<link linkend="tx-decl-explained"><literal>&lt;tx:annotation-driven/&gt;</literal></link> element
-					for that purpose.</para>
-				</note>
-			</section>
-			<section id="xsd-config-body-schemas-context-component-scan">
-				<title><literal>&lt;component-scan/&gt;</literal></title>
-				<para>This element is detailed in <xref linkend="beans-annotation-config"/>.</para>
-			</section>
-			<section id="xsd-config-body-schemas-context-ltw">
-				<title><literal>&lt;load-time-weaver/&gt;</literal></title>
-				<para>This element is detailed in <xref linkend="aop-aj-ltw"/>.</para>
-			</section>
-			<section id="xsd-config-body-schemas-context-sc">
-				<title><literal>&lt;spring-configured/&gt;</literal></title>
-				<para>This element is detailed in <xref linkend="aop-atconfigurable"/>.</para>
-			</section>
-			<section id="xsd-config-body-schemas-context-mbe">
-				<title><literal>&lt;mbean-export/&gt;</literal></title>
-				<para>This element is detailed in <xref linkend="jmx-context-mbeanexport"/>.</para>
-			</section>
-		</section>
+            <note>
+                <para>The <literal>context</literal> schema was only introduced in Spring 2.5.</para>
+            </note>
+            <section id="xsd-config-body-schemas-context-pphc">
+                <title><literal>&lt;property-placeholder/&gt;</literal></title>
+                <para>This element activates the replacement of <literal>${...}</literal> placeholders, resolved
+                against the specified properties file (as a <link linkend="resources">Spring resource location</link>).
+                This element is a convenience mechanism that sets up a
+                <link linkend="beans-factory-placeholderconfigurer"><classname>PropertyPlaceholderConfigurer</classname></link>
+                for you; if you need more control over the <classname>PropertyPlaceholderConfigurer</classname>, just
+                define one yourself explicitly.</para>
+            </section>
+            <section id="xsd-config-body-schemas-context-ac">
+                <title><literal>&lt;annotation-config/&gt;</literal></title>
+                <para>Activates the Spring infrastructure for various annotations to be detected in bean classes:
+                Spring's <link linkend="beans-required-annotation"><interfacename>@Required</interfacename></link>
+                and <link linkend="beans-annotation-config"><interfacename>@Autowired</interfacename></link>, as well as
+                JSR 250's <interfacename>@PostConstruct</interfacename>, <interfacename>@PreDestroy</interfacename> and
+                <interfacename>@Resource</interfacename> (if available), and JPA's
+                <interfacename>@PersistenceContext</interfacename> and <interfacename>@PersistenceUnit</interfacename>
+                (if available). Alternatively, you can choose to activate the individual
+                <interfacename>BeanPostProcessors</interfacename> for those annotations explictly.</para>
+                <note>
+                    <para>This element does <emphasis>not</emphasis> activate processing of Spring's
+                    <link linkend="transaction-declarative-annotations"><interfacename>@Transactional</interfacename></link>
+                    annotation. Use the
+                    <link linkend="tx-decl-explained"><literal>&lt;tx:annotation-driven/&gt;</literal></link> element
+                    for that purpose.</para>
+                </note>
+            </section>
+            <section id="xsd-config-body-schemas-context-component-scan">
+                <title><literal>&lt;component-scan/&gt;</literal></title>
+                <para>This element is detailed in <xref linkend="beans-annotation-config"/>.</para>
+            </section>
+            <section id="xsd-config-body-schemas-context-ltw">
+                <title><literal>&lt;load-time-weaver/&gt;</literal></title>
+                <para>This element is detailed in <xref linkend="aop-aj-ltw"/>.</para>
+            </section>
+            <section id="xsd-config-body-schemas-context-sc">
+                <title><literal>&lt;spring-configured/&gt;</literal></title>
+                <para>This element is detailed in <xref linkend="aop-atconfigurable"/>.</para>
+            </section>
+            <section id="xsd-config-body-schemas-context-mbe">
+                <title><literal>&lt;mbean-export/&gt;</literal></title>
+                <para>This element is detailed in <xref linkend="jmx-context-mbeanexport"/>.</para>
+            </section>
+        </section>
 
-		<section id="xsd-config-body-schemas-tool">
+        <section id="xsd-config-body-schemas-tool">
             <title>The <literal>tool</literal> schema</title>
             <para>The <literal>tool</literal> tags are for use when you want to add
             tooling-specific metadata to your custom configuration elements. This metadata
@@ -850,15 +850,15 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <para>This final section documents the steps involved in setting up a number of
         popular Java IDEs to effect the easier editing of Spring's XML Schema-based
         configuration files. If your favourite Java IDE or editor is not included in the
-		list of documented IDEs, then please do
+        list of documented IDEs, then please do
         <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">raise an issue</ulink>
         and an example with your favorite IDE/editor <emphasis>may</emphasis> be included
-		in the next release.</para>
+        in the next release.</para>
         <section id="xsd-config-setup-eclipse">
         <title>Setting up Eclipse</title>
         <procedure>
             <para>The following steps illustrate setting up
-            <ulink url="http://www.eclipse.org/">Eclipse</ulink> to be XSD-aware. 
+            <ulink url="http://www.eclipse.org/">Eclipse</ulink> to be XSD-aware.
             The assumption in the following steps is that you already have an Eclipse
             project open (either a brand new project or an already existing one).</para>
             <note>
@@ -880,16 +880,16 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
 </beans>]]></programlisting>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/eclipse-setup-1.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/eclipse-setup-1.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/eclipse-setup-1.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/eclipse-setup-1.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
             <step>
                 <title>Step Two</title>
@@ -898,36 +898,36 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 as plain text. There is no XML editing support out of the box in Eclipse,
                 and as such there is not even any syntax highlighting of elements and attributes.
                 To address this, you will have to install an XML editor plugin for Eclipse...</para>
-		        <table id="xsd-config-setup-eclipse-plugins">
-			        <title>Eclipse XML editors</title>
-			        <tgroup cols="2">
-				        <colspec align="left" />
-				        <thead>
-					        <row>
-						        <entry align="center">XML Editor</entry>
-						        <entry align="center">Link</entry>
-					        </row>
-				        </thead>
-				        <tbody>
-					        <row>
-						        <entry>
-							        <para>The Eclipse Web Tools Platform (WTP)</para>
-						        </entry>
-						        <entry>
-							        <ulink url="http://www.eclipse.org/webtools/"/>
-						        </entry>
-					        </row>
-					        <row>
-						        <entry>
-							        <para>A list of Eclipse XML plugins</para>
-						        </entry>
-						        <entry>
-							        <ulink url="http://eclipse-plugins.2y.net/eclipse/plugins.jsp?category=XML"/>
-						        </entry>
-					        </row>
-				        </tbody>
-			        </tgroup>
-		        </table>
+                <table id="xsd-config-setup-eclipse-plugins">
+                    <title>Eclipse XML editors</title>
+                    <tgroup cols="2">
+                        <colspec align="left" />
+                        <thead>
+                            <row>
+                                <entry align="center">XML Editor</entry>
+                                <entry align="center">Link</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry>
+                                    <para>The Eclipse Web Tools Platform (WTP)</para>
+                                </entry>
+                                <entry>
+                                    <ulink url="http://www.eclipse.org/webtools/"/>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>
+                                    <para>A list of Eclipse XML plugins</para>
+                                </entry>
+                                <entry>
+                                    <ulink url="http://eclipse-plugins.2y.net/eclipse/plugins.jsp?category=XML"/>
+                                </entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
                 <sidebar>
                     <title>Contributing documentation...</title>
                     <para>Patches showing how to configure an Eclipse XML editor are
@@ -946,38 +946,38 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <step>
                 <title>Spring IDE</title>
                 <para>There is a dedicated Spring Framework plugin for Eclipse called
-				<ulink url="http://springide.org/blog/">Spring IDE</ulink> and it is pretty darn cool. (There's a
-				considered and non-biased opinion for you!) This plugin makes using Spring even easier, and it has more
-				than just support for the core Spring Framework... Spring Web Flow is supported too. Details of how to
-				install Spring IDE can be found on the
-				<ulink url="http://springide.org/project/wiki/SpringideInstall">Spring IDE installation page</ulink>.</para>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/eclipse-setup-3.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/eclipse-setup-3.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
-			</step>
+                <ulink url="http://springide.org/blog/">Spring IDE</ulink> and it is pretty darn cool. (There's a
+                considered and non-biased opinion for you!) This plugin makes using Spring even easier, and it has more
+                than just support for the core Spring Framework... Spring Web Flow is supported too. Details of how to
+                install Spring IDE can be found on the
+                <ulink url="http://springide.org/project/wiki/SpringideInstall">Spring IDE installation page</ulink>.</para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/eclipse-setup-3.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/eclipse-setup-3.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </step>
             <step>
                 <title>Web Tools Platform (WTP) for Eclipse</title>
                 <para>If you are using the Web Tools Platform (WTP) for Eclipse, you don't need to
                 do anything other than open a Spring XML configuration file using the WTP platform's
                 XML editor. As can be seen in the screenshot below, you immediately get some slick
                 IDE-level support for autocompleting tags and suchlike.</para>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/eclipse-setup-2.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/eclipse-setup-2.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/eclipse-setup-2.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/eclipse-setup-2.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
         </procedure>
         </section>
@@ -1002,16 +1002,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
 </beans>]]></programlisting>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/idea-setup-1.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/idea-setup-1.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/idea-setup-1.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/idea-setup-1.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
             <step>
                 <title>Step Two</title>
@@ -1022,20 +1022,20 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 area (see the screenshot below); then press the <keycombo action='open'>
                     <keycap>Alt</keycap>
                     <keycap>Enter</keycap>
-					</keycombo> keystroke combination, and press the <keycombo action='open'>
+                    </keycombo> keystroke combination, and press the <keycombo action='open'>
                     <keycap>Enter</keycap>
                  </keycombo> key again when the popup becomes active to fetch the external
                  resource.</para>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/idea-setup-6.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/idea-setup-6.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/idea-setup-6.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/idea-setup-6.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
             <step>
                 <title>Step Three</title>
@@ -1048,16 +1048,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     <keycap>S</keycap>
                  </keycombo> keystroke combination or via the <literal>'File|Settings'</literal> menu),
                  and click on the <literal>'Resources'</literal> button.</para>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/idea-setup-2.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/idea-setup-2.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/idea-setup-2.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/idea-setup-2.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
             <step>
                 <title>Step Four</title>
@@ -1065,16 +1065,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 that allows you to add an explicit reference to a local copy of the
                 <literal>util</literal> schema file. (You can find all of the various Spring
                 XSD files in the <literal>'src'</literal> directory of the Spring distribution.)</para>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/idea-setup-3.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/idea-setup-3.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/idea-setup-3.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/idea-setup-3.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
             <step>
                 <title>Step Five</title>
@@ -1084,16 +1084,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <literal>'http://www.springframework.org/schema/util'</literal> namespace
                 is being associated with the file resource
                 <literal>'C:\bench\spring\src\org\springframework\beans\factory\xml\spring-util-3.0.xsd'</literal>.</para>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/idea-setup-4.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/idea-setup-4.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/idea-setup-4.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/idea-setup-4.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
             <step>
                 <title>Step Six</title>
@@ -1103,21 +1103,21 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 the <literal>'&lt;'</literal> character into the editing window now also
                 brings up a handy dropdown box that contains all of the imported tags from
                 the <literal>util</literal> namespace.</para>
-		        <para>
-			        <mediaobject>
-				        <imageobject role="fo">
-					        <imagedata fileref="images/idea-setup-5.png" format="PNG" align="center" />
-				        </imageobject>
-				        <imageobject role="html">
-					        <imagedata fileref="images/idea-setup-5.png" format="PNG" align="center" />
-				        </imageobject>
-			        </mediaobject>
-		        </para>
+                <para>
+                    <mediaobject>
+                        <imageobject role="fo">
+                            <imagedata fileref="images/idea-setup-5.png" format="PNG" align="center" />
+                        </imageobject>
+                        <imageobject role="html">
+                            <imagedata fileref="images/idea-setup-5.png" format="PNG" align="center" />
+                        </imageobject>
+                    </mediaobject>
+                </para>
             </step>
             <para>Repeat as required for setting up IDEA to reference the other Spring XSD files.</para>
         </procedure>
         </section>
-        
+
         <section id="xsd-config-integration">
             <title>Integration issues</title>
             <para>This final section details integration issues that may arise when you switch over
