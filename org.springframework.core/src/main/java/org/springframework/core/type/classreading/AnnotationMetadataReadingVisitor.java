@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	private final MultiValueMap<String, MethodMetadata> methodMetadataMap = new LinkedMultiValueMap<String, MethodMetadata>();
 
+
 	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
@@ -61,7 +62,7 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		return new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, methodMetadataMap);
+		return new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap);
 	}
 
 	@Override
@@ -134,11 +135,11 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 	}
 
 	public boolean hasAnnotatedMethods(String annotationType) {
-		return methodMetadataMap.containsKey(annotationType);
+		return this.methodMetadataMap.containsKey(annotationType);
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
-		List<MethodMetadata> list = methodMetadataMap.get(annotationType);
+		List<MethodMetadata> list = this.methodMetadataMap.get(annotationType);
 		if (CollectionUtils.isEmpty(list)) {
 			return new LinkedHashSet<MethodMetadata>(0);
 		}
@@ -146,4 +147,5 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		annotatedMethods.addAll(list);
 		return annotatedMethods;
 	}
+
 }
