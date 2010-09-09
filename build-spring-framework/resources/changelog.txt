@@ -14,6 +14,7 @@ Changes in version 3.0.5 (2010-09-14)
 * SpEL supports projection on any kind of Collection (not just on Lists and arrays)
 * JDBC bundle uses local ClassLoader as bean ClassLoader for "sql-error-codes.xml" parsing
 * DefaultLobHandler's "wrapAsLob" mode works with PostgreSQL's getAsciiStream() requirement
+* ResultSetWrappingSqlRowSet (as used by JdbcTemplate's "queryForRowSet") supports column labels now
 * LocalSessionFactoryBean's "entityCacheStrategies" works with region names on Hibernate 3.6 as well
 * fixed DefaultMessageListenerContainer's no-message commit to work without Session caching as well
 * JaxWsPortClientInterceptor does not fall back to annotation-specified name as portName anymore
