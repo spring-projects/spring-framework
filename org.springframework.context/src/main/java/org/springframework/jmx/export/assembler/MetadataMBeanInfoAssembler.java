@@ -201,9 +201,9 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		Method writeMethod = propertyDescriptor.getWriteMethod();
 
 		ManagedAttribute getter =
-				(readMethod != null) ? this.attributeSource.getManagedAttribute(readMethod) : null;
+				(readMethod != null ? this.attributeSource.getManagedAttribute(readMethod) : null);
 		ManagedAttribute setter =
-				(writeMethod != null) ? this.attributeSource.getManagedAttribute(writeMethod) : null;
+				(writeMethod != null ? this.attributeSource.getManagedAttribute(writeMethod) : null);
 
 		if (getter != null && StringUtils.hasText(getter.getDescription())) {
 			return getter.getDescription();
@@ -212,8 +212,8 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			return setter.getDescription();
 		}
 
-		ManagedMetric metric = (readMethod != null) ? this.attributeSource.getManagedMetric(readMethod) : null;
-		if(metric != null && StringUtils.hasText(metric.getDescription())) {
+		ManagedMetric metric = (readMethod != null ? this.attributeSource.getManagedMetric(readMethod) : null);
+		if (metric != null && StringUtils.hasText(metric.getDescription())) {
 			return metric.getDescription();
 		}
 

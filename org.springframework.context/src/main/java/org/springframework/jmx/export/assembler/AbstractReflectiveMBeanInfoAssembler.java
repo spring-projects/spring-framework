@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -402,7 +402,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	/**
 	 * Return the class to be used for the JMX descriptor field "class".
 	 * Only applied when the "exposeClassDescriptor" property is "true".
-	 * <p>Default implementation returns the first implemented interface
+	 * <p>The default implementation returns the first implemented interface
 	 * for a JDK proxy, and the target class else.
 	 * @param managedBean the bean instance (might be an AOP proxy)
 	 * @return the class to expose in the descriptor field "class"
@@ -450,7 +450,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	/**
 	 * Get the description for a particular attribute.
-	 * <p>Default implementation returns a description for the operation
+	 * <p>The default implementation returns a description for the operation
 	 * that is the name of corresponding <code>Method</code>.
 	 * @param propertyDescriptor the PropertyDescriptor for the attribute
 	 * @param beanKey the key associated with the MBean in the beans map
@@ -463,7 +463,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	/**
 	 * Get the description for a particular operation.
-	 * <p>Default implementation returns a description for the operation
+	 * <p>The default implementation returns a description for the operation
 	 * that is the name of corresponding <code>Method</code>.
 	 * @param method the operation method
 	 * @param beanKey the key associated with the MBean in the beans map
@@ -475,8 +475,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	}
 
 	/**
-	 * Create parameter info for the given method. Default implementation
-	 * returns an empty arry of <code>MBeanParameterInfo</code>.
+	 * Create parameter info for the given method.
+	 * <p>The default implementation returns an empty arry of <code>MBeanParameterInfo</code>.
 	 * @param method the <code>Method</code> to get the parameter information for
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * of the <code>MBeanExporter</code>
@@ -488,8 +488,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 
 	/**
-	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for an
-	 * MBean. Default implementation sets the <code>currencyTimeLimit</code> field to
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for an MBean.
+	 * <p>The default implementation sets the <code>currencyTimeLimit</code> field to
 	 * the specified "defaultCurrencyTimeLimit", if any (by default none).
 	 * @param descriptor the <code>Descriptor</code> for the MBean resource.
 	 * @param managedBean the bean instance (might be an AOP proxy)
@@ -504,8 +504,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	}
 
 	/**
-	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
-	 * attribute. Default implementation sets the <code>currencyTimeLimit</code> field to
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a
+	 * particular attribute.
+	 * <p>The default implementation sets the <code>currencyTimeLimit</code> field to
 	 * the specified "defaultCurrencyTimeLimit", if any (by default none).
 	 * @param desc the attribute descriptor
 	 * @param getter the accessor method for the attribute
@@ -520,8 +521,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	}
 
 	/**
-	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a particular
-	 * operation. Default implementation sets the <code>currencyTimeLimit</code> field to
+	 * Allows subclasses to add extra fields to the <code>Descriptor</code> for a
+	 * particular operation.
+	 * <p>The default implementation sets the <code>currencyTimeLimit</code> field to
 	 * the specified "defaultCurrencyTimeLimit", if any (by default none).
 	 * @param desc the operation descriptor
 	 * @param method the method corresponding to the operation
@@ -548,7 +550,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	/**
 	 * Apply the given JMX "currencyTimeLimit" value to the given descriptor.
-	 * <p>Default implementation sets a value <code>>0</code> as-is (as number of cache seconds),
+	 * <p>The default implementation sets a value <code>>0</code> as-is (as number of cache seconds),
 	 * turns a value of <code>0</code> into <code>Integer.MAX_VALUE</code> ("always cache")
 	 * and sets the "defaultCurrencyTimeLimit" (if any, indicating "never cache") in case of
 	 * a value <code><0</code>. This follows the recommendation in the JMX 1.2 specification.
