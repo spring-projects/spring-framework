@@ -6,14 +6,15 @@ http://www.springsource.org
 Changes in version 3.0.5 (2010-09-14)
 -------------------------------------
 
-* consistent use of JDK 1.5's ThreadLocal.remove() over ThreadLocal.set(null)
+* consistent use of JDK 1.5's "ThreadLocal.remove()" over "ThreadLocal.set(null)"
 * ConversionService protects itself against infinite recursion in ObjectToCollectionConverter
 * refined ApplicationContext singleton processing to not fail for manually registered null instances
 * modified expression parsing to pass full TypeDescriptor context through to ConversionService calls
 * adapted expression parser's Constructor/MethodResolver to accept TypeDescriptors instead of raw types
 * SpEL supports projection on any kind of Collection (not just on Lists and arrays)
 * JDBC bundle uses local ClassLoader as bean ClassLoader for "sql-error-codes.xml" parsing
-* DefaultLobHandler's "wrapAsLob" mode works with PostgreSQL's getAsciiStream() requirement
+* EmbeddedDatabaseFactory shuts down database when failing to populate it in "initDatabase()"
+* DefaultLobHandler's "wrapAsLob" mode works with PostgreSQL's "getAsciiStream()" requirement
 * ResultSetWrappingSqlRowSet (as used by JdbcTemplate's "queryForRowSet") supports column labels now
 * LocalSessionFactoryBean's "entityCacheStrategies" works with region names on Hibernate 3.6 as well
 * fixed DefaultMessageListenerContainer's no-message commit to work without Session caching as well
