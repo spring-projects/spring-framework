@@ -52,6 +52,9 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish */
 	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
 	
+	/** Default Servlet name used by Google App Engine */
+	private static final String GAE_DEFAULT_SERVLET_NAME = "_ah_default";
+	
 	/** Default Servlet name used by Resin */
 	private static final String RESIN_DEFAULT_SERVLET_NAME = "resin-file";
 	
@@ -84,6 +87,9 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 		if (!StringUtils.hasText(this.defaultServletName)) {
 			if (this.servletContext.getNamedDispatcher(COMMON_DEFAULT_SERVLET_NAME) != null) {
 				this.defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
+			}
+			else if (this.servletContext.getNamedDispatcher(GAE_DEFAULT_SERVLET_NAME) != null) {
+				this.defaultServletName = GAE_DEFAULT_SERVLET_NAME;
 			}
 			else if (this.servletContext.getNamedDispatcher(RESIN_DEFAULT_SERVLET_NAME) != null) {
 				this.defaultServletName = RESIN_DEFAULT_SERVLET_NAME;
