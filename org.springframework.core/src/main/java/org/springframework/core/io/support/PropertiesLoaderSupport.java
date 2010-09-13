@@ -179,7 +179,15 @@ public abstract class PropertiesLoaderSupport {
 				InputStream is = null;
 				try {
 					is = location.getInputStream();
-					if (location.getFilename().endsWith(XML_FILE_EXTENSION)) {
+
+					String filename = null;
+					try {
+						filename = location.getFilename();
+					} catch (IllegalStateException ex) {
+						// resource is not file-based. See SPR-7552.
+					}
+
+					if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
 						this.propertiesPersister.loadFromXml(props, is);
 					}
 					else {
