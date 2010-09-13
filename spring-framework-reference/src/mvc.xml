@@ -3360,13 +3360,20 @@ public class SimpleController {
   		<para>
   			This tag allows static resource requests following a particular URL pattern to be served by a <classname>ResourceHttpRequestHandler</classname> from 
   			any of a list of <classname>Resource</classname> locations.  This provides a convenient way to serve static resources from locations other than the 
-  			web application root, including locations on the classpath, and the resources are served with far future expiration headers (1 year, as recommended by 
-  			optimization tools such as Page Speed and YSlow) so that they will be more efficiently utilized by the client.  For example, to serve resource requests 
-  			with a URL pattern of <code>/resources/**</code> from a <code>public-resources</code> directory within the web application root, the tag would be used 
-  			as follows: 
+  			web application root, including locations on the classpath. The <code>cache-seconds</code> property may be used to set far future expiration headers 
+  			(1 year is the recommendation of optimization tools such as Page Speed and YSlow) so that they will be more efficiently utilized by the client.  The handler 
+  			also properly evaluates the <code>Last-Modified</code> header (if present) so that a <code>304</code> status code will be returned as appropriate, avoiding 
+  			unnecessary overhead for resources that are already cached by the client.  For example, to serve resource requests with a URL pattern of 
+  			<code>/resources/**</code> from a <code>public-resources</code> directory within the web application root, the tag would be used as follows: 
   		</para>
   		<programlisting language="xml"><![CDATA[
 <mvc:resources mapping="/resources/**" location="/public-resources/"/>]]>
+  		</programlisting>
+  		<para>
+  			To serve these resources with a 1-year future expiration to ensure maximum use of the browser cache and a reduction in HTTP requests made by the browser:
+  		</para>
+  		<programlisting language="xml"><![CDATA[
+<mvc:resources mapping="/resources/**" location="/public-resources/" cache-seconds="31556926"/>]]>
   		</programlisting>
   		<para>
   			The <code>mapping</code> attribute must be an Ant pattern that can be used by <classname>SimpleUrlHandlerMapping</classname>, and the <code>location</code> 
@@ -3423,7 +3430,7 @@ application.version=1.0.0]]>
   		<para>
   			This tag allows for mapping the <code>DispatcherServlet</code> to "/" (thus overriding the mapping of the container's default Servlet), 
   			while still allowing static resource requests to be handled by the container's default Servlet.  It configures a 
-  			<code>DefaultServletHttpHandler</code> with a URL mapping (given a lowest precedence order) of "/**".  This handler will 
+  			<code>DefaultServletHttpRequestHandler</code> with a URL mapping (given a lowest precedence order) of "/**".  This handler will 
   			forward all requests to the default Servlet.  To enable this feature using the default setup, simply include the tag in the form: 
   		</para>
   		<programlisting language="xml"><![CDATA[
@@ -3431,7 +3438,7 @@ application.version=1.0.0]]>
   		</programlisting>
   		<para>
   			The caveat to overriding the "/" Servlet mapping is that the <code>RequestDispatcher</code> for the default Servlet must be 
-  			retrieved by name rather than by path.  The <code>DefaultServletHttpHandler</code> will attempt to auto-detect the default 
+  			retrieved by name rather than by path.  The <code>DefaultServletHttpRequestHandler</code> will attempt to auto-detect the default 
   			Servlet for the container at startup time, using a list of known names for most of the major Servlet containers (including Tomcat, 
   			Jetty, Glassfish, JBoss, Resin, WebLogic, and WebSphere).  If the default Servlet has been custom configured 
   			with a different name, or if a different Servlet container is being used where the default Servlet name is unknown, then the 
