@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Are we overrding include synonyms default?
+	 * Are we overriding include synonyms default?
 	 */
 	public boolean isOverrideIncludeSynonymsDefault() {
 		return this.overrideIncludeSynonymsDefault;
@@ -149,7 +149,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Does this database support the JDBC 3.0 feature of retreiving generated keys
+	 * Does this database support the JDBC 3.0 feature of retrieving generated keys
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
 	public boolean isGetGeneratedKeysSupported() {
@@ -175,7 +175,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Is a column name String array for retreiving generated keys supported
+	 * Is a column name String array for retrieving generated keys supported
 	 * {@link java.sql.Connection#createStruct(String, Object[])}?
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {
@@ -186,7 +186,7 @@ public class TableMetaDataContext {
 	/**
 	 * Process the current meta data with the provided configuration options
 	 * @param dataSource the DataSource being used
-	 * @param declaredColumns any coluns that are declared
+	 * @param declaredColumns any columns that are declared
 	 * @param generatedKeyNames name of generated keys
 	 */
 	public void processMetaData(DataSource dataSource, List<String> declaredColumns, String[] generatedKeyNames) {
@@ -199,7 +199,7 @@ public class TableMetaDataContext {
 	 * @param declaredColumns declared column names
 	 * @param generatedKeyNames names of generated key columns
 	 */
-	private List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
+	protected List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
 		if (generatedKeyNames.length > 0) {
 			generatedKeyColumnsUsed = true;
 		}
