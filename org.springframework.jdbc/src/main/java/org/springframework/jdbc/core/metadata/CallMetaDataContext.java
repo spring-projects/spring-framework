@@ -219,7 +219,7 @@ public class CallMetaDataContext {
 	 * Create a ReturnResultSetParameter/SqlOutParameter depending on the support provided
 	 * by the JDBC driver used for the database in use.
 	 * @param parameterName the name of the parameter (also used as the name of the List returned in the output)
-	 * @param rowMapper a RowMapper implementation used to map the data retuned in the result set
+	 * @param rowMapper a RowMapper implementation used to map the data returned in the result set
 	 * @return the appropriate SqlParameter
 	 */
 	public SqlParameter createReturnResultSetParameter(String parameterName, RowMapper rowMapper) {
@@ -268,7 +268,7 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Process the list of parameters provided and if procedure column metedata is used the
+	 * Process the list of parameters provided and if procedure column metadata is used the
 	 * parameters will be matched against the metadata information and any missing ones will
 	 * be automatically included
 	 * @param parameters the list of parameters to use as a base
@@ -280,7 +280,7 @@ public class CallMetaDataContext {
 	/**
 	 * Reconcile the provided parameters with available metadata and add new ones where appropriate
 	 */
-	private List<SqlParameter> reconcileParameters(List<SqlParameter> parameters) {
+	protected List<SqlParameter> reconcileParameters(List<SqlParameter> parameters) {
 		final List<SqlParameter> declaredReturnParameters = new ArrayList<SqlParameter>();
 		final Map<String, SqlParameter> declaredParameters = new LinkedHashMap<String, SqlParameter>();
 		boolean returnDeclared = false;
