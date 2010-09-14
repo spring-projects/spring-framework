@@ -666,6 +666,19 @@ public class HelloWorldController {
     <lineannotation>// ...</lineannotation>
 
 &lt;/beans&gt;</programlisting>
+
+      <para>A common pitfall when working with annotated controller classes is
+      a scenario where you want apply functionality to it that involves
+      creating a proxy for the controller object (transactional controllers
+      e.g.). Usually you will introduce an interface for the controller then
+      to use JDK dynamic proxies. To make this work you have to move the
+      <interfacename>@RequestMapping</interfacename> annotations to the
+      interface as well as the mapping lookup only "sees" the interface
+      exposed by the proxy then. An alternative might be to activate
+      <code>proxy-target-class="true"</code> in the configuration for the
+      functionality applied to the controller (in our transaction scenario in
+      <code>&lt;tx:annotation-driven /&gt;</code>). For more information on
+      various proxying mechanisms see <xref linkend="aop-proxying" />.</para>
     </section>
 
     <section id="mvc-ann-requestmapping">
