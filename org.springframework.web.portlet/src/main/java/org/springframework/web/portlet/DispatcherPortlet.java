@@ -39,7 +39,6 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.StateAwareResponse;
-import javax.portlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +50,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.core.style.StylerUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
@@ -988,14 +988,13 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	protected void noHandlerFound(PortletRequest request, PortletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {
-			pageNotFoundLogger.warn("No mapping found for current request " +
+			pageNotFoundLogger.warn("No handler found for current request " +
 					"in DispatcherPortlet with name '" + getPortletName() +
 					"', mode '" + request.getPortletMode() +
 					"', phase '" + request.getAttribute(PortletRequest.LIFECYCLE_PHASE) +
-					"', session '" + request.getRequestedSessionId() +
-					"', user '" + getUsernameForRequest(request) + "'");
+					"', parameters " + StylerUtils.style(request.getParameterMap()));
 		}
-		throw new UnavailableException("No handler found for request");
+		throw new NoHandlerFoundException("No handler found for portlet request", request);
 	}
 
 	/**

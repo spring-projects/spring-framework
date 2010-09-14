@@ -48,7 +48,6 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.StateAwareResponse;
-import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
 import javax.servlet.http.Cookie;
 
@@ -62,7 +61,6 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.style.StylerUtils;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -88,6 +86,7 @@ import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.NoHandlerFoundException;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
@@ -505,10 +504,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				}
 			}
 			else {
-				throw new UnavailableException(
-						"No matching handler method found for portlet request: mode '" + request.getPortletMode() +
-						"', phase '" + request.getAttribute(PortletRequest.LIFECYCLE_PHASE) +
-						"', parameters " + StylerUtils.style(request.getParameterMap()));
+				throw new NoHandlerFoundException("No matching handler method found for portlet request", request);
 			}
 		}
 

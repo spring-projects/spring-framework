@@ -37,7 +37,6 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceServingPortlet;
-import javax.portlet.UnavailableException;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
@@ -45,6 +44,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.NoHandlerFoundException;
 import org.springframework.web.portlet.context.PortletConfigAware;
 import org.springframework.web.portlet.context.PortletContextAware;
 import org.springframework.web.portlet.util.PortletUtils;
@@ -190,7 +190,7 @@ public class PortletWrappingController extends AbstractController
 			ResourceRequest request, ResourceResponse response) throws Exception {
 
 		if (!(this.portletInstance instanceof ResourceServingPortlet)) {
-			throw new UnavailableException("Cannot handle resource request - target portlet [" +
+			throw new NoHandlerFoundException("Cannot handle resource request - target portlet [" +
 					this.portletInstance.getClass() + " does not implement ResourceServingPortlet");
 		}
 		ResourceServingPortlet resourcePortlet = (ResourceServingPortlet) this.portletInstance;
