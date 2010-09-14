@@ -27,6 +27,7 @@ import org.xml.sax.InputSource;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyEditorRegistrySupport;
+import org.springframework.beans.propertyeditors.ClassArrayEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
@@ -89,8 +90,9 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 		doRegisterEditor(registry, URL.class, new URLEditor(baseEditor));
 
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();
-		doRegisterEditor(registry, Class.class, new ClassEditor(classLoader));
 		doRegisterEditor(registry, URI.class, new URIEditor(classLoader));
+		doRegisterEditor(registry, Class.class, new ClassEditor(classLoader));
+		doRegisterEditor(registry, Class[].class, new ClassArrayEditor(classLoader));
 
 		if (this.resourceLoader instanceof ResourcePatternResolver) {
 			doRegisterEditor(registry, Resource[].class,

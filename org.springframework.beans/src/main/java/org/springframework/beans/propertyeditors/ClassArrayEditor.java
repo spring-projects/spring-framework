@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.util.StringUtils;
  * to the standard {@link Class#forName(String)} method.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class ClassArrayEditor extends PropertyEditorSupport {
@@ -52,8 +54,7 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 	 * (or pass <code>null</code> for the thread context <code>ClassLoader</code>)
 	 */
 	public ClassArrayEditor(ClassLoader classLoader) {
-		this.classLoader = classLoader != null
-				? classLoader : ClassUtils.getDefaultClassLoader();
+		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
 
@@ -76,14 +77,9 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 	@Override
 	public String getAsText() {
 		Class[] classes = (Class[]) getValue();
-		if (classes == null || classes.length == 0) {
+		if (ObjectUtils.isEmpty(classes)) {
 			return "";
 		}
-		return toCommaDelimitedString(classes);
-	}
-
-
-	private static String toCommaDelimitedString(Class[] classes) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < classes.length; ++i) {
 			if (i > 0) {
