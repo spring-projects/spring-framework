@@ -158,6 +158,22 @@ public class ExampleBean {
             has two arguments of the same type. Note that the <emphasis>index is
             0 based</emphasis>.</para>
         </section>
+
+        <section id="beans-factory-ctor-arguments-name">
+          <title>Constructor argument name</title>
+
+          <para>As of Spring 3.0 you can also use the constructor parameter
+          name for value disambiguation:</para>
+
+          <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+&lt;constructor-arg name="years" value="7500000"/&gt;
+&lt;constructor-arg name="ultimateanswer" value="42"/&gt;
+&lt;/bean&gt;</programlisting>
+
+          <para>Keep in mind that your code has to be compiled with the debug
+          flag enabled so that Spring can lookup the parameter name from the
+          constructor.</para>
+        </section>
       </section>
     </section>
 
