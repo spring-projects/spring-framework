@@ -170,9 +170,27 @@ public class ExampleBean {
 &lt;constructor-arg name="ultimateanswer" value="42"/&gt;
 &lt;/bean&gt;</programlisting>
 
-          <para>Keep in mind that your code has to be compiled with the debug
-          flag enabled so that Spring can lookup the parameter name from the
-          constructor.</para>
+          <para>Keep in mind that to make this work out of the box your code
+          has to be compiled with the debug flag enabled so that Spring can
+          lookup the parameter name from the constructor. If you can't compile
+          your code with debug flag (or don't want to) you can use
+          <interfacename><ulink
+          url="http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html">@ConstructorProperties</ulink></interfacename>
+          JDK annotation to explicitly name your constructor arguments. The
+          sample class would then have to look as follows:</para>
+
+          <programlisting language="java">package examples;
+
+public class ExampleBean {
+
+  <lineannotation>// </lineannotation>Fields omitted
+
+  @ConstructorProperties({"years", "ultimateAnswer"})
+  public ExampleBean(int years, String ultimateAnswer) {
+      this.years = years;
+      this.ultimateAnswer = ultimateAnswer;
+  }
+}</programlisting>
         </section>
       </section>
     </section>
