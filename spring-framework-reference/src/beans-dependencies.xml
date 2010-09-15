@@ -171,8 +171,8 @@ public class ExampleBean {
 &lt;/bean&gt;</programlisting>
 
           <para>Keep in mind that to make this work out of the box your code
-          has to be compiled with the debug flag enabled so that Spring can
-          lookup the parameter name from the constructor. If you can't compile
+          must be compiled with the debug flag enabled so that Spring can
+          look up the parameter name from the constructor. If you can't compile
           your code with debug flag (or don't want to) you can use
           <interfacename><ulink
           url="http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html">@ConstructorProperties</ulink></interfacename>
