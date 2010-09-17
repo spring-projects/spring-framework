@@ -3380,7 +3380,7 @@ public class SimpleController {
   		<para>
   			This tag allows static resource requests following a particular URL pattern to be served by a <classname>ResourceHttpRequestHandler</classname> from 
   			any of a list of <classname>Resource</classname> locations.  This provides a convenient way to serve static resources from locations other than the 
-  			web application root, including locations on the classpath. The <code>cache-seconds</code> property may be used to set far future expiration headers 
+  			web application root, including locations on the classpath. The <code>cache-period</code> property may be used to set far future expiration headers 
   			(1 year is the recommendation of optimization tools such as Page Speed and YSlow) so that they will be more efficiently utilized by the client.  The handler 
   			also properly evaluates the <code>Last-Modified</code> header (if present) so that a <code>304</code> status code will be returned as appropriate, avoiding 
   			unnecessary overhead for resources that are already cached by the client.  For example, to serve resource requests with a URL pattern of 
@@ -3393,7 +3393,7 @@ public class SimpleController {
   			To serve these resources with a 1-year future expiration to ensure maximum use of the browser cache and a reduction in HTTP requests made by the browser:
   		</para>
   		<programlisting language="xml"><![CDATA[
-<mvc:resources mapping="/resources/**" location="/public-resources/" cache-seconds="31556926"/>]]>
+<mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/>]]>
   		</programlisting>
   		<para>
   			The <code>mapping</code> attribute must be an Ant pattern that can be used by <classname>SimpleUrlHandlerMapping</classname>, and the <code>location</code> 
