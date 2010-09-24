@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,12 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Default implementation of the {@link ResponseErrorHandler} interface.
@@ -64,14 +67,18 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = response.getStatusCode();
+		MediaType contentType = response.getHeaders().getContentType();
+		Charset charset = contentType != null ? contentType.getCharSet() : null;
+		byte[] body = FileCopyUtils.copyToByteArray(response.getBody());
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
-				throw new HttpClientErrorException(statusCode, response.getStatusText());
+				throw new HttpClientErrorException(statusCode, response.getStatusText(), body, charset);
 			case SERVER_ERROR:
-				throw new HttpServerErrorException(statusCode, response.getStatusText());
+				throw new HttpServerErrorException(statusCode, response.getStatusText(), body, charset);
 			default:
 				throw new RestClientException("Unknown status code [" + statusCode + "]");
 		}
 	}
+
 }
 
