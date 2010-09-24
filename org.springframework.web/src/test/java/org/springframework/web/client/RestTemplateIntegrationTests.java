@@ -145,14 +145,30 @@ public class RestTemplateIntegrationTests {
 		assertEquals("Invalid content", helloWorld, s);
 	}
 
-	@Test(expected = HttpClientErrorException.class)
+	@Test
 	public void notFound() {
-		template.execute(URI + "/errors/notfound", HttpMethod.GET, null, null);
+		try {
+			template.execute(URI + "/errors/notfound", HttpMethod.GET, null, null);
+			fail("HttpClientErrorException expected");
+		}
+		catch (HttpClientErrorException ex) {
+			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+			assertNotNull(ex.getStatusText());
+			assertNotNull(ex.getResponseBodyAsString());
+		}
 	}
 
-	@Test(expected = HttpServerErrorException.class)
+	@Test
 	public void serverError() {
-		template.execute(URI + "/errors/server", HttpMethod.GET, null, null);
+		try {
+			template.execute(URI + "/errors/server", HttpMethod.GET, null, null);
+			fail("HttpServerErrorException expected");
+		}
+		catch (HttpServerErrorException ex) {
+			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
+			assertNotNull(ex.getStatusText());
+			assertNotNull(ex.getResponseBodyAsString());
+		}
 	}
 
 	@Test
