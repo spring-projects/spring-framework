@@ -134,7 +134,8 @@ public class ResourceHttpRequestHandlerTests {
 	public void modified() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
-		request.addHeader("If-Modified-Since", new ClassPathResource("test/foo.css", getClass()).getFile().lastModified() - 1);
+		request.addHeader("If-Modified-Since",
+				new ClassPathResource("test/foo.css", getClass()).getFile().lastModified() / 1000 * 1000 - 1);
 		request.setMethod("GET");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
