@@ -34,7 +34,6 @@ import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.StateAwareResponse;
-import javax.portlet.UnavailableException;
 import javax.portlet.WindowState;
 import javax.servlet.http.Cookie;
 
@@ -86,6 +85,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.portlet.DispatcherPortlet;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.NoHandlerFoundException;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -419,9 +419,9 @@ public class Portlet20AnnotationControllerTests {
 		MockRenderResponse response = new MockRenderResponse();
 		try {
 			portlet.render(request, response);
-			fail("Should have thrown UnavailableException");
+			fail("Should have thrown NoHandlerFoundException");
 		}
-		catch (UnavailableException ex) {
+		catch (NoHandlerFoundException ex) {
 			// expected
 		}
 

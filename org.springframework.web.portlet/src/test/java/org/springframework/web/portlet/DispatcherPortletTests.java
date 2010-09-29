@@ -136,7 +136,7 @@ public class DispatcherPortletTests extends TestCase {
 		simpleDispatcherPortlet.processAction(request, response);
 		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
-		assertTrue(exceptionParam.startsWith(UnavailableException.class.getName()));
+		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
 	}
 
 	public void testSimpleFormViewNoBindOnNewForm() throws Exception {
@@ -246,7 +246,7 @@ public class DispatcherPortletTests extends TestCase {
 			simpleDispatcherPortlet.doDispatch(request, response);
 			fail("Should have thrown UnavailableException");
 		}
-		catch (UnavailableException ex) {
+		catch (NoHandlerFoundException ex) {
 			// expected
 		}
 	}
@@ -279,7 +279,7 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.processAction(request, response);
 		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
-		assertTrue(exceptionParam.startsWith(UnavailableException.class.getName()));
+		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
 	}
 
 	public void testPortletModeParameterMappingInvalidHelpRenderRequest() throws Exception {
@@ -289,7 +289,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "help3");
 		complexDispatcherPortlet.doDispatch(request, response);
 		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
-		assertTrue(model.get("exception").getClass().equals(UnavailableException.class));
+		assertTrue(model.get("exception").getClass().equals(NoHandlerFoundException.class));
 		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-unavailable", view.getBeanName());
 	}
@@ -405,7 +405,7 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.processAction(request, response);
 		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
-		assertTrue(exceptionParam.startsWith(UnavailableException.class.getName()));
+		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
 	}
 
 	public void testNoDetectAllHandlerMappingsWithParameterRenderRequest() throws Exception {
@@ -420,7 +420,7 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.doDispatch(request, response);
 		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
-		assertTrue(exception.getClass().equals(UnavailableException.class));
+		assertTrue(exception.getClass().equals(NoHandlerFoundException.class));
 		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-unavailable", view.getBeanName());
 	}
@@ -900,9 +900,9 @@ public class DispatcherPortletTests extends TestCase {
 
 			try {
 				simpleDispatcherPortlet.doDispatch(request, response);
-				fail("should have failed to find a handler and raised an UnavailableException");
+				fail("should have failed to find a handler and raised an NoHandlerFoundExceptionException");
 			}
-			catch (UnavailableException ex) {
+			catch (NoHandlerFoundException ex) {
 				// expected
 			}
 
