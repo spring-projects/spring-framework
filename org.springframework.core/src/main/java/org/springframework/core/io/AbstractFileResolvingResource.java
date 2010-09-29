@@ -18,6 +18,7 @@ package org.springframework.core.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -95,14 +96,28 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				// Try a URL connection content-length header...
 				URLConnection con = url.openConnection();
 				con.setUseCaches(false);
-				if (con instanceof HttpURLConnection) {
-					((HttpURLConnection) con).setRequestMethod("HEAD");
+				HttpURLConnection httpCon =
+						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
+				if (httpCon != null) {
+					httpCon.setRequestMethod("HEAD");
+					if (httpCon.getResponseCode() == HttpURLConnection.HTTP_OK) {
+						return true;
+					}
 				}
-				boolean doesExist = (con.getContentLength() >= 0);
-				if (!doesExist && con instanceof HttpURLConnection) {
-					((HttpURLConnection) con).disconnect();
+				if (con.getContentLength() >= 0) {
+					return true;
 				}
-				return doesExist;
+				if (httpCon != null) {
+					// no HTTP OK status, and no content-length header: give up
+					httpCon.disconnect();
+					return false;
+				}
+				else {
+					// Fall back to stream existence: can we open the stream?
+					InputStream is = getInputStream();
+					is.close();
+					return true;
+				}
 			}
 		}
 		catch (IOException ex) {
@@ -178,4 +193,5 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			return new VfsResource(VfsUtils.getRoot(uri));
 		}
 	}
+
 }
