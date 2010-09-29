@@ -159,7 +159,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		pvs.add("exceptionMappings",
 		    "java.lang.IllegalAccessException=failed-illegalaccess\n" +
 		    "PortletRequestBindingException=failed-binding\n" +
-		    "UnavailableException=failed-unavailable");
+		    "NoHandlerFoundException=failed-unavailable");
 		pvs.add("defaultErrorView", "failed-default-1");
 		registerSingleton("exceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
