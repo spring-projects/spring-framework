@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -73,6 +72,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.portlet.DispatcherPortlet;
 import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.portlet.NoHandlerFoundException;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.mvc.AbstractController;
 import org.springframework.web.servlet.View;
@@ -382,9 +382,9 @@ public class PortletAnnotationControllerTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		try {
 			portlet.render(request, response);
-			fail("Should have thrown UnavailableException");
+			fail("Should have thrown NoHandlerFoundException");
 		}
-		catch (UnavailableException ex) {
+		catch (NoHandlerFoundException ex) {
 			// expected
 		}
 
