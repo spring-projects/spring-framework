@@ -224,17 +224,21 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 
 
 	/**
-	 * Delegates to {@link #postProcessAnnotationConfiguration}.
+	 * This default implementation delegates to {@link #postProcessAnnotationConfiguration}.
 	 */
 	@Override
-	protected final void postProcessConfiguration(Configuration config) throws HibernateException {
+	protected void postProcessConfiguration(Configuration config) throws HibernateException {
 		postProcessAnnotationConfiguration((AnnotationConfiguration) config);
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to perform custom
+	 * To be implemented by subclasses which want to to perform custom
 	 * post-processing of the AnnotationConfiguration object after this
 	 * FactoryBean performed its default initialization.
+	 * <p>Note: As of Hibernate 3.6, AnnotationConfiguration's features
+	 * have been rolled into Configuration itself. Simply overriding
+	 * {@link #postProcessConfiguration(org.hibernate.cfg.Configuration)}
+	 * becomes an option as well then.
 	 * @param config the current AnnotationConfiguration object
 	 * @throws HibernateException in case of Hibernate initialization errors
 	 */
