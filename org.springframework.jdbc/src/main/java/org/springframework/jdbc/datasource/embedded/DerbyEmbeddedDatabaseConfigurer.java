@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -42,6 +43,8 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 
 	// Error code that indicates successful shutdown
 	private static final String SHUTDOWN_CODE = "08006";
+	private static final boolean IS_AT_LEAST_DOT_SIX = new EmbeddedDriver().getMinorVersion() >= 6;
+	private static final String SHUTDOWN_COMMAND = String.format("%s=true", IS_AT_LEAST_DOT_SIX ? "drop" : "shutdown");
 
 	private static DerbyEmbeddedDatabaseConfigurer INSTANCE;
 
@@ -72,15 +75,16 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 
 	public void shutdown(DataSource dataSource, String databaseName) {
 		try {
-			new EmbeddedDriver().connect(
-					String.format(URL_TEMPLATE, databaseName, "shutdown=true"), new Properties());
-		}
-		catch (SQLException ex) {
-			if (SHUTDOWN_CODE.equals(ex.getSQLState())) {
-				purgeDatabase(databaseName);
-			}
-			else {
+			new EmbeddedDriver().connect(String.format(URL_TEMPLATE, databaseName, SHUTDOWN_COMMAND), new Properties());
+		} catch (SQLException ex) {
+
+			if (!SHUTDOWN_CODE.equals(ex.getSQLState())) {
 				logger.warn("Could not shutdown in-memory Derby database", ex);
+				return;
+			}
+
+			if (!IS_AT_LEAST_DOT_SIX) {
+				purgeDatabase(databaseName);
 			}
 		}
 	}
@@ -99,5 +103,4 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 			logger.warn("Could not purge in-memory Derby database", ex);
 		}
 	}
-
 }
