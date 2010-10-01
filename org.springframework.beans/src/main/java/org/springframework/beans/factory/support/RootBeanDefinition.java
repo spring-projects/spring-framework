@@ -48,11 +48,11 @@ import org.springframework.util.Assert;
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	private final Set<Member> externallyManagedConfigMembers = Collections.synchronizedSet(new HashSet<Member>());
+	private final Set<Member> externallyManagedConfigMembers = Collections.synchronizedSet(new HashSet<Member>(0));
 
-	private final Set<String> externallyManagedInitMethods = Collections.synchronizedSet(new HashSet<String>());
+	private final Set<String> externallyManagedInitMethods = Collections.synchronizedSet(new HashSet<String>(0));
 
-	private final Set<String> externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet<String>());
+	private final Set<String> externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet<String>(0));
 
 	private BeanDefinitionHolder decoratedDefinition;
 

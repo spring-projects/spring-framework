@@ -50,7 +50,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * @see #add(String, Object)
 	 */
 	public MutablePropertyValues() {
-		this.propertyValueList = new ArrayList<PropertyValue>();
+		this.propertyValueList = new ArrayList<PropertyValue>(0);
 	}
 
 	/**
