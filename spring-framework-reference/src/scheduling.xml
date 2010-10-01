@@ -551,23 +551,26 @@ public void doSomething() {
     <section id="scheduling-annotation-support-async">
       <title>The @Async Annotation</title>
 
-      <para>The @Async annotation can be provided on a method so that
-      invocation of that method will occur asynchronously. In other words, the
-      caller will return immediately upon invocation and the actual execution
-      of the method will occur in a task that has been submitted to a Spring
-      TaskExecutor. In the simplest case, the annotation may be applied to a
-      void-returning method.</para>
+      <para>The <interfacename>@Async</interfacename> annotation can be
+      provided on a method so that invocation of that method will occur
+      asynchronously. In other words, the caller will return immediately upon
+      invocation and the actual execution of the method will occur in a task
+      that has been submitted to a Spring
+      <interfacename>TaskExecutor</interfacename>. In the simplest case, the
+      annotation may be applied to a <literal>void</literal>-returning
+      method.</para>
 
       <programlisting language="java">@Async
 void doSomething() {
     // this will be executed asynchronously
 }</programlisting>
 
-      <para>Unlike the methods annotated with the @Scheduled annotation, these
-      methods can expect arguments, because they will be invoked in the
-      "normal" way by callers at runtime rather than from a scheduled task
-      being managed by the container. For example, the following is a
-      legitimate application of the @Async annotation.</para>
+      <para>Unlike the methods annotated with the
+      <interfacename>@Scheduled</interfacename> annotation, these methods can
+      expect arguments, because they will be invoked in the "normal" way by
+      callers at runtime rather than from a scheduled task being managed by
+      the container. For example, the following is a legitimate application of
+      the <interfacename>@Async</interfacename> annotation.</para>
 
       <programlisting language="java">@Async
 void doSomething(String s) {
@@ -575,14 +578,44 @@ void doSomething(String s) {
 }</programlisting>
 
       <para>Even methods that return a value can be invoked asynchronously.
-      However, such methods are required to have a Future typed return value.
-      This still provides the benefit of asynchronous execution so that the
-      caller can perform other tasks prior to calling 'get()' on that
-      Future.</para>
+      However, such methods are required to have a
+      <interfacename>Future</interfacename> typed return value. This still
+      provides the benefit of asynchronous execution so that the caller can
+      perform other tasks prior to calling <methodname>get()</methodname> on
+      that Future.</para>
 
       <programlisting language="java">@Async
 Future&lt;String&gt; returnSomething(int i) {
     // this will be executed asynchronously
+}</programlisting>
+
+      <para><interfacename>@Async</interfacename> can not be used in
+      conjunction with lifecycle callbacks such as
+      <interfacename>@PostConstruct</interfacename>. To asynchonously
+      initialize Spring beans you currently have to use a separate
+      initializing Spring bean that invokes the
+      <interfacename>@Async</interfacename> annotated method on the target
+      then.</para>
+
+      <programlisting language="java">public class SampleBeanImpl implements SampleBean {
+
+  @Async
+  void doSomething() { … }
+}
+
+
+public class SampleBeanInititalizer {
+
+  private final SampleBean bean;
+
+  public SampleBeanInitializer(SampleBean bean) {
+    this.bean = bean;
+  }
+
+  @PostConstruct
+  public void initialize() {
+    bean.doSomething();
+  }
 }</programlisting>
     </section>
 
