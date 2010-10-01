@@ -21,7 +21,7 @@
 
     <para>The package <literal>org.springframework.jms.core</literal> provides
     the core functionality for using JMS. It contains JMS template classes
-    that simplifies the use of the JMS by handling the creation and release of
+    that simplify the use of the JMS by handling the creation and release of
     resources, much like the <classname>JdbcTemplate</classname> does for
     JDBC. The design principle common to Spring template classes is to provide
     helper methods to perform common operations and for more sophisticated
@@ -68,7 +68,7 @@
       <para>The <classname>JmsTemplate</classname> class is the central class
       in the JMS core package. It simplifies the use of JMS since it handles
       the creation and release of resources when sending or synchronously
-      recieving messages.</para>
+      receiving messages.</para>
 
       <para>Code that uses the <classname>JmsTemplate</classname> only needs
       to implement callback interfaces giving them a clearly defined high
@@ -130,9 +130,9 @@
 
       <para>When using JMS inside an EJB, the vendor provides implementations
       of the JMS interfaces so that they can participate in declarative
-      transaction management and perform pooling of connections and session.
-      In order to use this implementation, Java EE containers typically require
-      that you declare a JMS connection factory as a
+      transaction management and perform pooling of connections and sessions.
+      In order to use this implementation, Java EE containers typically
+      require that you declare a JMS connection factory as a
       <property>resource-ref</property> inside the EJB or servlet deployment
       descriptors. To ensure the use of these features with the
       <classname>JmsTemplate</classname> inside an EJB, the client application
@@ -222,7 +222,7 @@
       the application is deployed. This is often because there is shared
       application logic between interacting system components that create
       destinations at runtime according to a well-known naming convention.
-      Even though the creation of dynamic destinations are not part of the JMS
+      Even though the creation of dynamic destinations is not part of the JMS
       specification, most vendors have provided this functionality. Dynamic
       destinations are created with a name defined by the user which
       differentiates them from temporary destinations and are often not
@@ -243,9 +243,9 @@
       configure the <classname>JmsTemplate</classname> with knowledge of what
       JMS domain is being used. By default the value of this property is
       false, indicating that the point-to-point domain, Queues, will be used.
-      This property is used by <classname>JmsTemplate</classname> determines
-      the behavior of dynamic destination resolution via implementations of
-      the <interfacename>DestinationResolver</interfacename> interface.</para>
+      This property used by <classname>JmsTemplate</classname> determines the
+      behavior of dynamic destination resolution via implementations of the
+      <interfacename>DestinationResolver</interfacename> interface.</para>
 
       <para>You can also configure the <classname>JmsTemplate</classname> with
       a default destination via the property
@@ -300,10 +300,10 @@
         this container variant does allow for dynamic adaption to runtime
         demands and is able to participate in externally managed transactions.
         Each received message is registered with an XA transaction when
-        configured with a <classname>JtaTransactionManager</classname>;
-        so processing may take advantage of XA transation semantics. This
-        listener container strikes a good balance between low requirements
-        on the JMS provider, advanced functionality such as transaction
+        configured with a <classname>JtaTransactionManager</classname>; so
+        processing may take advantage of XA transaction semantics. This
+        listener container strikes a good balance between low requirements on
+        the JMS provider, advanced functionality such as transaction
         participation, and compatibility with Java EE environments.</para>
       </section>
     </section>
@@ -607,7 +607,7 @@ public interface SessionAwareMessageListener {
       your MDPs to be able to respond to any received messages (using the
       <interfacename>Session</interfacename> supplied in the
       <literal>onMessage(Message, Session)</literal> method). All of the
-      message listener container implementations that ship wth Spring have
+      message listener container implementations that ship with Spring have
       support for MDPs that implement either the
       <interfacename>MessageListener</interfacename> or
       <interfacename>SessionAwareMessageListener</interfacename> interface.
@@ -790,7 +790,7 @@ public interface SessionAwareMessageListener {
       delegates to the Java EE server's transaction subsystem). Note that the
       underlying JMS ConnectionFactory needs to be XA-capable and properly
       registered with your JTA transaction coordinator! (Check your Java EE
-      server's configuration of JNDI resources.) This allows message recepton
+      server's configuration of JNDI resources.) This allows message reception
       as well as e.g. database access to be part of the same transaction (with
       unified commit semantics, at the expense of XA transaction log
       overhead).</para>
@@ -888,7 +888,7 @@ public interface SessionAwareMessageListener {
     not tied to JMS:
     <classname>org.springframework.jca.endpoint.GenericMessageEndpointManager</classname>.
     This component allows for using any message listener type (e.g. a CCI
-    MessageListener) and any provided-specific ActivationSpec object. Check
+    MessageListener) and any provider-specific ActivationSpec object. Check
     out your JCA provider's documentation to find out about the actual
     capabilities of your connector, and consult
     <classname>GenericMessageEndpointManager</classname>'s JavaDoc for the
@@ -1049,7 +1049,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <para>The following table describes all available attributes. Consult the
     class-level Javadoc of the
     <classname>AbstractMessageListenerContainer</classname> and its concrete
-    subclasses for more detail on the individual properties. The Javadoc also
+    subclasses for more details on the individual properties. The Javadoc also
     provides a discussion of transaction choices and message redelivery
     scenarios.</para>
 
