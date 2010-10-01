@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Vector;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -91,15 +92,15 @@ public class MockPortletSession implements PortletSession {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(this.portletAttributes.keySet());
+		return new Vector<String>(this.portletAttributes.keySet()).elements();
 	}
 
 	public Enumeration<String> getAttributeNames(int scope) {
 		if (scope == PortletSession.PORTLET_SCOPE) {
-			return Collections.enumeration(this.portletAttributes.keySet());
+			return new Vector<String>(this.portletAttributes.keySet()).elements();
 		}
 		else if (scope == PortletSession.APPLICATION_SCOPE) {
-			return Collections.enumeration(this.applicationAttributes.keySet());
+			return new Vector<String>(this.applicationAttributes.keySet()).elements();
 		}
 		return null;
 	}

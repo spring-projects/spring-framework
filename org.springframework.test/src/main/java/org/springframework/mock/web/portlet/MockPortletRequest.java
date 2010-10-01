@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
@@ -327,7 +328,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return Collections.enumeration(this.attributes.keySet());
+		return new Vector<String>(this.attributes.keySet()).elements();
 	}
 
 	public void setParameters(Map<String, String[]> parameters) {

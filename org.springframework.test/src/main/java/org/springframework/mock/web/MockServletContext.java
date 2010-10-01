@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import javax.activation.FileTypeMap;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
@@ -323,7 +324,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(this.attributes.keySet());
+		return new Vector<String>(this.attributes.keySet()).elements();
 	}
 
 	public void setAttribute(String name, Object value) {
