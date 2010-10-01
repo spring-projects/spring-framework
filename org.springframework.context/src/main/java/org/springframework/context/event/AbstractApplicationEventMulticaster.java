@@ -238,7 +238,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 				BeanFactory beanFactory = getBeanFactory();
 				for (String listenerBeanName : this.applicationListenerBeans) {
 					ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-					if (!this.preFiltered && !allListeners.contains(listener)) {
+					if (this.preFiltered || !allListeners.contains(listener)) {
 						allListeners.add(listener);
 					}
 				}

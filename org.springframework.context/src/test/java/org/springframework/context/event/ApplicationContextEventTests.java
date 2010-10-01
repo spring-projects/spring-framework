@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,6 +127,39 @@ public class ApplicationContextEventTests {
 		assertTrue(listener1.seenEvents.contains(event2));
 		assertTrue(listener1.seenEvents.contains(event3));
 		assertTrue(listener1.seenEvents.contains(event4));
+
+		listener1.seenEvents.clear();
+		context.publishEvent(event1);
+		context.publishEvent(event2);
+		context.publishEvent(event3);
+		context.publishEvent(event4);
+		assertTrue(listener1.seenEvents.contains(event1));
+		assertTrue(listener1.seenEvents.contains(event2));
+		assertTrue(listener1.seenEvents.contains(event3));
+		assertTrue(listener1.seenEvents.contains(event4));
+	}
+
+	@Test
+	public void nonSingletonListenerInApplicationContext() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		RootBeanDefinition listener = new RootBeanDefinition(MyNonSingletonListener.class);
+		listener.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		context.registerBeanDefinition("listener", listener);
+		context.refresh();
+
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		MyOtherEvent event2 = new MyOtherEvent(context);
+		context.publishEvent(event2);
+		MyEvent event3 = new MyEvent(context);
+		context.publishEvent(event3);
+		MyOtherEvent event4 = new MyOtherEvent(context);
+		context.publishEvent(event4);
+		assertTrue(MyNonSingletonListener.seenEvents.contains(event1));
+		assertTrue(MyNonSingletonListener.seenEvents.contains(event2));
+		assertTrue(MyNonSingletonListener.seenEvents.contains(event3));
+		assertTrue(MyNonSingletonListener.seenEvents.contains(event4));
+		MyNonSingletonListener.seenEvents.clear();
 	}
 
 	@Test
@@ -209,6 +242,16 @@ public class ApplicationContextEventTests {
 
 		public void onApplicationEvent(MyEvent event) {
 			assertTrue(otherListener.seenEvents.contains(event));
+		}
+	}
+
+
+	public static class MyNonSingletonListener implements ApplicationListener {
+
+		public static final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+
+		public void onApplicationEvent(ApplicationEvent event) {
+			seenEvents.add(event);
 		}
 	}
 
