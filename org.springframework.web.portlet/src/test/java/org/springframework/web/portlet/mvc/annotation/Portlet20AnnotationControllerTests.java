@@ -33,6 +33,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceResponse;
 import javax.portlet.StateAwareResponse;
 import javax.portlet.WindowState;
 import javax.servlet.http.Cookie;
@@ -115,6 +116,38 @@ public class Portlet20AnnotationControllerTests {
 		MockRenderResponse response = new MockRenderResponse();
 		portlet.render(request, response);
 		assertEquals("test", response.getContentAsString());
+	}
+
+	@Test
+	public void standardHandleMethodWithResources() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
+				wac.setPortletConfig(getPortletConfig());
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockResourceRequest resourceRequest = new MockResourceRequest("/resource1");
+		MockResourceResponse resourceResponse = new MockResourceResponse();
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertEquals("/resource1", resourceResponse.getForwardedUrl());
+		assertNull(resourceResponse.getProperty(ResourceResponse.HTTP_STATUS_CODE));
+
+		resourceRequest = new MockResourceRequest("/WEB-INF/resource2");
+		resourceResponse = new MockResourceResponse();
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertNull(resourceResponse.getForwardedUrl());
+		assertEquals("404", resourceResponse.getProperty(ResourceResponse.HTTP_STATUS_CODE));
+
+		resourceRequest = new MockResourceRequest("/META-INF/resource3");
+		resourceResponse = new MockResourceResponse();
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertNull(resourceResponse.getForwardedUrl());
+		assertEquals("404", resourceResponse.getProperty(ResourceResponse.HTTP_STATUS_CODE));
 	}
 
 	@Test

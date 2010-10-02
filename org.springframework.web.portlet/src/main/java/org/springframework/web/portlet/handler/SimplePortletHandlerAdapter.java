@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.portlet.EventRequest;
 import javax.portlet.EventResponse;
 import javax.portlet.Portlet;
 import javax.portlet.PortletContext;
-import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
@@ -33,6 +32,7 @@ import javax.portlet.ResourceServingPortlet;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.context.PortletContextAware;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Adapter to use the Portlet interface with the generic DispatcherPortlet.
@@ -92,13 +92,8 @@ public class SimplePortletHandlerAdapter implements HandlerAdapter, PortletConte
 			((ResourceServingPortlet) handler).serveResource(request, response);
 		}
 		else {
-			// equivalent to Portlet 2.0 GenericPortlet
-			if (request.getResourceID() != null) {
-				PortletRequestDispatcher rd = this.portletContext.getRequestDispatcher(request.getResourceID());
-				if (rd != null) {
-					rd.forward(request, response);
-				}
-			}
+			// roughly equivalent to Portlet 2.0 GenericPortlet
+			PortletUtils.serveResource(request, response, this.portletContext);
 		}
 		return null;
 	}
