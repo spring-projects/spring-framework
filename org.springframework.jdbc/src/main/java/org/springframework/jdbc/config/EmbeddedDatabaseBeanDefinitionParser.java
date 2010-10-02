@@ -38,14 +38,25 @@ import org.w3c.dom.Element;
  * @author Oliver Gierke
  * @since 3.0
  */
-public class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
+class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
+
+	private static final String NAME_PROPERTY = "databaseName";
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext context) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(EmbeddedDatabaseFactoryBean.class);
 		setDatabaseType(element, builder);
 		setDatabasePopulator(element, context, builder);
+		useIdAsDatabaseNameIfGiven(element, builder);
 		return getSourcedBeanDefinition(builder, element, context);
+	}
+
+	private void useIdAsDatabaseNameIfGiven(Element element, BeanDefinitionBuilder builder) {
+
+		String id = element.getAttribute(ID_ATTRIBUTE);
+		if (StringUtils.hasText(id)) {
+			builder.addPropertyValue(NAME_PROPERTY, id);
+		}
 	}
 
 	private void setDatabaseType(Element element, BeanDefinitionBuilder builder) {
