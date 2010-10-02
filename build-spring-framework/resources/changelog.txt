@@ -3,28 +3,37 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.5 (2010-09-14)
+Changes in version 3.0.5 (2010-10-13)
 -------------------------------------
 
 * consistent use of JDK 1.5's "ThreadLocal.remove()" over "ThreadLocal.set(null)"
+* revised "ClassUtils.isAssignable" semantics to cover primitives vs wrappers in both directions
 * ConversionService protects itself against infinite recursion in ObjectToCollectionConverter
+* ApplicationContext registers context-specific ClassArrayEditor for its bean ClassLoader
 * refined ApplicationContext singleton processing to not fail for manually registered null instances
+* fixed ApplicationContext event processing for repeated invocations to non-singleton listener beans
 * modified expression parsing to pass full TypeDescriptor context through to ConversionService calls
 * adapted expression parser's Constructor/MethodResolver to accept TypeDescriptors instead of raw types
 * SpEL supports projection on any kind of Collection (not just on Lists and arrays)
+* AspectJExpressionPointcut uses bean ClassLoader for initializing the AspectJ pointcut parser
 * JDBC bundle uses local ClassLoader as bean ClassLoader for "sql-error-codes.xml" parsing
 * EmbeddedDatabaseFactory shuts down database when failing to populate it in "initDatabase()"
 * DefaultLobHandler's "wrapAsLob" mode works with PostgreSQL's "getAsciiStream()" requirement
 * ResultSetWrappingSqlRowSet (as used by JdbcTemplate's "queryForRowSet") supports column labels now
 * LocalSessionFactoryBean's "entityCacheStrategies" works with region names on Hibernate 3.6 as well
-* fixed DefaultMessageListenerContainer's no-message commit to work without Session caching as well
+* fixed DefaultMessageListenerContainer's no-message-received commit to work without Session caching
+* DefaultMessageListenerContainer's skips no-message-received commit on Tibco (avoiding a deadlock)
 * JaxWsPortClientInterceptor does not fall back to annotation-specified name as portName anymore
+* UriTemplate is serializable now
 * fixed AnnotationMethodHandlerAdapter's caching to avoid concurrency issues in RequestMappingInfo
 * fixed @MVC processing of parameter-level annotations to work with interface-based proxies again
 * revised @RequestParam processing to support CSV-to-array/collection binding with ConversionService
 * fixed EvalTag's EvaluationContext caching to properly handle JSP tag caching across requests
+* DispatcherPortlet throws custom NoHandlerFoundException instead of misleading UnavailableException
 * DispatcherPortlet copies all action parameters to render parameters in case of an action exception
+* DispatcherPortlet's default resource serving explicitly prevents access to WEB-INF and META-INF
 * Portlet @ExceptionHandler methods allow for writing the response directly (like in the Servlet case)
+* MockHttpServletRequest/HttpSession/etc returns independent Enumeration from "getAttributeNames()"
 
 
 Changes in version 3.0.4 (2010-08-19)
