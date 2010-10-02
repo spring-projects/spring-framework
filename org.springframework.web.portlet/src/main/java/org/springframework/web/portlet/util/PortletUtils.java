@@ -18,6 +18,7 @@ package org.springframework.web.portlet.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,11 +26,16 @@ import java.util.TreeMap;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletContext;
+import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.PortletSession;
+import javax.portlet.ResourceRequest;
+import javax.portlet.ResourceResponse;
 import javax.servlet.http.Cookie;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -442,11 +448,47 @@ public abstract class PortletUtils {
 	 */
 	public static void clearAllRenderParameters(ActionResponse response) {
 		try {
-			response.setRenderParameters(new HashMap());
+			response.setRenderParameters(new HashMap<String, String[]>(0));
 		}
 		catch (IllegalStateException ex) {
 			// Ignore in case sendRedirect was already set.
 		}
+	}
+
+	/**
+	 * Serve the resource as specified in the given request to the given response,
+	 * using the PortletContext's request dispatcher.
+	 * <p>This is roughly equivalent to Portlet 2.0 GenericPortlet.
+	 * @param request the current resource request
+	 * @param response the current resource response
+	 * @param context the current Portlet's PortletContext
+	 * @throws PortletException propagated from Portlet API's forward method
+	 * @throws IOException propagated from Portlet API's forward method
+	 */
+	public static void serveResource(ResourceRequest request, ResourceResponse response, PortletContext context)
+			throws PortletException, IOException {
+
+		String id = request.getResourceID();
+		if (id != null) {
+			if (!PortletUtils.isProtectedResource(id)) {
+				PortletRequestDispatcher rd = context.getRequestDispatcher(id);
+				if (rd != null) {
+					rd.forward(request, response);
+					return;
+				}
+			}
+			response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "404");
+		}
+	}
+
+	/**
+	 * Check whether the specified path indicates a resource in the protected
+	 * WEB-INF or META-INF directories.
+	 * @param path the path to check
+	 */
+	private static boolean isProtectedResource(String path) {
+		return (StringUtils.startsWithIgnoreCase(path, "/WEB-INF") ||
+				StringUtils.startsWithIgnoreCase(path, "/META-INF"));
 	}
 
 }
