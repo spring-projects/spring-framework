@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -102,13 +103,10 @@ public class TestContextManager {
 	}
 
 	/**
-	 * Constructs a new <code>TestContextManager</code> for the specified
-	 * {@link Class test class} and automatically
-	 * {@link #registerTestExecutionListeners(TestExecutionListener...)
-	 * registers} the {@link TestExecutionListener TestExecutionListeners}
-	 * configured for the test class via the {@link TestExecutionListeners
-	 * &#064;TestExecutionListeners} annotation.
-	 * 
+	 * Constructs a new <code>TestContextManager</code> for the specified {@link Class test class}
+	 * and automatically {@link #registerTestExecutionListeners registers} the
+	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
+	 * via the {@link TestExecutionListeners &#064;TestExecutionListeners} annotation.
 	 * @param testClass the test class to be managed
 	 * @param defaultContextLoaderClassName the name of the default
 	 * <code>ContextLoader</code> class to use (may be <code>null</code>)
@@ -128,54 +126,49 @@ public class TestContextManager {
 		return this.testContext;
 	}
 
+
 	/**
-	 * Register the supplied {@link TestExecutionListener
-	 * TestExecutionListeners} by appending them to the set of listeners used by
-	 * this <code>TestContextManager</code>.
+	 * Register the supplied {@link TestExecutionListener TestExecutionListeners}
+	 * by appending them to the set of listeners used by this <code>TestContextManager</code>.
 	 */
 	public void registerTestExecutionListeners(TestExecutionListener... testExecutionListeners) {
 		for (TestExecutionListener listener : testExecutionListeners) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Registering TestExecutionListener [" + listener + "]");
+				logger.trace("Registering TestExecutionListener: " + listener);
 			}
 			this.testExecutionListeners.add(listener);
 		}
 	}
 
 	/**
-	 * Gets an {@link Collections#unmodifiableList(List) unmodifiable} copy of
-	 * the {@link TestExecutionListener TestExecutionListeners} registered for
-	 * this <code>TestContextManager</code>.
+	 * Get the current {@link TestExecutionListener TestExecutionListeners}
+	 * registered for this <code>TestContextManager</code>.
+	 * <p>Allows for modifications, e.g. adding a listener to the beginning of the list.
+	 * However, make sure to keep the list stable while actually executing tests.
 	 */
 	public final List<TestExecutionListener> getTestExecutionListeners() {
-		return Collections.unmodifiableList(this.testExecutionListeners);
+		return this.testExecutionListeners;
 	}
 
 	/**
-	 * Gets a copy of the {@link TestExecutionListener TestExecutionListeners}
+	 * Get a copy of the {@link TestExecutionListener TestExecutionListeners}
 	 * registered for this <code>TestContextManager</code> in reverse order.
 	 */
 	private List<TestExecutionListener> getReversedTestExecutionListeners() {
-		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
-			getTestExecutionListeners());
+		List<TestExecutionListener> listenersReversed =
+				new ArrayList<TestExecutionListener>(getTestExecutionListeners());
 		Collections.reverse(listenersReversed);
 		return listenersReversed;
 	}
 
 	/**
-	 * Retrieves an array of newly instantiated {@link TestExecutionListener
-	 * TestExecutionListeners} for the specified {@link Class class}. If
-	 * {@link TestExecutionListeners &#064;TestExecutionListeners} is not
-	 * <em>present</em> on the supplied class, the default listeners will be
-	 * returned.
-	 * <p>
-	 * Note that the {@link TestExecutionListeners#inheritListeners()
-	 * inheritListeners} flag of {@link TestExecutionListeners
-	 * &#064;TestExecutionListeners} will be taken into consideration.
-	 * Specifically, if the <code>inheritListeners</code> flag is set to
-	 * <code>true</code>, listeners defined in the annotated class will be
-	 * appended to the listeners defined in superclasses.
-	 * 
+	 * Retrieve an array of newly instantiated {@link TestExecutionListener TestExecutionListeners}
+	 * for the specified {@link Class class}. If {@link TestExecutionListeners &#064;TestExecutionListeners}
+	 * is not <em>present</em> on the supplied class, the default listeners will be returned.
+	 * <p>Note that the {@link TestExecutionListeners#inheritListeners() inheritListeners} flag of
+	 * {@link TestExecutionListeners &#064;TestExecutionListeners} will be taken into consideration.
+	 * Specifically, if the <code>inheritListeners</code> flag is set to <code>true</code>, listeners
+	 * defined in the annotated class will be appended to the listeners defined in superclasses.
 	 * @param clazz the test class for which the listeners should be retrieved
 	 * @return an array of TestExecutionListeners for the specified class
 	 */
@@ -207,7 +200,8 @@ public class TestContextManager {
 				Class<? extends TestExecutionListener>[] listenerClasses = testExecutionListeners.listeners();
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
 					String msg = String.format(
-						"Test class [%s] has been configured with @TestExecutionListeners' 'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",
+						"Test class [%s] has been configured with @TestExecutionListeners' 'value' [%s] " +
+								"and 'listeners' [%s] attributes. Use one or the other, but not both.",
 						declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
 						ObjectUtils.nullSafeToString(listenerClasses));
 					logger.error(msg);
@@ -220,16 +214,15 @@ public class TestContextManager {
 				if (listenerClasses != null) {
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
-				declaringClass = (testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(
-					annotationType, declaringClass.getSuperclass())
-						: null);
+				declaringClass = (testExecutionListeners.inheritListeners() ?
+						AnnotationUtils.findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass()) : null);
 			}
 		}
 
 		List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
 			try {
-				listeners.add((TestExecutionListener) BeanUtils.instantiateClass(listenerClass));
+				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
 			catch (NoClassDefFoundError err) {
 				if (defaultListeners) {
@@ -252,11 +245,12 @@ public class TestContextManager {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Set<Class<? extends TestExecutionListener>> getDefaultTestExecutionListenerClasses() {
-		Set<Class<? extends TestExecutionListener>> defaultListenerClasses = new LinkedHashSet<Class<? extends TestExecutionListener>>();
+		Set<Class<? extends TestExecutionListener>> defaultListenerClasses =
+				new LinkedHashSet<Class<? extends TestExecutionListener>>();
 		for (String className : DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES) {
 			try {
-				defaultListenerClasses.add((Class<? extends TestExecutionListener>) getClass().getClassLoader().loadClass(
-					className));
+				defaultListenerClasses.add(
+						(Class<? extends TestExecutionListener>) getClass().getClassLoader().loadClass(className));
 			}
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
@@ -268,17 +262,16 @@ public class TestContextManager {
 		return defaultListenerClasses;
 	}
 
+
 	/**
 	 * Hook for pre-processing a test class <em>before</em> execution of any
 	 * tests within the class. Should be called prior to any framework-specific
 	 * <em>before class methods</em> (e.g., methods annotated with JUnit's
 	 * {@link org.junit.BeforeClass &#064;BeforeClass}).
-	 * <p>
-	 * An attempt will be made to give each registered
+	 * <p>An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to pre-process the test class
 	 * execution. If a listener throws an exception, however, the remaining
 	 * registered listeners will <strong>not</strong> be called.
-	 * 
 	 * @throws Exception if a registered TestExecutionListener throws an
 	 * exception
 	 * @see #getTestExecutionListeners()
@@ -306,19 +299,14 @@ public class TestContextManager {
 	 * Hook for preparing a test instance prior to execution of any individual
 	 * test methods, for example for injecting dependencies, etc. Should be
 	 * called immediately after instantiation of the test instance.
-	 * <p>
-	 * The managed {@link TestContext} will be updated with the supplied
+	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * <code>testInstance</code>.
-	 * <p>
-	 * An attempt will be made to give each registered
+	 * <p>An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to prepare the test instance. If a
 	 * listener throws an exception, however, the remaining registered listeners
 	 * will <strong>not</strong> be called.
-	 * 
-	 * @param testInstance the test instance to prepare (never <code>null</code>
-	 * )
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception
+	 * @param testInstance the test instance to prepare (never <code>null</code>)
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(Object testInstance) throws Exception {
@@ -346,20 +334,16 @@ public class TestContextManager {
 	 * starting a transaction, etc. Should be called prior to any
 	 * framework-specific <em>before methods</em> (e.g., methods annotated with
 	 * JUnit's {@link org.junit.Before &#064;Before}).
-	 * <p>
-	 * The managed {@link TestContext} will be updated with the supplied
+	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * <code>testInstance</code> and <code>testMethod</code>.
-	 * <p>
-	 * An attempt will be made to give each registered
+	 * <p>An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to pre-process the test method
 	 * execution. If a listener throws an exception, however, the remaining
 	 * registered listeners will <strong>not</strong> be called.
-	 * 
 	 * @param testInstance the current test instance (never <code>null</code>)
 	 * @param testMethod the test method which is about to be executed on the
 	 * test instance
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
 	public void beforeTestMethod(Object testInstance, Method testMethod) throws Exception {
@@ -388,26 +372,22 @@ public class TestContextManager {
 	 * ending a transaction, etc. Should be called after any framework-specific
 	 * <em>after methods</em> (e.g., methods annotated with JUnit's
 	 * {@link org.junit.After &#064;After}).
-	 * <p>
-	 * The managed {@link TestContext} will be updated with the supplied
+	 * <p>The managed {@link TestContext} will be updated with the supplied
 	 * <code>testInstance</code>, <code>testMethod</code>, and
 	 * <code>exception</code>.
-	 * <p>
-	 * Each registered {@link TestExecutionListener} will be given a chance to
+	 * <p>Each registered {@link TestExecutionListener} will be given a chance to
 	 * post-process the test method execution. If a listener throws an
 	 * exception, the remaining registered listeners will still be called, but
 	 * the first exception thrown will be tracked and rethrown after all
 	 * listeners have executed. Note that registered listeners will be executed
 	 * in the opposite order in which they were registered.
-	 * 
 	 * @param testInstance the current test instance (never <code>null</code>)
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
 	 * @param exception the exception that was thrown during execution of the
 	 * test method or by a TestExecutionListener, or <code>null</code> if none
 	 * was thrown
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
@@ -444,16 +424,13 @@ public class TestContextManager {
 	 * tests within the class. Should be called after any framework-specific
 	 * <em>after class methods</em> (e.g., methods annotated with JUnit's
 	 * {@link org.junit.AfterClass &#064;AfterClass}).
-	 * <p>
-	 * Each registered {@link TestExecutionListener} will be given a chance to
+	 * <p>Each registered {@link TestExecutionListener} will be given a chance to
 	 * post-process the test class. If a listener throws an exception, the
 	 * remaining registered listeners will still be called, but the first
 	 * exception thrown will be tracked and rethrown after all listeners have
 	 * executed. Note that registered listeners will be executed in the opposite
 	 * order in which they were registered.
-	 * 
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestClass() throws Exception {
