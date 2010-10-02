@@ -18,6 +18,8 @@ Changes in version 3.0.5 (2010-10-13)
 * AspectJExpressionPointcut uses bean ClassLoader for initializing the AspectJ pointcut parser
 * JDBC bundle uses local ClassLoader as bean ClassLoader for "sql-error-codes.xml" parsing
 * EmbeddedDatabaseFactory shuts down database when failing to populate it in "initDatabase()"
+* embedded database support now also works with Derby >= 10.6
+* "jdbc:embedded-database" uses id as database name to allow multiple ones in parallel
 * DefaultLobHandler's "wrapAsLob" mode works with PostgreSQL's "getAsciiStream()" requirement
 * ResultSetWrappingSqlRowSet (as used by JdbcTemplate's "queryForRowSet") supports column labels now
 * LocalSessionFactoryBean's "entityCacheStrategies" works with region names on Hibernate 3.6 as well
