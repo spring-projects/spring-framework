@@ -79,6 +79,11 @@ public class MediaType implements Comparable<MediaType> {
 	public final static MediaType APPLICATION_XHTML_XML;
 
 	/**
+	 * Public constant media type for {@code application/xml}.
+	 */
+	public final static MediaType APPLICATION_XML;
+
+	/**
 	 * Public constant media type for {@code image/gif}.
 	 */
 	public final static MediaType IMAGE_GIF;
@@ -92,11 +97,6 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code image/png}.
 	 */
 	public final static MediaType IMAGE_PNG;
-
-	/**
-	 * Public constant media type for {@code image/xml}.
-	 */
-	public final static MediaType APPLICATION_XML;
 
 	/**
 	 * Public constant media type for {@code multipart/form-data}.
