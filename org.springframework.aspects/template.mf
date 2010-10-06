@@ -7,6 +7,7 @@ Import-Template:
  org.aspectj.*;version=${aj.osgi.range};resolution:=optional,
  org.springframework.beans.*;version=${spring.osgi.range},
  org.springframework.transaction.*;version=${spring.osgi.range};resolution:=optional,
+ org.springframework.core.task.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.orm.jpa.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.dao.*;version=${spring.osgi.range};resolution:=optional
 Ignored-Existing-Headers: 
