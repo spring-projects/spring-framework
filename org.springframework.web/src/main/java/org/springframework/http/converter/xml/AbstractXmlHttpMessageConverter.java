@@ -52,7 +52,7 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	 * to {@code text/xml} and {@code application/xml}, and {@code application/*-xml}.
 	 */
 	protected AbstractXmlHttpMessageConverter() {
-		super(new MediaType("application", "xml"), new MediaType("text", "xml"), new MediaType("application", "*+xml"));
+		super(MediaType.APPLICATION_XML, MediaType.TEXT_XML, new MediaType("application", "*+xml"));
 	}
 
 
@@ -70,7 +70,7 @@ public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMes
 	 * Transforms the given {@code Source} to the {@code Result}.
 	 * @param source the source to transform from
 	 * @param result the result to transform to
-	 * @throws HttpMessageConversionException in case of transformation errors
+	 * @throws TransformerException in case of transformation errors
 	 */
 	protected void transform(Source source, Result result) throws TransformerException {
 		this.transformerFactory.newTransformer().transform(source, result);
