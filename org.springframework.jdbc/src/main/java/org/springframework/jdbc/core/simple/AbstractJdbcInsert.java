@@ -48,6 +48,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.util.Assert;
 
 /**
@@ -225,6 +226,13 @@ public abstract class AbstractJdbcInsert {
 	 */
 	protected JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
+	}
+
+	/**
+	 * Set the {@link NativeJdbcExtractor} to use to retrieve the native connection if necessary
+	 */
+	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
+		this.tableMetaDataContext.setNativeJdbcExtractor(nativeJdbcExtractor);
 	}
 
 

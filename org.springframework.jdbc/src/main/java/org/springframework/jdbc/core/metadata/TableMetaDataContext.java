@@ -33,6 +33,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Class to manage context metadata used for the configuration
@@ -69,6 +70,9 @@ public class TableMetaDataContext {
 
 	/** are we using generated key columns */
 	private boolean generatedKeyColumnsUsed = false;
+
+	/** NativeJdbcExtractor to be used to retrieve the native connection */
+	NativeJdbcExtractor nativeJdbcExtractor = null;
 
 	/**
 	 * Set the name of the table for this context.
@@ -182,6 +186,13 @@ public class TableMetaDataContext {
 		return this.metaDataProvider.isGeneratedKeysColumnNameArraySupported();
 	}
 
+	/**
+	 * Set {@link NativeJdbcExtractor} to be used to retrieve the native connection
+	 */
+	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
+		this.nativeJdbcExtractor = nativeJdbcExtractor;
+	}
+
 
 	/**
 	 * Process the current meta data with the provided configuration options
@@ -190,7 +201,7 @@ public class TableMetaDataContext {
 	 * @param generatedKeyNames name of generated keys
 	 */
 	public void processMetaData(DataSource dataSource, List<String> declaredColumns, String[] generatedKeyNames) {
-		this.metaDataProvider = TableMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
+		this.metaDataProvider = TableMetaDataProviderFactory.createMetaDataProvider(dataSource, this, this.nativeJdbcExtractor);
 		this.tableColumns = reconcileColumnsToUse(declaredColumns, generatedKeyNames);
 	}
 

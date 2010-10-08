@@ -28,6 +28,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Factory used to create a {@link TableMetaDataProvider} implementation based on the type of databse being used.
@@ -48,6 +49,19 @@ public class TableMetaDataProviderFactory {
 	 */
 	static public TableMetaDataProvider createMetaDataProvider(DataSource dataSource,
 															 final TableMetaDataContext context) {
+		return createMetaDataProvider(dataSource, context, null);
+	}
+	
+	/**
+	 * Create a TableMetaDataProvider based on the database metedata
+	 * @param dataSource used to retrieve metedata
+	 * @param context the class that holds configuration and metedata
+	 * @param nativeJdbcExtractor @{link NativeJdbcExtractor} to be used
+	 * @return instance of the TableMetaDataProvider implementation to be used
+	 */
+	static public TableMetaDataProvider createMetaDataProvider(DataSource dataSource,
+				final TableMetaDataContext context,
+				final NativeJdbcExtractor nativeJdbcExtractor) {
 		try {
 			return (TableMetaDataProvider) JdbcUtils.extractDatabaseMetaData(
 					dataSource, new DatabaseMetaDataCallback() {
@@ -73,6 +87,9 @@ public class TableMetaDataProviderFactory {
 					}
 					else {
 						provider = new GenericTableMetaDataProvider(databaseMetaData);
+					}
+					if (nativeJdbcExtractor != null) {
+						provider.setNativeJdbcExtractor(nativeJdbcExtractor);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Using " + provider.getClass().getName());

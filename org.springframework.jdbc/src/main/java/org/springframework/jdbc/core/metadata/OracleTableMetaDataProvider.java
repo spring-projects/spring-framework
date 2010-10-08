@@ -49,7 +49,19 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData,
 			String catalogName, String schemaName, String tableName) throws SQLException {
 
-		Connection con = databaseMetaData.getConnection();
+		Connection con = null;
+		if (nativeJdbcExtractor == null) {
+			con = databaseMetaData.getConnection();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using meta data JDBC connection: " + con.getClass().getName());
+			}
+		}
+		else {
+			con = nativeJdbcExtractor.getNativeConnection(databaseMetaData.getConnection());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using native JDBC connection: " + con.getClass().getName());
+			}
+		}
 		Method methodToInvoke = null;
 		Boolean origValueForIncludeSynonyms = null;
 
