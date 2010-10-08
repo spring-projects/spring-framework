@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * A SimpleJdbcInsert is a multi-threaded, reusable object providing easy insert
@@ -101,6 +102,11 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 
 	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
 		setOverrideIncludeSynonymsDefault(true);
+		return this;
+	}
+
+	public SimpleJdbcInsertOperations useNativeJdbcExtractorForMetaData(NativeJdbcExtractor nativeJdbcExtractor) {
+		setNativeJdbcExtractor(nativeJdbcExtractor);
 		return this;
 	}
 

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Interface specifying the API for a Simple JDBC Insert implemented by {@link SimpleJdbcInsert}.
@@ -80,6 +81,16 @@ public interface SimpleJdbcInsertOperations {
 	 * @return the instance of this SimpleJdbcInsert
 	 */
 	SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData();
+
+	/**
+	 * Use a the provided NativeJdbcExtractor during the column meta data
+	 * lookups via JDBC.
+	 * Note: this is only necessary to include when running with a connection pool 
+	 * that wraps the meta data connection and when using a database like Oracle 
+	 * where it is necessary to access the native connection to include synonyms.
+	 * @return the instance of this SimpleJdbcInsert
+	 */
+	SimpleJdbcInsertOperations useNativeJdbcExtractorForMetaData(NativeJdbcExtractor nativeJdbcExtractor);
 
 
 	/**

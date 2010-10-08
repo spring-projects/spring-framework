@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * A generic implementation of the {@link TableMetaDataProvider} that should provide enough features for all supported
@@ -70,6 +71,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	/** Collection of TableParameterMetaData objects */
 	private List<TableParameterMetaData> insertParameterMetaData = new ArrayList<TableParameterMetaData>();
+
+	/** NativeJdbcExtractor that can be used to retrieve the native connection */
+	protected NativeJdbcExtractor nativeJdbcExtractor = null;
 
 
 	/**
@@ -147,6 +151,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		this.generatedKeysColumnNameArraySupported = generatedKeysColumnNameArraySupported;
 	}
 
+	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
+		this.nativeJdbcExtractor = nativeJdbcExtractor;
+	}
 
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 
