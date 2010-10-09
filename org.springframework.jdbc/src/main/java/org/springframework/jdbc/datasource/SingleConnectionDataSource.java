@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,9 +325,22 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 				// Use hashCode of Connection proxy.
 				return System.identityHashCode(proxy);
 			}
+			else if (method.getName().equals("unwrap")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return proxy;
+				}
+			}
+			else if (method.getName().equals("isWrapperFor")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return true;
+				}
+			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: don't pass the call on.
 				return null;
+			}
+			else if (method.getName().equals("isClosed")) {
+				return false;
 			}
 			else if (method.getName().equals("getTargetConnection")) {
 				// Handle getTargetConnection method: return underlying Connection.

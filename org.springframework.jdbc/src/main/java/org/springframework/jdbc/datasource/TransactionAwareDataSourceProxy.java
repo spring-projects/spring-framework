@@ -196,14 +196,24 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				}
 				return sb.toString();
 			}
-			else if (method.getName().equals("isClosed")) {
-				return this.closed;
+			else if (method.getName().equals("unwrap")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return proxy;
+				}
+			}
+			else if (method.getName().equals("isWrapperFor")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return true;
+				}
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
 				DataSourceUtils.doReleaseConnection(this.target, this.targetDataSource);
 				this.closed = true;
 				return null;
+			}
+			else if (method.getName().equals("isClosed")) {
+				return this.closed;
 			}
 
 			if (this.target == null) {
