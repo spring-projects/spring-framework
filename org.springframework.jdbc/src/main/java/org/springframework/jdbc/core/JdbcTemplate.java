@@ -1295,7 +1295,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 
 	/**
-	 * Invocation handler that suppresses close calls on JDBC COnnections.
+	 * Invocation handler that suppresses close calls on JDBC Connections.
 	 * Also prepares returned Statement (Prepared/CallbackStatement) objects.
 	 * @see java.sql.Connection#close()
 	 */
@@ -1310,11 +1310,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying Connection.
-				return this.target;
-			}
-			else if (method.getName().equals("equals")) {
+			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0]);
 			}
@@ -1322,9 +1318,26 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				// Use hashCode of PersistenceManager proxy.
 				return System.identityHashCode(proxy);
 			}
+			else if (method.getName().equals("unwrap")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return proxy;
+				}
+			}
+			else if (method.getName().equals("isWrapperFor")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return true;
+				}
+			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: suppress, not valid.
 				return null;
+			}
+			else if (method.getName().equals("isClosed")) {
+				return false;
+			}
+			else if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying Connection.
+				return this.target;
 			}
 
 			// Invoke method on target Connection.

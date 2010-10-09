@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,6 +288,16 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				// Connection has been fetched: use hashCode of Connection proxy.
 				return System.identityHashCode(proxy);
 			}
+			else if (method.getName().equals("unwrap")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return proxy;
+				}
+			}
+			else if (method.getName().equals("isWrapperFor")) {
+				if (((Class) args[0]).isInstance(proxy)) {
+					return true;
+				}
+			}
 			else if (method.getName().equals("getTargetConnection")) {
 				// Handle getTargetConnection method: return underlying connection.
 				return getTargetConnection(method);
@@ -344,13 +354,13 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				else if (method.getName().equals("clearWarnings")) {
 					return null;
 				}
-				else if (method.getName().equals("isClosed")) {
-					return this.closed;
-				}
 				else if (method.getName().equals("close")) {
 					// Ignore: no target connection yet.
 					this.closed = true;
 					return null;
+				}
+				else if (method.getName().equals("isClosed")) {
+					return this.closed;
 				}
 				else if (this.closed) {
 					// Connection proxy closed, without ever having fetched a
