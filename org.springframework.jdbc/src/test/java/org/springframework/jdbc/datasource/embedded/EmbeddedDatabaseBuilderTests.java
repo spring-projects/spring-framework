@@ -1,15 +1,32 @@
+/*
+ * Copyright 2002-2010 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jdbc.datasource.embedded;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
-import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassRelativeResourceLoader;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 
+/**
+ * @author Keith Donald
+ */
 public class EmbeddedDatabaseBuilderTests {
 
 	@Test
@@ -36,14 +53,14 @@ public class EmbeddedDatabaseBuilderTests {
 	@Test
 	public void testBuildH2() {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
-		EmbeddedDatabase db = builder.setType(H2).addScript("db-schema.sql").addScript("db-test-data.sql").build();
+		EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.H2).addScript("db-schema.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
 	@Test
 	public void testBuildDerby() {
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
-		EmbeddedDatabase db = builder.setType(DERBY).addScript("db-schema-derby.sql").addScript("db-test-data.sql").build();
+		EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.DERBY).addScript("db-schema-derby.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);
 	}
 
@@ -52,7 +69,9 @@ public class EmbeddedDatabaseBuilderTests {
 		try {
 			new EmbeddedDatabaseBuilder().addScript("bogus.sql").build();
 			fail("Should have failed");
-		} catch (CannotReadScriptException e) {
+		}
+		catch (DataAccessResourceFailureException ex) {
+			assertTrue(ex.getCause() instanceof CannotReadScriptException);
 		}
 	}
 
