@@ -9,6 +9,7 @@ Changes in version 3.0.5 (2010-10-13)
 * consistent use of JDK 1.5's "ThreadLocal.remove()" over "ThreadLocal.set(null)"
 * revised "ClassUtils.isAssignable" semantics to cover primitives vs wrappers in both directions
 * ConversionService protects itself against infinite recursion in ObjectToCollectionConverter
+* fixed TypeDescriptor to correctly resolve nested collections and their element types
 * ApplicationContext registers context-specific ClassArrayEditor for its bean ClassLoader
 * refined ApplicationContext singleton processing to not fail for manually registered null instances
 * fixed ApplicationContext event processing for repeated invocations to non-singleton listener beans
@@ -20,6 +21,9 @@ Changes in version 3.0.5 (2010-10-13)
 * EmbeddedDatabaseFactory shuts down database when failing to populate it in "initDatabase()"
 * embedded database support now also works with Derby >= 10.6
 * "jdbc:embedded-database" uses id as database name to allow multiple ones in parallel
+* ResourceDatabasePopulator throws descriptive ScriptStatementFailedException with resource details
+* added configurable Connection/Statement/ResultSet target types to Jdbc4NativeJdbcExtractor
+* added OracleJdbc4NativeJdbcExtractor with pre-configured Oracle JDBC API types
 * DefaultLobHandler's "wrapAsLob" mode works with PostgreSQL's "getAsciiStream()" requirement
 * ResultSetWrappingSqlRowSet (as used by JdbcTemplate's "queryForRowSet") supports column labels now
 * LocalSessionFactoryBean's "entityCacheStrategies" works with region names on Hibernate 3.6 as well
