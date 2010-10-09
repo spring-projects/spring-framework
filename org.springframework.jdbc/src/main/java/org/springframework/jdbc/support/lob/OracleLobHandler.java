@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 * See SimpleNativeJdbcExtractor's javadoc for details.
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor#getNativeConnectionFromStatement
 	 * @see org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor
+	 * @see org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor
 	 * @see oracle.jdbc.OracleConnection
 	 */
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
@@ -144,20 +145,16 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 * Set whether to agressively release any resources used by the LOB. If set to <code>true</code>
 	 * then you can only read the LOB values once. Any subsequent reads will fail since the resources
 	 * have been closed.
-	 *
 	 * <p>Setting this property to <code>true</code> can be useful when your queries generates large
 	 * temporary LOBs that occupy space in the TEMPORARY tablespace or when you want to free up any
 	 * memory allocated by the driver for the LOB reading.
-	 *
 	 * <p>Default is <code>false</code>.
-	 * 
 	 * @see oracle.sql.BLOB#freeTemporary
 	 * @see oracle.sql.CLOB#freeTemporary
 	 * @see oracle.sql.BLOB#open
 	 * @see oracle.sql.CLOB#open
 	 * @see oracle.sql.BLOB#close
 	 * @see oracle.sql.CLOB#close
-	 * @since 3.0
 	 */
 	public void setReleaseResourcesAfterRead(boolean releaseResources) {
 		this.releaseResourcesAfterRead = releaseResources;
@@ -258,27 +255,25 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Initialize any LOB resources before a read is done.
-	 *
-	 * <p>This implementation calls
-	 * <code>BLOB.open(BLOB.MODE_READONLY)</code> or <code>CLOB.open(CLOB.MODE_READONLY)</code>
-	 * on any non-temporary LOBs  
-	 * if <code>releaseResourcesAfterRead</code> property is set to <code>true</code>.
+	 * <p>This implementation calls <code>BLOB.open(BLOB.MODE_READONLY)</code> or
+	 * <code>CLOB.open(CLOB.MODE_READONLY)</code> on any non-temporary LOBs if
+	 * <code>releaseResourcesAfterRead</code> property is set to <code>true</code>.
 	 * <p>This method can be overridden by sublcasses if different behavior is desired.
 	 * @param con the connection to be usde for initilization
 	 * @param lob the LOB to initialize
 	 */
 	protected void initializeResourcesBeforeRead(Connection con, Object lob) {
-		if (releaseResourcesAfterRead) {
+		if (this.releaseResourcesAfterRead) {
 			initOracleDriverClasses(con);
 			try {
 				/*
-				if (!((BLOB)lob.isTemporary() {
+				if (!((BLOB) lob.isTemporary() {
 				*/
 				Method isTemporary = lob.getClass().getMethod("isTemporary");
 				Boolean temporary = (Boolean) isTemporary.invoke(lob);
 				if (!temporary) {
 					/*
-					((BLOB)lob).open(BLOB.MODE_READONLY);
+					((BLOB) lob).open(BLOB.MODE_READONLY);
 					*/
 					Method open = lob.getClass().getMethod("open", int.class);
 					open.invoke(lob, modeReadOnlyConstants.get(lob.getClass()));
@@ -295,44 +290,42 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Release any LOB resources after read is complete.
-	 *
 	 * <p>If <code>releaseResourcesAfterRead</code> property is set to <code>true</code>
 	 * then this implementation calls
 	 * <code>BLOB.close()</code> or <code>CLOB.close()</code>
 	 * on any non-temporary LOBs that are open or
 	 * <code>BLOB.freeTemporary()</code> or <code>CLOB.freeTemporary()</code>
 	 * on any temporary LOBs.
-	 *
 	 * <p>This method can be overridden by sublcasses if different behavior is desired.
 	 * @param con the connection to be usde for initilization
 	 * @param lob the LOB to initialize
 	 */
 	protected void releaseResourcesAfterRead(Connection con, Object lob) {
-		if (releaseResourcesAfterRead) {
+		if (this.releaseResourcesAfterRead) {
 			initOracleDriverClasses(con);
 			Boolean temporary = Boolean.FALSE;
 			try {
 				/*
-				if (((BLOB)lob.isTemporary() {
+				if (((BLOB) lob.isTemporary() {
 				*/
 				Method isTemporary = lob.getClass().getMethod("isTemporary");
 				temporary = (Boolean) isTemporary.invoke(lob);
 				if (temporary) {
 					/*
-					((BLOB)lob).freeTemporary();
+					((BLOB) lob).freeTemporary();
 					*/
 					Method freeTemporary = lob.getClass().getMethod("freeTemporary");
 					freeTemporary.invoke(lob);
 				}
 				else {
 					/*
-					if (((BLOB)lob.isOpen() {
+					if (((BLOB) lob.isOpen() {
 					*/
 					Method isOpen = lob.getClass().getMethod("isOpen");
 					Boolean open = (Boolean) isOpen.invoke(lob);
 					if (open) {
 						/*
-						((BLOB)lob).close();
+						((BLOB) lob).close();
 						*/
 						Method close = lob.getClass().getMethod("close");
 						close.invoke(lob);
@@ -357,6 +350,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 			}
 		}
 	}
+
 
 	/**
 	 * LobCreator implementation for Oracle databases.
@@ -529,8 +523,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 		protected Connection getOracleConnection(PreparedStatement ps)
 				throws SQLException, ClassNotFoundException {
 
-			return (nativeJdbcExtractor != null) ?
-					nativeJdbcExtractor.getNativeConnectionFromStatement(ps) : ps.getConnection();
+			return (nativeJdbcExtractor != null ?
+					nativeJdbcExtractor.getNativeConnectionFromStatement(ps) : ps.getConnection());
 		}
 
 		/**

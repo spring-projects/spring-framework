@@ -5,6 +5,7 @@ Bundle-ManifestVersion: 2
 Import-Package: 
  com.ibm.websphere.rsadapter;version="0";resolution:=optional,
  com.ibm.ws.rsadapter.jdbc;version="0";resolution:=optional,
+ oracle.jdbc;version="0";resolution:=optional,
  oracle.sql;version="0";resolution:=optional,
  org.h2;version="[1.8.0, 2.0.0)";resolution:=optional,
  org.hsqldb;version="[1.0.0, 2.0.0)";resolution:=optional,
