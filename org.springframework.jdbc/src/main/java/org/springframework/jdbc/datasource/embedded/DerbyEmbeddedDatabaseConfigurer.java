@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -43,10 +42,14 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 
 	// Error code that indicates successful shutdown
 	private static final String SHUTDOWN_CODE = "08006";
+
 	private static final boolean IS_AT_LEAST_DOT_SIX = new EmbeddedDriver().getMinorVersion() >= 6;
-	private static final String SHUTDOWN_COMMAND = String.format("%s=true", IS_AT_LEAST_DOT_SIX ? "drop" : "shutdown");
+
+	private static final String SHUTDOWN_COMMAND =
+			String.format("%s=true", IS_AT_LEAST_DOT_SIX ? "drop" : "shutdown");
 
 	private static DerbyEmbeddedDatabaseConfigurer INSTANCE;
+
 
 	/**
 	 * Get the singleton {@link DerbyEmbeddedDatabaseConfigurer} instance.
@@ -75,32 +78,25 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 
 	public void shutdown(DataSource dataSource, String databaseName) {
 		try {
-			new EmbeddedDriver().connect(String.format(URL_TEMPLATE, databaseName, SHUTDOWN_COMMAND), new Properties());
-		} catch (SQLException ex) {
-
+			new EmbeddedDriver().connect(
+					String.format(URL_TEMPLATE, databaseName, SHUTDOWN_COMMAND), new Properties());
+		}
+		catch (SQLException ex) {
 			if (!SHUTDOWN_CODE.equals(ex.getSQLState())) {
 				logger.warn("Could not shutdown in-memory Derby database", ex);
 				return;
 			}
-
 			if (!IS_AT_LEAST_DOT_SIX) {
-				purgeDatabase(databaseName);
+				// Explicitly purge the in-memory database, to prevent it
+				// from hanging around after being shut down.
+				try {
+					VFMemoryStorageFactory.purgeDatabase(new File(databaseName).getCanonicalPath());
+				}
+				catch (IOException ex2) {
+					logger.warn("Could not purge in-memory Derby database", ex2);
+				}
 			}
 		}
 	}
 
-	/**
-	 * Purge the in-memory database, to prevent it from hanging around after
-	 * being shut down.
-	 */
-	private void purgeDatabase(String databaseName) {
-		// TODO: update this code once Derby adds a proper way to remove an in-memory db
-		// (see http://wiki.apache.org/db-derby/InMemoryBackEndPrimer for details)
-		try {
-			VFMemoryStorageFactory.purgeDatabase(new File(databaseName).getCanonicalPath());
-		}
-		catch (IOException ex) {
-			logger.warn("Could not purge in-memory Derby database", ex);
-		}
-	}
 }
