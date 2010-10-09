@@ -36,8 +36,8 @@ import org.springframework.util.StringUtils;
 /**
  * Populates a database from SQL scripts defined in external resources.
  *
- * <p>Call {@link #addScript(Resource)} to add a SQL script location.<br>
- * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.<br>
+ * <p>Call {@link #addScript(Resource)} to add a SQL script location.
+ * Call {@link #setSqlScriptEncoding(String)} to set the encoding for all added scripts.
  *
  * @author Keith Donald
  * @author Dave Syer
@@ -131,15 +131,17 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Execute the given SQL script. <p>The script will normally be loaded by classpath. There should be one statement
-	 * per line. Any semicolons will be removed. <b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * Execute the given SQL script.
+	 * <p>The script will normally be loaded by classpath. There should be one statement per line.
+	 * Any semicolons will be removed.
+	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param connection the JDBC Connection with which to perform JDBC operations
-	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from.
-	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error.
-	 * @param ignoreFailedDrops whether of not to continue in thw event of specifically an error on a <code>DROP</code>.
+	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from
+	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error
+	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a <code>DROP</code>
 	 */
-	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError, boolean ignoreFailedDrops)
-			throws SQLException {
+	private void executeSqlScript(Connection connection, EncodedResource resource,
+			boolean continueOnError, boolean ignoreFailedDrops) throws SQLException {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
@@ -170,14 +172,15 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					}
 				}
 				catch (SQLException ex) {
-					boolean dropStatement = statement.trim().toLowerCase().startsWith("drop");
+					boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Line " + lineNumber + " statement failed: " + statement, ex);
+							logger.debug("Failed to execute SQL script statement at line " + lineNumber +
+									" of resource " + resource + ": " + statement, ex);
 						}
 					}
 					else {
-						throw ex;
+						throw new ScriptStatementFailedException(statement, lineNumber, resource, ex);
 					}
 				}
 			}

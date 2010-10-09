@@ -88,7 +88,7 @@ public class DataSourceInitializer implements InitializingBean {
 					}
 				}
 			}
-			catch (SQLException ex) {
+			catch (Exception ex) {
 				throw new DataAccessResourceFailureException("Failed to populate database", ex);
 			}
 		}

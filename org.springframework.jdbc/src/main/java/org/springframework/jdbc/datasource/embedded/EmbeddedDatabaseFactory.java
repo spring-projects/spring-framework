@@ -161,7 +161,7 @@ public class EmbeddedDatabaseFactory {
 				}
 			}
 		}
-		catch (SQLException ex) {
+		catch (Exception ex) {
 			throw new DataAccessResourceFailureException("Failed to populate database", ex);
 		}
 	}
@@ -203,28 +203,28 @@ public class EmbeddedDatabaseFactory {
 			return this.dataSource.getConnection(username, password);
 		}
 
-		public int getLoginTimeout() throws SQLException {
-			return this.dataSource.getLoginTimeout();
-		}
-
 		public PrintWriter getLogWriter() throws SQLException {
 			return this.dataSource.getLogWriter();
-		}
-
-		public void setLoginTimeout(int seconds) throws SQLException {
-			this.dataSource.setLoginTimeout(seconds);
 		}
 
 		public void setLogWriter(PrintWriter out) throws SQLException {
 			this.dataSource.setLogWriter(out);
 		}
 
-		public boolean isWrapperFor(Class<?> iface) throws SQLException {
-			return this.dataSource.isWrapperFor(iface);
+		public int getLoginTimeout() throws SQLException {
+			return this.dataSource.getLoginTimeout();
+		}
+
+		public void setLoginTimeout(int seconds) throws SQLException {
+			this.dataSource.setLoginTimeout(seconds);
 		}
 
 		public <T> T unwrap(Class<T> iface) throws SQLException {
 			return this.dataSource.unwrap(iface);
+		}
+
+		public boolean isWrapperFor(Class<?> iface) throws SQLException {
+			return this.dataSource.isWrapperFor(iface);
 		}
 
 		public void shutdown() {
