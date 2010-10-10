@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,6 @@ public interface PathMatcher {
 	 * variables are expressed through curly brackets ('{' and '}').
 	 * <p>For example: For pattern "/hotels/{hotel}" and path "/hotels/1", this method will
 	 * return a map containing "hotel"->"1".
-	 *
 	 * @param pattern the path pattern, possibly containing URI templates
 	 * @param path the full path to extract template variables from
 	 * @return a map, containing variable names as keys; variables values as values
@@ -104,11 +103,12 @@ public interface PathMatcher {
 	Map<String, String> extractUriTemplateVariables(String pattern, String path);
 
 	/**
-	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness for that path.
-	 * <p>The full algorithm used depends on the underlying implementation, but generally, the returned
-	 * <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List, java.util.Comparator) sort} a
-	 * list so that more specific patterns (for that come before generic patterns.
-	 *
+	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns
+	 * in order of explicitness for that path.
+	 * <p>The full algorithm used depends on the underlying implementation, but generally,
+	 * the returned <code>Comparator</code> will
+	 * {@linkplain java.util.Collections#sort(java.util.List, java.util.Comparator) sort}
+	 * a list so that more specific patterns come before generic patterns.
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
 	 */
@@ -117,11 +117,11 @@ public interface PathMatcher {
 	/**
 	 * Combines two patterns into a new pattern that is returned.
 	 * <p>The full algorithm used for combining the two pattern depends on the underlying implementation.
-	 *
 	 * @param pattern1 the first pattern
 	 * @param pattern2 the second pattern
 	 * @return the combination of the two patterns
 	 * @throws IllegalArgumentException when the two patterns cannot be combined
 	 */
 	String combine(String pattern1, String pattern2);
+
 }
