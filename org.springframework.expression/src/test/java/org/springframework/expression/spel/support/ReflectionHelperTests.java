@@ -25,6 +25,7 @@ import java.util.List;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
@@ -36,8 +37,6 @@ import org.springframework.expression.spel.SpelUtilities;
 import org.springframework.expression.spel.ast.FormatHelper;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgsMatchKind;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.MethodParameter;
 
 /**
  * Tests for any helper code.
@@ -99,7 +98,7 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 	public void testTypedValue() {
 		TypedValue tValue = new TypedValue("hello");
 		Assert.assertEquals(String.class,tValue.getTypeDescriptor().getType());
-		Assert.assertEquals("TypedValue: hello of [TypeDescriptor java.lang.String]",tValue.toString());
+		Assert.assertEquals("TypedValue: 'hello' of [java.lang.String]",tValue.toString());
 	}
 	
 	@Test
