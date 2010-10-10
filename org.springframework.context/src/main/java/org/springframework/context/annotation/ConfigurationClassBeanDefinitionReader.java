@@ -118,11 +118,9 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
-		
 		for (ConfigurationClassMethod method : configClass.getMethods()) {
 			loadBeanDefinitionsForModelMethod(method);
 		}
-		
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 	}
 
@@ -139,7 +137,7 @@ class ConfigurationClassBeanDefinitionReader {
 		GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
 		String className = configClass.getMetadata().getClassName();
 		configBeanDef.setBeanClassName(className);
-		if(checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
+		if (checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
 			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef, this.registry);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
@@ -160,8 +158,8 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
-	 * Reads a particular {@link ConfigurationClassMethod}, registering bean definitions with
-	 * the BeanDefinitionRegistry based on its contents.
+	 * Reads a particular {@link ConfigurationClassMethod}, registering bean definitions
+	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForModelMethod(ConfigurationClassMethod method) {
 		ConfigurationClass configClass = method.getConfigurationClass();
