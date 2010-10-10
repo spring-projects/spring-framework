@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.util;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * PathMatcher implementation for Ant-style path patterns. Examples are provided below.
@@ -53,10 +53,12 @@ public class AntPathMatcher implements PathMatcher {
 
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
 
+
 	/** Set the path separator to use for pattern parsing. Default is "/", as in Ant. */
 	public void setPathSeparator(String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 	}
+
 
 	public boolean isPattern(String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
@@ -70,19 +72,18 @@ public class AntPathMatcher implements PathMatcher {
 		return doMatch(pattern, path, false, null);
 	}
 
+
 	/**
 	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
-	 *
 	 * @param pattern the pattern to match against
 	 * @param path the path String to test
-	 * @param fullMatch whether a full pattern match is required (else a pattern match as far as the given base path goes
-	 * is sufficient)
+	 * @param fullMatch whether a full pattern match is required (else a pattern match
+	 * as far as the given base path goes is sufficient)
 	 * @return <code>true</code> if the supplied <code>path</code> matched, <code>false</code> if it didn't
 	 */
-	protected boolean doMatch(String pattern,
-			String path,
-			boolean fullMatch,
+	protected boolean doMatch(String pattern, String path, boolean fullMatch,
 			Map<String, String> uriTemplateVariables) {
+
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
@@ -210,7 +211,6 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Tests whether or not a string matches against a pattern. The pattern may contain two special characters:<br> '*'
 	 * means zero or more characters<br> '?' means one and only one character
-	 *
 	 * @param pattern pattern to match against. Must not be <code>null</code>.
 	 * @param str string which must be matched against the pattern. Must not be <code>null</code>.
 	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
@@ -271,9 +271,11 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Combines two patterns into a new pattern that is returned. <p>This implementation simply concatenates the two
-	 * patterns, unless the first pattern contains a file extension match (such as {@code *.html}. In that case, the second
-	 * pattern should be included in the first, or an {@code IllegalArgumentException} is thrown. <p>For example: <table>
+	 * Combines two patterns into a new pattern that is returned.
+	 * <p>This implementation simply concatenates the two patterns, unless the first pattern
+	 * contains a file extension match (such as {@code *.html}. In that case, the second pattern
+	 * should be included in the first, or an {@code IllegalArgumentException} is thrown.
+	 * <p>For example: <table>
 	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr> <tr><td>/hotels</td><td>{@code
 	 * null}</td><td>/hotels</td></tr> <tr><td>{@code null}</td><td>/hotels</td><td>/hotels</td></tr>
 	 * <tr><td>/hotels</td><td>/bookings</td><td>/hotels/bookings</td></tr> <tr><td>/hotels</td><td>bookings</td><td>/hotels/bookings</td></tr>
@@ -282,7 +284,6 @@ public class AntPathMatcher implements PathMatcher {
 	 * <tr><td>/hotels/&#42;&#42;</td><td>{hotel}</td><td>/hotels/&#42;&#42;/{hotel}</td></tr>
 	 * <tr><td>/*.html</td><td>/hotels.html</td><td>/hotels.html</td></tr> <tr><td>/*.html</td><td>/hotels</td><td>/hotels.html</td></tr>
 	 * <tr><td>/*.html</td><td>/*.txt</td><td>IllegalArgumentException</td></tr> </table>
-	 *
 	 * @param pattern1 the first pattern
 	 * @param pattern2 the second pattern
 	 * @return the combination of the two patterns
@@ -354,22 +355,20 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
-	 *
 	 * <p>The returned <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List,
 	 * java.util.Comparator) sort} a list so that more specific patterns (without uri templates or wild cards) come before
 	 * generic patterns. So given a list with the following patterns: <ol> <li><code>/hotels/new</code></li>
 	 * <li><code>/hotels/{hotel}</code></li> <li><code>/hotels/*</code></li> </ol> the returned comparator will sort this
 	 * list so that the order will be as indicated.
-	 *
 	 * <p>The full path given as parameter is used to test for exact matches. So when the given path is {@code /hotels/2},
 	 * the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
-	 *
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
 	 */
 	public Comparator<String> getPatternComparator(String path) {
 		return new AntPatternComparator(path);
 	}
+
 
 	private static class AntPatternComparator implements Comparator<String> {
 
