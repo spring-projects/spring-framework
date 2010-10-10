@@ -17,17 +17,19 @@
 package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Constructor;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.MethodParameter;
 
 /**
  * A constructor resolver that uses reflection to locate the constructor that should be invoked
@@ -49,13 +51,24 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	 */
 	public ConstructorExecutor resolve(EvaluationContext context, String typename, List<TypeDescriptor> argumentTypes)
 			throws AccessException {
+
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = context.getTypeLocator().findType(typename);
 			Constructor[] ctors = type.getConstructors();
+
+			Arrays.sort(ctors, new Comparator<Constructor>() {
+				public int compare(Constructor c1, Constructor c2) {
+					int c1pl = c1.getParameterTypes().length;
+					int c2pl = c2.getParameterTypes().length;
+					return (new Integer(c1pl)).compareTo(c2pl);
+				}
+			});
+
 			Constructor closeMatch = null;
 			int[] argsToConvert = null;
 			Constructor matchRequiringConversion = null;
+
 			for (Constructor ctor : ctors) {
 				Class[] paramTypes = ctor.getParameterTypes();
 				List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);

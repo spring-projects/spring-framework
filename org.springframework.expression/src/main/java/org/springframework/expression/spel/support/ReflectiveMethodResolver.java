@@ -18,6 +18,8 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +35,13 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A method resolver that uses reflection to locate the method that should be invoked.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class ReflectiveMethodResolver implements MethodResolver {
@@ -58,31 +62,41 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 */
 	public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 			List<TypeDescriptor> argumentTypes) throws AccessException {
+
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
 			Method[] methods = type.getMethods();
 			
 			// If a filter is registered for this type, call it
-			MethodFilter methodfilter = (filters==null?null:filters.get(type));
-			if (methodfilter!=null) {
+			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
+			if (filter != null) {
 			    List<Method> methodsForFiltering = new ArrayList<Method>();
 			    for (Method method: methods) {
 			    	methodsForFiltering.add(method);
 			    }
-				List<Method> methodsFiltered = methodfilter.filter(methodsForFiltering);
-				if (methodsFiltered == null || methodsFiltered.size()==0) {
+				List<Method> methodsFiltered = filter.filter(methodsForFiltering);
+				if (CollectionUtils.isEmpty(methodsFiltered)) {
 					methods = NO_METHODS;
 				}
 				else {
 					methods = methodsFiltered.toArray(new Method[methodsFiltered.size()]);
 				}
 			}
-			
+
+			Arrays.sort(methods, new Comparator<Method>() {
+				public int compare(Method m1, Method m2) {
+					int m1pl = m1.getParameterTypes().length;
+					int m2pl = m2.getParameterTypes().length;
+					return (new Integer(m1pl)).compareTo(m2pl);
+				}
+			});
+
 			Method closeMatch = null;
 			int[] argsToConvert = null;
-			boolean multipleOptions = false;
 			Method matchRequiringConversion = null;
+			boolean multipleOptions = false;
+
 			for (Method method : methods) {
 				if (method.isBridge()) {
 					continue;
@@ -139,7 +153,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
 		if (this.filters == null) {
-			this.filters = new HashMap<Class<?>,MethodFilter>();
+			this.filters = new HashMap<Class<?>, MethodFilter>();
 		}
 		if (filter == null) {
 			this.filters.remove(type);
