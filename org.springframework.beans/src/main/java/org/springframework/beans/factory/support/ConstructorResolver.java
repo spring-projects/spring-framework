@@ -466,7 +466,7 @@ class ConstructorResolver {
 								this.beanFactory.logger.trace("Ignoring factory method [" + candidate +
 										"] of bean '" + beanName + "': " + ex);
 							}
-							if (i == candidates.length - 1 && factoryMethodToUse == null) {
+							if (i == candidates.length - 1 && argsHolderToUse == null) {
 								if (causes != null) {
 									for (Exception cause : causes) {
 										this.beanFactory.onSuppressedException(cause);
@@ -547,7 +547,7 @@ class ConstructorResolver {
 						ambiguousFactoryMethods);
 			}
 
-			if (explicitArgs == null) {
+			if (explicitArgs == null && argsHolderToUse != null) {
 				argsHolderToUse.storeCache(mbd, factoryMethodToUse);
 			}
 		}
