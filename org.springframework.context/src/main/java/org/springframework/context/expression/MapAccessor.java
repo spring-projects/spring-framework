@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,17 @@ import org.springframework.expression.TypedValue;
 public class MapAccessor implements PropertyAccessor {
 
 	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-		return (((Map) target).containsKey(name));
+		Map map = (Map) target;
+		return map.containsKey(name);
 	}
 
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		return new TypedValue(((Map) target).get(name));
+		Map map = (Map) target;
+		Object value = map.get(name);
+		if (value == null && !map.containsKey(name)) {
+			throw new MapAccessException(name);
+		}
+		return new TypedValue(value);
 	}
 
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -47,11 +53,32 @@ public class MapAccessor implements PropertyAccessor {
 
 	@SuppressWarnings("unchecked")
 	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-		((Map) target).put(name, newValue);
+		Map map = (Map) target;
+		map.put(name, newValue);
 	}
 
 	public Class[] getSpecificTargetClasses() {
-		return new Class[] { Map.class };
+		return new Class[] {Map.class};
 	}
-	
+
+
+	/**
+	 * Exception thrown from <code>read</code> in order to reset a cached
+	 * PropertyAccessor, allowing other accessors to have a try.
+	 */
+	private static class MapAccessException extends AccessException {
+
+		private final String key;
+
+		public MapAccessException(String key) {
+			super(null);
+			this.key = key;
+		}
+
+		@Override
+		public String getMessage() {
+			return "Map does not contain a value for key '" + this.key + "'";
+		}
+	}
+
 }
