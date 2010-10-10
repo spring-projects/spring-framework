@@ -89,10 +89,12 @@ public class HandlerMethodResolver {
 							(bridgedMethod == specificMethod || !isHandlerMethod(bridgedMethod))) {
 						handlerMethods.add(specificMethod);
 					}
-					else if (method.isAnnotationPresent(InitBinder.class)) {
+					else if (isInitBinderMethod(specificMethod) &&
+							(bridgedMethod == specificMethod || !isInitBinderMethod(bridgedMethod))) {
 						initBinderMethods.add(specificMethod);
 					}
-					else if (method.isAnnotationPresent(ModelAttribute.class)) {
+					else if (isModelAttributeMethod(specificMethod) &&
+							(bridgedMethod == specificMethod || !isModelAttributeMethod(bridgedMethod))) {
 						modelAttributeMethods.add(specificMethod);
 					}
 				}
@@ -109,6 +111,14 @@ public class HandlerMethodResolver {
 
 	protected boolean isHandlerMethod(Method method) {
 		return AnnotationUtils.findAnnotation(method, RequestMapping.class) != null;
+	}
+
+	protected boolean isInitBinderMethod(Method method) {
+		return AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
+	}
+
+	protected boolean isModelAttributeMethod(Method method) {
+		return AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null;
 	}
 
 
