@@ -76,6 +76,8 @@ public class TypeDescriptor {
 
 	private Field field;
 
+	private int fieldNestingLevel = 1;
+
 	private Object value;
 
 	private TypeDescriptor elementType;
@@ -130,6 +132,19 @@ public class TypeDescriptor {
 	public TypeDescriptor(Field field, Class<?> type) {
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
+		this.type = type;
+	}
+
+	/**
+	 * Create a new type descriptor for a field.
+	 * Use this constructor when a target conversion point originates from a field.
+	 * @param field the field to wrap
+	 * @param type the specific type to expose (may be an array/collection element)
+	 */
+	private TypeDescriptor(Field field, int nestingLevel, Class<?> type) {
+		Assert.notNull(field, "Field must not be null");
+		this.field = field;
+		this.fieldNestingLevel = nestingLevel;
 		this.type = type;
 	}
 
@@ -397,10 +412,12 @@ public class TypeDescriptor {
 			return TypeDescriptor.UNKNOWN;
 		}
 		else if (this.methodParameter != null) {
-			return new TypeDescriptor(this.methodParameter, elementType);
+			MethodParameter nested = new MethodParameter(this.methodParameter);
+			nested.increaseNestingLevel();
+			return new TypeDescriptor(nested, elementType);
 		}
 		else if (this.field != null) {
-			return new TypeDescriptor(this.field, elementType);
+			return new TypeDescriptor(this.field, this.fieldNestingLevel + 1, elementType);
 		}
 		else {
 			return TypeDescriptor.valueOf(elementType);
@@ -434,7 +451,7 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * A textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages
+	 * A textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages.
 	 */
 	public String asString() {
 		return toString();
@@ -442,28 +459,22 @@ public class TypeDescriptor {
 
 	public String toString() {
 		if (this == TypeDescriptor.NULL) {
-			return "[TypeDescriptor.NULL]";
+			return "null";
 		}
 		else {
 			StringBuilder builder = new StringBuilder();
-			builder.append("[TypeDescriptor ");
 			Annotation[] anns = getAnnotations();
 			for (Annotation ann : anns) {
 				builder.append("@").append(ann.annotationType().getName()).append(' ');
 			}
 			builder.append(ClassUtils.getQualifiedName(getType()));
 			if (isMap()) {
-				Class<?> mapKeyType = getMapKeyType();
-				Class<?> valueKeyType = getMapValueType();
-				builder.append("<").append(mapKeyType != null ? ClassUtils.getQualifiedName(mapKeyType) : "?");
-				builder.append(", ").append(valueKeyType != null ? ClassUtils.getQualifiedName(valueKeyType) : "?");
-				builder.append(">");
+				builder.append("<").append(getMapKeyTypeDescriptor());
+				builder.append(", ").append(getMapValueTypeDescriptor()).append(">");
 			}
 			else if (isCollection()) {
-				Class<?> elementType = getElementType();
-				builder.append("<").append(elementType != null ? ClassUtils.getQualifiedName(elementType) : "?").append(">");
+				builder.append("<").append(getElementTypeDescriptor()).append(">");
 			}
-			builder.append("]");
 			return builder.toString();
 		}
 	}
@@ -486,7 +497,7 @@ public class TypeDescriptor {
 	@SuppressWarnings("unchecked")
 	private Class<?> resolveCollectionElementType() {
 		if (this.field != null) {
-			return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
+			return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.fieldNestingLevel);
 		}
 		else if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
@@ -497,7 +508,10 @@ public class TypeDescriptor {
 				return elementType;
 			}
 		}
-        return (this.type != null ? GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type) : null);
+        else if (this.type != null) {
+			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type);
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -514,7 +528,10 @@ public class TypeDescriptor {
 				return keyType;
 			}
 		}
-		return (this.type != null && isMap() ? GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type) : null);
+		else if (this.type != null && isMap()) {
+			return GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type);
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -531,7 +548,10 @@ public class TypeDescriptor {
 				return valueType;
 			}
 		}
-		return (isMap() && this.type != null ? GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type) : null);
+		else if (this.type != null && isMap()) {
+			return GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type);
+		}
+		return null;
 	}
 
 	private Annotation[] resolveAnnotations() {

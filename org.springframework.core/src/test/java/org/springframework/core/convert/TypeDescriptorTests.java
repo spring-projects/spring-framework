@@ -16,16 +16,16 @@
 
 package org.springframework.core.convert;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
 /**
@@ -33,44 +33,75 @@ import org.junit.Test;
  */
 public class TypeDescriptorTests {
 
-	List<String> listOfString;
-	int[] intArray;
-	List<String>[] arrayOfListOfString;
+	public List<String> listOfString;
+
+	public List<List<String>> listOfListOfString = new ArrayList<List<String>>();
+
+	public List<List> listOfListOfUnknown = new ArrayList<List>();
+
+	public int[] intArray;
+
+	public List<String>[] arrayOfListOfString;
+
+	public List<Integer> listField = new ArrayList<Integer>();
+
+	public Map<String, Integer> mapField = new HashMap<String, Integer>();
+
 
 	@Test
-	public void listDescriptors() throws Exception {
+	public void listDescriptor() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("listOfString"));
 		assertFalse(typeDescriptor.isArray());
-		assertEquals(List.class,typeDescriptor.getType());
-		assertEquals(String.class,typeDescriptor.getElementType());
+		assertEquals(List.class, typeDescriptor.getType());
+		assertEquals(String.class, typeDescriptor.getElementType());
 		// TODO caught shorten these names but it is OK that they are fully qualified for now
-		assertEquals("[TypeDescriptor java.util.List<java.lang.String>]",typeDescriptor.asString());
+		assertEquals("java.util.List<java.lang.String>", typeDescriptor.asString());
 	}
-	
+
 	@Test
-	public void arrayTypeDescriptors() throws Exception {
+	public void listOfListOfStringDescriptor() throws Exception {
+		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("listOfListOfString"));
+		assertFalse(typeDescriptor.isArray());
+		assertEquals(List.class, typeDescriptor.getType());
+		assertEquals(List.class, typeDescriptor.getElementType());
+		assertEquals(String.class, typeDescriptor.getElementTypeDescriptor().getElementType());
+		assertEquals("java.util.List<java.util.List<java.lang.String>>", typeDescriptor.asString());
+	}
+
+	@Test
+	public void listOfListOfUnknownDescriptor() throws Exception {
+		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("listOfListOfUnknown"));
+		assertFalse(typeDescriptor.isArray());
+		assertEquals(List.class, typeDescriptor.getType());
+		assertEquals(List.class, typeDescriptor.getElementType());
+		assertEquals(Object.class, typeDescriptor.getElementTypeDescriptor().getElementType());
+		assertEquals("java.util.List<java.util.List<java.lang.Object>>", typeDescriptor.asString());
+	}
+
+	@Test
+	public void arrayTypeDescriptor() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("intArray"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
-		assertEquals("[TypeDescriptor int[]]",typeDescriptor.asString());
+		assertEquals("int[]",typeDescriptor.asString());
 	}
 
 	@Test
-	public void buildingArrayTypeDescriptors() throws Exception {
+	public void buildingArrayTypeDescriptor() throws Exception {
 		TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(int[].class);
 		assertTrue(typeDescriptor.isArray());
-		assertEquals(Integer.TYPE,typeDescriptor.getElementType());
+		assertEquals(Integer.TYPE ,typeDescriptor.getElementType());
 	}
-	
+
 	@Test
-	public void complexTypeDescriptors() throws Exception {
+	public void complexTypeDescriptor() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("arrayOfListOfString"));
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementType());
 		// TODO asc notice that the type of the list elements is lost: typeDescriptor.getElementType() should return a TypeDescriptor
-		assertEquals("[TypeDescriptor java.util.List[]]",typeDescriptor.asString());
+		assertEquals("java.util.List[]",typeDescriptor.asString());
 	}
-	
+
 	@Test
 	public void testEquals() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.valueOf(String.class);
@@ -94,9 +125,5 @@ public class TypeDescriptorTests {
 		TypeDescriptor t12 = new TypeDescriptor(getClass().getField("mapField"));
 		assertEquals(t11, t12);
 	}
-	
-	public List<Integer> listField = new ArrayList<Integer>();
-	
-	public Map<String, Integer> mapField = new HashMap<String, Integer>();
 
 }
