@@ -160,7 +160,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		TypedValue contextObject = state.getActiveContextObject();
 		Object targetObject = contextObject.getValue();
 
-		if (targetObject == null && nullSafe) {
+		if (targetObject == null && this.nullSafe) {
 			return TypedValue.NULL;
 		}
 
@@ -188,7 +188,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canRead(eContext, contextObject.getValue(), name)) {
 						if (accessor instanceof ReflectivePropertyAccessor) {
-							accessor = ((ReflectivePropertyAccessor)accessor).createOptimalAccessor(eContext, contextObject.getValue(), name);
+							accessor = ((ReflectivePropertyAccessor) accessor).createOptimalAccessor(
+									eContext, contextObject.getValue(), name);
 						}
 						this.cachedReadAccessor = accessor;
 						return accessor.read(eContext, contextObject.getValue(), name);
@@ -203,7 +204,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			throw new SpelEvaluationException(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
 		}
 		else {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, name,
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, name,
 					FormatHelper.formatClassNameForMessage(contextObjectClass));
 		}
 	}
