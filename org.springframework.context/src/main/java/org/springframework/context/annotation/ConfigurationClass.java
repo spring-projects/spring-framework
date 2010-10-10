@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,8 +107,7 @@ final class ConfigurationClass {
 
 
 	public void validate(ProblemReporter problemReporter) {
-		
-		// a @Bean method may only be overloaded through inheritance. No single
+		// An @Bean method may only be overloaded through inheritance. No single
 		// @Configuration class may declare two @Bean methods with the same name.
 		final char hashDelim = '#';
 		Map<String, Integer> methodNameCounts = new HashMap<String, Integer>();
@@ -134,9 +133,10 @@ final class ConfigurationClass {
 			if (getMetadata().isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
-			for (ConfigurationClassMethod method : this.methods) {
-				method.validate(problemReporter);
-			}
+		}
+
+		for (ConfigurationClassMethod method : this.methods) {
+			method.validate(problemReporter);
 		}
 	}
 
@@ -152,7 +152,10 @@ final class ConfigurationClass {
 		return getMetadata().getClassName().hashCode();
 	}
 
-	/** Configuration classes must be non-final to accommodate CGLIB subclassing. */
+
+	/**
+	 * Configuration classes must be non-final to accommodate CGLIB subclassing.
+	 */
 	private class FinalConfigurationProblem extends Problem {
 
 		public FinalConfigurationProblem() {
@@ -161,7 +164,10 @@ final class ConfigurationClass {
 		}
 	}
 
-	/** Bean methods on configuration classes may only be overloaded through inheritance. */
+
+	/**
+	 * Bean methods on configuration classes may only be overloaded through inheritance.
+	 */
 	private class BeanMethodOverloadingProblem extends Problem {
 
 		public BeanMethodOverloadingProblem(String methodName, int count) {
@@ -171,5 +177,4 @@ final class ConfigurationClass {
 		}
 	}
 	
-
 }

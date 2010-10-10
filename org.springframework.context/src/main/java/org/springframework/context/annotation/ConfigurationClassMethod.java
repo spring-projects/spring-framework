@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.context.annotation;
-
-import static java.lang.String.format;
 
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
@@ -54,18 +52,25 @@ final class ConfigurationClassMethod {
 	}
 
 	public Location getResourceLocation() {
-		return new Location(this.configurationClass.getResource(), metadata);
+		return new Location(this.configurationClass.getResource(), this.metadata);
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-		if (this.configurationClass.getMetadata().isAnnotated(Configuration.class.getName()) && !getMetadata().isOverridable()) {
-			problemReporter.error(new NonOverridableMethodError());
+		if (this.configurationClass.getMetadata().isAnnotated(Configuration.class.getName())) {
+			if (!getMetadata().isOverridable()) {
+				problemReporter.error(new NonOverridableMethodError());
+			}
+		}
+		else {
+			if (getMetadata().isStatic()) {
+				problemReporter.error(new StaticMethodError());
+			}
 		}
 	}
 	
 	@Override
 	public String toString() {
-		return format("[%s:name=%s,declaringClass=%s]",
+		return String.format("[%s:name=%s,declaringClass=%s]",
 				this.getClass().getSimpleName(), this.getMetadata().getMethodName(), this.getMetadata().getDeclaringClassName());
 	}
 
@@ -81,5 +86,16 @@ final class ConfigurationClassMethod {
 		}
 	}
 
+
+	/**
+	 * {@link Bean} methods must at least not be static in the non-CGLIB case.
+	 */
+	private class StaticMethodError extends Problem {
+
+		public StaticMethodError() {
+			super(String.format("Method '%s' must not be static; remove the method's static modifier to continue",
+					getMetadata().getMethodName()), getResourceLocation());
+		}
+	}
 
 }
