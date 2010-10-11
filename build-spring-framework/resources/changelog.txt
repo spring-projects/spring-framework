@@ -6,16 +6,21 @@ http://www.springsource.org
 Changes in version 3.0.5 (2010-10-13)
 -------------------------------------
 
+* added core serializer abstraction with default implementations using Java Serialization
 * consistent use of JDK 1.5's "ThreadLocal.remove()" over "ThreadLocal.set(null)"
+* fixed JodaTimeContextHolder to use a non-inheritable ThreadLocal and expose a reset method
 * revised "ClassUtils.isAssignable" semantics to cover primitives vs wrappers in both directions
 * ConversionService protects itself against infinite recursion in ObjectToCollectionConverter
 * fixed TypeDescriptor to correctly resolve nested collections and their element types
 * ApplicationContext registers context-specific ClassArrayEditor for its bean ClassLoader
 * refined ApplicationContext singleton processing to not fail for manually registered null instances
 * fixed ApplicationContext event processing for repeated invocations to non-singleton listener beans
+* optimized @Bean error messages for static factory methods as well as for argument type mismatches
 * modified expression parsing to pass full TypeDescriptor context through to ConversionService calls
 * adapted expression parser's Constructor/MethodResolver to accept TypeDescriptors instead of raw types
 * SpEL supports projection on any kind of Collection (not just on Lists and arrays)
+* SpEL MapAccessor consistently rejects "target.key" style access to Maps if no such key is found
+* SpEL method invocations prefer method with fewest parameters (e.g. no-arg over vararg)
 * AspectJExpressionPointcut uses bean ClassLoader for initializing the AspectJ pointcut parser
 * JDBC bundle uses local ClassLoader as bean ClassLoader for "sql-error-codes.xml" parsing
 * EmbeddedDatabaseFactory shuts down database when failing to populate it in "initDatabase()"
