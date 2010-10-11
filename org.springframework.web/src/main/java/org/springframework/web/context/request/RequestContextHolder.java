@@ -24,7 +24,9 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Holder class to expose the web request in the form of a thread-bound
- * {@link RequestAttributes} object.
+ * {@link RequestAttributes} object. The request will be inherited
+ * by any child threads spawned by the current thread if the
+ * <code>inheritable<code> flag is set to <code>true</code>.
  *
  * <p>Use {@link RequestContextListener} or
  * {@link org.springframework.web.filter.RequestContextFilter} to expose
@@ -73,18 +75,24 @@ public abstract class RequestContextHolder  {
 
 	/**
 	 * Bind the given RequestAttributes to the current thread.
-	 * @param attributes the RequestAttributes to expose
+	 * @param attributes the RequestAttributes to expose,
+	 * or <code>null</code> to reset the thread-bound context
 	 * @param inheritable whether to expose the RequestAttributes as inheritable
 	 * for child threads (using an {@link java.lang.InheritableThreadLocal})
 	 */
 	public static void setRequestAttributes(RequestAttributes attributes, boolean inheritable) {
-		if (inheritable) {
-			inheritableRequestAttributesHolder.set(attributes);
-			requestAttributesHolder.remove();
+		if (attributes == null) {
+			resetRequestAttributes();
 		}
 		else {
-			requestAttributesHolder.set(attributes);
-			inheritableRequestAttributesHolder.remove();
+			if (inheritable) {
+				inheritableRequestAttributesHolder.set(attributes);
+				requestAttributesHolder.remove();
+			}
+			else {
+				requestAttributesHolder.set(attributes);
+				inheritableRequestAttributesHolder.remove();
+			}
 		}
 	}
 
