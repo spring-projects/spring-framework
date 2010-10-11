@@ -20,27 +20,40 @@ import java.util.Locale;
 
 import org.joda.time.format.DateTimeFormatter;
 
-import org.springframework.core.NamedInheritableThreadLocal;
+import org.springframework.core.NamedThreadLocal;
 
 /**
  * A holder for a thread-local user {@link JodaTimeContext}.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public final class JodaTimeContextHolder {
 
 	private static final ThreadLocal<JodaTimeContext> jodaTimeContextHolder =
-			new NamedInheritableThreadLocal<JodaTimeContext>("JodaTime Context");
+			new NamedThreadLocal<JodaTimeContext>("JodaTime Context");
 
 
 	/**
-	 * Associate the given JodaTimeContext with the current thread.
-	 * @param context the current JodaTimeContext, or <code>null</code> to clear
-	 * the thread-bound context
+	 * Reset the JodaTimeContext for the current thread.
 	 */
-	public static void setJodaTimeContext(JodaTimeContext context) {
-		jodaTimeContextHolder.set(context);
+	public static void resetJodaTimeContext() {
+		jodaTimeContextHolder.remove();
+	}
+
+	/**
+	 * Associate the given JodaTimeContext with the current thread.
+	 * @param jodaTimeContext the current JodaTimeContext,
+	 * or <code>null</code> to reset the thread-bound context
+	 */
+	public static void setJodaTimeContext(JodaTimeContext jodaTimeContext) {
+		if (jodaTimeContext == null) {
+			resetJodaTimeContext();
+		}
+		else {
+			jodaTimeContextHolder.set(jodaTimeContext);
+		}
 	}
 
 	/**

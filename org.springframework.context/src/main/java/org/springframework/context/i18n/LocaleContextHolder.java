@@ -24,7 +24,8 @@ import org.springframework.core.NamedThreadLocal;
 /**
  * Simple holder class that associates a LocaleContext instance
  * with the current thread. The LocaleContext will be inherited
- * by any child threads spawned by the current thread.
+ * by any child threads spawned by the current thread if the
+ * <code>inheritable<code> flag is set to <code>true</code>.
  *
  * <p>Used as a central holder for the current Locale in Spring,
  * wherever necessary: for example, in MessageSourceAccessor.
@@ -58,8 +59,7 @@ public abstract class LocaleContextHolder {
 	/**
 	 * Associate the given LocaleContext with the current thread,
 	 * <i>not</i> exposing it as inheritable for child threads.
-	 * @param localeContext the current LocaleContext, or <code>null</code> to reset
-	 * the thread-bound context
+	 * @param localeContext the current LocaleContext
 	 */
 	public static void setLocaleContext(LocaleContext localeContext) {
 		setLocaleContext(localeContext, false);
@@ -67,19 +67,24 @@ public abstract class LocaleContextHolder {
 
 	/**
 	 * Associate the given LocaleContext with the current thread.
-	 * @param localeContext the current LocaleContext, or <code>null</code> to reset
-	 * the thread-bound context
+	 * @param localeContext the current LocaleContext,
+	 * or <code>null</code> to reset the thread-bound context
 	 * @param inheritable whether to expose the LocaleContext as inheritable
 	 * for child threads (using an {@link java.lang.InheritableThreadLocal})
 	 */
 	public static void setLocaleContext(LocaleContext localeContext, boolean inheritable) {
-		if (inheritable) {
-			inheritableLocaleContextHolder.set(localeContext);
-			localeContextHolder.remove();
+		if (localeContext == null) {
+			resetLocaleContext();
 		}
 		else {
-			localeContextHolder.set(localeContext);
-			inheritableLocaleContextHolder.remove();
+			if (inheritable) {
+				inheritableLocaleContextHolder.set(localeContext);
+				localeContextHolder.remove();
+			}
+			else {
+				localeContextHolder.set(localeContext);
+				inheritableLocaleContextHolder.remove();
+			}
 		}
 	}
 
