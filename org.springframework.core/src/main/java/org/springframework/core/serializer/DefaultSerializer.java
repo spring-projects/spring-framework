@@ -21,8 +21,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import org.springframework.util.Assert;
-
 /**
  * Serializer that writes an object to an output stream using Java Serialization.
  * 
@@ -34,11 +32,13 @@ public class DefaultSerializer implements Serializer<Object> {
 
 	/**
 	 * Writes the source object to an output stream using Java Serialization.
-	 * Source object must implement {@link Serializable}.
+	 * The source object must implement {@link Serializable}.
 	 */
 	public void serialize(Object object, OutputStream outputStream) throws IOException {
-		Assert.isTrue(object instanceof Serializable, this.getClass().getName()
-				+ " requires a Serializable payload, but received [" + object.getClass().getName() + "]");
+		if (!(object instanceof Serializable)) {
+			throw new IllegalArgumentException(getClass().getSimpleName() + " requires a Serializable payload " +
+					"but received an object of type [" + object.getClass().getName() + "]");
+		}
 		ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
 		objectOutputStream.writeObject(object);
 		objectOutputStream.flush();

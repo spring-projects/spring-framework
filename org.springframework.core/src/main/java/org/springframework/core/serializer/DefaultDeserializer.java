@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
+import org.springframework.core.NestedIOException;
+
 /**
  * Deserializer that reads an input stream using Java Serialization.
  * 
@@ -30,19 +32,15 @@ import java.io.ObjectInputStream;
 public class DefaultDeserializer implements Deserializer<Object> { 
 
 	/**
-	 * Reads the input stream and deserializes into an object. 
+	 * Reads the input stream and deserializes into an object.
 	 */
 	public Object deserialize(InputStream inputStream) throws IOException {
-		ObjectInputStream objectInputStream = null;
+		ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 		try {
-			objectInputStream = new ObjectInputStream(inputStream);
 			return objectInputStream.readObject();
 		}
-		catch (ClassNotFoundException e) {
-			if (objectInputStream != null) {
-				objectInputStream.close();
-			}
-			throw new IOException(e.getMessage());
+		catch (ClassNotFoundException ex) {
+			throw new NestedIOException("Failed to deserialize object type", ex);
 		}
 	}
 

@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.core.serializer;
+package org.springframework.core.serializer.support;
 
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Root exception for serialization and deserialization exceptions.
- * 
+ * Wrapper for the native IOException (or similar) when a
+ * {@link org.springframework.core.serializer.Serializer} or
+ * {@link org.springframework.core.serializer.Deserializer} failed.
+ * Thrown by {@link SerializingConverter} and {@link DeserializingConverter}.
+ *
  * @author Gary Russell
+ * @author Juergen Hoeller
  * @since 3.0.5
  */
-@SuppressWarnings("serial")
-public abstract class SerializationException extends NestedRuntimeException {
+public class SerializationFailedException extends NestedRuntimeException {
 
 	/**
 	 * Construct a <code>SerializationException</code> with the specified detail message.
 	 * @param message the detail message
 	 */
-	public SerializationException(String message) {
+	public SerializationFailedException(String message) {
 		super(message);
 	}
 
@@ -41,7 +44,7 @@ public abstract class SerializationException extends NestedRuntimeException {
 	 * @param message the detail message
 	 * @param cause the nested exception
 	 */
-	public SerializationException(String message, Throwable cause) {
+	public SerializationFailedException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
