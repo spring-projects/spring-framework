@@ -12,11 +12,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * {@link org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer} that increments the maximum value of a given SQL Server table
- * with the equivalent of an auto-increment column. Note: If you use this class, your Derby key
+ * {@link org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer} that increments 
+ * the maximum value of a given Sybase SQL Server table
+ * with the equivalent of an auto-increment column. Note: If you use this class, your table key
  * column should <i>NOT</i> be defined as an IDENTITY column, as the sequence table does the job.
  *
- * <p>This class is inteded to be used with Sybase Adaptive Server.
+ * <p>This class is intended to be used with Sybase Adaptive Server.
  *
  * <p>The sequence is kept in a table. There should be one sequence table per
  * table that needs an auto-generated key.
@@ -89,7 +90,7 @@ public class SybaseMaxValueIncrementer extends AbstractColumnMaxValueIncrementer
 				this.valueCache = new long[getCacheSize()];
 				this.nextValueIndex = 0;
 				for (int i = 0; i < getCacheSize(); i++) {
-					stmt.executeUpdate("insert into " + getIncrementerName() + " values()");
+					stmt.executeUpdate(getIncrementStatement());
 					ResultSet rs = stmt.executeQuery("select @@identity");
 					try {
 						if (!rs.next()) {
@@ -113,6 +114,14 @@ public class SybaseMaxValueIncrementer extends AbstractColumnMaxValueIncrementer
 			}
 		}
 		return this.valueCache[this.nextValueIndex++];
+	}
+
+	/**
+	 * Statement to use to increment the "sequence" value. Can be overridden by sub-classes.
+	 * @return The SQL statement to use
+	 */
+	protected String getIncrementStatement() {
+		return "insert into " + getIncrementerName() + " values()";
 	}
 
 }
