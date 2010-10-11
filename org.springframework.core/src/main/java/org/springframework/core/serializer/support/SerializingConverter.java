@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.core.serializer;
+package org.springframework.core.serializer.support;
 
 import java.io.ByteArrayOutputStream;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.serializer.DefaultSerializer;
+import org.springframework.core.serializer.Serializer;
 import org.springframework.util.Assert;
 
 /**
- * A {@Link Converter} that delegates to a {@link Serializer} to convert an object to a byte array. 
- * 
+ * A {@Link Converter} that delegates to a {@link org.springframework.core.serializer.Serializer}
+ * to convert an object to a byte array.
+ *
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5
  */
 public class SerializingConverter implements Converter<Object, byte[]> {
 
-	private final Serializer<Object> serializer; 
+	private final Serializer<Object> serializer;
 
 
 	/**
@@ -44,7 +47,7 @@ public class SerializingConverter implements Converter<Object, byte[]> {
 	 * Create a SerializingConverter that delegates to the provided {@link Serializer}
 	 */
 	public SerializingConverter(Serializer<Object> serializer) {
-		Assert.notNull(serializer, "serializer must not be null");
+		Assert.notNull(serializer, "Serializer must not be null");
 		this.serializer = serializer;
 	}
 
@@ -58,8 +61,9 @@ public class SerializingConverter implements Converter<Object, byte[]> {
 			this.serializer.serialize(source, byteStream);
 			return byteStream.toByteArray();
 		}
-		catch (Exception e) {
-			throw new SerializationFailureException("failed to serialize object", e);
+		catch (Throwable ex) {
+			throw new SerializationFailedException("Failed to serialize object using " +
+					this.serializer.getClass().getSimpleName(), ex);
 		}
 	}
 

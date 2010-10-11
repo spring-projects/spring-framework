@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.core.serializer;
+package org.springframework.core.serializer.support;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.serializer.DefaultDeserializer;
+import org.springframework.core.serializer.Deserializer;
 import org.springframework.util.Assert;
 
 /**
- * A {@link Converter} that delegates to a {@link Deserializer} 
+ * A {@link Converter} that delegates to a {@link org.springframework.core.serializer.Deserializer}
  * to convert data in a byte array to an object.
- * 
+ *
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5
@@ -43,10 +44,10 @@ public class DeserializingConverter implements Converter<byte[], Object> {
 	}
 
 	/**
-	 * Create a DeserializingConverter that delegates to the provided {@link Deserializer}
+	 * Create a DeserializingConverter that delegates to the provided {@link Deserializer}.
 	 */
 	public DeserializingConverter(Deserializer<Object> deserializer) {
-		Assert.notNull(deserializer, "deserializer must not be null");
+		Assert.notNull(deserializer, "Deserializer must not be null");
 		this.deserializer = deserializer;
 	}
 
@@ -56,15 +57,10 @@ public class DeserializingConverter implements Converter<byte[], Object> {
 		try {
 			return this.deserializer.deserialize(byteStream);
 		}
-		catch (Exception e) {
-			try {
-				byteStream.close();
-			}
-			catch (IOException e1) { /* ignore */ }
-			throw new DeserializationFailureException(
-					"Failed to deserialize payload. " +
-					"Is the byte array a result of corresponding serialization for " + 
-					this.deserializer.getClass().getName() + "?", e);
+		catch (Throwable ex) {
+			throw new SerializationFailedException("Failed to deserialize payload. " +
+					"Is the byte array a result of corresponding serialization for " +
+					this.deserializer.getClass().getSimpleName() + "?", ex);
 		}
 	}
 

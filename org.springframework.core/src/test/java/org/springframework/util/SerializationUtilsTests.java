@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.serializer;
+package org.springframework.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,7 +24,7 @@ import java.math.BigInteger;
 
 import org.junit.Test;
 
-import org.springframework.core.serializer.SerializationUtils;
+import org.springframework.util.SerializationUtils;
 
 /**
  * Test for static utility to help with serialization.

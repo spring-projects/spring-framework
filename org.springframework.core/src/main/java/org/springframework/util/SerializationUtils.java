@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.serializer;
+package org.springframework.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,16 +23,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 /**
- * Static utility for serialization and deserialization.
- * 
+ * Static utilities for serialization and deserialization.
+ *
  * @author Dave Syer
  * @since 3.0.5
  */
 public abstract class SerializationUtils {
 
 	/**
-	 * Serialize the object provided.
-	 * 
+	 * Serialize the given object to a byte array.
 	 * @param object the object to serialize
 	 * @return an array of bytes representing the object in a portable fashion
 	 */
@@ -40,19 +39,20 @@ public abstract class SerializationUtils {
 		if (object == null) {
 			return null;
 		}
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			new ObjectOutputStream(stream).writeObject(object);
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(object);
+			oos.flush();
 		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("failed to serialize object of type: " + object.getClass(), e);
+		catch (IOException ex) {
+			throw new IllegalArgumentException("Failed to serialize object of type: " + object.getClass(), ex);
 		}
-		return stream.toByteArray();
+		return baos.toByteArray();
 	}
 
 	/**
 	 * Deserialize the byte array into an object.
-	 * 
 	 * @param bytes a serialized object
 	 * @return the result of deserializing the bytes
 	 */
@@ -61,13 +61,14 @@ public abstract class SerializationUtils {
 			return null;
 		}
 		try {
-			return new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
+			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+			return ois.readObject();
 		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("failed to deserialize object", e);
+		catch (IOException ex) {
+			throw new IllegalArgumentException("Failed to deserialize object", ex);
 		}
-		catch (ClassNotFoundException e) {
-			throw new IllegalStateException("failed to deserialize object type", e);
+		catch (ClassNotFoundException ex) {
+			throw new IllegalStateException("Failed to deserialize object type", ex);
 		}
 	}
 

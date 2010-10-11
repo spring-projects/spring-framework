@@ -16,20 +16,15 @@
 
 package org.springframework.core.serializer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.NotSerializableException;
 import java.io.Serializable;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.core.serializer.DeserializationFailureException;
-import org.springframework.core.serializer.DeserializingConverter;
-import org.springframework.core.serializer.SerializationFailureException;
-import org.springframework.core.serializer.SerializingConverter;
+import org.springframework.core.serializer.support.DeserializingConverter;
+import org.springframework.core.serializer.support.SerializationFailedException;
+import org.springframework.core.serializer.support.SerializingConverter;
 
 /**
  * @author Gary Russell
@@ -53,7 +48,7 @@ public class SerializationConverterTests {
 			toBytes.convert(new Object());
 			fail("Expected IllegalArgumentException");
 		}
-		catch (SerializationFailureException e) {
+		catch (SerializationFailedException e) {
 			assertNotNull(e.getCause());
 			assertTrue(e.getCause() instanceof IllegalArgumentException);
 		}
@@ -66,13 +61,13 @@ public class SerializationConverterTests {
 			toBytes.convert(new UnSerializable());
 			fail("Expected SerializationFailureException");
 		}
-		catch (SerializationFailureException e) {
+		catch (SerializationFailedException e) {
 			assertNotNull(e.getCause());
 			assertTrue(e.getCause() instanceof NotSerializableException);
 		}
 	}
 
-	@Test(expected = DeserializationFailureException.class)
+	@Test(expected = SerializationFailedException.class)
 	public void deserializationFailure() {
 		DeserializingConverter fromBytes = new DeserializingConverter();
 		fromBytes.convert("Junk".getBytes());

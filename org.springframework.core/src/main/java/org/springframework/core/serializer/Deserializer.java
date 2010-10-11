@@ -29,11 +29,14 @@ import java.io.InputStream;
 public interface Deserializer<T> {
 
 	/**
-	 * Read (assemble an object of type T) from an InputStream.
-	 * @param inputStream The InputStream.
+	 * Read (assemble) an object of type T from the given InputStream.
+	 * <p>Note: Implementations should not close the given InputStream
+	 * (or any decorators of that InputStream) but rather leave this up
+	 * to the caller.
+	 * @param inputStream the input stream
 	 * @return the deserialized object
-	 * @throws IOException in case of errors reading the stream
+	 * @throws IOException in case of errors reading from the stream
 	 */
-	public T deserialize(InputStream inputStream) throws IOException;
+	T deserialize(InputStream inputStream) throws IOException;
 
 }
