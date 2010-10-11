@@ -29,6 +29,7 @@ public final class ConverterNotFoundException extends ConversionException {
 
 	private final TypeDescriptor targetType;
 
+
 	/**
 	 * Creates a new conversion executor not found exception.
 	 * @param sourceType the source type requested to convert from
@@ -41,6 +42,7 @@ public final class ConverterNotFoundException extends ConversionException {
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 	}
+
 
 	/**
 	 * Returns the source type that was requested to convert from.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.core.convert;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Base class for exceptions thrown by the convert system.
+ * Base class for exceptions thrown by the conversion system.
  *
  * @author Keith Donald
  * @since 3.0 
@@ -29,18 +29,18 @@ public abstract class ConversionException extends NestedRuntimeException {
 	/**
 	 * Construct a new conversion exception.
 	 * @param message the exception message
-	 * @param cause the cause
 	 */
-	public ConversionException(String message, Throwable cause) {
-		super(message, cause);
+	public ConversionException(String message) {
+		super(message);
 	}
 
 	/**
 	 * Construct a new conversion exception.
 	 * @param message the exception message
+	 * @param cause the cause
 	 */
-	public ConversionException(String message) {
-		super(message);
+	public ConversionException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }
