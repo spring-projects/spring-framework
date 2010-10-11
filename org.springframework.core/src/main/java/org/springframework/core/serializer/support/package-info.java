@@ -5,5 +5,5 @@
  * Includes adapters to the Converter SPI.
  *
  */
-package org.springframework.core.io.support;
+package org.springframework.core.serializer.support;
 
