@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -172,7 +171,6 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 		ObjectOutputStream oos = createObjectOutputStream(decorateOutputStream(request, response, os));
 		try {
 			doWriteRemoteInvocationResult(result, oos);
-			oos.flush();
 		}
 		finally {
 			oos.close();
