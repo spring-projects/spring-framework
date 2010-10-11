@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public abstract class FileSystemUtils {
 			if (root.isDirectory()) {
 				File[] children = root.listFiles();
 				if (children != null) {
-					for (int i = 0; i < children.length; i++) {
-						deleteRecursively(children[i]);
+					for (File child : children) {
+						deleteRecursively(child);
 					}
 				}
 			}
@@ -77,9 +77,8 @@ public abstract class FileSystemUtils {
 			if (entries == null) {
 				throw new IOException("Could not list files in directory: " + src);
 			}
-			for (int i = 0; i < entries.length; i++) {
-				File file = entries[i];
-				doCopyRecursively(file, new File(dest, file.getName()));
+			for (File entry : entries) {
+				doCopyRecursively(entry, new File(dest, entry.getName()));
 			}
 		}
 		else if (src.isFile()) {
