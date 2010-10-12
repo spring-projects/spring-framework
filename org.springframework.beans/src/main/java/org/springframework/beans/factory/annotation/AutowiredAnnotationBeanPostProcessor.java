@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
@@ -528,11 +527,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		@Override
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
-			if (this.skip == null && this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
-				// Explicit value provided as part of the bean definition.
-				this.skip = Boolean.TRUE;
+			if (this.skip == null) {
+				this.skip = checkPropertySkipping(pvs);
 			}
-			if (this.skip != null && this.skip) {
+			if (this.skip) {
 				return;
 			}
 			Method method = (Method) this.member;
@@ -589,12 +587,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							arguments = resolveCachedArguments(beanName);
 						}
 					}
-				}
-				if (this.skip == null) {
-					if (this.pd != null && pvs instanceof MutablePropertyValues) {
-						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
-					}
-					this.skip = Boolean.FALSE;
 				}
 				if (arguments != null) {
 					ReflectionUtils.makeAccessible(method);
