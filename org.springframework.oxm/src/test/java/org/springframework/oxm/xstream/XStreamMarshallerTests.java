@@ -216,6 +216,42 @@ public class XStreamMarshallerTests {
 		String expected = "<flight flightNumber=\"42\" />";
 		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
+	
+	@Test
+	public void useAttributesForClassStringListMap() throws Exception {
+		marshaller
+				.setUseAttributeFor(Collections.singletonMap(Flight.class, Collections.singletonList("flightNumber")));
+		Writer writer = new StringWriter();
+		marshaller.marshal(flight, new StreamResult(writer));
+		String expected = "<flight flightNumber=\"42\" />";
+		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
+	}
+
+	@Test
+	public void aliasesByTypeStringClassMap() throws Exception {
+		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		aliases.put("flight", Flight.class);
+		FlightSubclass flight = new FlightSubclass();
+		flight.setFlightNumber(42);
+		marshaller.setAliasesByType(aliases);
+
+		Writer writer = new StringWriter();
+		marshaller.marshal(flight, new StreamResult(writer));
+		assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
+	}
+
+	@Test
+	public void aliasesByTypeStringStringMap() throws Exception {
+		Map<String, String> aliases = new HashMap<String, String>();
+		aliases.put("flight", Flight.class.getName());
+		FlightSubclass flight = new FlightSubclass();
+		flight.setFlightNumber(42);
+		marshaller.setAliasesByType(aliases);
+
+		Writer writer = new StringWriter();
+		marshaller.marshal(flight, new StreamResult(writer));
+		assertXMLEqual("Marshaller does not use attributes", EXPECTED_STRING, writer.toString());
+	}
 
 	@Test
 	public void fieldAliases() throws Exception {
@@ -288,7 +324,7 @@ public class XStreamMarshallerTests {
 	}
 
 	@Test
-	public void testAnnotatedMarshalStreamResultWriter() throws Exception {
+	public void annotatedMarshalStreamResultWriter() throws Exception {
 		marshaller.setAnnotatedClass(Flight.class);
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
