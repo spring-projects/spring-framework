@@ -50,8 +50,6 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 
 	private final XMLEventConsumer eventConsumer;
 
-	private Locator locator;
-
 	/**
 	 * Constructs a new instance of the <code>StaxEventContentHandler</code> that writes to the given
 	 * <code>XMLEventConsumer</code>. A default <code>XMLEventFactory</code> will be created.
@@ -76,8 +74,31 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 		eventConsumer = consumer;
 	}
 
-	public void setDocumentLocator(Locator locator) {
-		this.locator = locator;
+	public void setDocumentLocator(final Locator locator) {
+		if (locator != null) {
+			eventFactory.setLocation(new Location() {
+
+				public int getLineNumber() {
+					return locator.getLineNumber();
+				}
+
+				public int getColumnNumber() {
+					return locator.getColumnNumber();
+				}
+
+				public int getCharacterOffset() {
+					return -1;
+				}
+
+				public String getPublicId() {
+					return locator.getPublicId();
+				}
+
+				public String getSystemId() {
+					return locator.getSystemId();
+				}
+			});
+		}
 	}
 
 	@Override
@@ -120,9 +141,6 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 	}
 
 	private void consumeEvent(XMLEvent event) throws XMLStreamException {
-		if (locator != null) {
-			eventFactory.setLocation(new SaxLocation(locator));
-		}
 		eventConsumer.add(event);
 	}
 
@@ -164,32 +182,4 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 	protected void skippedEntityInternal(String name) throws XMLStreamException {
 	}
 
-	private static class SaxLocation implements Location {
-
-		private Locator locator;
-
-		private SaxLocation(Locator locator) {
-			this.locator = locator;
-		}
-
-		public int getLineNumber() {
-			return locator.getLineNumber();
-		}
-
-		public int getColumnNumber() {
-			return locator.getColumnNumber();
-		}
-
-		public int getCharacterOffset() {
-			return -1;
-		}
-
-		public String getPublicId() {
-			return locator.getPublicId();
-		}
-
-		public String getSystemId() {
-			return locator.getSystemId();
-		}
-	}
 }
