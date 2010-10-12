@@ -90,15 +90,17 @@ class StaxStreamContentHandler extends AbstractStaxContentHandler {
 	protected void startElementInternal(QName name, Attributes attributes, SimpleNamespaceContext namespaceContext)
 			throws XMLStreamException {
 		streamWriter.writeStartElement(name.getPrefix(), name.getLocalPart(), name.getNamespaceURI());
-		String defaultNamespaceUri = namespaceContext.getNamespaceURI("");
-		if (StringUtils.hasLength(defaultNamespaceUri)) {
-			streamWriter.writeNamespace("", defaultNamespaceUri);
-			streamWriter.setDefaultNamespace(defaultNamespaceUri);
-		}
-		for (Iterator iterator = namespaceContext.getBoundPrefixes(); iterator.hasNext();) {
-			String prefix = (String) iterator.next();
-			streamWriter.writeNamespace(prefix, namespaceContext.getNamespaceURI(prefix));
-			streamWriter.setPrefix(prefix, namespaceContext.getNamespaceURI(prefix));
+		if (namespaceContext != null) {
+			String defaultNamespaceUri = namespaceContext.getNamespaceURI("");
+			if (StringUtils.hasLength(defaultNamespaceUri)) {
+				streamWriter.writeNamespace("", defaultNamespaceUri);
+				streamWriter.setDefaultNamespace(defaultNamespaceUri);
+			}
+			for (Iterator<String> iterator = namespaceContext.getBoundPrefixes(); iterator.hasNext();) {
+				String prefix = iterator.next();
+				streamWriter.writeNamespace(prefix, namespaceContext.getNamespaceURI(prefix));
+				streamWriter.setPrefix(prefix, namespaceContext.getNamespaceURI(prefix));
+			}
 		}
 		for (int i = 0; i < attributes.getLength(); i++) {
 			QName attrName = toQName(attributes.getURI(i), attributes.getQName(i));
