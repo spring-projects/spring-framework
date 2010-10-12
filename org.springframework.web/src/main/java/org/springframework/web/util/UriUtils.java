@@ -462,6 +462,7 @@ public abstract class UriUtils {
 		Assert.hasLength(encoding, "'encoding' must not be empty");
 		int length = source.length();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
+		boolean changed = false;
 		for (int i = 0; i < length; i++) {
 			int ch = source.charAt(i);
 			if (ch == '%') {
@@ -472,6 +473,7 @@ public abstract class UriUtils {
 					int l = Character.digit(hex2, 16);
 					bos.write((char) ((u << 4) + l));
 					i += 2;
+					changed = true;
 				}
 				else {
 					throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
@@ -481,7 +483,7 @@ public abstract class UriUtils {
 				bos.write(ch);
 			}
 		}
-		return new String(bos.toByteArray(), encoding);
+		return changed ? new String(bos.toByteArray(), encoding) : source;
 	}
 
 }
