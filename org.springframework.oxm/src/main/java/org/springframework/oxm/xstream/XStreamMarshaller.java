@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -152,20 +154,48 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * @see XStream#alias(String, Class)
 	 */
 	public void setAliases(Map<String, ?> aliases) throws ClassNotFoundException {
-		for (Map.Entry<String, ?> entry : aliases.entrySet()) {
-			String alias = entry.getKey();
+		Map<String, Class<?>> classMap = toClassMap(aliases);
+
+		for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
+			this.getXStream().alias(entry.getKey(), entry.getValue());
+		}
+	}
+
+	/**
+	 * Sets the aliases by type map, consisting of string aliases mapped to classes. Any class that is assignable to
+	 * this type will be aliased to the same name. Keys are aliases; values are either
+	 * {@code Class} instances, or String class names.
+	 *
+	 * @see XStream#aliasType(String, Class)
+	 */
+	public void setAliasesByType(Map<String, ?> aliases) throws ClassNotFoundException {
+		Map<String, Class<?>> classMap = toClassMap(aliases);
+
+		for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
+			this.getXStream().aliasType(entry.getKey(), entry.getValue());
+		}
+	}
+
+	private Map<String, Class<?>> toClassMap(Map<String, ?> map) throws ClassNotFoundException {
+		Map<String, Class<?>> result = new LinkedHashMap<String, Class<?>>(map.size());
+
+		for (Map.Entry<String, ?> entry : map.entrySet()) {
+			String key = entry.getKey();
 			Object value = entry.getValue();
 			Class type;
 			if (value instanceof Class) {
 				type = (Class) value;
-			} else if (value instanceof String) {
+			}
+			else if (value instanceof String) {
 				String s = (String) value;
 				type = ClassUtils.forName(s, classLoader);
-			} else {
+			}
+			else {
 				throw new IllegalArgumentException("Unknown value [" + value + "], expected String or Class");
 			}
-			this.getXStream().alias(alias, type);
+			result.put(key, type);
 		}
+		return result;
 	}
 
 	/**
@@ -203,22 +233,47 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	/**
 	 * Set the types to use XML attributes for. The given map can contain
-	 * either <code>&lt;String, Class&gt;</code> pairs, in which case
-	 * {@link XStream#useAttributeFor(String, Class)} is called,
-	 * or <code>&lt;Class, String&gt;</code> pairs, which results in
+	 * either {@code <String, Class>} pairs, in which case
+	 * {@link XStream#useAttributeFor(String, Class)} is called.
+	 * Alternatively, the map can contain {@code <Class, String>}
+	 * or {@code <Class, List<String>>} pairs, which results in
 	 * {@link XStream#useAttributeFor(Class, String)} calls.
 	 */
 	public void setUseAttributeFor(Map<?, ?> attributes) {
 		for (Map.Entry<?, ?> entry : attributes.entrySet()) {
-			if (entry.getKey() instanceof String && entry.getValue() instanceof Class) {
-				this.getXStream().useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
+			if (entry.getKey() instanceof String) {
+				if (entry.getValue() instanceof Class) {
+					this.getXStream().useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
+				}
+				else {
+					throw new IllegalArgumentException(
+							"Invalid argument 'attributes'. 'useAttributesFor' property takes map of <String, Class>," +
+									" when using a map key of type String");
+				}
 			}
-			else if (entry.getKey() instanceof Class && entry.getValue() instanceof String) {
-				this.getXStream().useAttributeFor((Class) entry.getKey(), (String) entry.getValue());
+			else if (entry.getKey() instanceof Class) {
+				Class<?> key = (Class<?>) entry.getKey();
+				if (entry.getValue() instanceof String) {
+					this.getXStream().useAttributeFor(key, (String) entry.getValue());
+				}
+				else if (entry.getValue() instanceof List) {
+					List list = (List) entry.getValue();
+
+					for (Object o : list) {
+						if (o instanceof String) {
+							this.getXStream().useAttributeFor(key, (String) o);
+						}
+					}
+				}
+				else {
+					throw new IllegalArgumentException("Invalid argument 'attributes'. " +
+							"'useAttributesFor' property takes either <Class, String> or <Class, List<String>> map," +
+							" when using a map key of type Class");
+				}
 			}
 			else {
-				throw new IllegalArgumentException("Invalid attribute key and value pair. " +
-						"'useAttributesFor' property takes either a <String, Class> map or a <Class, String> map");
+				throw new IllegalArgumentException("Invalid argument 'attributes. " +
+						"'useAttributesFor' property takes either a map key of type String or Class");
 			}
 		}
 	}
