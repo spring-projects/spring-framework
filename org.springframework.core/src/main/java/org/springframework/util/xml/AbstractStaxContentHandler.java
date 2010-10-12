@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,11 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	private SimpleNamespaceContext namespaceContext = new SimpleNamespaceContext();
 
+	private boolean namespaceContextChanged = false;
+
 	public final void startDocument() throws SAXException {
 		namespaceContext.clear();
+		namespaceContextChanged = false;
 		try {
 			startDocumentInternal();
 		}
@@ -49,6 +52,7 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	public final void endDocument() throws SAXException {
 		namespaceContext.clear();
+		namespaceContextChanged = false;
 		try {
 			endDocumentInternal();
 		}
@@ -66,6 +70,7 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 	 */
 	public final void startPrefixMapping(String prefix, String uri) {
 		namespaceContext.bindNamespaceUri(prefix, uri);
+		namespaceContextChanged = true;
 	}
 
 	/**
@@ -75,11 +80,13 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 	 */
 	public final void endPrefixMapping(String prefix) {
 		namespaceContext.removeBinding(prefix);
+		namespaceContextChanged = true;
 	}
 
 	public final void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 		try {
-			startElementInternal(toQName(uri, qName), atts, namespaceContext);
+			startElementInternal(toQName(uri, qName), atts, namespaceContextChanged ? namespaceContext : null);
+			namespaceContextChanged = false;
 		}
 		catch (XMLStreamException ex) {
 			throw new SAXException("Could not handle startElement: " + ex.getMessage(), ex);
@@ -91,7 +98,8 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	public final void endElement(String uri, String localName, String qName) throws SAXException {
 		try {
-			endElementInternal(toQName(uri, qName), namespaceContext);
+			endElementInternal(toQName(uri, qName), namespaceContextChanged ? namespaceContext : null);
+			namespaceContextChanged = false;
 		}
 		catch (XMLStreamException ex) {
 			throw new SAXException("Could not handle endElement: " + ex.getMessage(), ex);
