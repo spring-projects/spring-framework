@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ public class InjectionMetadata {
 		 */
 		protected boolean checkPropertySkipping(PropertyValues pvs) {
 			if (this.pd != null && pvs != null) {
-				if (pvs.contains(this.pd.getName())) {
+				if (pvs.getPropertyValue(this.pd.getName()) != null) {
 					// Explicit value provided as part of the bean definition.
 					return true;
 				}
