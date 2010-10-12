@@ -88,11 +88,13 @@ public class UriUtilsTests {
 
 	@Test
 	public void decode() throws UnsupportedEncodingException {
+		assertEquals("Invalid encoded URI", "", UriUtils.decode("", ENC));
 		assertEquals("Invalid encoded URI", "foobar", UriUtils.decode("foobar", ENC));
 		assertEquals("Invalid encoded URI", "foo bar", UriUtils.decode("foo%20bar", ENC));
 		assertEquals("Invalid encoded URI", "foo+bar", UriUtils.decode("foo%2bbar", ENC));
 		assertEquals("Invalid encoded result", "T\u014dky\u014d", UriUtils.decode("T%C5%8Dky%C5%8D", ENC));
 		assertEquals("Invalid encoded result", "/Z\u00fcrich", UriUtils.decode("/Z%C3%BCrich", ENC));
+		assertEquals("Invalid encoded result", "T\u014dky\u014d", UriUtils.decode("T\u014dky\u014d", ENC));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
