@@ -511,17 +511,20 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			RequestMapping mapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			if (mapping != null) {
-				RequestMappingInfo mappingInfo = new RequestMappingInfo();
-				mappingInfo.patterns = mapping.value();
+				String[] patterns = mapping.value();
+				RequestMethod[] methods = new RequestMethod[0];
+				String[] params = new String[0];
+				String[] headers = new String[0];
 				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(), getTypeLevelMapping().method())) {
-					mappingInfo.methods = mapping.method();
+					methods = mapping.method();
 				}
 				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(), getTypeLevelMapping().params())) {
-					mappingInfo.params = mapping.params();
+					params = mapping.params();
 				}
 				if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(), getTypeLevelMapping().headers())) {
-					mappingInfo.headers = mapping.headers();
+					headers = mapping.headers();
 				}
+				RequestMappingInfo mappingInfo = new RequestMappingInfo(patterns, methods, params, headers);
 				this.mappings.put(method, mappingInfo);
 				return true;
 			}
@@ -531,15 +534,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		public Method resolveHandlerMethod(HttpServletRequest request) throws ServletException {
 			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
 			Comparator<String> pathComparator = pathMatcher.getPatternComparator(lookupPath);
-			Map<RequestMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestMappingInfo, Method>();
+			Map<RequestSpecificMappingInfo, Method> targetHandlerMethods = new LinkedHashMap<RequestSpecificMappingInfo, Method>();
 			Set<String> allowedMethods = new LinkedHashSet<String>(7);
 			String resolvedMethodName = null;
 			for (Method handlerMethod : getHandlerMethods()) {
-				RequestMappingInfo mappingInfo = this.mappings.get(handlerMethod);
+				RequestSpecificMappingInfo mappingInfo = new RequestSpecificMappingInfo(this.mappings.get(handlerMethod));
 				boolean match = false;
 				if (mappingInfo.hasPatterns()) {
-					List<String> matchingPatterns = new ArrayList<String>(mappingInfo.patterns.length);
-					for (String pattern : mappingInfo.patterns) {
+					for (String pattern : mappingInfo.getPatterns()) {
 						if (!hasTypeLevelMapping() && !pattern.startsWith("/")) {
 							pattern = "/" + pattern;
 						}
@@ -547,7 +549,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						if (combinedPattern != null) {
 							if (mappingInfo.matches(request)) {
 								match = true;
-								matchingPatterns.add(combinedPattern);
+								mappingInfo.addMatchedPattern(combinedPattern);
 							}
 							else {
 								if (!mappingInfo.matchesRequestMethod(request)) {
@@ -557,13 +559,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 							}
 						}
 					}
-					Collections.sort(matchingPatterns, pathComparator);
-					mappingInfo.matchedPatterns = matchingPatterns;
+					mappingInfo.sortMatchedPatterns(pathComparator);
 				}
 				else {
 					// No paths specified: parameter match sufficient.
 					match = mappingInfo.matches(request);
-					if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 &&
+					if (match && mappingInfo.getMethodCount() == 0 && mappingInfo.getParamCount() == 0 &&
 							resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
 						match = false;
 					}
@@ -576,7 +577,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				if (match) {
 					Method oldMappedMethod = targetHandlerMethods.put(mappingInfo, handlerMethod);
 					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
-						if (methodNameResolver != null && mappingInfo.patterns.length == 0) {
+						if (methodNameResolver != null && !mappingInfo.hasPatterns()) {
 							if (!oldMappedMethod.getName().equals(handlerMethod.getName())) {
 								if (resolvedMethodName == null) {
 									resolvedMethodName = methodNameResolver.getHandlerMethodName(request);
@@ -606,11 +607,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				}
 			}
 			if (!targetHandlerMethods.isEmpty()) {
-				List<RequestMappingInfo> matches = new ArrayList<RequestMappingInfo>(targetHandlerMethods.keySet());
-				RequestMappingInfoComparator requestMappingInfoComparator =
-						new RequestMappingInfoComparator(pathComparator, request);
+				List<RequestSpecificMappingInfo> matches = new ArrayList<RequestSpecificMappingInfo>(targetHandlerMethods.keySet());
+				RequestSpecificMappingInfoComparator requestMappingInfoComparator =
+						new RequestSpecificMappingInfoComparator(pathComparator, request);
 				Collections.sort(matches, requestMappingInfoComparator);
-				RequestMappingInfo bestMappingMatch = matches.get(0);
+				RequestSpecificMappingInfo bestMappingMatch = matches.get(0);
 				String bestMatchedPath = bestMappingMatch.bestMatchedPattern();
 				if (bestMatchedPath != null) {
 					extractHandlerMethodUriTemplates(bestMatchedPath, lookupPath, request);
@@ -996,26 +997,43 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 
 	/**
-	 * Holder for request mapping metadata. Allows for finding a best matching candidate.
+	 * Holder for request mapping metadata.
 	 */
 	static class RequestMappingInfo {
 
-		String[] patterns = new String[0];
+		private final String[] patterns;
 
-		List<String> matchedPatterns = Collections.emptyList();
+		private final RequestMethod[] methods;
 
-		RequestMethod[] methods = new RequestMethod[0];
+		private final String[] params;
 
-		String[] params = new String[0];
+		private final String[] headers;
 
-		String[] headers = new String[0];
+		RequestMappingInfo(String[] patterns, RequestMethod[] methods, String[] params, String[] headers) {
+			this.patterns = patterns != null ? patterns : new String[0];
+			this.methods = methods != null ? methods : new RequestMethod[0];
+			this.params = params != null ? params : new String[0];
+			this.headers = headers != null ? headers : new String[0];
+		}
 
 		public boolean hasPatterns() {
 			return patterns.length > 0;
 		}
 
-		public String bestMatchedPattern() {
-			return (!this.matchedPatterns.isEmpty() ? this.matchedPatterns.get(0) : null);
+		public String[] getPatterns() {
+			return patterns;
+		}
+
+		public int getMethodCount() {
+			return methods.length;
+		}
+
+		public int getParamCount() {
+			return params.length;
+		}
+
+		public int getHeaderCount() {
+			return headers.length;
 		}
 
 		public boolean matches(HttpServletRequest request) {
@@ -1075,12 +1093,41 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 	}
 
+	/**
+	 * Subclass of {@link RequestMappingInfo} that holds request-specific data.
+	 */
+	static class RequestSpecificMappingInfo extends RequestMappingInfo {
+
+		private final List<String> matchedPatterns = new ArrayList<String>();
+
+		RequestSpecificMappingInfo(String[] patterns, RequestMethod[] methods, String[] params, String[] headers) {
+			super(patterns, methods, params, headers);
+		}
+
+		RequestSpecificMappingInfo(RequestMappingInfo other) {
+			super(other.patterns, other.methods, other.params, other.headers);
+		}
+
+		public void addMatchedPattern(String matchedPattern) {
+			matchedPatterns.add(matchedPattern);
+		}
+
+		public void sortMatchedPatterns(Comparator<String> pathComparator) {
+			Collections.sort(matchedPatterns, pathComparator);
+		}
+
+		public String bestMatchedPattern() {
+			return (!this.matchedPatterns.isEmpty() ? this.matchedPatterns.get(0) : null);
+		}
+
+	}
+
 
 	/**
-	 * Comparator capable of sorting {@link RequestMappingInfo}s (RHIs) so that sorting a list with this comparator will
+	 * Comparator capable of sorting {@link RequestSpecificMappingInfo}s (RHIs) so that sorting a list with this comparator will
 	 * result in:
 	 * <ul>
-	 * <li>RHIs with {@linkplain RequestMappingInfo#matchedPatterns better matched paths} take prescedence
+	 * <li>RHIs with {@linkplain org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo#matchedPatterns better matched paths} take prescedence
 	 * over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String) path
 	 * pattern comparator}.) Typically, this means that patterns without wild cards and uri templates will be ordered
 	 * before those without.</li>
@@ -1090,29 +1137,29 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * less parameters</li>
 	 * </ol>
 	 */
-	static class RequestMappingInfoComparator implements Comparator<RequestMappingInfo> {
+	static class RequestSpecificMappingInfoComparator implements Comparator<RequestSpecificMappingInfo> {
 
 		private final Comparator<String> pathComparator;
 
 		private final ServerHttpRequest request;
 
-		RequestMappingInfoComparator(Comparator<String> pathComparator, HttpServletRequest request) {
+		RequestSpecificMappingInfoComparator(Comparator<String> pathComparator, HttpServletRequest request) {
 			this.pathComparator = pathComparator;
 			this.request = new ServletServerHttpRequest(request);
 		}
 
-		public int compare(RequestMappingInfo info1, RequestMappingInfo info2) {
+		public int compare(RequestSpecificMappingInfo info1, RequestSpecificMappingInfo info2) {
 			int pathComparison = pathComparator.compare(info1.bestMatchedPattern(), info2.bestMatchedPattern());
 			if (pathComparison != 0) {
 				return pathComparison;
 			}
-			int info1ParamCount = info1.params.length;
-			int info2ParamCount = info2.params.length;
+			int info1ParamCount = info1.getParamCount();
+			int info2ParamCount = info2.getParamCount();
 			if (info1ParamCount != info2ParamCount) {
 				return info2ParamCount - info1ParamCount;
 			}
-			int info1HeaderCount = info1.headers.length;
-			int info2HeaderCount = info2.headers.length;
+			int info1HeaderCount = info1.getHeaderCount();
+			int info2HeaderCount = info2.getHeaderCount();
 			if (info1HeaderCount != info2HeaderCount) {
 				return info2HeaderCount - info1HeaderCount;
 			}
@@ -1120,8 +1167,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (acceptComparison != 0) {
 				return acceptComparison;
 			}
-			int info1MethodCount = info1.methods.length;
-			int info2MethodCount = info2.methods.length;
+			int info1MethodCount = info1.getMethodCount();
+			int info2MethodCount = info2.getMethodCount();
 			if (info1MethodCount == 0 && info2MethodCount > 0) {
 				return 1;
 			}

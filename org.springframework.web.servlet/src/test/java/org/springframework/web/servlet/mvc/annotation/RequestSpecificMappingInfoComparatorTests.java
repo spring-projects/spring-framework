@@ -31,45 +31,39 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * @author Arjen Poutsma
  */
-public class RequestMappingInfoComparatorTests {
+public class RequestSpecificMappingInfoComparatorTests {
 
-	private AnnotationMethodHandlerAdapter.RequestMappingInfoComparator comparator;
+	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator comparator;
 
-	private AnnotationMethodHandlerAdapter.RequestMappingInfo emptyInfo;
+	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo emptyInfo;
 
-	private AnnotationMethodHandlerAdapter.RequestMappingInfo oneMethodInfo;
+	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo oneMethodInfo;
 
-	private AnnotationMethodHandlerAdapter.RequestMappingInfo twoMethodsInfo;
+	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo twoMethodsInfo;
 
-	private AnnotationMethodHandlerAdapter.RequestMappingInfo oneMethodOneParamInfo;
+	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo oneMethodOneParamInfo;
 
-	private AnnotationMethodHandlerAdapter.RequestMappingInfo oneMethodTwoParamsInfo;
+	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo oneMethodTwoParamsInfo;
 
 
 	@Before
 	public void setUp() throws NoSuchMethodException {
-		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), new MockHttpServletRequest());
+		comparator = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator(new MockComparator(), new MockHttpServletRequest());
 
-		emptyInfo = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+		emptyInfo = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, new RequestMethod[0],null, null);
 
-		oneMethodInfo = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
-		oneMethodInfo.methods = new RequestMethod[]{RequestMethod.GET};
+		oneMethodInfo = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, new RequestMethod[]{RequestMethod.GET}, null, null);
 
-		twoMethodsInfo = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
-		twoMethodsInfo.methods = new RequestMethod[]{RequestMethod.GET, RequestMethod.POST};
+		twoMethodsInfo = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, new RequestMethod[]{RequestMethod.GET, RequestMethod.POST}, null, null);
 
-		oneMethodOneParamInfo = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
-		oneMethodOneParamInfo.methods = new RequestMethod[]{RequestMethod.GET};
-		oneMethodOneParamInfo.params = new String[]{"param"};
+		oneMethodOneParamInfo = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, new RequestMethod[]{RequestMethod.GET}, new String[]{"param"}, null);
 
-		oneMethodTwoParamsInfo = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
-		oneMethodTwoParamsInfo.methods = new RequestMethod[]{RequestMethod.GET};
-		oneMethodTwoParamsInfo.params = new String[]{"param1", "param2"};
+		oneMethodTwoParamsInfo = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, new RequestMethod[]{RequestMethod.GET}, new String[]{"param1", "param2"}, null);
 	}
 
 	@Test
 	public void sort() {
-		List<AnnotationMethodHandlerAdapter.RequestMappingInfo> infos = new ArrayList<AnnotationMethodHandlerAdapter.RequestMappingInfo>();
+		List<AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo> infos = new ArrayList<AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo>();
 		infos.add(emptyInfo);
 		infos.add(oneMethodInfo);
 		infos.add(twoMethodsInfo);
@@ -88,17 +82,15 @@ public class RequestMappingInfoComparatorTests {
 
 	@Test
 	public void acceptHeaders() {
-		AnnotationMethodHandlerAdapter.RequestMappingInfo html = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
-		html.headers = new String[] {"accept=text/html"};
+		AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo html = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, null, null, new String[] {"accept=text/html"});
 
-		AnnotationMethodHandlerAdapter.RequestMappingInfo xml = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
-		xml.headers = new String[] {"accept=application/xml"};
+		AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo xml = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, null, null, new String[] {"accept=application/xml"});
 
-		AnnotationMethodHandlerAdapter.RequestMappingInfo none = new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+		AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo none = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo(null, null, null, null);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/xml, text/html");
-		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+		comparator = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator(new MockComparator(), request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
@@ -109,14 +101,14 @@ public class RequestMappingInfoComparatorTests {
 
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/xml, text/*");
-		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+		comparator = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator(new MockComparator(), request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
 
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/pdf");
-		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+		comparator = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator(new MockComparator(), request);
 
 		assertTrue(comparator.compare(html, xml) == 0);
 		assertTrue(comparator.compare(xml, html) == 0);
@@ -124,7 +116,7 @@ public class RequestMappingInfoComparatorTests {
 		// See SPR-7000
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "text/html;q=0.9,application/xml");
-		comparator = new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(), request);
+		comparator = new AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator(new MockComparator(), request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
