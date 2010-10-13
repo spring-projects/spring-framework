@@ -468,14 +468,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					value = resolvedCachedArgument(beanName, this.cachedFieldValue);
 				}
 				else {
-					synchronized (pvs) {
+					DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
+					Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
+					TypeConverter typeConverter = beanFactory.getTypeConverter();
+					value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
+					synchronized (this) {
 						if (!this.cached) {
-							Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
-							TypeConverter typeConverter = beanFactory.getTypeConverter();
-							DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
-							this.cachedFieldValue = descriptor;
-							value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
 							if (value != null) {
+								this.cachedFieldValue = descriptor;
 								registerDependentBeans(beanName, autowiredBeanNames);
 								if (autowiredBeanNames.size() == 1) {
 									String autowiredBeanName = autowiredBeanNames.iterator().next();
@@ -490,10 +490,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								this.cachedFieldValue = null;
 							}
 							this.cached = true;
-						}
-						else {
-							// Already cached in the meantime...
-							value = resolvedCachedArgument(beanName, this.cachedFieldValue);
 						}
 					}
 				}
@@ -538,26 +534,29 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					arguments = resolveCachedArguments(beanName);
 				}
 				else {
-					synchronized (pvs) {
+					Class[] paramTypes = method.getParameterTypes();
+					arguments = new Object[paramTypes.length];
+					DependencyDescriptor[] descriptors = new DependencyDescriptor[paramTypes.length];
+					Set<String> autowiredBeanNames = new LinkedHashSet<String>(paramTypes.length);
+					TypeConverter typeConverter = beanFactory.getTypeConverter();
+					for (int i = 0; i < arguments.length; i++) {
+						MethodParameter methodParam = new MethodParameter(method, i);
+						GenericTypeResolver.resolveParameterType(methodParam, bean.getClass());
+						descriptors[i] = new DependencyDescriptor(methodParam, this.required);
+						arguments[i] = beanFactory.resolveDependency(
+								descriptors[i], beanName, autowiredBeanNames, typeConverter);
+						if (arguments[i] == null) {
+							arguments = null;
+							break;
+						}
+					}
+					synchronized (this) {
 						if (!this.cached) {
-							Class[] paramTypes = method.getParameterTypes();
-							arguments = new Object[paramTypes.length];
-							Set<String> autowiredBeanNames = new LinkedHashSet<String>(arguments.length);
-							TypeConverter typeConverter = beanFactory.getTypeConverter();
-							this.cachedMethodArguments = new Object[arguments.length];
-							for (int i = 0; i < arguments.length; i++) {
-								MethodParameter methodParam = new MethodParameter(method, i);
-								GenericTypeResolver.resolveParameterType(methodParam, bean.getClass());
-								DependencyDescriptor descriptor = new DependencyDescriptor(methodParam, this.required);
-								this.cachedMethodArguments[i] = descriptor;
-								arguments[i] = beanFactory.resolveDependency(
-										descriptor, beanName, autowiredBeanNames, typeConverter);
-								if (arguments[i] == null) {
-									arguments = null;
-									break;
-								}
-							}
 							if (arguments != null) {
+								this.cachedMethodArguments = new Object[arguments.length];
+								for (int i = 0; i < arguments.length; i++) {
+									this.cachedMethodArguments[i] = descriptors[i];
+								}
 								registerDependentBeans(beanName, autowiredBeanNames);
 								if (autowiredBeanNames.size() == paramTypes.length) {
 									Iterator<String> it = autowiredBeanNames.iterator();
@@ -578,10 +577,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								this.cachedMethodArguments = null;
 							}
 							this.cached = true;
-						}
-						else {
-							// Already cached in the meantime...
-							arguments = resolveCachedArguments(beanName);
 						}
 					}
 				}
