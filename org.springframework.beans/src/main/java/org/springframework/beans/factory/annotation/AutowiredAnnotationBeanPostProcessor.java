@@ -468,7 +468,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					value = resolvedCachedArgument(beanName, this.cachedFieldValue);
 				}
 				else {
-					synchronized (this) {
+					synchronized (pvs) {
 						if (!this.cached) {
 							Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
 							TypeConverter typeConverter = beanFactory.getTypeConverter();
@@ -527,10 +527,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		@Override
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
-			if (this.skip == null) {
-				this.skip = checkPropertySkipping(pvs);
-			}
-			if (this.skip) {
+			if (checkPropertySkipping(pvs)) {
 				return;
 			}
 			Method method = (Method) this.member;
@@ -541,7 +538,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					arguments = resolveCachedArguments(beanName);
 				}
 				else {
-					synchronized (this) {
+					synchronized (pvs) {
 						if (!this.cached) {
 							Class[] paramTypes = method.getParameterTypes();
 							arguments = new Object[paramTypes.length];
