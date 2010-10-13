@@ -147,10 +147,7 @@ public class InjectionMetadata {
 				field.set(target, getResourceToInject(target, requestingBeanName));
 			}
 			else {
-				if (this.skip == null) {
-					this.skip = checkPropertySkipping(pvs);
-				}
-				if (this.skip) {
+				if (checkPropertySkipping(pvs)) {
 					return;
 				}
 				try {
@@ -170,16 +167,24 @@ public class InjectionMetadata {
 		 * affected property as processed for other processors to ignore it.
 		 */
 		protected boolean checkPropertySkipping(PropertyValues pvs) {
-			if (this.pd != null && pvs != null) {
-				if (pvs.getPropertyValue(this.pd.getName()) != null) {
-					// Explicit value provided as part of the bean definition.
-					return true;
-				}
-				else if (pvs instanceof MutablePropertyValues) {
-					((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
+			if (this.skip == null) {
+				synchronized (pvs) {
+					if (this.skip == null) {
+						if (this.pd != null && pvs != null) {
+							if (pvs.contains(this.pd.getName())) {
+								// Explicit value provided as part of the bean definition.
+								this.skip = true;
+								return true;
+							}
+							else if (pvs instanceof MutablePropertyValues) {
+								((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
+							}
+						}
+						this.skip = false;
+					}
 				}
 			}
-			return false;
+			return this.skip;
 		}
 
 		/**
