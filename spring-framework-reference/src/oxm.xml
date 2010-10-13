@@ -667,12 +667,29 @@ public class Application {
     ...
 
 </beans>]]></programlisting>
-            <note>
+            <warning>
                 <para>
-                    Note that XStream is an XML serialization library, not a data binding library. Therefore, it has
-                    limited namespace support. As such, it is rather unsuitable for usage within Web services.
+                  By default, XStream allows for arbitrary classes to be unmarshalled, which can result in security
+                  vulnerabilities.
+                  As such, it is recommended to set the <property>supportedClasses</property> property on the
+                  <classname>XStreamMarshaller</classname>, like so:
+                  <programlisting language="xml"><![CDATA[<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
+    <property name="supportedClasses" value="org.springframework.oxm.xstream.Flight"/>
+    ...
+</bean>]]></programlisting>
+                  This will make sure that only the registered classes are eligible for unmarshalling.
                 </para>
-            </note>
+                <para>
+                  Additionally, you can register <ulink url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher[])">
+                  custom converters</ulink> to make sure that only your supported classes can be unmarshalled.
+                </para>
+            </warning>
+          <note>
+              <para>
+                  Note that XStream is an XML serialization library, not a data binding library. Therefore, it has
+                  limited namespace support. As such, it is rather unsuitable for usage within Web services.
+              </para>
+          </note>
         </section>
     </section>
 </chapter>
