@@ -567,9 +567,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 												this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
 											}
 										}
-										else {
-											this.cachedMethodArguments[i] = arguments[i];
-										}
 									}
 								}
 							}
