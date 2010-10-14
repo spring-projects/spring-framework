@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.5 (2010-10-13)
+Changes in version 3.0.5 (2010-10-15)
 -------------------------------------
 
 * added core serializer abstraction with default implementations using Java Serialization
@@ -12,6 +12,8 @@ Changes in version 3.0.5 (2010-10-13)
 * revised "ClassUtils.isAssignable" semantics to cover primitives vs wrappers in both directions
 * ConversionService protects itself against infinite recursion in ObjectToCollectionConverter
 * fixed TypeDescriptor to correctly resolve nested collections and their element types
+* BeanWrapper does not attempt to populate Map values on access (just auto-grows Map itself)
+* fixed Autowired/CommonAnnotationBeanPostProcessor to prevent race condition in skipping check
 * ApplicationContext registers context-specific ClassArrayEditor for its bean ClassLoader
 * refined ApplicationContext singleton processing to not fail for manually registered null instances
 * fixed ApplicationContext event processing for repeated invocations to non-singleton listener beans
