@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,24 @@ package org.springframework.jdbc.core.simple;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,6 +56,7 @@ import org.springframework.util.Assert;
  * This class provides the base SPI for {@link SimpleJdbcInsert}.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public abstract class AbstractJdbcInsert {
@@ -65,10 +65,13 @@ public abstract class AbstractJdbcInsert {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Lower-level class used to execute SQL */
-	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
+	private final JdbcTemplate jdbcTemplate;
+
+	/** Context used to retrieve and manage database metadata */
+	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
 	/** List of columns objects to be used in insert statement */
-	private List<String> declaredColumns = new ArrayList<String>();
+	private final List<String> declaredColumns = new ArrayList<String>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
@@ -77,31 +80,30 @@ public abstract class AbstractJdbcInsert {
 	 */
 	private boolean compiled = false;
 
-	/** the generated string used for insert statement */
+	/** The generated string used for insert statement */
 	private String insertString;
 
-	/** the SQL Type information for the insert columns */
+	/** The SQL type information for the insert columns */
 	private int[] insertTypes;
 
-	/** the names of the columns holding the generated key */
-	private String[] generatedKeyNames = new String[] {};
-
-	/** context used to retrieve and manage database metadata */
-	private TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
+	/** The names of the columns holding the generated key */
+	private String[] generatedKeyNames = new String[0];
 
 
 	/**
 	 * Constructor for sublasses to delegate to for setting the DataSource.
 	 */
 	protected AbstractJdbcInsert(DataSource dataSource) {
-		jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	/**
 	 * Constructor for sublasses to delegate to for setting the JdbcTemplate.
 	 */
 	protected AbstractJdbcInsert(JdbcTemplate jdbcTemplate) {
+		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
 		this.jdbcTemplate = jdbcTemplate;
+		setNativeJdbcExtractor(jdbcTemplate.getNativeJdbcExtractor());
 	}
 
 
@@ -110,25 +112,18 @@ public abstract class AbstractJdbcInsert {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Get the name of the table for this insert
-	 */
-	public String getTableName() {
-		return tableMetaDataContext.getTableName();
-	}
-
-	/**
 	 * Set the name of the table for this insert
 	 */
 	public void setTableName(String tableName) {
 		checkIfConfigurationModificationIsAllowed();
-		tableMetaDataContext.setTableName(tableName);
+		this.tableMetaDataContext.setTableName(tableName);
 	}
 
 	/**
-	 * Get the name of the schema for this insert
+	 * Get the name of the table for this insert
 	 */
-	public String getSchemaName() {
-		return tableMetaDataContext.getSchemaName();
+	public String getTableName() {
+		return this.tableMetaDataContext.getTableName();
 	}
 
 	/**
@@ -136,14 +131,14 @@ public abstract class AbstractJdbcInsert {
 	 */
 	public void setSchemaName(String schemaName) {
 		checkIfConfigurationModificationIsAllowed();
-		tableMetaDataContext.setSchemaName(schemaName);
+		this.tableMetaDataContext.setSchemaName(schemaName);
 	}
 
 	/**
-	 * Get the name of the catalog for this insert
+	 * Get the name of the schema for this insert
 	 */
-	public String getCatalogName() {
-		return tableMetaDataContext.getCatalogName();
+	public String getSchemaName() {
+		return this.tableMetaDataContext.getSchemaName();
 	}
 
 	/**
@@ -151,7 +146,14 @@ public abstract class AbstractJdbcInsert {
 	 */
 	public void setCatalogName(String catalogName) {
 		checkIfConfigurationModificationIsAllowed();
-		tableMetaDataContext.setCatalogName(catalogName);
+		this.tableMetaDataContext.setCatalogName(catalogName);
+	}
+
+	/**
+	 * Get the name of the catalog for this insert
+	 */
+	public String getCatalogName() {
+		return this.tableMetaDataContext.getCatalogName();
 	}
 
 	/**
@@ -159,22 +161,22 @@ public abstract class AbstractJdbcInsert {
 	 */
 	public void setColumnNames(List<String> columnNames) {
 		checkIfConfigurationModificationIsAllowed();
-		declaredColumns.clear();
-		declaredColumns.addAll(columnNames);
+		this.declaredColumns.clear();
+		this.declaredColumns.addAll(columnNames);
 	}
 
 	/**
 	 * Get the names of the columns used
 	 */
 	public List<String> getColumnNames() {
-		return Collections.unmodifiableList(declaredColumns);
+		return Collections.unmodifiableList(this.declaredColumns);
 	}
 
 	/**
 	 * Get the names of any generated keys
 	 */
 	public String[] getGeneratedKeyNames() {
-		return generatedKeyNames;
+		return this.generatedKeyNames;
 	}
 
 	/**
@@ -208,31 +210,31 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
+	 * Set the {@link NativeJdbcExtractor} to use to retrieve the native connection if necessary
+	 */
+	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
+		this.tableMetaDataContext.setNativeJdbcExtractor(nativeJdbcExtractor);
+	}
+
+	/**
 	 * Get the insert string to be used
 	 */
 	public String getInsertString() {
-		return insertString;
+		return this.insertString;
 	}
 
 	/**
 	 * Get the array of {@link java.sql.Types} to be used for insert
 	 */
 	public int[] getInsertTypes() {
-		return insertTypes;
+		return this.insertTypes;
 	}
 
 	/**
 	 * Get the {@link JdbcTemplate} that is configured to be used
 	 */
 	protected JdbcTemplate getJdbcTemplate() {
-		return jdbcTemplate;
-	}
-
-	/**
-	 * Set the {@link NativeJdbcExtractor} to use to retrieve the native connection if necessary
-	 */
-	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
-		this.tableMetaDataContext.setNativeJdbcExtractor(nativeJdbcExtractor);
+		return this.jdbcTemplate;
 	}
 
 

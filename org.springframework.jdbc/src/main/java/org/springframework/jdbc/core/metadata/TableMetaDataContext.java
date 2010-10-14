@@ -72,7 +72,8 @@ public class TableMetaDataContext {
 	private boolean generatedKeyColumnsUsed = false;
 
 	/** NativeJdbcExtractor to be used to retrieve the native connection */
-	NativeJdbcExtractor nativeJdbcExtractor = null;
+	NativeJdbcExtractor nativeJdbcExtractor;
+
 
 	/**
 	 * Set the name of the table for this context.
@@ -162,7 +163,7 @@ public class TableMetaDataContext {
 
 	/**
 	 * Does this database support simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported
+	 * when the JDBC 3.0 feature is not supported.
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
 	public boolean isGetGeneratedKeysSimulated() {
@@ -171,7 +172,7 @@ public class TableMetaDataContext {
 
 	/**
 	 * Does this database support simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported
+	 * when the JDBC 3.0 feature is not supported.
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 */
 	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
@@ -179,7 +180,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Is a column name String array for retrieving generated keys supported
+	 * Is a column name String array for retrieving generated keys supported?
 	 * {@link java.sql.Connection#createStruct(String, Object[])}?
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {
@@ -187,7 +188,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Set {@link NativeJdbcExtractor} to be used to retrieve the native connection
+	 * Set {@link NativeJdbcExtractor} to be used to retrieve the native connection.
 	 */
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
@@ -195,7 +196,7 @@ public class TableMetaDataContext {
 
 
 	/**
-	 * Process the current meta data with the provided configuration options
+	 * Process the current meta data with the provided configuration options.
 	 * @param dataSource the DataSource being used
 	 * @param declaredColumns any columns that are declared
 	 * @param generatedKeyNames name of generated keys
@@ -212,7 +213,7 @@ public class TableMetaDataContext {
 	 */
 	protected List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
 		if (generatedKeyNames.length > 0) {
-			generatedKeyColumnsUsed = true;
+			this.generatedKeyColumnsUsed = true;
 		}
 		if (declaredColumns.size() > 0) {
 			return new ArrayList<String>(declaredColumns);
@@ -240,7 +241,7 @@ public class TableMetaDataContext {
 		// database metadata is not necessarily providing case sensitive column names
 		Map caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
-		for (String column : tableColumns) {
+		for (String column : this.tableColumns) {
 			if (parameterSource.hasValue(column)) {
 				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, column));
 			}
@@ -280,7 +281,7 @@ public class TableMetaDataContext {
 		for (String key : inParameters.keySet()) {
 			source.put(key.toLowerCase(), inParameters.get(key));
 		}
-		for (String column : tableColumns) {
+		for (String column : this.tableColumns) {
 			values.add(source.get(column.toLowerCase()));
 		}
 		return values;
@@ -316,7 +317,7 @@ public class TableMetaDataContext {
 		}
 		insertStatement.append(") VALUES(");
 		if (columnCount < 1) {
-			if (generatedKeyColumnsUsed) {
+			if (this.generatedKeyColumnsUsed) {
 				logger.info("Unable to locate non-key columns for table '" +
 						this.getTableName() + "' so an empty insert statement is generated");
 			}
@@ -340,15 +341,12 @@ public class TableMetaDataContext {
 	 * @return the array of types to be used
 	 */
 	public int[] createInsertTypes() {
-
 		int[] types = new int[this.getTableColumns().size()];
-
 		List<TableParameterMetaData> parameters = this.metaDataProvider.getTableParameterMetaData();
 		Map<String, TableParameterMetaData> parameterMap = new HashMap<String, TableParameterMetaData>(parameters.size());
 		for (TableParameterMetaData tpmd : parameters) {
 			parameterMap.put(tpmd.getParameterName().toUpperCase(), tpmd);
 		}
-
 		int typeIndx = 0;
 		for (String column : this.getTableColumns()) {
 			if (column == null) {
@@ -365,7 +363,6 @@ public class TableMetaDataContext {
 			}
 			typeIndx++;
 		}
-
 		return types;
 	}
 
