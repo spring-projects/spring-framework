@@ -6,14 +6,17 @@ http://www.springsource.org
 Changes in version 3.0.5 (2010-10-15)
 -------------------------------------
 
+* support for Hibernate 3.6 final
 * added core serializer abstraction with default implementations using Java Serialization
 * consistent use of JDK 1.5's "ThreadLocal.remove()" over "ThreadLocal.set(null)"
 * fixed JodaTimeContextHolder to use a non-inheritable ThreadLocal and expose a reset method
 * revised "ClassUtils.isAssignable" semantics to cover primitives vs wrappers in both directions
+* optimized AnnotationUtils findAnnotation performance for repeated search on same interfaces
 * ConversionService protects itself against infinite recursion in ObjectToCollectionConverter
 * fixed TypeDescriptor to correctly resolve nested collections and their element types
 * BeanWrapper does not attempt to populate Map values on access (just auto-grows Map itself)
 * fixed Autowired/CommonAnnotationBeanPostProcessor to prevent race condition in skipping check
+* fixed @Value injection to correctly cache temporary null results for non-singleton beans
 * ApplicationContext registers context-specific ClassArrayEditor for its bean ClassLoader
 * refined ApplicationContext singleton processing to not fail for manually registered null instances
 * fixed ApplicationContext event processing for repeated invocations to non-singleton listener beans
