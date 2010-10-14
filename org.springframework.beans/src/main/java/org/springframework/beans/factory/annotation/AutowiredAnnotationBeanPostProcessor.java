@@ -474,7 +474,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
 					synchronized (this) {
 						if (!this.cached) {
-							if (value != null) {
+							if (value != null || this.required) {
 								this.cachedFieldValue = descriptor;
 								registerDependentBeans(beanName, autowiredBeanNames);
 								if (autowiredBeanNames.size() == 1) {
@@ -545,7 +545,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						descriptors[i] = new DependencyDescriptor(methodParam, this.required);
 						arguments[i] = beanFactory.resolveDependency(
 								descriptors[i], beanName, autowiredBeanNames, typeConverter);
-						if (arguments[i] == null) {
+						if (arguments[i] == null && !this.required) {
 							arguments = null;
 							break;
 						}
