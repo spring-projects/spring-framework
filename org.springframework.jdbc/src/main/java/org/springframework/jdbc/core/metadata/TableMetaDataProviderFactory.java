@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -38,74 +37,70 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  */
 public class TableMetaDataProviderFactory {
 
-	/** Logger */
 	private static final Log logger = LogFactory.getLog(TableMetaDataProviderFactory.class);
 
+
 	/**
 	 * Create a TableMetaDataProvider based on the database metedata
 	 * @param dataSource used to retrieve metedata
 	 * @param context the class that holds configuration and metedata
 	 * @return instance of the TableMetaDataProvider implementation to be used
 	 */
-	static public TableMetaDataProvider createMetaDataProvider(DataSource dataSource,
-															 final TableMetaDataContext context) {
+	public static TableMetaDataProvider createMetaDataProvider(DataSource dataSource, TableMetaDataContext context) {
 		return createMetaDataProvider(dataSource, context, null);
 	}
-	
+
 	/**
 	 * Create a TableMetaDataProvider based on the database metedata
 	 * @param dataSource used to retrieve metedata
 	 * @param context the class that holds configuration and metedata
-	 * @param nativeJdbcExtractor @{link NativeJdbcExtractor} to be used
+	 * @param nativeJdbcExtractor the NativeJdbcExtractor to be used
 	 * @return instance of the TableMetaDataProvider implementation to be used
 	 */
-	static public TableMetaDataProvider createMetaDataProvider(DataSource dataSource,
-				final TableMetaDataContext context,
-				final NativeJdbcExtractor nativeJdbcExtractor) {
+	public static TableMetaDataProvider createMetaDataProvider(DataSource dataSource,
+				final TableMetaDataContext context, final NativeJdbcExtractor nativeJdbcExtractor) {
 		try {
-			return (TableMetaDataProvider) JdbcUtils.extractDatabaseMetaData(
-					dataSource, new DatabaseMetaDataCallback() {
-
-				public Object processMetaData(DatabaseMetaData databaseMetaData)
-						throws SQLException, MetaDataAccessException {
-					String databaseProductName =
-							JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
-					boolean accessTableColumnMetaData = context.isAccessTableColumnMetaData();
-					TableMetaDataProvider provider;
-					if ("Oracle".equals(databaseProductName)) {
-						provider = new OracleTableMetaDataProvider(databaseMetaData,
-								context.isOverrideIncludeSynonymsDefault());
-					}
-					else if ("HSQL Database Engine".equals(databaseProductName)) {
-						provider = new HsqlTableMetaDataProvider(databaseMetaData);
-					}
-					else if ("PostgreSQL".equals(databaseProductName)) {
-						provider = new PostgresTableMetaDataProvider(databaseMetaData);
-					}
-					else if ("Apache Derby".equals(databaseProductName)) {
-						provider = new DerbyTableMetaDataProvider(databaseMetaData);
-					}
-					else {
-						provider = new GenericTableMetaDataProvider(databaseMetaData);
-					}
-					if (nativeJdbcExtractor != null) {
-						provider.setNativeJdbcExtractor(nativeJdbcExtractor);
-					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("Using " + provider.getClass().getName());
-					}
-					provider.initializeWithMetaData(databaseMetaData);
-					if (accessTableColumnMetaData) {
-						provider.initializeWithTableColumnMetaData(databaseMetaData, context.getCatalogName(),
-								context.getSchemaName(), context.getTableName());
-					}
-					return provider;
-				}
-			});
-		} catch (MetaDataAccessException e) {
-			throw new DataAccessResourceFailureException("Error retreiving database metadata", e);
+			return (TableMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource,
+					new DatabaseMetaDataCallback() {
+						public Object processMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
+							String databaseProductName =
+									JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
+							boolean accessTableColumnMetaData = context.isAccessTableColumnMetaData();
+							TableMetaDataProvider provider;
+							if ("Oracle".equals(databaseProductName)) {
+								provider = new OracleTableMetaDataProvider(databaseMetaData,
+										context.isOverrideIncludeSynonymsDefault());
+							}
+							else if ("HSQL Database Engine".equals(databaseProductName)) {
+								provider = new HsqlTableMetaDataProvider(databaseMetaData);
+							}
+							else if ("PostgreSQL".equals(databaseProductName)) {
+								provider = new PostgresTableMetaDataProvider(databaseMetaData);
+							}
+							else if ("Apache Derby".equals(databaseProductName)) {
+								provider = new DerbyTableMetaDataProvider(databaseMetaData);
+							}
+							else {
+								provider = new GenericTableMetaDataProvider(databaseMetaData);
+							}
+							if (nativeJdbcExtractor != null) {
+								provider.setNativeJdbcExtractor(nativeJdbcExtractor);
+							}
+							if (logger.isDebugEnabled()) {
+								logger.debug("Using " + provider.getClass().getSimpleName());
+							}
+							provider.initializeWithMetaData(databaseMetaData);
+							if (accessTableColumnMetaData) {
+								provider.initializeWithTableColumnMetaData(databaseMetaData, context.getCatalogName(),
+										context.getSchemaName(), context.getTableName());
+							}
+							return provider;
+						}
+					});
 		}
-
+		catch (MetaDataAccessException ex) {
+			throw new DataAccessResourceFailureException("Error retrieving database metadata", ex);
+		}
 	}
 
 }
