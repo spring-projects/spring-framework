@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,9 @@ final class StringToArrayConverter implements ConditionalGenericConverter {
 		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
 		Object target = Array.newInstance(targetType.getElementType(), fields.length);
 		for (int i = 0; i < fields.length; i++) {
-			Object sourceElement = fields[i];
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType, targetType.getElementTypeDescriptor());
+			String sourceElement = fields[i];
+			Object targetElement = this.conversionService.convert(sourceElement.trim(),
+					sourceType, targetType.getElementTypeDescriptor());
 			Array.set(target, i, targetElement);
 		}
 		return target;
