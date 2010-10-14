@@ -7,9 +7,6 @@
 
 	<context:annotation-config/>
 
-	<bean class="org.springframework.context.annotation.configuration.AutowiredConfigurationTests$ValueConfig"/>
+	<bean class="org.springframework.context.annotation.configuration.AutowiredConfigurationTests$ValueConfig" scope="prototype"/>
 
-<!--
-	<context:component-scan  base-package="test.basic.value"/>
--->
 </beans>
