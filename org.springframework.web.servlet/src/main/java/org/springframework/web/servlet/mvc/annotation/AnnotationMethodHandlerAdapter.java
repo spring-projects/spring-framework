@@ -599,9 +599,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						if (oldMappedMethod != null) {
 							throw new IllegalStateException(
 									"Ambiguous handler methods mapped for HTTP path '" + lookupPath + "': {" +
-											oldMappedMethod + ", " + handlerMethod +
-											"}. If you intend to handle the same path in multiple methods, then factor " +
-											"them out into a dedicated handler class with that path mapped at the type level!");
+									oldMappedMethod + ", " + handlerMethod +
+									"}. If you intend to handle the same path in multiple methods, then factor " +
+									"them out into a dedicated handler class with that path mapped at the type level!");
 						}
 					}
 				}
@@ -1093,6 +1093,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 	}
 
+
 	/**
 	 * Subclass of {@link RequestMappingInfo} that holds request-specific data.
 	 */
@@ -1119,22 +1120,21 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		public String bestMatchedPattern() {
 			return (!this.matchedPatterns.isEmpty() ? this.matchedPatterns.get(0) : null);
 		}
-
 	}
 
 
 	/**
-	 * Comparator capable of sorting {@link RequestSpecificMappingInfo}s (RHIs) so that sorting a list with this comparator will
-	 * result in:
+	 * Comparator capable of sorting {@link RequestSpecificMappingInfo}s (RHIs) so that
+	 * sorting a list with this comparator will result in:
 	 * <ul>
-	 * <li>RHIs with {@linkplain org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo#matchedPatterns better matched paths} take prescedence
-	 * over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String) path
-	 * pattern comparator}.) Typically, this means that patterns without wild cards and uri templates will be ordered
-	 * before those without.</li>
+	 * <li>RHIs with {@linkplain AnnotationMethodHandlerAdapter.RequestSpecificMappingInfo#matchedPatterns better matched paths}
+	 * take prescedence over those with a weaker match (as expressed by the {@linkplain PathMatcher#getPatternComparator(String)
+	 * path pattern comparator}.) Typically, this means that patterns without wild cards and uri templates
+	 * will be ordered before those without.</li>
 	 * <li>RHIs with one single {@linkplain RequestMappingInfo#methods request method} will be
 	 * ordered before those without a method, or with more than one method.</li>
-	 * <li>RHIs with more {@linkplain RequestMappingInfo#params request parameters} will be ordered before those with
-	 * less parameters</li>
+	 * <li>RHIs with more {@linkplain RequestMappingInfo#params request parameters} will be ordered
+	 * before those with less parameters</li>
 	 * </ol>
 	 */
 	static class RequestSpecificMappingInfoComparator implements Comparator<RequestSpecificMappingInfo> {
