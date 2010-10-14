@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
@@ -49,6 +50,8 @@ public abstract class AnnotationUtils {
 
 	/** The attribute name for annotations with a single element */
 	static final String VALUE = "value";
+
+	private static final Map<Class, Boolean> annotatedInterfaceCache = new WeakHashMap<Class, Boolean>();
 
 
 	/**
@@ -120,26 +123,45 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class[] ifcs) {
 		A annotation = null;
 		for (Class<?> iface : ifcs) {
-			Method equivalentMethod;
-			try {
-				equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
-				annotation = getAnnotation(equivalentMethod, annotationType);
-			}
-			catch (NoSuchMethodException e) {
-				// skip this interface - it doesn't have the method
-			}
-			if (annotation != null) {
-				break;
+			if (isInterfaceWithAnnotatedMethods(iface)) {
+				try {
+					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
+					annotation = getAnnotation(equivalentMethod, annotationType);
+				}
+				catch (NoSuchMethodException ex) {
+					// Skip this interface - it doesn't have the method...
+				}
+				if (annotation != null) {
+					break;
+				}
 			}
 		}
 		return annotation;
 	}
 
+	private static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {
+		synchronized (annotatedInterfaceCache) {
+			Boolean flag = annotatedInterfaceCache.get(iface);
+			if (flag != null) {
+				return flag;
+			}
+			boolean found = false;
+			for (Method ifcMethod : iface.getMethods()) {
+				if (ifcMethod.getAnnotations().length > 0) {
+					found = true;
+					break;
+				}
+			}
+			annotatedInterfaceCache.put(iface, found);
+			return found;
+		}
+	}
+
 	/**
 	 * Find a single {@link Annotation} of <code>annotationType</code> from the supplied {@link Class},
-	 * traversing its interfaces and super classes if no annotation can be found on the given class itself.
+	 * traversing its interfaces and superclasses if no annotation can be found on the given class itself.
 	 * <p>This method explicitly handles class-level annotations which are not declared as
-	 * {@link Inherited inherited} <i>as well as annotations on interfaces</i>.
+	 * {@link java.lang.annotation.Inherited inherited} <i>as well as annotations on interfaces</i>.
 	 * <p>The algorithm operates as follows: Searches for an annotation on the given class and returns
 	 * it if found. Else searches all interfaces that the given class declares, returning the annotation
 	 * from the first matching candidate, if any. Else proceeds with introspection of the superclass
@@ -171,7 +193,7 @@ public abstract class AnnotationUtils {
 			}
 		}
 		Class<?> superClass = clazz.getSuperclass();
-		if (superClass == null || superClass.equals(Object.class)) {
+		if (superClass == null || superClass == Object.class) {
 			return null;
 		}
 		return findAnnotation(superClass, annotationType);
