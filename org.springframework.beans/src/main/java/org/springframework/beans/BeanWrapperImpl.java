@@ -586,18 +586,22 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		PropertyTokenHolder tokens = new PropertyTokenHolder();
 		tokens.actualName = propertyName;
 		tokens.canonicalName = propertyName;
-		setPropertyValue(tokens, createDefaultPropertyValue(tokens));
-		return getPropertyValue(tokens);
+		return setDefaultValue(tokens);
 	}
 
 	private Object setDefaultValue(PropertyTokenHolder tokens) {
-		setPropertyValue(tokens, createDefaultPropertyValue(tokens));
-		return getPropertyValue(tokens);
+		PropertyValue pv = createDefaultPropertyValue(tokens);
+		setPropertyValue(tokens, pv);
+		return pv.getValue();
 	}
 	
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
-		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(tokens.actualName);
-		Object defaultValue = newValue(pd.getPropertyType(), tokens.canonicalName);
+		Class type = getPropertyType(tokens.canonicalName);
+		if (type == null) {
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
+					"Could not determine property type for auto-growing a default value");
+		}
+		Object defaultValue = newValue(type, tokens.canonicalName);
 		return new PropertyValue(tokens.canonicalName, defaultValue);
 	}
 	
@@ -791,9 +795,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						// must not kick in for map keys but rather only for map values.
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType,
 								new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), mapKeyType));
-						// Pass full property name and old value in here, since we want full
-						// conversion ability for map values.
-						growMapIfNecessary(map, convertedMapKey, indexedPropertyName, pd, i + 1);
 						value = map.get(convertedMapKey);
 					}
 					else {
@@ -861,21 +862,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				for (int i = collection.size(); i < index + 1; i++) {
 					collection.add(newValue(elementType, name));
 				}
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void growMapIfNecessary(
-			Map map, Object key, String name, PropertyDescriptor pd, int nestingLevel) {
-
-		if (!this.autoGrowNestedPaths) {
-			return;
-		}
-		if (!map.containsKey(key)) {
-			Class valueType = GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod(), nestingLevel);
-			if (valueType != null) {
-				map.put(key, newValue(valueType, name));
 			}
 		}
 	}

@@ -130,16 +130,9 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
-	public void getPropertyValueAutoGrowMap() {
-		assertNotNull(wrapper.getPropertyValue("map[A]"));
-		assertEquals(1, bean.getMap().size());
-		assertTrue(bean.getMap().get("A") instanceof Bean);
-	}
-
-	@Test
 	public void setPropertyValueAutoGrowMap() {
-		wrapper.setPropertyValue("map[A].prop", "test");
-		assertEquals("test", bean.getMap().get("A").getProp());
+		wrapper.setPropertyValue("map[A]", new Bean());
+		assertTrue(bean.getMap().get("A") instanceof Bean);
 	}
 
 
