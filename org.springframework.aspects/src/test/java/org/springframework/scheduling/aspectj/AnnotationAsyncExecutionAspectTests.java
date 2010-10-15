@@ -33,7 +33,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 /**
  * @author Ramnivas Laddad
  */
-public class AnnotationDrivenAsynchronousExecutionAspectTests {
+public class AnnotationAsyncExecutionAspectTests {
 
 	private static final long WAIT_TIME = 1000; //milli seconds
 
@@ -42,7 +42,7 @@ public class AnnotationDrivenAsynchronousExecutionAspectTests {
 	@Before
 	public void setUp() {
 		executor = new CountingExecutor();
-		AnnotationDrivenAsynchronousExecutionAspect.aspectOf().setExecutor(executor);
+		AnnotationAsyncExecutionAspect.aspectOf().setExecutor(executor);
 	}
 	
 	@Test
@@ -150,7 +150,7 @@ public class AnnotationDrivenAsynchronousExecutionAspectTests {
 		// We need to keep this commented out, otherwise there will be a compile-time error. 
 		// Please uncomment and re-comment this periodically to check that the compiler 
 		// produces an error message due to the 'declare error' statement 
-		// in AnnotationDrivenAsynchronousExecutionAspect
+		// in AnnotationAsyncExecutionAspect
 //		@Async public int getInt() {
 //			return 0;
 //		}
@@ -164,7 +164,7 @@ public class AnnotationDrivenAsynchronousExecutionAspectTests {
 			counter++;
 		}
 		
-		// Manually check that there is a warning from the 'declare warning' statement in AnnotationDrivenAsynchronousExecutionAspect
+		// Manually check that there is a warning from the 'declare warning' statement in AnnotationAsynchExecutionAspect
 		public int return5() {
 			return 5;
 		}

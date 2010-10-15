@@ -33,7 +33,7 @@ import org.springframework.scheduling.annotation.Async;
  * @author Ramnivas Laddad
  * @since 3.0.5
  */
-public aspect AnnotationDrivenAsynchronousExecutionAspect extends AbstractAsynchronousExecutionAspect {
+public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspect {
 
 	private pointcut asyncMarkedMethod() 
 		: execution(@Async (void || Future+) *(..));

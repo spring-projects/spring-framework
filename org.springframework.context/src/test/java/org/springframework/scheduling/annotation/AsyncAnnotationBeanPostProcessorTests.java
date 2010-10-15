@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,23 @@
 
 package org.springframework.scheduling.annotation;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class AsyncAnnotationBeanPostProcessorTests {
 
@@ -85,6 +86,19 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		context.close();
 	}
 
+	@Test
+	public void configuredThroughNamespace() {
+		GenericXmlApplicationContext context = new GenericXmlApplicationContext();
+		context.load(new ClassPathResource("taskNamespaceTests.xml", getClass()));
+		context.refresh();
+		ITestBean testBean = (ITestBean) context.getBean("target");
+		testBean.test();
+		testBean.await(3000);
+		Thread asyncThread = testBean.getThread();
+		assertTrue(asyncThread.getName().startsWith("testExecutor"));
+		context.close();
+	}
+
 
 	private static interface ITestBean {
 
@@ -96,7 +110,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class TestBean implements ITestBean {
+	public static class TestBean implements ITestBean {
 
 		private Thread thread;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
  * @since 2.0
  */
 public abstract aspect AbstractTransactionAspect extends TransactionAspectSupport {
-	
+
 	/**
 	 * Construct object using the given transaction metadata retrieval strategy.
 	 * @param tas TransactionAttributeSource implementation, retrieving Spring
@@ -55,29 +55,29 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	protected AbstractTransactionAspect(TransactionAttributeSource tas) {
 		setTransactionAttributeSource(tas);
 	}
-	
+
 	@SuppressAjWarnings("adviceDidNotMatch")
 	before(Object txObject) : transactionalMethodExecution(txObject) {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
 		TransactionInfo txInfo = createTransactionIfNecessary(method, txObject.getClass());
 	}
-	
+
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) throwing(Throwable t) : transactionalMethodExecution(txObject) {
-    try {
-      completeTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
-    }
-    catch (Throwable t2) {
-      logger.error("Failed to close transaction after throwing in a transactional method", t2);
-    }
-  }
-	
+		try {
+      		completeTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
+		}
+		catch (Throwable t2) {
+			logger.error("Failed to close transaction after throwing in a transactional method", t2);
+		}
+	}
+
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) returning() : transactionalMethodExecution(txObject) {
 		commitTransactionAfterReturning(TransactionAspectSupport.currentTransactionInfo());
 	}
-	
+
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) : transactionalMethodExecution(txObject) {
 		cleanupTransactionInfo(TransactionAspectSupport.currentTransactionInfo());
