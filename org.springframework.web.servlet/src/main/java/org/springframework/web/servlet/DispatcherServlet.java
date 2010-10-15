@@ -750,7 +750,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				processedRequest = checkMultipart(request);
 
 				// Determine handler for the current request.
-				mappedHandler = getHandler(processedRequest);
+				mappedHandler = getHandler(processedRequest, false);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
 					noHandlerFound(processedRequest, response);
 					return;
@@ -905,7 +905,21 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Return the HandlerExecutionChain for this request. Try all handler mappings in order.
 	 * @param request current HTTP request
-	 * @return the HandlerExceutionChain, or <code>null</code> if no handler could be found
+	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
+	 * @return the HandlerExecutionChain, or <code>null</code> if no handler could be found
+	 * @deprecated as of Spring 3.0.4, in favor of {@link #getHandler(javax.servlet.http.HttpServletRequest)},
+	 * with this method's cache attribute now effectively getting ignored
+	 */
+	@Deprecated
+	protected HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
+		return getHandler(request);
+	}
+
+	/**
+	 * Return the HandlerExecutionChain for this request.
+	 * <p>Tries all handler mappings in order.
+	 * @param request current HTTP request
+	 * @return the HandlerExecutionChain, or <code>null</code> if no handler could be found
 	 */
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		for (HandlerMapping hm : this.handlerMappings) {
