@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.5 (2010-10-15)
+Changes in version 3.0.5 (2010-10-18)
 -------------------------------------
 
 * support for Hibernate 3.6 final
@@ -27,6 +27,8 @@ Changes in version 3.0.5 (2010-10-15)
 * SpEL MapAccessor consistently rejects "target.key" style access to Maps if no such key is found
 * SpEL method invocations prefer method with fewest parameters (e.g. no-arg over vararg)
 * AspectJExpressionPointcut uses bean ClassLoader for initializing the AspectJ pointcut parser
+* added AnnotationAsyncExecutionAspect as AspectJ-based variant of @Async processing
+* added mode="proxy"/"aspectj" and proxy-target-class options to task:annotation-driven
 * JDBC bundle uses local ClassLoader as bean ClassLoader for "sql-error-codes.xml" parsing
 * EmbeddedDatabaseFactory shuts down database when failing to populate it in "initDatabase()"
 * embedded database support now also works with Derby >= 10.6
