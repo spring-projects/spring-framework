@@ -864,7 +864,7 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="listOrSetType">
-					<xsd:attribute name="merge" type="defaultable-boolean">
+					<xsd:attribute name="merge" default="default" type="defaultable-boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Enables/disables merging for collections when using parent/child beans.
@@ -887,7 +887,7 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="listOrSetType">
-					<xsd:attribute name="merge" type="defaultable-boolean">
+					<xsd:attribute name="merge" default="default" type="defaultable-boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Enables/disables merging for collections when using parent/child beans.
@@ -908,7 +908,7 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="listOrSetType">
-					<xsd:attribute name="merge" type="defaultable-boolean">
+					<xsd:attribute name="merge" default="default" type="defaultable-boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Enables/disables merging for collections when using parent/child beans.
@@ -929,7 +929,7 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="mapType">
-					<xsd:attribute name="merge" type="defaultable-boolean">
+					<xsd:attribute name="merge" default="default" type="defaultable-boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Enables/disables merging for collections when using parent/child beans.
@@ -960,7 +960,7 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="propsType">
-					<xsd:attribute name="merge" type="defaultable-boolean">
+					<xsd:attribute name="merge" default="default" type="defaultable-boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Enables/disables merging for collections when using parent/child beans.
