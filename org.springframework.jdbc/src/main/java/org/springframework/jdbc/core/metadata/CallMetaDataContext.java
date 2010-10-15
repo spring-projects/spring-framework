@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
@@ -456,18 +457,24 @@ public class CallMetaDataContext {
 							matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
 						}
 						else {
-							String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(parameterName);
-							if (parameterSource.hasValue(propertyName)) {
-								matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
+							String englishLowerCaseName = parameterName.toLowerCase(Locale.ENGLISH);
+							if (parameterSource.hasValue(englishLowerCaseName)) {
+								matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, englishLowerCaseName));
 							}
 							else {
-								if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
-									String sourceName = (String) caseInsensitiveParameterNames.get(lowerCaseName);
-									matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
+								String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(parameterName);
+								if (parameterSource.hasValue(propertyName)) {
+									matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
 								}
 								else {
-									logger.warn("Unable to locate the corresponding parameter value for '" + parameterName +
-											"' within the parameter values provided: " + caseInsensitiveParameterNames.values());
+									if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
+										String sourceName = (String) caseInsensitiveParameterNames.get(lowerCaseName);
+										matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
+									}
+									else {
+										logger.warn("Unable to locate the corresponding parameter value for '" + parameterName +
+												"' within the parameter values provided: " + caseInsensitiveParameterNames.values());
+									}
 								}
 							}
 						}
