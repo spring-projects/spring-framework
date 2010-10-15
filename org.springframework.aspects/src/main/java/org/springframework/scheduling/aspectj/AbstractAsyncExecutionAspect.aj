@@ -28,21 +28,17 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
 /**
  * Abstract aspect that routes selected methods asynchronously.
  *
- * <p>This aspect, by default, uses {@link SimpleAsyncTaskExecutor} to route
- * method execution. However, you may inject it with any implementation of 
- * {@link Executor} to override the default.
+ * <p>This aspect needs to be injected with an implementation of 
+ * {@link Executor} to activate it for a specific thread pool.
+ * Otherwise it will simply delegate all calls synchronously.
  *
  * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  * @since 3.0.5
  */
-public abstract aspect AbstractAsynchronousExecutionAspect {
+public abstract aspect AbstractAsyncExecutionAspect {
 
 	private AsyncTaskExecutor asyncExecutor;
-
-	public AbstractAsynchronousExecutionAspect() {
-		// Set default executor, which may be replaced by calling setExecutor.
-		setExecutor(new SimpleAsyncTaskExecutor());
-	}
 
 	public void setExecutor(Executor executor) {
 		if (executor instanceof AsyncTaskExecutor) {
@@ -54,6 +50,9 @@ public abstract aspect AbstractAsynchronousExecutionAspect {
 	}
 
 	Object around() : asyncMethod() {
+                if (this.asyncExecutor == null) {
+			return proceed();
+                }
 		Callable<Object> callable = new Callable<Object>() {
 			public Object call() throws Exception {
 				Object result = proceed();
@@ -62,7 +61,7 @@ public abstract aspect AbstractAsynchronousExecutionAspect {
 				}
 				return null;
 			}};
-		Future<?> result = asyncExecutor.submit(callable);
+		Future<?> result = this.asyncExecutor.submit(callable);
 		if (Future.class.isAssignableFrom(((MethodSignature) thisJoinPointStaticPart.getSignature()).getReturnType())) {
 			return result;
 		}

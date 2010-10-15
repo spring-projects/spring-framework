@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:task="http://www.springframework.org/schema/task"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+				http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+	<!--
+	<context:load-time-weaver aspectj-weaving="on"/>
+	-->
+
+	<task:annotation-driven executor="executor"/>
+
+	<bean id="executor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="threadNamePrefix" value="testExecutor"/>
+	</bean>
+
+	<bean id="target" class="org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessorTests$TestBean"/>
+
+</beans>

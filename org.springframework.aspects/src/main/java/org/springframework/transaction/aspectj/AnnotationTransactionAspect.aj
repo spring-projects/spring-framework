@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import org.springframework.transaction.annotation.AnnotationTransactionAttribute
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Concrete AspectJ transaction aspect using Spring Transactional annotation
- * for JDK 1.5+.
+ * Concrete AspectJ transaction aspect using Spring's @Transactional annotation.
  * 
  * <p>When using this aspect, you <i>must</i> annotate the implementation class
  * (and/or methods within that class), <i>not</i> the interface (if any) that

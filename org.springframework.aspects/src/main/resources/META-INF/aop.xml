@@ -11,6 +11,7 @@
 
 	<aspects>
 		<aspect name="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"/>
+		<aspect name="org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect"/>
 		<aspect name="org.springframework.transaction.aspectj.AnnotationTransactionAspect"/>
 	</aspects>
 
