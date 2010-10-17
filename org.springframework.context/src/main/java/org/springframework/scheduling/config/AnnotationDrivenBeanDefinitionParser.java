@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 3.0
  */
 public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
@@ -48,7 +49,7 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 	 * The bean name of the internally managed transaction aspect (mode="aspectj").
 	 */
 	public static final String ASYNC_EXECUTION_ASPECT_BEAN_NAME =
-			"org.springframework.transaction.config.internalTransactionAspect";
+			"org.springframework.scheduling.config.internalAsyncExecutionAspect";
 
 	private static final String ASYNC_EXECUTION_ASPECT_CLASS_NAME =
 			"org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect";
