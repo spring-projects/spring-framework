@@ -568,7 +568,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Expose current Spring-managed Locale and MessageSource to JasperReports i18n
 	 * ($R expressions etc). The MessageSource should only be exposed as JasperReports
 	 * resource bundle if no such bundle is defined in the report itself.
-	 * <p>Default implementation exposes the Spring RequestContext Locale and a
+	 * <p>The default implementation exposes the Spring RequestContext Locale and a
 	 * MessageSourceResourceBundle adapter for the Spring ApplicationContext,
 	 * analogous to the <code>JstlUtils.exposeLocalizationContext</code> method.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
@@ -580,9 +580,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected void exposeLocalizationContext(Map<String, Object> model, HttpServletRequest request) {
 		RequestContext rc = new RequestContext(request, getServletContext());
-		model.put(JRParameter.REPORT_LOCALE, rc.getLocale());
+		if (!model.containsKey(JRParameter.REPORT_LOCALE)) {
+			model.put(JRParameter.REPORT_LOCALE, rc.getLocale());
+		}
 		JasperReport report = getReport();
-		if (report == null || report.getResourceBundle() == null) {
+		if ((report == null || report.getResourceBundle() == null) &&
+				!model.containsKey(JRParameter.REPORT_RESOURCE_BUNDLE)) {
 			model.put(JRParameter.REPORT_RESOURCE_BUNDLE,
 					new MessageSourceResourceBundle(rc.getMessageSource(), rc.getLocale()));
 		}
