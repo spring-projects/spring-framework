@@ -96,7 +96,7 @@ public class UriTemplate implements Serializable {
 	 */
 	public URI expand(Map<String, ?> uriVariables) {
 		Assert.notNull(uriVariables, "'uriVariables' must not be null");
-		Object[] values = new String[this.variableNames.size()];
+		Object[] values = new Object[this.variableNames.size()];
 		for (int i = 0; i < this.variableNames.size(); i++) {
 			String name = this.variableNames.get(i);
 			if (!uriVariables.containsKey(name)) {

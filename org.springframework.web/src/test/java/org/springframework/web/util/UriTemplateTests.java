@@ -70,6 +70,16 @@ public class UriTemplateTests {
 		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
 	}
 
+	@Test
+	public void expandMapNonString() throws Exception {
+		Map<String, Integer> uriVariables = new HashMap<String, Integer>(2);
+		uriVariables.put("booking", 42);
+		uriVariables.put("hotel", 1);
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+		URI result = template.expand(uriVariables);
+		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void expandMapInvalidAmountVariables() throws Exception {
 		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
