@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.5 (2010-10-18)
+Changes in version 3.0.5 (2010-10-20)
 -------------------------------------
 
 * support for Hibernate 3.6 final
@@ -47,6 +47,7 @@ Changes in version 3.0.5 (2010-10-18)
 * fixed @MVC processing of parameter-level annotations to work with interface-based proxies again
 * revised @RequestParam processing to support CSV-to-array/collection binding with ConversionService
 * fixed EvalTag's EvaluationContext caching to properly handle JSP tag caching across requests
+* AbstractJasperReportsView only sets locale model attributes if not present already
 * DispatcherPortlet throws custom NoHandlerFoundException instead of misleading UnavailableException
 * DispatcherPortlet copies all action parameters to render parameters in case of an action exception
 * DispatcherPortlet's default resource serving explicitly prevents access to WEB-INF and META-INF
