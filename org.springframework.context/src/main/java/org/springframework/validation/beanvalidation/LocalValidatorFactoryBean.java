@@ -142,8 +142,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	/**
 	 * Specify bean validation properties to be passed to the validation provider.
-	 * <p>Can be populated with a String
-	 * "value" (parsed via PropertiesEditor) or a "props" element in XML bean definitions.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
 	 * @see javax.validation.Configuration#addProperty(String, String)
 	 */
 	public void setValidationProperties(Properties jpaProperties) {
@@ -152,8 +152,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	/**
 	 * Specify bean validation properties to be passed to the validation provider as a Map.
-	 * <p>Can be populated with a
-	 * "map" or "props" element in XML bean definitions.
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.validation.Configuration#addProperty(String, String)
 	 */
 	public void setValidationPropertyMap(Map<String, String> validationProperties) {
