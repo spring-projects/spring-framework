@@ -25,6 +25,12 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  * <code>${user.dir}</code>.  Default values can be supplied using the ":" separator between key 
  * and value.
  *
+ * TODO SPR-7508: review item - nearly all uses of {@link SystemPropertyUtils#resolvePlaceholders(String)}
+ * have been replaced by Environment#resolvePlaceholder(), however, there are several locations in the
+ * framework that cannot be so refactored as referring to Environment would introduce a cycle. Case in point
+ * Log4JConfigurer and Log4JWebConfigurer.  Need to unify this functionality one way or another. It's
+ * currently pure duplication.
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Dave Syer

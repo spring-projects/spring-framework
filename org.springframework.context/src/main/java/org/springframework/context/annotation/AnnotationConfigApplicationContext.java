@@ -16,8 +16,11 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 
 /**
  * Standalone application context, accepting annotated classes as input - in particular
@@ -46,6 +49,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 
 	private final ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this);
 
+	{ // TODO: rework this, it's a bit confusing
+		this.setEnvironment(this.getEnvironment());
+	}
 
 	/**
  	 * Create a new AnnotationConfigApplicationContext that needs to be populated
@@ -75,6 +81,15 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		refresh();
 	}
 
+	/**
+	 * TODO SPR-7508: document
+	 */
+	@Override
+	public void setEnvironment(ConfigurableEnvironment environment) {
+		super.setEnvironment(environment);
+		this.reader.setEnvironment(environment);
+		this.scanner.setEnvironment(environment);
+	}
 
 	/**
 	 * Set the BeanNameGenerator to use for detected bean classes.
@@ -93,7 +108,6 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		this.reader.setScopeMetadataResolver(scopeMetadataResolver);
 		this.scanner.setScopeMetadataResolver(scopeMetadataResolver);
 	}
-
 
 	/**
 	 * Register an annotated class to be processed. Allows for programmatically

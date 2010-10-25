@@ -16,6 +16,7 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
+import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 
 /**
@@ -32,7 +33,7 @@ public class AsmCircularImportDetectionTests extends AbstractCircularImportDetec
 
 	@Override
 	protected ConfigurationClassParser newParser() {
-		return new ConfigurationClassParser(new CachingMetadataReaderFactory(), new FailFastProblemReporter());
+		return new ConfigurationClassParser(new CachingMetadataReaderFactory(), new FailFastProblemReporter(), new DefaultEnvironment());
 	}
 
 	@Override

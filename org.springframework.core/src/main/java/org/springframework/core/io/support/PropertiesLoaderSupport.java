@@ -23,7 +23,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
@@ -45,11 +44,11 @@ public abstract class PropertiesLoaderSupport {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Properties[] localProperties;
+	protected Properties[] localProperties;
+
+	protected boolean localOverride = false;
 
 	private Resource[] locations;
-
-	private boolean localOverride = false;
 
 	private boolean ignoreResourceNotFound = false;
 

@@ -16,6 +16,14 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
+import static test.util.TestResourceUtils.qualifiedResource;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,18 +31,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import test.beans.IndexedTestBean;
-import test.beans.TestBean;
-import static test.util.TestResourceUtils.*;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
@@ -43,11 +45,15 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
 
+import test.beans.IndexedTestBean;
+import test.beans.TestBean;
+
 /**
  * Unit tests for various {@link PropertyResourceConfigurer} implementations including:
  * {@link PropertyPlaceholderConfigurer}, {@link PropertyOverrideConfigurer} and
  * {@link PreferencesPlaceholderConfigurer}.
  * 
+ * @see PropertyPlaceholderConfigurerTests
  * @since 02.10.2003
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -793,6 +799,39 @@ public final class PropertyResourceConfigurerTests {
 		Preferences.systemRoot().node("mySystemPath/myotherpath").remove("myTouchy");
 		Preferences.systemRoot().node("mySystemPath/mypath").remove("myName");
 	}
+
+	/* TODO SPR-7508: uncomment after EnvironmentAwarePropertyPlaceholderConfigurer implementation
+	@Test
+	public void testPreferencesPlaceholderConfigurerWithCustomPropertiesInEnvironment() {
+		factory.registerBeanDefinition("tb",
+			genericBeanDefinition(TestBean.class)
+			.addPropertyValue("name", "${mypath/myName}")
+			.addPropertyValue("age", "${myAge}")
+			.addPropertyValue("touchy", "${myotherpath/myTouchy}")
+			.getBeanDefinition());
+
+		Properties props = new Properties();
+		props.put("myAge", "99");
+		factory.getEnvironment().getPropertySources().add(new PropertiesPropertySource("localProps", props));
+
+		PreferencesPlaceholderConfigurer ppc = new PreferencesPlaceholderConfigurer();
+		ppc.setSystemTreePath("mySystemPath");
+		ppc.setUserTreePath("myUserPath");
+		Preferences.systemRoot().node("mySystemPath").node("mypath").put("myName", "myNameValue");
+		Preferences.systemRoot().node("mySystemPath/myotherpath").put("myTouchy", "myTouchyValue");
+		Preferences.userRoot().node("myUserPath/myotherpath").put("myTouchy", "myOtherTouchyValue");
+		ppc.afterPropertiesSet();
+		ppc.postProcessBeanFactory(factory);
+
+		TestBean tb = (TestBean) factory.getBean("tb");
+		assertEquals("myNameValue", tb.getName());
+		assertEquals(99, tb.getAge());
+		assertEquals("myOtherTouchyValue", tb.getTouchy());
+		Preferences.userRoot().node("myUserPath/myotherpath").remove("myTouchy");
+		Preferences.systemRoot().node("mySystemPath/myotherpath").remove("myTouchy");
+		Preferences.systemRoot().node("mySystemPath/mypath").remove("myName");
+	}
+	*/
 
 
 	private static class ConvertingOverrideConfigurer extends PropertyOverrideConfigurer {

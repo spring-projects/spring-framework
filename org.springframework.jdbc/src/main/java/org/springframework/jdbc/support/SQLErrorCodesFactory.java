@@ -103,6 +103,7 @@ public class SQLErrorCodesFactory {
 			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 			lbf.setBeanClassLoader(getClass().getClassLoader());
 			XmlBeanDefinitionReader bdr = new XmlBeanDefinitionReader(lbf);
+			// TODO: SPR-7508 consider setEnvironment() here
 
 			// Load default SQL error codes.
 			Resource resource = loadResource(SQL_ERROR_CODE_DEFAULT_PATH);

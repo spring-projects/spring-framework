@@ -110,7 +110,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class)
 	 */
-	String[] getBeanNamesForType(Class type);
+	String[] getBeanNamesForType(Class<?> type);
 
 	/**
 	 * Return the names of beans matching the given type (including subclasses),
@@ -123,7 +123,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
 	 * type. If "allowEagerInit" is not set, only raw FactoryBeans will be checked
 	 * (which doesn't require initialization of each FactoryBean).
-$	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beanNamesForTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
@@ -143,7 +143,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * @see FactoryBean#getObjectType
 	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, Class, boolean, boolean)
 	 */
-	String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit);
+	String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit);
 
 	/**
 	 * Return the bean instances that match the given object type (including

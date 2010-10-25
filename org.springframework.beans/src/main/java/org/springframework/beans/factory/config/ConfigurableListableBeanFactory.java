@@ -44,7 +44,7 @@ public interface ConfigurableListableBeanFactory
 	 * for example, String. Default is none.
 	 * @param type the dependency type to ignore
 	 */
-	void ignoreDependencyType(Class type);
+	void ignoreDependencyType(Class<?> type);
 
 	/**
 	 * Ignore the given dependency interface for autowiring.
@@ -57,7 +57,7 @@ public interface ConfigurableListableBeanFactory
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
 	 */
-	void ignoreDependencyInterface(Class ifc);
+	void ignoreDependencyInterface(Class<?> ifc);
 
 	/**
 	 * Register a special dependency type with corresponding autowired value.
@@ -75,7 +75,7 @@ public interface ConfigurableListableBeanFactory
 	 * implementation of the {@link org.springframework.beans.factory.ObjectFactory}
 	 * interface, which allows for lazy resolution of the actual target value.
 	 */
-	void registerResolvableDependency(Class dependencyType, Object autowiredValue);
+	void registerResolvableDependency(Class<?> dependencyType, Object autowiredValue);
 
 	/**
 	 * Determine whether the specified bean qualifies as an autowire candidate,

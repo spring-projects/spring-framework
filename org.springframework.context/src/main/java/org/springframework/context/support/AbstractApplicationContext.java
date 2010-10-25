@@ -18,7 +18,6 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -33,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -54,6 +52,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.MessageSource;
@@ -73,6 +72,8 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -203,7 +204,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
 	/** Statically specified listeners */
-	private Set<ApplicationListener> applicationListeners = new LinkedHashSet<ApplicationListener>();
+	private Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<ApplicationListener<?>>();
+
+	/** TODO SPR-7508: document */
+	private ConfigurableEnvironment environment = new DefaultEnvironment();
 
 
 	/**
@@ -269,6 +273,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	public ApplicationContext getParent() {
 		return this.parent;
+	}
+
+	public ConfigurableEnvironment getEnvironment() {
+		return this.environment;
+	}
+
+	public void setEnvironment(ConfigurableEnvironment environment) {
+		this.environment = environment;
 	}
 
 	/**
@@ -363,6 +375,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.beanFactoryPostProcessors.add(beanFactoryPostProcessor);
 	}
 
+
 	/**
 	 * Return the list of BeanFactoryPostProcessors that will get applied
 	 * to the internal BeanFactory.
@@ -371,7 +384,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.beanFactoryPostProcessors;
 	}
 
-	public void addApplicationListener(ApplicationListener listener) {
+	public void addApplicationListener(ApplicationListener<?> listener) {
 		if (this.applicationEventMulticaster != null) {
 			this.applicationEventMulticaster.addApplicationListener(listener);
 		}
@@ -383,7 +396,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Return the list of statically specified ApplicationListeners.
 	 */
-	public Collection<ApplicationListener> getApplicationListeners() {
+	public Collection<ApplicationListener<?>> getApplicationListeners() {
 		return this.applicationListeners;
 	}
 
@@ -481,7 +494,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Tell the internal bean factory to use the context's class loader etc.
 		beanFactory.setBeanClassLoader(getClassLoader());
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
-		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
+		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, this.getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
@@ -489,6 +502,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
 		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
 		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
@@ -505,54 +519,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
+		if (!beanFactory.containsBean(ENVIRONMENT_BEAN_NAME)) {
+			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
+		}
+
 		if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
-			Map systemProperties;
-			try {
-				systemProperties = System.getProperties();
-			}
-			catch (AccessControlException ex) {
-				systemProperties = new ReadOnlySystemAttributesMap() {
-					@Override
-					protected String getSystemAttribute(String propertyName) {
-						try {
-							return System.getProperty(propertyName);
-						}
-						catch (AccessControlException ex) {
-							if (logger.isInfoEnabled()) {
-								logger.info("Not allowed to obtain system property [" + propertyName + "]: " +
-										ex.getMessage());
-							}
-							return null;
-						}
-					}
-				};
-			}
-			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, systemProperties);
+			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
 		}
 
 		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
-			Map<String,String> systemEnvironment;
-			try {
-				systemEnvironment = System.getenv();
-			}
-			catch (AccessControlException ex) {
-				systemEnvironment = new ReadOnlySystemAttributesMap() {
-					@Override
-					protected String getSystemAttribute(String variableName) {
-						try {
-							return System.getenv(variableName);
-						}
-						catch (AccessControlException ex) {
-							if (logger.isInfoEnabled()) {
-								logger.info("Not allowed to obtain system environment variable [" + variableName + "]: " +
-										ex.getMessage());
-							}
-							return null;
-						}
-					}
-				};
-			}
-			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, systemEnvironment);
+			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
 		}
 	}
 
@@ -662,6 +638,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		for (BeanFactoryPostProcessor postProcessor : postProcessors) {
 			postProcessor.postProcessBeanFactory(beanFactory);
 		}
+	}
+
+	/**
+	 * Common location for subclasses to call and receive registration of standard
+	 * {@link BeanFactoryPostProcessor} bean definitions.
+	 *
+	 * @param registry subclass BeanDefinitionRegistry
+	 */
+	protected void registerStandardBeanFactoryPostProcessors(BeanDefinitionRegistry registry) {
 	}
 
 	/**
@@ -848,7 +833,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void registerListeners() {
 		// Register statically specified listeners first.
-		for (ApplicationListener listener : getApplicationListeners()) {
+		for (ApplicationListener<?> listener : getApplicationListeners()) {
 			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
@@ -869,7 +854,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @deprecated as of Spring 3.0, in favor of {@link #addApplicationListener}
 	 */
 	@Deprecated
-	protected void addListener(ApplicationListener listener) {
+	protected void addListener(ApplicationListener<?> listener) {
 		getApplicationEventMulticaster().addApplicationListener(listener);
 	}
 
@@ -1099,7 +1084,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().isPrototype(name);
 	}
 
-	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
 		return getBeanFactory().isTypeMatch(name, targetType);
 	}
 
@@ -1128,11 +1113,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBeanDefinitionNames();
 	}
 
-	public String[] getBeanNamesForType(Class type) {
+	public String[] getBeanNamesForType(Class<?> type) {
 		return getBeanFactory().getBeanNamesForType(type);
 	}
 
-	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
 
@@ -1347,7 +1332,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>();
 
-		public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+		public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 			if (beanDefinition.isSingleton()) {
 				this.singletonNames.put(beanName, Boolean.TRUE);
 			}
@@ -1363,7 +1348,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				Boolean flag = this.singletonNames.get(beanName);
 				if (Boolean.TRUE.equals(flag)) {
 					// singleton bean (top-level or inner): register on the fly
-					addApplicationListener((ApplicationListener) bean);
+					addApplicationListener((ApplicationListener<?>) bean);
 				}
 				else if (flag == null) {
 					if (logger.isWarnEnabled() && !containsBean(beanName)) {

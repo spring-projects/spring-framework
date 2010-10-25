@@ -65,6 +65,7 @@ import org.springframework.util.xml.XmlValidationModeDetector;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 26.11.2003
  * @see #setDocumentReaderClass
  * @see BeanDefinitionDocumentReader
@@ -103,7 +104,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	private boolean namespaceAware = false;
 
-	private Class documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
+	private Class<?> documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
@@ -133,7 +134,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		super(registry);
 	}
-
 
 	/**
 	 * Set whether to use XML validation. Default is <code>true</code>.
@@ -283,7 +283,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>The default is {@link DefaultBeanDefinitionDocumentReader}.
 	 * @param documentReaderClass the desired BeanDefinitionDocumentReader implementation class
 	 */
-	public void setDocumentReaderClass(Class documentReaderClass) {
+	public void setDocumentReaderClass(Class<?> documentReaderClass) {
 		if (documentReaderClass == null || !BeanDefinitionDocumentReader.class.isAssignableFrom(documentReaderClass)) {
 			throw new IllegalArgumentException(
 					"documentReaderClass must be an implementation of the BeanDefinitionDocumentReader interface");
@@ -487,8 +487,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
-		// Read document based on new BeanDefinitionDocumentReader SPI.
+		// Read document based on new BeanDefinitionDocumentReader SPI. // TODO SPR-7508: polish - remove comment
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
+		// TODO SPR-7508: remove ugly cast
+		if (documentReader instanceof DefaultBeanDefinitionDocumentReader) {
+			((DefaultBeanDefinitionDocumentReader)documentReader).setEnvironment(this.getEnvironment());
+		}
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 		return getRegistry().getBeanDefinitionCount() - countBefore;
@@ -500,7 +504,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>The default implementation instantiates the specified "documentReaderClass".
 	 * @see #setDocumentReaderClass
 	 */
-	@SuppressWarnings("unchecked")
 	protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
 		return BeanDefinitionDocumentReader.class.cast(BeanUtils.instantiateClass(this.documentReaderClass));
 	}

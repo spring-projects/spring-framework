@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
@@ -48,6 +49,7 @@ import org.springframework.util.PatternMatchUtils;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.5
  * @see AnnotationConfigApplicationContext#scan
  * @see org.springframework.stereotype.Component
@@ -87,6 +89,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * {@link org.springframework.context.ApplicationContext} implementations.
 	 * <p>If given a plain BeanDefinitionRegistry, the default ResourceLoader will be a
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
+	 * <p>If the the passed-in bean factory also implements {@link EnvironmentCapable} its
+	 * environment will be used by this reader.  Otherwise, the reader will initialize and
+	 * use a {@link DefaultEnvironment}. All ApplicationContext implementations are
+	 * EnvironmentCapable, while normal BeanFactory implementations are not.
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
 	 * @param useDefaultFilters whether to include the default filters for the
@@ -96,6 +102,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * {@link org.springframework.stereotype.Controller @Controller} stereotype
 	 * annotations.
 	 * @see #setResourceLoader
+	 * @see #setEnvironment
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters) {
 		super(useDefaultFilters);
@@ -106,6 +113,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		// Determine ResourceLoader to use.
 		if (this.registry instanceof ResourceLoader) {
 			setResourceLoader((ResourceLoader) this.registry);
+		}
+
+		// Inherit Environment if possible
+		if (this.registry instanceof EnvironmentCapable) {
+			setEnvironment(((EnvironmentCapable) this.registry).getEnvironment());
 		}
 	}
 

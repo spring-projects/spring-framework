@@ -68,6 +68,9 @@ import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -100,6 +103,7 @@ import org.springframework.util.StringValueResolver;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
+ * @author Chris Beams
  * @since 15 April 2001
  * @see #getBeanDefinition
  * @see #createBean
@@ -166,6 +170,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
 			new NamedThreadLocal<Object>("Prototype beans currently in creation");
 
+	private ConfigurableEnvironment environment = new DefaultEnvironment();
+
+
 	/**
 	 * Create a new AbstractBeanFactory.
 	 */
@@ -189,7 +196,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public Object getBean(String name) throws BeansException {
 		return doGetBean(name, null, null, false);
 	}
-		
+
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return doGetBean(name, requiredType, null, false);
 	}
@@ -682,7 +689,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.propertyEditorRegistrars;
 	}
 
-	public void registerCustomEditor(Class requiredType, Class<? extends PropertyEditor> propertyEditorClass) {
+	public void registerCustomEditor(Class<?> requiredType, Class<? extends PropertyEditor> propertyEditorClass) {
 		Assert.notNull(requiredType, "Required type must not be null");
 		Assert.isAssignable(PropertyEditor.class, propertyEditorClass);
 		this.customEditors.put(requiredType, propertyEditorClass);
@@ -1253,7 +1260,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
 		}
 	}
-	
+
 	private Class doResolveBeanClass(RootBeanDefinition mbd, Class... typesToMatch) throws ClassNotFoundException {
 		if (!ObjectUtils.isEmpty(typesToMatch)) {
 			ClassLoader tempClassLoader = getTempClassLoader();

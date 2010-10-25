@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.awt.dnd.Autoscroll;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -38,7 +39,9 @@ import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.Assert;
@@ -61,7 +64,8 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor, BeanClassLoaderAware {
+public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
+		BeanClassLoaderAware, EnvironmentAware {
 
 	/** Whether the CGLIB2 library is present on the classpath */
 	private static final boolean cglibAvailable = ClassUtils.isPresent(
@@ -83,6 +87,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private boolean postProcessBeanDefinitionRegistryCalled = false;
 
 	private boolean postProcessBeanFactoryCalled = false;
+
+	private Environment environment;
 
 
 	/**
@@ -121,8 +127,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
 	public int getOrder() {
-		return Ordered.HIGHEST_PRECEDENCE;
+		return Ordered.HIGHEST_PRECEDENCE + 1; // make room for AutoScanningBeanDefinitionRegistrar
 	}
 
 
@@ -180,7 +190,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Populate a new configuration model by parsing each @Configuration classes
-		ConfigurationClassParser parser = new ConfigurationClassParser(this.metadataReaderFactory, this.problemReporter);
+		ConfigurationClassParser parser = new ConfigurationClassParser(this.metadataReaderFactory, this.problemReporter, this.environment);
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {

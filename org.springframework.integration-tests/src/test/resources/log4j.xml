@@ -15,6 +15,10 @@
 		<level value="warn" />
 	</logger>
 
+	<logger name="org.springframework.beans.factory.xml.XmlBeanFactory">
+		<level value="error" />
+	</logger>
+
 	<logger name="org.springframework.binding">
 		<level value="debug" />
 	</logger>

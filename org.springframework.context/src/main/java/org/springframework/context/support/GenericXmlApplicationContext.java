@@ -17,7 +17,7 @@
 package org.springframework.context.support;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 
 /**
@@ -47,6 +47,7 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 	 * through {@link #load} calls and then manually {@link #refresh refreshed}.
 	 */
 	public GenericXmlApplicationContext() {
+		reader.setEnvironment(this.getEnvironment());
 	}
 
 	/**
@@ -88,6 +89,15 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 		this.reader.setValidating(validating);
 	}
 
+	/**
+	 * Set a custom environment.  Should be called before any call to
+	 * {@link #load}. TODO SPR-7508: document
+	 */
+	@Override
+	public void setEnvironment(ConfigurableEnvironment environment) {
+		super.setEnvironment(environment);
+		this.reader.setEnvironment(this.getEnvironment());
+	}
 
 	/**
 	 * Load bean definitions from the given XML resources.

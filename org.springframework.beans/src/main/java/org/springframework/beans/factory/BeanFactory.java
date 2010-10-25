@@ -87,6 +87,7 @@ import org.springframework.beans.BeansException;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 13 April 2001
  * @see BeanNameAware#setBeanName
  * @see BeanClassLoaderAware#setBeanClassLoader
@@ -112,7 +113,6 @@ public interface BeanFactory {
 	 * will return the factory, not the instance returned by the factory.
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
-
 
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
@@ -240,7 +240,7 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #getType
 	 */
-	boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException;
+	boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Determine the type of the bean with the given name. More specifically,

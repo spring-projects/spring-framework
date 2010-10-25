@@ -19,15 +19,12 @@ package org.springframework.beans.factory.config;
 import java.util.Properties;
 import java.util.Set;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Constants;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
-import org.springframework.util.StringValueResolver;
+
 
 /**
  * A property resource configurer that resolves placeholders in bean property values of
@@ -81,6 +78,7 @@ import org.springframework.util.StringValueResolver;
  * be detected and decrypted accordingly before processing them.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 02.10.2003
  * @see #setLocations
  * @see #setProperties
@@ -91,18 +89,8 @@ import org.springframework.util.StringValueResolver;
  * @see #convertPropertyValue
  * @see PropertyOverrideConfigurer
  */
-public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
+public class PropertyPlaceholderConfigurer extends AbstractPropertyPlaceholderConfigurer
 		implements BeanNameAware, BeanFactoryAware {
-
-	/** Default placeholder prefix: "${" */
-	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
-
-	/** Default placeholder suffix: "}" */
-	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
-
-	/** Default value separator: ":" */
-	public static final String DEFAULT_VALUE_SEPARATOR = ":";
-
 
 	/** Never check system properties. */
 	public static final int SYSTEM_PROPERTIES_MODE_NEVER = 0;
@@ -122,52 +110,10 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	private static final Constants constants = new Constants(PropertyPlaceholderConfigurer.class);
 
-	private String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
-
-	private String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
-
-	private String valueSeparator = DEFAULT_VALUE_SEPARATOR;
-
 	private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
 	private boolean searchSystemEnvironment = true;
 
-	private boolean ignoreUnresolvablePlaceholders = false;
-
-	private String nullValue;
-
-	private String beanName;
-
-	private BeanFactory beanFactory;
-
-
-	/**
-	 * Set the prefix that a placeholder string starts with.
-	 * The default is "${".
-	 * @see #DEFAULT_PLACEHOLDER_PREFIX
-	 */
-	public void setPlaceholderPrefix(String placeholderPrefix) {
-		this.placeholderPrefix = placeholderPrefix;
-	}
-
-	/**
-	 * Set the suffix that a placeholder string ends with.
-	 * The default is "}".
-	 * @see #DEFAULT_PLACEHOLDER_SUFFIX
-	 */
-	public void setPlaceholderSuffix(String placeholderSuffix) {
-		this.placeholderSuffix = placeholderSuffix;
-	}
-
-	/**
-	 * Specify the separating character between the placeholder variable
-	 * and the associated default value, or <code>null</code> if no such
-	 * special character should be processed as a value separator.
-	 * The default is ":".
-	 */
-	public void setValueSeparator(String valueSeparator) {
-		this.valueSeparator = valueSeparator;
-	}
 
 	/**
 	 * Set the system property mode by the name of the corresponding constant,
@@ -216,84 +162,6 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 */
 	public void setSearchSystemEnvironment(boolean searchSystemEnvironment) {
 		this.searchSystemEnvironment = searchSystemEnvironment;
-	}
-
-	/**
-	 * Set whether to ignore unresolvable placeholders.
-	 * <p>Default is "false": An exception will be thrown if a placeholder fails
-	 * to resolve. Switch this flag to "true" in order to preserve the placeholder
-	 * String as-is in such a case, leaving it up to other placeholder configurers
-	 * to resolve it.
-	 */
-	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
-		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
-	}
-
-	/**
-	 * Set a value that should be treated as <code>null</code> when
-	 * resolved as a placeholder value: e.g. "" (empty String) or "null".
-	 * <p>Note that this will only apply to full property values,
-	 * not to parts of concatenated values.
-	 * <p>By default, no such null value is defined. This means that
-	 * there is no way to express <code>null</code> as a property
-	 * value unless you explictly map a corresponding value here.
-	 */
-	public void setNullValue(String nullValue) {
-		this.nullValue = nullValue;
-	}
-
-	/**
-	 * Only necessary to check that we're not parsing our own bean definition,
-	 * to avoid failing on unresolvable placeholders in properties file locations.
-	 * The latter case can happen with placeholders for system properties in
-	 * resource locations.
-	 * @see #setLocations
-	 * @see org.springframework.core.io.ResourceEditor
-	 */
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
-
-	/**
-	 * Only necessary to check that we're not parsing our own bean definition,
-	 * to avoid failing on unresolvable placeholders in properties file locations.
-	 * The latter case can happen with placeholders for system properties in
-	 * resource locations.
-	 * @see #setLocations
-	 * @see org.springframework.core.io.ResourceEditor
-	 */
-	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
-	}
-
-
-	@Override
-	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
-			throws BeansException {
-
-		StringValueResolver valueResolver = new PlaceholderResolvingStringValueResolver(props);
-		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
-
-		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
-		for (String curName : beanNames) {
-			// Check that we're not parsing our own bean definition,
-			// to avoid failing on unresolvable placeholders in properties file locations.
-			if (!(curName.equals(this.beanName) && beanFactoryToProcess.equals(this.beanFactory))) {
-				BeanDefinition bd = beanFactoryToProcess.getBeanDefinition(curName);
-				try {
-					visitor.visitBeanDefinition(bd);
-				}
-				catch (Exception ex) {
-					throw new BeanDefinitionStoreException(bd.getResourceDescription(), curName, ex.getMessage());
-				}
-			}
-		}
-
-		// New in Spring 2.5: resolve placeholders in alias target names and aliases as well.
-		beanFactoryToProcess.resolveAliases(valueResolver);
-
-		// New in Spring 3.0: resolve placeholders in embedded values such as annotation attributes.
-		beanFactoryToProcess.addEmbeddedValueResolver(valueResolver);
 	}
 
 	/**
@@ -379,30 +247,16 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * Only retained for compatibility with Spring 2.5 extensions.
 	 */
 	@Deprecated
-	protected String parseStringValue(String strVal, Properties props, Set visitedPlaceholders) {
+	protected String parseStringValue(String strVal, Properties props, Set<?> visitedPlaceholders) {
 		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
 				placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
 		PlaceholderResolver resolver = new PropertyPlaceholderConfigurerResolver(props);
 		return helper.replacePlaceholders(strVal, resolver);
 	}
 
-
-	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
-
-		private final PropertyPlaceholderHelper helper;
-
-		private final PlaceholderResolver resolver;
-
-		public PlaceholderResolvingStringValueResolver(Properties props) {
-			this.helper = new PropertyPlaceholderHelper(
-					placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
-			this.resolver = new PropertyPlaceholderConfigurerResolver(props);
-		}
-
-		public String resolveStringValue(String strVal) throws BeansException {
-			String value = this.helper.replacePlaceholders(strVal, this.resolver);
-			return (value.equals(nullValue) ? null : value);
-		}
+	@Override
+	protected PlaceholderResolver getPlaceholderResolver(Properties props) {
+		return new PropertyPlaceholderConfigurerResolver(props);
 	}
 
 
@@ -418,5 +272,6 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName, props, systemPropertiesMode);
 		}
 	}
+
 
 }

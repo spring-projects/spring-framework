@@ -126,6 +126,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 				sec.addPropertyAccessor(new BeanFactoryAccessor());
 				sec.addPropertyAccessor(new MapAccessor());
+				sec.addPropertyAccessor(new EnvironmentAccessor());
 				sec.setBeanResolver(new BeanFactoryResolver(evalContext.getBeanFactory()));
 				sec.setTypeLocator(new StandardTypeLocator(evalContext.getBeanFactory().getBeanClassLoader()));
 				ConversionService conversionService = evalContext.getBeanFactory().getConversionService();

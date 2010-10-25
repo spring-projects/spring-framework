@@ -16,10 +16,30 @@
 
 package org.springframework.context.annotation;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.aspectj.lang.annotation.Aspect;
+import org.junit.Test;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+
+import example.profilescan.ProfileAnnotatedComponent;
 import example.scannable.FooDao;
 import example.scannable.FooService;
 import example.scannable.FooServiceImpl;
@@ -28,18 +48,6 @@ import example.scannable.NamedComponent;
 import example.scannable.NamedStubDao;
 import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
-import org.aspectj.lang.annotation.Aspect;
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.core.type.filter.RegexPatternTypeFilter;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 /**
  * @author Mark Fisher
@@ -49,7 +57,7 @@ import org.springframework.stereotype.Service;
 public class ClassPathScanningCandidateComponentProviderTests {
 
 	private static final String TEST_BASE_PACKAGE = "example.scannable";
-			//ClassPathScanningCandidateComponentProviderTests.class.getPackage().getName();
+	private static final String TEST_PROFILE_PACKAGE = "example.profilescan";
 
 
 	@Test
@@ -102,7 +110,6 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		assertFalse(containsBeanClass(candidates, NamedStubDao.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testWithAspectAnnotationOnly() throws Exception {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
@@ -153,6 +160,59 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		assertTrue(containsBeanClass(candidates, NamedComponent.class));
 		assertTrue(containsBeanClass(candidates, ServiceInvocationCounter.class));
 		assertFalse(containsBeanClass(candidates, FooServiceImpl.class));
+	}
+
+	@Test
+	public void testWithNullEnvironment() {
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
+		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_PROFILE_PACKAGE);
+		assertThat(containsBeanClass(candidates, ProfileAnnotatedComponent.class), is(false));
+	}
+
+	@Test
+	public void testWithInactiveProfile() {
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
+		ConfigurableEnvironment env = new DefaultEnvironment();
+		env.setActiveProfiles("other");
+		provider.setEnvironment(env);
+		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_PROFILE_PACKAGE);
+		assertThat(containsBeanClass(candidates, ProfileAnnotatedComponent.class), is(false));
+	}
+
+	@Test
+	public void testWithActiveProfile() {
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
+		ConfigurableEnvironment env = new DefaultEnvironment();
+		env.setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
+		provider.setEnvironment(env);
+		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_PROFILE_PACKAGE);
+		assertThat(containsBeanClass(candidates, ProfileAnnotatedComponent.class), is(true));
+	}
+
+	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_noProfile() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ProfileAnnotatedComponent.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(false));
+	}
+
+	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_validProfile() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getEnvironment().setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
+		ctx.register(ProfileAnnotatedComponent.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(true));
+	}
+
+	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_invalidProfile() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getEnvironment().setActiveProfiles("other");
+		ctx.register(ProfileAnnotatedComponent.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(false));
 	}
 
 	private boolean containsBeanClass(Set<BeanDefinition> candidates, Class beanClass) {

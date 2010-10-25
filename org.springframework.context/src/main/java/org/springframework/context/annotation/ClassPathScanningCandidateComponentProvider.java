@@ -25,11 +25,13 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -46,7 +48,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.SystemPropertyUtils;
 
 /**
  * A component provider that scans the classpath from a base package. It then
@@ -59,17 +60,20 @@ import org.springframework.util.SystemPropertyUtils;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
+ * @author Chris Beams
  * @since 2.5
  * @see org.springframework.core.type.classreading.MetadataReaderFactory
  * @see org.springframework.core.type.AnnotationMetadata
  * @see ScannedGenericBeanDefinition
  */
-public class ClassPathScanningCandidateComponentProvider implements ResourceLoaderAware {
+public class ClassPathScanningCandidateComponentProvider implements EnvironmentCapable, ResourceLoaderAware {
 
 	private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private Environment environment = new DefaultEnvironment();
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -108,6 +112,20 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
+	}
+
+	/**
+	 * TODO SPR-7508: document
+	 */
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	/**
+	 * TODO SPR-7508: document
+	 */
+	public Environment getEnvironment() {
+		return this.environment;
 	}
 
 	/**
@@ -261,7 +279,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	 * @return the pattern specification to be used for package searching
 	 */
 	protected String resolveBasePackage(String basePackage) {
-		return ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage));
+		return ClassUtils.convertClassNameToResourcePath(environment.resolveRequiredPlaceholders(basePackage));
 	}
 
 	/**
@@ -278,11 +296,27 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 		}
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
-				return true;
+				return hasEligibleProfile(metadataReader);
 			}
 		}
 		return false;
 	}
+
+	private boolean hasEligibleProfile(MetadataReader metadataReader) {
+		boolean hasEligibleProfile = false;
+		if (!metadataReader.getAnnotationMetadata().hasAnnotation(Profile.class.getName())) {
+			hasEligibleProfile = true;
+		} else {
+			for (String profile : (String[])metadataReader.getAnnotationMetadata().getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME)) {
+				if (this.environment.getActiveProfiles().contains(profile)) {
+					hasEligibleProfile = true;
+					break;
+				}
+			}
+		}
+		return hasEligibleProfile;
+	}
+
 
 	/**
 	 * Determine whether the given bean definition qualifies as candidate.

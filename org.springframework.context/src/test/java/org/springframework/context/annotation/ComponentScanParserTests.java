@@ -16,7 +16,12 @@
 
 package org.springframework.context.annotation;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,11 +31,14 @@ import java.lang.annotation.Target;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
+import example.profilescan.ProfileAnnotatedComponent;
 import example.scannable.AutowiredQualifierFooService;
 
 /**
@@ -86,6 +94,31 @@ public class ComponentScanParserTests {
 				"org/springframework/context/annotation/customTypeFilterTests.xml");
 		CustomAnnotationAutowiredBean testBean = (CustomAnnotationAutowiredBean) context.getBean("testBean");
 		assertNotNull(testBean.getDependency());
+	}
+
+	@Test
+	public void testComponentScanRespectsProfileAnnotation() {
+		String xmlLocation = "org/springframework/context/annotation/componentScanRespectsProfileAnnotationTests.xml";
+		{ // should exclude the profile-annotated bean if active profiles remains unset
+			GenericXmlApplicationContext context = new GenericXmlApplicationContext();
+			context.load(xmlLocation);
+			context.refresh();
+			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(false));
+		}
+		{ // should include the profile-annotated bean with active profiles set
+			GenericXmlApplicationContext context = new GenericXmlApplicationContext();
+			context.getEnvironment().setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
+			context.load(xmlLocation);
+			context.refresh();
+			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(true));
+		}
+		{ // ensure the same works for AbstractRefreshableApplicationContext impls too
+			ConfigurableApplicationContext context =
+				new ClassPathXmlApplicationContext(new String[]{xmlLocation}, false);
+			context.getEnvironment().setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
+			context.refresh();
+			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(true));
+		}
 	}
 
 

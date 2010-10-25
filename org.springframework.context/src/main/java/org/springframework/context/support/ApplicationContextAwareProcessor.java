@@ -27,8 +27,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.env.Environment;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -37,18 +39,24 @@ import org.springframework.util.StringValueResolver;
  * implement the {@link ResourceLoaderAware}, {@link MessageSourceAware},
  * {@link ApplicationEventPublisherAware} and/or
  * {@link ApplicationContextAware} interfaces.
- * If all of them are implemented, they are satisfied in the given order.
+ * 
+ * <p>Also delegates the ApplicationContext {@link Environment} instance
+ * to beans that implement {@link EnvironmentAware}.
+ * 
+ * <p>Implemented interfaces are satisfied in order of their mention above.
  *
  * <p>Application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
+ * @author Chris Beams
  * @since 10.10.2003
  * @see org.springframework.context.ResourceLoaderAware
  * @see org.springframework.context.MessageSourceAware
  * @see org.springframework.context.ApplicationEventPublisherAware
  * @see org.springframework.context.ApplicationContextAware
+ * @see org.springframework.context.EnvironmentAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
 class ApplicationContextAwareProcessor implements BeanPostProcessor {
@@ -104,6 +112,9 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		}
 		if (bean instanceof ApplicationContextAware) {
 			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
+		}
+		if (bean instanceof EnvironmentAware) {
+			((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
 		}
 	}
 

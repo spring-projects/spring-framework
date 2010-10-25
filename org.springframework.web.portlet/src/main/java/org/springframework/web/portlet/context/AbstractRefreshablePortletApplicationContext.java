@@ -21,6 +21,7 @@ import javax.portlet.PortletContext;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
 import org.springframework.core.io.Resource;
@@ -167,4 +168,8 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		return new PortletContextResourcePatternResolver(this);
 	}
 
+	@Override
+	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		super.customizeBeanFactory(beanFactory);
+	}
 }

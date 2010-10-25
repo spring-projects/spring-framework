@@ -37,6 +37,9 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.DefaultWebEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -74,7 +77,7 @@ import org.springframework.web.util.NestedServletException;
  * @see #doFilter
  */
 public abstract class GenericFilterBean implements
-		Filter, BeanNameAware, ServletContextAware, InitializingBean, DisposableBean {
+		Filter, BeanNameAware, EnvironmentAware, ServletContextAware, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -88,8 +91,14 @@ public abstract class GenericFilterBean implements
 	/* The FilterConfig of this filter */
 	private FilterConfig filterConfig;
 
-
 	private String beanName;
+
+	/**
+	 * TODO SPR-7508: document
+	 * Defaults to {@link DefaultWebEnvironment}; can be overriden if deployed
+	 * as a spring bean by {@link #setEnvironment(Environment)}
+	 */
+	private Environment environment = new DefaultWebEnvironment();
 
 	private ServletContext servletContext;
 
@@ -103,6 +112,13 @@ public abstract class GenericFilterBean implements
 	 */
 	public final void setBeanName(String beanName) {
 		this.beanName = beanName;
+	}
+
+	/**
+	 * TODO SPR-7508: document
+	 */
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
 	}
 
 	/**
@@ -164,7 +180,7 @@ public abstract class GenericFilterBean implements
 			PropertyValues pvs = new FilterConfigPropertyValues(filterConfig, this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(filterConfig.getServletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.environment));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}

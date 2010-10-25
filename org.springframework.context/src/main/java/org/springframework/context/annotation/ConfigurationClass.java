@@ -105,7 +105,6 @@ final class ConfigurationClass {
 		return this.importedResources;
 	}
 
-
 	public void validate(ProblemReporter problemReporter) {
 		// An @Bean method may only be overloaded through inheritance. No single
 		// @Configuration class may declare two @Bean methods with the same name.

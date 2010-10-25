@@ -136,6 +136,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 
 		// Load XML resource with context-aware entity resolver.
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		reader.setEnvironment(getApplicationContext().getEnvironment());
 		reader.setEntityResolver(new ResourceEntityResolver(getApplicationContext()));
 		reader.loadBeanDefinitions(actualLocation);
 

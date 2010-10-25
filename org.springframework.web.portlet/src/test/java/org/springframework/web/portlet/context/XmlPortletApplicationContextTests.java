@@ -118,7 +118,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 	
 	public void testCount() {
 		assertTrue("should have 16 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
-				this.applicationContext.getBeanDefinitionCount() == 16);	
+				this.applicationContext.getBeanDefinitionCount() == 16);
 	}
 	
 	public void testPortletContextAwareBean() {

@@ -27,6 +27,7 @@ import java.util.Stack;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
@@ -63,14 +64,18 @@ class ConfigurationClassParser {
 	private final Set<ConfigurationClass> configurationClasses =
 		new LinkedHashSet<ConfigurationClass>();
 
+	private final Environment environment;
+
 
 	/**
 	 * Create a new {@link ConfigurationClassParser} instance that will be used
 	 * to populate the set of configuration classes.
 	 */
-	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory, ProblemReporter problemReporter) {
+	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory,
+			ProblemReporter problemReporter, Environment environment) {
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
+		this.environment = environment;
 	}
 
 
@@ -95,8 +100,28 @@ class ConfigurationClassParser {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName));
 	}
 
-
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
+		boolean hasEligibleProfile = false;
+		if (this.environment == null) {
+			hasEligibleProfile = true;
+		} else {
+			if (!configClass.getMetadata().hasAnnotation(Profile.class.getName())) {
+				hasEligibleProfile = true;
+			} else {
+				for (String profile : (String[])configClass.getMetadata().getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME)) {
+					if (this.environment.getActiveProfiles().contains(profile)) {
+						hasEligibleProfile = true;
+						break;
+					}
+				}
+			}
+		}
+		if (!hasEligibleProfile) {
+			//logger.debug("TODO SPR-7508: issue debug statement that this class is being excluded");
+			// make sure XML has a symmetrical statement as well
+			return;
+		}
+
 		AnnotationMetadata metadata = configClass.getMetadata();
 		while (metadata != null) {
 			doProcessConfigurationClass(configClass, metadata);
@@ -120,6 +145,7 @@ class ConfigurationClassParser {
 			// Let's remove the old one and go with the new one.
 			this.configurationClasses.remove(configClass);
 		}
+
 		this.configurationClasses.add(configClass);
 	}
 

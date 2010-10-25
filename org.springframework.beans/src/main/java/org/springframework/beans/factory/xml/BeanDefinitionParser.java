@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public interface BeanDefinitionParser {
 	/**
 	 * Parse the specified {@link Element} and register the resulting
 	 * {@link BeanDefinition BeanDefinition(s)} with the
-	 * {@link org.springframework.beans.factory.xml.ParserContext#getRegistry()} BeanDefinitionRegistry}
+	 * {@link org.springframework.beans.factory.xml.ParserContext#getRegistry() BeanDefinitionRegistry}
 	 * embedded in the supplied {@link ParserContext}.
 	 * <p>Implementations must return the primary {@link BeanDefinition} that results
 	 * from the parse if they will ever be used in a nested fashion (for example as
@@ -50,7 +50,8 @@ public interface BeanDefinitionParser {
 	 * <code>null</code> if they will <strong>not</strong> be used in a nested fashion.
 	 * @param element the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
 	 * @param parserContext the object encapsulating the current state of the parsing process;
-	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry
+	 * BeanDefinitionRegistry}.
 	 * @return the primary {@link BeanDefinition}
 	 */
 	BeanDefinition parse(Element element, ParserContext parserContext);

@@ -21,6 +21,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.DefaultWebEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
@@ -60,6 +61,11 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 	private ThemeSource themeSource;
 
+	// override superclass definition of environment
+	// TODO SPR-7508: polish
+	{
+		this.setEnvironment(new DefaultWebEnvironment());
+	}
 
 	/**
 	 * Create a new GenericWebApplicationContext.
@@ -154,6 +160,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	@Override
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
+		this.getEnvironment().getPropertySources().push(new ServletContextPropertySource(servletContext));
 	}
 
 	public Theme getTheme(String themeName) {
