@@ -23,6 +23,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.env.DefaultWebEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.web.context.WebApplicationContext;
@@ -60,6 +61,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 
 	public StaticPortletApplicationContext() {
 		setDisplayName("Root Portlet ApplicationContext");
+		setEnvironment(new DefaultWebEnvironment()); // TODO SPR-7508: create custom portlet env?
 	}
 
 

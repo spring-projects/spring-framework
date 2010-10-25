@@ -152,11 +152,12 @@ public class ClassPathBeanDefinitionScannerTests {
 	public void testSimpleScanWithDefaultFiltersAndOverriddenEqualNamedBean() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("myNamedDao", new RootBeanDefinition(NamedStubDao.class));
+		int initialBeanCount = context.getBeanDefinitionCount();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
-		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(5, beanCount);
-		assertEquals(6, context.getBeanDefinitionCount());
+		int scannedBeanCount = scanner.scan(BASE_PACKAGE);
+		assertEquals(5, scannedBeanCount);
+		assertEquals(initialBeanCount + scannedBeanCount, context.getBeanDefinitionCount());
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
@@ -170,11 +171,12 @@ public class ClassPathBeanDefinitionScannerTests {
 		RootBeanDefinition bd = new RootBeanDefinition(NamedStubDao.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("myNamedDao", bd);
+		int initialBeanCount = context.getBeanDefinitionCount();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
-		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(5, beanCount);
-		assertEquals(6, context.getBeanDefinitionCount());
+		int scannedBeanCount = scanner.scan(BASE_PACKAGE);
+		assertEquals(5, scannedBeanCount);
+		assertEquals(initialBeanCount + scannedBeanCount, context.getBeanDefinitionCount());
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
@@ -362,11 +364,12 @@ public class ClassPathBeanDefinitionScannerTests {
 	public void testMultipleScanCalls() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(10, beanCount);
-		assertEquals(beanCount, context.getBeanDefinitionCount());
+		int initialBeanCount = context.getBeanDefinitionCount();
+		int scannedBeanCount = scanner.scan(BASE_PACKAGE);
+		assertEquals(10, scannedBeanCount);
+		assertEquals(scannedBeanCount, context.getBeanDefinitionCount() - initialBeanCount);
 		int addedBeanCount = scanner.scan("org.springframework.aop.aspectj.annotation");
-		assertEquals(beanCount + addedBeanCount, context.getBeanDefinitionCount());
+		assertEquals(initialBeanCount + scannedBeanCount + addedBeanCount, context.getBeanDefinitionCount());
 	}
 
 	@Test

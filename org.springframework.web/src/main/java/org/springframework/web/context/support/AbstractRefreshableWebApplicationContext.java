@@ -21,6 +21,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
+import org.springframework.core.env.DefaultWebEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
@@ -92,11 +93,14 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	public AbstractRefreshableWebApplicationContext() {
 		setDisplayName("Root WebApplicationContext");
+		setEnvironment(new DefaultWebEnvironment());
 	}
 
 
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
+		// TODO: SPR-7508 extract createEnvironment() method; do also in GWAC
+		this.getEnvironment().getPropertySources().push(new ServletContextPropertySource(this.servletContext));
 	}
 
 	public ServletContext getServletContext() {
@@ -106,8 +110,10 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
 		if (servletConfig != null && this.servletContext == null) {
-			this.servletContext = servletConfig.getServletContext();
+			this.setServletContext(servletConfig.getServletContext());
 		}
+		// TODO: SPR-7508 extract createEnvironment() method; do also in GWAC
+		this.getEnvironment().getPropertySources().push(new ServletConfigPropertySource(servletConfig));
 	}
 
 	public ServletConfig getServletConfig() {

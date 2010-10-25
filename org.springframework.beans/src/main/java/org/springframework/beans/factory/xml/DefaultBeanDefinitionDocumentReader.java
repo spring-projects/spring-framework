@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.xml;
 
+import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
+import static org.springframework.util.StringUtils.trimAllWhitespace;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
@@ -32,11 +35,11 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Default implementation of the {@link BeanDefinitionDocumentReader} interface.
@@ -59,6 +62,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	public static final String BEAN_ELEMENT = BeanDefinitionParserDelegate.BEAN_ELEMENT;
 
+	public static final String NESTED_BEANS_ELEMENT = "beans";
+
 	public static final String ALIAS_ELEMENT = "alias";
 
 	public static final String NAME_ATTRIBUTE = "name";
@@ -69,14 +74,29 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	public static final String RESOURCE_ATTRIBUTE = "resource";
 
+	/** @see org.springframework.context.annotation.Profile */
+	public static final String PROFILE_ATTRIBUTE = "profile";
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private XmlReaderContext readerContext;
 
+	private Environment environment;
+
+	private BeanDefinitionParserDelegate delegate;
+
 
 	/**
-	 * Parses bean definitions according to the "spring-beans" DTD.
+	 * TODO SPR-7508: document
+	 * @param environment
+	 */
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	/**
+	 * Parses bean definitions according to the "spring-beans" DTD. TODO SPR-7508 XSD
 	 * <p>Opens a DOM Document; then initializes the default settings
 	 * specified at <code>&lt;beans&gt;</code> level; then parses
 	 * the contained bean definitions.
@@ -87,16 +107,49 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
 
-		BeanDefinitionParserDelegate delegate = createHelper(readerContext, root);
-
-		preProcessXml(root);
-		parseBeanDefinitions(root, delegate);
-		postProcessXml(root);
+		doRegisterBeanDefinitions(root);
 	}
 
-	protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root) {
-		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
-		delegate.initDefaults(root);
+	protected void doRegisterBeanDefinitions(Element root) {
+		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
+		boolean isCandidate = false;
+		if (profileSpec == null || profileSpec.equals("")) {
+			isCandidate = true;
+		} else {
+			String[] profiles = commaDelimitedListToStringArray(trimAllWhitespace(profileSpec));
+			for (String profile : profiles) {
+				if (this.environment.getActiveProfiles().contains(profile)) {
+					isCandidate = true;
+					break;
+				}
+			}
+		}
+
+		if (!isCandidate) {
+			// TODO SPR-7508 logging
+			// logger.debug(format("XML is targeted for environment [%s], but current environment is [%s]. Skipping", targetEnvironment, environment == null ? null : environment.getName()));
+			return;
+		}
+
+		// any nested <beans> elements will cause recursion in this method. in
+		// order to propagate and preserve <beans> default-* attributes correctly,
+		// keep track of the current (parent) delegate, which may be null. Create
+		// the new (child) delegate with a reference to the parent for fallback purposes,
+		// then ultimately reset this.delegate back to its original (parent) reference.
+		// this behavior emulates a stack of delegates without actually necessitating one.
+		BeanDefinitionParserDelegate parent = this.delegate;
+		this.delegate = createHelper(readerContext, root, parent);
+
+		preProcessXml(root);
+		parseBeanDefinitions(root, this.delegate);
+		postProcessXml(root);
+
+		this.delegate = parent;
+	}
+
+	protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext, environment);
+		delegate.initDefaults(root, parentDelegate);
 		return delegate;
 	}
 
@@ -152,6 +205,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			processBeanDefinition(ele, delegate);
 		}
+		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
+			// recurse
+			doRegisterBeanDefinitions(ele);
+		}
 	}
 
 	/**
@@ -166,7 +223,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		// Resolve system properties: e.g. "${user.dir}"
-		location = SystemPropertyUtils.resolvePlaceholders(location);
+		location = environment.resolveRequiredPlaceholders(location);
 
 		Set<Resource> actualResources = new LinkedHashSet<Resource>(4);
 

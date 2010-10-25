@@ -24,6 +24,9 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * Convenient adapter for programmatic registration of annotated bean classes.
@@ -31,12 +34,15 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
  * the same resolution of annotations but for explicitly registered classes only.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
  * @see AnnotationConfigApplicationContext#register
  */
 public class AnnotatedBeanDefinitionReader {
 
 	private final BeanDefinitionRegistry registry;
+
+	private Environment environment = new DefaultEnvironment();
 
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
@@ -62,8 +68,16 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * Set the Environment to use when registering classes.
+	 * <p>The default is a {@link DefaultEnvironment}.
+	 */
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	/**
 	 * Set the BeanNameGenerator to use for detected bean classes.
-	 * <p>Default is a {@link AnnotationBeanNameGenerator}.
+	 * <p>The default is a {@link AnnotationBeanNameGenerator}.
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
@@ -92,8 +106,45 @@ public class AnnotatedBeanDefinitionReader {
 		registerBean(annotatedClass, null, qualifiers);
 	}
 
+	private boolean hasEligibleProfile(AnnotationMetadata metadata) {
+		boolean hasEligibleProfile = false;
+		if (!metadata.hasAnnotation(Profile.class.getName())) {
+			hasEligibleProfile = true;
+		} else {
+			for (String profile : (String[])metadata.getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME)) {
+				if (this.environment.getActiveProfiles().contains(profile)) {
+					hasEligibleProfile = true;
+					break;
+				}
+			}
+		}
+		return hasEligibleProfile;
+	}
+
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+		if (!hasEligibleProfile(abd.getMetadata())) {
+			// TODO SPR-7508: log that this bean is being rejected on profile mismatch
+			return;
+		}
+		/*
+		if (metadata.hasAnnotation(Profile.class.getName())) {
+			if (this.environment == null) {
+				return;
+			}
+			Map<String, Object> profileAttribs = metadata.getAnnotationAttributes(Profile.class.getName());
+			String[] names = (String[]) profileAttribs.get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
+			boolean go=false;
+			for (String pName : names) {
+				if (this.environment.getActiveProfiles().contains(pName)) {
+					go = true;
+				}
+			}
+			if (!go) {
+				return;
+			}
+		}
+		*/
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));

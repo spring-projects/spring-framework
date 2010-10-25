@@ -117,9 +117,13 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * system property values if necessary. Applied to config locations.
 	 * @param path the original file path
 	 * @return the resolved file path
-	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
+	 * @see SystemPropertyUtils#resolveRequiredPlaceholders(String)
 	 */
 	protected String resolvePath(String path) {
+		// TODO SPR-7508: note that ARAC cannot delegate to its beanFactory's environment
+		// to call Environment.resolve[Required]Placeholders(String), as the bean factory
+		// has not yet been initialized.  This amounts to one more reason not to use the ARAC
+		// hierarchy - it won't have early access to environment property resolution.
 		return SystemPropertyUtils.resolvePlaceholders(path);
 	}
 

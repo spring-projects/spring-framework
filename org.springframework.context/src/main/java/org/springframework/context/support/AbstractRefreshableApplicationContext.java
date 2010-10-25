@@ -53,6 +53,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * supports {@literal @Configuration}-annotated classes as a source of bean definitions.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.1.3
  * @see #loadBeanDefinitions
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
@@ -217,6 +218,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 		beanFactory.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		registerStandardBeanFactoryPostProcessors(beanFactory);
 	}
 
 	/**

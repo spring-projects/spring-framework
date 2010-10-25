@@ -203,6 +203,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public void setAutowireCandidateResolver(final AutowireCandidateResolver autowireCandidateResolver) {
 		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
+		// TODO SPR-7515: should also do EnvironmentAware injection here?
 		if (autowireCandidateResolver instanceof BeanFactoryAware) {
 			if (System.getSecurityManager() != null) {
 				final BeanFactory target = this;
@@ -460,7 +461,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ConfigurableListableBeanFactory interface
 	//---------------------------------------------------------------------
 
-	public void registerResolvableDependency(Class dependencyType, Object autowiredValue) {
+	public void registerResolvableDependency(Class<?> dependencyType, Object autowiredValue) {
 		Assert.notNull(dependencyType, "Type must not be null");
 		if (autowiredValue != null) {
 			Assert.isTrue((autowiredValue instanceof ObjectFactory || dependencyType.isInstance(autowiredValue)),

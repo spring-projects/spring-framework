@@ -27,13 +27,14 @@ import javax.portlet.PortletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.core.env.DefaultWebEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -74,7 +75,12 @@ public abstract class GenericPortletBean extends GenericPortlet {
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	
+	/**
+	 * TODO SPR-7508: think about making this overridable {@link EnvironmentAware}?
+	 */
+	private Environment environment = new DefaultWebEnvironment();
+
+
 	/**
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
@@ -103,7 +109,7 @@ public abstract class GenericPortletBean extends GenericPortlet {
 			PropertyValues pvs = new PortletConfigPropertyValues(getPortletConfig(), this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new PortletContextResourceLoader(getPortletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.environment));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}

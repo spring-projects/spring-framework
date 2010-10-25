@@ -34,6 +34,9 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.DefaultWebEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -83,6 +86,11 @@ public abstract class HttpServletBean extends HttpServlet {
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
+	/**
+	 * TODO SPR-7508: think about making this overridable {@link EnvironmentAware}?
+	 */
+	private Environment environment = new DefaultWebEnvironment();
+
 
 	/**
 	 * Subclasses can invoke this method to specify that this property
@@ -114,7 +122,7 @@ public abstract class HttpServletBean extends HttpServlet {
 			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.environment));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}

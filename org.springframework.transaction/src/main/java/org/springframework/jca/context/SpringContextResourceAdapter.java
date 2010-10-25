@@ -166,6 +166,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 				new ResourceAdapterApplicationContext(bootstrapContext);
 		// Set ResourceAdapter's ClassLoader as bean class loader.
 		applicationContext.setClassLoader(getClass().getClassLoader());
+		// TODO: SPR-7508 consider setEnvironment() here
 		// Extract individual config locations.
 		String[] configLocations =
 				StringUtils.tokenizeToStringArray(getContextConfigLocation(), CONFIG_LOCATION_DELIMITERS);
@@ -184,6 +185,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 * @see #setContextConfigLocation
 	 */
 	protected void loadBeanDefinitions(BeanDefinitionRegistry registry, String[] configLocations) {
+		// TODO: SPR-7508 consider setEnvironment() here
 		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(configLocations);
 	}
 

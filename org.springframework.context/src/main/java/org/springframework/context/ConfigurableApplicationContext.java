@@ -19,6 +19,8 @@ package org.springframework.context;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * methods should only be used by startup and shutdown code.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 03.11.2003
  */
 public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle {
@@ -58,6 +61,11 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
 	 */
 	String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
+
+	/**
+	 * Name of the {@link Environment} bean in the factory.
+	 */
+	String ENVIRONMENT_BEAN_NAME = "environment";
 
 	/**
 	 * Name of the System properties bean in the factory.
@@ -88,6 +96,16 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void setParent(ApplicationContext parent);
 
 	/**
+	 * TODO SPR-7508: document
+	 */
+	ConfigurableEnvironment getEnvironment();
+
+	/**
+	 * TODO SPR-7508: document
+	 */
+	void setEnvironment(ConfigurableEnvironment environment);
+
+	/**
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
 	 * bean factory of this application context on refresh, before any of the
 	 * bean definitions get evaluated. To be invoked during context configuration.
@@ -105,7 +123,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.context.event.ContextRefreshedEvent
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
-	void addApplicationListener(ApplicationListener listener);
+	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Load or refresh the persistent representation of the configuration,

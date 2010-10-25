@@ -101,7 +101,7 @@ public @interface Bean {
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
 	 * factory, which is always the case for singletons but not guaranteed 
 	 * for any other scope.
-	 * @see {@link org.springframework.context.ConfigurableApplicationContext#close()}
+	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	String destroyMethod() default "";
 

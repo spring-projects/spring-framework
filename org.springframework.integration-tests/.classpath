@@ -84,6 +84,7 @@
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.serp/com.springsource.serp/1.13.1/com.springsource.serp-1.13.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-2.0.0.jar" sourcepath="/IVY_CACHE/javax.portlet/com.springsource.javax.portlet/2.0.0/com.springsource.javax.portlet-sources-2.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-4.7.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.7.0.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.hamcrest/com.springsource.org.hamcrest/1.1.0/com.springsource.org.hamcrest-1.1.0.jar" sourcepath="/IVY_CACHE/org.hamcrest/com.springsource.org.hamcrest/1.1.0/com.springsource.org.hamcrest-sources-1.1.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-1.6.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -78,6 +79,7 @@ import org.springframework.util.Assert;
  * from the {@link AbstractRefreshableApplicationContext} base class.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.1.2
  * @see #registerBeanDefinition
  * @see #refresh()
@@ -102,6 +104,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.beanFactory.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		this.beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		registerStandardBeanFactoryPostProcessors(this.beanFactory);
 	}
 
 	/**
@@ -181,7 +184,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * delegate all <code>getResource</code> calls to the given ResourceLoader.
 	 * If not set, default resource loading will apply.
 	 * <p>The main reason to specify a custom ResourceLoader is to resolve
-	 * resource paths (withour URL prefix) in a specific fashion.
+	 * resource paths (without URL prefix) in a specific fashion.
 	 * The default behavior is to resolve such paths as class path locations.
 	 * To resolve resource paths as file system locations, specify a
 	 * FileSystemResourceLoader here.

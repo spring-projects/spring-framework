@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
@@ -29,6 +30,8 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.jndi.TypeMismatchNamingException;
 
@@ -67,6 +70,9 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	/** Cache of the types of nonshareable resources: bean name --> bean type */
 	private final Map<String, Class> resourceTypes = new HashMap<String, Class>();
 
+	/** TODO SPR-7508: should be JNDI-specific environment */
+	private ConfigurableEnvironment environment = new DefaultEnvironment();
+
 
 	public SimpleJndiBeanFactory() {
 		setResourceRef(true);
@@ -92,6 +98,11 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	public void addShareableResource(String shareableResource) {
 		this.shareableResources.add(shareableResource);
 	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of BeanFactory interface
+	//---------------------------------------------------------------------
 
 
 	public Object getBean(String name) throws BeansException {

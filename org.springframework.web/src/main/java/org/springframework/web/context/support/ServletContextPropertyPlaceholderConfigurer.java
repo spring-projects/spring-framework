@@ -21,7 +21,9 @@ import java.util.Properties;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.context.support.EnvironmentAwarePropertyPlaceholderConfigurer;
 import org.springframework.web.context.ServletContextAware;
+
 
 /**
  * Subclass of PropertyPlaceholderConfigurer that resolves placeholders as
@@ -57,7 +59,10 @@ import org.springframework.web.context.ServletContextAware;
  * @see #setSearchContextAttributes
  * @see javax.servlet.ServletContext#getInitParameter(String)
  * @see javax.servlet.ServletContext#getAttribute(String)
+ * @deprecated in Spring 3.1 in favor of {@link EnvironmentAwarePropertyPlaceholderConfigurer}
+ * in conjunction with {@link org.springframework.core.env.DefaultWebEnvironment}.
  */
+@Deprecated
 public class ServletContextPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer
 		implements ServletContextAware {
 

@@ -953,6 +953,15 @@
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.junit/com.springsource.org.junit/4.7.0/com.springsource.org.junit-sources-4.7.0.jar!/" />
       </SOURCES>
     </library>
+    <library name="Hamcrest">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.hamcrest/com.springsource.org.hamcrest/1.1.0/com.springsource.org.hamcrest-1.1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.hamcrest/com.springsource.org.hamcrest/1.1.0/com.springsource.org.hamcrest-sources-1.1.0.jar!/" />
+      </SOURCES>
+    </library>
     <library name="EasyMock">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.easymock/com.springsource.org.easymock/2.5.1/com.springsource.org.easymock-2.5.1.jar!/" />

@@ -432,6 +432,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	protected BeanFactory createDefinition(String resourceLocation, String factoryKey) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		// TODO SPR-7508: consider whether to allow for setEnvironment() here (where would it come from?)
 		ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 		try {

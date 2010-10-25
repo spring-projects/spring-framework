@@ -1,7 +1,11 @@
 target
 integration-repo
 ivy-cache
-spring-build
 jmx.log
 .springBeans
 .DS_Store
+*.sw*
+org.springframework.test/test-output/
+build.sh
+org.springframework.beans/.settings/org.springframework.ide.eclipse.beans.core.prefs
+org.springframework.beans/.settings/org.springframework.ide.eclipse.core.prefs

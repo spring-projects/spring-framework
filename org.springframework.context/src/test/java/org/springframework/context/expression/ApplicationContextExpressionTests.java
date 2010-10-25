@@ -240,7 +240,6 @@ public class ApplicationContextExpressionTests {
 			System.getProperties().remove("country");
 			System.getProperties().remove("name");
 		}
-		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 6000);
 	}
 

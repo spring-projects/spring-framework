@@ -58,6 +58,7 @@ import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -92,9 +93,13 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public static final String TRUE_VALUE = "true";
 
+	public static final String FALSE_VALUE = "false";
+
 	public static final String DEFAULT_VALUE = "default";
 
 	public static final String DESCRIPTION_ELEMENT = "description";
+
+	public static final String AUTOWIRE_NO_VALUE = "no";
 
 	public static final String AUTOWIRE_BY_NAME_VALUE = "byName";
 
@@ -239,19 +244,25 @@ public class BeanDefinitionParserDelegate {
 
 	private final ParseState parseState = new ParseState();
 
+	private Environment environment;
+
 	/**
-	 * Stores all used bean names so we can enforce uniqueness on a per file basis.
+	 * Stores all used bean names so we can enforce uniqueness on a per
+	 * beans-element basis. Duplicate bean ids/names may not exist within the
+	 * same level of beans element nesting, but may be duplicated across levels.
 	 */
 	private final Set<String> usedNames = new HashSet<String>();
 
 
 	/**
 	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext}.
+	 * supplied {@link XmlReaderContext} and {@link Environment}.
 	 */
-	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
+	public BeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
 		Assert.notNull(readerContext, "XmlReaderContext must not be null");
+		Assert.notNull(readerContext, "Environment must not be null");
 		this.readerContext = readerContext;
+		this.environment = environment;
 	}
 
 	/**
@@ -261,6 +272,12 @@ public class BeanDefinitionParserDelegate {
 		return this.readerContext;
 	}
 
+	/**
+	 * Get the {@link Environment} associated with this helper instance.
+	 */
+	public final Environment getEnvironment() {
+		return this.environment;
+	}
 
 	/**
 	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
@@ -294,33 +311,69 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Initialize the default lazy-init, autowire, dependency check settings,
-	 * init-method, destroy-method and merge settings.
-	 * @see #populateDefaults(DocumentDefaultsDefinition, org.w3c.dom.Element)
+	 * init-method, destroy-method and merge settings. Support nested 'beans'
+	 * element use cases by falling back to <literal>parent</literal> in case the
+	 * defaults are not explicitly set locally.
+	 * @see #populateDefaults(DocumentDefaultsDefinition, DocumentDefaultsDefinition, org.w3c.dom.Element)
 	 * @see #getDefaults()
 	 */
-	public void initDefaults(Element root) {
-		populateDefaults(this.defaults, root);
+	public void initDefaults(Element root, BeanDefinitionParserDelegate parent) {
+		populateDefaults(this.defaults, (parent != null ? parent.defaults : null), root);
 		this.readerContext.fireDefaultsRegistered(this.defaults);
 	}
 
 	/**
 	 * Populate the given DocumentDefaultsDefinition instance with the default lazy-init,
 	 * autowire, dependency check settings, init-method, destroy-method and merge settings.
+	 * Support nested 'beans' element use cases by falling back to
+	 * <literal>parentDefaults</literal> in case the defaults are not explicitly set
+	 * locally.
+	 * @param defaults the defaults to populate
+	 * @param defaults the parent BeanDefinitionParserDelegate (if any) defaults to fall back to
+	 * @param root the root element of the current bean definition document (or nested beans element)
 	 */
-	protected void populateDefaults(DocumentDefaultsDefinition defaults, Element root) {
-		defaults.setLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
-		defaults.setMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
-		defaults.setAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
+	protected void populateDefaults(DocumentDefaultsDefinition defaults, DocumentDefaultsDefinition parentDefaults, Element root) {
+		String lazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
+		if (DEFAULT_VALUE.equals(lazyInit)) {
+			lazyInit = parentDefaults != null ? parentDefaults.getLazyInit() : FALSE_VALUE;
+		}
+		defaults.setLazyInit(lazyInit);
+
+		String merge = root.getAttribute(DEFAULT_MERGE_ATTRIBUTE);
+		if (DEFAULT_VALUE.equals(merge)) {
+			merge = parentDefaults != null ? parentDefaults.getMerge() : FALSE_VALUE;
+		}
+		defaults.setMerge(merge);
+
+		String autowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
+		if (DEFAULT_VALUE.equals(autowire)) {
+			autowire = parentDefaults != null ? parentDefaults.getAutowire() : AUTOWIRE_NO_VALUE;
+		}
+		defaults.setAutowire(autowire);
+
+		// don't fall back to parentDefaults for dependency-check as it's no
+		// longer supported in <beans> as of 3.0. Therefore, no nested <beans>
+		// would ever need to fall back to it.
 		defaults.setDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
+
 		if (root.hasAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE)) {
 			defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
+		} else if (parentDefaults != null) {
+			defaults.setAutowireCandidates(parentDefaults.getAutowireCandidates());
 		}
+
 		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
 			defaults.setInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
+		} else if (parentDefaults != null) {
+			defaults.setInitMethod(parentDefaults.getInitMethod());
 		}
+
 		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
 			defaults.setDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
+		} else if (parentDefaults != null) {
+			defaults.setDestroyMethod(parentDefaults.getDestroyMethod());
 		}
+
 		defaults.setSource(this.readerContext.extractSource(root));
 	}
 
@@ -431,7 +484,8 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Validate that the specified bean name and aliases have not been used already.
+	 * Validate that the specified bean name and aliases have not been used already
+	 * within the current level of beans element nesting.
 	 */
 	protected void checkNameUniqueness(String beanName, List<String> aliases, Element beanElement) {
 		String foundName = null;
@@ -443,7 +497,7 @@ public class BeanDefinitionParserDelegate {
 			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
 		if (foundName != null) {
-			error("Bean name '" + foundName + "' is already used in this file", beanElement);
+			error("Bean name '" + foundName + "' is already used in this <beans> element", beanElement);
 		}
 
 		this.usedNames.add(beanName);

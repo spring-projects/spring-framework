@@ -173,7 +173,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param requiredType type of the property
 	 * @param propertyEditorClass the {@link PropertyEditor} class to register
 	 */
-	void registerCustomEditor(Class requiredType, Class<? extends PropertyEditor> propertyEditorClass);
+	void registerCustomEditor(Class<?> requiredType, Class<? extends PropertyEditor> propertyEditorClass);
 
 	/**
 	 * Initialize the given PropertyEditorRegistry with the custom editors

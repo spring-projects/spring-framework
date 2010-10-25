@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.context.support;
+package org.springframework.core.env;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Read-only {@code Map<String, String>} implementation that is backed by system properties or environment
@@ -28,6 +29,7 @@ import java.util.Set;
  * System#getProperties()} or {@link System#getenv()}.
  *
  * @author Arjen Poutsma
+ * @author Chris Beams
  * @since 3.0
  */
 abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
@@ -42,7 +44,25 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 			return getSystemAttribute(attributeName);
 		}
 		else {
-			return null;
+			// TODO SPR-7508: technically breaks backward-compat. Used to return null
+			// for non-string keys, now throws. Any callers who have coded to this
+			// behavior will now break.  It's highly unlikely, however; could be
+			// a calculated risk to take.  Throwing is a better choice, as returning
+			// null represents a 'false negative' - it's not actually that the key
+			// isn't present, it's simply that you cannot access it through the current
+			// abstraction.  Remember, this case would only come up if (a) there are
+			// non-string keys or values in system properties, (b) there is a
+			// SecurityManager present, and (c) the user attempts to access one
+			// of those properties through this abstraction. This combination is
+			// probably unlikely enough to merit the change.
+			//
+			// note also that the previous implementation didn't consider the
+			// possibility of non-string values the anonymous implementation used
+			// for System properties access now does.
+			//
+			// See AbstractEnvironment for relevant anonymous implementations
+			// See DefaultEnvironmentTests for unit tests around these cases
+			throw new IllegalStateException("TODO SPR-7508: message");
 		}
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 
 /**
@@ -34,7 +35,7 @@ import org.springframework.core.io.Resource;
  * <p>This class registers each bean definition with the {@link DefaultListableBeanFactory}
  * superclass, and relies on the latter's implementation of the {@link BeanFactory} interface.
  * It supports singletons, prototypes, and references to either of these kinds of bean.
- * See "spring-beans-2.0.dtd" for details on options and configuration style.
+ * See "spring-beans-2.0.dtd" for details on options and configuration style. // TODO SPR-7508 polish - s/dtd/xsd/
  *
  * <p><b>For advanced needs, consider using a {@link DefaultListableBeanFactory} with
  * an {@link XmlBeanDefinitionReader}.</b> The latter allows for reading from multiple XML
@@ -42,10 +43,14 @@ import org.springframework.core.io.Resource;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 15 April 2001
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  * @see XmlBeanDefinitionReader
+ * @deprecated as of Spring 3.1 in favor of {@link DefaultListableBeanFactory} and
+ * {@link XmlBeanDefinitionReader}
  */
+@Deprecated
 public class XmlBeanFactory extends DefaultListableBeanFactory {
 
 	private final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this);
@@ -58,7 +63,7 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public XmlBeanFactory(Resource resource) throws BeansException {
-		this(resource, null);
+		this(resource, (BeanFactory)null);
 	}
 
 	/**

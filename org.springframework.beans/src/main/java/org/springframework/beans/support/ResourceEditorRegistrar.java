@@ -34,6 +34,8 @@ import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -53,8 +55,25 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  */
 public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
+	private final Environment environment;
+
 	private final ResourceLoader resourceLoader;
 
+
+	/**
+	 * Create a new ResourceEditorRegistrar for the given {@link ResourceLoader}
+	 * using a {@link DefaultEnvironment}.
+	 * @param resourceLoader the ResourceLoader (or ResourcePatternResolver)
+	 * to create editors for (usually an ApplicationContext)
+	 * @see org.springframework.core.io.support.ResourcePatternResolver
+	 * @see org.springframework.context.ApplicationContext
+	 * @deprecated as of Spring 3.1 in favor of
+	 * {@link ResourceEditorRegistrar#ResourceEditorRegistrar(ResourceLoader, Environment)}
+	 */
+	@Deprecated
+	public ResourceEditorRegistrar(ResourceLoader resourceLoader) {
+		this(resourceLoader, new DefaultEnvironment());
+	}
 
 	/**
 	 * Create a new ResourceEditorRegistrar for the given ResourceLoader
@@ -63,8 +82,9 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.context.ApplicationContext
 	 */
-	public ResourceEditorRegistrar(ResourceLoader resourceLoader) {
+	public ResourceEditorRegistrar(ResourceLoader resourceLoader, Environment environment) {
 		this.resourceLoader = resourceLoader;
+		this.environment = environment;
 	}
 
 
@@ -82,7 +102,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
 	 */
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
-		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader);
+		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader, this.environment);
 		doRegisterEditor(registry, Resource.class, baseEditor);
 		doRegisterEditor(registry, InputStream.class, new InputStreamEditor(baseEditor));
 		doRegisterEditor(registry, InputSource.class, new InputSourceEditor(baseEditor));
@@ -96,7 +116,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
 		if (this.resourceLoader instanceof ResourcePatternResolver) {
 			doRegisterEditor(registry, Resource[].class,
-					new ResourceArrayPropertyEditor((ResourcePatternResolver) this.resourceLoader));
+					new ResourceArrayPropertyEditor((ResourcePatternResolver) this.resourceLoader, this.environment));
 		}
 	}
 

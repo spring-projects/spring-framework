@@ -21,8 +21,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -40,7 +42,7 @@ import org.springframework.util.Assert;
  * @since 11.12.2003
  * @see BeanDefinitionReaderUtils
  */
-public abstract class AbstractBeanDefinitionReader implements BeanDefinitionReader {
+public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable, BeanDefinitionReader {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -50,6 +52,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	private ResourceLoader resourceLoader;
 
 	private ClassLoader beanClassLoader;
+
+	private Environment environment = new DefaultEnvironment();
 
 	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
 
@@ -62,9 +66,14 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * {@link org.springframework.context.ApplicationContext} implementations.
 	 * <p>If given a plain BeanDefinitionRegistry, the default ResourceLoader will be a
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
+	 * <p>If the the passed-in bean factory also implements {@link EnvironmentCapable} its
+	 * environment will be used by this reader.  Otherwise, the reader will initialize and
+	 * use a {@link DefaultEnvironment}. All ApplicationContext implementations are
+	 * EnvironmentCapable, while normal BeanFactory implementations are not.
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
 	 * @see #setResourceLoader
+	 * @see #setEnvironment
 	 */
 	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
@@ -76,6 +85,14 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		}
 		else {
 			this.resourceLoader = new PathMatchingResourcePatternResolver();
+		}
+
+		// Inherit Environment if possible
+		if (this.registry instanceof EnvironmentCapable) {
+			this.environment = ((EnvironmentCapable)this.registry).getEnvironment();
+		}
+		else {
+			this.environment = new DefaultEnvironment();
 		}
 	}
 
@@ -120,6 +137,21 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
+	}
+
+	/**
+	 * TODO SPR-7508: document
+	 * @param environment
+	 */
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	/**
+	 * TODO SPR-7508: document
+	 */
+	public Environment getEnvironment() {
+		return this.environment;
 	}
 
 	/**

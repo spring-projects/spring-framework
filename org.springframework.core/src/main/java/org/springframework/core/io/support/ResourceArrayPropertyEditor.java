@@ -25,9 +25,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
-import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Editor for {@link org.springframework.core.io.Resource} arrays, to
@@ -44,16 +44,18 @@ import org.springframework.util.SystemPropertyUtils;
  * by default using a {@link PathMatchingResourcePatternResolver}.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.1.2
  * @see org.springframework.core.io.Resource
  * @see ResourcePatternResolver
  * @see PathMatchingResourcePatternResolver
- * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
- * @see System#getProperty(String)
+ * @see org.springframework.env.Environment#resolvePlaceholders
  */
 public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	private static final Log logger = LogFactory.getLog(ResourceArrayPropertyEditor.class);
+
+	private final Environment environment;
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
@@ -62,29 +64,59 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with a default
-	 * PathMatchingResourcePatternResolver.
+	 * {@link PathMatchingResourcePatternResolver} and {@link DefaultEnvironment}.
 	 * @see PathMatchingResourcePatternResolver
+	 * @see Environment
 	 */
 	public ResourceArrayPropertyEditor() {
-		this(new PathMatchingResourcePatternResolver());
+		this(new PathMatchingResourcePatternResolver(), new DefaultEnvironment(), true);
 	}
 
 	/**
-	 * Create a new ResourceArrayPropertyEditor with the given ResourcePatternResolver.
+	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
+	 * and a {@link DefaultEnvironment}.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
+	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, Environment)}
 	 */
+	@Deprecated
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver) {
-		this(resourcePatternResolver, true);
+		this(resourcePatternResolver, new DefaultEnvironment(), true);
 	}
 
 	/**
-	 * Create a new ResourceArrayPropertyEditor with the given ResourcePatternResolver.
+	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
+	 * and {@link Environment}.
+	 * @param resourcePatternResolver the ResourcePatternResolver to use
+	 * @param environment the Environment to use
+	 */
+	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, Environment environment) {
+		this(resourcePatternResolver, environment, true);
+	}
+
+	/**
+	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
+	 * and a {@link DefaultEnvironment}.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
 	 * if no corresponding system property could be found
+	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, Environment, boolean)}
 	 */
+	@Deprecated
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, boolean ignoreUnresolvablePlaceholders) {
+		this(resourcePatternResolver, new DefaultEnvironment(), ignoreUnresolvablePlaceholders);
+	}
+
+	/**
+	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
+	 * and {@link Environment}.
+	 * @param resourcePatternResolver the ResourcePatternResolver to use
+	 * @param environment the Environment to use
+	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
+	 * if no corresponding system property could be found
+	 */
+	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, Environment environment, boolean ignoreUnresolvablePlaceholders) {
 		this.resourcePatternResolver = resourcePatternResolver;
+		this.environment = environment;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
 
@@ -160,10 +192,13 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * corresponding system property values if necessary.
 	 * @param path the original file path
 	 * @return the resolved file path
-	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders
+	 * @see Environment#resolvePlaceholders
+	 * @see Environment#resolveRequiredPlaceholders
 	 */
 	protected String resolvePath(String path) {
-		return SystemPropertyUtils.resolvePlaceholders(path, this.ignoreUnresolvablePlaceholders);
+		return this.ignoreUnresolvablePlaceholders ?
+				environment.resolvePlaceholders(path) :
+				environment.resolveRequiredPlaceholders(path);
 	}
 
 }
