@@ -9,3 +9,5 @@ org.springframework.test/test-output/
 build.sh
 org.springframework.beans/.settings/org.springframework.ide.eclipse.beans.core.prefs
 org.springframework.beans/.settings/org.springframework.ide.eclipse.core.prefs
+org.springframework.jdbc/derby.log
+spring-build
