@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request;
 
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletRequest;
@@ -25,12 +26,14 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.multipart.MultipartRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -38,14 +41,25 @@ import org.springframework.web.multipart.MultipartRequest;
  */
 public class ServletWebRequestTests {
 
+	private MockHttpServletRequest servletRequest;
+
+	private MockHttpServletResponse servletResponse;
+
+	private ServletWebRequest request;
+
+	@Before
+	public void setUp() {
+		servletRequest = new MockHttpServletRequest();
+		servletResponse = new MockHttpServletResponse();
+		request = new ServletWebRequest(servletRequest, servletResponse);
+	}
+
 	@Test
-	public void testParameters() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+	public void parameters() {
 		servletRequest.addParameter("param1", "value1");
 		servletRequest.addParameter("param2", "value2");
 		servletRequest.addParameter("param2", "value2a");
 
-		ServletWebRequest request = new ServletWebRequest(servletRequest);
 		assertEquals("value1", request.getParameter("param1"));
 		assertEquals(1, request.getParameterValues("param1").length);
 		assertEquals("value1", request.getParameterValues("param1")[0]);
@@ -64,19 +78,14 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void testLocale() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+	public void locale() {
 		servletRequest.addPreferredLocale(Locale.UK);
 
-		ServletWebRequest request = new ServletWebRequest(servletRequest);
 		assertEquals(Locale.UK, request.getLocale());
 	}
 
 	@Test
-	public void testNativeRequest() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		ServletWebRequest request = new ServletWebRequest(servletRequest, servletResponse);
+	public void nativeRequest() {
 		assertSame(servletRequest, request.getNativeRequest());
 		assertSame(servletRequest, request.getNativeRequest(ServletRequest.class));
 		assertSame(servletRequest, request.getNativeRequest(HttpServletRequest.class));
@@ -90,9 +99,7 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void testDecoratedNativeRequest() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
+	public void decoratedNativeRequest() {
 		HttpServletRequest decoratedRequest = new HttpServletRequestWrapper(servletRequest);
 		HttpServletResponse decoratedResponse = new HttpServletResponseWrapper(servletResponse);
 		ServletWebRequest request = new ServletWebRequest(decoratedRequest, decoratedResponse);
@@ -106,6 +113,67 @@ public class ServletWebRequestTests {
 		assertSame(decoratedResponse, request.getNativeResponse(HttpServletResponse.class));
 		assertSame(servletResponse, request.getNativeResponse(MockHttpServletResponse.class));
 		assertNull(request.getNativeResponse(MultipartRequest.class));
+	}
+
+	@Test
+	public void checkNotModifiedTimeStamp() {
+		long currentTime = new Date().getTime();
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-Modified-Since", currentTime);
+
+		request.checkNotModified(currentTime);
+
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedTimeStamp() {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
+
+		request.checkNotModified(currentTime);
+
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals(currentTime, servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedETag() {
+		String eTag = "Foo";
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-None-Match", "\"" + eTag + "\"");
+
+		request.checkNotModified(eTag);
+
+		assertEquals(304, servletResponse.getStatus());
+	}
+
+	@Test
+	public void checkModifiedETagNonQuoted() {
+		String currentETag = "Foo";
+		String oldEtag = "Bar";
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-None-Match", "\"" + oldEtag + "\"");
+
+		request.checkNotModified(currentETag);
+
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals("\"" + currentETag + "\"", servletResponse.getHeader("ETag"));
+	}
+
+	@Test
+	public void checkModifiedETagQuoted() {
+		String currentETag = "\"Foo\"";
+		String oldEtag = "Bar";
+		servletRequest.setMethod("GET");
+		servletRequest.addHeader("If-None-Match", oldEtag);
+
+		request.checkNotModified(currentETag);
+
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals(currentETag, servletResponse.getHeader("ETag"));
 	}
 
 }

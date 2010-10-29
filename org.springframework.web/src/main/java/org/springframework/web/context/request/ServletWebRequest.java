@@ -40,10 +40,16 @@ import org.springframework.util.StringUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
+	private static final String HEADER_ETAG = "ETag";
+
 	private static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+
+	private static final String HEADER_IF_NONE_MATCH = "If-None-Match";
 
 	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
 
+	private static final String METHOD_GET = "GET";
+	
 
 	private HttpServletResponse response;
 
@@ -186,7 +192,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			long ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
 			this.notModified = (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
 			if (this.response != null) {
-				if (this.notModified && "GET".equals(getRequest().getMethod())) {
+				if (this.notModified && METHOD_GET.equals(getRequest().getMethod())) {
 					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
@@ -195,6 +201,30 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			}
 		}
 		return this.notModified;
+	}
+
+	public boolean checkNotModified(String eTag) {
+		if (StringUtils.hasLength(eTag) && !this.notModified &&
+				(this.response == null || !this.response.containsHeader(HEADER_ETAG))) {
+			if (!eTag.startsWith("\"")) {
+				eTag = "\"" + eTag;
+			}
+			if (!eTag.endsWith("\"")) {
+				eTag = eTag + "\"";
+			}
+			String ifNoneMatch = getRequest().getHeader(HEADER_IF_NONE_MATCH);
+			this.notModified = eTag.equals(ifNoneMatch);
+			if (this.response != null) {
+				if (this.notModified && METHOD_GET.equals(getRequest().getMethod())) {
+					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+				}
+				else {
+					this.response.setHeader(HEADER_ETAG, eTag);
+				}
+			}
+		}
+		return this.notModified;
+
 	}
 
 	public boolean isNotModified() {

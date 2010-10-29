@@ -177,6 +177,14 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return false;
 	}
 
+	/**
+	 * Last-modified handling not supported for portlet requests:
+	 * As a consequence, this method always returns <code>false</code>.
+	 */
+	public boolean checkNotModified(String eTag) {
+		return false;
+	}
+
 	public String getDescription(boolean includeClientInfo) {
 		PortletRequest request = getRequest();
 		StringBuilder result = new StringBuilder();
