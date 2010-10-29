@@ -6,6 +6,7 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.aspectj.*;version=${aj.osgi.range};resolution:=optional,
  org.springframework.beans.*;version=${spring.osgi.range},
+ org.springframework.cache.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.transaction.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.core.task.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.orm.jpa.*;version=${spring.osgi.range};resolution:=optional,
