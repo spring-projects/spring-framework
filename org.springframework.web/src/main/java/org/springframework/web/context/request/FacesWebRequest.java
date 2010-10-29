@@ -130,6 +130,10 @@ public class FacesWebRequest extends FacesRequestAttributes implements NativeWeb
 		return false;
 	}
 
+	public boolean checkNotModified(String eTag) {
+		return false;
+	}
+
 	public String getDescription(boolean includeClientInfo) {
 		ExternalContext externalContext = getExternalContext();
 		StringBuilder sb = new StringBuilder();

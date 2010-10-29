@@ -141,6 +141,9 @@ public interface WebRequest extends RequestAttributes {
 	 *   model.addAttribute(...);
 	 *   return "myViewName";
 	 * }</pre>
+	 * <p><strong>Note:</strong> that you typically want to use either
+	 * this {@link #checkNotModified(long)} method; or
+	 * {@link #checkNotModified(String)}, but not both.
 	 * @param lastModifiedTimestamp the last-modified timestamp that
 	 * the application determined for the underlying resource
 	 * @return whether the request qualifies as not modified,
@@ -148,6 +151,35 @@ public interface WebRequest extends RequestAttributes {
 	 * telling the client that the content has not been modified
 	 */
 	boolean checkNotModified(long lastModifiedTimestamp);
+
+	/**
+	 * Check whether the request qualifies as not modified given the
+	 * supplied {@code ETag} (entity tag), as determined by the application.
+	 * <p>This will also transparently set the appropriate response headers,
+	 * for both the modified case and the not-modified case.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 *   String eTag = // application-specific calculation
+	 *   if (request.checkNotModified(eTag)) {
+	 *     // shortcut exit - no further processing necessary
+	 *     return null;
+	 *   }
+	 *   // further request processing, actually building content
+	 *   model.addAttribute(...);
+	 *   return "myViewName";
+	 * }</pre>
+	 * <p><strong>Note:</strong> that you typically want to use either
+	 * this {@link #checkNotModified(String)} method; or
+	 * {@link #checkNotModified(long)}, but not both.
+	 * @param eTag the entity tag that the application determined
+	 * for the underlying resource. This parameter will be padded
+	 * with quotes (") if necessary.   
+	 * @return whether the request qualifies as not modified,
+	 * allowing to abort request processing and relying on the response
+	 * telling the client that the content has not been modified
+	 */
+	boolean checkNotModified(String eTag);
 
 	/**
 	 * Get a short description of this request,
