@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.ClientDataRequest;
@@ -58,6 +60,7 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -149,8 +152,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 	private BeanExpressionContext expressionContext;
 
-	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache =
-			new HashMap<Class<?>, PortletHandlerMethodResolver>();
+	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache = new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
 
 
 	/**

@@ -27,13 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -44,7 +45,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -182,8 +182,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	private BeanExpressionContext expressionContext;
 
-	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
-			new HashMap<Class<?>, ServletHandlerMethodResolver>();
+	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache = new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
+
+	private final Map<Class<?>, Boolean> sessionAnnotatedClassesCache = new ConcurrentHashMap<Class<?>, Boolean>();
 
 
 	public AnnotationMethodHandlerAdapter() {
@@ -390,7 +391,16 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		if (AnnotationUtils.findAnnotation(handler.getClass(), SessionAttributes.class) != null) {
+		Class<?> clazz = ClassUtils.getUserClass(handler);
+		Boolean annotated = sessionAnnotatedClassesCache.get(clazz);
+
+		if (annotated == null) {
+			annotated = Boolean.valueOf(AnnotationUtils.findAnnotation(handler
+					.getClass(), SessionAttributes.class) != null);
+			sessionAnnotatedClassesCache.put(clazz, annotated);
+		}
+
+		if (annotated) {
 			// Always prevent caching in case of session attribute management.
 			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
 			// Prepare cached set of session attributes names.
@@ -498,7 +508,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 */
 	private class ServletHandlerMethodResolver extends HandlerMethodResolver {
 
-		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
+		private final Map<Method, RequestMappingInfo> mappings = new ConcurrentHashMap<Method, RequestMappingInfo>();
 
 		private ServletHandlerMethodResolver(Class<?> handlerType) {
 			init(handlerType);

@@ -27,10 +27,11 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -81,6 +82,12 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @since 3.0
  */
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
+
+	// dummy method placeholder
+	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", null);
+	
+	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache = 
+			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>(); 
 
 	private WebArgumentResolver[] customArgumentResolvers;
 
@@ -147,10 +154,24 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 * @return the best matching method; or <code>null</code> if none is found
 	 */
 	private Method findBestExceptionHandlerMethod(Object handler, final Exception thrownException) {
-		final Class<?> handlerType = handler.getClass();
+		final Class<?> handlerType = ClassUtils.getUserClass(handler);
 		final Class<? extends Throwable> thrownExceptionType = thrownException.getClass();
-		final Map<Class<? extends Throwable>, Method> resolverMethods =
-				new LinkedHashMap<Class<? extends Throwable>, Method>();
+		Method handlerMethod = null;
+		
+		Map<Class<? extends Throwable>, Method> handlers = exceptionHandlerCache.get(handlerType);
+
+		if (handlers != null) {
+			handlerMethod = handlers.get(thrownExceptionType);
+			if (handlerMethod != null) {
+				return (handlerMethod == NO_METHOD_FOUND ? null : handlerMethod);
+			}
+		}
+		else {
+			handlers = new ConcurrentHashMap<Class<? extends Throwable>, Method>();
+			exceptionHandlerCache.put(handlerType, handlers);
+		}
+		
+		final Map<Class<? extends Throwable>, Method> resolverMethods = handlers;
 
 		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 			public void doWith(Method method) {
@@ -174,7 +195,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 		});
 
-		return getBestMatchingMethod(resolverMethods, thrownException);
+		handlerMethod = getBestMatchingMethod(resolverMethods, thrownException);
+		handlers.put(thrownExceptionType, (handlerMethod == null ? NO_METHOD_FOUND : handlerMethod));
+		return handlerMethod;
 	}
 
 	/**
