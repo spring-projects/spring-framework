@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,14 @@ public interface HandlerMapping {
 	 * this request attribute to be present in all scenarios.
 	 */
 	String BEST_MATCHING_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPattern";
+
+	/**
+	 * Name of the boolean {@link HttpServletRequest} attribute that indicates
+	 * whether type-level mappings should be inspected.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations.
+	 */
+	String INTROSPECT_TYPE_LEVEL_MAPPING = HandlerMapping.class.getName() + ".introspectTypeLevelMapping";
 
 	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains the URI

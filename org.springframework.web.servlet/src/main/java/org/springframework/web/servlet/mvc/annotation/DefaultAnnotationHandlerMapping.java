@@ -261,4 +261,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		}
 	}
 
+	@Override
+	protected boolean supportsTypeLevelMappings() {
+		return true;
+	}
 }

@@ -34,7 +34,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -45,6 +44,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -571,6 +571,27 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 					}
 					mappingInfo.sortMatchedPatterns(pathComparator);
 				}
+				else if (useTypeLevelMapping(request)) {
+					String[] typeLevelPatterns = getTypeLevelMapping().value();
+					for (String typeLevelPattern : typeLevelPatterns) {
+						if (!typeLevelPattern.startsWith("/")) {
+							typeLevelPattern = "/" + typeLevelPattern;
+						}
+						if (isPathMatchInternal(typeLevelPattern, lookupPath)) {
+							if (mappingInfo.matches(request)) {
+								match = true;
+								mappingInfo.addMatchedPattern(typeLevelPattern);
+							}
+							else {
+								if (!mappingInfo.matchesRequestMethod(request)) {
+									allowedMethods.addAll(mappingInfo.methodNames());
+								}
+								break;
+							}
+						}
+					}
+					mappingInfo.sortMatchedPatterns(pathComparator);
+				}
 				else {
 					// No paths specified: parameter match sufficient.
 					match = mappingInfo.matches(request);
@@ -638,6 +659,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 		}
 
+		private boolean useTypeLevelMapping(HttpServletRequest request) {
+			if (!hasTypeLevelMapping() || ObjectUtils.isEmpty(getTypeLevelMapping().value())) {
+				return false;
+			}
+			return (Boolean) request.getAttribute(
+							HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING);
+		}
+
 		/**
 		 * Determines the combined pattern for the given methodLevelPattern and path.
 		 * <p>Uses the following algorithm: <ol>
@@ -649,7 +678,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		 * </ol>
 		 */
 		private String getCombinedPattern(String methodLevelPattern, String lookupPath, HttpServletRequest request) {
-			if (hasTypeLevelMapping() && (!ObjectUtils.isEmpty(getTypeLevelMapping().value()))) {
+			if (useTypeLevelMapping(request)) {
 				String[] typeLevelPatterns = getTypeLevelMapping().value();
 				for (String typeLevelPattern : typeLevelPatterns) {
 					if (!typeLevelPattern.startsWith("/")) {
