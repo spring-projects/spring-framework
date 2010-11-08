@@ -429,6 +429,13 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		return Collections.unmodifiableMap(this.handlerMap);
 	}
 
+	/**
+	 * Indicates whether this handler mapping support type-level mappings. Default to {@code false}.
+	 */
+	protected boolean supportsTypeLevelMappings() {
+		return false;
+	}
+
 
 	/**
 	 * Special interceptor for exposing the
@@ -449,10 +456,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 			exposePathWithinMapping(this.bestMatchingPattern, this.pathWithinMapping, request);
+			request.setAttribute(HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING, supportsTypeLevelMappings());
 			return true;
 		}
-	}
 
+	}
 
 	/**
 	 * Special interceptor for exposing the

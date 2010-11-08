@@ -50,7 +50,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -133,6 +132,8 @@ import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameRes
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -1842,6 +1843,16 @@ public class ServletAnnotationControllerTests {
 		assertEquals("1-2", response.getContentAsString());
 	}
 
+	@Test
+	public void testMatchWithoutMethodLevelPath() throws Exception {
+		initServlet(NoPathGetAndM2PostController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/t1/m2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(405, response.getStatus());
+	}
+
 
 	/*
 	 * Controllers
@@ -3103,5 +3114,21 @@ public class ServletAnnotationControllerTests {
 			response.getWriter().write(StringUtils.arrayToDelimitedString(content, "-"));
 		}
 	}
+
+	@Controller
+	@RequestMapping("/t1")
+	protected static class NoPathGetAndM2PostController {
+		@RequestMapping(method = RequestMethod.GET)
+		public void handle1(Writer writer) throws IOException {
+			writer.write("handle1");
+		}
+
+		@RequestMapping(value = "/m2", method = RequestMethod.POST)
+		public void handle2(Writer writer) throws IOException {
+			writer.write("handle2");
+		}
+	}
+
+
 
 }
