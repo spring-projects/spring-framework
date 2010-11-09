@@ -39,7 +39,6 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,9 +55,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
+import org.springframework.http.client.FreePortScanner;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class RestTemplateIntegrationTests {
@@ -69,20 +71,22 @@ public class RestTemplateIntegrationTests {
 
 	private static String helloWorld = "H\u00e9llo W\u00f6rld";
 
-	private static final String URI = "http://localhost:8889";
+	private static String baseUrl;
 
 	private static MediaType contentType;
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		jettyServer = new Server(8889);
+		int port = FreePortScanner.getFreePort();
+		jettyServer = new Server(port);
+		baseUrl = "http://localhost:" + port;
 		Context jettyContext = new Context(jettyServer, "/");
 		byte[] bytes = helloWorld.getBytes("UTF-8");
 		contentType = new MediaType("text", "plain", Collections.singletonMap("charset", "utf-8"));
 		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
 		jettyContext.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
 		jettyContext.addServlet(
-				new ServletHolder(new PostServlet(helloWorld, URI + "/post/1", bytes, contentType)),
+				new ServletHolder(new PostServlet(helloWorld, baseUrl + "/post/1", bytes, contentType)),
 				"/post");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/errors/notfound");
 		jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)), "/errors/server");
@@ -105,13 +109,13 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void getString() {
-		String s = template.getForObject(URI + "/{method}", String.class, "get");
+		String s = template.getForObject(baseUrl + "/{method}", String.class, "get");
 		assertEquals("Invalid content", helloWorld, s);
 	}
 
 	@Test
 	public void getEntity() {
-		ResponseEntity<String> entity = template.getForEntity(URI + "/{method}", String.class, "get");
+		ResponseEntity<String> entity = template.getForEntity(baseUrl + "/{method}", String.class, "get");
 		assertEquals("Invalid content", helloWorld, entity.getBody());
 		assertFalse("No headers", entity.getHeaders().isEmpty());
 		assertEquals("Invalid content-type", contentType, entity.getHeaders().getContentType());
@@ -120,14 +124,14 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void getNoResponse() {
-		String s = template.getForObject(URI + "/get/nothing", String.class);
+		String s = template.getForObject(baseUrl + "/get/nothing", String.class);
 		assertEquals("Invalid content", "", s);
 	}
 
 	@Test
 	public void postForLocation() throws URISyntaxException {
-		URI location = template.postForLocation(URI + "/{method}", helloWorld, "post");
-		assertEquals("Invalid location", new URI(URI + "/post/1"), location);
+		URI location = template.postForLocation(baseUrl + "/{method}", helloWorld, "post");
+		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), location);
 	}
 
 	@Test
@@ -135,20 +139,20 @@ public class RestTemplateIntegrationTests {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
 		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
-		URI location = template.postForLocation(URI + "/{method}", entity, "post");
-		assertEquals("Invalid location", new URI(URI + "/post/1"), location);
+		URI location = template.postForLocation(baseUrl + "/{method}", entity, "post");
+		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), location);
 	}
 
 	@Test
 	public void postForObject() throws URISyntaxException {
-		String s = template.postForObject(URI + "/{method}", helloWorld, String.class, "post");
+		String s = template.postForObject(baseUrl + "/{method}", helloWorld, String.class, "post");
 		assertEquals("Invalid content", helloWorld, s);
 	}
 
 	@Test
 	public void notFound() {
 		try {
-			template.execute(URI + "/errors/notfound", HttpMethod.GET, null, null);
+			template.execute(baseUrl + "/errors/notfound", HttpMethod.GET, null, null);
 			fail("HttpClientErrorException expected");
 		}
 		catch (HttpClientErrorException ex) {
@@ -161,7 +165,7 @@ public class RestTemplateIntegrationTests {
 	@Test
 	public void serverError() {
 		try {
-			template.execute(URI + "/errors/server", HttpMethod.GET, null, null);
+			template.execute(baseUrl + "/errors/server", HttpMethod.GET, null, null);
 			fail("HttpServerErrorException expected");
 		}
 		catch (HttpServerErrorException ex) {
@@ -173,20 +177,20 @@ public class RestTemplateIntegrationTests {
 
 	@Test
 	public void optionsForAllow() throws URISyntaxException {
-		Set<HttpMethod> allowed = template.optionsForAllow(new URI(URI + "/get"));
+		Set<HttpMethod> allowed = template.optionsForAllow(new URI(baseUrl + "/get"));
 		assertEquals("Invalid response",
 				EnumSet.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE), allowed);
 	}
 
 	@Test
 	public void uri() throws InterruptedException, URISyntaxException {
-		String result = template.getForObject(URI + "/uri/{query}", String.class, "Z\u00fcrich");
+		String result = template.getForObject(baseUrl + "/uri/{query}", String.class, "Z\u00fcrich");
 		assertEquals("Invalid request URI", "/uri/Z%C3%BCrich", result);
 
-		result = template.getForObject(URI + "/uri/query={query}", String.class, "foo@bar");
+		result = template.getForObject(baseUrl + "/uri/query={query}", String.class, "foo@bar");
 		assertEquals("Invalid request URI", "/uri/query=foo@bar", result);
 
-		result = template.getForObject(URI + "/uri/query={query}", String.class, "T\u014dky\u014d");
+		result = template.getForObject(baseUrl + "/uri/query={query}", String.class, "T\u014dky\u014d");
 		assertEquals("Invalid request URI", "/uri/query=T%C5%8Dky%C5%8D", result);
 	}
 
@@ -199,7 +203,7 @@ public class RestTemplateIntegrationTests {
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
 
-		template.postForLocation(URI + "/multipart", parts);
+		template.postForLocation(baseUrl + "/multipart", parts);
 	}
 
 	@Test
@@ -208,7 +212,7 @@ public class RestTemplateIntegrationTests {
 		requestHeaders.set("MyHeader", "MyValue");
 		HttpEntity<?> requestEntity = new HttpEntity(requestHeaders);
 		ResponseEntity<String> response =
-				template.exchange(URI + "/{method}", HttpMethod.GET, requestEntity, String.class, "get");
+				template.exchange(baseUrl + "/{method}", HttpMethod.GET, requestEntity, String.class, "get");
 		assertEquals("Invalid content", helloWorld, response.getBody());
 	}
 
@@ -218,8 +222,8 @@ public class RestTemplateIntegrationTests {
 		requestHeaders.set("MyHeader", "MyValue");
 		requestHeaders.setContentType(MediaType.TEXT_PLAIN);
 		HttpEntity<String> requestEntity = new HttpEntity<String>(helloWorld, requestHeaders);
-		HttpEntity<?> result = template.exchange(URI + "/{method}", HttpMethod.POST, requestEntity, null, "post");
-		assertEquals("Invalid location", new URI(URI + "/post/1"), result.getHeaders().getLocation());
+		HttpEntity<?> result = template.exchange(baseUrl + "/{method}", HttpMethod.POST, requestEntity, null, "post");
+		assertEquals("Invalid location", new URI(baseUrl + "/post/1"), result.getHeaders().getLocation());
 		assertFalse(result.hasBody());
 	}
 
