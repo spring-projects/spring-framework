@@ -10,6 +10,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context.support"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.expression"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.jdbc"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.jms"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.orm"/>
