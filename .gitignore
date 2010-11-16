@@ -1,13 +1,15 @@
 target
+bin
 integration-repo
 ivy-cache
 jmx.log
 .springBeans
+.settings
 .DS_Store
 *.sw*
 org.springframework.test/test-output/
+org.springframework.spring-parent/.classpath
+org.springframework.spring-parent/.project
 build.sh
-org.springframework.beans/.settings/org.springframework.ide.eclipse.beans.core.prefs
-org.springframework.beans/.settings/org.springframework.ide.eclipse.core.prefs
 org.springframework.jdbc/derby.log
 spring-build
