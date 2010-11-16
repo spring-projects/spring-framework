@@ -49,8 +49,8 @@
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
-        <artifactId>hamcrest-core</artifactId>
-        <version>1.2</version>
+        <artifactId>hamcrest-all</artifactId>
+        <version>1.1</version>
         <scope>test</scope>
       </dependency>
       <dependency>

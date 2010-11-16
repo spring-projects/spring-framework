@@ -15,7 +15,7 @@
   <dependencies>
       <dependency>
         <groupId>org.hamcrest</groupId>
-        <artifactId>hamcrest-core</artifactId>
+        <artifactId>hamcrest-all</artifactId>
         <scope>test</scope>
       </dependency>
     <dependency>
