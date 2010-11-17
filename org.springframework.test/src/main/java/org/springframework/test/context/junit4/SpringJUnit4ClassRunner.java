@@ -308,9 +308,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 		Statement statement = methodInvoker(frameworkMethod, testInstance);
 		statement = possiblyExpectingExceptions(frameworkMethod, testInstance, statement);
-		statement = withRulesReflectively(frameworkMethod, testInstance, statement);
 		statement = withBefores(frameworkMethod, testInstance, statement);
 		statement = withAfters(frameworkMethod, testInstance, statement);
+		statement = withRulesReflectively(frameworkMethod, testInstance, statement);
 		statement = withPotentialRepeat(frameworkMethod, testInstance, statement);
 		statement = withPotentialTimeout(frameworkMethod, testInstance, statement);
 
