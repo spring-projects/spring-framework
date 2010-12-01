@@ -33,13 +33,13 @@ import org.springframework.core.io.ClassPathResource;
  *
  * @author Chris Beams
  */
-public class EnvironmentBeansTests {
+public class ProfileXmlBeanDefinitionTests {
 
-	private static final String PROD_ELIGIBLE_XML = "environmentBeans-prodProfile.xml";
-	private static final String DEV_ELIGIBLE_XML = "environmentBeans-devProfile.xml";
-	private static final String ALL_ELIGIBLE_XML = "environmentBeans-noProfile.xml";
-	private static final String MULTI_ELIGIBLE_XML = "environmentBeans-multiProfile.xml";
-	private static final String UNKOWN_ELIGIBLE_XML = "environmentBeans-unknownProfile.xml";
+	private static final String PROD_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-prodProfile.xml";
+	private static final String DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-devProfile.xml";
+	private static final String ALL_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-noProfile.xml";
+	private static final String MULTI_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-multiProfile.xml";
+	private static final String UNKOWN_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-unknownProfile.xml";
 
 	private static final String PROD_ACTIVE = "prod";
 	private static final String DEV_ACTIVE = "dev";
@@ -51,7 +51,7 @@ public class EnvironmentBeansTests {
 	private static final String TARGET_BEAN = "foo";
 
 	@Test
-	public void test() {
+	public void testProfilePermutations() {
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, NONE_ACTIVE), not(containsTargetBean()));
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE), not(containsTargetBean()));
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, DEV_ACTIVE), not(containsTargetBean()));
