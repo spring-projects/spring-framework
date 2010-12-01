@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.awt.dnd.Autoscroll;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -25,7 +24,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -129,10 +127,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
-	}
-
-	public int getOrder() {
-		return Ordered.HIGHEST_PRECEDENCE + 1; // make room for AutoScanningBeanDefinitionRegistrar
 	}
 
 
