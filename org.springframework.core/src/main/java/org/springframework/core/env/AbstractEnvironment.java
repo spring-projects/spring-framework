@@ -50,7 +50,17 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  */
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
-	public static final String SPRING_PROFILES_PROPERTY_NAME = "springProfiles";
+	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "springProfiles";
+
+	public static final String DEFAULT_PROFILE_PROPERTY_NAME = "defaultSpringProfile";
+
+	/**
+	 * Default name of the default profile. Override with
+	 * {@link #setDefaultProfile(String)}.
+	 *
+	 * @see #setDefaultProfile(String)
+	 */
+	public static final String DEFAULT_PROFILE_NAME = "default";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -65,6 +75,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	private ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 
 	private boolean explicitlySetProfiles;
+
+	private String defaultProfile = DEFAULT_PROFILE_NAME;
 
 
 	public void addPropertySource(PropertySource<?> propertySource) {
@@ -183,7 +195,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		if (explicitlySetProfiles)
 			return;
 
-		String profiles = getProperty(SPRING_PROFILES_PROPERTY_NAME);
+		String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 		if (profiles == null || profiles.equals("")) {
 			return;
 		}
@@ -265,6 +277,31 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	public String resolveRequiredPlaceholders(String text) {
 		return doResolvePlaceholders(text, strictHelper);
+	}
+
+	public boolean acceptsProfiles(String[] specifiedProfiles) {
+		boolean activeProfileFound = false;
+		Set<String> activeProfiles = this.getActiveProfiles();
+		for (String profile : specifiedProfiles) {
+			if (activeProfiles.contains(profile)
+					|| (activeProfiles.isEmpty() && profile.equals(this.getDefaultProfile()))) {
+				activeProfileFound = true;
+				break;
+			}
+		}
+		return activeProfileFound;
+	}
+
+	public String getDefaultProfile() {
+		String defaultSpringProfileProperty = getProperty(DEFAULT_PROFILE_PROPERTY_NAME);
+		if (defaultSpringProfileProperty != null) {
+			return defaultSpringProfileProperty;
+		}
+		return defaultProfile;
+	}
+
+	public void setDefaultProfile(String defaultProfile) {
+		this.defaultProfile = defaultProfile;
 	}
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {

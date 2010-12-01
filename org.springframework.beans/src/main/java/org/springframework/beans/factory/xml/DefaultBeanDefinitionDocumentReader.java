@@ -112,23 +112,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	protected void doRegisterBeanDefinitions(Element root) {
 		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
-		boolean isCandidate = false;
-		if (profileSpec == null || profileSpec.equals("")) {
-			isCandidate = true;
-		} else {
-			String[] profiles = commaDelimitedListToStringArray(trimAllWhitespace(profileSpec));
-			for (String profile : profiles) {
-				if (this.environment.getActiveProfiles().contains(profile)) {
-					isCandidate = true;
-					break;
-				}
+		if (StringUtils.hasText(profileSpec)) {
+			String[] specifiedProfiles = commaDelimitedListToStringArray(trimAllWhitespace(profileSpec));
+			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
+				return;
 			}
-		}
-
-		if (!isCandidate) {
-			// TODO SPR-7508 logging
-			// logger.debug(format("XML is targeted for environment [%s], but current environment is [%s]. Skipping", targetEnvironment, environment == null ? null : environment.getName()));
-			return;
 		}
 
 		// any nested <beans> elements will cause recursion in this method. in

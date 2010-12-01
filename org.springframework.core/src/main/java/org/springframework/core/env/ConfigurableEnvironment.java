@@ -29,4 +29,11 @@ public interface ConfigurableEnvironment extends Environment, PropertySourceAggr
 	 */
 	void setActiveProfiles(String... profiles);
 
+	/**
+	 * Set the default profile name to be used instead of 'default'
+	 *
+	 * @param defaultProfile
+	 */
+	void setDefaultProfile(String defaultProfile);
+
 }
