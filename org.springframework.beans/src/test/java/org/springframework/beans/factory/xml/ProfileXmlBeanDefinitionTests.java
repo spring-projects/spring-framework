@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.io.ClassPathResource;
 
@@ -40,6 +41,9 @@ public class ProfileXmlBeanDefinitionTests {
 	private static final String ALL_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-noProfile.xml";
 	private static final String MULTI_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-multiProfile.xml";
 	private static final String UNKOWN_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-unknownProfile.xml";
+	private static final String DEFAULT_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-defaultProfile.xml";
+	private static final String CUSTOM_DEFAULT_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-customDefaultProfile.xml";
+	private static final String DEFAULT_AND_DEV_ELIGIBLE_XML = "ProfileXmlBeanDefinitionTests-defaultAndDevProfile.xml";
 
 	private static final String PROD_ACTIVE = "prod";
 	private static final String DEV_ACTIVE = "dev";
@@ -80,11 +84,45 @@ public class ProfileXmlBeanDefinitionTests {
 		assertThat(beanFactoryFor(UNKOWN_ELIGIBLE_XML, MULTI_ACTIVE), not(containsTargetBean()));
 	}
 
-	private BeanDefinitionRegistry beanFactoryFor(String xmlName, String... activeProfileNames) {
+	@Test
+	public void testDefaultProfile() {
+		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other"), not(containsTargetBean()));
+
+		assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML, PROD_ACTIVE), not(containsTargetBean()));
+	}
+
+	@Test
+	public void testCustomDefaultProfile() {
+		{
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+			ConfigurableEnvironment env = new DefaultEnvironment();
+			env.setDefaultProfile("custom-default");
+			reader.setEnvironment(env);
+			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_ELIGIBLE_XML, getClass()));
+
+			assertThat(beanFactory, not(containsTargetBean()));
+		}
+		{
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+			ConfigurableEnvironment env = new DefaultEnvironment();
+			env.setDefaultProfile("custom-default");
+			reader.setEnvironment(env);
+			reader.loadBeanDefinitions(new ClassPathResource(CUSTOM_DEFAULT_ELIGIBLE_XML, getClass()));
+
+			assertThat(beanFactory, containsTargetBean());
+		}
+	}
+
+	private BeanDefinitionRegistry beanFactoryFor(String xmlName, String... activeProfiles) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 		DefaultEnvironment env = new DefaultEnvironment();
-		env.setActiveProfiles(activeProfileNames);
+		env.setActiveProfiles(activeProfiles);
 		reader.setEnvironment(env);
 		reader.loadBeanDefinitions(new ClassPathResource(xmlName, getClass()));
 		return beanFactory;

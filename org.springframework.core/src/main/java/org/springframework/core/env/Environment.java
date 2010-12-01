@@ -38,6 +38,19 @@ public interface Environment {
 	/**
 	 * TODO SPR-7508: document
 	 */
+	String getDefaultProfile();
+
+	/**
+	 * TODO SPR-7508: document
+	 * returns true if:
+	 * 	a) one or more of specifiedProfiles are active in the given environment - see {@link #getActiveProfiles()}
+	 *  b) specifiedProfiles contains default profile - see {@link #getDefaultProfile()}
+	 */
+	boolean acceptsProfiles(String[] specifiedProfiles);
+
+	/**
+	 * TODO SPR-7508: document
+	 */
 	boolean containsProperty(String key);
 
 	/**

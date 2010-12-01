@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -215,8 +216,44 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		assertThat(ctx.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(false));
 	}
 
-	private boolean containsBeanClass(Set<BeanDefinition> candidates, Class beanClass) {
-		for (Iterator it = candidates.iterator(); it.hasNext();) {
+	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_defaultProfile() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		// no active profiles are set
+		ctx.register(DefaultProfileAnnotatedComponent.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean(DefaultProfileAnnotatedComponent.BEAN_NAME), is(true));
+	}
+
+	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_defaultAndDevProfile() {
+		Class<?> beanClass = DefaultAndDevProfileAnnotatedComponent.class;
+		String beanName = DefaultAndDevProfileAnnotatedComponent.BEAN_NAME;
+		{
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			// no active profiles are set
+			ctx.register(beanClass);
+			ctx.refresh();
+			assertThat(ctx.containsBean(beanName), is(true));
+		}
+		{
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setActiveProfiles("dev");
+			ctx.register(beanClass);
+			ctx.refresh();
+			assertThat(ctx.containsBean(beanName), is(true));
+		}
+		{
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setActiveProfiles("other");
+			ctx.register(beanClass);
+			ctx.refresh();
+			assertThat(ctx.containsBean(beanName), is(false));
+		}
+	}
+
+	private boolean containsBeanClass(Set<BeanDefinition> candidates, Class<?> beanClass) {
+		for (Iterator<BeanDefinition> it = candidates.iterator(); it.hasNext();) {
 			ScannedGenericBeanDefinition definition = (ScannedGenericBeanDefinition) it.next();
 			if (beanClass.getName().equals(definition.getBeanClassName())) {
 				return true;
@@ -225,4 +262,16 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		return false;
 	}
 
+
+	@Profile(AbstractEnvironment.DEFAULT_PROFILE_NAME)
+	@Component(DefaultProfileAnnotatedComponent.BEAN_NAME)
+	private static class DefaultProfileAnnotatedComponent {
+		static final String BEAN_NAME = "defaultProfileAnnotatedComponent";
+	}
+
+	@Profile({AbstractEnvironment.DEFAULT_PROFILE_NAME,"dev"})
+	@Component(DefaultAndDevProfileAnnotatedComponent.BEAN_NAME)
+	private static class DefaultAndDevProfileAnnotatedComponent {
+		static final String BEAN_NAME = "defaultAndDevProfileAnnotatedComponent";
+	}
 }

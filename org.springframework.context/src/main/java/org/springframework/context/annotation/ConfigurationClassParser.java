@@ -101,25 +101,13 @@ class ConfigurationClassParser {
 	}
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
-		boolean hasEligibleProfile = false;
-		if (this.environment == null) {
-			hasEligibleProfile = true;
-		} else {
-			if (!configClass.getMetadata().hasAnnotation(Profile.class.getName())) {
-				hasEligibleProfile = true;
-			} else {
-				for (String profile : (String[])configClass.getMetadata().getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME)) {
-					if (this.environment.getActiveProfiles().contains(profile)) {
-						hasEligibleProfile = true;
-						break;
-					}
-				}
+		if (this.environment != null && configClass.getMetadata().hasAnnotation(Profile.class.getName())) {
+			String[] specifiedProfiles =
+				(String[])configClass.getMetadata().getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
+			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
+				return;
 			}
-		}
-		if (!hasEligibleProfile) {
-			//logger.debug("TODO SPR-7508: issue debug statement that this class is being excluded");
-			// make sure XML has a symmetrical statement as well
-			return;
 		}
 
 		AnnotationMetadata metadata = configClass.getMetadata();

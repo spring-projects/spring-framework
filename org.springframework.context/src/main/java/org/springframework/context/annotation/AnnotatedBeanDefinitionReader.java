@@ -106,45 +106,18 @@ public class AnnotatedBeanDefinitionReader {
 		registerBean(annotatedClass, null, qualifiers);
 	}
 
-	private boolean hasEligibleProfile(AnnotationMetadata metadata) {
-		boolean hasEligibleProfile = false;
-		if (!metadata.hasAnnotation(Profile.class.getName())) {
-			hasEligibleProfile = true;
-		} else {
-			for (String profile : (String[])metadata.getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME)) {
-				if (this.environment.getActiveProfiles().contains(profile)) {
-					hasEligibleProfile = true;
-					break;
-				}
-			}
-		}
-		return hasEligibleProfile;
-	}
-
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
-		if (!hasEligibleProfile(abd.getMetadata())) {
-			// TODO SPR-7508: log that this bean is being rejected on profile mismatch
-			return;
-		}
-		/*
+		AnnotationMetadata metadata = abd.getMetadata();
+
 		if (metadata.hasAnnotation(Profile.class.getName())) {
-			if (this.environment == null) {
-				return;
-			}
-			Map<String, Object> profileAttribs = metadata.getAnnotationAttributes(Profile.class.getName());
-			String[] names = (String[]) profileAttribs.get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
-			boolean go=false;
-			for (String pName : names) {
-				if (this.environment.getActiveProfiles().contains(pName)) {
-					go = true;
-				}
-			}
-			if (!go) {
+			String[] specifiedProfiles =
+				(String[])metadata.getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
+			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return;
 			}
 		}
-		*/
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));

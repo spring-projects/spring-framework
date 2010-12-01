@@ -37,6 +37,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -296,27 +297,17 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
-				return hasEligibleProfile(metadataReader);
+				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+				if (!metadata.hasAnnotation(Profile.class.getName())) {
+					return true;
+				}
+				String[] specifiedProfiles = 
+					(String[])metadata.getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
+				return this.environment.acceptsProfiles(specifiedProfiles);
 			}
 		}
 		return false;
 	}
-
-	private boolean hasEligibleProfile(MetadataReader metadataReader) {
-		boolean hasEligibleProfile = false;
-		if (!metadataReader.getAnnotationMetadata().hasAnnotation(Profile.class.getName())) {
-			hasEligibleProfile = true;
-		} else {
-			for (String profile : (String[])metadataReader.getAnnotationMetadata().getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME)) {
-				if (this.environment.getActiveProfiles().contains(profile)) {
-					hasEligibleProfile = true;
-					break;
-				}
-			}
-		}
-		return hasEligibleProfile;
-	}
-
 
 	/**
 	 * Determine whether the given bean definition qualifies as candidate.

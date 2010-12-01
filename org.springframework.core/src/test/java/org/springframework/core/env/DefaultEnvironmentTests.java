@@ -28,10 +28,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.junit.matchers.JUnitMatchers.hasItems;
-import static org.springframework.core.env.AbstractEnvironment.SPRING_PROFILES_PROPERTY_NAME;
+import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
+import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILE_NAME;
+import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILE_PROPERTY_NAME;
 import static org.springframework.core.env.DefaultEnvironmentTests.CollectionMatchers.isEmpty;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.Permission;
@@ -48,8 +49,6 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.internal.matchers.TypeSafeMatcher;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 /**
  * Unit tests for {@link DefaultEnvironment}.
@@ -220,59 +219,47 @@ public class DefaultEnvironmentTests {
 	public void systemPropertiesEmpty() {
 		assertThat(environment.getActiveProfiles(), isEmpty());
 
-		System.setProperty(SPRING_PROFILES_PROPERTY_NAME, "");
+		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "");
 		assertThat(environment.getActiveProfiles(), isEmpty());
 
-		System.getProperties().remove(SPRING_PROFILES_PROPERTY_NAME);
+		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
 	public void systemPropertiesResoloutionOfProfiles() {
 		assertThat(environment.getActiveProfiles(), isEmpty());
 
-		System.setProperty(SPRING_PROFILES_PROPERTY_NAME, "foo");
+		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo");
 		assertThat(environment.getActiveProfiles(), hasItem("foo"));
 
 		// clean up
-		System.getProperties().remove(SPRING_PROFILES_PROPERTY_NAME);
+		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
 	public void systemPropertiesResoloutionOfMultipleProfiles() {
 		assertThat(environment.getActiveProfiles(), isEmpty());
 
-		System.setProperty(SPRING_PROFILES_PROPERTY_NAME, "foo,bar");
+		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo,bar");
 		assertThat(environment.getActiveProfiles(), hasItems("foo", "bar"));
 
-		System.setProperty(SPRING_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
+		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
 		assertThat(environment.getActiveProfiles(), not(hasItems("foo", "bar")));
 		assertThat(environment.getActiveProfiles(), hasItems("bar", "baz"));
 
-		System.getProperties().remove(SPRING_PROFILES_PROPERTY_NAME);
+		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
-
-	/*
-	static class WithNoProfile { }
-	@Profile("test")
-	static class WithTestProfile { }
 
 	@Test
-	public void accepts() throws IOException {
-
-		assertThat(environment.accepts(metadataForClass(WithNoProfile.class)), is(true));
-		assertThat(environment.accepts(metadataForClass(WithTestProfile.class)), is(false));
-		assertThat(environment.accepts("foo,bar"), is(false));
-		assertThat(environment.accepts("test"), is(false));
-		assertThat(environment.accepts("test,foo"), is(false));
-
-		environment.setActiveProfiles("test");
-		assertThat(environment.accepts(metadataForClass(WithNoProfile.class)), is(true));
-		assertThat(environment.accepts(metadataForClass(WithTestProfile.class)), is(true));
-		assertThat(environment.accepts("foo,bar"), is(false));
-		assertThat(environment.accepts("test"), is(true));
-		assertThat(environment.accepts("test,foo"), is(true));
+	public void environmentResolutionOfDefaultSpringProfileProperty_noneSet() {
+		assertThat(environment.getDefaultProfile(), equalTo(DEFAULT_PROFILE_NAME));
 	}
-	*/
+
+	@Test
+	public void environmentResolutionOfDefaultSpringProfileProperty_isSet() {
+		testProperties.setProperty(DEFAULT_PROFILE_PROPERTY_NAME, "custom-default");
+		assertThat(environment.getDefaultProfile(), equalTo("custom-default"));
+	}
 
 	@Test
 	public void systemPropertiesAccess() {
@@ -411,10 +398,6 @@ public class DefaultEnvironmentTests {
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), is("Could not resolve placeholder 'unresolvable'"));
 		}
-	}
-
-	private AnnotationMetadata metadataForClass(Class<?> clazz) throws IOException {
-		return new SimpleMetadataReaderFactory().getMetadataReader(clazz.getName()).getAnnotationMetadata();
 	}
 
 	public static class CollectionMatchers {
