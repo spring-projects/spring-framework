@@ -87,7 +87,9 @@
 	* profile="default" means that beans will be registered unless other profile(s) are active
 	* profile="xyz,default" means that beans will be registered if 'xyz' is active or if no profile is active
 	* ConfigurableEnvironment.setDefaultProfileName(String) customizes the name of the default profile
-	* 'defaultSpringProfile' property customizes the name of the default profile (usually for use as a
+	* 'spring.profile.default' property customizes the name of the default profile (usually for use as a
+	* ConfigurableEnvironment.setActiveProfiles(String...) sets which profiles are active
+	* 'spring.profile.active' sets which profiles are active (typically as a -D system property)
 	  servlet context/init param)
 					]]></xsd:documentation>
 				</xsd:annotation>

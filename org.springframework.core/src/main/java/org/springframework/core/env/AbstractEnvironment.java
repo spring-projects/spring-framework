@@ -50,9 +50,9 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  */
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
-	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "springProfiles";
+	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profile.active";
 
-	public static final String DEFAULT_PROFILE_PROPERTY_NAME = "defaultSpringProfile";
+	public static final String DEFAULT_PROFILE_PROPERTY_NAME = "spring.profile.default";
 
 	/**
 	 * Default name of the default profile. Override with
@@ -293,9 +293,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	public String getDefaultProfile() {
-		String defaultSpringProfileProperty = getProperty(DEFAULT_PROFILE_PROPERTY_NAME);
-		if (defaultSpringProfileProperty != null) {
-			return defaultSpringProfileProperty;
+		String defaultProfileProperty = getProperty(DEFAULT_PROFILE_PROPERTY_NAME);
+		if (defaultProfileProperty != null) {
+			return defaultProfileProperty;
 		}
 		return defaultProfile;
 	}

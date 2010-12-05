@@ -30,9 +30,9 @@ import java.lang.annotation.Target;
  * @Profile("default") means that beans will be registered unless other profile(s) are active
  * @Profile({"xyz,default"}) means that beans will be registered if 'xyz' is active or if no profile is active
  * ConfigurableEnvironment.setDefaultProfileName(String) customizes the name of the default profile
- * 'defaultSpringProfile' property customizes the name of the default profile (usually for use as a servlet context/init param)
+ * 'spring.profile.default' property customizes the name of the default profile (usually for use as a servlet context/init param)
  * ConfigurableEnvironment.setActiveProfiles(String...) sets which profiles are active
- * 'springProfiles' sets which profiles are active (typically as a -D system property)
+ * 'spring.profile.active' sets which profiles are active (typically as a -D system property)
  *
  * @author Chris Beams
  * @since 3.1
