@@ -38,7 +38,7 @@ public interface Environment {
 	/**
 	 * TODO SPR-7508: document
 	 */
-	String getDefaultProfile();
+	Set<String> getDefaultProfiles();
 
 	/**
 	 * TODO SPR-7508: document

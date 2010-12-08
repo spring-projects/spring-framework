@@ -27,12 +27,13 @@ import java.lang.annotation.Target;
  * TODO SPR-7508: document
  * 
  * Components not @Profile-annotated will always be registered
- * @Profile("default") means that beans will be registered unless other profile(s) are active
- * @Profile({"xyz,default"}) means that beans will be registered if 'xyz' is active or if no profile is active
- * ConfigurableEnvironment.setDefaultProfileName(String) customizes the name of the default profile
- * 'spring.profile.default' property customizes the name of the default profile (usually for use as a servlet context/init param)
  * ConfigurableEnvironment.setActiveProfiles(String...) sets which profiles are active
  * 'spring.profile.active' sets which profiles are active (typically as a -D system property)
+   servlet context/init param)
+ * ConfigurableEnvironment.setDefaultProfiles(String...) or 'spring.profile.default' property specifies one
+   or more default profiles, e.g., 'default'
+ * if 'default' is specified as a default profile, @Profile({"xyz,default}) means that beans will be
+   registered if 'xyz' is active or if no profile is active
  *
  * @author Chris Beams
  * @since 3.1

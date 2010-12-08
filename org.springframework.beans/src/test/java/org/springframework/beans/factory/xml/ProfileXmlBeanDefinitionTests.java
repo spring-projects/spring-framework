@@ -86,21 +86,11 @@ public class ProfileXmlBeanDefinitionTests {
 
 	@Test
 	public void testDefaultProfile() {
-		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other"), not(containsTargetBean()));
-
-		assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML, PROD_ACTIVE), not(containsTargetBean()));
-	}
-
-	@Test
-	public void testCustomDefaultProfile() {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 			ConfigurableEnvironment env = new DefaultEnvironment();
-			env.setDefaultProfile("custom-default");
+			env.setDefaultProfiles("custom-default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_ELIGIBLE_XML, getClass()));
 
@@ -110,13 +100,51 @@ public class ProfileXmlBeanDefinitionTests {
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 			ConfigurableEnvironment env = new DefaultEnvironment();
-			env.setDefaultProfile("custom-default");
+			env.setDefaultProfiles("custom-default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(CUSTOM_DEFAULT_ELIGIBLE_XML, getClass()));
 
 			assertThat(beanFactory, containsTargetBean());
 		}
 	}
+
+	@Test
+	public void testDefaultAndNonDefaultProfile() {
+		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other"), not(containsTargetBean()));
+
+		{
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+			ConfigurableEnvironment env = new DefaultEnvironment();
+			env.setActiveProfiles(DEV_ACTIVE);
+			env.setDefaultProfiles("default");
+			reader.setEnvironment(env);
+			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_AND_DEV_ELIGIBLE_XML, getClass()));
+			assertThat(beanFactory, containsTargetBean());
+		}
+		{
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+			ConfigurableEnvironment env = new DefaultEnvironment();
+			// env.setActiveProfiles(DEV_ACTIVE);
+			env.setDefaultProfiles("default");
+			reader.setEnvironment(env);
+			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_AND_DEV_ELIGIBLE_XML, getClass()));
+			assertThat(beanFactory, containsTargetBean());
+		}
+		{
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+			ConfigurableEnvironment env = new DefaultEnvironment();
+			// env.setActiveProfiles(DEV_ACTIVE);
+			//env.setDefaultProfiles("default");
+			reader.setEnvironment(env);
+			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_AND_DEV_ELIGIBLE_XML, getClass()));
+			assertThat(beanFactory, not(containsTargetBean()));
+		}
+	}
+
 
 	private BeanDefinitionRegistry beanFactoryFor(String xmlName, String... activeProfiles) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -59,6 +58,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 
 	private static final String TEST_BASE_PACKAGE = "example.scannable";
 	private static final String TEST_PROFILE_PACKAGE = "example.profilescan";
+	private static final String TEST_DEFAULT_PROFILE_NAME = "testDefault";
 
 
 	@Test
@@ -219,6 +219,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	@Test
 	public void testIntegrationWithAnnotationConfigApplicationContext_defaultProfile() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getEnvironment().setDefaultProfiles(TEST_DEFAULT_PROFILE_NAME);
 		// no active profiles are set
 		ctx.register(DefaultProfileAnnotatedComponent.class);
 		ctx.refresh();
@@ -231,6 +232,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		String beanName = DefaultAndDevProfileAnnotatedComponent.BEAN_NAME;
 		{
 			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setDefaultProfiles(TEST_DEFAULT_PROFILE_NAME);
 			// no active profiles are set
 			ctx.register(beanClass);
 			ctx.refresh();
@@ -238,6 +240,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		}
 		{
 			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setDefaultProfiles(TEST_DEFAULT_PROFILE_NAME);
 			ctx.getEnvironment().setActiveProfiles("dev");
 			ctx.register(beanClass);
 			ctx.refresh();
@@ -245,6 +248,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		}
 		{
 			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setDefaultProfiles(TEST_DEFAULT_PROFILE_NAME);
 			ctx.getEnvironment().setActiveProfiles("other");
 			ctx.register(beanClass);
 			ctx.refresh();
@@ -263,13 +267,13 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	}
 
 
-	@Profile(AbstractEnvironment.DEFAULT_PROFILE_NAME)
+	@Profile(TEST_DEFAULT_PROFILE_NAME)
 	@Component(DefaultProfileAnnotatedComponent.BEAN_NAME)
 	private static class DefaultProfileAnnotatedComponent {
 		static final String BEAN_NAME = "defaultProfileAnnotatedComponent";
 	}
 
-	@Profile({AbstractEnvironment.DEFAULT_PROFILE_NAME,"dev"})
+	@Profile({TEST_DEFAULT_PROFILE_NAME,"dev"})
 	@Component(DefaultAndDevProfileAnnotatedComponent.BEAN_NAME)
 	private static class DefaultAndDevProfileAnnotatedComponent {
 		static final String BEAN_NAME = "defaultAndDevProfileAnnotatedComponent";

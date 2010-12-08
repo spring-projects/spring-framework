@@ -25,12 +25,12 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
-import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILE_NAME;
-import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILE_PROPERTY_NAME;
+import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.DefaultEnvironmentTests.CollectionMatchers.isEmpty;
 
 import java.lang.reflect.Field;
@@ -239,26 +239,28 @@ public class DefaultEnvironmentTests {
 	@Test
 	public void systemPropertiesResoloutionOfMultipleProfiles() {
 		assertThat(environment.getActiveProfiles(), isEmpty());
-
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo,bar");
 		assertThat(environment.getActiveProfiles(), hasItems("foo", "bar"));
+		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
+	}
 
+	@Test
+	public void systemPropertiesResolutionOfMulitpleProfiles_withWhitespace() {
+		assertThat(environment.getActiveProfiles(), isEmpty());
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
-		assertThat(environment.getActiveProfiles(), not(hasItems("foo", "bar")));
 		assertThat(environment.getActiveProfiles(), hasItems("bar", "baz"));
-
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
 	public void environmentResolutionOfDefaultSpringProfileProperty_noneSet() {
-		assertThat(environment.getDefaultProfile(), equalTo(DEFAULT_PROFILE_NAME));
+		assertThat(environment.getDefaultProfiles(), isEmpty());
 	}
 
 	@Test
 	public void environmentResolutionOfDefaultSpringProfileProperty_isSet() {
-		testProperties.setProperty(DEFAULT_PROFILE_PROPERTY_NAME, "custom-default");
-		assertThat(environment.getDefaultProfile(), equalTo("custom-default"));
+		testProperties.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "custom-default");
+		assertTrue(environment.getDefaultProfiles().contains("custom-default"));
 	}
 
 	@Test

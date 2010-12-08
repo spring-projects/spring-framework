@@ -40,6 +40,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
+import org.springframework.util.StringUtils;
 
 
 /**
@@ -51,18 +52,15 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profile.active";
-
-	public static final String DEFAULT_PROFILE_PROPERTY_NAME = "spring.profile.default";
-
-	/**
-	 * Default name of the default profile. Override with
-	 * {@link #setDefaultProfile(String)}.
-	 *
-	 * @see #setDefaultProfile(String)
-	 */
-	public static final String DEFAULT_PROFILE_NAME = "default";
+	public static final String DEFAULT_PROFILES_PROPERTY_NAME = "spring.profile.default";
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private Set<String> activeProfiles = new LinkedHashSet<String>();
+	private Set<String> defaultProfiles = new LinkedHashSet<String>();
+
+	private LinkedList<PropertySource<?>> propertySources = new LinkedList<PropertySource<?>>();
+	private ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 
 	private final PropertyPlaceholderHelper nonStrictHelper =
 		new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, true);
@@ -70,13 +68,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	private final PropertyPlaceholderHelper strictHelper =
 		new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
 
-	private Set<String> activeProfiles = new LinkedHashSet<String>();
-	private LinkedList<PropertySource<?>> propertySources = new LinkedList<PropertySource<?>>();
-	private ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 
-	private boolean explicitlySetProfiles;
-
-	private String defaultProfile = DEFAULT_PROFILE_NAME;
 
 
 	public void addPropertySource(PropertySource<?> propertySource) {
@@ -187,26 +179,33 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	public Set<String> getActiveProfiles() {
-		doGetProfiles();
+		if (this.activeProfiles.isEmpty()) {
+			String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
+			if (StringUtils.hasText(profiles)) {
+				this.activeProfiles = commaDelimitedListToSet(trimAllWhitespace(profiles));
+			}
+		}
 		return Collections.unmodifiableSet(activeProfiles);
 	}
 
-	private void doGetProfiles() {
-		if (explicitlySetProfiles)
-			return;
-
-		String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
-		if (profiles == null || profiles.equals("")) {
-			return;
-		}
-
-		this.activeProfiles = commaDelimitedListToSet(trimAllWhitespace(profiles));
-	}
-
 	public void setActiveProfiles(String... profiles) {
-		explicitlySetProfiles = true;
 		this.activeProfiles.clear();
 		this.activeProfiles.addAll(Arrays.asList(profiles));
+	}
+
+	public Set<String> getDefaultProfiles() {
+		if (this.defaultProfiles.isEmpty()) {
+			String profiles = getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
+			if (StringUtils.hasText(profiles)) {
+				this.defaultProfiles = commaDelimitedListToSet(profiles);
+			}
+		}
+		return Collections.unmodifiableSet(this.defaultProfiles);
+	}
+
+	public void setDefaultProfiles(String... profiles) {
+		this.defaultProfiles.clear();
+		this.defaultProfiles.addAll(Arrays.asList(profiles));
 	}
 
 	public Map<String, String> getSystemEnvironment() {
@@ -282,26 +281,15 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public boolean acceptsProfiles(String[] specifiedProfiles) {
 		boolean activeProfileFound = false;
 		Set<String> activeProfiles = this.getActiveProfiles();
+		Set<String> defaultProfiles = this.getDefaultProfiles();
 		for (String profile : specifiedProfiles) {
 			if (activeProfiles.contains(profile)
-					|| (activeProfiles.isEmpty() && profile.equals(this.getDefaultProfile()))) {
+					|| (activeProfiles.isEmpty() && defaultProfiles.contains(profile))) {
 				activeProfileFound = true;
 				break;
 			}
 		}
 		return activeProfileFound;
-	}
-
-	public String getDefaultProfile() {
-		String defaultProfileProperty = getProperty(DEFAULT_PROFILE_PROPERTY_NAME);
-		if (defaultProfileProperty != null) {
-			return defaultProfileProperty;
-		}
-		return defaultProfile;
-	}
-
-	public void setDefaultProfile(String defaultProfile) {
-		this.defaultProfile = defaultProfile;
 	}
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
@@ -314,8 +302,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [activeProfiles=" + activeProfiles
-			+ ", propertySources=" + propertySources + "]";
+		return String.format("%s [activeProfiles=%s, defaultProfiles=%s, propertySources=%s]",
+				getClass().getSimpleName(), activeProfiles, defaultProfiles, propertySources);
 	}
 
 }
