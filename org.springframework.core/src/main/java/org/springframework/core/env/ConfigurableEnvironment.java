@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import org.springframework.core.convert.ConversionService;
+
 /**
  * TODO SPR-7508: document
  *
@@ -34,4 +36,7 @@ public interface ConfigurableEnvironment extends Environment, PropertySourceAggr
 	 */
 	void setDefaultProfiles(String... profiles);
 
+	public ConversionService getConversionService();
+
+	public void setConversionService(ConversionService conversionService);
 }
