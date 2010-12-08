@@ -30,10 +30,8 @@ public interface ConfigurableEnvironment extends Environment, PropertySourceAggr
 	void setActiveProfiles(String... profiles);
 
 	/**
-	 * Set the default profile name to be used instead of 'default'
-	 *
-	 * @param defaultProfile
+	 * TODO SPR-7508: document
 	 */
-	void setDefaultProfile(String defaultProfile);
+	void setDefaultProfiles(String... profiles);
 
 }
