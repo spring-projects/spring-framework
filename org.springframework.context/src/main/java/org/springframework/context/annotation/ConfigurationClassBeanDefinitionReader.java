@@ -103,7 +103,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 
 	/**
-	 * Reads {@code configurationModel}, registering bean definitions with {@link #registry}
+	 * Read {@code configurationModel}, registering bean definitions with {@link #registry}
 	 * based on its contents.
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
@@ -113,7 +113,7 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
-	 * Reads a particular {@link ConfigurationClass}, registering bean definitions for the
+	 * Read a particular {@link ConfigurationClass}, registering bean definitions for the
 	 * class itself, all its {@link Bean} methods
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
@@ -158,7 +158,7 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
-	 * Reads a particular {@link ConfigurationClassMethod}, registering bean definitions
+	 * Read a particular {@link ConfigurationClassMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForModelMethod(ConfigurationClassMethod method) {
