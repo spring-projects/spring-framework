@@ -69,7 +69,13 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
 
 
+	public ConversionService getConversionService() {
+		return this.conversionService;
+	}
 
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
 
 	public void addPropertySource(PropertySource<?> propertySource) {
 		propertySources.push(propertySource);
