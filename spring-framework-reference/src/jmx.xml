@@ -1196,7 +1196,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       below:</para>
 
       <programlisting language="xml"><![CDATA[<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
-  <property name="serviceUrl" value="service:jmx:rmi://localhost:9875"/>
+  <property name="serviceUrl" value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi"/>
 </bean>]]></programlisting>
     </section>
 
