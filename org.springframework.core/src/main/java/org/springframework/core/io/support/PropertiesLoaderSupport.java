@@ -180,11 +180,10 @@ public abstract class PropertiesLoaderSupport {
 				try {
 					is = location.getInputStream();
 
-					if (location instanceof AbstractFileResolvingResource) {
-						String filename = location.getFilename();
-						if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
-							this.propertiesPersister.loadFromXml(props, is);
-						}
+					String filename = (location instanceof AbstractFileResolvingResource) ?
+							location.getFilename() : null;
+					if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+						this.propertiesPersister.loadFromXml(props, is);
 					}
 					else {
 						if (this.fileEncoding != null) {
