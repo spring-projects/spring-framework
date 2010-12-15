@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.AbstractFileResolvingResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
@@ -179,15 +180,11 @@ public abstract class PropertiesLoaderSupport {
 				try {
 					is = location.getInputStream();
 
-					String filename = null;
-					try {
-						filename = location.getFilename();
-					} catch (IllegalStateException ex) {
-						// resource is not file-based. See SPR-7552.
-					}
-
-					if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
-						this.propertiesPersister.loadFromXml(props, is);
+					if (location instanceof AbstractFileResolvingResource) {
+						String filename = location.getFilename();
+						if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+							this.propertiesPersister.loadFromXml(props, is);
+						}
 					}
 					else {
 						if (this.fileEncoding != null) {
