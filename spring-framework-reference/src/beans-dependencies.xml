@@ -1029,6 +1029,53 @@ support=support@example.co.uk</programlisting>
           time.<!--Clarify ref to all three approaches.I see two, XML and namespace.--></para>
       </note>
     </section>
+    
+   	<section id="beans-c-namespace">
+      <title>XML shortcut with the c-namespace</title>
+      
+      <para>Similar to the <xref linkend="beans-p-namespace"/>, the <emphasis>c-namespace</emphasis>, newly introduced in Spring 3.1, 
+      allows usage of inlined attributes for configuring the constructor arguments rather then nested <literal>constructor-arg</literal>
+      elements.</para>
+      
+      <para>Let's review the examples from <xref linkend="beans-constructor-injection"/> with the <literal>c</literal> namespace:</para>
+      
+      <programlisting language="java">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:p="http://www.springframework.org/schema/c"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+      
+  &lt;bean id="bar" class="x.y.Bar"/&gt;
+  &lt;bean id="baz" class="x.y.Baz"/&gt;
+
+  &lt;-- 'traditional' declaration --&gt;      
+  &lt;bean id="foo" class="x.y.Foo"&gt;
+      &lt;constructor-arg ref="bar"/&gt;
+      &lt;constructor-arg ref="baz"/&gt;
+      &lt;constructor-arg value="foo@bar.com"/&gt;
+  &lt;/bean&gt;
+
+  &lt;-- 'c-namespace' declaration --&gt;
+  &lt;bean id="foo" class="x.y.Foo" c:bar-ref="bar" c:baz-ref="baz" c:email="foo@bar.com"&gt;
+
+&lt;/beans&gt;</programlisting>
+
+	  <para>The <literal>c</literal> namespace uses the same conventions as the <literal>p</literal> one (trailing <literal>-ref</literal> for bean references)
+	  for setting the constructor arguments by their names. And just as well, it needs to be declared even though it is not defined in an XSD schema
+	  (but it exists inside the Spring core).</para>
+	  
+	  <para>For the rare cases where the constructor argument names are not available (usually if the bytecode was compiled without debugging information), one can
+	  use fallback to the argument indexes:</para>
+
+      <programlisting language="java">&lt;-- 'c-namespace' index declaration --&gt;
+&lt;bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz"&gt;</programlisting>
+
+      <note>Due to the XML grammar, the index notation requires the presence of the leading <emphasis>_</emphasis> as XML attribute names cannot start
+      with a number (even though some IDE allow it).</note>
+      
+	  <para>In practice, the constructor resolution <link linkend="beans-factory-ctor-arguments-resolution">mechanism</link> is quite efficient in matching arguments so 
+	  unless one really needs to, we recommend using the name notation through-out your configuration.</para>
+    </section>
 
     <section id="beans-compound-property-names">
       <title>Compound property names</title>
