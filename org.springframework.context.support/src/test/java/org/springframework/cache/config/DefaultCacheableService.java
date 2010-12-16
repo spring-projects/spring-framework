@@ -31,21 +31,21 @@ public class DefaultCacheableService implements CacheableService<Long> {
 
 	private AtomicLong counter = new AtomicLong();
 
-	@Cacheable
+	@Cacheable("default")
 	public Long cache(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
-	@CacheEvict
+	@CacheEvict("default")
 	public void invalidate(Object arg1) {
 	}
 
-	@Cacheable(condition = "#classField == 3")
+	@Cacheable(value = "default", condition = "#classField == 3")
 	public Long conditional(int classField) {
 		return counter.getAndIncrement();
 	}
 
-	@Cacheable(key = "#p0")
+	@Cacheable(value = "default", key = "#p0")
 	public Long key(Object arg1, Object arg2) {
 		return counter.getAndIncrement();
 	}

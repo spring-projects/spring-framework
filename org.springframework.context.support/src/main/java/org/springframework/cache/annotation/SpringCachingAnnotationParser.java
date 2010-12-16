@@ -20,8 +20,8 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
-import org.springframework.cache.interceptor.CacheInvalidateDefinition;
 import org.springframework.cache.interceptor.CacheDefinition;
+import org.springframework.cache.interceptor.CacheInvalidateDefinition;
 import org.springframework.cache.interceptor.CacheUpdateDefinition;
 import org.springframework.cache.interceptor.DefaultCacheInvalidateDefinition;
 import org.springframework.cache.interceptor.DefaultCacheUpdateDefinition;
@@ -34,17 +34,17 @@ import org.springframework.cache.interceptor.DefaultCacheUpdateDefinition;
 @SuppressWarnings("serial")
 public class SpringCachingAnnotationParser implements CacheAnnotationParser, Serializable {
 
-	public CacheDefinition parseTransactionAnnotation(AnnotatedElement ae) {
+	public CacheDefinition parseCacheAnnotation(AnnotatedElement ae) {
 		Cacheable update = findAnnotation(ae, Cacheable.class);
 
 		if (update != null) {
-			return parseCacheableAnnotation(update);
+			return parseCacheableAnnotation(ae, update);
 		}
 
 		CacheEvict invalidate = findAnnotation(ae, CacheEvict.class);
 
 		if (invalidate != null) {
-			return parseInvalidateAnnotation(invalidate);
+			return parseInvalidateAnnotation(ae, invalidate);
 		}
 
 		return null;
@@ -63,22 +63,24 @@ public class SpringCachingAnnotationParser implements CacheAnnotationParser, Ser
 		return ann;
 	}
 
-	public CacheUpdateDefinition parseCacheableAnnotation(Cacheable ann) {
+	CacheUpdateDefinition parseCacheableAnnotation(AnnotatedElement target, Cacheable ann) {
 		DefaultCacheUpdateDefinition dcud = new DefaultCacheUpdateDefinition();
-		dcud.setCacheName(ann.value());
+		dcud.setCacheNames(ann.value());
 		dcud.setCondition(ann.condition());
 		dcud.setKey(ann.key());
+		dcud.setName(target.toString());
 
 		return dcud;
 	}
 
-	public CacheInvalidateDefinition parseInvalidateAnnotation(CacheEvict ann) {
+	CacheInvalidateDefinition parseInvalidateAnnotation(AnnotatedElement target, CacheEvict ann) {
 		DefaultCacheInvalidateDefinition dcid = new DefaultCacheInvalidateDefinition();
-		dcid.setCacheName(ann.value());
+		dcid.setCacheNames(ann.value());
 		dcid.setCondition(ann.condition());
 		dcid.setKey(ann.key());
 		dcid.setCacheWide(ann.allEntries());
-
+		dcid.setName(target.toString());
+		
 		return dcid;
 	}
 }

@@ -24,7 +24,7 @@ import org.springframework.cache.annotation.Cacheable;
 /**
  * @author Costin Leau
  */
-@Cacheable
+@Cacheable("default")
 public class AnnotatedClassCacheableService implements CacheableService {
 
 	private AtomicLong counter = new AtomicLong();
@@ -37,11 +37,11 @@ public class AnnotatedClassCacheableService implements CacheableService {
 		return null;
 	}
 
-	@CacheEvict
+	@CacheEvict("default")
 	public void invalidate(Object arg1) {
 	}
 
-	@Cacheable(key = "#p0")
+	@Cacheable(value = "default", key = "#p0")
 	public Object key(Object arg1, Object arg2) {
 		return counter.getAndIncrement();
 	}

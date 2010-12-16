@@ -16,6 +16,11 @@
 
 package org.springframework.cache.interceptor;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.springframework.util.Assert;
 
 /**
  * Base class implementing {@link CacheDefinition}.
@@ -24,14 +29,14 @@ package org.springframework.cache.interceptor;
  */
 abstract class AbstractCacheDefinition implements CacheDefinition {
 
-	private String cacheName = "";
+	private Set<String> cacheNames = Collections.emptySet();
 	private String condition = "";
 	private String key = "";
 	private String name = "";
 
 
-	public String getCacheName() {
-		return cacheName;
+	public Set<String> getCacheNames() {
+		return cacheNames;
 	}
 
 	public String getCondition() {
@@ -47,18 +52,30 @@ abstract class AbstractCacheDefinition implements CacheDefinition {
 	}
 
 	public void setCacheName(String cacheName) {
-		this.cacheName = cacheName;
+		Assert.hasText(cacheName);
+		this.cacheNames = Collections.singleton(cacheName);
+	}
+
+	public void setCacheNames(String[] cacheNames) {
+		Assert.notEmpty(cacheNames);
+		this.cacheNames = new LinkedHashSet<String>(cacheNames.length);
+		for (String string : cacheNames) {
+			this.cacheNames.add(string);
+		}
 	}
 
 	public void setCondition(String condition) {
+		Assert.notNull(condition);
 		this.condition = condition;
 	}
 
 	public void setKey(String key) {
+		Assert.notNull(key);
 		this.key = key;
 	}
 
 	public void setName(String name) {
+		Assert.hasText(name);
 		this.name = name;
 	}
 
@@ -97,12 +114,15 @@ abstract class AbstractCacheDefinition implements CacheDefinition {
 	 */
 	protected StringBuilder getDefinitionDescription() {
 		StringBuilder result = new StringBuilder();
-		result.append(cacheName);
-		result.append(',');
+		result.append("CacheDefinition[");
+		result.append(name);
+		result.append("] caches=");
+		result.append(cacheNames);
+		result.append(" | condition='");
 		result.append(condition);
-		result.append(",");
+		result.append("' | key='");
 		result.append(key);
-
+		result.append("'");
 		return result;
 	}
 }

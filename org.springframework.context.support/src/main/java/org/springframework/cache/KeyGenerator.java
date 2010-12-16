@@ -16,14 +16,15 @@
 
 package org.springframework.cache;
 
+import java.lang.reflect.Method;
+
 /**
- * Cache 'key' extractor. Used for creating a key based on the given
- * parameters.
+ * Cache 'key' extractor. Used for creating a key based on the given method
+ * (used as context) and its parameter.
  * 
  * @author Costin Leau
  */
-// CL: could be renamed to KeyFactory
 public interface KeyGenerator<K> {
 
-	K extract(Object... params);
+	K extract(Method method, Object... params);
 }

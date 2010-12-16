@@ -37,11 +37,12 @@ import java.lang.annotation.Target;
 public @interface Cacheable {
 
 	/**
-	 * Name of the cache in which the update takes place.
-	 * <p>May be used to determine the target cache (or caches), matching the qualifier 
-	 * value (or the bean name(s)) of (a) specific bean definition.
+	 * Name of the caches in which the update takes place.
+	 * <p>
+	 * May be used to determine the target cache (or caches), matching the
+	 * qualifier value (or the bean name(s)) of (a) specific bean definition.
 	 */
-	String value() default "";
+	String[] value();
 
 	/**
 	 * Spring Expression Language (SpEL) attribute for computing the key dynamically.
