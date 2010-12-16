@@ -1060,7 +1060,7 @@ support=support@example.co.uk</programlisting>
 
 &lt;/beans&gt;</programlisting>
 
-	  <para>The <literal>c</literal> namespace uses the same conventions as the <literal>p</literal> one (trailing <literal>-ref</literal> for bean references)
+	  <para>The <literal>c:</literal> namespace uses the same conventions as the <literal>p:</literal> one (trailing <literal>-ref</literal> for bean references)
 	  for setting the constructor arguments by their names. And just as well, it needs to be declared even though it is not defined in an XSD schema
 	  (but it exists inside the Spring core).</para>
 	  
