@@ -16,20 +16,11 @@
 
 package org.springframework.cache.ehcache;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.SimpleMapEntry;
 import org.springframework.util.Assert;
 
 /**
@@ -74,49 +65,15 @@ public class EhCacheCache implements Cache<Object, Object> {
 		return cache.isValueInCache(value);
 	}
 
-	@SuppressWarnings("unchecked")
-	public Set<Map.Entry<Object, Object>> entrySet() {
-		List<Object> keys = cache.getKeys();
-		Set<Map.Entry<Object, Object>> entries = new LinkedHashSet<Map.Entry<Object, Object>>(keys.size());
-		for (Object key : keys) {
-			Element element = cache.get(key);
-			if (element != null) {
-				entries.add(new SimpleMapEntry(key, element.getObjectValue()));
-			}
-		}
-
-		return Collections.unmodifiableSet(entries);
-	}
-
 	public Object get(Object key) {
 		Element element = cache.get(key);
 		return (element != null ? element.getObjectValue() : null);
-	}
-
-	public boolean isEmpty() {
-		return cache.getSize() == 0;
-	}
-
-	@SuppressWarnings("unchecked")
-	public Set<Object> keySet() {
-		List<Object> keys = cache.getKeys();
-		Set<Object> keySet = new LinkedHashSet<Object>(keys.size());
-		for (Object key : keys) {
-			keySet.add(key);
-		}
-		return Collections.unmodifiableSet(keySet);
 	}
 
 	public Object put(Object key, Object value) {
 		Element previous = cache.getQuiet(key);
 		cache.put(new Element(key, value));
 		return (previous != null ? previous.getValue() : null);
-	}
-
-	public void putAll(Map<? extends Object, ? extends Object> m) {
-		for (Map.Entry<? extends Object, ? extends Object> entry : m.entrySet()) {
-			cache.put(new Element(entry.getKey(), entry.getValue()));
-		}
 	}
 
 	public Object remove(Object key) {
@@ -127,23 +84,6 @@ public class EhCacheCache implements Cache<Object, Object> {
 		}
 		cache.remove(key);
 		return value;
-	}
-
-	public int size() {
-		return cache.getSize();
-	}
-
-	@SuppressWarnings("unchecked")
-	public Collection<Object> values() {
-		List<Object> keys = cache.getKeys();
-		List<Object> values = new ArrayList<Object>(keys.size());
-		for (Object key : keys) {
-			Element element = cache.get(key);
-			if (element != null) {
-				values.add(element.getObjectValue());
-			}
-		}
-		return Collections.unmodifiableCollection(values);
 	}
 
 	public Object putIfAbsent(Object key, Object value) {
