@@ -16,14 +16,19 @@
 
 package org.springframework.cache.support;
 
+import java.lang.reflect.Method;
+
 import org.springframework.cache.KeyGenerator;
 
 /**
+ * Default key generator. Computes a resulting key based on the hashcode of the
+ * given parameters.
+ * 
  * @author Costin Leau
  */
 public class DefaultKeyGenerator implements KeyGenerator<Object> {
 
-	public Object extract(Object... params) {
+	public Object extract(Method method, Object... params) {
 		int hashCode = 17;
 
 		for (Object object : params) {

@@ -16,6 +16,8 @@
 
 package org.springframework.cache.interceptor;
 
+import java.util.Collection;
+
 import org.springframework.cache.Cache;
 
 /**
@@ -33,9 +35,9 @@ interface CacheExpressionRootObject {
 	String getMethodName();
 
 	/**
-	 * Returns the cache against which the method is executed.
+	 * Returns the caches against which the method is executed.
 	 * 
 	 * @return current cache
 	 */
-	Cache getCache();
+	Collection<Cache<?,?>> getCaches();
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.cache.interceptor;
 
+import java.util.Set;
+
 /**
  * Interface describing Spring-compliant caching operation.
  * 
@@ -33,11 +35,11 @@ public interface CacheDefinition {
 	String getName();
 
 	/**
-	 * Returns the name of the cache against which this operation is performed.
+	 * Returns the names of the cache against which this operation is performed.
 	 * 
-	 * @return name of the cache on which the operation is performed.
+	 * @return names of the cache on which the operation is performed.
 	 */
-	String getCacheName();
+	Set<String> getCacheNames();
 
 	/**
 	 * Returns the SpEL expression conditioning the operation.  

@@ -40,7 +40,7 @@ public @interface CacheEvict {
 	 * <p>May be used to determine the target cache (or caches), matching the qualifier 
 	 * value (or the bean name(s)) of (a) specific bean definition.
 	 */
-	String value() default "";
+	String[] value();
 
 	/**
 	 * Spring Expression Language (SpEL) attribute for computing the key dynamically.
@@ -57,11 +57,11 @@ public @interface CacheEvict {
 	String condition() default "";
 
 	/**
-	 * Whether or not all the entries inside the cache are removed or not.
-	 * By default, only the value under the associated key is removed.
+	 * Whether or not all the entries inside the cache(s) are removed or not. By
+	 * default, only the value under the associated key is removed.
 	 * 
 	 * Note that specifying setting this parameter to true and specifying a
-	 * {@link CacheKey key} is not allowed. 
+	 * {@link CacheKey key} is not allowed.
 	 */
 	boolean allEntries() default false;
 }

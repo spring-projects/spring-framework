@@ -107,7 +107,7 @@ public class AnnotationCacheDefinitionSource extends AbstractFallbackCacheDefini
 	 */
 	protected CacheDefinition determineCacheDefinition(AnnotatedElement ae) {
 		for (CacheAnnotationParser annotationParser : this.annotationParsers) {
-			CacheDefinition attr = annotationParser.parseTransactionAnnotation(ae);
+			CacheDefinition attr = annotationParser.parseCacheAnnotation(ae);
 			if (attr != null) {
 				return attr;
 			}

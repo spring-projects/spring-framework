@@ -42,5 +42,5 @@ public interface CacheAnnotationParser {
 	 * or <code>null</code> if none was found
 	 * @see AnnotationCacheDefinitionSource#determineCacheOperationDefinition
 	 */
-	CacheDefinition parseTransactionAnnotation(AnnotatedElement ae);
+	CacheDefinition parseCacheAnnotation(AnnotatedElement ae);
 }

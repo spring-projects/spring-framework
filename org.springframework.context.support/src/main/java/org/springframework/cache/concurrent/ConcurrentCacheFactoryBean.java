@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.StringUtils;
 
 /**
  * Factory bean for easy configuration of {@link ConcurrentCache} through Spring.
@@ -52,7 +53,9 @@ public class ConcurrentCacheFactoryBean<K, V> implements FactoryBean<ConcurrentC
 	}
 
 	public void setBeanName(String beanName) {
-		setName(beanName);
+		if (!StringUtils.hasText(name)) {
+			setName(beanName);
+		}
 	}
 
 	public void setName(String name) {
