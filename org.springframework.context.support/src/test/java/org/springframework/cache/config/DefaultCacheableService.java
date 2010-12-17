@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
-
 /**
  * Simple cacheable service
  * 
@@ -29,7 +28,8 @@ import org.springframework.cache.annotation.Cacheable;
  */
 public class DefaultCacheableService implements CacheableService<Long> {
 
-	private AtomicLong counter = new AtomicLong();
+	private final AtomicLong counter = new AtomicLong();
+	private final AtomicLong nullInvocations = new AtomicLong();
 
 	@Cacheable("default")
 	public Long cache(Object arg1) {
@@ -48,5 +48,15 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Cacheable(value = "default", key = "#p0")
 	public Long key(Object arg1, Object arg2) {
 		return counter.getAndIncrement();
+	}
+
+	@Cacheable("default")
+	public Long nullValue(Object arg1) {
+		nullInvocations.incrementAndGet();
+		return null;
+	}
+
+	public Number nullInvocations() {
+		return nullInvocations.get();
 	}
 }

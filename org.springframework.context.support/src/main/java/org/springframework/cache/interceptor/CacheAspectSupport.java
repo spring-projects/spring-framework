@@ -16,7 +16,6 @@
 
 package org.springframework.cache.interceptor;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,14 +59,6 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  */
 public abstract class CacheAspectSupport implements InitializingBean {
-
-	private static class EmptyHolder implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-	}
-
-	// TODO: can null values be properly stored into user caches?
-	private static final Object NULL_RETURN = new EmptyHolder();
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -124,7 +115,6 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	protected Collection<Cache<?, ?>> getCaches(CacheDefinition definition) {
-		// TODO: add behaviour for the default cache
 		Set<String> cacheNames = definition.getCacheNames();
 
 		Collection<Cache<?,?>> caches = new ArrayList<Cache<?,?>>(cacheNames.size());

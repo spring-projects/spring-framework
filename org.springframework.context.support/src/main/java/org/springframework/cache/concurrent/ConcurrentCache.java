@@ -22,9 +22,9 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractDelegatingCache;
 
-/** 
- * Simple {@link Cache} implementation based on the JDK 1.5+ java.util.concurrent package.
- * Useful for testing or simple caching scenarios.
+/**
+ * Simple {@link Cache} implementation based on the JDK 1.5+
+ * java.util.concurrent package. Useful for testing or simple caching scenarios.
  * 
  * @author Costin Leau
  */
@@ -42,7 +42,7 @@ public class ConcurrentCache<K, V> extends AbstractDelegatingCache<K, V> {
 	}
 
 	public ConcurrentCache(ConcurrentMap<K, V> delegate, String name) {
-		super(delegate);
+		super(delegate, true);
 		this.store = delegate;
 		this.name = name;
 	}
@@ -55,19 +55,51 @@ public class ConcurrentCache<K, V> extends AbstractDelegatingCache<K, V> {
 		return store;
 	}
 
+	@SuppressWarnings("unchecked")
 	public V putIfAbsent(K key, V value) {
-		return store.putIfAbsent(key, value);
+		if (getAllowNullValues()) {
+			if (value == null) {
+				ConcurrentMap raw = store;
+				return filterNull((V) raw.putIfAbsent(key, NULL_HOLDER));
+			}
+		}
+		return filterNull(store.putIfAbsent(key, value));
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean remove(Object key, Object value) {
+		if (getAllowNullValues()) {
+			if (value == null) {
+				ConcurrentMap raw = store;
+				return raw.remove(key, NULL_HOLDER);
+			}
+		}
+
 		return store.remove(key, value);
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean replace(K key, V oldValue, V newValue) {
+		if (getAllowNullValues()) {
+			Object rawOldValue = (oldValue == null ? NULL_HOLDER : oldValue);
+			Object rawNewValue = (newValue == null ? NULL_HOLDER : newValue);
+
+			ConcurrentMap raw = store;
+			return raw.replace(key, rawOldValue, rawNewValue);
+		}
+
 		return store.replace(key, oldValue, newValue);
 	}
 
+	@SuppressWarnings("unchecked")
 	public V replace(K key, V value) {
-		return store.replace(key, value);
+		if (getAllowNullValues()) {
+			if (value == null) {
+				ConcurrentMap raw = store;
+				return filterNull((V) raw.replace(key, NULL_HOLDER));
+			}
+		}
+
+		return filterNull(store.replace(key, value));
 	}
 }
