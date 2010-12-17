@@ -16,8 +16,7 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +25,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Abstract annotation test (containing several reusable methods).
+ * 
  * @author Costin Leau
  */
 public abstract class AbstractAnnotationTest {
@@ -72,7 +72,8 @@ public abstract class AbstractAnnotationTest {
 		assertSame(r3, r4);
 	}
 
-	public void testConditionalExpression(CacheableService service) throws Exception {
+	public void testConditionalExpression(CacheableService service)
+			throws Exception {
 		Object r1 = service.conditional(4);
 		Object r2 = service.conditional(4);
 
@@ -94,6 +95,16 @@ public abstract class AbstractAnnotationTest {
 		Object r4 = service.key(2, 5);
 
 		assertNotSame(r3, r4);
+	}
+
+	public void testNullValue(CacheableService service) throws Exception {
+		Object key = new Object();
+		assertNull(service.nullValue(key));
+		int nr = service.nullInvocations().intValue();
+		assertNull(service.nullValue(key));
+		assertEquals(nr, service.nullInvocations().intValue());
+		assertNull(service.nullValue(new Object()));
+		assertEquals(nr + 1, service.nullInvocations().intValue());
 	}
 
 	@Test
@@ -126,4 +137,22 @@ public abstract class AbstractAnnotationTest {
 		testInvalidate(ccs);
 	}
 
+	@Test
+	public void testNullValue() throws Exception {
+		testNullValue(cs);
+	}
+
+	@Test
+	public void testClassNullValue() throws Exception {
+		Object key = new Object();
+		assertNull(ccs.nullValue(key));
+		int nr = ccs.nullInvocations().intValue();
+		assertNull(ccs.nullValue(key));
+		assertEquals(nr, ccs.nullInvocations().intValue());
+		assertNull(ccs.nullValue(new Object()));
+		// the check method is also cached
+		assertEquals(nr, ccs.nullInvocations().intValue());
+		assertEquals(nr + 1, AnnotatedClassCacheableService.nullInvocations
+				.intValue());
+	}
 }

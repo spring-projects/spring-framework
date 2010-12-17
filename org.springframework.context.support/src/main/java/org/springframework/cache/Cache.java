@@ -18,7 +18,11 @@ package org.springframework.cache;
 
 
 /**
- * Interface that defines the common cache operations. 
+ * Interface that defines the common cache operations.
+ * 
+ * <b>Note:</b> Due to the generic use of caching, it is recommended that 
+ * implementations allow storage of <tt>null</tt> values (for example to 
+ * cache methods that return null).
  * 
  * @author Costin Leau
  */

@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+
 /**
  * Basic service interface.
  * 
@@ -30,5 +31,9 @@ public interface CacheableService<T> {
 	T conditional(int field);
 
 	T key(Object arg1, Object arg2);
+
+	T nullValue(Object arg1);
+
+	Number nullInvocations();
 
 }
