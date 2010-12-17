@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -167,14 +168,47 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			if (context.hasConditionPassed()) {
 				// check operation
 				if (cacheDef instanceof CacheUpdateDefinition) {
-					// for each cache
-					// check cache first
-					for (Cache cache : caches) {
-						Object key = context.generateKey();
-						retVal = cache.get(key);
-						if (retVal == null) {
+					Object key = context.generateKey();
+
+					//
+					// check usage of single cache
+					// very common case which allows for some optimization
+					// in exchange for code readability
+					//
+
+					if (caches.size() == 1) {
+						Cache cache = caches.iterator().next();
+
+						if (cache.containsKey(key)) {
+							retVal = cache.get(key);
+						} else {
 							retVal = invocation.call();
-							cache.put(key, (retVal == null ? NULL_RETURN : retVal));
+							cache.put(key, retVal);
+						}
+					}
+
+					//
+					// multi cache path
+					//
+					else {
+						// for each cache
+						boolean cacheHit = false;
+						
+						for (Iterator<Cache<?,?>> iterator = caches.iterator(); iterator.hasNext() && !cacheHit;) {
+							Cache cache = iterator.next();
+							if (cache.containsKey(key)){
+								retVal = cache.get(key);
+								cacheHit = true;
+							}
+						}
+						
+						if (!cacheHit) {
+							retVal = invocation.call();
+						}
+	
+						// update all caches (if needed)
+						for (Cache cache : caches) {
+							cache.putIfAbsent(key, retVal);
 						}
 					}
 				}
@@ -184,6 +218,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					retVal = invocation.call();
 					
 					// for each cache
+					// lazy key initialization
+					Object key = null;
 					
 					for (Cache cache : caches) {
 						// flush the cache (ignore arguments)
@@ -191,7 +227,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
 							cache.clear();
 						} else {
 							// check key
-							Object key = context.generateKey();
+							if (key == null) {
+								key = context.generateKey();
+							}
 							cache.remove(key);
 						}
 					}
