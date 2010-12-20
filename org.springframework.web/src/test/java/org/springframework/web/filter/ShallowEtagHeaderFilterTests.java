@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,13 +23,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
 
 public class ShallowEtagHeaderFilterTests {
 
@@ -87,6 +88,7 @@ public class ShallowEtagHeaderFilterTests {
 				assertEquals("Invalid request passed", request, filterRequest);
 				byte[] responseBody = "Hello World".getBytes("UTF-8");
 				FileCopyUtils.copy(responseBody, filterResponse.getOutputStream());
+				filterResponse.setContentLength(responseBody.length);
 			}
 		};
 
@@ -94,7 +96,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertEquals("Invalid status", 304, response.getStatus());
 		assertEquals("Invalid ETag header", "\"0b10a8db164e0754105b7a99be72e3fe5\"", response.getHeader("ETag"));
-		assertEquals("Invalid Content-Length header", 0, response.getContentLength());
+		assertFalse("Response has Content-Length header", response.containsHeader("Content-Length"));
 		assertArrayEquals("Invalid content", new byte[0], response.getContentAsByteArray());
 	}
 
@@ -120,7 +122,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertEquals("Invalid status", 304, response.getStatus());
 		assertEquals("Invalid ETag header", "\"0b10a8db164e0754105b7a99be72e3fe5\"", response.getHeader("ETag"));
-		assertEquals("Invalid Content-Length header", 0, response.getContentLength());
+		assertFalse("Response has Content-Length header", response.containsHeader("Content-Length"));
 		assertArrayEquals("Invalid content", new byte[0], response.getContentAsByteArray());
 	}
 
