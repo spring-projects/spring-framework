@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,7 +43,6 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can handle form data, including multipart form data
@@ -92,7 +91,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private final Random rnd = new Random();
 
-	private Charset charset = Charset.forName(WebUtils.DEFAULT_CHARACTER_ENCODING);
+	private Charset charset = Charset.forName("UTF-8");
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
 
