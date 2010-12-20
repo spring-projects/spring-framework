@@ -45,35 +45,26 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can handle form data, including multipart form data
- * (i.e. file uploads).
+ * Implementation of {@link HttpMessageConverter} that can handle form data, including multipart form data (i.e. file
+ * uploads).
  *
  * <p>This converter can write the {@code application/x-www-form-urlencoded} and {@code multipart/form-data} media
  * types, and read the {@code application/x-www-form-urlencoded}) media type (but not {@code multipart/form-data}).
  *
- * <p>In other words, this converter can read and write 'normal' HTML forms (as
- * {@link MultiValueMap MultiValueMap&lt;String, String&gt;}), and it can write multipart form (as
- * {@link MultiValueMap MultiValueMap&lt;String, Object&gt;}. When writing multipart, this converter uses other
- * {@link HttpMessageConverter HttpMessageConverters} to write the respective MIME parts. By default, basic converters
- * are registered (supporting {@code Strings} and {@code Resources}, for instance); these can be overridden by setting
- * the {@link #setPartConverters(java.util.List) partConverters} property.
+ * <p>In other words, this converter can read and write 'normal' HTML forms (as {@link MultiValueMap
+ * MultiValueMap&lt;String, String&gt;}), and it can write multipart form (as {@link MultiValueMap
+ * MultiValueMap&lt;String, Object&gt;}. When writing multipart, this converter uses other {@link HttpMessageConverter
+ * HttpMessageConverters} to write the respective MIME parts. By default, basic converters are registered (supporting
+ * {@code Strings} and {@code Resources}, for instance); these can be overridden by setting the {@link
+ * #setPartConverters(java.util.List) partConverters} property.
  *
- * <p>For example, the following snippet shows how to submit an HTML form:
- * <pre class="code">
- * RestTemplate template = new RestTemplate(); // FormHttpMessageConverter is configured by default
- * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;String, String&gt;();
- * form.add("field 1", "value 1");
- * form.add("field 2", "value 2");
- * form.add("field 2", "value 3");
- * template.postForLocation("http://example.com/myForm", form);
- * </pre>
- * <p>The following snippet shows how to do a file upload:
- * <pre class="code">
- * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;String, Object&gt;();
- * parts.add("field 1", "value 1");
- * parts.add("file", new ClassPathResource("myFile.jpg"));
- * template.postForLocation("http://example.com/myFileUpload", parts);
- * </pre>
+ * <p>For example, the following snippet shows how to submit an HTML form: <pre class="code"> RestTemplate template =
+ * new RestTemplate(); // FormHttpMessageConverter is configured by default MultiValueMap&lt;String, String&gt; form =
+ * new LinkedMultiValueMap&lt;String, String&gt;(); form.add("field 1", "value 1"); form.add("field 2", "value 2");
+ * form.add("field 2", "value 3"); template.postForLocation("http://example.com/myForm", form); </pre> <p>The following
+ * snippet shows how to do a file upload: <pre class="code"> MultiValueMap&lt;String, Object&gt; parts = new
+ * LinkedMultiValueMap&lt;String, Object&gt;(); parts.add("field 1", "value 1"); parts.add("file", new
+ * ClassPathResource("myFile.jpg")); template.postForLocation("http://example.com/myFileUpload", parts); </pre>
  *
  * <p>Some methods in this class were inspired by {@link org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
  *
@@ -87,14 +78,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			new byte[]{'-', '_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
 					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
 					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-				 	'V', 'W', 'X', 'Y', 'Z'};
+					'V', 'W', 'X', 'Y', 'Z'};
 
 	private final Random rnd = new Random();
 
 	private Charset charset = Charset.forName("UTF-8");
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
-
 
 	public FormHttpMessageConverter() {
 		this.partConverters.add(new ByteArrayHttpMessageConverter());
@@ -104,30 +94,22 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		this.partConverters.add(new ResourceHttpMessageConverter());
 	}
 
-
-	/**
-	 * Add a message body converter. Such a converters is used to convert objects to MIME parts.
-	 */
+	/** Add a message body converter. Such a converters is used to convert objects to MIME parts. */
 	public final void addPartConverter(HttpMessageConverter<?> partConverter) {
 		Assert.notNull(partConverter, "'partConverter' must not be NULL");
 		this.partConverters.add(partConverter);
 	}
 
-	/**
-	 * Set the message body converters to use. These converters are used to convert objects to MIME parts.
-	 */
+	/** Set the message body converters to use. These converters are used to convert objects to MIME parts. */
 	public final void setPartConverters(List<HttpMessageConverter<?>> partConverters) {
 		Assert.notEmpty(partConverters, "'partConverters' must not be empty");
 		this.partConverters = partConverters;
 	}
 
-	/**
-	 * Sets the character set used for writing form data.
-	 */
+	/** Sets the character set used for writing form data. */
 	public void setCharset(Charset charset) {
 		this.charset = charset;
 	}
-
 
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
@@ -187,7 +169,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	public void write(MultiValueMap<String, ?> map, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 		if (!isMultipart(map, contentType)) {
-			writeForm((MultiValueMap<String, String>) map, outputMessage);
+			writeForm((MultiValueMap<String, String>) map, contentType, outputMessage);
 		}
 		else {
 			writeMultipart((MultiValueMap<String, Object>) map, outputMessage);
@@ -208,8 +190,16 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, String> form, HttpOutputMessage outputMessage) throws IOException {
-		outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+	private void writeForm(MultiValueMap<String, String> form, MediaType contentType, HttpOutputMessage outputMessage)
+			throws IOException {
+		Charset charset;
+		if (contentType != null) {
+			outputMessage.getHeaders().setContentType(contentType);
+			charset = contentType.getCharSet() != null ? contentType.getCharSet() : this.charset;
+		} else {
+			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			charset = this.charset;
+		}
 		StringBuilder builder = new StringBuilder();
 		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
 			String name = nameIterator.next();
@@ -231,7 +221,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		FileCopyUtils.copy(builder.toString(), new OutputStreamWriter(outputMessage.getBody(), charset));
 	}
 
-	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
+	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
+			throws IOException {
 		byte[] boundary = generateMultipartBoundary();
 
 		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, "US-ASCII"));
@@ -308,8 +299,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
-	 * Generate a multipart boundary.
-	 * <p>Default implementation returns a random boundary. Can be overridden in subclasses.
+	 * Generate a multipart boundary. <p>Default implementation returns a random boundary. Can be overridden in
+	 * subclasses.
 	 */
 	protected byte[] generateMultipartBoundary() {
 		byte[] boundary = new byte[rnd.nextInt(11) + 30];
@@ -321,8 +312,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Return the filename of the given multipart part. This value will be used for the {@code Content-Disposition} header.
-	 * <p>Default implementation returns {@link Resource#getFilename()} if the part is a {@code Resource}, and
-	 * {@code null} in other cases. Can be overridden in subclasses.
+	 * <p>Default implementation returns {@link Resource#getFilename()} if the part is a {@code Resource}, and {@code null}
+	 * in other cases. Can be overridden in subclasses.
+	 *
 	 * @param part the part to determine the file name for
 	 * @return the filename, or {@code null} if not known
 	 */
@@ -336,10 +328,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
-
-	/**
-	 * Implementation of {@link org.springframework.http.HttpOutputMessage} used for writing multipart data.
-	 */
+	/** Implementation of {@link org.springframework.http.HttpOutputMessage} used for writing multipart data. */
 	private class MultipartHttpOutputMessage implements HttpOutputMessage {
 
 		private final HttpHeaders headers = new HttpHeaders();
