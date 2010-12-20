@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -69,7 +69,6 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 				if (logger.isTraceEnabled()) {
 					logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
 				}
-				response.setContentLength(0);
 				response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {
@@ -89,8 +88,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	}
 
 	private void copyBodyToResponse(byte[] body, HttpServletResponse response) throws IOException {
-		response.setContentLength(body.length);
 		if (body.length > 0) {
+			response.setContentLength(body.length);
 			FileCopyUtils.copy(body, response.getOutputStream());
 		}
 	}
@@ -113,7 +112,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	/**
 	 * Generate the ETag header value from the given response body byte array.
 	 * <p>The default implementation generates an MD5 hash.
-	 * @param bytes the response bdoy as byte array
+	 * @param bytes the response body as byte array
 	 * @return the ETag header value
 	 * @see org.springframework.util.DigestUtils
 	 */
@@ -166,6 +165,10 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		public void sendError(int sc, String msg) throws IOException {
 			super.sendError(sc, msg);
 			this.statusCode = sc;
+		}
+
+		@Override
+		public void setContentLength(int len) {
 		}
 
 		@Override
