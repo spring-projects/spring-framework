@@ -20,6 +20,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -36,6 +38,8 @@ public abstract class AbstractAnnotationTest {
 
 	protected CacheableService ccs;
 
+	protected CacheManager cm;
+
 	protected abstract String getConfig();
 
 	@Before
@@ -43,6 +47,7 @@ public abstract class AbstractAnnotationTest {
 		ctx = new ClassPathXmlApplicationContext(getConfig());
 		cs = ctx.getBean("service", CacheableService.class);
 		ccs = ctx.getBean("classService", CacheableService.class);
+		cm = ctx.getBean(CacheManager.class);
 	}
 
 	public void testCacheable(CacheableService service) throws Exception {
@@ -107,6 +112,16 @@ public abstract class AbstractAnnotationTest {
 		assertEquals(nr + 1, service.nullInvocations().intValue());
 	}
 
+	public void testMethodName(CacheableService service, String keyName)
+			throws Exception {
+		Object key = new Object();
+		Object r1 = service.name(key);
+		assertSame(r1, service.name(key));
+		Cache<Object, Object> cache = cm.getCache("default");
+		// assert the method name is used
+		assertTrue(cache.containsKey(keyName));
+	}
+
 	@Test
 	public void testCacheable() throws Exception {
 		testCacheable(cs);
@@ -154,5 +169,15 @@ public abstract class AbstractAnnotationTest {
 		assertEquals(nr, ccs.nullInvocations().intValue());
 		assertEquals(nr + 1, AnnotatedClassCacheableService.nullInvocations
 				.intValue());
+	}
+
+	@Test
+	public void testMethodName() throws Exception {
+		testMethodName(cs, "name");
+	}
+
+	@Test
+	public void testClassMethodName() throws Exception {
+		testMethodName(ccs, "namedefault");
 	}
 }
