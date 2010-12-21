@@ -68,6 +68,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	private final ExpressionEvaluator evaluator = new ExpressionEvaluator();
 
+	private KeyGenerator<?> keyGenerator = new DefaultKeyGenerator();
+
 	public void afterPropertiesSet() {
 		if (this.cacheManager == null) {
 			throw new IllegalStateException("Setting the property 'cacheManager' is required");
@@ -104,6 +106,14 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return cacheDefinitionSource;
 	}
 
+	public KeyGenerator getKeyGenerator() {
+		return keyGenerator;
+	}
+
+	public <K> void setKeyGenerator(KeyGenerator<K> keyGenerator) {
+		this.keyGenerator = keyGenerator;
+	}
+
 	/**
 	 * Set multiple cache definition sources which are used to find the cache
 	 * attributes. Will build a CompositeCachingDefinitionSource for the given sources.
@@ -135,6 +145,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return new CacheOperationContext(definition, method, args, targetClass);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Object execute(Callable<Object> invocation, Object target,
 			Method method, Object[] args) throws Exception {
 		// get backing class
@@ -160,6 +171,10 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				if (cacheDef instanceof CacheUpdateDefinition) {
 					Object key = context.generateKey();
 
+					if (key == null){
+						throw new IllegalArgumentException("Null key returned for cache definition " + cacheDef);
+					}
+					
 					//
 					// check usage of single cache
 					// very common case which allows for some optimization
@@ -242,7 +257,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		// context passed around to avoid multiple creations
 		private final EvaluationContext evalContext;
 
-		private final KeyGenerator<Object> keyGenerator = new DefaultKeyGenerator();
+		private final KeyGenerator<?> keyGenerator = CacheAspectSupport.this.keyGenerator;
 
 		public CacheOperationContext(CacheDefinition operationDefinition,
 				Method method, Object[] args, Class<?> targetClass) {
