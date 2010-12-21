@@ -46,6 +46,8 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 
 	LazyParamAwareEvaluationContext(Object rootObject, ParameterNameDiscoverer paramDiscoverer, Method method,
 			Object[] args, Class<?> targetClass, Map<Method, Method> methodCache) {
+		super(rootObject);
+
 		this.paramDiscoverer = paramDiscoverer;
 		this.method = method;
 		this.args = args;

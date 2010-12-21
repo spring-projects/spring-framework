@@ -32,6 +32,8 @@ public interface CacheableService<T> {
 
 	T key(Object arg1, Object arg2);
 
+	T name(Object arg1);
+
 	T nullValue(Object arg1);
 
 	Number nullInvocations();
