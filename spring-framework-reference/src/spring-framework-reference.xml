@@ -453,6 +453,12 @@
         <listitem>
           <para><xref linkend="dynamic-language" /></para>
         </listitem>
+
+        <!--
+        <listitem>
+          <para><xref linkend="cache" /></para>
+        </listitem>
+        -->
       </itemizedlist>
     </partintro>
 
@@ -473,6 +479,11 @@
 
     <xi:include href="dynamic-languages.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
+                
+    <!--
+    <xi:include href="cache.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+    -->
   </part>
 
   <!-- back matter -->
