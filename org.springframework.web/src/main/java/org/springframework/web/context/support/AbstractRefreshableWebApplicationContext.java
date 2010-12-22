@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -100,7 +100,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 		// TODO: SPR-7508 extract createEnvironment() method; do also in GWAC
-		this.getEnvironment().getPropertySources().push(new ServletContextPropertySource(this.servletContext));
+		this.getEnvironment().getPropertySources().addFirst(new ServletContextPropertySource(this.servletContext));
 	}
 
 	public ServletContext getServletContext() {
@@ -113,7 +113,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 			this.setServletContext(servletConfig.getServletContext());
 		}
 		// TODO: SPR-7508 extract createEnvironment() method; do also in GWAC
-		this.getEnvironment().getPropertySources().push(new ServletConfigPropertySource(servletConfig));
+		this.getEnvironment().getPropertySources().addFirst(new ServletConfigPropertySource(servletConfig));
 	}
 
 	public ServletConfig getServletConfig() {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,23 +15,6 @@
  */
 
 package org.springframework.core.env;
-
-import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.hasItem;
-import static org.junit.matchers.JUnitMatchers.hasItems;
-import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
-import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
-import static org.springframework.core.env.DefaultEnvironmentTests.CollectionMatchers.isEmpty;
 
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
@@ -49,6 +32,13 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.internal.matchers.TypeSafeMatcher;
+
+import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.*;
+import static org.springframework.core.env.AbstractEnvironment.*;
+import static org.springframework.core.env.DefaultEnvironmentTests.CollectionMatchers.*;
 
 /**
  * Unit tests for {@link DefaultEnvironment}.
@@ -89,7 +79,7 @@ public class DefaultEnvironmentTests {
 
 		// put 'system' at the front of the list
 		LinkedList<PropertySource<?>> propertySources = env.getPropertySources();
-		propertySources.push(propertySources.remove(propertySources.indexOf(PropertySource.named("system"))));
+		propertySources.addFirst(propertySources.remove(propertySources.indexOf(PropertySource.named("system"))));
 
 		// 'system' now has precedence
 		assertThat(env.getProperty("foo"), equalTo("systemValue"));

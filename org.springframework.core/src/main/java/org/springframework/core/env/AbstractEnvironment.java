@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,9 @@
 
 package org.springframework.core.env;
 
-import static java.lang.String.format;
-import static org.springframework.util.StringUtils.commaDelimitedListToSet;
-import static org.springframework.util.StringUtils.trimAllWhitespace;
-import static org.springframework.util.SystemPropertyUtils.PLACEHOLDER_PREFIX;
-import static org.springframework.util.SystemPropertyUtils.PLACEHOLDER_SUFFIX;
-import static org.springframework.util.SystemPropertyUtils.VALUE_SEPARATOR;
-
 import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -36,11 +28,16 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringUtils;
+
+import static java.lang.String.*;
+import static org.springframework.util.StringUtils.*;
+import static org.springframework.util.SystemPropertyUtils.*;
 
 
 /**
@@ -78,7 +75,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	public void addPropertySource(PropertySource<?> propertySource) {
-		propertySources.push(propertySource);
+		propertySources.addFirst(propertySource);
 	}
 
 	public void addPropertySource(String name, Properties properties) {
@@ -169,9 +166,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public Properties asProperties() {
 		// TODO SPR-7508: refactor, simplify. only handles map-based propertysources right now.
 		Properties mergedProps = new Properties();
-		Iterator<PropertySource<?>> descendingIterator = getPropertySources().descendingIterator();
-		while (descendingIterator.hasNext()) {
-			PropertySource<?> propertySource =  descendingIterator.next();
+		for (int i = propertySources.size() -1; i >= 0; i--) {
+			PropertySource<?> propertySource = propertySources.get(i);
 			Object object = propertySource.getSource();
 			if (object instanceof Map) {
 				for (Entry<?, ?> entry : ((Map<?, ?>)object).entrySet()) {
