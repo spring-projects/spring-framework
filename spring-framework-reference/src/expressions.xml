@@ -1011,6 +1011,15 @@ tesla.setPlaceOfBirth(null);
 city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, String.class);
 
 System.out.println(city); // null - does not throw NullPointerException!!!</programlisting>
+      <note>
+        <para>The Elvis operator can be used to apply default values in
+        expressions, e.g. in an <interfacename>@Value</interfacename> expression:</para>
+
+        <programlisting>@Value("#{systemProperties['pop3.port'] ?: 25}")</programlisting>
+
+        <para>This will inject a system property <code>pop3.port</code> if it
+        is defined or 25 if not.</para>
+      </note>
     </section>
 
     <section>
