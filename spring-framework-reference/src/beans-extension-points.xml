@@ -283,15 +283,14 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       would any other bean.</para>
 
     <note>
-      <para>As with <literal>BeanPostProcessors</literal>, you typically do not
-        want <literal>BeanFactoryPostProcessors</literal> marked as
-        lazy-initialized. If they are marked as such, the Spring container never
-        instantiates them, and thus they cannot apply their custom logic. If you
-        use the <literal>default-lazy-init</literal> attribute on the
-        declaration of your <literal>&lt;beans/&gt;</literal> element, be sure
-        to mark your various
-        <interfacename>BeanFactoryPostProcessor</interfacename> bean definitions
-        with <literal>lazy-init="false"</literal>.</para>
+      <para>As with <interfacename>BeanPostProcessors</interfacename>, you typically
+        do not want <interfacename>BeanFactoryPostProcessors</interfacename> marked as
+        lazy-initialized. If no other bean references a <interfacename>Bean(Factory)PostProcessor
+        </interfacename> those wouldn't get instantiated at all. Thus, marking them as
+        lazy-initialized will be ignored and the <interfacename>Bean(Factory)PostProcessor
+        </interfacename> will be instantied eagerly even if you use the <literal>default-lazy-init
+        </literal> attribute set to <literal>true</literal>on the declaration of your
+        <code><beans /></code> element.</para>
     </note>
 
     <section id="beans-factory-placeholderconfigurer">
