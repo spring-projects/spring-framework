@@ -269,4 +269,26 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		assertNotNull(SerializationTestUtils.serializeAndDeserialize(sharedEntityManager));
 	}
 
+	@Test
+	public void testname() throws Exception {
+
+		EmbeddedDatabase database = new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+
+		for (Entry<String, String> entry : AbstractEntityManagerFactoryBean.fallbackInterfaces.entrySet()) {
+
+			Class<? extends PersistenceProvider> providerClass = (Class<? extends PersistenceProvider>) ClassUtils
+					.forName(entry.getKey(), getClass().getClassLoader());
+			Class<?> emInterface = ClassUtils.forName(entry.getValue(), getClass().getClassLoader());
+
+			LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+			factoryBean.setPersistenceXmlLocation("classpath:org/springframework/orm/jpa/persistence-example6.xml");
+			factoryBean.setPersistenceUnitName("pu");
+			factoryBean.setDataSource(database);
+			factoryBean.setPersistenceProviderClass(providerClass);
+			factoryBean.afterPropertiesSet();
+
+			assertEquals(emInterface, factoryBean.getEntityManagerInterface());
+		}
+	}
+
 }

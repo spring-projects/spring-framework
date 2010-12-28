@@ -308,6 +308,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		}
 
 		this.nativeEntityManagerFactory = createNativeEntityManagerFactory();
+
+		configureFallbackInterfaces();
+
 		if (this.nativeEntityManagerFactory == null) {
 			throw new IllegalStateException(
 					"JPA PersistenceProvider returned null EntityManagerFactory - check your JPA provider setup!");
@@ -321,6 +324,35 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		// application-managed EntityManager proxy that automatically joins
 		// existing transactions.
 		this.entityManagerFactory = createEntityManagerFactoryProxy(this.nativeEntityManagerFactory);
+	}
+
+	static Map<String, String> fallbackInterfaces = new HashMap<String, String>();
+
+	static {
+		fallbackInterfaces.put("org.hibernate.ejb.HibernatePersistence", "org.hibernate.ejb.HibernateEntityManager");
+		fallbackInterfaces.put("org.eclipse.persistence.jpa.PersistenceProvider",
+				"org.eclipse.persistence.jpa.JpaEntityManager");
+		fallbackInterfaces.put("org.apache.openjpa.persistence.PersistenceProviderImpl",
+				"org.apache.openjpa.persistence.OpenJPAEntityManager");
+	}
+
+	private void configureFallbackInterfaces() {
+
+		if (this.entityManagerInterface != null) {
+			return;
+		}
+
+		String providerClassName = getPersistenceProvider().getClass().getName();
+		String entityManagerInterface = fallbackInterfaces.get(providerClassName);
+
+		if (entityManagerInterface != null) {
+			try {
+				this.entityManagerInterface = (Class<? extends EntityManager>) ClassUtils.forName(
+						entityManagerInterface, this.beanClassLoader);
+			} catch (ClassNotFoundException e) {
+				// Ignore and use EntityManager instead
+			}
+		}
 	}
 
 	/**
