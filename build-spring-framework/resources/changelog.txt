@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.1.0.M1 (2010-12-31)
+----------------------------------------
+
+* upgraded to JUnit 4.8.1, TestNG 5.12.1
+* introduced c: namespace for constructor arguments
+* introduced Cache abstraction SPI and annotations
+* introduced cache namespace
+* introduced environment profiles and environment-specific beans
+
+
 Changes in version 3.0.5 (2010-10-20)
 -------------------------------------
 

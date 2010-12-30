@@ -467,7 +467,7 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>org.testng</artifactId>
-      <version>5.8</version>
+      <version>5.12.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
