@@ -2,37 +2,36 @@
 <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <section id="beans-factory-extension">
-  <title>Container extension points</title>
+  <title>Container Extension Points</title>
 
-  <para>Typically, an application developer does not need to subclass any
+  <para>Typically, an application developer does not need to subclass
     <interfacename>ApplicationContext</interfacename> implementation classes.
-    You can extend The Spring IoC container infinitely by plugging in
+    Instead, the Spring IoC container can be extended by plugging in
     implementations of special integration interfaces. The next few sections
     describe these integration interfaces.</para>
 
   <section id="beans-factory-extension-bpp">
-    <title>Customizing beans using the
-      <interfacename>BeanPostProcessor</interfacename> Interface <literal>
-      </literal></title>
+    <title>Customizing beans using a
+      <interfacename>BeanPostProcessor</interfacename></title>
 
     <para>The <interfacename>BeanPostProcessor</interfacename> interface defines
       <firstterm>callback methods</firstterm> that you can implement to provide
       your own (or override the container's default) instantiation logic,
       dependency-resolution logic, and so forth. If you want to implement some
       custom logic after the Spring container finishes instantiating,
-      configuring, and otherwise initializing a bean, you can plug in one or
+      configuring, and initializing a bean, you can plug in one or
       more <interfacename>BeanPostProcessor</interfacename>
       implementations.</para>
 
     <para>You can configure multiple <literal>BeanPostProcessor</literal>
-      interfaces. You can control the order in which these
-      <literal>BeanPostProcessor</literal> interfaces execute by setting the
+      instances, and you can control the order in which these
+      <literal>BeanPostProcessor</literal>s execute by setting the
       <literal>order</literal> property. You can set this property only if the
       <interfacename>BeanPostProcessor</interfacename> implements the
       <interfacename>Ordered</interfacename> interface; if you write your own
       <interfacename>BeanPostProcessor</interfacename> you should consider
       implementing the <interfacename>Ordered</interfacename> interface too. For
-      more details, consult the Javadoc for the
+      further details, consult the Javadoc for the
       <interfacename>BeanPostProcessor</interfacename> and
       <interfacename>Ordered</interfacename> interfaces.</para>
 
@@ -40,21 +39,20 @@
       <para><literal>BeanPostProcessor</literal>s operate on bean (or object)
         <emphasis>instances</emphasis>; that is to say, the Spring IoC container
         instantiates a bean instance and <emphasis>then</emphasis>
-        <literal>BeanPostProcessor</literal> interfaces do their work.</para>
+        <literal>BeanPostProcessor</literal>s do their work.</para>
 
-      <para><literal>BeanPostProcessor</literal> interfaces are scoped
+      <para><literal>BeanPostProcessor</literal>s are scoped
         <emphasis>per-container</emphasis>. This is only relevant if you are
         using container hierarchies. If you define a
         <interfacename>BeanPostProcessor</interfacename> in one container, it
-        will <emphasis>only</emphasis> do its work on the beans in that
-        container. Beans that are defined in one container are not
-        post-processed by a <literal>BeanPostProcessor</literal> in another
-        container, even if both containers are part of the same
-        hierarchy.</para>
+        will <emphasis>only</emphasis> post-process the beans in that
+        container. In other words, beans that are defined in one container are not
+        post-processed by a <literal>BeanPostProcessor</literal> defined in another
+        container, even if both containers are part of the same hierarchy.</para>
 
-      <para>To change the actual bean definition (that is, the recipe that
-        defines the bean), you instead need to use a
-        <interfacename>BeanFactoryPostProcessor</interfacename>, described below
+      <para>To change the actual bean definition (i.e., the
+        <emphasis>blueprint</emphasis> that defines the bean), you instead need to use a
+        <interfacename>BeanFactoryPostProcessor</interfacename> as described
         in <xref linkend="beans-factory-extension-factory-postprocessors"
         />.</para>
     </note>
@@ -65,22 +63,23 @@
       registered as a post-processor with the container, for each bean instance
       that is created by the container, the post-processor gets a callback from
       the container both <emphasis>before</emphasis> container initialization
-      methods (such as <emphasis>afterPropertiesSet</emphasis> and any declared
-      init method) are called, and also afterwards. The post-processor can take
+      methods (such as InitializingBean's <emphasis>afterPropertiesSet()</emphasis>
+      and any declared init method) are called as well as <emphasis>after</emphasis>
+      any bean initialization callbacks. The post-processor can take
       any action with the bean instance, including ignoring the callback
       completely. A bean post-processor typically checks for callback
-      interfaces, or may wrap a bean with a proxy. Some Spring AOP
-      infrastructure classes are implemented as bean post-processors and they do
-      this proxy-wrapping logic.</para>
+      interfaces or may wrap a bean with a proxy. Some Spring AOP
+      infrastructure classes are implemented as bean post-processors in order
+      to provide proxy-wrapping logic.</para>
 
     <para>An <interfacename>ApplicationContext</interfacename>
       <emphasis>automatically detects</emphasis> any beans that are defined in
-      the configuration metadata it receives that implement the
+      the configuration metadata which implement the
       <interfacename>BeanPostProcessor</interfacename> interface. The
       <interfacename>ApplicationContext</interfacename> registers these beans as
-      post-processors, to be then called appropriately by the container upon
-      bean creation. You can then deploy the post-processors as you would any
-      bean.</para>
+      post-processors so that they can be called later upon bean creation.
+      Bean post-processors can be deployed in the container just like any other
+      beans.</para>
 
     <note>
       <title><interfacename>BeanPostProcessors</interfacename> and AOP
@@ -88,27 +87,27 @@
 
       <para>Classes that implement the
         <interfacename>BeanPostProcessor</interfacename> interface are
-        <emphasis>special</emphasis>, and so they are treated differently by the
+        <emphasis>special</emphasis> and are treated differently by the
         container. All <interfacename>BeanPostProcessors</interfacename>
-        <emphasis>and their directly referenced beans</emphasis> are
+        <emphasis>and beans that they reference directly</emphasis> are
         instantiated on startup, as part of the special startup phase of the
-        <interfacename>ApplicationContext</interfacename>. Next, all those
+        <interfacename>ApplicationContext</interfacename>. Next, all
         <interfacename>BeanPostProcessors</interfacename> are registered in a
-        sorted fashion - and applied to all further beans. Because AOP
-        auto-proxying is implemented as a
-        <interfacename>BeanPostProcessor</interfacename> itself, no
-        <interfacename>BeanPostProcessors</interfacename> or directly referenced
-        beans are eligible for auto-proxying, and thus do not have aspects woven
+        sorted fashion and applied to all further beans in the container.
+        Because AOP auto-proxying is implemented as a
+        <interfacename>BeanPostProcessor</interfacename> itself, neither
+        <interfacename>BeanPostProcessors</interfacename> nor the beans they reference
+        directly are eligible for auto-proxying, and thus do not have aspects woven
         into them.</para>
 
-      <para>For any such bean, you should see an info log message:
-        <emphasis><quote>Bean foo is not eligible for getting processed by all
+      <para>For any such bean, you should see an informational log message:
+        <quote><emphasis>Bean foo is not eligible for getting processed by all
         BeanPostProcessor interfaces (for example: not eligible for
-        auto-proxying)</quote>.</emphasis></para>
+        auto-proxying)</emphasis></quote>.</para>
     </note>
 
     <para>The following examples show how to write, register, and use
-      <literal>BeanPostProcessors</literal> in the context of an
+      <literal>BeanPostProcessors</literal> in an
       <interfacename>ApplicationContext</interfacename>.</para>
 
     <section id="beans-factory-extension-bpp-examples-hw">
@@ -175,7 +174,7 @@ public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor 
         Spring 2.0 dynamic language support is detailed in the chapter entitled
         <xref linkend="dynamic-language"/>.)</para>
 
-      <para>The following small driver script executes the preceding code and
+      <para>The following simple Java application executes the preceding code and
         configuration:</para>
 
       <programlisting language="java">import org.springframework.context.ApplicationContext;
@@ -191,7 +190,7 @@ public final class Boot {
   }
 }</programlisting>
 
-      <para>The output of the preceding execution resembles the
+      <para>The output of the preceding application resembles the
         following:</para>
 
       <programlisting>Bean 'messenger' created : org.springframework.scripting.groovy.GroovyMessenger@272961
@@ -205,7 +204,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       <para>Using callback interfaces or annotations in conjunction with a
         custom <interfacename>BeanPostProcessor</interfacename> implementation
         is a common means of extending the Spring IoC container. An example is
-        Spring's <classname>RequiredAnnotationBeanPostProcessor</classname> -- a
+        Spring's <classname>RequiredAnnotationBeanPostProcessor</classname> &mdash; a
         <interfacename>BeanPostProcessor</interfacename> implementation that
         ships with the Spring distribution which ensures that JavaBean
         properties on beans that are marked with an (arbitrary) annotation are
@@ -214,12 +213,12 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
   </section>
 
   <section id="beans-factory-extension-factory-postprocessors">
-    <title>Customizing configuration metadata with
-      <interfacename>BeanFactoryPostProcessor</interfacename> interface</title>
+    <title>Customizing configuration metadata with a
+      <interfacename>BeanFactoryPostProcessor</interfacename></title>
 
     <para>The next extension point that we will look at is the
       <interfacename>org.springframework.beans.factory.config.BeanFactoryPostProcessor</interfacename>.
-      The semantics of this interface are similar to the
+      The semantics of this interface are similar to those of the
       <interfacename>BeanPostProcessor</interfacename>, with one major
       difference: <literal>BeanFactoryPostProcessor</literal>s operate on the
       <emphasis>bean configuration metadata</emphasis>; that is, the Spring IoC
@@ -229,27 +228,27 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       than <literal>BeanFactoryPostProcessors</literal>.</para>
 
     <para>You can configure multiple
-      <literal>BeanFactoryPostProcessors</literal>. You can control the order in
+      <literal>BeanFactoryPostProcessors</literal>, and you can control the order in
       which these <literal>BeanFactoryPostProcessors</literal> execute by
       setting the <literal>order</literal> property. However, you can only set
       this property if the
       <interfacename>BeanFactoryPostProcessor</interfacename> implements the
       <interfacename>Ordered</interfacename> interface. If you write your own
-      <interfacename>BeanFactoryPostProcessor,</interfacename> you should
+      <interfacename>BeanFactoryPostProcessor</interfacename>, you should
       consider implementing the <interfacename>Ordered</interfacename> interface
-      too; consult the Javadoc for the
+      too. Consult the Javadoc for the
       <interfacename>BeanFactoryPostProcessor</interfacename> and
       <interfacename>Ordered</interfacename> interfaces for more details.</para>
 
     <note>
       <para>If you want to change the actual bean <emphasis>instances</emphasis>
-        (the objects that are created from the configuration metadata), then you
+        (i.e., the objects that are created from the configuration metadata), then you
         instead need to use a <interfacename>BeanPostProcessor</interfacename>
-        (described above in <xref linkend="beans-factory-extension-bpp"/>. While
+        (described above in <xref linkend="beans-factory-extension-bpp"/>). While
         it is technically possible to work with bean instances within a
-        <interfacename>BeanFactoryPostProcessor</interfacename> (e.g. using
+        <interfacename>BeanFactoryPostProcessor</interfacename> (e.g., using
         <methodname>BeanFactory.getBean()</methodname>), doing so causes
-        premature bean instantiation, violating the usual containter lifecycle.
+        premature bean instantiation, violating the standard container lifecycle.
         This may cause negative side effects such as bypassing bean post
         processing.</para>
 
@@ -257,40 +256,42 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         <emphasis>per-container</emphasis>. This is only relevant if you are
         using container hierarchies. If you define a
         <interfacename>BeanFactoryPostProcessor</interfacename> in one
-        container, it will <emphasis>only</emphasis> do its stuff on the bean
-        definitions in that container. Bean definitions in another container
+        container, it will <emphasis>only</emphasis> be applied to the bean
+        definitions in that container. Bean definitions in one container
         will not be post-processed by
         <literal>BeanFactoryPostProcessors</literal> in another container, even
         if both containers are part of the same hierarchy.</para>
     </note>
 
     <para>A bean factory post-processor is executed automatically when it is
-      declared inside of an <interfacename>ApplicationContext,</interfacename>
-      in order to apply changes to the configuration metadata that defines a
-      container. Spring includes a number of pre-existing bean factory
+      declared inside an <interfacename>ApplicationContext</interfacename>,
+      in order to apply changes to the configuration metadata that define the
+      container. Spring includes a number of predefined bean factory
       post-processors, such as <classname>PropertyOverrideConfigurer</classname>
-      and <classname>PropertyPlaceholderConfigurer. </classname>A custom
+      and <classname>PropertyPlaceholderConfigurer</classname>. A custom
       <interfacename>BeanFactoryPostProcessor</interfacename> can also be used,
       for example, to register custom property editors.</para>
 
     <anchor id="beans-factory-autodetect-beanfactorypostprocessors"/>
 
-    <para>An <interfacename>ApplicationContext</interfacename> detects any beans
-      that are deployed into it and that implement the
+    <para>An <interfacename>ApplicationContext</interfacename> automatically
+      detects any beans that are deployed into it that implement the
       <interfacename>BeanFactoryPostProcessor</interfacename> interface. It
-      automatically uses these beans as bean factory post-processors, at the
-      appropriate time. You can then deploy these post-processor beans as you
+      uses these beans as bean factory post-processors, at the
+      appropriate time. You can deploy these post-processor beans as you
       would any other bean.</para>
 
     <note>
-      <para>As with <interfacename>BeanPostProcessors</interfacename>, you typically
-        do not want <interfacename>BeanFactoryPostProcessors</interfacename> marked as
-        lazy-initialized. If no other bean references a <interfacename>Bean(Factory)PostProcessor
-        </interfacename> those wouldn't get instantiated at all. Thus, marking them as
-        lazy-initialized will be ignored and the <interfacename>Bean(Factory)PostProcessor
-        </interfacename> will be instantied eagerly even if you use the <literal>default-lazy-init
-        </literal> attribute set to <literal>true</literal>on the declaration of your
-        <code><beans /></code> element.</para>
+      <para>As with <interfacename>BeanPostProcessor</interfacename>s, you typically
+        do not want to configure <interfacename>BeanFactoryPostProcessor</interfacename>s
+        for lazy initialization. If no other bean references a
+        <interfacename>Bean(Factory)PostProcessor</interfacename>,
+        that post-processor will not get instantiated at all. Thus, marking it for
+        lazy initialization will be ignored, and the 
+        <interfacename>Bean(Factory)PostProcessor</interfacename> will be
+        instantiated eagerly even if you set the <literal>default-lazy-init</literal>
+        attribute to <literal>true</literal> on the declaration of your
+        <code>&lt;beans /&gt;</code> element.</para>
     </note>
 
     <section id="beans-factory-placeholderconfigurer">
@@ -299,8 +300,8 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
 
       <para>You use the
         <interfacename>PropertyPlaceholderConfigurer</interfacename> to
-        externalize property values from a bean definition into another separate
-        file in the standard Java <classname>Properties</classname> format.
+        externalize property values from a bean definition in a separate
+        file using the standard Java <classname>Properties</classname> format.
         Doing so enables the person deploying an application to customize
         environment-specific properties such as database URLs and passwords,
         without the complexity or risk of modifying the main XML definition file
@@ -314,8 +315,8 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         external <classname>Properties</classname> file. At runtime, a
         <classname>PropertyPlaceholderConfigurer</classname> is applied to the
         metadata that will replace some properties of the DataSource. The values
-        to replace are specified as 'placeholders' of the form ${property-name}
-        which follows the Ant / Log4J / JSP EL style.</para>
+        to replace are specified as <emphasis>placeholders</emphasis> of the form
+        ${property-name} which follows the Ant / log4j / JSP EL style.</para>
 
       <programlisting language="xml">&lt;bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
   &lt;property name="locations" value="classpath:com/foo/jdbc.properties"/&gt;
@@ -332,39 +333,52 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       <para>The actual values come from another file in the standard Java
         <classname>Properties</classname> format:</para>
 
-      <programlisting language="java">jdbc.driverClassName=org.hsqldb.jdbcDriver
+      <programlisting>jdbc.driverClassName=org.hsqldb.jdbcDriver
 jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root</programlisting>
 
-      <para>Therefore, the string ${jdbc.username} is replaced at runtime with
-        the value 'sa' and similarly for other placeholder values that match to
-        keys in the property file. The PropertyPlaceholderConfigurer checks for
-        placeholders in most locations of a bean definition and the placeholder
-        prefix and suffix can be customized.</para>
+      <para>Therefore, the string <literal>${jdbc.username}</literal> is replaced
+        at runtime with the value 'sa', and the same applies for other placeholder
+        values that match keys in the properties file. The
+        <classname>PropertyPlaceholderConfigurer</classname> checks for
+        placeholders in most properties and attributes of a bean definition.
+        Furthermore, the placeholder prefix and suffix can be customized.</para>
 
       <para>With the <literal>context</literal> namespace introduced in Spring
         2.5, it is possible to configure property placeholders with a dedicated
-        configuration element. You can provide multiple locations as a
+        configuration element. One or more locations can be provided as a
         comma-separated list in the <literal>location</literal>
         attribute.</para>
 
       <programlisting language="xml">&lt;context:property-placeholder location="classpath:com/foo/jdbc.properties"/&gt;</programlisting>
 
-      <para>The <classname>PropertyPlaceholderConfigurer</classname> does not
-        look for properties only in the <classname>Properties</classname> file
-        you specify, but also checks against the Java
+      <para>The <classname>PropertyPlaceholderConfigurer</classname> not only
+        looks for properties in the <classname>Properties</classname> file
+        you specify. By default it also checks against the Java
         <classname>System</classname> properties if it cannot find a property
-        you are trying to use. You can customize this behavior by setting the
-        <literal>systemPropertiesMode</literal> property of the configurer. It
-        has three values that specify configurer behavior: always override,
-        <emphasis>never</emphasis> override, and override only if the property
-        is not found in the properties file specified.
+        in the specified properties files. You can customize this behavior by setting the
+        <literal>systemPropertiesMode</literal> property of the configurer with
+        one of the following three supported integer values:
         <!--What property is it overriding and what will replace the overridden value?-->
         <!--MLP: override a value in the Properties with one from the 'systemProperties' -->
-        Consult the Javadoc for the
-        <classname>PropertyPlaceholderConfigurer</classname> for more
-        information.</para>
+        </para>
+
+        <itemizedlist>
+        	<listitem>
+	        	<para><emphasis>never</emphasis> (0): Never check system properties</para>
+        	</listitem>
+        	<listitem>
+	        	<para><emphasis>fallback</emphasis> (1): Check system properties if not resolvable in the specified properties files. This is the default.</para>
+        	</listitem>
+        	<listitem>
+	        	<para><emphasis>override</emphasis> (2): Check system properties first, before trying the specified properties files. This allows system properties to override any other property source.</para>
+        	</listitem>
+        </itemizedlist>
+
+      <para>
+        Consult the Javadoc for the <classname>PropertyPlaceholderConfigurer</classname>
+        for more information.</para>
 
       <tip>
         <title>Class name substitution</title>
@@ -407,7 +421,7 @@ jdbc.password=root</programlisting>
 
       <para>Note that the bean definition is <emphasis>not</emphasis> aware of
         being overridden, so it is not immediately obvious from the XML
-        definition file that the override configurer is used. In case of
+        definition file that the override configurer is being used. In case of
         multiple <classname>PropertyOverrideConfigurer</classname> instances
         that define different values for the same bean property, the last one
         wins, due to the overriding mechanism.</para>
@@ -421,7 +435,7 @@ jdbc.password=root</programlisting>
       <programlisting language="java">dataSource.driverClassName=com.mysql.jdbc.Driver
 dataSource.url=jdbc:mysql:mydb</programlisting>
 
-      <para>This example file is usable against a container definition that
+      <para>This example file can be used with a container definition that
         contains a bean called <emphasis>dataSource</emphasis>, which has
         <emphasis>driver</emphasis> and <emphasis>url</emphasis>
         properties.</para>
@@ -438,12 +452,12 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         of the <literal>foo</literal> bean is set to the scalar value
         <literal>123</literal>.</para>
 
-      <para><note>
+      <note>
         <para>Specified override values are always <emphasis>literal</emphasis>
           values; they are not translated into bean references. This convention
           also applies when the original value in the XML bean definition
           specifies a bean reference.</para>
-        </note></para>
+      </note>
 
       <para>With the <literal>context</literal> namespace introduced in Spring
         2.5, it is possible to configure property overriding with a dedicated
@@ -454,11 +468,10 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
   </section>
 
   <section id="beans-factory-extension-factorybean">
-    <title>Customizing instantiation logic with the
-      <interfacename>FactoryBean</interfacename> Interface <literal>
-      </literal></title>
+    <title>Customizing instantiation logic with a
+      <interfacename>FactoryBean</interfacename></title>
 
-    <para>You implement the
+    <para>Implement the
       <interfacename>org.springframework.beans.factory.FactoryBean</interfacename>
       interface for objects that <emphasis>are themselves
       factories</emphasis>.</para>
@@ -492,7 +505,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       <listitem>
         <para><methodname>Class getObjectType()</methodname>: returns the object
           type returned by the <methodname>getObject()</methodname> method or
-          <literal>null</literal> if the type is not known in advance</para>
+          <literal>null</literal> if the type is not known in advance.</para>
       </listitem>
     </itemizedlist>
 
@@ -502,15 +515,15 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
       interface ship with Spring itself.</para>
 
     <para>When you need to ask a container for an actual
-      <interfacename>FactoryBean</interfacename> instance itself, not the bean
-      it produces, you preface the bean id with the ampersand symbol
-      <literal>&amp;</literal> (without quotes) when calling the
+      <interfacename>FactoryBean</interfacename> instance itself instead of the bean
+      it produces, preface the bean's id with the ampersand symbol
+      (<literal>&amp;</literal>) when calling the
       <methodname>getBean()</methodname> method of the
       <interfacename>ApplicationContext</interfacename>. So for a given
       <interfacename>FactoryBean</interfacename> with an id of
       <literal>myBean</literal>, invoking <literal>getBean("myBean")</literal>
       on the container returns the product of the
-      <interfacename>FactoryBean</interfacename>, and invoking
+      <interfacename>FactoryBean</interfacename>; whereas, invoking
       <literal>getBean("&amp;myBean")</literal> returns the
       <interfacename>FactoryBean</interfacename> instance
       itself.<!--Moved ApplicationContext section to almost the end of the doc, right before BeanFactory and renamed it Additional Capabilities of.--></para>
