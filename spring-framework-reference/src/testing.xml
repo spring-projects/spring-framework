@@ -480,7 +480,8 @@ public class CustomConfiguredApplicationContextTests {
           </warning>
 
           <para>If class-level usage of <interfacename>@DirtiesContext</interfacename>
-          is supported (e.g., with JUnit 4.5+ or TestNG), you can use
+          is supported &mdash; for example, with JUnit 4.5+ or TestNG &mdash;
+          you can use
           <interfacename>@DirtiesContext</interfacename> as both a class-level
           and method-level annotation within the same test class. In such scenarios,
           the <interfacename>ApplicationContext</interfacename> is marked as
@@ -861,14 +862,14 @@ public void testProcessRepeatedly() {
       <literal>org.springframework.test.context</literal> package) provides
       generic, annotation-driven unit and integration testing support that is
       agnostic of the testing framework in use, whether JUnit 3.8.2, JUnit
-      4.5+, TestNG 5.10, and so on. The TestContext framework also places a
+      4.5+, TestNG 5.12, and so on. The TestContext framework also places a
       great deal of importance on <emphasis>convention over
       configuration</emphasis> with reasonable defaults that can be overridden
       through annotation-based configuration.</para>
 
       <para>In addition to generic testing infrastructure, the TestContext
       framework provides explicit support for JUnit 3.8.2, JUnit 4.5+, and
-      TestNG 5.10 in the form of <literal>abstract</literal> support classes.
+      TestNG 5.12 in the form of <literal>abstract</literal> support classes.
       For JUnit 4.5+, the framework also provides a custom
       <interfacename>Runner</interfacename> that allows one to write test
       classes that are not required to extend a particular class
