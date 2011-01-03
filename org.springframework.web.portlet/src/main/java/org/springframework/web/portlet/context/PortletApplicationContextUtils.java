@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
@@ -30,6 +31,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -37,6 +39,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.SessionScope;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Convenience methods for retrieving the root WebApplicationContext for a given
@@ -181,6 +184,29 @@ public abstract class PortletApplicationContextUtils {
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
 					Collections.unmodifiableMap(attributeMap));
+		}
+	}
+
+	/**
+	 * Replace {@code Servlet}- and {@code Portlet}-based stub property sources
+	 * with actual instances populated with the given context and config objects.
+	 * @see org.springframework.core.env.PropertySource.StubPropertySource
+	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(MutablePropertySources, ServletContext)
+	 */
+	public static void initPortletPropertySources(MutablePropertySources propertySources, ServletContext servletContext,
+			PortletContext portletContext, PortletConfig portletConfig) {
+		Assert.notNull(propertySources, "propertySources must not be null");
+
+		WebApplicationContextUtils.initServletPropertySources(propertySources, servletContext);
+
+		if(portletContext != null && propertySources.contains(DefaultPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME)) {
+			propertySources.replace(DefaultPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME,
+					new PortletContextPropertySource(DefaultPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME, portletContext));
+		}
+		if(portletConfig != null && propertySources.contains(DefaultPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME)) {
+			propertySources.replace(DefaultPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME,
+					new PortletConfigPropertySource(DefaultPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME, portletConfig));
 		}
 	}
 

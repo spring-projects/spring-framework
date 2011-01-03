@@ -33,8 +33,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.util.StringUtils;
 
 /**
@@ -60,9 +58,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	/** Map from bean name to bean instance */
 	private final Map<String, Object> beans = new HashMap<String, Object>();
-
-	/** TODO SPR-7508: document */
-	private ConfigurableEnvironment environment = new DefaultEnvironment();
 
 
 	/**

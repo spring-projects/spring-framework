@@ -800,7 +800,7 @@ public final class PropertyResourceConfigurerTests {
 		Preferences.systemRoot().node("mySystemPath/mypath").remove("myName");
 	}
 
-	/* TODO SPR-7508: uncomment after EnvironmentAwarePropertyPlaceholderConfigurer implementation
+	/* TODO SPR-7508: uncomment after PropertySourcesPlaceholderConfigurer implementation
 	@Test
 	public void testPreferencesPlaceholderConfigurerWithCustomPropertiesInEnvironment() {
 		factory.registerBeanDefinition("tb",

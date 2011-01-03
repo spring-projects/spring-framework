@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
  * the instance returned from the method.
  *
  * <p>In this context, scope means the lifecycle of an instance, such as
- * {@literal singleton}, {@literal prototype}, and so forth.
+ * {@code singleton}, {@code prototype}, and so forth.
  * 
  * @author Mark Fisher
  * @author Chris Beams
@@ -59,7 +59,7 @@ public @interface Scope {
 	 * and if so, whether the proxy should be interface-based or subclass-based.
 	 * <p>Defaults to {@link ScopedProxyMode#NO}, indicating that no scoped
 	 * proxy should be created.
-	 * <p>Analogous to {@literal <aop:scoped-proxy/>} support in Spring XML.
+	 * <p>Analogous to {@code <aop:scoped-proxy/>} support in Spring XML.
 	 */
 	ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT;
 

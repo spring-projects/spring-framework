@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
-import org.springframework.core.env.DefaultWebEnvironment;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
@@ -93,14 +93,11 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	public AbstractRefreshableWebApplicationContext() {
 		setDisplayName("Root WebApplicationContext");
-		setEnvironment(new DefaultWebEnvironment());
 	}
 
 
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
-		// TODO: SPR-7508 extract createEnvironment() method; do also in GWAC
-		this.getEnvironment().getPropertySources().addFirst(new ServletContextPropertySource(this.servletContext));
 	}
 
 	public ServletContext getServletContext() {
@@ -112,8 +109,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		if (servletConfig != null && this.servletContext == null) {
 			this.setServletContext(servletConfig.getServletContext());
 		}
-		// TODO: SPR-7508 extract createEnvironment() method; do also in GWAC
-		this.getEnvironment().getPropertySources().addFirst(new ServletConfigPropertySource(servletConfig));
 	}
 
 	public ServletConfig getServletConfig() {
@@ -134,6 +129,14 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	@Override
 	public String[] getConfigLocations() {
 		return super.getConfigLocations();
+	}
+
+	/**
+	 * Create and return a new {@link DefaultWebEnvironment}.
+	 */
+	@Override
+	protected ConfigurableEnvironment createEnvironment() {
+		return new DefaultWebEnvironment();
 	}
 
 
@@ -174,6 +177,18 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	@Override
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Replace {@code Servlet}-related property sources.
+	 */
+	@Override
+	protected void initPropertySources() {
+		super.initPropertySources();
+		WebApplicationContextUtils.initServletPropertySources(
+				this.getEnvironment().getPropertySources(), this.servletContext,
+				this.servletConfig);
 	}
 
 	public Theme getTheme(String themeName) {

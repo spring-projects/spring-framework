@@ -206,8 +206,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Statically specified listeners */
 	private Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<ApplicationListener<?>>();
 
-	/** TODO SPR-7508: document */
-	private ConfigurableEnvironment environment = new DefaultEnvironment();
+	/** Environment used by this context; initialized by {@link #createEnvironment()} */
+	private ConfigurableEnvironment environment;
 
 
 	/**
@@ -224,6 +224,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public AbstractApplicationContext(ApplicationContext parent) {
 		this.parent = parent;
 		this.resourcePatternResolver = getResourcePatternResolver();
+		this.environment = this.createEnvironment();
 	}
 
 
@@ -279,6 +280,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.environment;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>Default value is determined by {@link #createEnvironment()}. Replacing the
+	 * default with this method is one option but configuration through {@link
+	 * #getEnvironment()} should also be considered. In either case, such modifications
+	 * should be performed <em>before</em> {@link #refresh()}.
+	 * @see org.springframework.context.support.AbstractApplicationContext#createEnvironment
+	 */
 	public void setEnvironment(ConfigurableEnvironment environment) {
 		this.environment = environment;
 	}
@@ -400,6 +409,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.applicationListeners;
 	}
 
+	/**
+	 * Create and return a new {@link DefaultEnvironment}.
+	 */
+	protected ConfigurableEnvironment createEnvironment() {
+		return new DefaultEnvironment();
+	}
 
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
@@ -456,7 +471,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Prepare this context for refreshing, setting its startup date and
-	 * active flag.
+	 * active flag as well as performing any initialization of property sources.
 	 */
 	protected void prepareRefresh() {
 		this.startupDate = System.currentTimeMillis();
@@ -468,6 +483,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (logger.isInfoEnabled()) {
 			logger.info("Refreshing " + this);
 		}
+
+		// Initialize any placeholder property sources in the context environment
+		initPropertySources();
+	}
+
+	/**
+	 * <p>Replace any stub property sources with actual instances.
+	 * @see org.springframework.core.env.PropertySource.StubPropertySource
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initSerlvetPropertySources
+	 */
+	protected void initPropertySources() {
+		// For subclasses: do nothing by default.
 	}
 
 	/**

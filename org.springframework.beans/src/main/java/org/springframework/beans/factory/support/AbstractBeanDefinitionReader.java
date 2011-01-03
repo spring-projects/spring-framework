@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * and the class loader to use for loading bean classes.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 11.12.2003
  * @see BeanDefinitionReaderUtils
  */
@@ -140,16 +141,14 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	}
 
 	/**
-	 * TODO SPR-7508: document
-	 * @param environment
+	 * Set the Environment to use when reading bean definitions. Most often used
+	 * for evaluating profile information to determine which bean definitions
+	 * should be read and which should be omitted.
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
 
-	/**
-	 * TODO SPR-7508: document
-	 */
 	public Environment getEnvironment() {
 		return this.environment;
 	}

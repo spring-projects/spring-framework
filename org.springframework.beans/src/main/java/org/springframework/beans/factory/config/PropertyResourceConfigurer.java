@@ -55,15 +55,24 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 
+	/**
+	 * Set the order value of this object for sorting purposes.
+	 * @see PriorityOrdered
+	 */
 	public void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	public int getOrder() {
-	  return this.order;
+		return this.order;
 	}
 
 
+	/**
+	 * {@linkplain #mergeProperties Merge}, {@linkplain #convertProperties convert} and
+	 * {@linkplain #processProperties process} properties against the given bean factory.
+	 * @throws BeanInitializationException if any properties cannot be loaded
+	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		try {
 			Properties mergedProps = mergeProperties();
@@ -88,7 +97,7 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	 * @see #processProperties
 	 */
 	protected void convertProperties(Properties props) {
-		Enumeration propertyNames = props.propertyNames();
+		Enumeration<?> propertyNames = props.propertyNames();
 		while (propertyNames.hasMoreElements()) {
 			String propertyName = (String) propertyNames.nextElement();
 			String propertyValue = props.getProperty(propertyName);

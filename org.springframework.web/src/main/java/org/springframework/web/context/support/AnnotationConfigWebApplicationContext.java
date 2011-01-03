@@ -28,7 +28,7 @@ import org.springframework.context.annotation.ScopeMetadataResolver;
  * which accepts annotated classes as input - in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
  * classes, but also plain {@link org.springframework.stereotype.Component @Components}
- * and JSR-330 compliant classes using {@literal javax.inject} annotations. Allows for
+ * and JSR-330 compliant classes using {@code javax.inject} annotations. Allows for
  * registering classes one by one (specifying class names as config location) as well
  * as for classpath scanning (specifying base packages as config location).
  *
@@ -46,7 +46,7 @@ import org.springframework.context.annotation.ScopeMetadataResolver;
  * FrameworkServlet.  The param-value may contain both fully-qualified
  * class names and base packages to scan for components.
  *
- * <p>Note: In case of multiple {@literal @Configuration} classes, later {@literal @Bean}
+ * <p>Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
  * definitions will override ones defined in earlier loaded files. This can be leveraged
  * to deliberately override certain bean definitions via an extra Configuration class.
  *
@@ -60,10 +60,10 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	/**
 	 * Register a {@link BeanDefinition} for each class specified by {@link #getConfigLocations()},
 	 * or scan each specified package for annotated classes. Enables the default set of
-	 * annotation configuration post processors, such that {@literal @Autowired},
-	 * {@literal @Required}, and associated annotations can be used.
+	 * annotation configuration post processors, such that {@code @Autowired},
+	 * {@code @Required}, and associated annotations can be used.
 	 * <p>Configuration class bean definitions are registered with generated bean definition
-	 * names unless the {@literal value} attribute is provided to the stereotype annotation.
+	 * names unless the {@code value} attribute is provided to the stereotype annotation.
 	 * @see #getConfigLocations()
 	 * @see AnnotatedBeanDefinitionReader
 	 * @see ClassPathBeanDefinitionScanner

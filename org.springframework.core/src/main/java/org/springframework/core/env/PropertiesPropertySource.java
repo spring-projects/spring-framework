@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,26 @@
 
 package org.springframework.core.env;
 
+import java.util.Map;
 import java.util.Properties;
 
-
 /**
- * TODO SPR-7508: document how this does accept a Properties object,
- * which is capable of holding non-string keys and values (because
- * Properties is a Hashtable),  but is limited to resolving string-based
- * keys and values.
+ * {@link PropertySource} implementation that extracts properties from a {@link java.util.Properties} object.
  *
- * Consider adding a TypeConvertingPropertiesPropertySource to accommodate
- * non-string keys and values (such as is technically possible with
- * System.getProperties())
+ * <p>Note that because a {@code Properties} object is technically an {@code <Object, Object>}
+ * {@link java.util.Hashtable Hashtable}, one may contain non-{@code String} keys or values. This
+ * implementation, however is restricted to accessing only {@code String}-based keys and values, in
+ * the same fashion as {@link Properties#getProperty} and {@link Properties#setProperty}.
  *
  * @author Chris Beams
  * @since 3.1
+ * @see org.springframework.mock.env.MockPropertySource
  */
-public class PropertiesPropertySource extends PropertySource<Properties> {
+public class PropertiesPropertySource extends MapPropertySource {
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public PropertiesPropertySource(String name, Properties source) {
-		super(name, source);
-	}
-
-	public boolean containsProperty(String key) {
-		return source.containsKey(key);
-	}
-
-	public String getProperty(String key) {
-		return source.getProperty(key);
-	}
-
-	@Override
-	public int size() {
-		return source.size();
+		super(name, (Map)source);
 	}
 
 }

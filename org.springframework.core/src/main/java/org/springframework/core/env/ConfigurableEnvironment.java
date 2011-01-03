@@ -16,46 +16,45 @@
 
 package org.springframework.core.env;
 
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Properties;
-
-import org.springframework.core.convert.ConversionService;
-
 /**
- * TODO SPR-7508: document
+ * Configuration interface to be implemented by most if not all {@link Environment
+ * Environments}. Provides facilities for setting active and default profiles as well
+ * as specializing the return types for {@link #getPropertySources()} and
+ * {@link #getPropertyResolver()} such that they return types that may be manipulated.
  *
  * @author Chris Beams
  * @since 3.1
+ * @see DefaultEnvironment
+ * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment
  */
 public interface ConfigurableEnvironment extends Environment {
 
+	/**
+	 * Specify the set of profiles active for this Environment. Profiles are
+	 * evaluated during container bootstrap to determine whether bean definitions
+	 * should be registered with the container.
+	 *
+	 * @see #setDefaultProfiles
+	 * @see org.springframework.context.annotation.Profile
+	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+	 */
 	void setActiveProfiles(String... profiles);
 
+	/**
+	 * Specify the set of profiles to be made active by default if no other profiles
+	 * are explicitly made active through {@link #setActiveProfiles}.
+	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
+	 */
 	void setDefaultProfiles(String... profiles);
 
-	public ConversionService getConversionService();
-
-	public void setConversionService(ConversionService conversionService);
-
-	void addPropertySource(PropertySource<?> propertySource);
-
-	void addPropertySource(String name, Properties properties);
-
-	void addPropertySource(String name, Map<String, String> propertiesMap);
+	/**
+	 * Return the {@link PropertySources} for this environment in mutable form
+	 */
+	MutablePropertySources getPropertySources();
 
 	/**
-	 * TODO: SPR-7508 document
-	 *
-	 * Care should be taken to ensure duplicates are not introduced.
-	 *
-	 * Recommend using {@link LinkedList#set(int, Object)} for replacing items,
-	 * and combining {@link LinkedList#remove()} with other methods like
-	 * {@link LinkedList#add(Object)} to prevent duplicates.
-	 *
-	 * Explain how {@link PropertySource#equals(Object)} and hashCode work, and that
-	 * recommend using {@link PropertySource#named(String)} for lookups in the list.
+	 * Return the {@link PropertyResolver} for this environment in configurable form
 	 */
-	LinkedList<PropertySource<?>> getPropertySources();
+	ConfigurablePropertyResolver getPropertyResolver();
 
 }

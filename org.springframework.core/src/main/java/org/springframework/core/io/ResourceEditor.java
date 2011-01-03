@@ -21,16 +21,16 @@ import java.io.IOException;
 
 import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 
 /**
  * {@link java.beans.PropertyEditor Editor} for {@link Resource}
- * descriptors, to automatically convert <code>String</code> locations
- * e.g. <code>"file:C:/myfile.txt"</code> or
- * <code>"classpath:myfile.txt"</code>) to <code>Resource</code>
- * properties instead of using a <code>String</code> location property.
+ * descriptors, to automatically convert {@code String} locations
+ * e.g. {@code file:C:/myfile.txt} or {@code classpath:myfile.txt} to
+ * {@code Resource} properties instead of using a {@code String} location property.
  *
  * <p>The path may contain <code>${...}</code> placeholders, to be
  * resolved as {@link Environment} properties: e.g. <code>${user.dir}</code>.
@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  * @see Resource
  * @see ResourceLoader
  * @see DefaultResourceLoader
- * @see org.springframework.env.Environment#resolvePlaceholders
+ * @see Environment#resolvePlaceholders
  */
 public class ResourceEditor extends PropertyEditorSupport {
 
@@ -137,9 +137,10 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @see Environment#resolveRequiredPlaceholders
 	 */
 	protected String resolvePath(String path) {
+		PropertyResolver resolver = environment.getPropertyResolver();
 		return this.ignoreUnresolvablePlaceholders ?
-				environment.resolvePlaceholders(path) :
-				environment.resolveRequiredPlaceholders(path);
+				resolver.resolvePlaceholders(path) :
+				resolver.resolveRequiredPlaceholders(path);
 	}
 
 

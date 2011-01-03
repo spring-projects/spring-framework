@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.DefaultWebEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
@@ -46,6 +45,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.support.DefaultWebEnvironment;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.util.NestedServletException;
 
@@ -88,16 +88,10 @@ public abstract class GenericFilterBean implements
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	/* The FilterConfig of this filter */
 	private FilterConfig filterConfig;
 
 	private String beanName;
 
-	/**
-	 * TODO SPR-7508: document
-	 * Defaults to {@link DefaultWebEnvironment}; can be overriden if deployed
-	 * as a spring bean by {@link #setEnvironment(Environment)}
-	 */
 	private Environment environment = new DefaultWebEnvironment();
 
 	private ServletContext servletContext;
@@ -115,7 +109,9 @@ public abstract class GenericFilterBean implements
 	}
 
 	/**
-	 * TODO SPR-7508: document
+	 * {@inheritDoc}
+	 * <p>Any environment set here overrides the {@link DefaultWebEnvironment}
+	 * provided by default.
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
@@ -282,6 +278,7 @@ public abstract class GenericFilterBean implements
 	/**
 	 * PropertyValues implementation created from FilterConfig init parameters.
 	 */
+	@SuppressWarnings("serial")
 	private static class FilterConfigPropertyValues extends MutablePropertyValues {
 
 		/**
@@ -292,12 +289,12 @@ public abstract class GenericFilterBean implements
 		 * @throws ServletException if any required properties are missing
 		 */
 		public FilterConfigPropertyValues(FilterConfig config, Set<String> requiredProperties)
-		    throws ServletException {
+			throws ServletException {
 
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet<String>(requiredProperties) : null;
 
-			Enumeration en = config.getInitParameterNames();
+			Enumeration<?> en = config.getInitParameterNames();
 			while (en.hasMoreElements()) {
 				String property = (String) en.nextElement();
 				Object value = config.getInitParameter(property);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 
 /**
@@ -35,7 +34,8 @@ import org.springframework.core.io.Resource;
  * <p>This class registers each bean definition with the {@link DefaultListableBeanFactory}
  * superclass, and relies on the latter's implementation of the {@link BeanFactory} interface.
  * It supports singletons, prototypes, and references to either of these kinds of bean.
- * See "spring-beans-2.0.dtd" for details on options and configuration style. // TODO SPR-7508 polish - s/dtd/xsd/
+ * See {@code "spring-beans-3.x.xsd"} (or historically, {@code "spring-beans-2.0.dtd"}) for
+ * details on options and configuration style.
  *
  * <p><b>For advanced needs, consider using a {@link DefaultListableBeanFactory} with
  * an {@link XmlBeanDefinitionReader}.</b> The latter allows for reading from multiple XML
@@ -63,7 +63,7 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 	 * @throws BeansException in case of loading or parsing errors
 	 */
 	public XmlBeanFactory(Resource resource) throws BeansException {
-		this(resource, (BeanFactory)null);
+		this(resource, null);
 	}
 
 	/**

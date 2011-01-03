@@ -1476,7 +1476,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Determine whether the name of the supplied node is equal to the supplied name.
 	 * <p>The default implementation checks the supplied desired name against both
-	 * {@link Node#getNodeName()) and {@link Node#getLocalName()}.
+	 * {@link Node#getNodeName()} and {@link Node#getLocalName()}.
 	 * <p>Subclasses may override the default implementation to provide a different
 	 * mechanism for comparing node names.
 	 * @param node the node to compare

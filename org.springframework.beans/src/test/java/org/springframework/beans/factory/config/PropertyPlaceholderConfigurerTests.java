@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerWithGeneratedName;
 
@@ -33,13 +34,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import test.beans.TestBean;
 
 
 /**
- * Unit tests for {@link EnvironmentAwarePropertyPlaceholderConfigurer}.
+ * Unit tests for {@link PropertyPlaceholderConfigurer}.
  *
+ * @see PropertySourcesPlaceholderConfigurerTests
  * @see PropertyResourceConfigurerTests
  * @author Chris Beams
  */
@@ -50,7 +54,7 @@ public class PropertyPlaceholderConfigurerTests {
 	private static final String P1_SYSTEM_ENV_VAL = "p1SystemEnvVal";
 
 	private DefaultListableBeanFactory bf;
-	private AbstractPropertyPlaceholderConfigurer ppc;
+	private PropertyPlaceholderConfigurer ppc;
 	private Properties ppcProperties;
 
 	private AbstractBeanDefinition p1BeanDef;
@@ -79,9 +83,19 @@ public class PropertyPlaceholderConfigurerTests {
 	}
 
 
-	// -------------------------------------------------------------------------
-	// Tests to ensure backward-compatibility for Environment refactoring
-	// -------------------------------------------------------------------------
+	@Test
+	public void localPropertiesViaResource() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${my.name}")
+					.getBeanDefinition());
+
+		PropertyPlaceholderConfigurer pc = new PropertyPlaceholderConfigurer();
+		Resource resource = new ClassPathResource("PropertyPlaceholderConfigurerTests.properties", this.getClass());
+		pc.setLocation(resource);
+		pc.postProcessBeanFactory(bf);
+	}
 
 	@Test
 	public void resolveFromSystemProperties() {
@@ -115,7 +129,6 @@ public class PropertyPlaceholderConfigurerTests {
 		assertThat(bean.getName(), equalTo(P1_LOCAL_PROPS_VAL));
 	}
 
-	/*
 	@Test
 	public void setSystemSystemPropertiesMode_toOverride_andResolveFromSystemProperties() {
 		registerWithGeneratedName(p1BeanDef, bf);
@@ -145,7 +158,6 @@ public class PropertyPlaceholderConfigurerTests {
 		TestBean bean = bf.getBean(TestBean.class);
 		assertThat(bean.getName(), equalTo(P1_LOCAL_PROPS_VAL)); // has to resort to local props
 	}
-	*/
 
 	/**
 	 * Creates a scenario in which two PPCs are configured, each with different
@@ -230,34 +242,6 @@ public class PropertyPlaceholderConfigurerTests {
 		getModifiableSystemEnvironment().remove("my.name");
 	}
 
-
-	// -------------------------------------------------------------------------
-	// Tests for functionality not possible prior to Environment refactoring
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Tests that properties against a BeanFactory's Environment are used by
-	 * PropertyPlaceholderConfigurer during placeholder resolution.
-	@Test @SuppressWarnings({ "unchecked", "rawtypes", "serial" })
-	public void replacePlaceholdersFromBeanFactoryEnvironmentPropertySources() {
-		System.setProperty("key1", "systemValue");
-
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.getEnvironment().addPropertySource("psCustom", new HashMap() {{ put("key1", "customValue"); }});
-		bf.registerBeanDefinition("testBean",
-				rootBeanDefinition(TestBean.class).addPropertyValue("name", "${key1}").getBeanDefinition());
-
-		new PropertyPlaceholderConfigurer().postProcessBeanFactory(bf);
-		assertThat(bf.getBean(TestBean.class).getName(), is("customValue"));
-
-		System.clearProperty("key1");
-	}
-	 */
-
-
-	// -------------------------------------------------------------------------
-	// Utilities
-	// -------------------------------------------------------------------------
 
 	// TODO SPR-7508: duplicated from EnvironmentPropertyResolutionSearchTests
 	@SuppressWarnings("unchecked")

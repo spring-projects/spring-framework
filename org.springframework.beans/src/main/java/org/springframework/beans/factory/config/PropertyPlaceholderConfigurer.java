@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,69 +25,40 @@ import org.springframework.core.Constants;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
-
 /**
- * A property resource configurer that resolves placeholders in bean property values of
- * context definitions. It <i>pulls</i> values from a properties file into bean definitions.
+ * {@link AbstractPropertyPlaceholderConfigurer} subclass that resolves ${...} placeholders
+ * against {@link #setLocation local} {@link #setProperties properties} and/or system properties
+ * and environment variables.
  *
- * <p>The default placeholder syntax follows the Ant / Log4J / JSP EL style:
+ * <p>As of Spring 3.1, {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+ * PropertySourcesPlaceholderConfigurer} should be used preferentially over this implementation; it is
+ * more flexible through taking advantage of the {@link org.springframework.core.env.Environment Environment} and
+ * {@link org.springframework.core.env.PropertySource PropertySource} mechanisms also made available in Spring 3.1.
  *
- * <pre class="code">${...}</pre>
+ * <p>{@link PropertyPlaceholderConfigurer} is still appropriate for use when:
+ * <ul>
+ *   <li>the {@link org.springframework.context spring-context} module is not available (i.e., one is using
+ *   Spring's {@code BeanFactory} API as opposed to {@code ApplicationContext}).
+ *   <li>existing configuration makes use of the {@link #setSystemPropertiesMode(int) "systemPropertiesMode"} and/or
+ *   {@link #setSystemPropertiesModeName(String) "systemPropertiesModeName"} properties. Users are encouraged to move
+ *   away from using these settings, and rather configure property source search order through the container's
+ *   {@code Environment}; however, exact preservation of functionality may be maintained by continuing to
+ *   use {@code PropertyPlaceholderConfigurer}.
+ * </ul>
  *
- * Example XML context definition:
- *
- * <pre class="code">&lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
- *   &lt;property name="driverClassName"&gt;&lt;value&gt;${driver}&lt;/value&gt;&lt;/property&gt;
- *   &lt;property name="url"&gt;&lt;value&gt;jdbc:${dbname}&lt;/value&gt;&lt;/property&gt;
- * &lt;/bean&gt;</pre>
- *
- * Example properties file:
- *
- * <pre class="code">driver=com.mysql.jdbc.Driver
- * dbname=mysql:mydb</pre>
- *
- * PropertyPlaceholderConfigurer checks simple property values, lists, maps,
- * props, and bean names in bean references. Furthermore, placeholder values can
- * also cross-reference other placeholders, like:
- *
- * <pre class="code">rootPath=myrootdir
- * subPath=${rootPath}/subdir</pre>
- *
- * In contrast to PropertyOverrideConfigurer, this configurer allows to fill in
- * explicit placeholders in context definitions. Therefore, the original definition
- * cannot specify any default values for such bean properties, and the placeholder
- * properties file is supposed to contain an entry for each defined placeholder.
- *
- * <p>If a configurer cannot resolve a placeholder, a BeanDefinitionStoreException
- * will be thrown. If you want to check against multiple properties files, specify
- * multiple resources via the "locations" setting. You can also define multiple
- * PropertyPlaceholderConfigurers, each with its <i>own</i> placeholder syntax.
- *
- * <p>Default property values can be defined via "properties", to make overriding
- * definitions in properties files optional. A configurer will also check against
- * system properties (e.g. "user.dir") if it cannot resolve a placeholder with any
- * of the specified properties. This can be customized via "systemPropertiesMode".
- *
- * <p>Note that the context definition <i>is</i> aware of being incomplete;
- * this is immediately obvious to users when looking at the XML definition file.
- * Hence, placeholders have to be resolved; any desired defaults have to be
- * defined as placeholder values as well (for example in a default properties file).
- *
- * <p>Property values can be converted after reading them in, through overriding
- * the {@link #convertPropertyValue} method. For example, encrypted values can
- * be detected and decrypted accordingly before processing them.
+ * <p>Prior to Spring 3.1, the {@code <context:property-placeholder/>} namespace element
+ * registered an instance of {@code PropertyPlaceholderConfigurer}.  It will still do so if
+ * using the {@code spring-beans-3.0.xsd} definition of the namespace.  That is, you can preserve
+ * registration of {@code PropertyPlaceholderConfigurer} through the namespace, even if using Spring 3.1;
+ * simply do not update your {@code xsi:schemaLocation} and continue using the 3.0 XSD.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 02.10.2003
- * @see #setLocations
- * @see #setProperties
- * @see #setPlaceholderPrefix
- * @see #setPlaceholderSuffix
  * @see #setSystemPropertiesModeName
- * @see System#getProperty(String)
- * @see #convertPropertyValue
+ * @see AbstractPropertyPlaceholderConfigurer
  * @see PropertyOverrideConfigurer
+ * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  */
 public class PropertyPlaceholderConfigurer extends AbstractPropertyPlaceholderConfigurer
 		implements BeanNameAware, BeanFactoryAware {

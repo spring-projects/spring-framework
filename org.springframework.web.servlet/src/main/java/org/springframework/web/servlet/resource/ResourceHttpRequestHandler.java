@@ -35,9 +35,9 @@ import org.springframework.web.servlet.support.WebContentGenerator;
 /**
  * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance 
  * (according to the guidelines of Page Speed, YSlow, etc.) by allowing for flexible cache settings
- * ({@link #setCacheSeconds "cacheSeconds" property}, last-modified support).
+ * ({@linkplain #setCacheSeconds "cacheSeconds" property}, last-modified support).
  *
- * <p>The {@link #setLocations "locations" property takes a list of Spring {@link Resource} locations
+ * <p>The {@linkplain #setLocations "locations" property} takes a list of Spring {@link Resource} locations
  * from which static resources are allowed  to be served by this handler. For a given request, the
  * list of locations will be consulted in order for the presence of the requested resource, and the
  * first found match will be written to the response, with {@code Expires} and {@code Cache-Control}
@@ -54,7 +54,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * using Spring EL. See the reference manual for further examples of this approach.
  *
  * <p>Rather than being directly configured as a bean, this handler will typically be configured
- * through use of the <code>&lt;mvc:resources/&gt;</code> XML configuration element.
+ * through use of the {@code <mvc:resources/>} XML configuration element.
  *
  * @author Keith Donald
  * @author Jeremy Grelle

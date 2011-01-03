@@ -9,7 +9,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Unit tests for {@link GenericXmlApplicationContext}.
- * 
+ *
  * See SPR-7530.
  *
  * @author Chris Beams
