@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.jmx.export.notification;
+
+import org.springframework.beans.factory.Aware;
 
 /**
  * Interface to be implemented by any Spring-managed resource that is to be
@@ -33,10 +35,11 @@ package org.springframework.jmx.export.notification;
  * interface (or implementing a full {@link javax.management.modelmbean.ModelMBean}).
  *
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 2.0
  * @see NotificationPublisher
  */
-public interface NotificationPublisherAware {
+public interface NotificationPublisherAware extends Aware {
 
 	/**
 	 * Set the {@link NotificationPublisher} instance for the current managed resource instance.

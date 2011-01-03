@@ -21,6 +21,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContextAware;
@@ -97,24 +98,26 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 	
 	private void invokeAwareInterfaces(Object bean) {
-		if (bean instanceof EmbeddedValueResolverAware) {
-			((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(
-					new EmbeddedValueResolver(this.applicationContext.getBeanFactory()));
-		}
-		if (bean instanceof ResourceLoaderAware) {
-			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
-		}
-		if (bean instanceof ApplicationEventPublisherAware) {
-			((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
-		}
-		if (bean instanceof MessageSourceAware) {
-			((MessageSourceAware) bean).setMessageSource(this.applicationContext);
-		}
-		if (bean instanceof ApplicationContextAware) {
-			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
-		}
-		if (bean instanceof EnvironmentAware) {
-			((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
+		if (bean instanceof Aware) {
+			if (bean instanceof EmbeddedValueResolverAware) {
+				((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(
+						new EmbeddedValueResolver(this.applicationContext.getBeanFactory()));
+			}
+			if (bean instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
+			}
+			if (bean instanceof ApplicationEventPublisherAware) {
+				((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
+			}
+			if (bean instanceof MessageSourceAware) {
+				((MessageSourceAware) bean).setMessageSource(this.applicationContext);
+			}
+			if (bean instanceof ApplicationContextAware) {
+				((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
+			}
+			if (bean instanceof EnvironmentAware) {
+				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
+			}
 		}
 	}
 

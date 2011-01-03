@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,13 @@ package org.springframework.beans.factory;
  * {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.0
  * @see BeanNameAware
  * @see BeanFactoryAware
  * @see InitializingBean
  */
-public interface BeanClassLoaderAware {
+public interface BeanClassLoaderAware extends Aware {
 
 	/**
 	 * Callback that supplies the bean {@link ClassLoader class loader} to

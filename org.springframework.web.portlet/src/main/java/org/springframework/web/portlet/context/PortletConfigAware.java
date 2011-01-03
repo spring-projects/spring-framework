@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@ package org.springframework.web.portlet.context;
 
 import javax.portlet.PortletConfig;
 
+import org.springframework.beans.factory.Aware;
+
 /**
  * Interface to be implemented by any object that wishes to be notified
  * of the PortletConfig (typically determined by the PortletApplicationContext)
  * that it runs in.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.0
  * @see PortletContextAware
  */
-public interface PortletConfigAware {
+public interface PortletConfigAware extends Aware {
 
 	/**
 	 * Set the PortletConfigthat this object runs in.

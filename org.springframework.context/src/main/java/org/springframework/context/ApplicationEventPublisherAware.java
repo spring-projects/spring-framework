@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,19 @@
 
 package org.springframework.context;
 
+import org.springframework.beans.factory.Aware;
+
 /**
  * Interface to be implemented by any object that wishes to be notified
  * of the ApplicationEventPublisher (typically the ApplicationContext)
  * that it runs in.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.1.1
  * @see ApplicationContextAware
  */
-public interface ApplicationEventPublisherAware {
+public interface ApplicationEventPublisherAware extends Aware {
 
 	/**
 	 * Set the ApplicationEventPublisher that this object runs in.
