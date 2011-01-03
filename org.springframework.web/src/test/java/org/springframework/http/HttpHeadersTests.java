@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,9 +27,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class HttpHeadersTests {
@@ -99,6 +100,14 @@ public class HttpHeadersTests {
 
 	@Test
 	public void eTag() {
+		String eTag = "\"v2.6\"";
+		headers.setETag(eTag);
+		assertEquals("Invalid ETag header", eTag, headers.getETag());
+		assertEquals("Invalid ETag header", "\"v2.6\"", headers.getFirst("ETag"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void illegalETag() {
 		String eTag = "v2.6";
 		headers.setETag(eTag);
 		assertEquals("Invalid ETag header", eTag, headers.getETag());
@@ -107,7 +116,7 @@ public class HttpHeadersTests {
 
 	@Test
 	public void ifNoneMatch() {
-		String ifNoneMatch = "v2.6";
+		String ifNoneMatch = "\"v2.6\"";
 		headers.setIfNoneMatch(ifNoneMatch);
 		assertEquals("Invalid If-None-Match header", ifNoneMatch, headers.getIfNoneMatch().get(0));
 		assertEquals("Invalid If-None-Match header", "\"v2.6\"", headers.getFirst("If-None-Match"));
@@ -115,8 +124,8 @@ public class HttpHeadersTests {
 
 	@Test
 	public void ifNoneMatchList() {
-		String ifNoneMatch1 = "v2.6";
-		String ifNoneMatch2 = "v2.7";
+		String ifNoneMatch1 = "\"v2.6\"";
+		String ifNoneMatch2 = "\"v2.7\"";
 		List<String> ifNoneMatchList = new ArrayList<String>(2);
 		ifNoneMatchList.add(ifNoneMatch1);
 		ifNoneMatchList.add(ifNoneMatch2);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -310,7 +310,11 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	 * @param eTag the new entity tag
 	 */
 	public void setETag(String eTag) {
-		set(ETAG, quote(eTag));
+		if (eTag != null) {
+			Assert.isTrue(eTag.startsWith("\"") || eTag.startsWith("W/"), "Invalid eTag, does not start with W/ or \"");
+			Assert.isTrue(eTag.endsWith("\""), "Invalid eTag, does not end with \"");
+		}
+			set(ETAG, eTag);
 	}
 
 	/**
@@ -318,7 +322,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	 * @return the entity tag
 	 */
 	public String getETag() {
-		return unquote(getFirst(ETAG));
+		return getFirst(ETAG);
 	}
 
 	/**
@@ -362,7 +366,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	 * @param ifNoneMatch the new value of the header
 	 */
 	public void setIfNoneMatch(String ifNoneMatch) {
-		set(IF_NONE_MATCH, quote(ifNoneMatch));
+		set(IF_NONE_MATCH, ifNoneMatch);
 	}
 
 	/**
@@ -373,7 +377,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 		StringBuilder builder = new StringBuilder();
 		for (Iterator<String> iterator = ifNoneMatchList.iterator(); iterator.hasNext();) {
 			String ifNoneMatch = iterator.next();
-			builder.append(quote(ifNoneMatch));
+			builder.append(ifNoneMatch);
 			if (iterator.hasNext()) {
 				builder.append(", ");
 			}
@@ -392,7 +396,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 		if (value != null) {
 			String[] tokens = value.split(",\\s*");
 			for (String token : tokens) {
-				result.add(unquote(token));
+				result.add(token);
 			}
 		}
 		return result;
@@ -451,31 +455,6 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 	}
 
 	// Utility methods
-
-	private String quote(String s) {
-		Assert.notNull(s);
-		if (!s.startsWith("\"")) {
-			s = "\"" + s;
-		}
-		if (!s.endsWith("\"")) {
-			s = s + "\"";
-		}
-		return s;
-	}
-
-	private String unquote(String s) {
-		if (s == null) {
-			return null;
-		}
-		if (s.startsWith("\"")) {
-			s = s.substring(1);
-		}
-		if (s.endsWith("\"")) {
-			s = s.substring(0, s.length() - 1);
-		}
-		return s;
-	}
-
 
 	private long getFirstDate(String headerName) {
 		String headerValue = getFirst(headerName);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -141,9 +141,9 @@ public class ServletWebRequestTests {
 
 	@Test
 	public void checkNotModifiedETag() {
-		String eTag = "Foo";
+		String eTag = "\"Foo\"";
 		servletRequest.setMethod("GET");
-		servletRequest.addHeader("If-None-Match", "\"" + eTag + "\"");
+		servletRequest.addHeader("If-None-Match", eTag );
 
 		request.checkNotModified(eTag);
 
@@ -151,20 +151,7 @@ public class ServletWebRequestTests {
 	}
 
 	@Test
-	public void checkModifiedETagNonQuoted() {
-		String currentETag = "Foo";
-		String oldEtag = "Bar";
-		servletRequest.setMethod("GET");
-		servletRequest.addHeader("If-None-Match", "\"" + oldEtag + "\"");
-
-		request.checkNotModified(currentETag);
-
-		assertEquals(200, servletResponse.getStatus());
-		assertEquals("\"" + currentETag + "\"", servletResponse.getHeader("ETag"));
-	}
-
-	@Test
-	public void checkModifiedETagQuoted() {
+	public void checkModifiedETag() {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "Bar";
 		servletRequest.setMethod("GET");
