@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context;
 
+import org.springframework.beans.factory.Aware;
 import org.springframework.core.io.ResourceLoader;
 
 /**
@@ -47,6 +48,7 @@ import org.springframework.core.io.ResourceLoader;
  * automatic type conversion by the bean factory.
  * 
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 10.03.2004
  * @see ApplicationContextAware
  * @see org.springframework.beans.factory.InitializingBean
@@ -57,7 +59,7 @@ import org.springframework.core.io.ResourceLoader;
  * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
  * @see org.springframework.context.support.ReloadableResourceBundleMessageSource
  */
-public interface ResourceLoaderAware {
+public interface ResourceLoaderAware extends Aware {
 
 	/**
 	 * Set the ResourceLoader that this object runs in.

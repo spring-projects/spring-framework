@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scheduling.quartz;
 
 import org.quartz.SchedulerContext;
+import org.springframework.beans.factory.Aware;
 
 /**
  * Callback interface to be implemented by Spring-managed
@@ -27,11 +28,12 @@ import org.quartz.SchedulerContext;
  * that are passed in via Spring's SchedulerFactoryBean.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.0
  * @see org.quartz.spi.JobFactory
  * @see SchedulerFactoryBean#setJobFactory
  */
-public interface SchedulerContextAware {
+public interface SchedulerContextAware extends Aware {
 
 	/**
 	 * Set the SchedulerContext of the current Quartz Scheduler.

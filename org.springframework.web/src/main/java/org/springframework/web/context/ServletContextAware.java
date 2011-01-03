@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@ package org.springframework.web.context;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.factory.Aware;
+
 /**
  * Interface to be implemented by any object that wishes to be notified
  * of the ServletContext (typically determined by the WebApplicationContext)
  * that it runs in.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 12.03.2004
  * @see ServletConfigAware
  */
-public interface ServletContextAware {
+public interface ServletContextAware extends Aware {
 
 	/**
 	 * Set the ServletContext that this object runs in.

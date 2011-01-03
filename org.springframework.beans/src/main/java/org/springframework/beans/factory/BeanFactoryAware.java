@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,14 @@ import org.springframework.beans.BeansException;
  * {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Rod Johnson
+ * @author Chris Beams
  * @since 11.03.2003
  * @see BeanNameAware
  * @see BeanClassLoaderAware
  * @see InitializingBean
  * @see org.springframework.context.ApplicationContextAware
  */
-public interface BeanFactoryAware {
+public interface BeanFactoryAware extends Aware {
 
 	/**
 	 * Callback that supplies the owning factory to a bean instance.
