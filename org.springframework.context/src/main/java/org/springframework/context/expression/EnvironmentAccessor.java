@@ -44,11 +44,11 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Access provided {@literal target} object by calling its {@link Environment#getProperty(String)}
-	 * method with the provided {@literal name}.
+	 * Access the given target object by resolving the given property name against the given target
+	 * environment.
 	 */
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		return new TypedValue(((Environment)target).getProperty(name));
+		return new TypedValue(((Environment)target).getPropertyResolver().getProperty(name));
 	}
 
 	/**

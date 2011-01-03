@@ -101,16 +101,14 @@ class ConfigurationClassParser {
 	}
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
-		if (this.environment != null && configClass.getMetadata().hasAnnotation(Profile.class.getName())) {
-			String[] specifiedProfiles =
-				(String[])configClass.getMetadata().getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
-			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+		AnnotationMetadata metadata = configClass.getMetadata();
+		if (this.environment != null && Profile.Helper.isProfileAnnotationPresent(metadata)) {
+			if (!this.environment.acceptsProfiles(Profile.Helper.getCandidateProfiles(metadata))) {
 				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return;
 			}
 		}
 
-		AnnotationMetadata metadata = configClass.getMetadata();
 		while (metadata != null) {
 			doProcessConfigurationClass(configClass, metadata);
 			String superClassName = metadata.getSuperClassName();

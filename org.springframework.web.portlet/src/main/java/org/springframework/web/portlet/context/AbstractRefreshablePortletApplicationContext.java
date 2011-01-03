@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.web.context.ServletContextAware;
@@ -148,6 +149,14 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		PortletApplicationContextUtils.registerPortletApplicationScopes(beanFactory, this.portletContext);
 		PortletApplicationContextUtils.registerEnvironmentBeans(
 				beanFactory, this.servletContext, this.portletContext, this.portletConfig);
+	}
+
+	/**
+	 * Create and return a new {@link DefaultPortletEnvironment}.
+	 */
+	@Override
+	protected ConfigurableEnvironment createEnvironment() {
+		return new DefaultPortletEnvironment();
 	}
 
 	/**

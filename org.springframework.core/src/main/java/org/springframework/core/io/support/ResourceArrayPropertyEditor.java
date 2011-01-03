@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
 
 /**
@@ -196,9 +197,10 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * @see Environment#resolveRequiredPlaceholders
 	 */
 	protected String resolvePath(String path) {
+		PropertyResolver resolver = environment.getPropertyResolver();
 		return this.ignoreUnresolvablePlaceholders ?
-				environment.resolvePlaceholders(path) :
-				environment.resolveRequiredPlaceholders(path);
+				resolver.resolvePlaceholders(path) :
+				resolver.resolveRequiredPlaceholders(path);
 	}
 
 }

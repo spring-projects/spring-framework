@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,27 @@ import java.util.Enumeration;
 
 import javax.servlet.ServletConfig;
 
-import org.springframework.core.env.DefaultWebEnvironment;
 import org.springframework.core.env.PropertySource;
-
+import org.springframework.util.CollectionUtils;
 
 /**
- * TODO SPR-7508: document
- * 
+ * {@link PropertySource} that reads init parameters from a {@link ServletConfig} object.
+ *
  * @author Chris Beams
  * @since 3.1
  * @see ServletContextPropertySource
  */
 public class ServletConfigPropertySource extends PropertySource<ServletConfig> {
 
-	public ServletConfigPropertySource(ServletConfig servletConfig) {
-		this(DefaultWebEnvironment.SERVLET_CONFIG_PARAMS_PROPERTY_SOURCE_NAME, servletConfig);
-	}
-
 	public ServletConfigPropertySource(String name, ServletConfig servletConfig) {
 		super(name, servletConfig);
 	}
 
 	@Override
-	public boolean containsProperty(String name) {
-		Enumeration<?> initParamNames = this.source.getInitParameterNames();
-		while (initParamNames.hasMoreElements()) {
-			if (initParamNames.nextElement().equals(name)) {
-				return true;
-			}
-		}
-		return false;
+	@SuppressWarnings("unchecked")
+	public String[] getPropertyNames() {
+		return CollectionUtils.toArray(
+				(Enumeration<String>)this.source.getInitParameterNames(), EMPTY_NAMES_ARRAY);
 	}
 
 	@Override
@@ -57,14 +48,4 @@ public class ServletConfigPropertySource extends PropertySource<ServletConfig> {
 		return this.source.getInitParameter(name);
 	}
 
-	@Override
-	public int size() {
-		int size=0;
-		Enumeration<?> initParamNames = this.source.getInitParameterNames();
-		while (initParamNames.hasMoreElements()) {
-			initParamNames.nextElement();
-			size++;
-		}
-		return size;
-	}
 }

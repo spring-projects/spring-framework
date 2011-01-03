@@ -23,18 +23,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates one or more {@link Configuration} classes to import.
+ * Indicates one or more {@link Configuration @Configuration} classes to import.
  *
- * <p>Provides functionality equivalent to the {@literal <import/>} element in Spring XML.
- * Only supported for actual {@literal @Configuration}-annotated classes.
+ * <p>Provides functionality equivalent to the {@code <import/>} element in Spring XML.
+ * Only supported for actual {@code @Configuration}-annotated classes.
  *
- * <p>{@literal @Bean} definitions declared in imported {@literal @Configuration} classes
+ * <p>{@code @Bean} definitions declared in imported {@code @Configuration} classes
  * should be accessed by using {@link Autowired @Autowired} injection.  Either the bean
  * itself can be autowired, or the configuration class instance declaring the bean can be
  * autowired.  The latter approach allows for explicit, IDE-friendly navigation between
- * {@literal @Configuration} class methods.
+ * {@code @Configuration} class methods.
  *
- * <p>If XML or other non-{@literal @Configuration} bean definition resources need to be
+ * <p>If XML or other non-{@code @Configuration} bean definition resources need to be
  * imported, use {@link ImportResource @ImportResource}
  *
  * @author Chris Beams

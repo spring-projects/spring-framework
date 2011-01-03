@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class ContextNamespaceHandlerTests {
 
 	@Test
 	public void propertyPlaceholderEnvironmentProperties() throws Exception {
-		MockEnvironment env = MockEnvironment.withProperty("foo", "spam");
+		MockEnvironment env = new MockEnvironment().withProperty("foo", "spam");
 		GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext();
 		applicationContext.setEnvironment(env);
 		applicationContext.load(new ClassPathResource("contextNamespaceHandlerTests-simple.xml", getClass()));

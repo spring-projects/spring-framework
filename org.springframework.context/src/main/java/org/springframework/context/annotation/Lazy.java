@@ -25,25 +25,25 @@ import java.lang.annotation.Inherited;
 
 /**
  * Indicates whether a bean is to be lazily initialized.
- * 
+ *
  * <p>May be used on any class directly or indirectly annotated with
  * {@link org.springframework.stereotype.Component} or on methods annotated with
  * {@link Bean}.
- * 
+ *
  * <p>If this annotation is not present on a Component or Bean definition, eager
- * initialization will occur. If present and set to {@literal true}, the
+ * initialization will occur. If present and set to {@code true}, the
  * Bean/Component will not be initialized until referenced by another bean or
  * explicitly retrieved from the enclosing
  * {@link org.springframework.beans.factory.BeanFactory}. If present and set to
- * {@literal false}, the bean will be instantiated on startup by bean factories
+ * {@code false}, the bean will be instantiated on startup by bean factories
  * that perform eager initialization of singletons.
- * 
- * <p>If Lazy is present on a {@link Configuration} class, this indicates that all
- * {@link Bean} methods within that {@literal Configuration} should be lazily
- * initialized. If Lazy is present and false on a Bean method within a
- * Lazy-annotated Configuration class, this indicates overriding the 'default
- * lazy' behavior and that the bean should be eagerly initialized.
- * 
+ *
+ * <p>If Lazy is present on a {@link Configuration @Configuration} class, this
+ * indicates that all {@link Bean @Bean} methods within that {@code @Configuration}
+ * should be lazily initialized. If Lazy is present and false on a Bean method
+ * within a Lazy-annotated Configuration class, this indicates overriding the
+ * 'default lazy' behavior and that the bean should be eagerly initialized.
+ *
  * @author Chris Beams
  * @since 3.0
  * @see Primary

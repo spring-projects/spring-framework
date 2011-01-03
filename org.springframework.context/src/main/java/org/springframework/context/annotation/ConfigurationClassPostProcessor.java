@@ -49,8 +49,8 @@ import org.springframework.util.ClassUtils;
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
  * {@link Configuration @Configuration} classes.
  *
- * <p>Registered by default when using {@literal <context:annotation-config/>} or
- * {@literal <context:component-scan/>}. Otherwise, may be declared manually as
+ * <p>Registered by default when using {@code <context:annotation-config/>} or
+ * {@code <context:component-scan/>}. Otherwise, may be declared manually as
  * with any other BeanFactoryPostProcessor.
  *
  * <p>This post processor is {@link Ordered#HIGHEST_PRECEDENCE} as it is important
@@ -100,7 +100,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	/**
 	 * Set the {@link ProblemReporter} to use.
 	 * <p>Used to register any problems detected with {@link Configuration} or {@link Bean}
-	 * declarations. For instance, an @Bean method marked as {@literal final} is illegal
+	 * declarations. For instance, an @Bean method marked as {@code final} is illegal
 	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter}.
 	 */
 	public void setProblemReporter(ProblemReporter problemReporter) {
@@ -110,7 +110,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	/**
 	 * Set the {@link MetadataReaderFactory} to use.
 	 * <p>Default is a {@link CachingMetadataReaderFactory} for the specified
-	 * {@link #setBeanClassLoader bean class loader}.
+	 * {@linkplain #setBeanClassLoader bean class loader}.
 	 */
 	public void setMetadataReaderFactory(MetadataReaderFactory metadataReaderFactory) {
 		Assert.notNull(metadataReaderFactory, "MetadataReaderFactory must not be null");

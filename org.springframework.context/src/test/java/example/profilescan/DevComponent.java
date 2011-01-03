@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.core.env;
+package example.profilescan;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * TODO SPR-7508: document
- *
- * @author Chris Beams
- * @since 3.1
- */
-public class DefaultWebEnvironment extends DefaultEnvironment {
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
-	public static final String SERVLET_CONTEXT_PARAMS_PROPERTY_SOURCE_NAME = "servletContextInitParams";
-	public static final String SERVLET_CONFIG_PARAMS_PROPERTY_SOURCE_NAME = "servletConfigInitParams";
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Profile(DevComponent.PROFILE_NAME)
+@Component
+public @interface DevComponent {
+
+	public static final String PROFILE_NAME = "dev";
+
+	String value() default "";
 
 }

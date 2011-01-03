@@ -40,7 +40,7 @@ import test.beans.TestBean;
  * particularly convenient syntax requiring no extra artifact for the aspect.
  * 
  * <p>Currently it is assumed that the user is bootstrapping Configuration class processing via XML (using
- * annotation-config or component-scan), and thus will also use {@literal <aop:aspectj-autoproxy/>} to enable
+ * annotation-config or component-scan), and thus will also use {@code <aop:aspectj-autoproxy/>} to enable
  * processing of the Aspect annotation.
  *
  * @author Chris Beams

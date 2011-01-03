@@ -17,11 +17,11 @@
 package org.springframework.context.support;
 
 import org.springframework.beans.factory.BeanNameAware;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.util.SystemPropertyUtils;
 
 /**
  * {@link AbstractRefreshableApplicationContext} subclass that adds common handling
@@ -117,14 +117,9 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * system property values if necessary. Applied to config locations.
 	 * @param path the original file path
 	 * @return the resolved file path
-	 * @see SystemPropertyUtils#resolveRequiredPlaceholders(String)
 	 */
 	protected String resolvePath(String path) {
-		// TODO SPR-7508: note that ARAC cannot delegate to its beanFactory's environment
-		// to call Environment.resolve[Required]Placeholders(String), as the bean factory
-		// has not yet been initialized.  This amounts to one more reason not to use the ARAC
-		// hierarchy - it won't have early access to environment property resolution.
-		return SystemPropertyUtils.resolvePlaceholders(path);
+		return this.getEnvironment().getPropertyResolver().resolveRequiredPlaceholders(path);
 	}
 
 

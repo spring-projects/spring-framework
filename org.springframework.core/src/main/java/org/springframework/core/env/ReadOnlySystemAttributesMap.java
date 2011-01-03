@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.util.Assert;
 
 /**
  * Read-only {@code Map<String, String>} implementation that is backed by system properties or environment
@@ -38,32 +39,16 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 		return get(key) != null;
 	}
 
+	/**
+	 * @param key the name of the system attribute to retrieve
+	 * @throws IllegalArgumentException if given key is non-String
+	 */
 	public String get(Object key) {
-		if (key instanceof String) {
-			String attributeName = (String) key;
-			return getSystemAttribute(attributeName);
-		}
-		else {
-			// TODO SPR-7508: technically breaks backward-compat. Used to return null
-			// for non-string keys, now throws. Any callers who have coded to this
-			// behavior will now break.  It's highly unlikely, however; could be
-			// a calculated risk to take.  Throwing is a better choice, as returning
-			// null represents a 'false negative' - it's not actually that the key
-			// isn't present, it's simply that you cannot access it through the current
-			// abstraction.  Remember, this case would only come up if (a) there are
-			// non-string keys or values in system properties, (b) there is a
-			// SecurityManager present, and (c) the user attempts to access one
-			// of those properties through this abstraction. This combination is
-			// probably unlikely enough to merit the change.
-			//
-			// note also that the previous implementation didn't consider the
-			// possibility of non-string values the anonymous implementation used
-			// for System properties access now does.
-			//
-			// See AbstractEnvironment for relevant anonymous implementations
-			// See DefaultEnvironmentTests for unit tests around these cases
-			throw new IllegalStateException("TODO SPR-7508: message");
-		}
+		Assert.isInstanceOf(String.class, key,
+			String.format("expected key [%s] to be of type String, got %s",
+					key, key.getClass().getName()));
+
+		return this.getSystemAttribute((String) key);
 	}
 
 	public boolean isEmpty() {

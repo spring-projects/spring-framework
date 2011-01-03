@@ -20,8 +20,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -66,7 +67,7 @@ public class PropertySourceTests {
 
 		PropertySource<?> ps1 = new MapPropertySource("ps1", map1);
 		ps1.getSource();
-		LinkedList<PropertySource<?>> propertySources = new LinkedList<PropertySource<?>>();
+		List<PropertySource<?>> propertySources = new ArrayList<PropertySource<?>>();
 		assertThat(propertySources.add(ps1), equalTo(true));
 		assertThat(propertySources.contains(ps1), is(true));
 		assertThat(propertySources.contains(PropertySource.named("ps1")), is(true));

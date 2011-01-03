@@ -27,11 +27,11 @@ import org.springframework.beans.factory.annotation.Autowire;
 /**
  * Indicates that a method produces a bean to be managed by the Spring container. The
  * names and semantics of the attributes to this annotation are intentionally similar
- * to those of the {@literal <bean/>} element in the Spring XML schema.
+ * to those of the {@code <bean/>} element in the Spring XML schema.
  *
- * <p>Note that the <code>@Bean</code> annotation does not provide attributes for scope,
- * primary or lazy. Rather, it should be used in conjunction with {@link Scope &#064;Scope},
- * {@link Primary &#064;Primary}, and {@link Lazy &#064;Lazy} annotations to achieve
+ * <p>Note that the {@code @Bean} annotation does not provide attributes for scope,
+ * primary or lazy. Rather, it should be used in conjunction with {@link Scope @Scope},
+ * {@link Primary @Primary}, and {@link Lazy @Lazy} annotations to achieve
  * those semantics. The same annotations can also be used at the type level, e.g. for
  * component scanning.
  *
@@ -96,7 +96,7 @@ public @interface Bean {
 
 	/**
 	 * The optional name of a method to call on the bean instance upon closing the
-	 * application context, for example a {@literal close()} method on a {@literal DataSource}.
+	 * application context, for example a {@code close()} method on a {@code DataSource}.
 	 * The method must have no arguments but may throw any exception.
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
 	 * factory, which is always the case for singletons but not guaranteed 

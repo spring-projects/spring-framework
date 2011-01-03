@@ -16,17 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
 
 /**
  * Standalone application context, accepting annotated classes as input - in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
  * classes, but also plain {@link org.springframework.stereotype.Component @Components}
- * and JSR-330 compliant classes using {@literal javax.inject} annotations. Allows for
+ * and JSR-330 compliant classes using {@code javax.inject} annotations. Allows for
  * registering classes one by one ({@link #register}) as well as for classpath scanning
  * ({@link #scan}).
  *
@@ -49,15 +47,13 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 
 	private final ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this);
 
-	{ // TODO: rework this, it's a bit confusing
-		this.setEnvironment(this.getEnvironment());
-	}
 
 	/**
  	 * Create a new AnnotationConfigApplicationContext that needs to be populated
-	 * through {@link #register} calls and then manually {@link #refresh refreshed}.
+	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		this.delegateEnvironment(super.getEnvironment());
 	}
 
 	/**
@@ -67,6 +63,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+		this();
 		register(annotatedClasses);
 		refresh();
 	}
@@ -77,16 +74,24 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param basePackages the packages to check for annotated classes
 	 */
 	public AnnotationConfigApplicationContext(String... basePackages) {
+		this();
 		scan(basePackages);
 		refresh();
 	}
 
+
 	/**
-	 * TODO SPR-7508: document
+	 * {@inheritDoc}
+	 * <p>Delegates given environment to underlying {@link AnnotatedBeanDefinitionReader}
+	 * and {@link ClassPathBeanDefinitionScanner} members.
 	 */
 	@Override
 	public void setEnvironment(ConfigurableEnvironment environment) {
 		super.setEnvironment(environment);
+		delegateEnvironment(environment);
+	}
+
+	private void delegateEnvironment(ConfigurableEnvironment environment) {
 		this.reader.setEnvironment(environment);
 		this.scanner.setEnvironment(environment);
 	}

@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.context.support.EnvironmentAwarePropertyPlaceholderConfigurer;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,32 +35,24 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
-		// as of Spring 3.1, the default for system-properties-mode is DELEGATE,
-		// meaning that the attribute should be disregarded entirely, instead
-		// deferring to the order of PropertySource objects in the enclosing
-		// application context's Environment object
-		if (!"DELEGATE".equals(element.getAttribute("system-properties-mode"))) {
+		if (element.hasAttribute("system-properties-mode")) {
 			return PropertyPlaceholderConfigurer.class;
 		}
 
-		return EnvironmentAwarePropertyPlaceholderConfigurer.class;
+		return PropertySourcesPlaceholderConfigurer.class;
 	}
 
 	@Override
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
-	
 		super.doParse(element, builder);
 
 		builder.addPropertyValue("ignoreUnresolvablePlaceholders",
 				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));
 
-		if (!"DELEGATE".equals(element.getAttribute("system-properties-mode"))) {
-			String systemPropertiesModeName = element.getAttribute("system-properties-mode");
-			if (StringUtils.hasLength(systemPropertiesModeName)) {
-				builder.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_"+systemPropertiesModeName);
-			}
+		String systemPropertiesModeName = element.getAttribute("system-properties-mode");
+		if (StringUtils.hasLength(systemPropertiesModeName)) {
+			builder.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_"+systemPropertiesModeName);
 		}
-
 	}
 
 }

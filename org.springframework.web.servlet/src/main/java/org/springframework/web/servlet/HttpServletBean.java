@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.DefaultWebEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.DefaultWebEnvironment;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
@@ -75,7 +75,8 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  * @see #doGet
  * @see #doPost
  */
-public abstract class HttpServletBean extends HttpServlet {
+@SuppressWarnings("serial")
+public abstract class HttpServletBean extends HttpServlet implements EnvironmentAware {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -86,9 +87,6 @@ public abstract class HttpServletBean extends HttpServlet {
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	/**
-	 * TODO SPR-7508: think about making this overridable {@link EnvironmentAware}?
-	 */
 	private Environment environment = new DefaultWebEnvironment();
 
 
@@ -180,6 +178,15 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * @throws ServletException if subclass initialization fails
 	 */
 	protected void initServletBean() throws ServletException {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Any environment set here overrides the {@link DefaultWebEnvironment}
+	 * provided by default.
+	 */
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
 	}
 
 

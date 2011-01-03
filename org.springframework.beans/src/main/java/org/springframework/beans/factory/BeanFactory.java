@@ -152,7 +152,7 @@ public interface BeanFactory {
 	/**
 	 * Return the bean instance that uniquely matches the given object type, if any.
 	 * @param requiredType type the bean must match; can be an interface or superclass.
-	 * {@literal null} is disallowed.
+	 * {@code null} is disallowed.
 	 * <p>This method goes into {@link ListableBeanFactory} by-type lookup territory
 	 * but may also be translated into a conventional by-name lookup based on the name
 	 * of the given type. For more extensive retrieval operations across sets of beans,

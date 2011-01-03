@@ -116,15 +116,15 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
-	 * TODO SPR-7508: document
+	 * Set the Environment to use when resolving placeholders and evaluating
+	 * {@link Profile @Profile}-annotated component classes.
+	 * <p>The default is a {@link DefaultEnvironment}
+	 * @param environment the Environment to use
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
 
-	/**
-	 * TODO SPR-7508: document
-	 */
 	public Environment getEnvironment() {
 		return this.environment;
 	}
@@ -280,7 +280,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @return the pattern specification to be used for package searching
 	 */
 	protected String resolveBasePackage(String basePackage) {
-		return ClassUtils.convertClassNameToResourcePath(environment.resolveRequiredPlaceholders(basePackage));
+		return ClassUtils.convertClassNameToResourcePath(environment.getPropertyResolver().resolveRequiredPlaceholders(basePackage));
 	}
 
 	/**
@@ -298,12 +298,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
 				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-				if (!metadata.hasAnnotation(Profile.class.getName())) {
+				if (!Profile.Helper.isProfileAnnotationPresent(metadata)) {
 					return true;
 				}
-				String[] specifiedProfiles = 
-					(String[])metadata.getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
-				return this.environment.acceptsProfiles(specifiedProfiles);
+				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
+				return this.environment.acceptsProfiles(Profile.Helper.getCandidateProfiles(metadata));
 			}
 		}
 		return false;

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletConfig;
@@ -30,6 +31,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -192,14 +194,14 @@ public abstract class WebApplicationContextUtils {
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<String, String>();
 			if (sc != null) {
-				Enumeration paramNameEnum = sc.getInitParameterNames();
+				Enumeration<?> paramNameEnum = sc.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
 					parameterMap.put(paramName, sc.getInitParameter(paramName));
 				}
 			}
 			if (config != null) {
-				Enumeration paramNameEnum = config.getInitParameterNames();
+				Enumeration<?> paramNameEnum = config.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
 					parameterMap.put(paramName, config.getInitParameter(paramName));
@@ -212,7 +214,7 @@ public abstract class WebApplicationContextUtils {
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
 			Map<String, Object> attributeMap = new HashMap<String, Object>();
 			if (sc != null) {
-				Enumeration attrNameEnum = sc.getAttributeNames();
+				Enumeration<?> attrNameEnum = sc.getAttributeNames();
 				while (attrNameEnum.hasMoreElements()) {
 					String attrName = (String) attrNameEnum.nextElement();
 					attributeMap.put(attrName, sc.getAttribute(attrName));
@@ -220,6 +222,38 @@ public abstract class WebApplicationContextUtils {
 			}
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
 					Collections.unmodifiableMap(attributeMap));
+		}
+	}
+
+	/**
+	 * Replace {@code Servlet}-based stub property sources with actual instances
+	 * populated with the given context object.
+	 * @see org.springframework.core.env.PropertySource.StubPropertySource
+	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(MutablePropertySources, ServletContext)
+	 */
+	public static void initServletPropertySources(
+			MutablePropertySources propertySources, ServletContext servletContext) {
+		initServletPropertySources(propertySources, servletContext, null);
+	}
+
+	/**
+	 * Replace {@code Servlet}-based stub property sources with actual instances
+	 * populated with the given context and config objects.
+	 * @see org.springframework.core.env.PropertySource.StubPropertySource
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(MutablePropertySources, ServletContext)
+	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
+	 */
+	public static void initServletPropertySources(
+			MutablePropertySources propertySources, ServletContext servletContext, ServletConfig servletConfig) {
+		Assert.notNull(propertySources, "propertySources must not be null");
+		if(servletContext != null && propertySources.contains(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)) {
+			propertySources.replace(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME,
+					new ServletContextPropertySource(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, servletContext));
+		}
+		if(servletConfig != null && propertySources.contains(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)) {
+			propertySources.replace(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
+					new ServletConfigPropertySource(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME, servletConfig));
 		}
 	}
 
@@ -239,6 +273,7 @@ public abstract class WebApplicationContextUtils {
 	/**
 	 * Factory that exposes the current request object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class RequestObjectFactory implements ObjectFactory<ServletRequest>, Serializable {
 
 		public ServletRequest getObject() {
@@ -255,6 +290,7 @@ public abstract class WebApplicationContextUtils {
 	/**
 	 * Factory that exposes the current session object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class SessionObjectFactory implements ObjectFactory<HttpSession>, Serializable {
 
 		public HttpSession getObject() {
@@ -271,6 +307,7 @@ public abstract class WebApplicationContextUtils {
 	/**
 	 * Factory that exposes the current WebRequest object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
 
 		public WebRequest getObject() {

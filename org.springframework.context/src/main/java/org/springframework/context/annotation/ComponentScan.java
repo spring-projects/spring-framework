@@ -27,7 +27,7 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 /**
  * Configures component scanning directives for use with {@link Configuration}
  * classes.  Provides support parallel with Spring XML's
- * &lt;context:component-scan&gt; element.
+ * {@code <context:component-scan>} element.
  *
  * TODO SPR-7508: complete documentation.
  *

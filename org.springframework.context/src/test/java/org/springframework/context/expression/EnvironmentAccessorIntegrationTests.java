@@ -20,12 +20,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
-import java.util.HashMap;
-
 import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.mock.env.MockPropertySource;
 
 import test.beans.TestBean;
 
@@ -49,7 +48,7 @@ public class EnvironmentAccessorIntegrationTests {
 					.getBeanDefinition());
 
 		GenericApplicationContext ctx = new GenericApplicationContext(bf);
-		ctx.getEnvironment().addPropertySource("testMap", new HashMap() {{ put("my.name", "myBean"); }});
+		ctx.getEnvironment().getPropertySources().addFirst(new MockPropertySource().withProperty("my.name", "myBean"));
 		ctx.refresh();
 
 		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("myBean"));

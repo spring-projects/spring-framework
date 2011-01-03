@@ -39,7 +39,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
+import example.profilescan.DevComponent;
 import example.profilescan.ProfileAnnotatedComponent;
+import example.profilescan.ProfileMetaAnnotatedComponent;
 import example.scannable.FooDao;
 import example.scannable.FooService;
 import example.scannable.FooServiceImpl;
@@ -208,12 +210,30 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	}
 
 	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_validMetaAnnotatedProfile() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getEnvironment().setActiveProfiles(DevComponent.PROFILE_NAME);
+		ctx.register(ProfileMetaAnnotatedComponent.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean(ProfileMetaAnnotatedComponent.BEAN_NAME), is(true));
+	}
+
+	@Test
 	public void testIntegrationWithAnnotationConfigApplicationContext_invalidProfile() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.getEnvironment().setActiveProfiles("other");
 		ctx.register(ProfileAnnotatedComponent.class);
 		ctx.refresh();
 		assertThat(ctx.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(false));
+	}
+
+	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_invalidMetaAnnotatedProfile() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getEnvironment().setActiveProfiles("other");
+		ctx.register(ProfileMetaAnnotatedComponent.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean(ProfileMetaAnnotatedComponent.BEAN_NAME), is(false));
 	}
 
 	@Test

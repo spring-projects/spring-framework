@@ -23,7 +23,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.core.env.DefaultWebEnvironment;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.web.context.WebApplicationContext;
@@ -61,9 +61,28 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 
 	public StaticPortletApplicationContext() {
 		setDisplayName("Root Portlet ApplicationContext");
-		setEnvironment(new DefaultWebEnvironment()); // TODO SPR-7508: create custom portlet env?
 	}
 
+
+	/**
+	 * Return a new {@link DefaultPortletEnvironment}
+	 */
+	@Override
+	protected ConfigurableEnvironment createEnvironment() {
+		return new DefaultPortletEnvironment();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Replace {@code Portlet}- and {@code Servlet}-related property sources.
+	 */
+	@Override
+	protected void initPropertySources() {
+		super.initPropertySources();
+		PortletApplicationContextUtils.initPortletPropertySources(
+				this.getEnvironment().getPropertySources(), this.servletContext,
+				this.portletContext, this.portletConfig);
+	}
 
 	@Override
 	public void setParent(ApplicationContext parent) {

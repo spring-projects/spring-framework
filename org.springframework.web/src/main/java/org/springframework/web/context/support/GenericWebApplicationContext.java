@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.env.DefaultWebEnvironment;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
@@ -60,12 +60,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	private ServletContext servletContext;
 
 	private ThemeSource themeSource;
-
-	// override superclass definition of environment
-	// TODO SPR-7508: polish
-	{
-		this.setEnvironment(new DefaultWebEnvironment());
-	}
 
 	/**
 	 * Create a new GenericWebApplicationContext.
@@ -124,6 +118,14 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 
 	/**
+	 * Create and return a new {@link DefaultWebEnvironment}.
+	 */
+	@Override
+	protected ConfigurableEnvironment createEnvironment() {
+		return new DefaultWebEnvironment();
+	}
+
+	/**
 	 * Register ServletContextAwareProcessor.
 	 * @see ServletContextAwareProcessor
 	 */
@@ -160,7 +162,17 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	@Override
 	protected void onRefresh() {
 		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-		this.getEnvironment().getPropertySources().addFirst(new ServletContextPropertySource(servletContext));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Replace {@code Servlet}-related property sources.
+	 */
+	@Override
+	protected void initPropertySources() {
+		super.initPropertySources();
+		WebApplicationContextUtils.initServletPropertySources(
+				this.getEnvironment().getPropertySources(), this.servletContext);
 	}
 
 	public Theme getTheme(String themeName) {

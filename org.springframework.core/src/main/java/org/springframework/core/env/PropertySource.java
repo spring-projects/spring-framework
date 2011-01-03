@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,43 +18,122 @@ package org.springframework.core.env;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 
-
+/**
+ * Abstract base class representing a source of key/value property pairs. The underlying
+ * {@linkplain #getSource() source object} may be of any type {@code T} that encapsulates
+ * properties. Examples include {@link java.util.Properties} objects, {@link java.util.Map}
+ * objects, {@code ServletContext} and {@code ServletConfig} objects (for access to init parameters).
+ * Explore the {@code PropertySource} type hierarchy to see provided implementations.
+ *
+ * <p>{@code PropertySource} objects are not typically used in isolation, but rather through a
+ * {@link PropertySources} object, which aggregates property sources and in conjunction with
+ * a {@link PropertyResolver} implementation that can perform precedence-based searches across
+ * the set of {@code PropertySources}.
+ *
+ * <p>{@code PropertySource} identity is determined not based on the content of encapsulated
+ * properties, but rather based on the {@link #getName() name} of the {@code PropertySource}
+ * alone. This is useful for manipulating {@code PropertySource} objects when in collection
+ * contexts. See operations in {@link MutablePropertySources} as well as the
+ * {@link #named(String)} and {@link #toString()} methods for details.
+ *
+ * @author Chris Beams
+ * @since 3.1
+ * @see PropertySources
+ * @see PropertyResolver
+ * @see PropertySourcesPropertyResolver
+ * @see MutablePropertySources
+ */
 public abstract class PropertySource<T> {
+
+	protected static final String[] EMPTY_NAMES_ARRAY = new String[0];
 
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
 	protected final String name;
+
 	protected final T source;
 
+	/**
+	 * Create a new {@code PropertySource} with the given name and source object.
+	 */
 	public PropertySource(String name, T source) {
+		Assert.hasText(name, "Property source name must contain at least one character");
+		Assert.notNull(source, "Property source must not be null");
 		this.name = name;
 		this.source = source;
 	}
 
+	/**
+	 * Return the name of this {@code PropertySource}
+	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
+	/**
+	 * Return the underlying source object for this {@code PropertySource}.
+	 */
 	public T getSource() {
 		return source;
 	}
 
-	public abstract boolean containsProperty(String key);
+	/**
+	 * Return the names of all properties contained by the {@linkplain #getSource() source}
+	 * object (never {@code null}).
+	 */
+	public abstract String[] getPropertyNames();
 
+	/**
+	 * Return the value associated with the given key, {@code null} if not found.
+	 * @param key the property key to find
+	 * @see PropertyResolver#getRequiredProperty(String)
+	 */
 	public abstract String getProperty(String key);
 
-	public abstract int size();
+	/**
+	 * Return whether this {@code PropertySource} contains a property with the given key.
+	 * @param key the property key to find
+	 */
+	public boolean containsProperty(String name) {
+		Assert.notNull(name, "property name must not be null");
+		for (String candidate : this.getPropertyNames()) {
+			if (candidate.equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
+	/**
+	 * Return the number of unique property keys available to this {@code PropertySource}.
+	 */
+	public int size() {
+		return this.getPropertyNames().length;
+	}
 
+	/**
+	 * Return a hashcode derived from the {@code name} property of this {@code PropertySource}
+	 * object.
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
 		return result;
 	}
 
+	/**
+	 * This {@code PropertySource} object is equal to the given object if:
+	 * <ul>
+	 *   <li>they are the same instance
+	 *   <li>the {@code name} properties for both objects are equal
+	 * </ul>
+	 *
+	 * <P>No properties other than {@code name} are evaluated.
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -64,10 +143,10 @@ public abstract class PropertySource<T> {
 		if (!(obj instanceof PropertySource))
 			return false;
 		PropertySource<?> other = (PropertySource<?>) obj;
-		if (name == null) {
+		if (this.name == null) {
 			if (other.name != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!this.name.equals(other.name))
 			return false;
 		return true;
 	}
@@ -87,17 +166,35 @@ public abstract class PropertySource<T> {
 	public String toString() {
 		if (logger.isDebugEnabled()) {
 			return String.format("%s@%s [name='%s', properties=%s]",
-					getClass().getSimpleName(), System.identityHashCode(this), name, source);
+					this.getClass().getSimpleName(), System.identityHashCode(this), this.name, this.source);
 		}
 
 		return String.format("%s [name='%s', propertyCount=%d]",
-				getClass().getSimpleName(), name, this.size());
+				this.getClass().getSimpleName(), this.name, this.size());
 	}
 
 
 	/**
-	 * For collection comparison purposes
-	 * TODO SPR-7508: document
+	 * Return a {@code PropertySource} implementation intended for collection comparison purposes only.
+	 *
+	 * <p>Primarily for internal use, but given a collection of {@code PropertySource} objects, may be
+	 * used as follows:
+	 * <pre class="code">
+	 * {@code  
+	 *   List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+	 *   sources.add(new MapPropertySource("sourceA", mapA));
+	 *   sources.add(new MapPropertySource("sourceB", mapB));
+	 *   assert sources.contains(PropertySource.named("sourceA"));
+	 *   assert sources.contains(PropertySource.named("sourceB"));
+	 *   assert !sources.contains(PropertySource.named("sourceC"));
+	 * }
+	 * </pre>
+	 *
+	 * <p>The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
+	 * if any methods other than {@code equals(Object)}, {@code hashCode()}, and {@code toString()}
+	 * are called.
+	 *
+	 * @param name the name of the comparison {@code PropertySource} to be created and returned.
 	 */
 	public static PropertySource<?> named(String name) {
 		return new ComparisonPropertySource(name);
@@ -105,35 +202,69 @@ public abstract class PropertySource<T> {
 
 
 	/**
-	 * TODO: SPR-7508: document
+	 * {@code PropertySource} to be used as a placeholder in cases where an actual
+	 * property source cannot be eagerly initialized at application context
+	 * creation time.  For example, a {@code ServletContext}-based property source
+	 * must wait until the {@code ServletContext} object is available to its enclosing
+	 * {@code ApplicationContext}.  In such cases, a stub should be used to hold the
+	 * intended default position/order of the property source, then be replaced
+	 * during context refresh.
+	 *
+	 * @see org.springframework.context.support.AbstractApplicationContext#initPropertySources()
+	 * @see org.springframework.web.context.support.DefaultWebEnvironment
+	 * @see org.springframework.web.context.support.ServletContextPropertySource
 	 */
-	public static class ComparisonPropertySource extends PropertySource<Void>{
+	public static class StubPropertySource extends PropertySource<Object> {
+
+		public StubPropertySource(String name) {
+			super(name, new Object());
+		}
+
+		@Override
+		public String getProperty(String key) {
+			// TODO SPR-7408: logging
+			return null;
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			return EMPTY_NAMES_ARRAY;
+		}
+	}
+
+
+	/**
+	 * @see PropertySource#named(String)
+	 */
+	static class ComparisonPropertySource extends StubPropertySource {
 
 		private static final String USAGE_ERROR =
 			"ComparisonPropertySource instances are for collection comparison " +
 			"use only";
 
 		public ComparisonPropertySource(String name) {
-			super(name, null);
+			super(name);
 		}
 
 		@Override
-		public Void getSource() {
+		public Object getSource() {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}
+
+		@Override
+		public String[] getPropertyNames() {
+			throw new UnsupportedOperationException(USAGE_ERROR);
+		}
+
+		@Override
 		public String getProperty(String key) {
-			throw new UnsupportedOperationException(USAGE_ERROR);
-		}
-		public boolean containsProperty(String key) {
-			throw new UnsupportedOperationException(USAGE_ERROR);
-		}
-		public int size() {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}
 
 		@Override
 		public String toString() {
-			return String.format("%s [name='%s']", getClass().getSimpleName(), name);
+			return String.format("%s [name='%s']", getClass().getSimpleName(), this.name);
 		}
 	}
+
 }

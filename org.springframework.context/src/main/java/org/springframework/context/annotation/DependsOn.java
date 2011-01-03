@@ -38,7 +38,7 @@ import java.lang.annotation.Documented;
  * <p>Using {@link DependsOn} at the class level has no effect unless component-scanning
  * is being used. If a {@link DependsOn}-annotated class is declared via XML,
  * {@link DependsOn} annotation metadata is ignored, and
- * {@literal <bean depends-on="..."/>} is respected instead.
+ * {@code <bean depends-on="..."/>} is respected instead.
  *
  * @author Juergen Hoeller
  * @since 3.0

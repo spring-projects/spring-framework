@@ -36,8 +36,6 @@
 
 	There is also support for lists, sets, maps, and java.util.Properties
 	as bean property types or constructor argument types.
-
-	TODO:SPR-7508: Document use of nested beans elements.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
@@ -63,8 +61,11 @@
 	<xsd:element name="beans">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	The top level (typically root) element. Allows the definition
-	of default values for all nested bean definitions.
+	Container for <bean> and other elements, typically the root element in the document.
+	Allows the definition of default values for all nested bean definitions. May itself
+	be nested for the purpose of defining a subset of beans with certain default values or
+	to be registered only when certain profile(s) are active. Any such nested <beans> element
+	must be declared as the last element in the document.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -81,16 +82,20 @@
 			<xsd:attribute name="profile" use="optional" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	TODO:SPR-7508: Document profile annotation:
-	* may be comma-delimited
-	* empty profile means beans will always be registered
-	* ConfigurableEnvironment.setActiveProfiles(String...) sets which profiles are active
-	* 'spring.profile.active' sets which profiles are active (typically as a -D system property)
-	  servlet context/init param)
-	* ConfigurableEnvironment.setDefaultProfiles(String...) or 'spring.profile.default' property specifies one
-	  or more default profiles, e.g., 'default'
-	* if 'default' is specified as a default profile, `profile="xyz,default"` means that beans will be
-	  registered if 'xyz' is active or if no profile is active
+	The set of profiles for which this <beans> element may be parsed. May be a comma-delimited
+	list in the case of multiple profiles.  If one or more of the specified profiles are active at time
+	of parsing, the <beans> element will be parsed, and all of its <bean> elements registered,
+	&lt;import&gt; elements followed, etc.  If none of the specified profiles are active at time of parsing,
+	then the entire element and its contents will be ignored.
+
+	Profiles are activated in one of two ways:
+		Programmatic:
+			ConfigurableEnvironment#setActiveProfiles(String...)
+			ConfigurableEnvironment#setDefaultProfiles(String...)
+
+		Properties (typically through -D system properties, environment variables, or servlet context init params):
+			spring.profile.active=p1,p2
+			spring.profile.default=p1,p2
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -115,7 +120,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'autowire' value; see the documentation for the
-	'autowire' attribute of the 'bean' element. The default is 'no'.
+	'autowire' attribute of the 'bean' element. The default is 'default'.
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>

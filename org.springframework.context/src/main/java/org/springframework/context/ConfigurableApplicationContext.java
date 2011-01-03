@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,12 +96,13 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void setParent(ApplicationContext parent);
 
 	/**
-	 * TODO SPR-7508: document
+	 * Return the Environment for this application context in configurable form.
 	 */
 	ConfigurableEnvironment getEnvironment();
 
 	/**
-	 * TODO SPR-7508: document
+	 * Set the {@code Environment} for this application context.
+	 * @param environment the new environment
 	 */
 	void setEnvironment(ConfigurableEnvironment environment);
 

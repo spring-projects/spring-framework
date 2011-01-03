@@ -38,6 +38,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -88,18 +89,21 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 
 	/**
-	 * TODO SPR-7508: document
-	 * @param environment
+	 * {@inheritDoc}
+	 * <p>Default value is {@code null}; property is required for parsing any
+	 * {@code <beans/>} element with a {@code profile} attribute present.
+	 * @see #doRegisterBeanDefinitions
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
 
 	/**
-	 * Parses bean definitions according to the "spring-beans" DTD. TODO SPR-7508 XSD
+	 * {@inheritDoc}
+	 * <p>This implementation parses bean definitions according to the "spring-beans" XSD
+	 * (or DTD, historically).
 	 * <p>Opens a DOM Document; then initializes the default settings
-	 * specified at <code>&lt;beans&gt;</code> level; then parses
-	 * the contained bean definitions.
+	 * specified at the {@code <beans/>} level; then parses the contained bean definitions.
 	 */
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
@@ -110,9 +114,16 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		doRegisterBeanDefinitions(root);
 	}
 
+	/**
+	 * Register each bean definition within the given root {@code <beans/>} element.
+	 * @throws IllegalStateException if {@code <beans profile="..."} attribute is present
+	 * and Environment property has not been set
+	 * @see #setEnvironment
+	 */
 	protected void doRegisterBeanDefinitions(Element root) {
 		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 		if (StringUtils.hasText(profileSpec)) {
+			Assert.state(this.environment != null, "environment property must not be null");
 			String[] specifiedProfiles = commaDelimitedListToStringArray(trimAllWhitespace(profileSpec));
 			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
 				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
@@ -120,7 +131,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 
-		// any nested <beans> elements will cause recursion in this method. in
+		// any nested <beans> elements will cause recursion in this method. In
 		// order to propagate and preserve <beans> default-* attributes correctly,
 		// keep track of the current (parent) delegate, which may be null. Create
 		// the new (child) delegate with a reference to the parent for fallback purposes,
@@ -212,7 +223,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		// Resolve system properties: e.g. "${user.dir}"
-		location = environment.resolveRequiredPlaceholders(location);
+		location = environment.getPropertyResolver().resolveRequiredPlaceholders(location);
 
 		Set<Resource> actualResources = new LinkedHashSet<Resource>(4);
 

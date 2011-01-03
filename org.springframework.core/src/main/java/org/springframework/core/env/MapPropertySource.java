@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,12 @@ package org.springframework.core.env;
 
 import java.util.Map;
 
-
 /**
- * TODO SPR-7508: document
- *
- * Consider adding a TypeConvertingMapPropertySource to accommodate
- * non-string keys and values. Could be confusing when used in conjunction
- * with Environment.getProperty(), which also does type conversions. If this
- * is added, consider renaming this class to SimpleMapPropertySource and
- * rename PropertiesPropertySource to SimplePropertiesPropertySource.
+ * {@link PropertySource} that reads keys and values from a {@code Map<String,String>} object.
  *
  * @author Chris Beams
  * @since 3.1
+ * @see PropertiesPropertySource
  */
 public class MapPropertySource extends PropertySource<Map<String, String>> {
 
@@ -37,17 +31,14 @@ public class MapPropertySource extends PropertySource<Map<String, String>> {
 		super(name, source);
 	}
 
-	public boolean containsProperty(String key) {
-		return source.containsKey(key);
-	}
-
-	public String getProperty(String key) {
-		return source.get(key);
+	@Override
+	public String[] getPropertyNames() {
+		return this.source.keySet().toArray(EMPTY_NAMES_ARRAY);
 	}
 
 	@Override
-	public int size() {
-		return source.size();
+	public String getProperty(String key) {
+		return this.source.get(key);
 	}
 
 }

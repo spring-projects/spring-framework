@@ -28,7 +28,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}
- * implementations which are supposed to support multiple calls to {@literal refresh},
+ * implementations which are supposed to support multiple calls to {@link #refresh()},
  * creating a new internal bean factory instance every time.
  * Typically (but not necessarily), such a context will be driven by
  * a set of config locations to load bean definitions from.
@@ -50,7 +50,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * and {@link FileSystemXmlApplicationContext}, which both derive from the
  * common {@link AbstractXmlApplicationContext} base class;
  * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext}
- * supports {@literal @Configuration}-annotated classes as a source of bean definitions.
+ * supports {@code @Configuration}-annotated classes as a source of bean definitions.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -182,7 +182,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * Called for each {@link #refresh()} attempt.
 	 * <p>The default implementation creates a
 	 * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
-	 * with the {@link #getInternalParentBeanFactory() internal bean factory} of this
+	 * with the {@linkplain #getInternalParentBeanFactory() internal bean factory} of this
 	 * context's parent as parent bean factory. Can be overridden in subclasses,
 	 * for example to customize DefaultListableBeanFactory's settings.
 	 * @return the bean factory for this context
@@ -199,8 +199,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * Customize the internal bean factory used by this context.
 	 * Called for each {@link #refresh()} attempt.
 	 * <p>The default implementation applies this context's
-	 * {@link #setAllowBeanDefinitionOverriding "allowBeanDefinitionOverriding"}
-	 * and {@link #setAllowCircularReferences "allowCircularReferences"} settings,
+	 * {@linkplain #setAllowBeanDefinitionOverriding "allowBeanDefinitionOverriding"}
+	 * and {@linkplain #setAllowCircularReferences "allowCircularReferences"} settings,
 	 * if specified. Can be overridden in subclasses to customize any of
 	 * {@link DefaultListableBeanFactory}'s settings.
 	 * @param beanFactory the newly created bean factory for this context

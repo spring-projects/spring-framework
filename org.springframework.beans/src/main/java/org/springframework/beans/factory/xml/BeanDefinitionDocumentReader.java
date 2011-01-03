@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Document;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.core.env.Environment;
+
+import org.w3c.dom.Document;
 
 /**
  * SPI for parsing an XML document that contains Spring bean definitions.
@@ -45,5 +46,12 @@ public interface BeanDefinitionDocumentReader {
 	 */
 	void registerBeanDefinitions(Document doc, XmlReaderContext readerContext)
 			throws BeanDefinitionStoreException;
+
+	/**
+	 * Set the Environment to use when reading bean definitions. Used for evaluating
+	 * profile information to determine whether a {@code <beans/>} document/element should
+	 * be included or omitted.
+	 */
+	void setEnvironment(Environment environment);
 
 }

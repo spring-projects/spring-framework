@@ -29,26 +29,87 @@ import org.springframework.util.StringValueResolver;
 
 
 /**
- * TODO SPR-7508: document.
+ * Abstract base class for property resource configurers that resolve placeholders
+ * in bean definition property values. Implementations <em>pull</em> values from a
+ * properties file or other {@linkplain org.springframework.core.env.PropertySource
+ * property source} into bean definitions.
+ *
+ * <p>The default placeholder syntax follows the Ant / Log4J / JSP EL style:
+ *
+ *<pre class="code">${...}</pre>
+ *
+ * Example XML bean definition:
+ *
+ *<pre class="code">{@code
+ *<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/>
+ *    <property name="driverClassName" value="}${driver}{@code"/>
+ *    <property name="url" value="jdbc:}${dbname}{@code"/>
+ *</bean>
+ *}</pre>
+ *
+ * Example properties file:
+ *
+ * <pre class="code"> driver=com.mysql.jdbc.Driver
+ * dbname=mysql:mydb</pre>
+ *
+ * Annotated bean definitions may take advantage of property replacement using
+ * the {@link org.springframework.beans.factory.annotation.Value @Value} annotation:
+ *
+ *<pre class="code">@Value("${person.age}")</pre>
+ *
+ * Implementations check simple property values, lists, maps, props, and bean names
+ * in bean references. Furthermore, placeholder values can also cross-reference
+ * other placeholders, like:
+ *
+ *<pre class="code">rootPath=myrootdir
+ *subPath=${rootPath}/subdir</pre>
+ *
+ * In contrast to {@link PropertyOverrideConfigurer}, subclasses of this type allow
+ * filling in of explicit placeholders in bean definitions.
+ *
+ * <p>If a configurer cannot resolve a placeholder, a {@link BeanDefinitionStoreException}
+ * will be thrown. If you want to check against multiple properties files, specify multiple
+ * resources via the {@link #setLocations locations} property. You can also define multiple
+ * configurers, each with its <em>own</em> placeholder syntax. Use {@link
+ * #ignoreUnresolvablePlaceholders} to intentionally suppress throwing an exception if a
+ * placeholder cannot be resolved.
+ *
+ * <p>Default property values can be defined globally for each configurer instance
+ * via the {@link #setProperties properties} property, or on a property-by-property basis
+ * using the default value separator which is {@code ":"} by default and
+ * customizable via {@link #setValueSeparator(String)}.
+ *
+ * <p>Example XML property with default value:
+ *
+ *<pre class="code">{@code
+ *  <property name="url" value="jdbc:}${dbname:defaultdb}{@code"/>
+ *}</pre>
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
+ * @see PropertyPlaceholderConfigurer
+ * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  */
 public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		implements BeanNameAware, BeanFactoryAware {
 
-	/** Default placeholder prefix: "${" */
+	/** Default placeholder prefix: {@value} */
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
-	/** Default placeholder suffix: "}" */
+
+	/** Default placeholder suffix: {@value} */
 	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
-	/** Default value separator: ":" */
+
+	/** Default value separator: {@value} */
 	public static final String DEFAULT_VALUE_SEPARATOR = ":";
 
+	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX} */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
 
+	/** Defaults to {@value #DEFAULT_PLACEHOLDER_SUFFIX} */
 	protected String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
+	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR} */
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
 	protected boolean ignoreUnresolvablePlaceholders = false;
@@ -60,12 +121,14 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 	private BeanFactory beanFactory;
 
 
+	/**
+	 * Return the {@code PlaceholderResolver} for this configurer.
+	 */
 	protected abstract PlaceholderResolver getPlaceholderResolver(Properties props);
 
 	/**
 	 * Set the prefix that a placeholder string starts with.
-	 * The default is "${".
-	 * @see #DEFAULT_PLACEHOLDER_PREFIX
+	 * The default is {@value #DEFAULT_PLACEHOLDER_PREFIX}.
 	 */
 	public void setPlaceholderPrefix(String placeholderPrefix) {
 		this.placeholderPrefix = placeholderPrefix;
@@ -73,8 +136,7 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 
 	/**
 	 * Set the suffix that a placeholder string ends with.
-	 * The default is "}".
-	 * @see #DEFAULT_PLACEHOLDER_SUFFIX
+	 * The default is {@value #DEFAULT_PLACEHOLDER_SUFFIX}.
 	 */
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.placeholderSuffix = placeholderSuffix;
@@ -82,22 +144,22 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 
 	/**
 	 * Specify the separating character between the placeholder variable
-	 * and the associated default value, or <code>null</code> if no such
+	 * and the associated default value, or {@code null} if no such
 	 * special character should be processed as a value separator.
-	 * The default is ":".
+	 * The default is {@value #DEFAULT_VALUE_SEPARATOR}.
 	 */
 	public void setValueSeparator(String valueSeparator) {
 		this.valueSeparator = valueSeparator;
 	}
 
 	/**
-	 * Set a value that should be treated as <code>null</code> when
+	 * Set a value that should be treated as {@code null} when
 	 * resolved as a placeholder value: e.g. "" (empty String) or "null".
 	 * <p>Note that this will only apply to full property values,
 	 * not to parts of concatenated values.
 	 * <p>By default, no such null value is defined. This means that
-	 * there is no way to express <code>null</code> as a property
-	 * value unless you explictly map a corresponding value here.
+	 * there is no way to express {@code null} as a property
+	 * value unless you explicitly map a corresponding value here.
 	 */
 	public void setNullValue(String nullValue) {
 		this.nullValue = nullValue;
@@ -139,6 +201,10 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 	}
 
 
+	/**
+	 * Visit each bean definition in the given bean factory and attempt to replace ${...} property
+	 * placeholders with values from the given properties.
+	 */
 	@Override
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
 			throws BeansException {
