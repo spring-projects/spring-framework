@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.http.server;
 import java.net.URI;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,6 +26,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -82,6 +83,19 @@ public class ServletHttpRequestTests {
 		mockRequest.setContent(content);
 
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertArrayEquals("Invalid content returned", content, result);
+	}
+
+	@Test
+	public void getFormBody() throws Exception {
+		mockRequest.setContentType("application/x-www-form-urlencoded");
+		mockRequest.setMethod("POST");
+		mockRequest.addParameter("name 1", "value 1");
+		mockRequest.addParameter("name 2", new String[] {"value 2+1", "value 2+2"});
+		mockRequest.addParameter("name 3", (String) null);
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		byte[] content = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes("UTF-8");
 		assertArrayEquals("Invalid content returned", content, result);
 	}
 }
