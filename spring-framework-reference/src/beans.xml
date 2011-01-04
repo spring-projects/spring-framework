@@ -942,6 +942,9 @@ List userList service.getUsernameList();
 
   <xi:include href="beans-classpath-scanning.xml"
     xmlns:xi="http://www.w3.org/2001/XInclude"/>
+    
+  <xi:include href="beans-standard-annotations.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
   <xi:include href="beans-java.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
