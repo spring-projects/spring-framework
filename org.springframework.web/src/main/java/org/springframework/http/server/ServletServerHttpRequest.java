@@ -48,6 +48,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private static final String POST_METHOD = "POST";
 
+	private static final String PUT_METHOD = "PUT";
+
 	private static final String FORM_CHARSET = "UTF-8";
 
 	private final HttpServletRequest servletRequest;
@@ -105,7 +107,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private boolean isFormSubmittal(HttpServletRequest request) {
 		return FORM_CONTENT_TYPE.equals(request.getContentType()) &&
-				POST_METHOD.equalsIgnoreCase(request.getMethod());
+				(POST_METHOD.equalsIgnoreCase(request.getMethod()) || PUT_METHOD.equalsIgnoreCase(request.getMethod()));
 	}
 
 	private InputStream getFormBody(HttpServletRequest request) throws IOException {
