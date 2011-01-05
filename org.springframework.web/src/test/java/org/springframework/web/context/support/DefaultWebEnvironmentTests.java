@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,22 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
-
 import org.junit.Test;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
-
 
 public class DefaultWebEnvironmentTests {
 
 	@Test
 	public void propertySourceOrder() {
 		ConfigurableEnvironment env = new DefaultWebEnvironment();
-		List<PropertySource<?>> sources = env.getPropertySources().asList();
+		MutablePropertySources sources = env.getPropertySources();
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)), equalTo(0));
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)), equalTo(1));
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(2));
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(3));
 		assertThat(sources.size(), is(4));
-		assertThat(sources.get(0).getName(), equalTo(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
-		assertThat(sources.get(1).getName(), equalTo(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		assertThat(sources.get(2).getName(), equalTo(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME));
-		assertThat(sources.get(3).getName(), equalTo(DefaultEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME));
 	}
 }

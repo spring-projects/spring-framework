@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
-
 import org.junit.Test;
 
 public class DefaultEnvironmentTests {
@@ -29,9 +27,9 @@ public class DefaultEnvironmentTests {
 	@Test
 	public void propertySourceOrder() {
 		ConfigurableEnvironment env = new DefaultEnvironment();
-		List<PropertySource<?>> sources = env.getPropertySources().asList();
+		MutablePropertySources sources = env.getPropertySources();
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(0));
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(1));
 		assertThat(sources.size(), is(2));
-		assertThat(sources.get(0).getName(), equalTo(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME));
-		assertThat(sources.get(1).getName(), equalTo(DefaultEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME));
 	}
 }
