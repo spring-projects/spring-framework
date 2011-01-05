@@ -18,6 +18,7 @@ package org.springframework.web.portlet.context;
 
 import javax.portlet.PortletContext;
 
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.CollectionUtils;
 
@@ -28,7 +29,7 @@ import org.springframework.util.CollectionUtils;
  * @since 3.1
  * @see PortletConfigPropertySource
  */
-public class PortletContextPropertySource extends PropertySource<PortletContext> {
+public class PortletContextPropertySource extends EnumerablePropertySource<PortletContext> {
 
 	public PortletContextPropertySource(String name, PortletContext portletContext) {
 		super(name, portletContext);

@@ -119,7 +119,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * @return the resolved file path
 	 */
 	protected String resolvePath(String path) {
-		return this.getEnvironment().getPropertyResolver().resolveRequiredPlaceholders(path);
+		return this.getEnvironment().resolveRequiredPlaceholders(path);
 	}
 
 

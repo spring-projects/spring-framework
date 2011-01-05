@@ -23,7 +23,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * Indicates that a component is eligible for registration when one or more {@linkplain #value
@@ -73,21 +72,4 @@ public @interface Profile {
 	 */
 	String[] value();
 
-
-	static class Helper {
-		/**
-		 * Return whether the given metadata includes Profile information, whether directly or
-		 * through meta-annotation.
-		 */
-		static boolean isProfileAnnotationPresent(AnnotationMetadata metadata) {
-			return metadata.isAnnotated(Profile.class.getName());
-		}
-
-		/**
-		 * Return the String[] of candidate profiles from {@link Profile#value()}.
-		 */
-		static String[] getCandidateProfiles(AnnotationMetadata metadata) {
-			return (String[])metadata.getAnnotationAttributes(Profile.class.getName()).get("value");
-		}
-	}
 }

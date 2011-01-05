@@ -235,7 +235,7 @@ public class EnvironmentTests {
 		getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
 
 		{
-			Map<String, String> systemEnvironment = environment.getSystemEnvironment();
+			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
 			assertThat(systemEnvironment, notNullValue());
 			assertSame(systemEnvironment, System.getenv());
 		}
@@ -258,10 +258,10 @@ public class EnvironmentTests {
 		System.setSecurityManager(securityManager);
 
 		{
-			Map<String, String> systemEnvironment = environment.getSystemEnvironment();
+			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
 			assertThat(systemEnvironment, notNullValue());
 			assertThat(systemEnvironment, instanceOf(ReadOnlySystemAttributesMap.class));
-			assertThat(systemEnvironment.get(ALLOWED_PROPERTY_NAME), equalTo(ALLOWED_PROPERTY_VALUE));
+			assertThat(systemEnvironment.get(ALLOWED_PROPERTY_NAME), equalTo((Object)ALLOWED_PROPERTY_VALUE));
 			assertThat(systemEnvironment.get(DISALLOWED_PROPERTY_NAME), nullValue());
 		}
 

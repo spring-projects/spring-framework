@@ -36,7 +36,6 @@ import org.springframework.core.env.PropertySource;
  *
  * @author Chris Beams
  * @since 3.1
- * @see MockEnvironment
  */
 public class MockPropertySource extends PropertiesPropertySource {
 

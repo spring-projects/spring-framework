@@ -25,6 +25,8 @@ import org.springframework.beans.factory.config.AbstractPropertyPlaceholderConfi
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -111,7 +113,7 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 		if (this.propertySources == null) {
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
-				this.propertySources.addAll(this.environment.getPropertySources());
+				this.propertySources.addAll(((ConfigurableEnvironment)this.environment).getPropertySources());
 			}
 			try {
 				PropertySource<?> localPropertySource =
@@ -128,7 +130,18 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 		}
 
 		this.propertyResolver = new PropertySourcesPropertyResolver(this.propertySources);
-		this.processProperties(beanFactory, this.propertyResolver.asProperties());
+		this.processProperties(beanFactory, asProperties(this.propertySources));
 	}
 
+    public Properties asProperties(PropertySources propertySources) {
+        Properties mergedProps = new Properties();
+        java.util.List<PropertySource<?>> propertySourcesList = propertySources.asList();
+        for (int i = propertySourcesList.size() -1; i >= 0; i--) {
+                PropertySource<?> source = propertySourcesList.get(i);
+                for (String key : ((EnumerablePropertySource<?>)source).getPropertyNames()) {
+                        mergedProps.put(key, source.getProperty(key));
+                }
+        }
+        return mergedProps;
+    }
 }

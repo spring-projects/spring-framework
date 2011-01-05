@@ -39,8 +39,8 @@ import org.junit.Test;
 public class PropertySourceTests {
 	@Test @SuppressWarnings("serial")
 	public void equals() {
-		Map<String, String> map1 = new HashMap<String, String>() {{ put("a", "b"); }};
-		Map<String, String> map2 = new HashMap<String, String>() {{ put("c", "d"); }};
+		Map<String, Object> map1 = new HashMap<String, Object>() {{ put("a", "b"); }};
+		Map<String, Object> map2 = new HashMap<String, Object>() {{ put("c", "d"); }};
 		Properties props1 = new Properties() {{ setProperty("a", "b"); }};
 		Properties props2 = new Properties() {{ setProperty("c", "d"); }};
 
@@ -62,8 +62,8 @@ public class PropertySourceTests {
 
 	@Test @SuppressWarnings("serial")
 	public void collectionsOperations() {
-		Map<String, String> map1 = new HashMap<String, String>() {{ put("a", "b"); }};
-		Map<String, String> map2 = new HashMap<String, String>() {{ put("c", "d"); }};
+		Map<String, Object> map1 = new HashMap<String, Object>() {{ put("a", "b"); }};
+		Map<String, Object> map2 = new HashMap<String, Object>() {{ put("c", "d"); }};
 
 		PropertySource<?> ps1 = new MapPropertySource("ps1", map1);
 		ps1.getSource();
@@ -92,7 +92,7 @@ public class PropertySourceTests {
 	@Test @SuppressWarnings("serial")
 	public void toString_verbosityVariesOnLogLevel() {
 		String name = "props";
-		Map<String, String> map = new HashMap<String, String>() {{ put("k1", "v1"); }};
+		Map<String, Object> map = new HashMap<String, Object>() {{ put("k1", "v1"); }};
 		MapPropertySource ps = new MapPropertySource(name, map);
 		Logger logger = Logger.getLogger(ps.getClass());
 		Level original = logger.getLevel();
@@ -110,7 +110,7 @@ public class PropertySourceTests {
 			logger.setLevel(Level.INFO);
 			assertThat("PropertySource.toString() should render concise output for log levels >= INFO",
 					ps.toString(),
-					equalTo(String.format("%s [name='%s', propertyCount=%d]",
+					equalTo(String.format("%s [name='%s']",
 							ps.getClass().getSimpleName(),
 							name,
 							map.size())));

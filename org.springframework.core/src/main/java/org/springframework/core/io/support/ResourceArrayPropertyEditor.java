@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,12 @@ import org.springframework.core.io.Resource;
  * @see org.springframework.core.io.Resource
  * @see ResourcePatternResolver
  * @see PathMatchingResourcePatternResolver
- * @see org.springframework.env.Environment#resolvePlaceholders
  */
 public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	private static final Log logger = LogFactory.getLog(ResourceArrayPropertyEditor.class);
 
-	private final Environment environment;
+	private final PropertyResolver propertyResolver;
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
@@ -88,10 +87,10 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
 	 * and {@link Environment}.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
-	 * @param environment the Environment to use
+	 * @param propertyResolver the PropertyResolver to use
 	 */
-	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, Environment environment) {
-		this(resourcePatternResolver, environment, true);
+	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, PropertyResolver propertyResolver) {
+		this(resourcePatternResolver, propertyResolver, true);
 	}
 
 	/**
@@ -111,13 +110,14 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
 	 * and {@link Environment}.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
-	 * @param environment the Environment to use
+	 * @param propertyResolver the PropertyResolver to use
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
 	 * if no corresponding system property could be found
 	 */
-	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, Environment environment, boolean ignoreUnresolvablePlaceholders) {
+	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver,
+			PropertyResolver propertyResolver, boolean ignoreUnresolvablePlaceholders) {
 		this.resourcePatternResolver = resourcePatternResolver;
-		this.environment = environment;
+		this.propertyResolver = propertyResolver;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
 	}
 
@@ -193,14 +193,13 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * corresponding system property values if necessary.
 	 * @param path the original file path
 	 * @return the resolved file path
-	 * @see Environment#resolvePlaceholders
-	 * @see Environment#resolveRequiredPlaceholders
+	 * @see PropertyResolver#resolvePlaceholders
+	 * @see PropertyResolver#resolveRequiredPlaceholders(String)
 	 */
 	protected String resolvePath(String path) {
-		PropertyResolver resolver = environment.getPropertyResolver();
 		return this.ignoreUnresolvablePlaceholders ?
-				resolver.resolvePlaceholders(path) :
-				resolver.resolveRequiredPlaceholders(path);
+				this.propertyResolver.resolvePlaceholders(path) :
+				this.propertyResolver.resolveRequiredPlaceholders(path);
 	}
 
 }

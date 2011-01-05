@@ -16,7 +16,6 @@
 
 package org.springframework.core.env;
 
-import java.util.Properties;
 
 
 /**
@@ -24,51 +23,40 @@ import java.util.Properties;
  *
  * @author Chris Beams
  * @since 3.1
- * @see Environment#getPropertyResolver()
  */
 public interface PropertyResolver {
 
 	/**
-	 * @return whether the given property key is available for resolution
+	 * Return whether the given property key is available for resolution.
 	 */
 	boolean containsProperty(String key);
 
 	/**
-	 * @return the property value associated with the given key
+	 * Return the property value associated with the given key.
 	 * @see #getProperty(String, Class)
 	 */
 	String getProperty(String key);
 
 	/**
-	 * @return the property value associated with the given key, or {@code null}
-	 * if the key cannot be resolved
+	 * Return the property value associated with the given key, or {@code null}
+	 * if the key cannot be resolved.
 	 */
 	<T> T getProperty(String key, Class<T> targetType);
 
 	/**
-	 * @return the property value associated with the given key, converted to the given
-	 * targetType (never {@code null})
+	 * Return the property value associated with the given key, converted to the given
+	 * targetType (never {@code null}).
 	 * @throws IllegalStateException if the key cannot be resolved
 	 * @see #getRequiredProperty(String, Class)
 	 */
 	String getRequiredProperty(String key) throws IllegalStateException;
 
 	/**
-	 * @return the property value associated with the given key, converted to the given
-	 * targetType (never {@code null})
+	 * Return the property value associated with the given key, converted to the given
+	 * targetType (never {@code null}).
 	 * @throws IllegalStateException if the given key cannot be resolved
 	 */
 	<T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException;
-
-	/**
-	 * @return the number of unique properties keys resolvable
-	 */
-	int getPropertyCount();
-
-	/**
-	 * @return all property key/value pairs as a {@link java.util.Properties} instance
-	 */
-	Properties asProperties();
 
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding
@@ -91,6 +79,5 @@ public interface PropertyResolver {
 	 * @throws IllegalArgumentException if any placeholders are unresolvable
 	 * @see org.springframework.util.SystemPropertyUtils#resolvePlaceholders(String, boolean)
 	 */
-	String resolveRequiredPlaceholders(String path) throws IllegalArgumentException;
-
+	String resolveRequiredPlaceholders(String text) throws IllegalArgumentException;
 }

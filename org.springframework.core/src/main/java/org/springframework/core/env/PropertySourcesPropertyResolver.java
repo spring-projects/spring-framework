@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,6 @@
 package org.springframework.core.env;
 
 import static java.lang.String.format;
-
-import java.util.List;
-import java.util.Properties;
 
 /**
  * {@link PropertyResolver} implementation that resolves property values against
@@ -40,10 +37,9 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		this.propertySources = propertySources;
 	}
 
-
 	public boolean containsProperty(String key) {
 		for (PropertySource<?> propertySource : this.propertySources.asList()) {
-			if (propertySource.containsProperty(key)) {
+			if (propertySource.getProperty(key) != null) {
 				return true;
 			}
 		}
@@ -67,17 +63,13 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 			if (debugEnabled) {
 				logger.debug(format("Searching for key '%s' in [%s]", key, propertySource.getName()));
 			}
-			if (propertySource.containsProperty(key)) {
-				Object value = propertySource.getProperty(key);
-				Class<?> valueType = value == null ? null : value.getClass();
+			Object value;
+			if ((value = propertySource.getProperty(key)) != null) {
+				Class<?> valueType = value.getClass();
 				if (debugEnabled) {
 					logger.debug(
 							format("Found key '%s' in [%s] with type [%s] and value '%s'",
-									key, propertySource.getName(),
-									valueType == null ? "" : valueType.getSimpleName(), value));
-				}
-				if (value == null) {
-					return null;
+									key, propertySource.getName(), valueType.getSimpleName(), value));
 				}
 				if (!this.conversionService.canConvert(valueType, targetValueType)) {
 					throw new IllegalArgumentException(
@@ -92,18 +84,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 			logger.debug(format("Could not find key '%s' in any property source. Returning [null]", key));
 		}
 		return null;
-	}
-
-	public Properties asProperties() {
-		Properties mergedProps = new Properties();
-		List<PropertySource<?>> propertySourcesList = this.propertySources.asList();
-		for (int i = propertySourcesList.size() -1; i >= 0; i--) {
-			PropertySource<?> source = propertySourcesList.get(i);
-			for (String key : source.getPropertyNames()) {
-				mergedProps.put(key, source.getProperty(key));
-			}
-		}
-		return mergedProps;
 	}
 
 }

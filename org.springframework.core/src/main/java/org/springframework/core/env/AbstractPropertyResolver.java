@@ -17,7 +17,6 @@
 package org.springframework.core.env;
 
 import static java.lang.String.format;
-
 import static org.springframework.util.SystemPropertyUtils.PLACEHOLDER_PREFIX;
 import static org.springframework.util.SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 import static org.springframework.util.SystemPropertyUtils.VALUE_SEPARATOR;
@@ -42,12 +41,12 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 
-	private final PropertyPlaceholderHelper nonStrictHelper =
-		new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, true);
+	private PropertyPlaceholderHelper nonStrictHelper;
+	private PropertyPlaceholderHelper strictHelper;
 
-	private final PropertyPlaceholderHelper strictHelper =
-		new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
-
+	private String placeholderPrefix = PLACEHOLDER_PREFIX;
+	private String placeholderSuffix = PLACEHOLDER_SUFFIX;
+	private String valueSeparator = VALUE_SEPARATOR;
 
 	public ConversionService getConversionService() {
 		return this.conversionService;
@@ -73,16 +72,35 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		return value;
 	}
 
-	public int getPropertyCount() {
-		return asProperties().size();
+	public void setPlaceholderPrefix(String placeholderPrefix) {
+		this.placeholderPrefix = placeholderPrefix;
+	}
+
+	public void setPlaceholderSuffix(String placeholderSuffix) {
+		this.placeholderSuffix = placeholderSuffix;
+	}
+
+	public void setValueSeparator(String valueSeparator) {
+		this.valueSeparator = valueSeparator;
 	}
 
 	public String resolvePlaceholders(String text) {
-		return doResolvePlaceholders(text, this.nonStrictHelper);
+		if (nonStrictHelper == null) {
+			nonStrictHelper = createPlaceholderHelper(true);
+		}
+		return doResolvePlaceholders(text, nonStrictHelper);
 	}
 
-	public String resolveRequiredPlaceholders(String text) {
-		return doResolvePlaceholders(text, this.strictHelper);
+	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+		if (strictHelper == null) {
+			strictHelper = createPlaceholderHelper(false);
+		}
+		return doResolvePlaceholders(text, strictHelper);
+	}
+
+	private PropertyPlaceholderHelper createPlaceholderHelper(boolean ignoreUnresolvablePlaceholders) {
+		return new PropertyPlaceholderHelper(this.placeholderPrefix, this.placeholderSuffix,
+				this.valueSeparator, ignoreUnresolvablePlaceholders);
 	}
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
