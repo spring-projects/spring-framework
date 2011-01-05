@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -337,13 +338,13 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		}
 		BindingResult otherResult = (BindingResult) other;
 		return (getObjectName().equals(otherResult.getObjectName()) &&
-				getTarget().equals(otherResult.getTarget()) &&
+				ObjectUtils.nullSafeEquals(getTarget(), otherResult.getTarget()) &&
 				getAllErrors().equals(otherResult.getAllErrors()));
 	}
 
 	@Override
 	public int hashCode() {
-		return getObjectName().hashCode() * 29 + getTarget().hashCode();
+		return getObjectName().hashCode();
 	}
 
 
