@@ -17,14 +17,20 @@
 package org.springframework.context.support;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 import java.util.Properties;
 
 import org.junit.Test;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.env.MockEnvironment;
@@ -139,6 +145,58 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
 	}
 
+	@Test(expected=BeanDefinitionStoreException.class)
+	public void ignoreUnresolvablePlaceholders_falseIsDefault() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${my.name}")
+					.getBeanDefinition());
+
+		PropertySourcesPlaceholderConfigurer pc = new PropertySourcesPlaceholderConfigurer();
+		//pc.setIgnoreUnresolvablePlaceholders(false); // the default
+		pc.postProcessBeanFactory(bf); // should throw
+	}
+
+	@Test
+	public void ignoreUnresolvablePlaceholders_true() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${my.name}")
+					.getBeanDefinition());
+
+		PropertySourcesPlaceholderConfigurer pc = new PropertySourcesPlaceholderConfigurer();
+		pc.setIgnoreUnresolvablePlaceholders(true);
+		pc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
+	}
+
+	@Test
+	public void withNonEnumerablePropertySource() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "${foo}")
+					.getBeanDefinition());
+
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+
+		PropertySource<?> ps = new PropertySource<Object>("simplePropertySource", new Object()) {
+			@Override
+			public Object getProperty(String key) {
+				return "bar";
+			}
+		};
+
+		MockEnvironment env = new MockEnvironment();
+		env.getPropertySources().addFirst(ps);
+		ppc.setEnvironment(env);
+
+		ppc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName(), equalTo("bar"));
+	}
+
 	@SuppressWarnings("serial")
 	private void localPropertiesOverride(boolean override) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -160,4 +218,40 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		}
 	}
 
+	@Test
+	public void customPlaceholderPrefixAndSuffix() {
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+		ppc.setPlaceholderPrefix("@<");
+		ppc.setPlaceholderSuffix(">");
+
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				rootBeanDefinition(TestBean.class)
+				.addPropertyValue("name", "@<key1>")
+				.addPropertyValue("sex", "${key2}")
+				.getBeanDefinition());
+
+		System.setProperty("key1", "systemKey1Value");
+		System.setProperty("key2", "systemKey2Value");
+		ppc.setEnvironment(new DefaultEnvironment());
+		ppc.postProcessBeanFactory(bf);
+		System.clearProperty("key1");
+		System.clearProperty("key2");
+
+		assertThat(bf.getBean(TestBean.class).getName(), is("systemKey1Value"));
+		assertThat(bf.getBean(TestBean.class).getSex(), is("${key2}"));
+	}
+
+	@Test
+	public void nullValueIsPreserved() {
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
+		ppc.setNullValue("customNull");
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean", rootBeanDefinition(TestBean.class)
+				.addPropertyValue("name", "${my.name}")
+				.getBeanDefinition());
+		ppc.setEnvironment(new MockEnvironment().withProperty("my.name", "customNull"));
+		ppc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName(), nullValue());
+	}
 }

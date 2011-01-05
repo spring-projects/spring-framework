@@ -19,11 +19,13 @@ package org.springframework.beans.factory.config;
 import java.util.Properties;
 import java.util.Set;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Constants;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
+import org.springframework.util.StringValueResolver;
 
 /**
  * {@link AbstractPropertyPlaceholderConfigurer} subclass that resolves ${...} placeholders
@@ -208,6 +210,37 @@ public class PropertyPlaceholderConfigurer extends AbstractPropertyPlaceholderCo
 	}
 
 	/**
+	 * Visit each bean definition in the given bean factory and attempt to replace ${...} property
+	 * placeholders with values from the given properties.
+	 */
+	@Override
+	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
+			throws BeansException {
+
+		StringValueResolver valueResolver = new PlaceholderResolvingStringValueResolver(props);
+
+		this.doProcessProperties(beanFactoryToProcess, valueResolver);
+	}
+
+	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
+
+		private final PropertyPlaceholderHelper helper;
+
+		private final PlaceholderResolver resolver;
+
+		public PlaceholderResolvingStringValueResolver(Properties props) {
+			this.helper = new PropertyPlaceholderHelper(
+					placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
+			this.resolver = new PropertyPlaceholderConfigurerResolver(props);
+		}
+
+		public String resolveStringValue(String strVal) throws BeansException {
+			String value = this.helper.replacePlaceholders(strVal, this.resolver);
+			return (value.equals(nullValue) ? null : value);
+		}
+	}
+
+	/**
 	 * Parse the given String value for placeholder resolution.
 	 * @param strVal the String value to parse
 	 * @param props the Properties to resolve placeholders against
@@ -225,12 +258,6 @@ public class PropertyPlaceholderConfigurer extends AbstractPropertyPlaceholderCo
 		return helper.replacePlaceholders(strVal, resolver);
 	}
 
-	@Override
-	protected PlaceholderResolver getPlaceholderResolver(Properties props) {
-		return new PropertyPlaceholderConfigurerResolver(props);
-	}
-
-
 	private class PropertyPlaceholderConfigurerResolver implements PlaceholderResolver {
 
 		private final Properties props;
@@ -243,6 +270,5 @@ public class PropertyPlaceholderConfigurer extends AbstractPropertyPlaceholderCo
 			return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName, props, systemPropertiesMode);
 		}
 	}
-
 
 }
