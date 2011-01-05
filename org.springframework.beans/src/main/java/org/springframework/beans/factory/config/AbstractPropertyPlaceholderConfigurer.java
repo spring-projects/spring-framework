@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,11 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Properties;
-
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.util.PropertyPlaceholderHelper;
-import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
-
 
 /**
  * Abstract base class for property resource configurers that resolve placeholders
@@ -114,17 +108,12 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 
 	protected boolean ignoreUnresolvablePlaceholders = false;
 
-	private String nullValue;
-
-	private String beanName;
+	protected String nullValue;
 
 	private BeanFactory beanFactory;
 
+	private String beanName;
 
-	/**
-	 * Return the {@code PlaceholderResolver} for this configurer.
-	 */
-	protected abstract PlaceholderResolver getPlaceholderResolver(Properties props);
 
 	/**
 	 * Set the prefix that a placeholder string starts with.
@@ -200,16 +189,8 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 		this.beanFactory = beanFactory;
 	}
 
-
-	/**
-	 * Visit each bean definition in the given bean factory and attempt to replace ${...} property
-	 * placeholders with values from the given properties.
-	 */
-	@Override
-	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
-			throws BeansException {
-
-		StringValueResolver valueResolver = new PlaceholderResolvingStringValueResolver(props);
+	protected void doProcessProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
+			StringValueResolver valueResolver) {
 		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
 
 		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
@@ -233,25 +214,5 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 		// New in Spring 3.0: resolve placeholders in embedded values such as annotation attributes.
 		beanFactoryToProcess.addEmbeddedValueResolver(valueResolver);
 	}
-
-
-	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
-
-		private final PropertyPlaceholderHelper helper;
-
-		private final PlaceholderResolver resolver;
-
-		public PlaceholderResolvingStringValueResolver(Properties props) {
-			this.helper = new PropertyPlaceholderHelper(
-					placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
-			this.resolver = getPlaceholderResolver(props);
-		}
-
-		public String resolveStringValue(String strVal) throws BeansException {
-			String value = this.helper.replacePlaceholders(strVal, this.resolver);
-			return (value.equals(nullValue) ? null : value);
-		}
-	}
-
 
 }

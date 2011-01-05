@@ -17,24 +17,20 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.AbstractPropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.ConfigurablePropertyResolver;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
-import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Specialization of {@link AbstractPropertyPlaceholderConfigurer}
@@ -45,7 +41,7 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  * @author Chris Beams
  * @since 3.1
  * @see AbstractPropertyPlaceholderConfigurer
- * @see PropertyPlaceholderConfigurer
+ * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
  */
 public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceholderConfigurer
 		implements EnvironmentAware {
@@ -56,9 +52,13 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 	 */
 	public static final String LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME = "localProperties";
 
-	private MutablePropertySources propertySources;
+	/**
+	 * {@value} is the name given to the {@link PropertySource} that wraps the
+	 * {@linkplain #setEnvironment environment} supplied to this configurer.
+	 */
+	public static final String ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME = "environmentProperties";
 
-	private PropertyResolver propertyResolver;
+	private MutablePropertySources propertySources;
 
 	private Environment environment;
 
@@ -83,15 +83,6 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 		this.propertySources = new MutablePropertySources(propertySources);
 	}
 
-	@Override
-	protected PlaceholderResolver getPlaceholderResolver(Properties props) {
-		return new PlaceholderResolver() {
-			public String resolvePlaceholder(String placeholderName) {
-				return propertyResolver.getProperty(placeholderName);
-			}
-		};
-	}
-
 	/**
 	 * {@inheritDoc}
 	 * <p>Processing occurs by replacing ${...} placeholders in bean definitions by resolving each
@@ -113,7 +104,14 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 		if (this.propertySources == null) {
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
-				this.propertySources.addAll(((ConfigurableEnvironment)this.environment).getPropertySources());
+				this.propertySources.addLast(
+					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
+						@Override
+						public String getProperty(String key) {
+							return this.source.getProperty(key);
+						}
+					}
+				);
 			}
 			try {
 				PropertySource<?> localPropertySource =
@@ -129,19 +127,43 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 			}
 		}
 
-		this.propertyResolver = new PropertySourcesPropertyResolver(this.propertySources);
-		this.processProperties(beanFactory, asProperties(this.propertySources));
+		this.processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
 	}
 
-    public Properties asProperties(PropertySources propertySources) {
-        Properties mergedProps = new Properties();
-        java.util.List<PropertySource<?>> propertySourcesList = propertySources.asList();
-        for (int i = propertySourcesList.size() -1; i >= 0; i--) {
-                PropertySource<?> source = propertySourcesList.get(i);
-                for (String key : ((EnumerablePropertySource<?>)source).getPropertyNames()) {
-                        mergedProps.put(key, source.getProperty(key));
-                }
-        }
-        return mergedProps;
-    }
+	/**
+	 * Visit each bean definition in the given bean factory and attempt to replace ${...} property
+	 * placeholders with values from the given properties.
+	 */
+	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
+			final ConfigurablePropertyResolver propertyResolver) throws BeansException {
+
+		propertyResolver.setPlaceholderPrefix(this.placeholderPrefix);
+		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
+		propertyResolver.setValueSeparator(this.valueSeparator);
+
+		StringValueResolver valueResolver = new StringValueResolver() {
+			public String resolveStringValue(String strVal) {
+				String resolved = ignoreUnresolvablePlaceholders ?
+						propertyResolver.resolvePlaceholders(strVal) :
+						propertyResolver.resolveRequiredPlaceholders(strVal);
+				return (resolved.equals(nullValue) ? null : resolved);
+			}
+		};
+
+		this.doProcessProperties(beanFactoryToProcess, valueResolver);
+	}
+
+	/**
+	 * Implemented for compatibility with {@link AbstractPropertyPlaceholderConfigurer}.
+	 * @deprecated in favor of {@link #processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver)}
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	@Deprecated
+	protected void processProperties(ConfigurableListableBeanFactory beanFactory, java.util.Properties props)
+			throws BeansException {
+		throw new UnsupportedOperationException(
+				"call processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver)");
+	}
+
 }
