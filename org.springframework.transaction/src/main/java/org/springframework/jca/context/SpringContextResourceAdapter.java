@@ -144,10 +144,11 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	}
 
 	/**
-	 * Return 
+	 * Return a new {@link DefaultEnvironment}.
+	 * <p>Subclasses may override this method in order to supply
+	 * a custom {@link ConfigurableEnvironment} implementation.
 	 */
 	protected ConfigurableEnvironment createEnvironment() {
-		// TODO: should actually return 
 		return new DefaultEnvironment();
 	}
 
