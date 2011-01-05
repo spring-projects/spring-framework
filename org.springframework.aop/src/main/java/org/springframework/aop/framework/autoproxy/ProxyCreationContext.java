@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,12 @@ public class ProxyCreationContext {
 	 * @param beanName the name of the bean, or <code>null</code> to reset it
 	 */
 	static void setCurrentProxiedBeanName(String beanName) {
-		currentProxiedBeanName.set(beanName);
+		if (beanName != null) {
+			currentProxiedBeanName.set(beanName);
+		}
+		else {
+			currentProxiedBeanName.remove();
+		}
 	}
 
 }
