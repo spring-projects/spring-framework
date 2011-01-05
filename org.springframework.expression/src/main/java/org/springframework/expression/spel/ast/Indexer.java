@@ -93,7 +93,7 @@ public class Indexer extends SpelNodeImpl {
 			Object possiblyConvertedKey = index;
 			possiblyConvertedKey = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
 			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-			return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor().applyType(o));
+			return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor().applyIndexedObject(o));
 		}
 		
 		if (targetObject == null) {
@@ -104,7 +104,8 @@ public class Indexer extends SpelNodeImpl {
 		if ((targetObject instanceof Collection ) || targetObject.getClass().isArray() || targetObject instanceof String) {
 			int idx = (Integer)state.convertValue(index, TypeDescriptor.valueOf(Integer.class));		
 			if (targetObject.getClass().isArray()) {
-				return new TypedValue(accessArrayElement(targetObject, idx), targetObjectTypeDescriptor.getElementTypeDescriptor());
+				Object arrayElement = accessArrayElement(targetObject, idx);
+				return new TypedValue(arrayElement, targetObjectTypeDescriptor.getElementTypeDescriptor().applyIndexedObject(arrayElement));
 			} else if (targetObject instanceof Collection) {
 				Collection c = (Collection) targetObject;
 				if (idx >= c.size()) {
@@ -115,7 +116,7 @@ public class Indexer extends SpelNodeImpl {
 				int pos = 0;
 				for (Object o : c) {
 					if (pos == idx) {
-						return new TypedValue(o, targetObjectTypeDescriptor.getElementTypeDescriptor().applyType(o));
+						return new TypedValue(o, targetObjectTypeDescriptor.getElementTypeDescriptor().applyIndexedObject(o));
 					}
 					pos++;
 				}

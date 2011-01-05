@@ -309,19 +309,33 @@ public class TypeDescriptor {
 
 	// special case public operations
 
-	public TypeDescriptor(Class<?> componentType, MethodParameter methodParameter) {
-		if (componentType == null) {
-			componentType = Object.class;
+	/**
+	 * Constructs a new TypeDescriptor for a nested type declared within a method parameter, such as a collection type or map key or value type.
+	 */
+	public TypeDescriptor(Class<?> nestedType, MethodParameter methodParameter) {
+		if (nestedType == null) {
+			nestedType = Object.class;
 		}
-		this.type = componentType;
+		this.type = nestedType;
 		this.methodParameter = methodParameter;
 	}
 	
+	/**
+	 * Exposes the underlying MethodParameter providing context for this TypeDescriptor.
+	 * Used to support legacy code scenarios where callers are already using the MethodParameter API (BeanWrapper).
+	 * In general, favor use of the TypeDescriptor API over the MethodParameter API as it is independent of type context location.
+	 * May be null if no MethodParameter was provided when this TypeDescriptor was constructed.
+	 */
 	public MethodParameter getMethodParameter() {
 		return methodParameter;
 	}
 
-	public TypeDescriptor applyType(Object object) {
+	/**
+	 * Create a copy of this nested type descriptor and apply the specific type information from the indexed object.
+	 * Used to support collection and map indexing scenarios, where the indexer has a reference to the indexed type descriptor but needs to ensure its type actually represents the indexed object type.
+	 * This is necessary to support type conversion during index object binding operations.
+	 */
+	public TypeDescriptor applyIndexedObject(Object object) {
 		if (object == null) {
 			return this;
 		}
@@ -406,45 +420,45 @@ public class TypeDescriptor {
 		}
 	}
 
-	protected TypeDescriptor newComponentTypeDescriptor(Class<?> componentType, MethodParameter nested) {
-		return new TypeDescriptor(componentType, nested);
+	protected TypeDescriptor newNestedTypeDescriptor(Class<?> nestedType, MethodParameter nested) {
+		return new TypeDescriptor(nestedType, nested);
 	}
 	
 	// internal helpers
 
 	private TypeDescriptor resolveElementTypeDescriptor() {
 		if (isCollection()) {
-			return createComponentTypeDescriptor(resolveCollectionElementType());
+			return createNestedTypeDescriptor(resolveCollectionElementType());
 		}
 		else {
 			// TODO: GenericCollectionTypeResolver is not capable of applying nesting levels to array fields;
 			// this means generic info of nested lists or maps stored inside array method parameters or fields is not obtainable
-			return createComponentTypeDescriptor(getType().getComponentType());
+			return createNestedTypeDescriptor(getType().getComponentType());
 		}
 	}
 
 	private TypeDescriptor resolveMapKeyTypeDescriptor() {
-		return createComponentTypeDescriptor(resolveMapKeyType());
+		return createNestedTypeDescriptor(resolveMapKeyType());
 	}
 
 	private TypeDescriptor resolveMapValueTypeDescriptor() {
-		return createComponentTypeDescriptor(resolveMapValueType());
+		return createNestedTypeDescriptor(resolveMapValueType());
 	}
 
-	private TypeDescriptor createComponentTypeDescriptor(Class<?> componentType) {
-		if (componentType == null) {
-			componentType = Object.class;
+	private TypeDescriptor createNestedTypeDescriptor(Class<?> nestedType) {
+		if (nestedType == null) {
+			nestedType = Object.class;
 		}
 		if (this.methodParameter != null) {
 			MethodParameter nested = new MethodParameter(this.methodParameter);
 			nested.increaseNestingLevel();
-			return newComponentTypeDescriptor(componentType, nested);				
+			return newNestedTypeDescriptor(nestedType, nested);				
 		}
 		else if (this.field != null) {
-			return new TypeDescriptor(componentType, this.field, this.fieldNestingLevel + 1);
+			return new TypeDescriptor(nestedType, this.field, this.fieldNestingLevel + 1);
 		}
 		else {
-			return TypeDescriptor.valueOf(componentType);
+			return TypeDescriptor.valueOf(nestedType);
 		}
 	}
 
@@ -486,8 +500,8 @@ public class TypeDescriptor {
 
 	// internal constructors
 
-	private TypeDescriptor(Class<?> componentType, Field field, int nestingLevel) {
-		this.type = componentType;
+	private TypeDescriptor(Class<?> nestedType, Field field, int nestingLevel) {
+		this.type = nestedType;
 		this.field = field;
 		this.fieldNestingLevel = nestingLevel;
 	}
