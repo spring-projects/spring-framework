@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package org.springframework.core.env;
 
+import java.util.Map;
+
 /**
  * Configuration interface to be implemented by most if not all {@link Environment
  * Environments}. Provides facilities for setting active and default profiles as well
- * as specializing the return types for {@link #getPropertySources()} and
- * {@link #getPropertyResolver()} such that they return types that may be manipulated.
+ * as accessing the {@linkplain #getPropertySources() property sources}.
  *
  * @author Chris Beams
  * @since 3.1
  * @see DefaultEnvironment
  * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment
  */
-public interface ConfigurableEnvironment extends Environment {
+public interface ConfigurableEnvironment extends Environment, ConfigurablePropertyResolver {
 
 	/**
 	 * Specify the set of profiles active for this Environment. Profiles are
@@ -53,8 +54,33 @@ public interface ConfigurableEnvironment extends Environment {
 	MutablePropertySources getPropertySources();
 
 	/**
-	 * Return the {@link PropertyResolver} for this environment in configurable form
+	 * Return the value of {@link System#getenv()} if allowed by the current {@link SecurityManager},
+	 * otherwise return a map implementation that will attempt to access individual keys using calls to
+	 * {@link System#getenv(String)}.
+	 *
+	 * <p>Note that most {@link Environment} implementations will include this system environment map as
+	 * a default {@link PropertySource} to be searched. Therefore, it is recommended that this method not be
+	 * used directly unless bypassing other property sources is expressly intended.
+	 *
+	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw {@link IllegalAccessException};
+	 * in cases where the SecurityManager forbids access to a property, {@code null} will be returned and an
+	 * INFO-level log message will be issued noting the exception.
 	 */
-	ConfigurablePropertyResolver getPropertyResolver();
+	Map<String, Object> getSystemEnvironment();
+
+	/**
+	 * Return the value of {@link System#getProperties()} if allowed by the current {@link SecurityManager},
+	 * otherwise return a map implementation that will attempt to access individual keys using calls to
+	 * {@link System#getProperty(String)}.
+	 *
+	 * <p>Note that most {@code Environment} implementations will include this system properties map as a
+	 * default {@link PropertySource} to be searched. Therefore, it is recommended that this method not be
+	 * used directly unless bypassing other property sources is expressly intended.
+	 *
+	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw {@link IllegalAccessException};
+	 * in cases where the SecurityManager forbids access to a property, {@code null} will be returned and an
+	 * INFO-level log message will be issued noting the exception.
+	 */
+	Map<String, Object> getSystemProperties();
 
 }

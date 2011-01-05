@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -60,6 +61,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	private MutablePropertySources propertySources = new MutablePropertySources();
 	private ConfigurablePropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 
+
+	//---------------------------------------------------------------------
+	// Implementation of ConfigurableEnvironment interface
+	//---------------------------------------------------------------------
 
 	public String[] getActiveProfiles() {
 		return this.doGetActiveProfiles().toArray(new String[]{});
@@ -123,8 +128,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertyResolver;
 	}
 
-	public Map<String, String> getSystemEnvironment() {
-		Map<String,String> systemEnvironment;
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getSystemEnvironment() {
+		Map<String, ?> systemEnvironment;
 		try {
 			systemEnvironment = System.getenv();
 		}
@@ -145,11 +151,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 				}
 			};
 		}
-		return systemEnvironment;
+		return (Map<String, Object>) systemEnvironment;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Map<String, String> getSystemProperties() {
+	public Map<String, Object> getSystemProperties() {
 		Map systemProperties;
 		try {
 			systemProperties = System.getProperties();
@@ -173,6 +179,62 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		}
 		return systemProperties;
 	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of ConfigurablePropertyResolver interface
+	//---------------------------------------------------------------------
+
+	public boolean containsProperty(String key) {
+		return this.propertyResolver.containsProperty(key);
+	}
+
+	public String getProperty(String key) {
+		return this.propertyResolver.getProperty(key);
+	}
+
+	public <T> T getProperty(String key, Class<T> targetType) {
+		return this.propertyResolver.getProperty(key, targetType);
+	}
+
+	public String getRequiredProperty(String key) throws IllegalStateException {
+		return this.propertyResolver.getRequiredProperty(key);
+	}
+
+	public <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException {
+		return this.propertyResolver.getRequiredProperty(key, targetType);
+	}
+
+	public String resolvePlaceholders(String text) {
+		return this.propertyResolver.resolvePlaceholders(text);
+	}
+
+	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+		return this.propertyResolver.resolveRequiredPlaceholders(text);
+	}
+
+	public void setConversionService(ConversionService conversionService) {
+		this.propertyResolver.setConversionService(conversionService);
+	}
+
+	public ConversionService getConversionService() {
+		return this.propertyResolver.getConversionService();
+	}
+
+	public void setPlaceholderPrefix(String placeholderPrefix) {
+		this.propertyResolver.setPlaceholderPrefix(placeholderPrefix);
+	}
+
+
+	public void setPlaceholderSuffix(String placeholderSuffix) {
+		this.propertyResolver.setPlaceholderSuffix(placeholderSuffix);
+	}
+
+
+	public void setValueSeparator(String valueSeparator) {
+		this.propertyResolver.setValueSeparator(valueSeparator);
+	}
+
 
 	@Override
 	public String toString() {

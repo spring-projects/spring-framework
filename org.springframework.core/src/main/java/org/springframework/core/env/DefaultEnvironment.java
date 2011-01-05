@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import org.springframework.core.convert.ConversionService;
+
 /**
  * Default implementation of the {@link Environment} interface. Used throughout all non-Web*
  * ApplicationContext implementations.

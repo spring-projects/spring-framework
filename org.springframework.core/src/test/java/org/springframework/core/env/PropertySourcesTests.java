@@ -45,9 +45,9 @@ public class PropertySourcesTests {
 		assertThat(sources.contains("g"), is(false));
 
 		assertThat(sources.get("b"), not(nullValue()));
-		assertThat(sources.get("b").getProperty("p1"), equalTo("bValue"));
+		assertThat(sources.get("b").getProperty("p1"), equalTo((Object)"bValue"));
 		assertThat(sources.get("d"), not(nullValue()));
-		assertThat(sources.get("d").getProperty("p1"), equalTo("dValue"));
+		assertThat(sources.get("d").getProperty("p1"), equalTo((Object)"dValue"));
 
 		sources.addBefore("b", new MockPropertySource("a"));
 		sources.addAfter("b", new MockPropertySource("c"));

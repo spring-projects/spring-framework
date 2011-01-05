@@ -102,8 +102,8 @@ class ConfigurationClassParser {
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
 		AnnotationMetadata metadata = configClass.getMetadata();
-		if (this.environment != null && Profile.Helper.isProfileAnnotationPresent(metadata)) {
-			if (!this.environment.acceptsProfiles(Profile.Helper.getCandidateProfiles(metadata))) {
+		if (this.environment != null && ProfileHelper.isProfileAnnotationPresent(metadata)) {
+			if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
 				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return;
 			}

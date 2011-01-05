@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -51,11 +52,12 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * {@link org.springframework.context.support.AbstractApplicationContext}.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.0
  */
 public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
-	private final Environment environment;
+	private final PropertyResolver propertyResolver;
 
 	private final ResourceLoader resourceLoader;
 
@@ -82,9 +84,9 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.context.ApplicationContext
 	 */
-	public ResourceEditorRegistrar(ResourceLoader resourceLoader, Environment environment) {
+	public ResourceEditorRegistrar(ResourceLoader resourceLoader, PropertyResolver propertyResolver) {
 		this.resourceLoader = resourceLoader;
-		this.environment = environment;
+		this.propertyResolver = propertyResolver;
 	}
 
 
@@ -102,7 +104,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
 	 */
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
-		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader, this.environment);
+		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader, this.propertyResolver);
 		doRegisterEditor(registry, Resource.class, baseEditor);
 		doRegisterEditor(registry, InputStream.class, new InputStreamEditor(baseEditor));
 		doRegisterEditor(registry, InputSource.class, new InputSourceEditor(baseEditor));
@@ -116,7 +118,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
 		if (this.resourceLoader instanceof ResourcePatternResolver) {
 			doRegisterEditor(registry, Resource[].class,
-					new ResourceArrayPropertyEditor((ResourcePatternResolver) this.resourceLoader, this.environment));
+					new ResourceArrayPropertyEditor((ResourcePatternResolver) this.resourceLoader, this.propertyResolver));
 		}
 	}
 

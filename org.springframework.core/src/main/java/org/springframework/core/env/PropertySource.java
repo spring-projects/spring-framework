@@ -47,8 +47,6 @@ import org.springframework.util.Assert;
  */
 public abstract class PropertySource<T> {
 
-	protected static final String[] EMPTY_NAMES_ARRAY = new String[0];
-
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
 	protected final String name;
@@ -80,38 +78,22 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
-	 * Return the names of all properties contained by the {@linkplain #getSource() source}
-	 * object (never {@code null}).
+	 * Return whether this {@code PropertySource} contains the given key.
+	 * <p>This implementation simply checks for a null return value
+	 * from {@link #getProperty(String)}. Subclasses may wish to
+	 * implement a more efficient algorithm if possible.
+	 * @param key the property key to find
 	 */
-	public abstract String[] getPropertyNames();
+	public boolean containsProperty(String key) {
+		return this.getProperty(key) != null;
+	}
 
 	/**
 	 * Return the value associated with the given key, {@code null} if not found.
 	 * @param key the property key to find
 	 * @see PropertyResolver#getRequiredProperty(String)
 	 */
-	public abstract String getProperty(String key);
-
-	/**
-	 * Return whether this {@code PropertySource} contains a property with the given key.
-	 * @param key the property key to find
-	 */
-	public boolean containsProperty(String name) {
-		Assert.notNull(name, "property name must not be null");
-		for (String candidate : this.getPropertyNames()) {
-			if (candidate.equals(name)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Return the number of unique property keys available to this {@code PropertySource}.
-	 */
-	public int size() {
-		return this.getPropertyNames().length;
-	}
+	public abstract Object getProperty(String key);
 
 	/**
 	 * Return a hashcode derived from the {@code name} property of this {@code PropertySource}
@@ -152,9 +134,9 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
-	 * Produce concise output (type, name, and number of properties) if the current log level does
-	 * not include debug. If debug is enabled, produce verbose output including hashcode of the
-	 * PropertySource instance and every key/value property pair.
+	 * Produce concise output (type and name) if the current log level does not include debug.
+	 * If debug is enabled, produce verbose output including hashcode of the PropertySource instance
+	 * and every key/value property pair.
 	 *
 	 * This variable verbosity is useful as a property source such as system properties
 	 * or environment variables may contain an arbitrary number of property pairs, potentially
@@ -169,8 +151,8 @@ public abstract class PropertySource<T> {
 					this.getClass().getSimpleName(), System.identityHashCode(this), this.name, this.source);
 		}
 
-		return String.format("%s [name='%s', propertyCount=%d]",
-				this.getClass().getSimpleName(), this.name, this.size());
+		return String.format("%s [name='%s']",
+				this.getClass().getSimpleName(), this.name);
 	}
 
 
@@ -225,11 +207,6 @@ public abstract class PropertySource<T> {
 			// TODO SPR-7408: logging
 			return null;
 		}
-
-		@Override
-		public String[] getPropertyNames() {
-			return EMPTY_NAMES_ARRAY;
-		}
 	}
 
 
@@ -252,7 +229,7 @@ public abstract class PropertySource<T> {
 		}
 
 		@Override
-		public String[] getPropertyNames() {
+		public boolean containsProperty(String key) {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}
 

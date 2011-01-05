@@ -20,6 +20,7 @@ import java.util.Enumeration;
 
 import javax.servlet.ServletConfig;
 
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.CollectionUtils;
 
@@ -30,7 +31,7 @@ import org.springframework.util.CollectionUtils;
  * @since 3.1
  * @see ServletContextPropertySource
  */
-public class ServletConfigPropertySource extends PropertySource<ServletConfig> {
+public class ServletConfigPropertySource extends EnumerablePropertySource<ServletConfig> {
 
 	public ServletConfigPropertySource(String name, ServletConfig servletConfig) {
 		super(name, servletConfig);

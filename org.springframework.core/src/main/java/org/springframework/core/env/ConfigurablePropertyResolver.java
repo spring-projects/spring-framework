@@ -44,4 +44,7 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	 */
 	void setConversionService(ConversionService conversionService);
 
+	void setPlaceholderPrefix(String placeholderPrefix);
+	void setPlaceholderSuffix(String placeholderSuffix);
+	void setValueSeparator(String valueSeparator);
 }

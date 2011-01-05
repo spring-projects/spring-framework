@@ -280,7 +280,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @return the pattern specification to be used for package searching
 	 */
 	protected String resolveBasePackage(String basePackage) {
-		return ClassUtils.convertClassNameToResourcePath(environment.getPropertyResolver().resolveRequiredPlaceholders(basePackage));
+		return ClassUtils.convertClassNameToResourcePath(environment.resolveRequiredPlaceholders(basePackage));
 	}
 
 	/**
@@ -298,11 +298,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
 				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-				if (!Profile.Helper.isProfileAnnotationPresent(metadata)) {
+				if (!ProfileHelper.isProfileAnnotationPresent(metadata)) {
 					return true;
 				}
 				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
-				return this.environment.acceptsProfiles(Profile.Helper.getCandidateProfiles(metadata));
+				return this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata));
 			}
 		}
 		return false;

@@ -25,20 +25,20 @@ import java.util.Map;
  * @since 3.1
  * @see PropertiesPropertySource
  */
-public class MapPropertySource extends PropertySource<Map<String, String>> {
+public class MapPropertySource extends EnumerablePropertySource<Map<String, ? super Object>> {
 
-	protected MapPropertySource(String name, Map<String, String> source) {
+	protected MapPropertySource(String name, Map<String, ? super Object> source) {
 		super(name, source);
+	}
+
+	@Override
+	public Object getProperty(String key) {
+		return this.source.get(key);
 	}
 
 	@Override
 	public String[] getPropertyNames() {
 		return this.source.keySet().toArray(EMPTY_NAMES_ARRAY);
-	}
-
-	@Override
-	public String getProperty(String key) {
-		return this.source.get(key);
 	}
 
 }

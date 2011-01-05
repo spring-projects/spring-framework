@@ -31,6 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.util.StringUtils;
 
 /**
@@ -141,6 +143,13 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 		return this.contextConfigLocation;
 	}
 
+	/**
+	 * Return 
+	 */
+	protected ConfigurableEnvironment createEnvironment() {
+		// TODO: should actually return 
+		return new DefaultEnvironment();
+	}
 
 	/**
 	 * This implementation loads a Spring ApplicationContext through the

@@ -114,8 +114,8 @@ public class AnnotatedBeanDefinitionReader {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		AnnotationMetadata metadata = abd.getMetadata();
 
-		if (Profile.Helper.isProfileAnnotationPresent(metadata)) {
-			if (!this.environment.acceptsProfiles(Profile.Helper.getCandidateProfiles(metadata))) {
+		if (ProfileHelper.isProfileAnnotationPresent(metadata)) {
+			if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
 				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return;
 			}
