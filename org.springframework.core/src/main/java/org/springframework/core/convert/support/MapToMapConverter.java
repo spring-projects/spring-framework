@@ -67,12 +67,8 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 			Map.Entry sourceMapEntry = (Map.Entry) entry;
 			Object sourceKey = sourceMapEntry.getKey();
 			Object sourceValue = sourceMapEntry.getValue();
-			Object targetKey = this.conversionService.convert(sourceKey,
-					sourceType.getMapKeyTypeDescriptor(sourceKey),
-					targetType.getMapKeyTypeDescriptor(sourceKey));
-			Object targetValue = this.conversionService.convert(sourceValue,
-					sourceType.getMapValueTypeDescriptor(sourceValue),
-					targetType.getMapValueTypeDescriptor(sourceValue));
+			Object targetKey = this.conversionService.convert(sourceKey, sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor());
+			Object targetValue = this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor());
 			targetMap.put(targetKey, targetValue);
 		}
 		return targetMap;

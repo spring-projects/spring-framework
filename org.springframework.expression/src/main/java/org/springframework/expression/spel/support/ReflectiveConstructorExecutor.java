@@ -18,7 +18,6 @@ package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Constructor;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
 import org.springframework.expression.EvaluationContext;
@@ -65,7 +64,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.ctor.getParameterTypes(), arguments);
 			}
 			ReflectionUtils.makeAccessible(this.ctor);
-			return new TypedValue(this.ctor.newInstance(arguments), TypeDescriptor.valueOf(this.ctor.getDeclaringClass()));
+			return new TypedValue(this.ctor.newInstance(arguments));
 		}
 		catch (Exception ex) {
 			throw new AccessException("Problem invoking constructor: " + this.ctor, ex);

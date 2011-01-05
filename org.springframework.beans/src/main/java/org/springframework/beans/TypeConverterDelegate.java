@@ -136,7 +136,7 @@ class TypeConverterDelegate {
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && convertedValue != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(convertedValue);
-			TypeDescriptor targetTypeDesc = typeDescriptor.forElementType(requiredType);
+			TypeDescriptor targetTypeDesc = typeDescriptor;
 			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
 				return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
 			}

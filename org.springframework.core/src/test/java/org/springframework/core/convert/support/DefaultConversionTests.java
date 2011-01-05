@@ -16,6 +16,13 @@
 
 package org.springframework.core.convert.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractList;
@@ -33,13 +40,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
+import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterRegistry;
 
 /**
  * @author Keith Donald
@@ -286,6 +294,24 @@ public class DefaultConversionTests {
 		assertEquals(new Integer("3"), result.get(2));
 	}
 
+	@Test
+	public void testSpr7766() throws Exception {
+		ConverterRegistry registry = ((ConverterRegistry) conversionService);
+		registry.addConverter(new ColorConverter());
+		List<Color> colors = (List<Color>) conversionService.convert(new String[] { "ffffff", "#000000" }, TypeDescriptor.valueOf(String[].class), new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
+		assertEquals(2, colors.size());
+		assertEquals(Color.WHITE, colors.get(0));
+		assertEquals(Color.BLACK, colors.get(1));
+	}
+
+	public class ColorConverter implements Converter<String, Color> {
+		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
+	}
+	
+	public void handlerMethod(List<Color> color) {
+		
+	}
+		
 	@Test
 	public void convertArrayToCollectionImpl() {
 		LinkedList<?> result = conversionService.convert(new String[] { "1", "2", "3" }, LinkedList.class);

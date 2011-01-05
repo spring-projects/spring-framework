@@ -17,8 +17,8 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Array;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -234,7 +234,6 @@ public class ConstructorReference extends SpelNodeImpl {
 		else {
 			componentType = arrayTypeCode.getType();
 		}
-		TypeDescriptor td = TypeDescriptor.valueOf(componentType);
 		Object newArray;
 		if (!hasInitializer()) {
 			// Confirm all dimensions were specified (for example [3][][5] is missing the 2nd dimension)
@@ -313,7 +312,7 @@ public class ConstructorReference extends SpelNodeImpl {
 				throw new IllegalStateException(arrayTypeCode.name());
 			}
 		}
-		return new TypedValue(newArray, td);
+		return new TypedValue(newArray);
 	}
 
 	private void populateReferenceTypeArray(ExpressionState state, Object newArray, TypeConverter typeConverter,

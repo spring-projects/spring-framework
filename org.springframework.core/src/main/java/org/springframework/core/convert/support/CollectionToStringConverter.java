@@ -62,8 +62,7 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 			if (i > 0) {
 				string.append(DELIMITER);
 			}
-			Object targetElement = this.conversionService.convert(
-					sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType);
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(), targetType);
 			string.append(targetElement);
 			i++;
 		}

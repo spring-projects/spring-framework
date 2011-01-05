@@ -124,7 +124,7 @@ public class ExpressionState {
 			return TypedValue.NULL;
 		}
 		else {
-			return new TypedValue(value, TypeDescriptor.forObject(value));
+			return new TypedValue(value);
 		}
 	}
 
@@ -183,7 +183,7 @@ public class ExpressionState {
 		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
 		if (overloader.overridesOperation(op, left, right)) {
 			Object returnValue = overloader.operate(op, left, right);
-			return new TypedValue(returnValue,TypeDescriptor.forObject(returnValue));
+			return new TypedValue(returnValue);
 		}
 		else {
 			String leftType = (left==null?"null":left.getClass().getName());

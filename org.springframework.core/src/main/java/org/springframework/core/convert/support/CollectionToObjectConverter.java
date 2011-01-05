@@ -55,7 +55,7 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Object firstElement = sourceCollection.iterator().next();
-		return this.conversionService.convert(firstElement, sourceType.getElementTypeDescriptor(firstElement), targetType);
+		return this.conversionService.convert(firstElement, sourceType.getElementTypeDescriptor(), targetType);
 	}
 
 }

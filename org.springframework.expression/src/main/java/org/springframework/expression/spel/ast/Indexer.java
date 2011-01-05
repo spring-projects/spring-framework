@@ -90,20 +90,10 @@ public class Indexer extends SpelNodeImpl {
 
 		// Indexing into a Map
 		if (targetObject instanceof Map) {
-			if (targetObject == null) {
-			    // Current decision: attempt to index into null map == exception and does not just return null
-				throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
-			}
 			Object possiblyConvertedKey = index;
-			if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
-				possiblyConvertedKey = state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
-			}
+			possiblyConvertedKey = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
 			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-			if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
-				return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
-			} else {
-				return new TypedValue(o);
-			}
+			return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor().applyType(o));
 		}
 		
 		if (targetObject == null) {
@@ -125,7 +115,7 @@ public class Indexer extends SpelNodeImpl {
 				int pos = 0;
 				for (Object o : c) {
 					if (pos == idx) {
-						return new TypedValue(o, targetObjectTypeDescriptor.getElementTypeDescriptor());
+						return new TypedValue(o, targetObjectTypeDescriptor.getElementTypeDescriptor().applyType(o));
 					}
 					pos++;
 				}
@@ -195,10 +185,8 @@ public class Indexer extends SpelNodeImpl {
 			Map map = (Map)targetObject;
 			Object possiblyConvertedKey = index;
 			Object possiblyConvertedValue = newValue;
-			if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
-			  possiblyConvertedKey = state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
-			  possiblyConvertedValue = state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
-			}
+			possiblyConvertedKey = state.convertValue(index.getValue(), targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
+			possiblyConvertedValue = state.convertValue(newValue, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
 			map.put(possiblyConvertedKey,possiblyConvertedValue);
 			return;
 		}

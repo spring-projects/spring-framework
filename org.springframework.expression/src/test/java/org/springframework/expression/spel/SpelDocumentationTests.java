@@ -69,6 +69,9 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 		public Inventor[] Members = new Inventor[1];
 		public List Members2 = new ArrayList();
 		public Map<String,Object> officers = new HashMap<String,Object>();
+		
+		public List reverse = new ArrayList<Map<String, Object>>();
+		
 		@SuppressWarnings("unchecked")
 		IEEE() {
 			officers.put("president",pupin);
@@ -77,6 +80,8 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 			officers.put("advisors",linv);
 			Members2.add(tesla);
 			Members2.add(pupin);
+			
+			reverse.add(officers);
 		}
 		
 		public boolean isMember(String name) {
@@ -214,6 +219,9 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 		Assert.assertEquals("Nikola Tesla",i.getName());
 		
 		parser.parseExpression("officers['advisors'][0].PlaceOfBirth.Country").setValue(societyContext, "Croatia");
+
+		Inventor i2 = parser.parseExpression("reverse[0]['advisors'][0]").getValue(societyContext,Inventor.class);
+		Assert.assertEquals("Nikola Tesla",i2.getName());
 
 	}
 	

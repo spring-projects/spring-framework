@@ -44,7 +44,7 @@ public abstract class ExpressionUtils {
 	 */
 	public static <T> T convert(EvaluationContext context, Object value, Class<T> targetType) throws EvaluationException {
 		// TODO remove this function over time and use the one it delegates to
-		return convertTypedValue(context,new TypedValue(value,TypeDescriptor.forObject(value)),targetType);
+		return convertTypedValue(context,new TypedValue(value),targetType);
 	}
 
 	/**
