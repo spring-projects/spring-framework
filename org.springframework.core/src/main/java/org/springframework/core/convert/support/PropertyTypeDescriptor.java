@@ -50,8 +50,8 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 		this.propertyDescriptor = propertyDescriptor;
 	}
 	
-	public PropertyTypeDescriptor(Class<?> componentType, MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
-		super(componentType, methodParameter);
+	public PropertyTypeDescriptor(Class<?> type, MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
+		super(type, methodParameter);
 		this.propertyDescriptor = propertyDescriptor;
 	}
 
@@ -102,8 +102,8 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 		return annMap.values().toArray(new Annotation[annMap.size()]);
 	}
 
-	public TypeDescriptor newComponentTypeDescriptor(Class<?> componentType, MethodParameter nested) {
-		return new PropertyTypeDescriptor(componentType, nested,  this.propertyDescriptor);
+	public TypeDescriptor newNestedTypeDescriptor(Class<?> nestedType, MethodParameter nested) {
+		return new PropertyTypeDescriptor(nestedType, nested, this.propertyDescriptor);
 	}
 
 }
