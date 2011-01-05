@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConversionServiceFactory;
@@ -62,6 +63,28 @@ public class Spr7839Tests {
 	}
 
 	@Test
+	public void listElementAutogrowObject() throws Exception {
+		request.setRequestURI("/nested/listElement");
+		request.addParameter("nested.list[0].foo", "Nested");
+		adapter.handle(request, response, controller);
+	}
+
+	@Test
+	public void listOfListsElement() throws Exception {
+		request.setRequestURI("/nested/listOfLists");
+		request.addParameter("nested.listOfLists[0][0]", "Nested");
+		adapter.handle(request, response, controller);
+	}
+
+	@Test
+	public void listOfListsElementAutogrowObject() throws Exception {
+		request.setRequestURI("/nested/listOfLists");
+		request.addParameter("nested.listOfLists[0][0].foo", "Nested");
+		adapter.handle(request, response, controller);
+	}
+
+	@Test
+	@Ignore
 	public void map() throws Exception {
 		request.setRequestURI("/nested/map");		
 		request.addParameter("nested.map['apple'].foo", "bar");
@@ -90,6 +113,11 @@ public class Spr7839Tests {
 		public void handlerListElement(JavaBean bean) {
 			assertEquals("Nested", bean.nested.list.get(0).foo);
 		}
+		
+		@RequestMapping("/nested/listOfLists")
+		public void handlerListOfLists(JavaBean bean) {
+			assertEquals("Nested", bean.nested.listOfLists.get(0).get(0).foo);
+		}
 
 	}
 	
@@ -113,7 +141,9 @@ public class Spr7839Tests {
 	    private String foo;
 
 	    private List<NestedBean> list;
-		
+
+	    private List<List<NestedBean>> listOfLists;
+	    
 	    private Map<String, NestedBean> map = new HashMap<String, NestedBean>();
 
 	    public NestedBean() {
@@ -148,7 +178,13 @@ public class Spr7839Tests {
 			this.map = map;
 		}
 
-	    
+		public List<List<NestedBean>> getListOfLists() {
+			return listOfLists;
+		}
+
+		public void setListOfLists(List<List<NestedBean>> listOfLists) {
+			this.listOfLists = listOfLists;
+		}
 	    
 	}
 	
