@@ -2,6 +2,7 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,6 @@ public class Spr7839Tests {
 	}
 
 	@Test
-	@Ignore
 	public void listOfLists() throws Exception {
 		request.setRequestURI("/nested/listOfLists");
 		request.addParameter("nested.listOfLists[0]", "Nested1,Nested2");
@@ -93,9 +93,25 @@ public class Spr7839Tests {
 
 	@Test
 	@Ignore
+	public void arrayOfLists() throws Exception {
+		// TODO two issues here: no autogrow for array properties, and GenericCollectionResolver not capable of accessing nested element type
+		request.setRequestURI("/nested/arrayOfLists");
+		request.addParameter("nested.arrayOfLists[0]", "Nested1,Nested2");
+		adapter.handle(request, response, controller);
+	}
+
+	@Test
+	@Ignore
 	public void map() throws Exception {
 		request.setRequestURI("/nested/map");		
 		request.addParameter("nested.map['apple'].foo", "bar");
+		adapter.handle(request, response, controller);
+	}
+
+	@Test
+	public void mapOfLists() throws Exception {
+		request.setRequestURI("/nested/mapOfLists");		
+		request.addParameter("nested.mapOfLists['apples'][0]", "1");
 		adapter.handle(request, response, controller);
 	}
 
@@ -112,11 +128,6 @@ public class Spr7839Tests {
 			assertEquals("Nested2", bean.nested.list.get(1).foo);
 		}
 
-		@RequestMapping("/nested/map")
-		public void handlerMap(JavaBean bean) {
-			assertEquals("bar", bean.nested.map.get("apple").foo);
-		}
-
 		@RequestMapping("/nested/listElement")
 		public void handlerListElement(JavaBean bean) {
 			assertEquals("Nested", bean.nested.list.get(0).foo);
@@ -130,6 +141,22 @@ public class Spr7839Tests {
 		@RequestMapping("/nested/listOfListsElement")
 		public void handlerListOfListsElement(JavaBean bean) {
 			assertEquals("Nested", bean.nested.listOfLists.get(0).get(0).foo);
+		}
+
+		@RequestMapping("/nested/arrayOfLists")
+		public void handlerArrayOfLists(JavaBean bean) {
+			System.out.println(bean.nested.arrayOfLists[0].get(1).getClass());
+			assertEquals("Nested2", bean.nested.arrayOfLists[0].get(1).foo);
+		}
+
+		@RequestMapping("/nested/map")
+		public void handlerMap(JavaBean bean) {
+			assertEquals("bar", bean.nested.map.get("apple").foo);
+		}
+		
+		@RequestMapping("/nested/mapOfLists")
+		public void handlerMapOfLists(JavaBean bean) {
+			assertEquals(new Integer(1), bean.nested.mapOfLists.get("apples").get(0));
 		}
 
 	}
@@ -157,10 +184,14 @@ public class Spr7839Tests {
 
 	    private List<List<NestedBean>> listOfLists;
 
+	    private List<NestedBean>[] arrayOfLists;
+
 	    private Map<String, NestedBean> map = new HashMap<String, NestedBean>();
 
+	    private Map<String, List<Integer>> mapOfLists = new HashMap<String, List<Integer>>();
+	    
 	    public NestedBean() {
-	    	
+	    	mapOfLists.put("apples", new ArrayList<Integer>());
 	    }
 	    
 	    public NestedBean(String foo) {
@@ -198,7 +229,23 @@ public class Spr7839Tests {
 		public void setListOfLists(List<List<NestedBean>> listOfLists) {
 			this.listOfLists = listOfLists;
 		}
-	    
+
+		public List<NestedBean>[] getArrayOfLists() {
+			return arrayOfLists;
+		}
+
+		public void setArrayOfLists(List<NestedBean>[] arrayOfLists) {
+			this.arrayOfLists = arrayOfLists;
+		}
+
+		public Map<String, List<Integer>> getMapOfLists() {
+			return mapOfLists;
+		}
+
+		public void setMapOfLists(Map<String, List<Integer>> mapOfLists) {
+			this.mapOfLists = mapOfLists;
+		}
+	   
 	}
 	
 }
