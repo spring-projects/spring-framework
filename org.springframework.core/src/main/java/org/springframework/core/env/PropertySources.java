@@ -16,23 +16,24 @@
 
 package org.springframework.core.env;
 
-import java.util.List;
-
 /**
- * TODO SPR-7508: document
+ * Holder containing one or more {@link PropertySource} objects.
  *
  * @author Chris Beams
  * @since 3.1
  */
-public interface PropertySources {
+public interface PropertySources extends Iterable<PropertySource<?>> {
 
-	PropertySource<?> get(String propertySourceName);
+	/**
+	 * Return whether a property source with the given name is contained.
+	 * @param name the {@linkplain PropertySource#getName() name of the property source} to find
+	 */
+	boolean contains(String name);
 
-	// TODO make iterable
-	List<PropertySource<?>> asList();
-
-	int size();
-
-	boolean contains(String propertySourceName);
+	/**
+	 * Return the property source with the given name, {@code null} if not found.
+	 * @param name the {@linkplain PropertySource#getName() name of the property source} to find
+	 */
+	PropertySource<?> get(String name);
 
 }

@@ -38,7 +38,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	}
 
 	public boolean containsProperty(String key) {
-		for (PropertySource<?> propertySource : this.propertySources.asList()) {
+		for (PropertySource<?> propertySource : this.propertySources) {
 			if (propertySource.getProperty(key) != null) {
 				return true;
 			}
@@ -59,7 +59,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 			logger.trace(format("getProperty(\"%s\", %s)", key, targetValueType.getSimpleName()));
 		}
 	
-		for (PropertySource<?> propertySource : this.propertySources.asList()) {
+		for (PropertySource<?> propertySource : this.propertySources) {
 			if (debugEnabled) {
 				logger.debug(format("Searching for key '%s' in [%s]", key, propertySource.getName()));
 			}

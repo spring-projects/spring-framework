@@ -53,43 +53,43 @@ public class PropertySourcesTests {
 		sources.addAfter("b", new MockPropertySource("c"));
 
 		assertThat(sources.size(), equalTo(5));
-		assertThat(sources.asList().indexOf(PropertySource.named("a")), is(0));
-		assertThat(sources.asList().indexOf(PropertySource.named("b")), is(1));
-		assertThat(sources.asList().indexOf(PropertySource.named("c")), is(2));
-		assertThat(sources.asList().indexOf(PropertySource.named("d")), is(3));
-		assertThat(sources.asList().indexOf(PropertySource.named("f")), is(4));
+		assertThat(sources.precedenceOf(PropertySource.named("a")), is(0));
+		assertThat(sources.precedenceOf(PropertySource.named("b")), is(1));
+		assertThat(sources.precedenceOf(PropertySource.named("c")), is(2));
+		assertThat(sources.precedenceOf(PropertySource.named("d")), is(3));
+		assertThat(sources.precedenceOf(PropertySource.named("f")), is(4));
 
 		sources.addBefore("f", new MockPropertySource("e"));
 		sources.addAfter("f", new MockPropertySource("g"));
 
 		assertThat(sources.size(), equalTo(7));
-		assertThat(sources.asList().indexOf(PropertySource.named("a")), is(0));
-		assertThat(sources.asList().indexOf(PropertySource.named("b")), is(1));
-		assertThat(sources.asList().indexOf(PropertySource.named("c")), is(2));
-		assertThat(sources.asList().indexOf(PropertySource.named("d")), is(3));
-		assertThat(sources.asList().indexOf(PropertySource.named("e")), is(4));
-		assertThat(sources.asList().indexOf(PropertySource.named("f")), is(5));
-		assertThat(sources.asList().indexOf(PropertySource.named("g")), is(6));
+		assertThat(sources.precedenceOf(PropertySource.named("a")), is(0));
+		assertThat(sources.precedenceOf(PropertySource.named("b")), is(1));
+		assertThat(sources.precedenceOf(PropertySource.named("c")), is(2));
+		assertThat(sources.precedenceOf(PropertySource.named("d")), is(3));
+		assertThat(sources.precedenceOf(PropertySource.named("e")), is(4));
+		assertThat(sources.precedenceOf(PropertySource.named("f")), is(5));
+		assertThat(sources.precedenceOf(PropertySource.named("g")), is(6));
 
 		sources.addLast(new MockPropertySource("a"));
 		assertThat(sources.size(), equalTo(7));
-		assertThat(sources.asList().indexOf(PropertySource.named("b")), is(0));
-		assertThat(sources.asList().indexOf(PropertySource.named("c")), is(1));
-		assertThat(sources.asList().indexOf(PropertySource.named("d")), is(2));
-		assertThat(sources.asList().indexOf(PropertySource.named("e")), is(3));
-		assertThat(sources.asList().indexOf(PropertySource.named("f")), is(4));
-		assertThat(sources.asList().indexOf(PropertySource.named("g")), is(5));
-		assertThat(sources.asList().indexOf(PropertySource.named("a")), is(6));
+		assertThat(sources.precedenceOf(PropertySource.named("b")), is(0));
+		assertThat(sources.precedenceOf(PropertySource.named("c")), is(1));
+		assertThat(sources.precedenceOf(PropertySource.named("d")), is(2));
+		assertThat(sources.precedenceOf(PropertySource.named("e")), is(3));
+		assertThat(sources.precedenceOf(PropertySource.named("f")), is(4));
+		assertThat(sources.precedenceOf(PropertySource.named("g")), is(5));
+		assertThat(sources.precedenceOf(PropertySource.named("a")), is(6));
 
 		sources.addFirst(new MockPropertySource("a"));
 		assertThat(sources.size(), equalTo(7));
-		assertThat(sources.asList().indexOf(PropertySource.named("a")), is(0));
-		assertThat(sources.asList().indexOf(PropertySource.named("b")), is(1));
-		assertThat(sources.asList().indexOf(PropertySource.named("c")), is(2));
-		assertThat(sources.asList().indexOf(PropertySource.named("d")), is(3));
-		assertThat(sources.asList().indexOf(PropertySource.named("e")), is(4));
-		assertThat(sources.asList().indexOf(PropertySource.named("f")), is(5));
-		assertThat(sources.asList().indexOf(PropertySource.named("g")), is(6));
+		assertThat(sources.precedenceOf(PropertySource.named("a")), is(0));
+		assertThat(sources.precedenceOf(PropertySource.named("b")), is(1));
+		assertThat(sources.precedenceOf(PropertySource.named("c")), is(2));
+		assertThat(sources.precedenceOf(PropertySource.named("d")), is(3));
+		assertThat(sources.precedenceOf(PropertySource.named("e")), is(4));
+		assertThat(sources.precedenceOf(PropertySource.named("f")), is(5));
+		assertThat(sources.precedenceOf(PropertySource.named("g")), is(6));
 
 		assertEquals(sources.remove("a"), PropertySource.named("a"));
 		assertThat(sources.size(), equalTo(6));
@@ -109,15 +109,15 @@ public class PropertySourcesTests {
 
 		sources.addFirst(new MockPropertySource("a"));
 		assertThat(sources.size(), equalTo(7));
-		assertThat(sources.asList().indexOf(PropertySource.named("a")), is(0));
-		assertThat(sources.asList().indexOf(PropertySource.named("b")), is(1));
-		assertThat(sources.asList().indexOf(PropertySource.named("c")), is(2));
+		assertThat(sources.precedenceOf(PropertySource.named("a")), is(0));
+		assertThat(sources.precedenceOf(PropertySource.named("b")), is(1));
+		assertThat(sources.precedenceOf(PropertySource.named("c")), is(2));
 
 		sources.replace("a", new MockPropertySource("a-replaced"));
 		assertThat(sources.size(), equalTo(7));
-		assertThat(sources.asList().indexOf(PropertySource.named("a-replaced")), is(0));
-		assertThat(sources.asList().indexOf(PropertySource.named("b")), is(1));
-		assertThat(sources.asList().indexOf(PropertySource.named("c")), is(2));
+		assertThat(sources.precedenceOf(PropertySource.named("a-replaced")), is(0));
+		assertThat(sources.precedenceOf(PropertySource.named("b")), is(1));
+		assertThat(sources.precedenceOf(PropertySource.named("c")), is(2));
 
 		sources.replace("a-replaced", new MockPropertySource("a"));
 
