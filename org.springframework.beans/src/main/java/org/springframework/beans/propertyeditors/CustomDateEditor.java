@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,10 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * thrown if the String does not exactly match the length specified. This is useful
 	 * because SimpleDateFormat does not enforce strict parsing of the year part,
 	 * not even with <code>setLenient(false)</code>. Without an "exactDateLength"
-	 * specified, the "01/01/05" would get parsed to "01/01/0005".
+	 * specified, the "01/01/05" would get parsed to "01/01/0005". However, even
+	 * with an "exactDateLength" specified, prepended zeros in the day or month
+	 * part may still allow for a shorter year part, so consider this as just
+	 * one more assertion that gets you closer to the intended date format.
 	 * @param dateFormat DateFormat to use for parsing and rendering
 	 * @param allowEmpty if empty strings should be allowed
 	 * @param exactDateLength the exact expected length of the date String
