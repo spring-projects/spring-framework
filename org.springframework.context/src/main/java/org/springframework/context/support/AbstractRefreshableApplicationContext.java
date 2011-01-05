@@ -218,7 +218,6 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 		beanFactory.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
-		registerStandardBeanFactoryPostProcessors(beanFactory);
 	}
 
 	/**

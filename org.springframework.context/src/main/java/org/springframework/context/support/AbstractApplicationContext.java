@@ -668,15 +668,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Common location for subclasses to call and receive registration of standard
-	 * {@link BeanFactoryPostProcessor} bean definitions.
-	 *
-	 * @param registry subclass BeanDefinitionRegistry
-	 */
-	protected void registerStandardBeanFactoryPostProcessors(BeanDefinitionRegistry registry) {
-	}
-
-	/**
 	 * Instantiate and invoke all registered BeanPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before any instantiation of application beans.
