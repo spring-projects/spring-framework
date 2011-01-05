@@ -29,7 +29,7 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 public class TypedValue {
 
-	public static final TypedValue NULL = new TypedValue(null, TypeDescriptor.NULL);
+	public static final TypedValue NULL = new TypedValue(null);
 
 
 	private final Object value;

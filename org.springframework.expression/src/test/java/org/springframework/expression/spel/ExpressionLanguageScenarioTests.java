@@ -26,7 +26,6 @@ import java.util.Map;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -247,7 +246,6 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 	private static class FruitColourAccessor implements PropertyAccessor {
 
 		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
-		private static TypeDescriptor mapElementTypeDescriptor = TypeDescriptor.valueOf(Color.class);
 
 		static {
 			propertyMap.put("banana",Color.yellow);
@@ -267,7 +265,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(propertyMap.get(name),mapElementTypeDescriptor);
+			return new TypedValue(propertyMap.get(name));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -306,7 +304,7 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(propertyMap.get(name),TypeDescriptor.valueOf(Color.class));
+			return new TypedValue(propertyMap.get(name));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

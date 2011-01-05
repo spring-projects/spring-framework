@@ -236,7 +236,7 @@ public class ReflectionHelper {
 			TypeDescriptor targetType;
 			if (varargsPosition != null && argPosition >= varargsPosition) {
 				MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, varargsPosition);
-				targetType = new TypeDescriptor(methodParam, methodParam.getParameterType().getComponentType());
+				targetType = new TypeDescriptor(methodParam.getParameterType().getComponentType(), methodParam);
 			}
 			else {
 				targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, argPosition));
@@ -268,7 +268,7 @@ public class ReflectionHelper {
 			TypeDescriptor targetType;
 			if (varargsPosition != null && argPosition >= varargsPosition) {
 				MethodParameter methodParam = new MethodParameter(method, varargsPosition);
-				targetType = new TypeDescriptor(methodParam, methodParam.getParameterType().getComponentType());
+				targetType = new TypeDescriptor(methodParam.getParameterType().getComponentType(), methodParam);
 			}
 			else {
 				targetType = new TypeDescriptor(new MethodParameter(method, argPosition));

@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import junit.framework.Assert;
-import org.junit.Test;
 
+import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -222,7 +222,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(new Principal(),TypeDescriptor.valueOf(Principal.class));
+			return new TypedValue(new Principal());
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -252,7 +252,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(activePerson,TypeDescriptor.valueOf(Person.class));
+			return new TypedValue(activePerson);
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {

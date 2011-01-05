@@ -80,7 +80,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				// The readerCache will only contain gettable properties (let's not worry about setters for now)
 				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, method, null);
 				TypeDescriptor typeDescriptor =
-						new PropertyTypeDescriptor(propertyDescriptor, new MethodParameter(method, -1));
+						new PropertyTypeDescriptor(new MethodParameter(method, -1), propertyDescriptor);
 				this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
 				this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 				return true;
@@ -128,7 +128,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 						// The readerCache will only contain gettable properties (let's not worry about setters for now)
 						PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, method, null);
 						TypeDescriptor typeDescriptor =
-								new PropertyTypeDescriptor(propertyDescriptor, new MethodParameter(method, -1));
+								new PropertyTypeDescriptor(new MethodParameter(method, -1), propertyDescriptor);
 						invoker = new InvokerPair(method, typeDescriptor);
 						this.readerCache.put(cacheKey, invoker);
 					}
@@ -192,7 +192,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				throw new AccessException("Unable to access property '" + name + "' through setter "+method, ex);
 			}
 			MethodParameter mp = new MethodParameter(method,0);
-			TypeDescriptor typeDescriptor = new PropertyTypeDescriptor(propertyDescriptor, mp);
+			TypeDescriptor typeDescriptor = new PropertyTypeDescriptor(mp, propertyDescriptor);
 			this.writerCache.put(cacheKey, method);
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;

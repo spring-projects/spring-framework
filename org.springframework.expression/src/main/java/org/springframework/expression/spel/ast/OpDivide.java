@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -50,7 +49,7 @@ public class OpDivide extends Operator {
 			}
 		}
 		Object result = state.operate(Operation.DIVIDE, operandOne, operandTwo);
-		return new TypedValue(result,TypeDescriptor.forObject(result));
+		return new TypedValue(result);
 	}
 
 }

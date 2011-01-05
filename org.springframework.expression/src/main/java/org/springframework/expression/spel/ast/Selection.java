@@ -74,7 +74,7 @@ public class Selection extends SpelNodeImpl {
 			Object lastKey = null;
 			for (Map.Entry entry : mapdata.entrySet()) {
 				try {
-					TypedValue kvpair = new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class));
+					TypedValue kvpair = new TypedValue(entry);
 					state.pushActiveContextObject(kvpair);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
@@ -95,7 +95,7 @@ public class Selection extends SpelNodeImpl {
 				}
 			}
 			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
-				return new TypedValue(null,TypeDescriptor.NULL);
+				return new TypedValue(null);
 			}
 			if (variant == LAST) {
 				Map resultMap = new HashMap();

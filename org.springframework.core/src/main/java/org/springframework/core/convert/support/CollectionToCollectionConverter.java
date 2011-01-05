@@ -52,7 +52,6 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
@@ -63,9 +62,7 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement,
-					sourceType.getElementTypeDescriptor(sourceElement),
-					targetType.getElementTypeDescriptor(sourceElement));
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
 			target.add(targetElement);
 		}
 		return target;

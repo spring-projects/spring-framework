@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.support;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.TypedValue;
 
 /**
@@ -31,7 +30,7 @@ public class BooleanTypedValue extends TypedValue {
 
 
 	private BooleanTypedValue(boolean b) {
-		super(b, TypeDescriptor.valueOf(Boolean.class));
+		super(b);
 	}
 	
 

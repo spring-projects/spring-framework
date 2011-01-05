@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -72,8 +71,7 @@ public class InlineList extends SpelNodeImpl {
 					constantList.add(((InlineList) child).getConstantValue());
 				}
 			}
-			this.constant = new TypedValue(Collections.unmodifiableList(constantList), TypeDescriptor
-					.valueOf(List.class));
+			this.constant = new TypedValue(Collections.unmodifiableList(constantList));
 		}
 	}
 
@@ -87,7 +85,7 @@ public class InlineList extends SpelNodeImpl {
 			for (int c = 0; c < childcount; c++) {
 				returnValue.add(getChild(c).getValue(expressionState));
 			}
-			return new TypedValue(returnValue, TypeDescriptor.valueOf(List.class));
+			return new TypedValue(returnValue);
 		}
 	}
 
