@@ -367,12 +367,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			String actualPropertyName = PropertyAccessorUtils.getPropertyName(propertyName);
 			PropertyDescriptor pd = getPropertyDescriptorInternal(actualPropertyName);
 			if (pd != null) {
-				Class type = getPropertyType(propertyName);
 				if (pd.getReadMethod() != null) {
-					return new PropertyTypeDescriptor(type, new MethodParameter(pd.getReadMethod(), -1), pd);
+					return new PropertyTypeDescriptor(new MethodParameter(pd.getReadMethod(), -1), pd);
 				}
 				else if (pd.getWriteMethod() != null) {
-					return new PropertyTypeDescriptor(type, BeanUtils.getWriteMethodParameter(pd), pd);
+					return new PropertyTypeDescriptor(BeanUtils.getWriteMethodParameter(pd), pd);
 				}
 			}
 		}
@@ -935,10 +934,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (isExtractOldValueForEditor()) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
-					MethodParameter methodParameter = new MethodParameter(pd.getReadMethod(), -1);
-					methodParameter.increaseNestingLevel();					
 					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
-							new PropertyTypeDescriptor(requiredType, methodParameter, pd));
+							PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1), pd));
 					Array.set(propValue, arrayIndex, convertedValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -956,10 +953,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (isExtractOldValueForEditor() && index < list.size()) {
 					oldValue = list.get(index);
 				}
-				MethodParameter methodParameter = new MethodParameter(pd.getReadMethod(), -1);
-				methodParameter.increaseNestingLevel();
 				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
-						new PropertyTypeDescriptor(requiredType, methodParameter, pd));
+						PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1), pd));
 				if (index < list.size()) {
 					list.set(index, convertedValue);
 				}
@@ -995,11 +990,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				// Pass full property name and old value in here, since we want full
 				// conversion ability for map values.
-				MethodParameter methodParameter = new MethodParameter(pd.getReadMethod(), -1);
-				methodParameter.increaseNestingLevel();
 				Object convertedMapValue = convertIfNecessary(
 						propertyName, oldValue, pv.getValue(), mapValueType,
-						new PropertyTypeDescriptor(mapValueType, methodParameter, pd));
+						PropertyTypeDescriptor.forNestedType(mapValueType, new MethodParameter(pd.getReadMethod(), -1), pd));
 				map.put(convertedMapKey, convertedMapValue);
 			}
 			else {

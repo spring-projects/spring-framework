@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
  * (getter/setter) and on the underlying field, if found.
  *
  * @author Juergen Hoeller
+ * @author Keith Donald
  * @since 3.0.2
  */
 public class PropertyTypeDescriptor extends TypeDescriptor {
@@ -41,18 +42,24 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 	private final PropertyDescriptor propertyDescriptor;
 
 	/**
-	 * Create a new BeanTypeDescriptor for the given bean property.
-	 * @param propertyDescriptor the corresponding JavaBean PropertyDescriptor
+	 * Create a new type descriptor for the given bean property.
 	 * @param methodParameter the target method parameter
+	 * @param propertyDescriptor the corresponding JavaBean PropertyDescriptor
 	 */
 	public PropertyTypeDescriptor(MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
 		super(methodParameter);
 		this.propertyDescriptor = propertyDescriptor;
 	}
-	
-	public PropertyTypeDescriptor(Class<?> type, MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
-		super(type, methodParameter);
-		this.propertyDescriptor = propertyDescriptor;
+
+	/**
+	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based property.
+	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
+	 * @param nestedType the nested type
+	 * @param parentMethodParameter the parent property's method parameter that declares the collection or map
+	 * @return the parent property descriptor
+	 */
+	public static PropertyTypeDescriptor forNestedType(Class<?> nestedType, MethodParameter propertyMethodParameter, PropertyDescriptor propertyDescriptor) {
+		return new PropertyTypeDescriptor(nestedType, propertyMethodParameter, propertyDescriptor);
 	}
 
 	/**
@@ -102,8 +109,15 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 		return annMap.values().toArray(new Annotation[annMap.size()]);
 	}
 
-	public TypeDescriptor newNestedTypeDescriptor(Class<?> nestedType, MethodParameter nested) {
+	protected TypeDescriptor newNestedTypeDescriptor(Class<?> nestedType, MethodParameter nested) {
 		return new PropertyTypeDescriptor(nestedType, nested, this.propertyDescriptor);
+	}
+
+	// internal constructors
+	
+	private PropertyTypeDescriptor(Class<?> nestedType, MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
+		super(nestedType, methodParameter);
+		this.propertyDescriptor = propertyDescriptor;
 	}
 
 }

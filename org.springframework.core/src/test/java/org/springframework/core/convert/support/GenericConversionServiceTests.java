@@ -382,6 +382,19 @@ public class GenericConversionServiceTests {
 	public static Map<String, Integer> map;
 
 
+	@Test
+	public void emptyList() throws Exception {
+		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		List<String> list = new ArrayList<String>();
+		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListTarget"));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertEquals(list, conversionService.convert(list, sourceType, targetType));
+	}
+
+	public List<Integer> emptyListTarget;
+	
 	private interface MyBaseInterface {
 
 	}
