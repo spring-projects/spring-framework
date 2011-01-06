@@ -86,8 +86,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
-	 * <p>Use this constructor when a target conversion point originates from a method parameter,
-	 * such as a setter method argument.
+	 * Use this constructor when a target conversion point originates from a method parameter, such as a setter method argument.
 	 * @param methodParameter the MethodParameter to wrap
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
@@ -106,24 +105,17 @@ public class TypeDescriptor {
 		this.type = field.getType();
 		this.field = field;
 	}
-
-	/**
-	 * Create a new type descriptor for the given class.
-	 * @param type the class
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor valueOf(Class<?> type) {
-		if (type == null) {
-			return NULL;
-		}
-		TypeDescriptor desc = typeDescriptorCache.get(type);
-		return (desc != null ? desc : new TypeDescriptor(type));
-	}
 	
 	/**
-	 * Create a new type descriptor for the class of the given object.
-	 * @param object the object
+	 * Create a new type descriptor for object.
+	 * Use this factory method to introspect a source object's type before asking the conversion system to convert it to some another type.
+	 * If the object is null, returns {@link TypeDescriptor#NULL}.
+	 * If the object is not a collection, simply calls {@link #valueOf(Class)}.
+	 * If the object is a collection, this factory method will derive the element type(s) by introspecting the collection.
+	 * @param object the source object
 	 * @return the type descriptor
+	 * @see ConversionService#convert(Object, Class)
+	 * @see CollectionUtils#findCommonElementType(Collection)
 	 */
 	public static TypeDescriptor forObject(Object object) {
 		if (object == null) {
@@ -138,6 +130,32 @@ public class TypeDescriptor {
 		else {
 			return valueOf(object.getClass());
 		}
+	}
+
+	/**
+	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based method parameter.
+	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
+	 * @param nestedType the nested type
+	 * @param parentMethodParameter the parent method parameter declaring the collection or map
+	 * @return the nested type descriptor
+	 */
+	public static TypeDescriptor forNestedType(Class<?> nestedType, MethodParameter parentMethodParameter) {
+		return new TypeDescriptor(nestedType, parentMethodParameter);
+	}
+	
+	/**
+	 * Create a new type descriptor for the given class.
+	 * Use this to instruct the conversion system to convert to an object to a specific target type, when no type location such as a method parameter or field is available.
+	 * Generally prefer use of {@link #forObject(Object)} for constructing source type descriptors for source objects.
+	 * @param type the class
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor valueOf(Class<?> type) {
+		if (type == null) {
+			return NULL;
+		}
+		TypeDescriptor desc = typeDescriptorCache.get(type);
+		return (desc != null ? desc : new TypeDescriptor(type));
 	}
 	
 	/**
@@ -310,17 +328,6 @@ public class TypeDescriptor {
 	// special case public operations
 
 	/**
-	 * Constructs a new TypeDescriptor for a nested type declared within a method parameter, such as a collection type or map key or value type.
-	 */
-	public TypeDescriptor(Class<?> nestedType, MethodParameter methodParameter) {
-		if (nestedType == null) {
-			nestedType = Object.class;
-		}
-		this.type = nestedType;
-		this.methodParameter = methodParameter;
-	}
-	
-	/**
 	 * Exposes the underlying MethodParameter providing context for this TypeDescriptor.
 	 * Used to support legacy code scenarios where callers are already using the MethodParameter API (BeanWrapper).
 	 * In general, favor use of the TypeDescriptor API over the MethodParameter API as it is independent of type context location.
@@ -402,6 +409,11 @@ public class TypeDescriptor {
 	}
 
 	// subclassing hooks
+
+	protected TypeDescriptor(Class<?> nestedType, MethodParameter parentMethodParameter) {
+		this.type = handleUnknownNestedType(nestedType);
+		this.methodParameter = createNestedMethodParameter(parentMethodParameter);
+	}
 	
 	protected Annotation[] resolveAnnotations() {
 		if (this.field != null) {
@@ -446,13 +458,9 @@ public class TypeDescriptor {
 	}
 
 	private TypeDescriptor createNestedTypeDescriptor(Class<?> nestedType) {
-		if (nestedType == null) {
-			nestedType = Object.class;
-		}
+		nestedType = handleUnknownNestedType(nestedType);
 		if (this.methodParameter != null) {
-			MethodParameter nested = new MethodParameter(this.methodParameter);
-			nested.increaseNestingLevel();
-			return newNestedTypeDescriptor(nestedType, nested);				
+			return newNestedTypeDescriptor(nestedType, createNestedMethodParameter(this.methodParameter));				
 		}
 		else if (this.field != null) {
 			return new TypeDescriptor(nestedType, this.field, this.fieldNestingLevel + 1);
@@ -461,7 +469,7 @@ public class TypeDescriptor {
 			return TypeDescriptor.valueOf(nestedType);
 		}
 	}
-
+	
 	private Class<?> resolveCollectionElementType() {
 		if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
@@ -498,13 +506,17 @@ public class TypeDescriptor {
 		}
 	}
 
-	// internal constructors
-
-	private TypeDescriptor(Class<?> nestedType, Field field, int nestingLevel) {
-		this.type = nestedType;
-		this.field = field;
-		this.fieldNestingLevel = nestingLevel;
+	private Class<?> handleUnknownNestedType(Class<?> nestedType) {
+		return nestedType != null ? nestedType : Object.class;
 	}
+
+	private MethodParameter createNestedMethodParameter(MethodParameter parentMethodParameter) {
+		MethodParameter methodParameter = new MethodParameter(parentMethodParameter);
+		methodParameter.increaseNestingLevel();
+		return methodParameter;
+	}
+	
+	// internal constructors
 
 	private TypeDescriptor() {
 	}
@@ -532,6 +544,12 @@ public class TypeDescriptor {
 		}
 		this.mapKeyType = TypeDescriptor.valueOf(keyType);
 		this.mapValueType = TypeDescriptor.valueOf(valueType);
+	}
+
+	private TypeDescriptor(Class<?> nestedType, Field field, int nestingLevel) {
+		this.type = nestedType;
+		this.field = field;
+		this.fieldNestingLevel = nestingLevel;
 	}
 
 }
