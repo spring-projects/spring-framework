@@ -87,7 +87,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	/**
-	 * Add the given property source object with precedence immediately greater
+	 * Add the given property source object with precedence immediately higher
 	 * than the named relative property source.
 	 */
 	public void addBefore(String relativePropertySourceName, PropertySource<?> propertySource) {
@@ -98,7 +98,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	/**
-	 * Add the given property source object with precedence immediately less than
+	 * Add the given property source object with precedence immediately lower than
 	 * than the named relative property source.
 	 */
 	public void addAfter(String relativePropertySourceName, PropertySource<?> propertySource) {
