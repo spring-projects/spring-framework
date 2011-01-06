@@ -19,15 +19,15 @@ package org.springframework.core.env;
 import java.util.Map;
 
 /**
- * {@link PropertySource} that reads keys and values from a {@code Map<String,String>} object.
+ * {@link PropertySource} that reads keys and values from a {@code Map} object.
  *
  * @author Chris Beams
  * @since 3.1
  * @see PropertiesPropertySource
  */
-public class MapPropertySource extends EnumerablePropertySource<Map<String, ? super Object>> {
+public class MapPropertySource extends EnumerablePropertySource<Map<String, Object>> {
 
-	protected MapPropertySource(String name, Map<String, ? super Object> source) {
+	protected MapPropertySource(String name, Map<String, Object> source) {
 		super(name, source);
 	}
 
