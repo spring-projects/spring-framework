@@ -136,11 +136,11 @@ public class TypeDescriptor {
 	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based method parameter.
 	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
 	 * @param nestedType the nested type
-	 * @param parentMethodParameter the parent method parameter declaring the collection or map
+	 * @param methodParameter the method parameter declaring the collection or map
 	 * @return the nested type descriptor
 	 */
-	public static TypeDescriptor forNestedType(Class<?> nestedType, MethodParameter parentMethodParameter) {
-		return new TypeDescriptor(nestedType, parentMethodParameter);
+	public static TypeDescriptor forNestedType(Class<?> nestedType, MethodParameter methodParameter) {
+		return new TypeDescriptor(nestedType, methodParameter);
 	}
 	
 	/**
@@ -410,9 +410,9 @@ public class TypeDescriptor {
 
 	// subclassing hooks
 
-	protected TypeDescriptor(Class<?> nestedType, MethodParameter parentMethodParameter) {
+	protected TypeDescriptor(Class<?> nestedType, MethodParameter methodParameter) {
 		this.type = handleUnknownNestedType(nestedType);
-		this.methodParameter = createNestedMethodParameter(parentMethodParameter);
+		this.methodParameter = createNestedMethodParameter(methodParameter);
 	}
 	
 	protected Annotation[] resolveAnnotations() {
