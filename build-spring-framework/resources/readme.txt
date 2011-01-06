@@ -1,5 +1,5 @@
 SPRING FRAMEWORK 3.1 M1 (January 2011)
--------------------------------------
+--------------------------------------
 http://www.springframework.org
 
 1. INTRODUCTION
