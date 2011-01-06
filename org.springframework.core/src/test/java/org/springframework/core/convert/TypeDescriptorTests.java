@@ -102,8 +102,6 @@ public class TypeDescriptorTests {
 		assertTrue(typeDescriptor.isArray());
 		assertEquals(List.class,typeDescriptor.getElementType());
 		assertEquals(String.class, typeDescriptor.getElementTypeDescriptor().getElementType());
-		
-		// TODO asc notice that the type of the list elements is lost: typeDescriptor.getElementType() should return a TypeDescriptor
 		assertEquals("java.util.List[]",typeDescriptor.asString());
 	}
 
