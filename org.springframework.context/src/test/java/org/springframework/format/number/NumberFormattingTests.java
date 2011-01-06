@@ -116,7 +116,6 @@ public class NumberFormattingTests {
 	}
 
 	@Test
-	@Ignore
 	public void testPatternArrayFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternArray", new String[] {"1,25.00", "2,35.00"});
@@ -135,7 +134,6 @@ public class NumberFormattingTests {
 	}
 
 	@Test
-	@Ignore
 	public void testPatternListFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternList", new String[] {"1,25.00", "2,35.00"});
@@ -154,15 +152,24 @@ public class NumberFormattingTests {
 	}
 
 	@Test
-	@Ignore
-	public void testPatternList2Formatting() {
+	public void testPatternList2FormattingListElement() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternList2[0]", "1,25.00");
 		propertyValues.add("patternList2[1]", "2,35.00");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("1,25.00", binder.getBindingResult().getFieldValue("patternList[0]"));
-		assertEquals("2,35.00", binder.getBindingResult().getFieldValue("patternList[1]"));
+		assertEquals("1,25.00", binder.getBindingResult().getFieldValue("patternList2[0]"));
+		assertEquals("2,35.00", binder.getBindingResult().getFieldValue("patternList2[1]"));
+	}
+
+	@Test
+	public void testPatternList2FormattingList() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("patternList2[0]", "1,25.00");
+		propertyValues.add("patternList2[1]", "2,35.00");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("1,25.00,2,35.00", binder.getBindingResult().getFieldValue("patternList2"));
 	}
 
 

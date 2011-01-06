@@ -382,7 +382,7 @@ public class DataBinderTests extends TestCase {
 		try {
 			binder.bind(pvs);
 			assertEquals(new Integer(1), tb.getIntegerList().get(0));
-			// TODO add back assertEquals("1", binder.getBindingResult().getFieldValue("integerList[0]"));
+			assertEquals("1", binder.getBindingResult().getFieldValue("integerList[0]"));
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();

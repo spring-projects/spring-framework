@@ -364,14 +364,27 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
-			String actualPropertyName = PropertyAccessorUtils.getPropertyName(propertyName);
-			PropertyDescriptor pd = getPropertyDescriptorInternal(actualPropertyName);
+			PropertyTokenHolder tokens = getPropertyNameTokens(propertyName);
+			PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 			if (pd != null) {
-				if (pd.getReadMethod() != null) {
-					return new PropertyTypeDescriptor(new MethodParameter(pd.getReadMethod(), -1), pd);
-				}
-				else if (pd.getWriteMethod() != null) {
-					return new PropertyTypeDescriptor(BeanUtils.getWriteMethodParameter(pd), pd);
+				if (tokens.keys != null) {
+					if (pd.getReadMethod() != null) {
+						return PropertyTypeDescriptor.forNestedType(new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length), pd);
+					}
+					else if (pd.getWriteMethod() != null) {
+						MethodParameter methodParameter = new MethodParameter(BeanUtils.getWriteMethodParameter(pd));
+						for (int i = 0; i < tokens.keys.length; i++) {
+							methodParameter.increaseNestingLevel();
+						}
+						return PropertyTypeDescriptor.forNestedType(methodParameter, pd);						
+					}				
+				} else {
+					if (pd.getReadMethod() != null) {
+						return new PropertyTypeDescriptor(new MethodParameter(pd.getReadMethod(), -1), pd);
+					}
+					else if (pd.getWriteMethod() != null) {
+						return new PropertyTypeDescriptor(BeanUtils.getWriteMethodParameter(pd), pd);
+					}				
 				}
 			}
 		}

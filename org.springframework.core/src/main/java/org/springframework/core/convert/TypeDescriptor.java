@@ -105,10 +105,26 @@ public class TypeDescriptor {
 		this.type = field.getType();
 		this.field = field;
 	}
+
+	/**
+	 * Create a new type descriptor for the given class.
+	 * Use this to instruct the conversion system to convert to an object to a specific target type, when no type location such as a method parameter or field is available to provide additional conversion context.
+	 * Generally prefer use of {@link #forObject(Object)} for constructing source type descriptors for source objects.
+	 * @param type the class
+	 * @return the type descriptor
+	 */
+	public static TypeDescriptor valueOf(Class<?> type) {
+		if (type == null) {
+			return NULL;
+		}
+		TypeDescriptor desc = typeDescriptorCache.get(type);
+		return (desc != null ? desc : new TypeDescriptor(type));
+	}
 	
 	/**
-	 * Create a new type descriptor for object.
+	 * Create a new type descriptor for an object.
 	 * Use this factory method to introspect a source object's type before asking the conversion system to convert it to some another type.
+	 * Builds in population of nested type descriptors for collection and map objects through object introspection.
 	 * If the object is null, returns {@link TypeDescriptor#NULL}.
 	 * If the object is not a collection, simply calls {@link #valueOf(Class)}.
 	 * If the object is a collection, this factory method will derive the element type(s) by introspecting the collection.
@@ -135,6 +151,16 @@ public class TypeDescriptor {
 	/**
 	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based method parameter.
 	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
+	 * @param methodParameter the method parameter declaring the collection or map
+	 * @return the nested type descriptor
+	 */
+	public static TypeDescriptor forNestedType(MethodParameter methodParameter) {
+		return new TypeDescriptor(resolveNestedType(methodParameter), methodParameter);
+	}
+
+	/**
+	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based method parameter.
+	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
 	 * @param nestedType the nested type
 	 * @param methodParameter the method parameter declaring the collection or map
 	 * @return the nested type descriptor
@@ -142,22 +168,7 @@ public class TypeDescriptor {
 	public static TypeDescriptor forNestedType(Class<?> nestedType, MethodParameter methodParameter) {
 		return new TypeDescriptor(nestedType, methodParameter);
 	}
-	
-	/**
-	 * Create a new type descriptor for the given class.
-	 * Use this to instruct the conversion system to convert to an object to a specific target type, when no type location such as a method parameter or field is available.
-	 * Generally prefer use of {@link #forObject(Object)} for constructing source type descriptors for source objects.
-	 * @param type the class
-	 * @return the type descriptor
-	 */
-	public static TypeDescriptor valueOf(Class<?> type) {
-		if (type == null) {
-			return NULL;
-		}
-		TypeDescriptor desc = typeDescriptorCache.get(type);
-		return (desc != null ? desc : new TypeDescriptor(type));
-	}
-	
+
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
 	 * @return the declared type, or <code>null</code> if this is {@link TypeDescriptor#NULL}
@@ -434,6 +445,18 @@ public class TypeDescriptor {
 
 	protected TypeDescriptor newNestedTypeDescriptor(Class<?> nestedType, MethodParameter nested) {
 		return new TypeDescriptor(nestedType, nested);
+	}
+	
+	protected static Class<?> resolveNestedType(MethodParameter methodParameter) {
+		if (Collection.class.isAssignableFrom(methodParameter.getParameterType())) {
+			return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
+		} else if (Map.class.isAssignableFrom(methodParameter.getParameterType())) {
+			return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);			
+		} else if (methodParameter.getParameterType().isArray()) {
+			return methodParameter.getParameterType().getComponentType();
+		} else {			
+			throw new IllegalStateException("Not a collection, map, or array method parameter type " + methodParameter.getParameterType());
+		}
 	}
 	
 	// internal helpers

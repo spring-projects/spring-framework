@@ -20,9 +20,11 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ReflectionUtils;
@@ -55,14 +57,25 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based property.
 	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
 	 * Builds in protection for increasing the nesting level of the provided MethodParameter if the nestedType is itself a collection.
+	 * @param methodParameter the method parameter
+	 * @return the property descriptor
+	 */
+	public static PropertyTypeDescriptor forNestedType(MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
+		return forNestedType(resolveNestedType(methodParameter), methodParameter, propertyDescriptor);
+	}
+
+	/**
+	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based property.
+	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
+	 * Builds in protection for increasing the nesting level of the provided MethodParameter if the nestedType is itself a collection.
 	 * @param nestedType the nested type
-	 * @param parentMethodParameter the method parameter
+	 * @param methodParameter the method parameter
 	 * @return the property descriptor
 	 */
 	public static PropertyTypeDescriptor forNestedType(Class<?> nestedType, MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
 		return new PropertyTypeDescriptor(nestedType, methodParameter, propertyDescriptor);
 	}
-
+	
 	/**
 	 * Return the underlying PropertyDescriptor.
 	 */
