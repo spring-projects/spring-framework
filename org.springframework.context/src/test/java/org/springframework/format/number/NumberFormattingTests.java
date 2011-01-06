@@ -153,6 +153,18 @@ public class NumberFormattingTests {
 		assertEquals("2,35.00", binder.getBindingResult().getFieldValue("patternList[1]"));
 	}
 
+	@Test
+	@Ignore
+	public void testPatternList2Formatting() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("patternList2[0]", "1,25.00");
+		propertyValues.add("patternList2[1]", "2,35.00");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("1,25.00", binder.getBindingResult().getFieldValue("patternList[0]"));
+		assertEquals("2,35.00", binder.getBindingResult().getFieldValue("patternList[1]"));
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class TestBean {
@@ -175,8 +187,11 @@ public class NumberFormattingTests {
 		private BigDecimal[] patternArray;
 
 		@NumberFormat(pattern="#,##.00")
-		private List[] patternList;
+		private List<BigDecimal>[] patternList;
 
+		@NumberFormat(pattern="#,##.00")
+		private List<BigDecimal> patternList2;
+		
 		public Integer getNumberDefault() {
 			return numberDefault;
 		}
@@ -225,13 +240,22 @@ public class NumberFormattingTests {
 			this.patternArray = patternArray;
 		}
 
-		public List[] getPatternList() {
+		public List<BigDecimal>[] getPatternList() {
 			return patternList;
 		}
 
-		public void setPatternList(List[] patternList) {
+		public void setPatternList(List<BigDecimal>[] patternList) {
 			this.patternList = patternList;
 		}
+
+		public List<BigDecimal> getPatternList2() {
+			return patternList2;
+		}
+
+		public void setPatternList2(List<BigDecimal> patternList2) {
+			this.patternList2 = patternList2;
+		}
+		
 	}
 
 }

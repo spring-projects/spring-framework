@@ -935,7 +935,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						oldValue = Array.get(propValue, arrayIndex);
 					}
 					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
-							PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1), pd));
+							PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length), pd));
 					Array.set(propValue, arrayIndex, convertedValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -953,9 +953,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (isExtractOldValueForEditor() && index < list.size()) {
 					oldValue = list.get(index);
 				}
-				// TODO method parameter nesting level should be token.keys.length + 1
 				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
-						PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1), pd));
+						PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length), pd));
 				if (index < list.size()) {
 					list.set(index, convertedValue);
 				}
@@ -994,7 +993,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				// TODO method parameter nesting level should be token.keys.length + 1
 				Object convertedMapValue = convertIfNecessary(
 						propertyName, oldValue, pv.getValue(), mapValueType,
-						PropertyTypeDescriptor.forNestedType(mapValueType, new MethodParameter(pd.getReadMethod(), -1), pd));
+						PropertyTypeDescriptor.forNestedType(mapValueType, new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length), pd));
 				map.put(convertedMapKey, convertedMapValue);
 			}
 			else {
