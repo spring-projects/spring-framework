@@ -364,9 +364,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
-			BeanWrapper nestedBw = getNestedBeanWrapper(propertyName);
-			PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));			
-			PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);			
+			BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
+			String finalPath = getFinalPath(nestedBw, propertyName);
+			PropertyTokenHolder tokens = getPropertyNameTokens(finalPath);
+			PropertyDescriptor pd = nestedBw.getCachedIntrospectionResults().getPropertyDescriptor(tokens.actualName);
 			if (pd != null) {
 				if (tokens.keys != null) {
 					if (pd.getReadMethod() != null) {
