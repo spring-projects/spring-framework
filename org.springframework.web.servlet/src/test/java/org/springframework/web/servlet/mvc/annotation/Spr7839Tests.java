@@ -69,6 +69,14 @@ public class Spr7839Tests {
 	}
 
 	@Test
+	@Ignore
+	public void listElementAutogrowOutOfMemory() throws Exception {
+		request.setRequestURI("/nested/listElement");
+		request.addParameter("nested.list[1000000000].foo", "Nested");
+		adapter.handle(request, response, controller);
+	}
+
+	@Test
 	public void listOfLists() throws Exception {
 		request.setRequestURI("/nested/listOfLists");
 		request.addParameter("nested.listOfLists[0]", "Nested1,Nested2");
@@ -90,7 +98,6 @@ public class Spr7839Tests {
 	}
 
 	@Test
-	@Ignore
 	public void arrayOfLists() throws Exception {
 		// TODO TypeDescriptor not capable of accessing nested element type for arrays
 		request.setRequestURI("/nested/arrayOfLists");
