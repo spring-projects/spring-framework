@@ -603,7 +603,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 	
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
-		Class type = getPropertyType(tokens.canonicalName);
+		Class<?> type = getPropertyTypeDescriptor(tokens.canonicalName).getType();
 		if (type == null) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
 					"Could not determine property type for auto-growing a default value");
@@ -637,6 +637,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 		}
 		catch (Exception ex) {
+			// TODO Root cause exception context is lost here... should we throw another exception type that preserves context instead?
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
 					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
 		}
@@ -936,11 +937,20 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			// Set value for last key.
 			String key = tokens.keys[tokens.keys.length - 1];
 			if (propValue == null) {
-				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
-						"Cannot access indexed value in property referenced " +
-						"in indexed property path '" + propertyName + "': returned null");
+				// null map value case
+				if (this.autoGrowNestedPaths) {
+					// TODO: cleanup, this is pretty hacky
+					int lastKeyIndex = tokens.canonicalName.lastIndexOf('[');
+					getterTokens.canonicalName = tokens.canonicalName.substring(0, lastKeyIndex);
+					propValue = setDefaultValue(getterTokens);
+				}
+				else {
+					throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
+							"Cannot access indexed value in property referenced " +
+							"in indexed property path '" + propertyName + "': returned null");
+				}
 			}
-			else if (propValue.getClass().isArray()) {
+			if (propValue.getClass().isArray()) {
 				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 				Class requiredType = propValue.getClass().getComponentType();
 				int arrayIndex = Integer.parseInt(key);

@@ -2,8 +2,6 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,7 +99,6 @@ public class Spr7839Tests {
 	}
 
 	@Test
-	@Ignore
 	public void map() throws Exception {
 		request.setRequestURI("/nested/map");		
 		request.addParameter("nested.map['apple'].foo", "bar");
@@ -185,12 +182,12 @@ public class Spr7839Tests {
 
 	    private List<NestedBean>[] arrayOfLists;
 
-	    private Map<String, NestedBean> map = new HashMap<String, NestedBean>();
+	    private Map<String, NestedBean> map;
 
-	    private Map<String, List<Integer>> mapOfLists = new HashMap<String, List<Integer>>();
+	    private Map<String, List<Integer>> mapOfLists;
 	    
 	    public NestedBean() {
-	    	mapOfLists.put("apples", new ArrayList<Integer>());
+	    	
 	    }
 	    
 	    public NestedBean(String foo) {
