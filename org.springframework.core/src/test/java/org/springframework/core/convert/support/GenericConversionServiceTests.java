@@ -16,6 +16,14 @@
 
 package org.springframework.core.convert.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,15 +32,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.DescriptiveResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -383,7 +389,7 @@ public class GenericConversionServiceTests {
 
 
 	@Test
-	public void emptyList() throws Exception {
+	public void emptyListToList() throws Exception {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		List<String> list = new ArrayList<String>();
@@ -394,6 +400,41 @@ public class GenericConversionServiceTests {
 	}
 
 	public List<Integer> emptyListTarget;
+
+	@Test
+	public void emptyListToArray() throws Exception {
+		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		List<String> list = new ArrayList<String>();
+		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
+		TypeDescriptor targetType = TypeDescriptor.valueOf(String[].class);
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertEquals(0, ((String[])conversionService.convert(list, sourceType, targetType)).length);
+	}
+
+	@Test
+	public void emptyListToObject() throws Exception {
+		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		List<String> list = new ArrayList<String>();
+		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
+		TypeDescriptor targetType = TypeDescriptor.valueOf(Integer.class);
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertNull(conversionService.convert(list, sourceType, targetType));
+	}
+
+	@Test
+	public void emptyMapToMap() throws Exception {
+		conversionService.addConverter(new MapToMapConverter(conversionService));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		Map<String, String> map = new HashMap<String, String>();
+		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapTarget"));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertEquals(map, conversionService.convert(map, sourceType, targetType));
+	}
+
+	public Map<String, String> emptyMapTarget;
 	
 	private interface MyBaseInterface {
 

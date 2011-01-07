@@ -49,6 +49,14 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
+		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
+		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
+		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
+		if (Object.class.equals(sourceKeyType.getType()) && Object.class.equals(sourceValueType.getType())
+				|| Object.class.equals(targetKeyType.getType()) && Object.class.equals(targetValueType.getType())) {
+			return true;
+		}		
 		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor()) && 
 			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor());
 	}
