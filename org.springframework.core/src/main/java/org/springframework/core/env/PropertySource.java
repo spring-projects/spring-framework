@@ -64,6 +64,18 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
+	 * Create a new {@code PropertySource} with the given name and with a new {@code Object}
+	 * instance as the underlying source.
+	 * <p>Often useful in testing scenarios when creating
+	 * anonymous implementations that never query an actual source, but rather return
+	 * hard-coded values.
+	 */
+	@SuppressWarnings("unchecked")
+	public PropertySource(String name) {
+		this(name, (T) new Object());
+	}
+
+	/**
 	 * Return the name of this {@code PropertySource}
 	 */
 	public String getName() {
