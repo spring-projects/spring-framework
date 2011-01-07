@@ -190,7 +190,7 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testParseEmptyString() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert("", TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
@@ -205,7 +205,7 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void testParseEmptyStringDefault() throws ParseException {
-		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert("", TypeDescriptor.valueOf(Integer.class)));
 	}
 
 

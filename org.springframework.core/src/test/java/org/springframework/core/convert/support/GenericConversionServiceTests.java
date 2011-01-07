@@ -109,12 +109,13 @@ public class GenericConversionServiceTests {
 	}
 
 	public void convertNullTargetClass() {
-		assertNull(conversionService.convert("3", null));
+		assertNull(conversionService.convert("3", (Class) null));
+		assertNull(conversionService.convert("3", TypeDescriptor.NULL));
 	}
 
 	@Test
 	public void convertNullTypeDescriptor() {
-		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
+		assertNull(conversionService.convert("3", TypeDescriptor.NULL));
 	}
 
 	@Test
@@ -147,10 +148,8 @@ public class GenericConversionServiceTests {
 		assertTrue(conversionService.canConvert(String.class, boolean.class));
 		Boolean b = conversionService.convert("true", boolean.class);
 		assertEquals(Boolean.TRUE, b);
-		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), TypeDescriptor
-				.valueOf(boolean.class)));
-		b = (Boolean) conversionService.convert("true", TypeDescriptor.valueOf(String.class), TypeDescriptor
-				.valueOf(boolean.class));
+		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(boolean.class)));
+		b = (Boolean) conversionService.convert("true", TypeDescriptor.valueOf(boolean.class));
 		assertEquals(Boolean.TRUE, b);
 	}
 
@@ -260,8 +259,7 @@ public class GenericConversionServiceTests {
 		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
 		Map<String, String> input = new LinkedHashMap<String, String>();
 		input.put("key", "value");
-		Object converted = conversionService.convert(input, TypeDescriptor.forObject(input),
-				new TypeDescriptor(getClass().getField("wildcardMap")));
+		Object converted = conversionService.convert(input, new TypeDescriptor(getClass().getField("wildcardMap")));
 		assertEquals(input, converted);
 	}
 
@@ -344,7 +342,7 @@ public class GenericConversionServiceTests {
 		source.add("3");
 		TypeDescriptor td = new TypeDescriptor(getClass().getField("list"));
 		for (int i = 0; i < 1000000; i++) {
-			conversionService.convert(source, TypeDescriptor.forObject(source), td);
+			conversionService.convert(source, td);
 		}
 		watch.stop();
 		watch.start("convert 4,000,000 manually");
@@ -371,7 +369,7 @@ public class GenericConversionServiceTests {
 		source.put("3", "3");
 		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));		
 		for (int i = 0; i < 1000000; i++) {
-			conversionService.convert(source, TypeDescriptor.forObject(source), td);
+			conversionService.convert(source, td);
 		}
 		watch.stop();
 		watch.start("convert 4,000,000 manually");
