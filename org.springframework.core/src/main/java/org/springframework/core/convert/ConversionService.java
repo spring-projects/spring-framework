@@ -64,4 +64,10 @@ public interface ConversionService {
 	 */
 	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
+	// 3.1 additions that encapsulate TypeDescriptor.forObject(source)
+	
+	boolean canConvert(Object source, TypeDescriptor targetType);
+
+	Object convert(Object source, TypeDescriptor targetType);
+
 }

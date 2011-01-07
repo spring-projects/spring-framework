@@ -188,6 +188,14 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return result;
 	}
 
+	public boolean canConvert(Object source, TypeDescriptor targetType) {
+		return canConvert(TypeDescriptor.forObject(source), targetType);
+	}
+
+	public Object convert(Object source, TypeDescriptor targetType) {
+		return convert(source, TypeDescriptor.forObject(source), targetType);
+	}
+
 	public String toString() {
 		List<String> converterStrings = new ArrayList<String>();
 		for (Map<Class<?>, MatchableConverters> targetConverters : this.converters.values()) {

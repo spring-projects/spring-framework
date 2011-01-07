@@ -16,14 +16,16 @@
 
 package org.springframework.expression.spel;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static junit.framework.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -141,7 +143,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		private final ConversionService service = ConversionServiceFactory.createDefaultConversionService();
 
 		public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
-			return this.service.convert(value, TypeDescriptor.forObject(value), typeDescriptor);
+			return this.service.convert(value, typeDescriptor);
 		}
 		
 		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
