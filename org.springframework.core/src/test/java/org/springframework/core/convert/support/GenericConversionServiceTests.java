@@ -400,6 +400,19 @@ public class GenericConversionServiceTests {
 	public List<Integer> emptyListTarget;
 
 	@Test
+	public void emptyListToListDifferentTargetType() throws Exception {
+		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		List<String> list = new ArrayList<String>();
+		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListDifferentTarget"));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertEquals(LinkedList.class, conversionService.convert(list, sourceType, targetType).getClass());
+	}
+
+	public LinkedList<Integer> emptyListDifferentTarget;
+
+	@Test
 	public void emptyListToArray() throws Exception {
 		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
@@ -433,6 +446,19 @@ public class GenericConversionServiceTests {
 	}
 
 	public Map<String, String> emptyMapTarget;
+
+	@Test
+	public void emptyMapToMapDifferentTargetType() throws Exception {
+		conversionService.addConverter(new MapToMapConverter(conversionService));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		Map<String, String> map = new HashMap<String, String>();
+		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapDifferentTarget"));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertEquals(map, conversionService.convert(map, sourceType, targetType));
+	}
+
+	public Map<String, String> emptyMapDifferentTarget;
 	
 	private interface MyBaseInterface {
 

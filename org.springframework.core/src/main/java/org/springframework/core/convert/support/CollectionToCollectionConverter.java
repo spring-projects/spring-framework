@@ -62,9 +62,6 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
-		if (sourceCollection.isEmpty()) {
-			return sourceCollection;
-		}
 		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		for (Object sourceElement : sourceCollection) {
 			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor().applyIndexedObject(sourceElement), targetType.getElementTypeDescriptor());

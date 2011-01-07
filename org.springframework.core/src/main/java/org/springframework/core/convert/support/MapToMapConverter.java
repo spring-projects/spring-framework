@@ -67,9 +67,6 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Map<?, ?> sourceMap = (Map<?, ?>) source;
-		if (sourceMap.isEmpty()) {
-			return sourceMap;
-		}
 		Map targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
 		for (Object entry : sourceMap.entrySet()) {
 			Map.Entry sourceMapEntry = (Map.Entry) entry;
