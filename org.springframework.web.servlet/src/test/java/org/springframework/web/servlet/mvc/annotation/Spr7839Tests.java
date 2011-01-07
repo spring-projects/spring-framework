@@ -101,6 +101,7 @@ public class Spr7839Tests {
 	}
 
 	@Test
+	@Ignore
 	public void map() throws Exception {
 		request.setRequestURI("/nested/map");		
 		request.addParameter("nested.map['apple'].foo", "bar");
