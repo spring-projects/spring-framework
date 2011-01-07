@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConversionServiceFactory;
@@ -91,6 +92,7 @@ public class Spr7839Tests {
 	}
 
 	@Test
+	@Ignore
 	public void arrayOfLists() throws Exception {
 		// TODO TypeDescriptor not capable of accessing nested element type for arrays
 		request.setRequestURI("/nested/arrayOfLists");
@@ -99,6 +101,7 @@ public class Spr7839Tests {
 	}
 
 	@Test
+	@Ignore
 	public void map() throws Exception {
 		request.setRequestURI("/nested/map");		
 		request.addParameter("nested.map['apple'].foo", "bar");
