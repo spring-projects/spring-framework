@@ -1017,7 +1017,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				// Pass full property name and old value in here, since we want full
 				// conversion ability for map values.
-				// TODO method parameter nesting level should be token.keys.length + 1
 				Object convertedMapValue = convertIfNecessary(
 						propertyName, oldValue, pv.getValue(), mapValueType,
 						PropertyTypeDescriptor.forNestedType(mapValueType, new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length), pd));
