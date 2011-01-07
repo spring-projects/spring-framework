@@ -271,26 +271,6 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
-	public void testEmptyList() {
-		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
-		List list = Collections.emptyList();
-		List result = service.convert(list, List.class);
-		assertSame(list, result);
-		result = service.convert(list, list.getClass());
-		assertSame(list, result);
-	}
-
-	@Test
-	public void testEmptyMap() {
-		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
-		Map map = Collections.emptyMap();
-		Map result = service.convert(map, Map.class);
-		assertSame(map, result);
-		result = service.convert(map, map.getClass());
-		assertSame(map, result);
-	}
-
-	@Test
 	public void testStringToString() {
 		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
 		String value = "myValue";
@@ -407,7 +387,9 @@ public class GenericConversionServiceTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListDifferentTarget"));
 		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(LinkedList.class, conversionService.convert(list, sourceType, targetType).getClass());
+		LinkedList<Integer> result = (LinkedList<Integer>) conversionService.convert(list, sourceType, targetType);
+		assertEquals(LinkedList.class, result.getClass());
+		assertTrue(result.isEmpty());
 	}
 
 	public LinkedList<Integer> emptyListDifferentTarget;
@@ -455,10 +437,12 @@ public class GenericConversionServiceTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapDifferentTarget"));
 		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(map, conversionService.convert(map, sourceType, targetType));
+		LinkedHashMap<String, String> result = (LinkedHashMap<String, String>) conversionService.convert(map, sourceType, targetType);
+		assertEquals(map, result);
+		assertEquals(LinkedHashMap.class, result.getClass());
 	}
 
-	public Map<String, String> emptyMapDifferentTarget;
+	public LinkedHashMap<String, String> emptyMapDifferentTarget;
 	
 	private interface MyBaseInterface {
 
