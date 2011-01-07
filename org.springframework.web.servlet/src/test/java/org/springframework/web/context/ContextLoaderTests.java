@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,24 @@
 
 package org.springframework.web.context;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
@@ -33,9 +42,14 @@ import org.springframework.beans.factory.LifecycleBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.SimpleWebApplicationContext;
@@ -98,6 +112,39 @@ public final class ContextLoaderTests {
 		};
 		listener.contextInitialized(new ServletContextEvent(sc));
 		assertEquals("customizeContext() should have been called.", expectedContents, buffer.toString());
+	}
+
+	@Test
+	public void testContextLoaderListenerWithRegisteredContextConfigurer() {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
+		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM,
+				StringUtils.arrayToCommaDelimitedString(
+						new Object[]{TestContextInitializer.class.getName(), TestWebContextInitializer.class.getName()}));
+		ContextLoaderListener listener = new ContextLoaderListener();
+		listener.contextInitialized(new ServletContextEvent(sc));
+		WebApplicationContext wac = ContextLoaderListener.getCurrentWebApplicationContext();
+		TestBean testBean = wac.getBean(TestBean.class);
+		assertThat(testBean.getName(), equalTo("testName"));
+		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+	}
+
+	@Test
+	public void testContextLoaderListenerWithUnkownContextConfigurer() {
+		MockServletContext sc = new MockServletContext("");
+		// config file doesn't matter.  just a placeholder
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"/org/springframework/web/context/WEB-INF/empty-context.xml");
+		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM,
+				StringUtils.arrayToCommaDelimitedString(new Object[]{UnknownContextInitializer.class.getName()}));
+		ContextLoaderListener listener = new ContextLoaderListener();
+		try {
+			listener.contextInitialized(new ServletContextEvent(sc));
+			fail("expected exception");
+		} catch (IllegalArgumentException ex) {
+			assertTrue(ex.getMessage().contains("not assignable"));
+		}
 	}
 
 	@Test
@@ -254,6 +301,35 @@ public final class ContextLoaderTests {
 		}
 		catch (BeanCreationException ex) {
 			// expected
+		}
+	}
+
+	private static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+		public void initialize(ConfigurableApplicationContext applicationContext) {
+			ConfigurableEnvironment environment = applicationContext.getEnvironment();
+			environment.getPropertySources().addFirst(new PropertySource<Object>("testPropertySource") {
+				@Override
+				public Object getProperty(String key) {
+					return "name".equals(key) ? "testName" : null;
+				}
+			});
+		}
+	}
+
+	private static class TestWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+		public void initialize(ConfigurableWebApplicationContext applicationContext) {
+			ServletContext ctx = applicationContext.getServletContext(); // type-safe access to servlet-specific methods
+			ctx.setAttribute("initialized", true);
+		}
+	}
+
+	private static interface UnknownApplicationContext extends ConfigurableApplicationContext {
+		void unheardOf();
+	}
+
+	private static class UnknownContextInitializer implements ApplicationContextInitializer<UnknownApplicationContext> {
+		public void initialize(UnknownApplicationContext applicationContext) {
+			applicationContext.unheardOf();
 		}
 	}
 
