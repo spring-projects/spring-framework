@@ -94,14 +94,13 @@ public class Spr7839Tests {
 	@Test
 	@Ignore
 	public void arrayOfLists() throws Exception {
-		// TODO two issues here: no autogrow for array properties, and GenericCollectionResolver not capable of accessing nested element type
+		// TODO TypeDescriptor not capable of accessing nested element type for arrays
 		request.setRequestURI("/nested/arrayOfLists");
 		request.addParameter("nested.arrayOfLists[0]", "Nested1,Nested2");
 		adapter.handle(request, response, controller);
 	}
 
 	@Test
-	@Ignore
 	public void map() throws Exception {
 		request.setRequestURI("/nested/map");		
 		request.addParameter("nested.map['apple'].foo", "bar");
@@ -145,7 +144,6 @@ public class Spr7839Tests {
 
 		@RequestMapping("/nested/arrayOfLists")
 		public void handlerArrayOfLists(JavaBean bean) {
-			System.out.println(bean.nested.arrayOfLists[0].get(1).getClass());
 			assertEquals("Nested2", bean.nested.arrayOfLists[0].get(1).foo);
 		}
 
