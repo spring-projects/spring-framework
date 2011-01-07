@@ -98,6 +98,7 @@ public class Spr7839Tests {
 	}
 
 	@Test
+	@Ignore
 	public void arrayOfLists() throws Exception {
 		// TODO TypeDescriptor not capable of accessing nested element type for arrays
 		request.setRequestURI("/nested/arrayOfLists");
