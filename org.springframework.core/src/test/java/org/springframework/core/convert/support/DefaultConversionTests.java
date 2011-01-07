@@ -457,8 +457,7 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertStringToCollectionWithElementConversion() throws Exception {
-		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
-				new TypeDescriptor(getClass().getField("genericList")));
+		List result = (List) conversionService.convert("1,2,3", new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(3, result.size());
 		assertEquals(new Integer(1), result.get(0));
 		assertEquals(new Integer(2), result.get(1));
@@ -494,8 +493,7 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertObjectToCollectionWithElementConversion() throws Exception {
-		List<Integer> result = (List<Integer>) conversionService.convert(3L, TypeDescriptor.valueOf(Long.class),
-				new TypeDescriptor(getClass().getField("genericList")));
+		List<Integer> result = (List<Integer>) conversionService.convert(3L, new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(1, result.size());
 		assertEquals(new Integer(3), result.get(0));
 	}

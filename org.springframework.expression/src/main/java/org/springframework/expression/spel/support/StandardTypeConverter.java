@@ -75,4 +75,8 @@ public class StandardTypeConverter implements TypeConverter {
 		}
 	}
 
+	public Object convertValue(Object value, TypeDescriptor targetType) {
+		return convertValue(value, TypeDescriptor.forObject(value), targetType);
+	}	
+
 }

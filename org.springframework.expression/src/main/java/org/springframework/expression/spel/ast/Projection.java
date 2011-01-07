@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -85,7 +84,7 @@ public class Projection extends SpelNodeImpl {
 			Class<?> arrayElementType = null;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(new TypedValue(element ,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
+					state.pushActiveContextObject(new TypedValue(element));
 					state.enterScope("index", idx);
 					Object value = children[0].getValueInternal(state).getValue();
 					if (value != null && operandIsArray) {
@@ -105,9 +104,9 @@ public class Projection extends SpelNodeImpl {
 				}
 				Object resultArray = Array.newInstance(arrayElementType, result.size());
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
-				return new TypedValue(resultArray, op.getTypeDescriptor());
+				return new TypedValue(resultArray);
 			}
-			return new TypedValue(result, op.getTypeDescriptor());
+			return new TypedValue(result);
 		}
 		else {
 			if (operand==null) {
