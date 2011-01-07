@@ -37,7 +37,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -946,12 +945,18 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				int arrayIndex = Integer.parseInt(key);
 				Object oldValue = null;
 				try {
-					if (isExtractOldValueForEditor()) {
+					if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
 					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
 							PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length), pd));
+					// TODO reduce this grow algorithm along side the null gap algorithm for setting lists below ... the two are inconsistent
+					propValue = growArrayIfNecessary(propValue, arrayIndex, actualName);
 					Array.set(propValue, arrayIndex, convertedValue);
+					PropertyValue newValue = new PropertyValue(actualName, propValue);
+					newValue.resolvedDescriptor = pd;
+					newValue.conversionNecessary = false;
+					setPropertyValue(newValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
 					throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
