@@ -16,15 +16,18 @@
 
 package org.springframework.expression.spel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.Assert;
+
 import org.junit.Ignore;
 import org.junit.Test;
-
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
@@ -34,6 +37,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -708,6 +712,60 @@ public class SpringEL300Tests extends ExpressionTestCase {
         evaluated = exp.getValue(ctx);
         Assert.assertEquals("Arthur",evaluated);
     }
+	
+	@Test
+	public void testProjectionTypeDescriptors_1() throws Exception {
+        StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+        SpelExpressionParser parser = new SpelExpressionParser();
+        String el1 = "ls.![#this.equals('abc')]";
+        SpelExpression exp = parser.parseRaw(el1);
+        List value = (List)exp.getValue(ctx);
+        // value is list containing [true,false]
+        Assert.assertEquals(Boolean.class,value.get(0).getClass());
+        TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+        Assert.assertEquals(Boolean.class,evaluated.getElementType());
+	}
+	
+	@Test
+	public void testProjectionTypeDescriptors_2() throws Exception {
+        StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+        SpelExpressionParser parser = new SpelExpressionParser();
+        String el1 = "as.![#this.equals('abc')]";
+        SpelExpression exp = parser.parseRaw(el1);
+        Object[] value = (Object[])exp.getValue(ctx);
+        // value is array containing [true,false]
+        Assert.assertEquals(Boolean.class,value[0].getClass());
+        TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+        Assert.assertEquals(Boolean.class,evaluated.getElementType());
+	}
+	
+	@Test
+	public void testProjectionTypeDescriptors_3() throws Exception {
+        StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+        SpelExpressionParser parser = new SpelExpressionParser();
+        String el1 = "ms.![key.equals('abc')]";
+        SpelExpression exp = parser.parseRaw(el1);
+        List value = (List)exp.getValue(ctx);
+        // value is list containing [true,false]
+        Assert.assertEquals(Boolean.class,value.get(0).getClass());
+        TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+        Assert.assertEquals(Boolean.class,evaluated.getElementType());
+	}
+	
+	static class C {
+		public List<String> ls;
+		public String[] as;
+		public Map<String,String> ms;
+		C() {
+			ls = new ArrayList<String>();
+			ls.add("abc");
+			ls.add("def");
+			as = new String[]{"abc","def"};
+			ms = new HashMap<String,String>();
+			ms.put("abc","xyz");
+			ms.put("def","pqr");
+		}
+	}
 
 	
 }
