@@ -43,7 +43,11 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType);
+		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
+		if (Object.class.equals(sourceElementType.getType())) {
+			return true;
+		}		
+		return this.conversionService.canConvert(sourceElementType, targetType);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
