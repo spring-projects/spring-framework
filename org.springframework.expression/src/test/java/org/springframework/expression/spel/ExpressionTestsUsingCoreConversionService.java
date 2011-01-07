@@ -121,8 +121,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		assertTrue(evaluationContext.getTypeConverter()
 				.canConvert(TypeDescriptor.valueOf(String.class), collectionType));
 		// ... and it can be done successfully
-		assertEquals("[1, 2, 3, 4]", evaluationContext.getTypeConverter().convertValue("1,2,3,4",
-				TypeDescriptor.valueOf(String.class), collectionType).toString());
+		assertEquals("[1, 2, 3, 4]", evaluationContext.getTypeConverter().convertValue("1,2,3,4", collectionType).toString());
 
 
 		evaluationContext.setVariable("target", new TestTarget());
@@ -153,6 +152,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) throws EvaluationException {
 			return this.service.convert(value, sourceType, targetType);
 		}
+		
 	}
 
 }

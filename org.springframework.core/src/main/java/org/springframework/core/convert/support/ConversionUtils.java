@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Map;
-
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -41,26 +39,6 @@ abstract class ConversionUtils {
 		catch (Exception ex) {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}
-	}
-
-	public static TypeDescriptor[] getMapEntryTypes(Map<?, ?> sourceMap) {
-		Class<?> keyType = null;
-		Class<?> valueType = null;
-		for (Object entry : sourceMap.entrySet()) {
-			Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-			Object key = mapEntry.getKey();
-			if (keyType == null && key != null) {
-				keyType = key.getClass();
-			}
-			Object value = mapEntry.getValue();
-			if (valueType == null && value != null) {
-				valueType = value.getClass();
-			}
-			if (keyType!= null && valueType != null) {
-				break;
-			}
-		}
-		return new TypeDescriptor[] { TypeDescriptor.valueOf(keyType), TypeDescriptor.valueOf(valueType) };
 	}
 
 }

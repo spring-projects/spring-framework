@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -101,9 +100,9 @@ public class Selection extends SpelNodeImpl {
 				Map resultMap = new HashMap();
 				Object lastValue = result.get(lastKey);
 				resultMap.put(lastKey,lastValue);
-				return new TypedValue(resultMap,TypeDescriptor.valueOf(Map.class));
+				return new TypedValue(resultMap);
 			}
-			return new TypedValue(result,op.getTypeDescriptor());
+			return new TypedValue(result);
 		} else if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
 			List<Object> data = new ArrayList<Object>();
 			Collection<?> c = (operand instanceof Collection) ?
@@ -113,13 +112,13 @@ public class Selection extends SpelNodeImpl {
 			int idx = 0;
 			for (Object element : data) {
 				try {
-					state.pushActiveContextObject(new TypedValue(element, op.getTypeDescriptor().getElementTypeDescriptor()));
+					state.pushActiveContextObject(new TypedValue(element));
 					state.enterScope("index", idx);
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST) {
-								return new TypedValue(element, op.getTypeDescriptor().getElementTypeDescriptor());
+								return new TypedValue(element);
 							}
 							result.add(element);
 						}
@@ -137,16 +136,16 @@ public class Selection extends SpelNodeImpl {
 				return TypedValue.NULL;
 			}
 			if (variant == LAST) {
-				return new TypedValue(result.get(result.size() - 1), op.getTypeDescriptor().getElementTypeDescriptor());
+				return new TypedValue(result.get(result.size() - 1));
 			}
 			if (operand instanceof Collection) {
-				return new TypedValue(result,op.getTypeDescriptor());
+				return new TypedValue(result);
 			}
 			else {
 				Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementType());
 				Object resultArray = Array.newInstance(elementType, result.size());
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
-				return new TypedValue(resultArray, op.getTypeDescriptor());
+				return new TypedValue(resultArray);
 			}
 		} else {
 			if (operand==null) {

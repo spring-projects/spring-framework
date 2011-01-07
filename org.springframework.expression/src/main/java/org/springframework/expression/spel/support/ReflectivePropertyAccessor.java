@@ -218,7 +218,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		TypeDescriptor typeDescriptor = getTypeDescriptor(context, target, name);
 		if (typeDescriptor != null) {
 			try {
-				possiblyConvertedNewValue = context.getTypeConverter().convertValue(newValue, TypeDescriptor.forObject(newValue), typeDescriptor);
+				possiblyConvertedNewValue = context.getTypeConverter().convertValue(newValue, typeDescriptor);
 			}
 			catch (EvaluationException evaluationException) {
 				throw new AccessException("Type conversion failure",evaluationException);

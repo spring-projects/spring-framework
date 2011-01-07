@@ -322,8 +322,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		for (int i = 0; i < newObjectArray.length; i++) {
 			SpelNode elementNode = initializer.getChild(i);
 			Object arrayEntry = elementNode.getValue(state);
-			newObjectArray[i] = typeConverter.convertValue(arrayEntry, TypeDescriptor.forObject(arrayEntry),
-					toTypeDescriptor);
+			newObjectArray[i] = typeConverter.convertValue(arrayEntry, toTypeDescriptor);
 		}
 	}
 

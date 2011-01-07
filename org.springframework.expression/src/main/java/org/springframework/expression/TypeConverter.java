@@ -49,5 +49,9 @@ public interface TypeConverter {
 	 * @throws EvaluationException if conversion is not possible
 	 */
 	Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	// 3.1 additions for encapsulation of TypeDescriptor.forObject(value);
+	
+	Object convertValue(Object value, TypeDescriptor targetType);
 	
 }
