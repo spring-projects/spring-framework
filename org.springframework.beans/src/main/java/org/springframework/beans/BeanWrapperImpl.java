@@ -848,8 +848,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			for (int i = length; i < Array.getLength(newArray); i++) {
 				Array.set(newArray, i, newValue(componentType, name));
 			}
+			// TODO this is not efficient because conversion may create a copy ... set directly because we know its assignable.
 			setPropertyValue(name, newArray);
-			return newArray;
+			return getPropertyValue(name);
 		}
 		else {
 			return array;
@@ -953,10 +954,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					// TODO reduce this grow algorithm along side the null gap algorithm for setting lists below ... the two are inconsistent
 					propValue = growArrayIfNecessary(propValue, arrayIndex, actualName);
 					Array.set(propValue, arrayIndex, convertedValue);
-					PropertyValue newValue = new PropertyValue(actualName, propValue);
-					newValue.resolvedDescriptor = pd;
-					newValue.conversionNecessary = false;
-					setPropertyValue(newValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
 					throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
