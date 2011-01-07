@@ -961,7 +961,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
 							PropertyTypeDescriptor.forNestedType(requiredType, new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length), pd));
-					// TODO reduce this grow algorithm along side the null gap algorithm for setting lists below ... the two are inconsistent
+					// TODO review this grow algorithm along side the null gap algorithm for setting lists below ... the two are inconsistent
 					propValue = growArrayIfNecessary(propValue, arrayIndex, actualName);
 					Array.set(propValue, arrayIndex, convertedValue);
 				}
