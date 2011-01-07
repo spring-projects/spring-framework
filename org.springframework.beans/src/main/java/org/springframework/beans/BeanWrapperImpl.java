@@ -986,7 +986,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						}
 					}
 					list.add(convertedValue);
-					System.out.println(list);
 				}
 			}
 			else if (propValue instanceof Map) {
