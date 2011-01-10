@@ -215,7 +215,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, Charset charSet) {
-		this(type, subtype, Collections.singletonMap(PARAM_CHARSET, charSet.toString()));
+		this(type, subtype, Collections.singletonMap(PARAM_CHARSET, charSet.name()));
 	}
 
 	/**
