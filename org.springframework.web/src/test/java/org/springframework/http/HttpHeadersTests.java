@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.GregorianCalendar;
@@ -64,6 +65,13 @@ public class HttpHeadersTests {
 		headers.setAcceptCharset(charsets);
 		assertEquals("Invalid Accept header", charsets, headers.getAcceptCharset());
 		assertEquals("Invalid Accept header", "utf-8, iso-8859-1", headers.getFirst("Accept-Charset"));
+	}
+
+	@Test
+	public void acceptCharsetWildcard() {
+		headers.set("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+		assertEquals("Invalid Accept header", Arrays.asList(Charset.forName("ISO-8859-1"), Charset.forName("UTF-8")),
+				headers.getAcceptCharset());
 	}
 
 	@Test
@@ -222,11 +230,12 @@ public class HttpHeadersTests {
 	@Test
 	public void contentDisposition() {
 		headers.setContentDispositionFormData("name", null);
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"", headers.getFirst("Content-Disposition"));
-
+		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"",
+				headers.getFirst("Content-Disposition"));
 
 		headers.setContentDispositionFormData("name", "filename");
-		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"", headers.getFirst("Content-Disposition"));
+		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"",
+				headers.getFirst("Content-Disposition"));
 	}
 
 

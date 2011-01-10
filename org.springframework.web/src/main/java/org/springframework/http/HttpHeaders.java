@@ -177,11 +177,15 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 			String[] tokens = value.split(",\\s*");
 			for (String token : tokens) {
 				int paramIdx = token.indexOf(';');
+				String charsetName;
 				if (paramIdx == -1) {
-					result.add(Charset.forName(token));
+					charsetName = token;
 				}
 				else {
-					result.add(Charset.forName(token.substring(0, paramIdx)));
+					charsetName = token.substring(0, paramIdx);
+				}
+				if (!charsetName.equals("*")) {
+					result.add(Charset.forName(charsetName));
 				}
 			}
 		}
