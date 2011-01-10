@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,10 @@ package org.springframework.web.servlet.config;
 
 import java.util.Date;
 import java.util.Locale;
-
 import javax.servlet.RequestDispatcher;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,6 +62,8 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Keith Donald
  * @author Arjen Poutsma 
@@ -84,7 +84,7 @@ public class MvcNamespaceTests {
 	public void testDefaultConfig() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml", getClass()));
-		assertEquals(5, appContext.getBeanDefinitionCount());
+		assertEquals(8, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -124,7 +124,7 @@ public class MvcNamespaceTests {
 	public void testCustomConversionService() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml", getClass()));
-		assertEquals(5, appContext.getBeanDefinitionCount());
+		assertEquals(8, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -154,7 +154,7 @@ public class MvcNamespaceTests {
 	public void testCustomValidator() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-validator.xml", getClass()));
-		assertEquals(5, appContext.getBeanDefinitionCount());
+		assertEquals(8, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
@@ -176,7 +176,7 @@ public class MvcNamespaceTests {
 	public void testInterceptors() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml", getClass()));
-		assertEquals(8, appContext.getBeanDefinitionCount());
+		assertEquals(11, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -279,7 +279,7 @@ public class MvcNamespaceTests {
 	}
 	
 	@Test
-	public void testDefaultServletHandlerWithOptionalAtrributes() throws Exception {
+	public void testDefaultServletHandlerWithOptionalAttributes() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-default-servlet-optional-attrs.xml", getClass()));
 		assertEquals(3, appContext.getBeanDefinitionCount());
@@ -311,7 +311,7 @@ public class MvcNamespaceTests {
 	public void testBeanDecoration() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-bean-decoration.xml", getClass()));
-		assertEquals(7, appContext.getBeanDefinitionCount());
+		assertEquals(10, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -335,7 +335,7 @@ public class MvcNamespaceTests {
 	public void testViewControllers() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml", getClass()));
-		assertEquals(9, appContext.getBeanDefinitionCount());
+		assertEquals(12, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		DefaultAnnotationHandlerMapping mapping = appContext.getBean(DefaultAnnotationHandlerMapping.class);
@@ -394,7 +394,7 @@ public class MvcNamespaceTests {
 	public void testViewControllersOnWebSphere() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml", getClass()));
-		assertEquals(9, appContext.getBeanDefinitionCount());
+		assertEquals(12, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);

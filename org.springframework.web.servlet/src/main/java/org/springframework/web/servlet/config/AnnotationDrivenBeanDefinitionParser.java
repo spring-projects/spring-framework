@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,10 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
+import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
  * {@link BeanDefinitionParser} that parses the {@code annotation-driven} element to configure a Spring MVC web
@@ -111,11 +114,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		bindingDef.getPropertyValues().add("conversionService", conversionService);
 		bindingDef.getPropertyValues().add("validator", validator);
 
+		ManagedList<RootBeanDefinition> messageConverters = getMessageConverters(source);
+
 		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 		annAdapterDef.setSource(source);
 		annAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		annAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
-		annAdapterDef.getPropertyValues().add("messageConverters", getMessageConverters(source));
+		annAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
 		String annAdapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
@@ -127,9 +132,34 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
 		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, csInterceptorDef);
 		String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedCsInterceptorDef);
+
+		RootBeanDefinition annExceptionResolver = new RootBeanDefinition(AnnotationMethodHandlerExceptionResolver.class);
+		annExceptionResolver.setSource(source);
+		annExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		annExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
+		annExceptionResolver.getPropertyValues().add("order", 0);
+		String annExceptionResolverName =
+				parserContext.getReaderContext().registerWithGeneratedName(annExceptionResolver);
+
+		RootBeanDefinition responseStatusExceptionResolver = new RootBeanDefinition(ResponseStatusExceptionResolver.class);
+		responseStatusExceptionResolver.setSource(source);
+		responseStatusExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		responseStatusExceptionResolver.getPropertyValues().add("order", 1);
+		String responseStatusExceptionResolverName =
+				parserContext.getReaderContext().registerWithGeneratedName(responseStatusExceptionResolver);
+
+		RootBeanDefinition defaultExceptionResolver = new RootBeanDefinition(DefaultHandlerExceptionResolver.class);
+		defaultExceptionResolver.setSource(source);
+		defaultExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		defaultExceptionResolver.getPropertyValues().add("order", 2);
+		String defaultExceptionResolverName =
+				parserContext.getReaderContext().registerWithGeneratedName(defaultExceptionResolver);
 		
 		parserContext.registerComponent(new BeanComponentDefinition(annMappingDef, annMappingName));
 		parserContext.registerComponent(new BeanComponentDefinition(annAdapterDef, annAdapterName));
+		parserContext.registerComponent(new BeanComponentDefinition(annExceptionResolver, annExceptionResolverName));
+		parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver, responseStatusExceptionResolverName));
+		parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver, defaultExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(mappedCsInterceptorDef, mappedInterceptorName));
 		parserContext.popAndRegisterContainingComponent();
 		
