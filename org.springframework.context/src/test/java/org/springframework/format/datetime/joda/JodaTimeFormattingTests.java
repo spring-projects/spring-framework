@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,15 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalDateAnnotatedWithError() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateAnnotated", "Oct 031, 2009");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getFieldErrorCount("localDateAnnotated"));
+		assertEquals("Oct 031, 2009", binder.getBindingResult().getFieldValue("localDateAnnotated"));
+	}
+
+	@Test
 	public void testBindNestedLocalDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("children[0].localDateAnnotated", "Oct 31, 2009");
@@ -125,6 +134,16 @@ public class JodaTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("Oct 31, 2009", binder.getBindingResult().getFieldValue("localDateAnnotated"));
+	}
+
+	@Test
+	public void testBindLocalDateAnnotatedWithDirectFieldAccessAndError() {
+		binder.initDirectFieldAccess();
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateAnnotated", "Oct 031, 2009");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getFieldErrorCount("localDateAnnotated"));
+		assertEquals("Oct 031, 2009", binder.getBindingResult().getFieldValue("localDateAnnotated"));
 	}
 
 	@Test
