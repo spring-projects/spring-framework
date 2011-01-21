@@ -1172,7 +1172,7 @@ public class ExtendedTest extends BaseTest {
 
         <para>Consider the scenario of testing a
         <classname>HibernateTitleRepository</classname> class, as outlined in the <link
-        linkend="testing-fixture-di">Goals</link> section. The next four
+        linkend="integration-testing-goals">Goals</link> section. The next four
         code listings demonstrate the use of <interfacename>@Autowired</interfacename>
         and <interfacename>@Resource</interfacename> on fields and
         setter methods. The application context configuration is presented
@@ -1299,8 +1299,8 @@ public class HibernateTitleRepositoryTests {
         &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
     &lt;/bean&gt;
     
-    &lt;bean id="sessionFactory" 
-				class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
+    &lt;bean id="sessionFactory"
+            class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
         <lineannotation>&lt;!-- configuration elided for brevity --&gt;</lineannotation>
     &lt;/bean&gt;
 
@@ -1937,8 +1937,11 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       </listitem>
 
       <listitem>
-        <para><ulink url="http://www.easymock.org/">EasyMock</ulink>: Used
-        by the Spring Framework in its test suite.</para>
+        <para><ulink url="http://www.easymock.org/">EasyMock</ulink>:
+        Java library <quote><emphasis>that provides Mock Objects for interfaces
+        (and objects through the class extension) by generating them
+        on the fly using Java's proxy mechanism.</emphasis></quote>
+        Used by the Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
