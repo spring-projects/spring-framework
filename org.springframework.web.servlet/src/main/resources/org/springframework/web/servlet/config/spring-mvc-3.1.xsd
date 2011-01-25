@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xsd:schema xmlns="http://www.springframework.org/schema/mvc"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:tool="http://www.springframework.org/schema/tool"
 	targetNamespace="http://www.springframework.org/schema/mvc"
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
@@ -16,6 +17,47 @@
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
+			<xsd:all minOccurs="0">
+				<xsd:element name="message-converters">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures one or more HttpMessageConverter types to use for converting @RequestBody method parameters and @ResponseBody method return values.
+	Using this configuration element is optional.
+	If used it overrides the default set of HttpMessageConverter type registrations.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HttpMessageConverter bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>			
+				<xsd:element name="formatters">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Registers custom Formatter and AnnotationFormatterFactory types with the FormattingConversionService.
+	Specifying custom formatters does not cancel the ones already built-in.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The Formatter or the AnnotationFormatterFactory bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>			
+			</xsd:all>
 			<xsd:attribute name="conversion-service" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation source="java:org.springframework.core.convert.ConversionService"><![CDATA[
@@ -41,6 +83,20 @@
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
 							<tool:expected-type type="java:org.springframework.validation.Validator" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="message-codes-resolver" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The bean name of a MessageCodesResolver to use to build message codes from data binding and validation error codes.
+	This attribute is not required. 
+	If not specified the DefaultMessageCodesResolver is used.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.validation.MessageCodesResolver" />
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -161,11 +217,11 @@
 								</xsd:complexType>
 							</xsd:element>
 							<xsd:element ref="beans:bean">
-										<xsd:annotation>
-											<xsd:documentation><![CDATA[
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
 	The interceptor's bean definition.
-											]]></xsd:documentation>
-										</xsd:annotation>
+									]]></xsd:documentation>
+								</xsd:annotation>
 							</xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
