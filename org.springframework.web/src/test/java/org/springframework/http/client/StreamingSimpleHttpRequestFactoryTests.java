@@ -33,7 +33,7 @@ public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestF
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-		factory.setStreaming(true);
+		factory.setBufferRequestBody(false);
 		return factory;
 	}
 
