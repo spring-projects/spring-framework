@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,13 @@ import org.springframework.util.Assert;
  */
 public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
 
+	private static final int DEFAULT_CHUNK_SIZE = 4096;
+
 	private Proxy proxy;
+
+	private boolean bufferRequestBody = true;
+
+	private int chunkSize = DEFAULT_CHUNK_SIZE;
 
 	/**
 	 * Sets the {@link Proxy} to use for this request factory.
@@ -45,16 +51,48 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		this.proxy = proxy;
 	}
 
-	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		HttpURLConnection connection = openConnection(uri.toURL(), proxy);
-		prepareConnection(connection, httpMethod.name());
-		return new SimpleClientHttpRequest(connection);
+	/**
+	 * Indicates whether this request factory should buffer the {@linkplain ClientHttpRequest#getBody() request body}
+	 * internally.
+	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is recommended to change this
+	 * property to {@code false}, so as not to run out of memory. This will result in a {@link ClientHttpRequest}
+	 * that either streams directly to the underlying {@link HttpURLConnection} (if the
+	 * {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length} is known in advance), or that will
+	 * use "Chunked transfer encoding" (if the {@code Content-Length} is not known in advance).
+	 *
+	 * @see #setChunkSize(int)
+	 * @see HttpURLConnection#setFixedLengthStreamingMode(int)
+	 */
+	public void setBufferRequestBody(boolean bufferRequestBody) {
+		this.bufferRequestBody = bufferRequestBody;
 	}
 
 	/**
-	 * Opens and returns a connection to the given URL.
-	 * <p>The default implementation uses the given {@linkplain #setProxy(java.net.Proxy) proxy} - if any - to open a
-	 * connection.
+	 * Sets the number of bytes to write in each chunk when not buffering request bodies locally.
+	 * <p>Note that this parameter is only used when {@link #setBufferRequestBody(boolean) bufferRequestBody} is set
+	 * to {@code false}, and the {@link org.springframework.http.HttpHeaders#getContentLength() Content-Length}
+	 * is not known in advance.
+	 *
+	 * @see #setBufferRequestBody(boolean)
+	 */
+	public void setChunkSize(int chunkSize) {
+		this.chunkSize = chunkSize;
+	}
+
+	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		HttpURLConnection connection = openConnection(uri.toURL(), proxy);
+		prepareConnection(connection, httpMethod.name());
+		if (bufferRequestBody) {
+			return new BufferingSimpleClientHttpRequest(connection);
+		}
+		else {
+			return new StreamingSimpleClientHttpRequest(connection, chunkSize);
+		}
+	}
+
+	/**
+	 * Opens and returns a connection to the given URL. <p>The default implementation uses the given {@linkplain
+	 * #setProxy(java.net.Proxy) proxy} - if any - to open a connection.
 	 *
 	 * @param url the URL to open a connection to
 	 * @param proxy the proxy to use, may be {@code null}
@@ -68,8 +106,8 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
-	 * Template method for preparing the given {@link HttpURLConnection}.
-	 * <p>The default implementation prepares the connection for input and output, and sets the HTTP method.
+	 * Template method for preparing the given {@link HttpURLConnection}. <p>The default implementation prepares the
+	 * connection for input and output, and sets the HTTP method.
 	 *
 	 * @param connection the connection to prepare
 	 * @param httpMethod the HTTP request method ({@code GET}, {@code POST}, etc.)

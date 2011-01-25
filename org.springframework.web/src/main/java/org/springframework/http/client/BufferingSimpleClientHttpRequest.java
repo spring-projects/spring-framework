@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * {@link ClientHttpRequest} implementation that uses standard J2SE facilities to execute requests.
+ * {@link ClientHttpRequest} implementation that uses standard J2SE facilities to execute buffered requests.
  * Created via the {@link SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
  * @since 3.0
  * @see SimpleClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
  */
-final class SimpleClientHttpRequest extends AbstractClientHttpRequest {
+final class BufferingSimpleClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final HttpURLConnection connection;
 
-
-	SimpleClientHttpRequest(HttpURLConnection connection) {
+	BufferingSimpleClientHttpRequest(HttpURLConnection connection) {
 		this.connection = connection;
 	}
 
