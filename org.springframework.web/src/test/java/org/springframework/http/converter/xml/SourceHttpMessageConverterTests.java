@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.converter.xml;
 
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
@@ -24,7 +25,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -35,6 +35,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
+
+import static org.custommonkey.xmlunit.XMLAssert.*;
 
 /** @author Arjen Poutsma */
 @SuppressWarnings("unchecked")
@@ -100,7 +102,7 @@ public class SourceHttpMessageConverterTests {
 	}
 
 	@Test
-	public void write() throws Exception {
+	public void writeDOMSource() throws Exception {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
 		Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
@@ -115,7 +117,34 @@ public class SourceHttpMessageConverterTests {
 				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
+		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
+				outputMessage.getHeaders().getContentLength());
+	}
+	
+	@Test
+	public void writeSAXSource() throws Exception {
+		String xml = "<root>Hello World</root>";
+		SAXSource saxSource = new SAXSource(new InputSource(new StringReader(xml)));
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(saxSource, null, outputMessage);
+		assertXMLEqual("Invalid result", "<root>Hello World</root>",
+				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals("Invalid content-type", new MediaType("application", "xml"),
+				outputMessage.getHeaders().getContentType());
 	}
 
+	@Test
+	public void writeStreamSource() throws Exception {
+		String xml = "<root>Hello World</root>";
+		StreamSource streamSource = new StreamSource(new StringReader(xml));
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(streamSource, null, outputMessage);
+		assertXMLEqual("Invalid result", "<root>Hello World</root>",
+				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals("Invalid content-type", new MediaType("application", "xml"),
+				outputMessage.getHeaders().getContentType());
+	}
 
 }

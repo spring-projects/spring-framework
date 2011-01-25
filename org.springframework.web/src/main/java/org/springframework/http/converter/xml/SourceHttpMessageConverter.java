@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.converter.xml;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -31,13 +32,14 @@ import javax.xml.transform.stream.StreamSource;
 import org.xml.sax.InputSource;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
- * that can read and write {@link Source} objects.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and write {@link
+ * Source} objects.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -85,12 +87,47 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractXmlHtt
 	}
 
 	@Override
+	protected Long getContentLength(T t, MediaType contentType) {
+		if (t instanceof DOMSource) {
+			try {
+				CountingOutputStream os = new CountingOutputStream();
+				transform(t, new StreamResult(os));
+				return os.count;
+			}
+			catch (TransformerException ex) {
+				// ignore
+			}
+		}
+		return null;
+	}
+
+	@Override
 	protected void writeToResult(T t, HttpHeaders headers, Result result) throws IOException {
 		try {
 			transform(t, result);
 		}
 		catch (TransformerException ex) {
 			throw new HttpMessageNotWritableException("Could not transform [" + t + "] to [" + result + "]", ex);
+		}
+	}
+
+	private static class CountingOutputStream extends OutputStream {
+
+		private long count = 0;
+
+		@Override
+		public void write(int b) throws IOException {
+			count++;
+		}
+
+		@Override
+		public void write(byte[] b) throws IOException {
+			count += b.length;
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			count += len;
 		}
 	}
 

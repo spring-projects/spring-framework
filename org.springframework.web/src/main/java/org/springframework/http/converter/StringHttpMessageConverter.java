@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,25 +67,19 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	@Override
 	protected String readInternal(Class clazz, HttpInputMessage inputMessage) throws IOException {
-		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
+		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		return FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
 	}
 
 	@Override
 	protected Long getContentLength(String s, MediaType contentType) {
-		if (contentType != null && contentType.getCharSet() != null) {
-			Charset charset = contentType.getCharSet();
-			try {
-				return (long) s.getBytes(charset.name()).length;
-			}
-			catch (UnsupportedEncodingException ex) {
-				// should not occur
-				throw new InternalError(ex.getMessage());
-			}
+		Charset charset = getContentTypeCharset(contentType);
+		try {
+			return (long) s.getBytes(charset.name()).length;
 		}
-		else {
-			return null;
+		catch (UnsupportedEncodingException ex) {
+			// should not occur
+			throw new InternalError(ex.getMessage());
 		}
 	}
 
@@ -94,8 +88,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		if (writeAcceptCharset) {
 			outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
 		}
-		MediaType contentType = outputMessage.getHeaders().getContentType();
-		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
+		Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
 		FileCopyUtils.copy(s, new OutputStreamWriter(outputMessage.getBody(), charset));
 	}
 
@@ -108,6 +101,15 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 */
 	protected List<Charset> getAcceptedCharsets() {
 		return this.availableCharsets;
+	}
+
+	private Charset getContentTypeCharset(MediaType contentType) {
+		if (contentType != null && contentType.getCharSet() != null) {
+			return contentType.getCharSet();
+		}
+		else {
+			return DEFAULT_CHARSET;
+		}
 	}
 
 }

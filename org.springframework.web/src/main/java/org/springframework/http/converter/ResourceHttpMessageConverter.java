@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,12 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -44,49 +41,28 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @since 3.0.2
  */
-public class ResourceHttpMessageConverter implements HttpMessageConverter<Resource> {
+public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<Resource> {
 
 	private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+	public ResourceHttpMessageConverter() {
+		super(MediaType.ALL);
+	}
+	@Override
+	protected boolean supports(Class<?> clazz) {
 		return Resource.class.isAssignableFrom(clazz);
 	}
 
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return Resource.class.isAssignableFrom(clazz);
-	}
-
-	public List<MediaType> getSupportedMediaTypes() {
-		return Collections.singletonList(MediaType.ALL);
-	}
-
-	public Resource read(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
+	@Override
+	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
-
 		byte[] body = FileCopyUtils.copyToByteArray(inputMessage.getBody());
 		return new ByteArrayResource(body);
 	}
 
-	public void write(Resource resource, MediaType contentType, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException {
-
-		HttpHeaders headers = outputMessage.getHeaders();
-		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-			contentType = getContentType(resource);
-		}
-		if (contentType != null) {
-			headers.setContentType(contentType);
-		}
-		Long contentLength = getContentLength(resource, contentType);
-		if (contentLength != null) {
-			headers.setContentLength(contentLength);
-		}
-		FileCopyUtils.copy(resource.getInputStream(), outputMessage.getBody());
-		outputMessage.getBody().flush();
-	}
-
-	private MediaType getContentType(Resource resource) {
+	@Override
+	protected MediaType getDefaultContentType(Resource resource) {
 		if (jafPresent) {
 			return ActivationMediaTypeFactory.getMediaType(resource);
 		}
@@ -95,10 +71,22 @@ public class ResourceHttpMessageConverter implements HttpMessageConverter<Resour
 		}
 	}
 
-	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
-		return resource.contentLength();
+	@Override
+	protected Long getContentLength(Resource resource, MediaType contentType) {
+		try {
+			return resource.contentLength();
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
+	@Override
+	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
+		FileCopyUtils.copy(resource.getInputStream(), outputMessage.getBody());
+		outputMessage.getBody().flush();
+	}
 
 	/**
 	 * Inner class to avoid hard-coded JAF dependency.
