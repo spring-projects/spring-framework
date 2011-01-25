@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.format.AnnotationFormatterFactory;
+import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
@@ -38,10 +39,8 @@ import org.springframework.util.StringValueResolver;
 
 /**
  * A factory for a {@link FormattingConversionService} that installs default
- * formatters for common types such as numbers and datetimes.
- *
- * <p>Subclasses may override {@link #installFormatters(FormatterRegistry)}
- * to register custom formatters.
+ * and custom converters and formatters for common types such as numbers 
+ * and datetimes .
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -55,19 +54,29 @@ public class FormattingConversionServiceFactoryBean
 
 	private Set<?> converters;
 
+	private Set<?> formatters;
+
 	private StringValueResolver embeddedValueResolver;
 
 	private FormattingConversionService conversionService;
 
-
 	/**
-	 * Configure the set of custom converter objects that should be added:
-	 * implementing {@link org.springframework.core.convert.converter.Converter},
-	 * {@link org.springframework.core.convert.converter.ConverterFactory},
-	 * or {@link org.springframework.core.convert.converter.GenericConverter}.
+	 * Configure the set of custom converter objects that should be added.
+	 * @param converters instances of 
+	 * 		{@link org.springframework.core.convert.converter.Converter},
+	 * 		{@link org.springframework.core.convert.converter.ConverterFactory} or
+	 * 		{@link org.springframework.core.convert.converter.GenericConverter}.
 	 */
 	public void setConverters(Set<?> converters) {
 		this.converters = converters;
+	}
+
+	/**
+	 * Configure the set of custom formatter objects that should be added.
+	 * @param formatters instances of {@link Formatter} or {@link AnnotationFormatterFactory}.
+	 */
+	public void setFormatters(Set<?> formatters) {
+		this.formatters = formatters;
 	}
 
 	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
@@ -111,6 +120,18 @@ public class FormattingConversionServiceFactoryBean
 		}
 		else {
 			registry.addFormatterForFieldAnnotation(new NoJodaDateTimeFormatAnnotationFormatterFactory());
+		}
+		if (this.formatters != null) {
+			for (Object formatter : this.formatters) {
+				if (formatter instanceof Formatter<?>) {
+					this.conversionService.addFormatter((Formatter<?>) formatter);
+				} else if (formatter instanceof AnnotationFormatterFactory<?>) {
+					this.conversionService.addFormatterForFieldAnnotation((AnnotationFormatterFactory<?>) formatter);
+				} else {
+					throw new IllegalArgumentException(
+							"Custom formatters must be implementations of Formatter or AnnotationFormatterFactory");
+				}
+			}
 		}
 	}
 

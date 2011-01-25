@@ -16,9 +16,8 @@
 
 package org.springframework.web.servlet.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -39,6 +38,7 @@ import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConvert
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.xml.DomUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -49,6 +49,7 @@ import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExc
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.w3c.dom.Element;
 
 /**
  * {@link BeanDefinitionParser} that parses the {@code annotation-driven} element to configure a Spring MVC web
@@ -75,6 +76,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
@@ -107,14 +109,16 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
+		RuntimeBeanReference messageCodesResolver = getMessageCodesResolver(element, source, parserContext);
 		
 		RootBeanDefinition bindingDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 		bindingDef.setSource(source);
 		bindingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		bindingDef.getPropertyValues().add("conversionService", conversionService);
 		bindingDef.getPropertyValues().add("validator", validator);
+		bindingDef.getPropertyValues().add("messageCodesResolver", messageCodesResolver);
 
-		ManagedList<RootBeanDefinition> messageConverters = getMessageConverters(source);
+		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
 
 		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 		annAdapterDef.setSource(source);
@@ -166,10 +170,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 	
-
 	private RuntimeBeanReference getConversionService(Element element, Object source, ParserContext parserContext) {
+		RuntimeBeanReference conversionServiceRef;
 		if (element.hasAttribute("conversion-service")) {
-			return new RuntimeBeanReference(element.getAttribute("conversion-service"));
+			conversionServiceRef = new RuntimeBeanReference(element.getAttribute("conversion-service"));
 		}
 		else {
 			RootBeanDefinition conversionDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
@@ -177,8 +181,21 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			conversionDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			String conversionName = parserContext.getReaderContext().registerWithGeneratedName(conversionDef);
 			parserContext.registerComponent(new BeanComponentDefinition(conversionDef, conversionName));
-			return new RuntimeBeanReference(conversionName);
+			conversionServiceRef = new RuntimeBeanReference(conversionName);
 		}
+		Element formattersElement = DomUtils.getChildElementByTagName(element, "formatters");
+		if (formattersElement != null) {
+			ManagedList<BeanDefinitionHolder> formatters = new ManagedList<BeanDefinitionHolder>();
+			formatters.setSource(source);
+			for (Element formatter : DomUtils.getChildElementsByTagName(formattersElement, "bean")) {
+				BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(formatter);
+				beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(formatter, beanDef);
+				formatters.add(beanDef);
+			}
+			BeanDefinition beanDef = parserContext.getRegistry().getBeanDefinition(conversionServiceRef.getBeanName());
+			beanDef.getPropertyValues().add("formatters", formatters);
+		}
+		return conversionServiceRef;
 	}
 
 	private RuntimeBeanReference getValidator(Element element, Object source, ParserContext parserContext) {
@@ -198,29 +215,51 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private ManagedList<RootBeanDefinition> getMessageConverters(Object source) {
-		ManagedList<RootBeanDefinition> messageConverters = new ManagedList<RootBeanDefinition>();
-		messageConverters.setSource(source);
-		messageConverters.add(createConverterBeanDefinition(ByteArrayHttpMessageConverter.class, source));
+	private RuntimeBeanReference getMessageCodesResolver(Element element, Object source, ParserContext parserContext) {
+		if (element.hasAttribute("message-codes-resolver")) {
+			return new RuntimeBeanReference(element.getAttribute("message-codes-resolver"));
+		} else {
+			return null;
+		}
+	}
 
-		RootBeanDefinition stringConverterDef = createConverterBeanDefinition(StringHttpMessageConverter.class, source);
-		stringConverterDef.getPropertyValues().add("writeAcceptCharset", false);
-		messageConverters.add(stringConverterDef);
+	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {
+		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
+		if (convertersElement != null) {
+			ManagedList<BeanDefinitionHolder> messageConverters = new ManagedList<BeanDefinitionHolder>();
+			messageConverters.setSource(source);
+			for (Element converter : DomUtils.getChildElementsByTagName(convertersElement, "bean")) {
+				BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(converter);
+				beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
+				messageConverters.add(beanDef);
+			}
+			return messageConverters;
+		} else {
+			ManagedList<RootBeanDefinition> messageConverters = new ManagedList<RootBeanDefinition>();
+			messageConverters.setSource(source);
+			messageConverters.add(createConverterBeanDefinition(ByteArrayHttpMessageConverter.class, source));
 
-		messageConverters.add(createConverterBeanDefinition(ResourceHttpMessageConverter.class, source));
-		messageConverters.add(createConverterBeanDefinition(SourceHttpMessageConverter.class, source));
-		messageConverters.add(createConverterBeanDefinition(XmlAwareFormHttpMessageConverter.class, source));
-		if (jaxb2Present) {
-			messageConverters.add(createConverterBeanDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
+			RootBeanDefinition stringConverterDef = createConverterBeanDefinition(StringHttpMessageConverter.class,
+					source);
+			stringConverterDef.getPropertyValues().add("writeAcceptCharset", false);
+			messageConverters.add(stringConverterDef);
+
+			messageConverters.add(createConverterBeanDefinition(ResourceHttpMessageConverter.class, source));
+			messageConverters.add(createConverterBeanDefinition(SourceHttpMessageConverter.class, source));
+			messageConverters.add(createConverterBeanDefinition(XmlAwareFormHttpMessageConverter.class, source));
+			if (jaxb2Present) {
+				messageConverters
+						.add(createConverterBeanDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
+			}
+			if (jacksonPresent) {
+				messageConverters.add(createConverterBeanDefinition(MappingJacksonHttpMessageConverter.class, source));
+			}
+			if (romePresent) {
+				messageConverters.add(createConverterBeanDefinition(AtomFeedHttpMessageConverter.class, source));
+				messageConverters.add(createConverterBeanDefinition(RssChannelHttpMessageConverter.class, source));
+			}
+			return messageConverters;
 		}
-		if (jacksonPresent) {
-			messageConverters.add(createConverterBeanDefinition(MappingJacksonHttpMessageConverter.class, source));
-		}
-		if (romePresent) {
-			messageConverters.add(createConverterBeanDefinition(AtomFeedHttpMessageConverter.class, source));
-			messageConverters.add(createConverterBeanDefinition(RssChannelHttpMessageConverter.class, source));
-		}
-		return messageConverters;
 	}
 
 	private RootBeanDefinition createConverterBeanDefinition(Class<? extends HttpMessageConverter> converterClass,

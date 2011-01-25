@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.core.convert.converter.ConverterRegistry;
 public interface FormatterRegistry extends ConverterRegistry {
 
 	/**
-	 * Adds a Formatter to format fields of a specific type.
+	 * Adds a Formatter to format fields of the given type.
 	 * <p>On print, if the Formatter's type T is declared and <code>fieldType</code> is not assignable to T,
 	 * a coersion to T will be attempted before delegating to <code>formatter</code> to print a field value.
 	 * On parse, if the parsed object returned by <code>formatter</code> is not assignable to the runtime field type,
@@ -39,6 +39,14 @@ public interface FormatterRegistry extends ConverterRegistry {
 	 * @param formatter the formatter to add
 	 */
 	void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter);
+
+	/**
+	 * Adds a Formatter to format fields of a specific type.
+	 * The field type is implied by the parameterized Formatter instance.
+	 * @param formatter the formatter to add
+	 * @see #addFormatterForFieldType(Class, Formatter)
+	 */
+	void addFormatter(Formatter<?> formatter);
 
 	/**
 	 * Adds a Printer/Parser pair to format fields of a specific type.

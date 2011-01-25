@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,12 +68,21 @@ public class FormattingConversionService extends GenericConversionService
 		addConverter(new ParserConverter(fieldType, formatter, this));
 	}
 
+	public void addFormatter(Formatter<?> formatter) {
+		final Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		if (fieldType == null) {
+			throw new IllegalArgumentException("Unable to extract parameterized field type argument from Formatter ["
+					+ formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
+		}
+		addFormatterForFieldType(fieldType, formatter);
+	}
+
 	public void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser) {
 		addConverter(new PrinterConverter(fieldType, printer, this));
 		addConverter(new ParserConverter(fieldType, parser, this));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void addFormatterForFieldAnnotation(final AnnotationFormatterFactory annotationFormatterFactory) {
 		final Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
 				GenericTypeResolver.resolveTypeArgument(annotationFormatterFactory.getClass(), AnnotationFormatterFactory.class);
@@ -174,7 +183,7 @@ public class FormattingConversionService extends GenericConversionService
 		
 		private TypeDescriptor printerObjectType;
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		private Printer printer;
 
 		private ConversionService conversionService;
