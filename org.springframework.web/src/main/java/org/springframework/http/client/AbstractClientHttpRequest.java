@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -29,14 +28,11 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
+abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private boolean executed = false;
 
 	private final HttpHeaders headers = new HttpHeaders();
-
-	private final ByteArrayOutputStream bufferedOutput = new ByteArrayOutputStream();
-
 
 	public final HttpHeaders getHeaders() {
 		return executed ? HttpHeaders.readOnlyHttpHeaders(headers) : this.headers;
@@ -44,12 +40,20 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	public final OutputStream getBody() throws IOException {
 		checkExecuted();
-		return this.bufferedOutput;
+		return getBodyInternal(this.headers);
 	}
+
+	/**
+	 * Abstract template method that returns the body.
+	 *
+	 * @param headers the HTTP headers
+	 * @return the body output stream
+	 */
+	protected abstract OutputStream getBodyInternal(HttpHeaders headers) throws IOException;
 
 	public final ClientHttpResponse execute() throws IOException {
 		checkExecuted();
-		ClientHttpResponse result = executeInternal(this.headers, this.bufferedOutput.toByteArray());
+		ClientHttpResponse result = executeInternal(this.headers);
 		this.executed = true;
 		return result;
 	}
@@ -58,14 +62,13 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		Assert.state(!this.executed, "ClientHttpRequest already executed");
 	}
 
-
 	/**
 	 * Abstract template method that writes the given headers and content to the HTTP request.
+	 *
 	 * @param headers the HTTP headers
-	 * @param bufferedOutput the body content
 	 * @return the response object for the executed request
 	 */
-	protected abstract ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput)
-			throws IOException;
+	protected abstract ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException;
+
 
 }

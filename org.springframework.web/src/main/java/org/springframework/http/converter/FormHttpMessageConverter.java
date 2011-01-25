@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -94,19 +93,25 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		this.partConverters.add(new ResourceHttpMessageConverter());
 	}
 
-	/** Add a message body converter. Such a converters is used to convert objects to MIME parts. */
+	/**
+	 * Add a message body converter. Such a converters is used to convert objects to MIME parts.
+	 */
 	public final void addPartConverter(HttpMessageConverter<?> partConverter) {
 		Assert.notNull(partConverter, "'partConverter' must not be NULL");
 		this.partConverters.add(partConverter);
 	}
 
-	/** Set the message body converters to use. These converters are used to convert objects to MIME parts. */
+	/**
+	 * Set the message body converters to use. These converters are used to convert objects to MIME parts.
+	 */
 	public final void setPartConverters(List<HttpMessageConverter<?>> partConverters) {
 		Assert.notEmpty(partConverters, "'partConverters' must not be empty");
 		this.partConverters = partConverters;
 	}
 
-	/** Sets the character set used for writing form data. */
+	/**
+	 * Sets the character set used for writing form data.
+	 */
 	public void setCharset(Charset charset) {
 		this.charset = charset;
 	}
@@ -196,7 +201,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		if (contentType != null) {
 			outputMessage.getHeaders().setContentType(contentType);
 			charset = contentType.getCharSet() != null ? contentType.getCharSet() : this.charset;
-		} else {
+		}
+		else {
 			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 			charset = this.charset;
 		}
@@ -218,7 +224,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 				builder.append('&');
 			}
 		}
-		FileCopyUtils.copy(builder.toString(), new OutputStreamWriter(outputMessage.getBody(), charset));
+		byte[] bytes = builder.toString().getBytes(charset.name());
+		outputMessage.getHeaders().setContentLength(bytes.length);
+		FileCopyUtils.copy(bytes, outputMessage.getBody());
 	}
 
 	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
@@ -328,7 +336,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
-	/** Implementation of {@link org.springframework.http.HttpOutputMessage} used for writing multipart data. */
+	/**
+	 * Implementation of {@link org.springframework.http.HttpOutputMessage} used for writing multipart data.
+	 */
 	private class MultipartHttpOutputMessage implements HttpOutputMessage {
 
 		private final HttpHeaders headers = new HttpHeaders();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,9 +44,9 @@ import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-/**
- * @author Arjen Poutsma
- */
+import static org.junit.Assert.*;
+
+/** @author Arjen Poutsma */
 public class FormHttpMessageConverterTests {
 
 	private FormHttpMessageConverter converter;
@@ -60,13 +59,13 @@ public class FormHttpMessageConverterTests {
 	@Test
 	public void canRead() {
 		assertTrue(converter.canRead(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
-		assertFalse(converter.canRead(MultiValueMap.class, new MediaType("multipart","form-data")));
+		assertFalse(converter.canRead(MultiValueMap.class, new MediaType("multipart", "form-data")));
 	}
 
 	@Test
 	public void canWrite() {
 		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded")));
-		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("multipart","form-data")));
+		assertTrue(converter.canWrite(MultiValueMap.class, new MediaType("multipart", "form-data")));
 		assertTrue(converter.canWrite(MultiValueMap.class, MediaType.ALL));
 	}
 
@@ -77,7 +76,7 @@ public class FormHttpMessageConverterTests {
 		Charset iso88591 = Charset.forName("ISO-8859-1");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(iso88591));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "x-www-form-urlencoded", iso88591));
-		MultiValueMap<String, String> result = (MultiValueMap<String, String>) converter.read(null, inputMessage);
+		MultiValueMap<String, String> result = converter.read(null, inputMessage);
 
 		assertEquals("Invalid result", 3, result.size());
 		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
@@ -97,19 +96,21 @@ public class FormHttpMessageConverterTests {
 		body.add("name 3", null);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(body, MediaType.APPLICATION_FORM_URLENCODED, outputMessage);
-		Charset iso88591 = Charset.forName("ISO-8859-1");
 		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
-				outputMessage.getBodyAsString(iso88591));
+				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 		assertEquals("Invalid content-type", new MediaType("application", "x-www-form-urlencoded"),
 				outputMessage.getHeaders().getContentType());
+		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
+				outputMessage.getHeaders().getContentLength());
 	}
-	
+
 	@Test
 	public void writeMultipart() throws Exception {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("name 1", "value 1");
 		parts.add("name 2", "value 2+1");
 		parts.add("name 2", "value 2+2");
+
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
 		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
@@ -122,7 +123,7 @@ public class FormHttpMessageConverterTests {
 		converter.write(parts, MediaType.MULTIPART_FORM_DATA, outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		assertNotNull(contentType.getParameter("boundary"));
+		assertNotNull("No boundary found", contentType.getParameter("boundary"));
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
@@ -157,6 +158,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	private static class MockHttpOutputMessageRequestContext implements RequestContext {
+
 		private final MockHttpOutputMessage outputMessage;
 
 		private MockHttpOutputMessageRequestContext(MockHttpOutputMessage outputMessage) {

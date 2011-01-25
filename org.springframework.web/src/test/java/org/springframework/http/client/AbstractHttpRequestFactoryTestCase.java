@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -45,11 +46,11 @@ import static org.junit.Assert.*;
 
 public abstract class AbstractHttpRequestFactoryTestCase {
 
-	private ClientHttpRequestFactory factory;
+	protected ClientHttpRequestFactory factory;
+
+	protected static String baseUrl;
 
 	private static Server jettyServer;
-
-	private static String baseUrl;
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
@@ -64,7 +65,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("GET")), "/methods/get");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("HEAD")), "/methods/head");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("OPTIONS")), "/methods/options");
-		jettyContext.addServlet(new ServletHolder(new MethodServlet("POST")), "/methods/post");
+		jettyContext.addServlet(new ServletHolder(new PostServlet()), "/methods/post");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("PUT")), "/methods/put");
 		jettyContext.addServlet(new ServletHolder(new RedirectServlet("/status/ok")), "/redirect");
 		jettyServer.start();
@@ -87,8 +88,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 	@Test
 	public void status() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
-		ClientHttpRequest request =
-				factory.createRequest(uri, HttpMethod.GET);
+		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
 		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
 		assertEquals("Invalid HTTP URI", uri, request.getURI());
 		ClientHttpResponse response = request.execute();
@@ -105,6 +105,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		String headerValue2 = "value2";
 		request.getHeaders().add(headerName, headerValue2);
 		byte[] body = "Hello World".getBytes("UTF-8");
+		request.getHeaders().setContentLength(body.length);
 		FileCopyUtils.copy(body, request.getBody());
 		ClientHttpResponse response = request.execute();
 		assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
@@ -159,6 +160,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		try {
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/" + path), method);
 			response = request.execute();
+			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());
 			assertEquals("Invalid method", path.toUpperCase(Locale.ENGLISH), request.getMethod().name());
 		}
 		finally {
@@ -167,16 +169,18 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 			}
 		}
 	}
-	
+
 	@Test
 	public void redirect() throws Exception {
 		ClientHttpResponse response = null;
 		try {
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/redirect"), HttpMethod.PUT);
 			response = request.execute();
-			assertEquals("Invalid Location value", new URI(baseUrl + "/status/ok"), response.getHeaders().getLocation());
+			assertEquals("Invalid Location value", new URI(baseUrl + "/status/ok"),
+					response.getHeaders().getLocation());
 
-		} finally {
+		}
+		finally {
 			if (response != null) {
 				response.close();
 				response = null;
@@ -187,13 +191,14 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 			response = request.execute();
 			assertNull("Invalid Location value", response.getHeaders().getLocation());
 
-		} finally {
+		}
+		finally {
 			if (response != null) {
 				response.close();
 			}
 		}
 	}
-	
+
 	/** Servlet that sets a given status code. */
 	private static class StatusServlet extends GenericServlet {
 
@@ -221,6 +226,31 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 			HttpServletRequest httpReq = (HttpServletRequest) req;
 			assertEquals("Invalid HTTP method", method, httpReq.getMethod());
+			res.setContentLength(0);
+			((HttpServletResponse) res).setStatus(200);
+		}
+	}
+
+	private static class PostServlet extends MethodServlet {
+
+		private PostServlet() {
+			super("POST");
+		}
+
+		@Override
+		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+			super.service(req, res);
+			long contentLength = req.getContentLength();
+			if (contentLength != -1) {
+				InputStream in = req.getInputStream();
+				long byteCount = 0;
+				byte[] buffer = new byte[4096];
+				int bytesRead;
+				while ((bytesRead = in.read(buffer)) != -1) {
+					byteCount += bytesRead;
+				}
+				assertEquals("Invalid content-length", contentLength, byteCount);
+			}
 		}
 	}
 
