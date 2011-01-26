@@ -65,10 +65,17 @@ final class BufferingSimpleClientHttpRequest extends AbstractBufferingClientHttp
 				this.connection.addRequestProperty(headerName, headerValue);
 			}
 		}
+
+		if (this.connection.getDoOutput()) {
+			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
+		}
+
 		this.connection.connect();
-		if (bufferedOutput.length > 0) {
+
+		if (this.connection.getDoOutput()) {
 			FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
 		}
+
 		return new SimpleClientHttpResponse(this.connection);
 	}
 
