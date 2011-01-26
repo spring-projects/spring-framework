@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -609,6 +609,19 @@ public class StringUtilsTests extends TestCase {
 		final String localeString = "en_GB_____" + variant; // lots of underscores
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-7779">See SPR-7779</a>.
+	 */
+	public void testParseLocaleWithInvalidCharacters() {
+		try {
+			StringUtils.parseLocaleString("%0D%0AContent-length:30%0D%0A%0D%0A%3Cscript%3Ealert%28123%29%3C/script%3E");
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 }

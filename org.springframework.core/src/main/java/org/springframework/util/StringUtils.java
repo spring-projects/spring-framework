@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -643,7 +643,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Parse the given <code>localeString</code> into a {@link Locale}.
+	 * Parse the given <code>localeString</code> value into a {@link Locale}.
 	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
 	 * @param localeString the locale string, following <code>Locale's</code>
 	 * <code>toString()</code> format ("en", "en_UK", etc);
@@ -651,6 +651,13 @@ public abstract class StringUtils {
 	 * @return a corresponding <code>Locale</code> instance
 	 */
 	public static Locale parseLocaleString(String localeString) {
+		for (int i = 0; i < localeString.length(); i++) {
+			char ch = localeString.charAt(i);
+			if (ch != '_' && !Character.isLetterOrDigit(ch)) {
+				throw new IllegalArgumentException(
+						"Locale value \"" + localeString + "\" contains invalid characters");
+			}
+		}
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
 		String country = (parts.length > 1 ? parts[1] : "");
