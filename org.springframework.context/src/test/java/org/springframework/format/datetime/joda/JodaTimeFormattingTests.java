@@ -16,6 +16,8 @@
 
 package org.springframework.format.datetime.joda;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,10 +30,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.support.ConversionServiceFactory;
@@ -54,8 +54,8 @@ public class JodaTimeFormattingTests {
 	public void setUp() {
 		ConversionServiceFactory.addDefaultConverters(conversionService);
 
-		JodaTimeFormattingConfigurer configurer = new JodaTimeFormattingConfigurer();
-		configurer.installJodaTimeFormatting(conversionService);
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.registerFormatters(conversionService);
 
 		JodaTimeBean bean = new JodaTimeBean();
 		bean.getChildren().add(new JodaTimeBean());

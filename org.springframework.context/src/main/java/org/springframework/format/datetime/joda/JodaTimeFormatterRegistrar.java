@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.format.datetime.joda;
 
 import java.util.Calendar;
@@ -27,7 +26,7 @@ import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
+import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
@@ -37,14 +36,14 @@ import org.springframework.format.Printer;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
- * @since 3.0
+ * @since 3.1
  * @see #setDateStyle
  * @see #setTimeStyle
  * @see #setDateTimeStyle
  * @see #setUseIsoFormat
  * @see #installJodaTimeFormatting
  */
-public class JodaTimeFormattingConfigurer {
+public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 	private String dateStyle;
 
@@ -53,7 +52,6 @@ public class JodaTimeFormattingConfigurer {
 	private String dateTimeStyle;
 
 	private boolean useIsoFormat;
-
 
 	/**
 	 * Set the default format style of Joda {@link LocalDate} objects.
@@ -89,32 +87,27 @@ public class JodaTimeFormattingConfigurer {
 		this.useIsoFormat = useIsoFormat;
 	}
 
-
-	/**
-	 * Install Joda Time formatters given the current configuration of this {@link JodaTimeFormattingConfigurer}.
-	 */
-	public void installJodaTimeFormatting(FormatterRegistry formatterRegistry) {
-		JodaTimeConverters.registerConverters(formatterRegistry);
+	public void registerFormatters(FormatterRegistry registry) {
+		JodaTimeConverters.registerConverters(registry);
 
 		DateTimeFormatter jodaDateFormatter = getJodaDateFormatter();
-		formatterRegistry.addFormatterForFieldType(LocalDate.class,
-				new ReadablePartialPrinter(jodaDateFormatter), new DateTimeParser(jodaDateFormatter));
+		registry.addFormatterForFieldType(LocalDate.class, new ReadablePartialPrinter(jodaDateFormatter),
+				new DateTimeParser(jodaDateFormatter));
 
 		DateTimeFormatter jodaTimeFormatter = getJodaTimeFormatter();
-		formatterRegistry.addFormatterForFieldType(LocalTime.class,
-				new ReadablePartialPrinter(jodaTimeFormatter), new DateTimeParser(jodaTimeFormatter));
+		registry.addFormatterForFieldType(LocalTime.class, new ReadablePartialPrinter(jodaTimeFormatter),
+				new DateTimeParser(jodaTimeFormatter));
 
 		DateTimeFormatter jodaDateTimeFormatter = getJodaDateTimeFormatter();
 		Parser<DateTime> dateTimeParser = new DateTimeParser(jodaDateTimeFormatter);
-		formatterRegistry.addFormatterForFieldType(LocalDateTime.class,
-				new ReadablePartialPrinter(jodaDateTimeFormatter), dateTimeParser);
+		registry.addFormatterForFieldType(LocalDateTime.class, new ReadablePartialPrinter(jodaDateTimeFormatter),
+				dateTimeParser);
 
 		Printer<ReadableInstant> readableInstantPrinter = new ReadableInstantPrinter(jodaDateTimeFormatter);
-		formatterRegistry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
+		registry.addFormatterForFieldType(ReadableInstant.class, readableInstantPrinter, dateTimeParser);
 
-		formatterRegistry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+		registry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 	}
-
 
 	// internal helpers
 
@@ -125,8 +118,7 @@ public class JodaTimeFormattingConfigurer {
 		if (this.dateStyle != null) {
 			return DateTimeFormat.forStyle(this.dateStyle + "-");
 
-		}
-		else {
+		} else {
 			return DateTimeFormat.shortDate();
 		}
 	}
@@ -137,8 +129,7 @@ public class JodaTimeFormattingConfigurer {
 		}
 		if (this.timeStyle != null) {
 			return DateTimeFormat.forStyle("-" + this.timeStyle);
-		}
-		else {
+		} else {
 			return DateTimeFormat.shortTime();
 		}
 	}
@@ -149,8 +140,7 @@ public class JodaTimeFormattingConfigurer {
 		}
 		if (this.dateTimeStyle != null) {
 			return DateTimeFormat.forStyle(this.dateTimeStyle);
-		}
-		else {
+		} else {
 			return DateTimeFormat.shortDateTime();
 		}
 	}
