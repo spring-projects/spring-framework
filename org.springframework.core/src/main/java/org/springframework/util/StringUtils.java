@@ -529,8 +529,15 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
-		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
-		return (sepIndex != -1 ? path.substring(sepIndex + 1) : null);
+		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		if (extIndex == -1) {
+			return null;
+		}
+		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR);
+		if (folderIndex > extIndex) {
+			return null;
+		}
+		return path.substring(extIndex + 1);
 	}
 
 	/**
@@ -544,8 +551,15 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
-		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
-		return (sepIndex != -1 ? path.substring(0, sepIndex) : path);
+		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		if (extIndex == -1) {
+			return path;
+		}
+		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR);
+		if (folderIndex > extIndex) {
+			return path;
+		}
+		return path.substring(0, extIndex);
 	}
 
 	/**
@@ -653,7 +667,7 @@ public abstract class StringUtils {
 	public static Locale parseLocaleString(String localeString) {
 		for (int i = 0; i < localeString.length(); i++) {
 			char ch = localeString.charAt(i);
-			if (ch != '_' && !Character.isLetterOrDigit(ch)) {
+			if (ch != '_' && ch != ' ' && !Character.isLetterOrDigit(ch)) {
 				throw new IllegalArgumentException(
 						"Locale value \"" + localeString + "\" contains invalid characters");
 			}
