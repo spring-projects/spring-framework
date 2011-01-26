@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.ServletRequest;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Special {@link org.springframework.validation.DataBinder} to perform data binding
@@ -103,8 +104,8 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 */
 	public void bind(ServletRequest request) {
 		MutablePropertyValues mpvs = new ServletRequestParameterPropertyValues(request);
-		if (request instanceof MultipartRequest) {
-			MultipartRequest multipartRequest = (MultipartRequest) request;
+		MultipartRequest multipartRequest = WebUtils.getNativeRequest(request, MultipartRequest.class);
+		if (multipartRequest != null) {
 			bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 		}
 		doBind(mpvs);

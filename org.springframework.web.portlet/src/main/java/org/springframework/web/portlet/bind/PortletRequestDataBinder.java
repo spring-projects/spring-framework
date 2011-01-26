@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Special {@link org.springframework.validation.DataBinder} to perform data binding
@@ -105,8 +106,8 @@ public class PortletRequestDataBinder extends WebDataBinder {
 	 */
 	public void bind(PortletRequest request) {
 		MutablePropertyValues mpvs = new PortletRequestParameterPropertyValues(request);
-		if (request instanceof MultipartRequest) {
-			MultipartRequest multipartRequest = (MultipartRequest) request;
+		MultipartRequest multipartRequest = PortletUtils.getNativeRequest(request, MultipartRequest.class);
+		if (multipartRequest != null) {
 			bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 		}
 		doBind(mpvs);
