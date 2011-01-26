@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.PortletSession;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+import javax.portlet.PortletResponse;
+import javax.portlet.filter.PortletRequestWrapper;
+import javax.portlet.filter.PortletResponseWrapper;
 import javax.servlet.http.Cookie;
 
 import org.springframework.util.Assert;
@@ -277,6 +280,48 @@ public abstract class PortletUtils {
 
 
 	/**
+	 * Return an appropriate request object of the specified type, if available,
+	 * unwrapping the given request as far as necessary.
+	 * @param request the portlet request to introspect
+	 * @param requiredType the desired type of request object
+	 * @return the matching request object, or <code>null</code> if none
+	 * of that type is available
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getNativeRequest(PortletRequest request, Class<T> requiredType) {
+		if (requiredType != null) {
+			if (requiredType.isInstance(request)) {
+				return (T) request;
+			}
+			else if (request instanceof PortletRequestWrapper) {
+				return getNativeRequest(((PortletRequestWrapper) request).getRequest(), requiredType);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return an appropriate response object of the specified type, if available,
+	 * unwrapping the given response as far as necessary.
+	 * @param response the portlet response to introspect
+	 * @param requiredType the desired type of response object
+	 * @return the matching response object, or <code>null</code> if none
+	 * of that type is available
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getNativeResponse(PortletResponse response, Class<T> requiredType) {
+		if (requiredType != null) {
+			if (requiredType.isInstance(response)) {
+				return (T) response;
+			}
+			else if (response instanceof PortletResponseWrapper) {
+				return getNativeResponse(((PortletResponseWrapper) response).getResponse(), requiredType);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Expose the given Map as request attributes, using the keys as attribute names
 	 * and the values as corresponding attribute values. Keys must be Strings.
 	 * @param request current portlet request
@@ -293,7 +338,7 @@ public abstract class PortletUtils {
 	/**
 	 * Retrieve the first cookie with the given name. Note that multiple
 	 * cookies can have the same name but different paths or domains.
-	 * @param request current servlet request
+	 * @param request current portlet request
 	 * @param name cookie name
 	 * @return the first cookie with the given name, or <code>null</code> if none is found
 	 */

@@ -20,10 +20,6 @@ import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * {@link WebRequest} adapter for an {@link javax.servlet.http.HttpServletRequest}.
@@ -92,40 +89,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeRequest(Class<T> requiredType) {
-		if (requiredType != null) {
-			ServletRequest request = getRequest();
-			while (request != null) {
-				if (requiredType.isInstance(request)) {
-					return (T) request;
-				}
-				else if (request instanceof ServletRequestWrapper) {
-					request = ((ServletRequestWrapper) request).getRequest();
-				}
-				else {
-					request = null;
-				}
-			}
-		}
-		return null;
+		return WebUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeResponse(Class<T> requiredType) {
-		if (requiredType != null) {
-			ServletResponse response = getResponse();
-			while (response != null) {
-				if (requiredType.isInstance(response)) {
-					return (T) response;
-				}
-				else if (response instanceof ServletResponseWrapper) {
-					response = ((ServletResponseWrapper) response).getResponse();
-				}
-				else {
-					response = null;
-				}
-			}
-		}
-		return null;
+		return WebUtils.getNativeResponse(getResponse(), requiredType);
 	}
 
 
