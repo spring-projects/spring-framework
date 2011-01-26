@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package org.springframework.web.servlet.i18n;
 
-import java.util.Locale;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.propertyeditors.LocaleEditor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -72,9 +70,7 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 			if (localeResolver == null) {
 				throw new IllegalStateException("No LocaleResolver found: not in a DispatcherServlet request?");
 			}
-			LocaleEditor localeEditor = new LocaleEditor();
-			localeEditor.setAsText(newLocale);
-			localeResolver.setLocale(request, response, (Locale) localeEditor.getValue());
+			localeResolver.setLocale(request, response, StringUtils.parseLocaleString(newLocale));
 		}
 		// Proceed in any case.
 		return true;
