@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.0
  */
-abstract class AbstractClientHttpRequest implements ClientHttpRequest {
+public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private boolean executed = false;
 
