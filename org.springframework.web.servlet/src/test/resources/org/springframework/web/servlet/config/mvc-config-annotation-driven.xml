@@ -10,10 +10,6 @@
 			<bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
 			<bean class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
 		</mvc:message-converters>
-		<mvc:formatters>
-			<bean class="org.springframework.web.servlet.config.AnnotationDrivenBeanDefinitionParserTests$TestBeanFormatter"/>
-			<bean class="org.springframework.web.servlet.config.AnnotationDrivenBeanDefinitionParserTests$TestBeanAnnotationFormatterFactory"/>
-		</mvc:formatters>
 	</mvc:annotation-driven>
 
 	<bean id="messageCodesResolver" 

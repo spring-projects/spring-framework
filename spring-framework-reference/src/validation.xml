@@ -1350,41 +1350,72 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
     <section id="format-FormatterRegistry-SPI">
       <title>FormatterRegistry SPI</title>
 
-      <para> At runtime, Formatters are registered in a FormatterRegistry. The
-        FormatterRegistry SPI allows you to configure Formatting rules
-        centrally, instead of duplicating such configuration across your
-        Controllers. For example, you might want to enforce that all Date fields
-        are formatted a certain way, or fields with a specific annotation are
-        formatted in a certain way. With a shared FormatterRegistry, you define
-        these rules once and they are applied whenever formatting is needed. </para>
+      <para> The FormatterRegistry is an SPI for registering formatters and 
+      	converters. <classname>FormattingConversionService</classname> is 
+      	an implementation of FormatterRegistry suitable for most environments. 
+      	This implementation may be configured programatically or declaratively 
+      	as a Spring bean using 
+      	<classname>FormattingConversionServiceFactoryBean</classname>.
+      	Because this implemementation also implements
+        <classname>ConversionService</classname>, it can be directly 
+        configured for use with Spring's DataBinder and the Spring Expression 
+        Language (SpEL).
+      </para>
 
       <para> Review the FormatterRegistry SPI below: </para>
 
       <programlisting language="java"><![CDATA[package org.springframework.format;
 
-public interface FormatterRegistry {
+public interface FormatterRegistry extends ConverterRegistry {
 
     void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
 
     void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter);
+
+    void addFormatterForFieldType(Formatter<?> formatter);
 
     void addFormatterForAnnotation(AnnotationFormatterFactory<?, ?> factory);
 
 }]]></programlisting>
 
       <para> As shown above, Formatters can be registered by fieldType or
-        annotation. <classname>FormattingConversionService</classname> is the
-        implementation of <classname>FormatterRegistry</classname> suitable for
-        most environments. This implementation may be configured
-        programatically, or declaratively as a Spring bean using
-        <classname>FormattingConversionServiceFactoryBean</classname>. Because
-        this implemementation also implements
-        <classname>ConversionService</classname>, it can be directly configured
-        for use with Spring's DataBinder and the Spring Expression Language
-        (SpEL). </para>
+        annotation. 
+      </para>
+      <para> The FormatterRegistry SPI allows you to configure Formatting rules
+        centrally, instead of duplicating such configuration across your
+        Controllers. For example, you might want to enforce that all Date fields
+        are formatted a certain way, or fields with a specific annotation are
+        formatted in a certain way. With a shared FormatterRegistry, you define
+        these rules once and they are applied whenever formatting is needed. 
+      </para>      
     </section>
 
-    <section id="format-configuring-FormatterRegistry">
+    <section id="format-FormatterRegistrar-SPI">
+      <title>FormatterRegistrar SPI</title>
+	
+	  <para> The FormatterRegistrar is an SPI for registering formatters and 
+	  	converters through the FormatterRegistry: 
+	  </para>
+	  
+      <programlisting language="java"><![CDATA[package org.springframework.format;
+
+public interface FormatterRegistrar {
+
+    void registerFormatters(FormatterRegistry registry);
+
+}]]></programlisting>
+
+	    <para> A FormatterRegistrar is useful when registering multiple related 
+	        converters and formatters for a given formatting category, such as Date 
+	        formatting. It can also be useful where declarative registration is
+	        insufficient. For example when a formatter needs to be indexed under a 
+	        specific field type different from its own &lt;T&gt; or when registering
+	        a Printer/Parser pair. The next section provides more information on 
+	        converter and formatter registration.
+	    </para>
+	</section>
+      
+    <section id="format-configuring-FormattingConverionService">
       <title>Configuring Formatting in Spring MVC</title>
 
       <para> In a Spring MVC application, you may configure a custom
@@ -1419,7 +1450,9 @@ public interface FormatterRegistry {
         classpath. </para>
 
       <para> To inject a ConversionService instance with custom formatters and
-        converters registered, set the conversion-service attribute: </para>
+        converters registered, set the conversion-service attribute and then 
+        specify custom converters, formatters, or FormatterRegistrars as properties
+        of the FormattingConversionServiceFactoryBean: </para>
       <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
@@ -1433,15 +1466,35 @@ public interface FormatterRegistry {
     <mvc:annotation-driven conversion-service="conversionService"/>
 
     <bean id="conversionService"
-          class="org.springframework.format.support.FormattingConversionServiceFactoryBean"/>
+          class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="org.example.MyConverter"/>
+            </set>
+        </property>
+        <property name="formatters">
+            <set>
+                <bean class="org.example.MyFormatter"/>
+                <bean class="org.example.MyAnnotationFormatterFactory"/>
+            </set>
+        </property>
+        <property name="formatterRegistrars">
+            <set>
+                <bean class="org.example.MyFormatterRegistrar"/>
+            </set>
+        </property>
+    </bean>
 
 </beans>
 ]]></programlisting>
 
-      <para> A custom ConversionService instance is often constructed by a
-        FactoryBean that internally registers custom Formatters and Converters
-        programatically before the ConversionService is returned. See
-        FormattingConversionServiceFactoryBean for an example. </para>
+      <note>
+	      <para> See <xref linkend="format-FormatterRegistrar-SPI"/> and  
+	        the <classname>FormattingConversionServiceFactoryBean</classname> 
+	        for more information on when to use FormatterRegistrars.
+	      </para>
+      </note>
+
     </section>
   </section>
 

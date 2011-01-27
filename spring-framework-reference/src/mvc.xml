@@ -1279,7 +1279,7 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         the <classname>AnnotationMethodHandlerAdapter</classname> is extended
         to support the <classname>@RequestBody</classname> and has the
         following <interfacename>HttpMessageConverters</interfacename>
-        registered by default:</para>
+        registered by default if not using the MVC namespace:</para>
 
         <itemizedlist>
           <listitem>
@@ -1301,16 +1301,12 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
             <para><classname>SourceHttpMessageConverter</classname> converts
             to/from a javax.xml.transform.Source.</para>
           </listitem>
-
-          <listitem>
-            <para><classname>MarshallingHttpMessageConverter</classname>
-            converts to/from an object using the
-            <classname>org.springframework.oxm</classname> package.</para>
-          </listitem>
         </itemizedlist>
 
         <para>For more information on these converters, see <link
-        linkend="rest-message-conversion">Message Converters</link>.</para>
+        linkend="rest-message-conversion">Message Converters</link>.
+        Also see <xref linkend="mvc-annotation-driven"/> for information
+        on the default message converters set up by the MVC namespace.</para>
 
         <para>The <classname>MarshallingHttpMessageConverter</classname>
         requires a <interfacename>Marshaller</interfacename> and
@@ -3313,13 +3309,69 @@ public class SimpleController {
     			</listitem>
     			<listitem>
     				<para>
-    					Support for reading and writing XML, if JAXB is present on the classpath.
+    					HttpMessageConverter support for @RequestBody method parameters and @ResponseBody method return values.
     				</para>
-    			</listitem>
-    			<listitem>
     				<para>
-    					Support for reading and writing JSON, if Jackson is present on the classpath.
+    					This is the complete list of HttpMessageConverters set up by mvc:annotation-driven:
+				        <itemizedlist>
+				          <listitem>
+				            <para><classname>ByteArrayHttpMessageConverter</classname>
+				            converts byte arrays.</para>
+				          </listitem>
+				
+				          <listitem>
+				            <para><classname>StringHttpMessageConverter</classname> converts
+				            strings.</para>
+				          </listitem>
+				
+				          <listitem>
+				            <para><classname>ResourceHttpMessageConverter</classname> converts
+				            to/from <classname>org.springframework.core.io.Resource</classname> 
+				            for all media types.</para>
+				          </listitem>
+
+				          <listitem>
+				            <para><classname>SourceHttpMessageConverter</classname> converts
+				            to/from a <classname>javax.xml.transform.Source</classname>.</para>
+				          </listitem>
+				
+				          <listitem>
+				            <para><classname>FormHttpMessageConverter</classname> converts
+				            form data to/from a <classname>MultiValueMap&lt;String, String&gt;</classname>.</para>
+				          </listitem>
+				
+				          <listitem>
+				            <para><classname>Jaxb2RootElementHttpMessageConverter</classname>
+				            converts Java objects to/from XML -- added if JAXB2 is present 
+				            on the classpath.
+				            </para>
+				          </listitem>
+
+				          <listitem>
+				            <para><classname>MappingJacksonHttpMessageConverter</classname>
+				            converts to/from JSON -- added if Jackson is present on the classpath.
+				            </para>
+				          </listitem>
+
+				          <listitem>
+				            <para><classname>AtomFeedHttpMessageConverter</classname>
+				            converts Atom feeds -- added if Rome is present on the classpath.
+				            </para>
+				          </listitem>
+
+				          <listitem>
+				            <para><classname>RssChannelHttpMessageConverter</classname>
+				            converts RSS feeds -- added if Rome is present on the classpath.
+				            </para>
+				          </listitem>
+			        	</itemizedlist>
     				</para>
+		            <note>
+						<para>
+							This list of HttpMessageConverters used can be replaced through 
+							the mvc:message-converters sub-element of mvc:annotation-driven.
+						</para>
+		            </note>
     			</listitem>
     		</orderedlist>
     		A typical usage is shown below:
