@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.net.URI;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.HttpRequest;
 
 /**
  * Represents a client-side HTTP request. Created via an implementation of the {@link ClientHttpRequestFactory}.
@@ -32,19 +32,7 @@ import org.springframework.http.HttpOutputMessage;
  * @since 3.0
  * @see ClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
  */
-public interface ClientHttpRequest extends HttpOutputMessage {
-
-	/**
-	 * Return the HTTP method of the request.
-	 * @return the HTTP method as an HttpMethod enum value
-	 */
-	HttpMethod getMethod();
-
-	/**
-	 * Return the URI of the request.
-	 * @return the URI of the request
-	 */
-	URI getURI();
+public interface ClientHttpRequest extends HttpRequest, HttpOutputMessage {
 
 	/**
 	 * Execute this request, resulting in a {@link ClientHttpResponse} that can be read.
