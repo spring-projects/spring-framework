@@ -3813,7 +3813,13 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
 
           <para>Note that GlassFish instrumentation-capable ClassLoader is available only in its EAR environment. 
           For GlassFish web applications, follow the Tomcat setup instructions as outlined above.</para>
-        </section>
+          
+          <para>Note that on JBoss 6.x, the app server scanning needs to be disabled to prevent it from loading the classes
+          before the application actually starts. A quick workaround is to add to your artifact a file named
+          <filename class="libraryfile">WEB-INF/jboss-scanning.xml</filename> with the following content:</para>
+          
+          <programlisting language="xml">&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</programlisting>
+          </section>
         
         <section id="aop-aj-ltw-environment-generic">
           <title>Generic Java applications</title>
