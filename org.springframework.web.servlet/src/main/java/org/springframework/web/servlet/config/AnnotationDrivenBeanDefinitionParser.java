@@ -183,18 +183,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			parserContext.registerComponent(new BeanComponentDefinition(conversionDef, conversionName));
 			conversionServiceRef = new RuntimeBeanReference(conversionName);
 		}
-		Element formattersElement = DomUtils.getChildElementByTagName(element, "formatters");
-		if (formattersElement != null) {
-			ManagedList<BeanDefinitionHolder> formatters = new ManagedList<BeanDefinitionHolder>();
-			formatters.setSource(source);
-			for (Element formatter : DomUtils.getChildElementsByTagName(formattersElement, "bean")) {
-				BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(formatter);
-				beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(formatter, beanDef);
-				formatters.add(beanDef);
-			}
-			BeanDefinition beanDef = parserContext.getRegistry().getBeanDefinition(conversionServiceRef.getBeanName());
-			beanDef.getPropertyValues().add("formatters", formatters);
-		}
 		return conversionServiceRef;
 	}
 
