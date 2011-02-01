@@ -26,7 +26,7 @@
 	annotations on bean classes, and that proxies are automatically
 	to be created for the relevant annotated beans.
 
-	The default annotations supported are Spring's @Cacheable and @CacheInvalidate.
+	The default annotations supported are Spring's @Cacheable and @CacheEvict.
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:attribute name="cache-manager" type="xsd:string" default="cacheManager">
