@@ -20,7 +20,6 @@ import java.lang.instrument.ClassFileTransformer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.instrument.InstrumentationSavingAgent;
@@ -31,6 +30,7 @@ import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWe
 import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
 import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
+import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWeaver;
 
 /**
  * Default {@link LoadTimeWeaver} bean for use in an application context,
@@ -50,6 +50,7 @@ import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeav
  *
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
+ * @author Costin Leau
  * @since 2.5
  * @see org.springframework.context.ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
@@ -109,6 +110,9 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			}
 			else if (name.startsWith("org.jboss")) {
 				return new JBossLoadTimeWeaver(classLoader);
+			}
+			else if (name.startsWith("com.ibm")) {
+				return new WebSphereLoadTimeWeaver(classLoader);
 			}
 		}
 		catch (IllegalStateException ex) {
