@@ -18,7 +18,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:all minOccurs="0">
-				<xsd:element name="message-converters">
+				<xsd:element name="message-converters" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures one or more HttpMessageConverter types to use for converting @RequestBody method parameters and @ResponseBody method return values.
@@ -38,7 +38,7 @@
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>			
-				<xsd:element name="argument-resolvers">
+				<xsd:element name="argument-resolvers" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures one or more WebArgumentResolver types to use for resolving custom arguments to handler methods.
