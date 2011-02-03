@@ -38,6 +38,27 @@
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>			
+				<xsd:element name="argument-resolvers">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures one or more WebArgumentResolver types to use for resolving custom arguments to handler methods.
+	Typically implemented to detect special parameter types, resolving well-known argument values for them.
+	Using this configuration element is optional.
+	Using it does not override the built-in support for resolving handler method arguments. 
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HttpMessageConverter bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>			
 			</xsd:all>
 			<xsd:attribute name="conversion-service" type="xsd:string">
 				<xsd:annotation>
