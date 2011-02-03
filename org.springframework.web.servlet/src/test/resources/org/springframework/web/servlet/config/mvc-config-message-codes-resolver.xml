@@ -5,16 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
 
-	<mvc:annotation-driven message-codes-resolver="messageCodesResolver">
-		<mvc:argument-resolvers>
-			<bean class="org.springframework.web.servlet.config.TestWebArgumentResolver"/>		
-			<bean class="org.springframework.web.servlet.config.TestWebArgumentResolver"/>		
-		</mvc:argument-resolvers>
-		<mvc:message-converters>
-			<bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
-			<bean class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
-		</mvc:message-converters>
-	</mvc:annotation-driven>
+	<mvc:annotation-driven message-codes-resolver="messageCodesResolver"/>
 
 	<bean id="messageCodesResolver" class="org.springframework.web.servlet.config.TestMessageCodesResolver"/>
 

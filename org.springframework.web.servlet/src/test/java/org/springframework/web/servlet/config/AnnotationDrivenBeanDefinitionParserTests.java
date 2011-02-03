@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -42,19 +42,16 @@ import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExc
  */
 public class AnnotationDrivenBeanDefinitionParserTests {
 
-	private static GenericWebApplicationContext appContext;
+	private GenericWebApplicationContext appContext;
 
-	@BeforeClass
-	public static void setup() {
+	@Before
+	public void setup() {
 		appContext = new GenericWebApplicationContext();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-annotation-driven.xml",
-				AnnotationDrivenBeanDefinitionParserTests.class));
-		appContext.refresh();
 	}
 
 	@Test
 	public void testMessageCodesResolver() {
+		loadBeanDefinitions("mvc-config-message-codes-resolver.xml");
 		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
 		assertNotNull(adapter);
 		Object initializer = new DirectFieldAccessor(adapter).getPropertyValue("webBindingInitializer");
@@ -66,12 +63,14 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 
 	@Test
 	public void testMessageConverters() {
+		loadBeanDefinitions("mvc-config-message-converters.xml");
 		verifyMessageConverters(appContext.getBean(AnnotationMethodHandlerAdapter.class));
 		verifyMessageConverters(appContext.getBean(AnnotationMethodHandlerExceptionResolver.class));
 	}
 
 	@Test
 	public void testArgumentResolvers() {
+		loadBeanDefinitions("mvc-config-argument-resolvers.xml");
 		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
 		assertNotNull(adapter);
 		Object resolvers = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
@@ -80,6 +79,13 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertEquals(2, ((WebArgumentResolver[]) resolvers).length);
 		assertTrue(((WebArgumentResolver[]) resolvers)[0] instanceof TestWebArgumentResolver);
 		assertTrue(((WebArgumentResolver[]) resolvers)[1] instanceof TestWebArgumentResolver);
+	}
+
+	private void loadBeanDefinitions(String fileName) {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
+		reader.loadBeanDefinitions(new ClassPathResource(fileName,
+				AnnotationDrivenBeanDefinitionParserTests.class));
+		appContext.refresh();
 	}
 
 	private void verifyMessageConverters(Object bean) {
