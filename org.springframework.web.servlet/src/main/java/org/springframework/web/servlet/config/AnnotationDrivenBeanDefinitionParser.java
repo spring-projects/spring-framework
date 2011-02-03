@@ -119,12 +119,16 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		bindingDef.getPropertyValues().add("messageCodesResolver", messageCodesResolver);
 
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
+		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
 
 		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 		annAdapterDef.setSource(source);
 		annAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		annAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		annAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
+		if (argumentResolvers != null) {
+			annAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
+		}
 		String annAdapterName = parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
@@ -209,6 +213,21 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		} else {
 			return null;
 		}
+	}
+
+	private ManagedList<?> getArgumentResolvers(Element element, Object source, ParserContext parserContext) {
+		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
+		if (resolversElement != null) {
+			ManagedList<BeanDefinitionHolder> argumentResolvers = new ManagedList<BeanDefinitionHolder>();
+			argumentResolvers.setSource(source);
+			for (Element resolver : DomUtils.getChildElementsByTagName(resolversElement, "bean")) {
+				BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(resolver);
+				beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(resolver, beanDef);
+				argumentResolvers.add(beanDef);
+			}
+			return argumentResolvers;
+		}
+		return null;
 	}
 
 	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {

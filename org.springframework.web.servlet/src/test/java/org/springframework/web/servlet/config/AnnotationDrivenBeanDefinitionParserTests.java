@@ -23,12 +23,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver;
@@ -67,6 +70,17 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		verifyMessageConverters(appContext.getBean(AnnotationMethodHandlerExceptionResolver.class));
 	}
 
+	@Test
+	public void testArgumentResolvers() {
+		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
+		assertNotNull(adapter);
+		Object resolvers = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+		assertNotNull(resolvers);
+		assertTrue(resolvers instanceof WebArgumentResolver[]);
+		assertEquals(2, ((WebArgumentResolver[]) resolvers).length);
+		assertTrue(((WebArgumentResolver[]) resolvers)[0] instanceof TestWebArgumentResolver);
+		assertTrue(((WebArgumentResolver[]) resolvers)[1] instanceof TestWebArgumentResolver);
+	}
 
 	private void verifyMessageConverters(Object bean) {
 		assertNotNull(bean);
@@ -78,17 +92,25 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(((HttpMessageConverter<?>[]) converters)[1] instanceof ResourceHttpMessageConverter);
 	}
 
-	private static class TestMessageCodesResolver implements MessageCodesResolver {
+}
 
-		public String[] resolveMessageCodes(String errorCode, String objectName) {
-			throw new IllegalStateException("Not expected to be invoked");
-		}
+class TestWebArgumentResolver implements WebArgumentResolver {
 
-		@SuppressWarnings("rawtypes")
-		public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
-			throw new IllegalStateException("Not expected to be invoked");
-		}
+	public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
+		return null;
+	}
 
+}
+
+class TestMessageCodesResolver implements MessageCodesResolver {
+
+	public String[] resolveMessageCodes(String errorCode, String objectName) {
+		return new String[] { "test.foo.bar" };
+	}
+
+	@SuppressWarnings("rawtypes")
+	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
+		return new String[] { "test.foo.bar" };
 	}
 
 }
