@@ -51,11 +51,11 @@ public class FormattingConversionService extends GenericConversionService
 
 	private StringValueResolver embeddedValueResolver;
 
-	private final Map<FieldFormatterKey, GenericConverter> cachedPrinters =
-			new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
+	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters =
+			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>();
 
-	private final Map<FieldFormatterKey, GenericConverter> cachedParsers =
-			new ConcurrentHashMap<FieldFormatterKey, GenericConverter>();
+	private final Map<AnnotationConverterKey, GenericConverter> cachedParsers =
+			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>();
 
 
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
@@ -93,89 +93,12 @@ public class FormattingConversionService extends GenericConversionService
 		if (this.embeddedValueResolver != null && annotationFormatterFactory instanceof EmbeddedValueResolverAware) {
 			((EmbeddedValueResolverAware) annotationFormatterFactory).setEmbeddedValueResolver(this.embeddedValueResolver);
 		}
-
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 		for (final Class<?> fieldType : fieldTypes) {
-			addConverter(new ConditionalGenericConverter() {
-				public Set<ConvertiblePair> getConvertibleTypes() {
-					return Collections.singleton(new ConvertiblePair(fieldType, String.class));
-				}
-				public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-					return (sourceType.getAnnotation(annotationType) != null);
-				}
-				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-					FieldFormatterKey key = new FieldFormatterKey(sourceType.getAnnotation(annotationType), fieldType);
-					GenericConverter converter = cachedPrinters.get(key);
-					if (converter == null) {
-						Printer<?> printer = annotationFormatterFactory.getPrinter(key.getAnnotation(), key.getFieldType());
-						converter = new PrinterConverter(fieldType, printer, FormattingConversionService.this);
-						cachedPrinters.put(key, converter);
-					}
-					return converter.convert(source, sourceType, targetType);
-				}
-				public String toString() {
-					return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " +
-							String.class.getName() + ": " + annotationFormatterFactory;
-				}
-			});
-			addConverter(new ConditionalGenericConverter() {
-				public Set<ConvertiblePair> getConvertibleTypes() {
-					return Collections.singleton(new ConvertiblePair(String.class, fieldType));
-				}
-				public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-					return (targetType.getAnnotation(annotationType) != null);
-				}
-				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-					FieldFormatterKey key = new FieldFormatterKey(targetType.getAnnotation(annotationType), fieldType);
-					GenericConverter converter = cachedParsers.get(key);
-					if (converter == null) {
-						Parser<?> printer = annotationFormatterFactory.getParser(key.getAnnotation(), key.getFieldType());
-						converter = new ParserConverter(fieldType, printer, FormattingConversionService.this);
-						cachedParsers.put(key, converter);
-					}
-					return converter.convert(source, sourceType, targetType);
-				}
-				public String toString() {
-					return String.class.getName() + " -> @" + annotationType.getName() + " " +
-							fieldType.getName() + ": " + annotationFormatterFactory;
-				}				
-			});
+			addConverter(new AnnotationPrinterConverter(annotationType, annotationFormatterFactory, fieldType));
+			addConverter(new AnnotationParserConverter(annotationType, annotationFormatterFactory, fieldType));
 		}
 	}
-
-
-	private static final class FieldFormatterKey {
-		
-		private final Annotation annotation;
-		
-		private final Class<?> fieldType;
-		
-		public FieldFormatterKey(Annotation annotation, Class<?> fieldType) {
-			this.annotation = annotation;
-			this.fieldType = fieldType;
-		}
-		
-		public Annotation getAnnotation() {
-			return annotation;
-		}
-		
-		public Class<?> getFieldType() {
-			return fieldType;
-		}
-		
-		public boolean equals(Object o) {
-			if (!(o instanceof FieldFormatterKey)) {
-				return false;
-			}
-			FieldFormatterKey key = (FieldFormatterKey) o;
-			return this.annotation.equals(key.annotation) && this.fieldType.equals(key.fieldType);
-		}
-		
-		public int hashCode() {
-			return this.annotation.hashCode() + 29 * this.fieldType.hashCode();
-		}
-	}
-
 
 	private static class PrinterConverter implements GenericConverter {
 
@@ -216,7 +139,6 @@ public class FormattingConversionService extends GenericConversionService
 		}
 	}
 
-
 	private static class ParserConverter implements GenericConverter {
 
 		private Class<?> fieldType;
@@ -256,6 +178,116 @@ public class FormattingConversionService extends GenericConversionService
 
 		public String toString() {
 			return String.class.getName() + " -> " + this.fieldType.getName() + ": " + this.parser;
+		}
+	}
+	
+	private final class AnnotationPrinterConverter implements ConditionalGenericConverter {
+		
+		private Class<? extends Annotation> annotationType;
+		
+		private AnnotationFormatterFactory annotationFormatterFactory;
+		
+		private Class<?> fieldType;
+
+		public AnnotationPrinterConverter(Class<? extends Annotation> annotationType,
+				AnnotationFormatterFactory annotationFormatterFactory, Class<?> fieldType) {
+			this.annotationType = annotationType;
+			this.annotationFormatterFactory = annotationFormatterFactory;
+			this.fieldType = fieldType;
+		}
+
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return Collections.singleton(new ConvertiblePair(fieldType, String.class));
+		}
+		
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return sourceType.getAnnotation(annotationType) != null;
+		}
+		
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			AnnotationConverterKey converterKey = new AnnotationConverterKey(sourceType.getAnnotation(annotationType), sourceType.getObjectType());
+			GenericConverter converter = cachedPrinters.get(converterKey);
+			if (converter == null) {
+				Printer<?> printer = annotationFormatterFactory.getPrinter(converterKey.getAnnotation(), converterKey.getFieldType());
+				converter = new PrinterConverter(fieldType, printer, FormattingConversionService.this);
+				cachedPrinters.put(converterKey, converter);
+			}
+			return converter.convert(source, sourceType, targetType);
+		}
+		
+		public String toString() {
+			return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " + String.class.getName() + ": " + annotationFormatterFactory;
+		}
+	}
+	
+	private final class AnnotationParserConverter implements ConditionalGenericConverter {
+		
+		private Class<? extends Annotation> annotationType;
+		
+		private AnnotationFormatterFactory annotationFormatterFactory;
+		
+		private Class<?> fieldType;
+
+		public AnnotationParserConverter(Class<? extends Annotation> annotationType,
+				AnnotationFormatterFactory<?> annotationFormatterFactory, Class<?> fieldType) {
+			this.annotationType = annotationType;
+			this.annotationFormatterFactory = annotationFormatterFactory;
+			this.fieldType = fieldType;
+		}
+
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return Collections.singleton(new ConvertiblePair(String.class, fieldType));
+		}
+		
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return targetType.getAnnotation(annotationType) != null;
+		}
+		
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			AnnotationConverterKey converterKey = new AnnotationConverterKey(targetType.getAnnotation(annotationType), targetType.getObjectType());
+			GenericConverter converter = cachedParsers.get(converterKey);
+			if (converter == null) {
+				Parser<?> parser = annotationFormatterFactory.getParser(converterKey.getAnnotation(), converterKey.getFieldType());
+				converter = new ParserConverter(fieldType, parser, FormattingConversionService.this);
+				cachedParsers.put(converterKey, converter);
+			}
+			return converter.convert(source, sourceType, targetType);
+		}
+		
+		public String toString() {
+			return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName() + ": " + annotationFormatterFactory;
+		}	
+	}
+	
+	private static final class AnnotationConverterKey {
+		
+		private final Annotation annotation;
+		
+		private final Class<?> fieldType;
+		
+		public AnnotationConverterKey(Annotation annotation, Class<?> fieldType) {
+			this.annotation = annotation;
+			this.fieldType = fieldType;
+		}
+		
+		public Annotation getAnnotation() {
+			return annotation;
+		}
+		
+		public Class<?> getFieldType() {
+			return fieldType;
+		}
+		
+		public boolean equals(Object o) {
+			if (!(o instanceof AnnotationConverterKey)) {
+				return false;
+			}
+			AnnotationConverterKey key = (AnnotationConverterKey) o;
+			return this.annotation.equals(key.annotation) && this.fieldType.equals(key.fieldType);
+		}
+		
+		public int hashCode() {
+			return this.annotation.hashCode() + 29 * this.fieldType.hashCode();
 		}
 	}
 	
