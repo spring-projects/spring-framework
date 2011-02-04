@@ -117,7 +117,6 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 		}
 		if (this.dateStyle != null) {
 			return DateTimeFormat.forStyle(this.dateStyle + "-");
-
 		} else {
 			return DateTimeFormat.shortDate();
 		}
