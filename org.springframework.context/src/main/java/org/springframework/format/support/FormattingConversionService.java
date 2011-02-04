@@ -63,11 +63,6 @@ public class FormattingConversionService extends GenericConversionService
 	}
 
 
-	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
-		addConverter(new PrinterConverter(fieldType, formatter, this));
-		addConverter(new ParserConverter(fieldType, formatter, this));
-	}
-
 	public void addFormatter(Formatter<?> formatter) {
 		final Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
 		if (fieldType == null) {
@@ -75,6 +70,11 @@ public class FormattingConversionService extends GenericConversionService
 					+ formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
 		}
 		addFormatterForFieldType(fieldType, formatter);
+	}
+	
+	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
+		addConverter(new PrinterConverter(fieldType, formatter, this));
+		addConverter(new ParserConverter(fieldType, formatter, this));
 	}
 
 	public void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser) {
