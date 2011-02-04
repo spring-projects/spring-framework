@@ -21,11 +21,12 @@ import java.util.Date;
 
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MutableDateTime;
 import org.joda.time.ReadableInstant;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 
@@ -46,6 +47,8 @@ final class JodaTimeConverters {
 		registry.addConverter(new DateTimeToLocalTimeConverter());
 		registry.addConverter(new DateTimeToLocalDateTimeConverter());
 		registry.addConverter(new DateTimeToDateMidnightConverter());
+		registry.addConverter(new DateTimeToInstantConverter());
+		registry.addConverter(new DateTimeToMutableDateTimeConverter());
 		registry.addConverter(new DateTimeToDateConverter());
 		registry.addConverter(new DateTimeToCalendarConverter());
 		registry.addConverter(new DateTimeToLongConverter());
@@ -94,6 +97,26 @@ final class JodaTimeConverters {
 		}
 	}
 
+	/** 
+	 * Used when binding a parsed DateTime to an Instant field. 
+	 * @see DateTimeParser 
+	 */
+	private static class DateTimeToInstantConverter implements Converter<DateTime, Instant> {
+		public Instant convert(DateTime source) {
+			return source.toInstant();
+		}
+	}
+
+	/** 
+	 * Used when binding a parsed DateTime to a MutableDateTime field. 
+	 * @see DateTimeParser 
+	 */
+	private static class DateTimeToMutableDateTimeConverter implements Converter<DateTime, MutableDateTime> {
+		public MutableDateTime convert(DateTime source) {
+			return source.toMutableDateTime();
+		}
+	}
+	
 	/** 
 	 * Used when binding a parsed DateTime to a java.util.Date field. 
 	 * @see DateTimeParser 

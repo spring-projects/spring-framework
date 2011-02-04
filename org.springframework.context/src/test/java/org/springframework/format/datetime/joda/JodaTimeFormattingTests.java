@@ -26,9 +26,11 @@ import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MutableDateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -310,6 +312,41 @@ public class JodaTimeFormattingTests {
 		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("isoDateTime"));
 	}
 
+	@Test
+	public void testBindInstant() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("instant", "10/31/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("instant"));
+	}
+	
+	@Test
+	public void testBindInstantAnnotated() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("instantAnnotated", "2009-10-31T12:00:00.000Z");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("instantAnnotated"));
+	}
+
+	@Test
+	public void testBindMutableDateTime() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("mutableDateTime", "10/31/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("mutableDateTime"));
+	}
+	
+	@Test
+	public void testBindMutableDateTimeAnnotated() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("mutableDateTimeAnnotated", "2009-10-31T12:00:00.000Z");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("mutableDateTimeAnnotated"));
+	}
 
 	@SuppressWarnings("unused")
 	private static class JodaTimeBean {
@@ -367,6 +404,16 @@ public class JodaTimeFormattingTests {
 
 		@DateTimeFormat(iso=ISO.DATE_TIME)
 		private DateTime isoDateTime;
+
+		private Instant instant;
+
+		@DateTimeFormat(iso=ISO.DATE_TIME)
+		private Instant instantAnnotated;
+
+		private MutableDateTime mutableDateTime;
+
+		@DateTimeFormat(iso=ISO.DATE_TIME)
+		private Instant mutableDateTimeAnnotated;
 
 		private final List<JodaTimeBean> children = new ArrayList<JodaTimeBean>();
 
@@ -529,6 +576,38 @@ public class JodaTimeFormattingTests {
 
 		public void setIsoDateTime(DateTime isoDateTime) {
 			this.isoDateTime = isoDateTime;
+		}
+		
+		public Instant getInstant() {
+			return instant;
+		}
+
+		public void setInstant(Instant instant) {
+			this.instant = instant;
+		}
+
+		public Instant getInstantAnnotated() {
+			return instantAnnotated;
+		}
+
+		public void setInstantAnnotated(Instant instantAnnotated) {
+			this.instantAnnotated = instantAnnotated;
+		}
+
+		public MutableDateTime getMutableDateTime() {
+			return mutableDateTime;
+		}
+
+		public void setMutableDateTime(MutableDateTime mutableDateTime) {
+			this.mutableDateTime = mutableDateTime;
+		}
+
+		public Instant getMutableDateTimeAnnotated() {
+			return mutableDateTimeAnnotated;
+		}
+
+		public void setMutableDateTimeAnnotated(Instant mutableDateTimeAnnotated) {
+			this.mutableDateTimeAnnotated = mutableDateTimeAnnotated;
 		}
 
 		public List<JodaTimeBean> getChildren() {

@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -30,7 +29,6 @@ import org.joda.time.LocalTime;
 import org.joda.time.ReadableInstant;
 import org.joda.time.ReadablePartial;
 import org.joda.time.format.DateTimeFormatter;
-
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
@@ -57,16 +55,7 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	
 
 	public JodaDateTimeFormatAnnotationFormatterFactory() {
-		Set<Class<?>> rawFieldTypes = new HashSet<Class<?>>(8);
-		rawFieldTypes.add(LocalDate.class);
-		rawFieldTypes.add(LocalTime.class);
-		rawFieldTypes.add(LocalDateTime.class);
-		rawFieldTypes.add(DateTime.class);
-		rawFieldTypes.add(DateMidnight.class);
-		rawFieldTypes.add(Date.class);
-		rawFieldTypes.add(Calendar.class);
-		rawFieldTypes.add(Long.class);
-		this.fieldTypes = Collections.unmodifiableSet(rawFieldTypes);
+		this.fieldTypes = createFieldTypes();
 	}
 
 	public final Set<Class<?>> getFieldTypes() {
@@ -105,7 +94,26 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		return new DateTimeParser(configureDateTimeFormatterFrom(annotation));				
 	}
 
+	// internal helpers
 
+	/** 
+	 * Create the set of field types that may be annotated with @DateTimeFormat.
+	 * Note: the 3 ReadablePartial concrete types are registered explicitly since addFormatterForFieldType rules exist for each of these types
+	 * (if we did not do this, the default byType rules for LocalDate, LocalTime, and LocalDateTime would take precedence over the annotation rule, which is not what we want)
+	 * @see JodaTimeFormatterRegistrar#registerFormatters(org.springframework.format.FormatterRegistry)
+	 */
+	private Set<Class<?>> createFieldTypes() {
+		Set<Class<?>> rawFieldTypes = new HashSet<Class<?>>(7);
+		rawFieldTypes.add(ReadableInstant.class);
+		rawFieldTypes.add(LocalDate.class);
+		rawFieldTypes.add(LocalTime.class);
+		rawFieldTypes.add(LocalDateTime.class);
+		rawFieldTypes.add(Date.class);
+		rawFieldTypes.add(Calendar.class);
+		rawFieldTypes.add(Long.class);
+		return Collections.unmodifiableSet(rawFieldTypes);		
+	}
+	
 	private DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
 		if (StringUtils.hasLength(annotation.pattern())) {
 			return forPattern(resolveEmbeddedValue(annotation.pattern()));
