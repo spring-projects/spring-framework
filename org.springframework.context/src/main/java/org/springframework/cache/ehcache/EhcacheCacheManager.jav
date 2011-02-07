@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * 
  * @author Costin Leau
  */
-public class EhcacheCacheManager extends AbstractCacheManager {
+public class EhCacheCacheManager extends AbstractCacheManager {
 
 	private net.sf.ehcache.CacheManager cacheManager;
 
