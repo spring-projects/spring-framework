@@ -18,6 +18,7 @@
 		<conf name="beanshell" extends="runtime" description="JARs needed to develop BeanShell beans"/>
 		<conf name="bytecode-proxy" extends="runtime" description="JARs needed to run with CGLIB bytecode proxies"/>
 		<conf name="ejb" extends="runtime" description="JARs needed to develop EJB3 beans"/>
+		<conf name="ehcache" extends="runtime" description="JARs needed to run with EHCache"/>
 		<conf name="jms" extends="runtime" description="JARs needed to develop JMS beans"/>
 		<conf name="groovy" extends="runtime" description="JARs needed to develop Groovy beans"/>
 		<conf name="instrumentation" extends="runtime" description="JARs needed to develop with Spring VM Instrumentation"/>
@@ -43,6 +44,7 @@
 		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" conf="provided->compile"/>
 		<dependency org="javax.xml.ws" name="com.springsource.javax.xml.ws" rev="2.1.1" conf="provided, ws->compile"/>
 		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.2.0" conf="optional, bytecode-proxy->compile"/>
+		<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.6.2" conf="optional, ehcache->compile"/>
 		<dependency org="org.aopalliance" name="com.springsource.org.aopalliance" rev="1.0.0" conf="compile, aop->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile, commons-logging->compile"/>
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="${aspectj.version}" conf="optional, aspectj->compile"/>

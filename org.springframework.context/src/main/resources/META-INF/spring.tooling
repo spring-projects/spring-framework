@@ -18,3 +18,7 @@ http\://www.springframework.org/schema/lang@name=lang Namespace
 http\://www.springframework.org/schema/lang@prefix=lang
 http\://www.springframework.org/schema/lang@icon=org/springframework/scripting/config/spring-lang.gif
 
+# Tooling related information for the cache namespace
+http\://www.springframework.org/schema/cache@name=cache Namespace
+http\://www.springframework.org/schema/cache@prefix=cache
+http\://www.springframework.org/schema/cache@icon=org/springframework/cache/config/spring-cache.gif
