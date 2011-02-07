@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/cache"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/cache"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.1.xsd"/>
+
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+	Defines the elements used in the Spring Framework's declarative
+	cache management infrastructure.
+		]]></xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:element name="annotation-driven">
+		<xsd:complexType>
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.cache.annotation.AnnotationCacheOperationDefinitionSource"><![CDATA[
+	Indicates that cache configuration is defined by Java 5
+	annotations on bean classes, and that proxies are automatically
+	to be created for the relevant annotated beans.
+
+	The default annotations supported are Spring's @Cacheable and @CacheEvict.
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:attribute name="cache-manager" type="xsd:string" default="cacheManager">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.cache.CacheManager"><![CDATA[
+	The bean name of the CacheManager that is to be used to retrieve the backing caches.
+	
+	This attribute is not required, and only needs to be specified
+	explicitly if the bean name of the desired CacheManager
+	is not 'cacheManager'.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.cache.CacheManager"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="mode" default="proxy">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Should annotated beans be proxied using Spring's AOP framework,
+	or should they rather be weaved with an AspectJ transaction aspect?
+
+	AspectJ weaving requires spring-aspects.jar on the classpath,
+	as well as load-time weaving (or compile-time weaving) enabled.
+
+	Note: The weaving-based aspect requires the @Cacheable and @CacheInvalidate
+	annotations to be defined on the concrete class. Annotations in interfaces
+	will not work in that case (they will rather only work with interface-based proxies)!
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="proxy"/>
+						<xsd:enumeration value="aspectj"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Are class-based (CGLIB) proxies to be created? By default, standard
+	Java interface-based proxies are created.
+
+	Note: Class-based proxies require the @Cacheable and @CacheInvalidate annotations
+	to be defined on the concrete class. Annotations in interfaces will not work
+	in that case (they will rather only work with interface-based proxies)!
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="order" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
+	Controls the ordering of the execution of the cache advisor
+	when multiple advice executes at a specific joinpoint.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>
