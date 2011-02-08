@@ -1,12 +1,11 @@
-SPRING FRAMEWORK 3.1 M1 (January 2011)
---------------------------------------
+SPRING FRAMEWORK 3.1 M1 (February 2011)
+---------------------------------------
 http://www.springframework.org
 
 1. INTRODUCTION
 
-Spring Framework 3.0 is the next generation of Spring: fully Java 5 based,
-EL enabled, REST enabled, and with support for JSR-330 (Dependency
-Injection) and JSR-303 (Bean Validation).
+Spring Framework 3.1 builds on the Spring Framework 3.0 foundation with
+a focus on Java-based application configuration and MVC enhancements.
 
 2. RELEASE NOTES
 
