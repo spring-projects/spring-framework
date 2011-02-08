@@ -45,13 +45,13 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * Name of property to set to specify active profiles: {@value}. May be comma delimited.
 	 * @see ConfigurableEnvironment#setActiveProfiles
 	 */
-	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profile.active";
+	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profiles.active";
 
 	/**
 	 * Name of property to set to specify default profiles: {@value}. May be comma delimited.
 	 * @see ConfigurableEnvironment#setDefaultProfiles
 	 */
-	public static final String DEFAULT_PROFILES_PROPERTY_NAME = "spring.profile.default";
+	public static final String DEFAULT_PROFILES_PROPERTY_NAME = "spring.profiles.default";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 

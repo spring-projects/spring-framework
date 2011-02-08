@@ -30,7 +30,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  *
  * <p>A <em>profile</em> is a named logical grouping that may be activated programatically via
  * {@link ConfigurableEnvironment#setActiveProfiles} or declaratively through setting the
- * {@link AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME spring.profile.active} property,
+ * {@link AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME spring.profiles.active} property,
  * usually through JVM system properties, as an environment variable, or for web applications
  * as a Servlet context parameter in {@code web.xml}.
  *
