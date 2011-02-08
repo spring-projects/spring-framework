@@ -18,8 +18,7 @@ package org.springframework.context.annotation;
 
 import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
-import org.springframework.context.annotation.ComponentScan.ExcludeFilter;
-import org.springframework.context.annotation.ComponentScan.IncludeFilter;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
@@ -27,11 +26,13 @@ import org.springframework.core.type.filter.TypeFilter;
  *
  * @author Chris Beams
  * @since 3.1
+ * @see ComponentScanAnnotationIntegrationTests
  */
 public class ComponentScanAnnotationTests {
 	@Test
-	public void test() {
-
+	public void noop() {
+		// no-op; the @ComponentScan-annotated MyConfig class below simply excercises
+		// available attributes of the annotation.
 	}
 }
 
@@ -39,22 +40,22 @@ public class ComponentScanAnnotationTests {
 
 @Configuration
 @ComponentScan(
-	packageOf={TestBean.class},
+	basePackageClasses={TestBean.class},
 	nameGenerator = DefaultBeanNameGenerator.class,
 	scopedProxy = ScopedProxyMode.NO,
 	scopeResolver = AnnotationScopeMetadataResolver.class,
 	useDefaultFilters = false,
 	resourcePattern = "**/*custom.class",
 	includeFilters = {
-		@IncludeFilter(type = FilterType.ANNOTATION, value = MyAnnotation.class)
+		@Filter(type = FilterType.ANNOTATION, value = MyAnnotation.class)
 	},
 	excludeFilters = {
-		@ExcludeFilter(type = FilterType.CUSTOM, value = TypeFilter.class)
+		@Filter(type = FilterType.CUSTOM, value = TypeFilter.class)
 	}
 )
 class MyConfig {
 
 }
 
-@ComponentScan(packageOf=example.scannable.NamedComponent.class)
+@ComponentScan(basePackageClasses=example.scannable.NamedComponent.class)
 class SimpleConfig { }

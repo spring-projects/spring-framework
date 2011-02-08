@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ import static org.springframework.util.SystemPropertyUtils.VALUE_SEPARATOR;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
-
 
 /**
  * Abstract base class for resolving properties against any underlying source.
@@ -39,7 +38,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	protected ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+	protected ConversionService conversionService = new DefaultConversionService();
 
 	private PropertyPlaceholderHelper nonStrictHelper;
 	private PropertyPlaceholderHelper strictHelper;

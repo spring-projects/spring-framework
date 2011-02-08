@@ -74,7 +74,7 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 
 	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
-		return TxNamespaceHandler.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
+		return TxAnnotationDriven.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
 	}
 
 }

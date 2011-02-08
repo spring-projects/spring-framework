@@ -86,7 +86,7 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Convenience method to instantiate a class using its no-arg constructor.
+	 * Instantiate a class using its no-arg constructor.
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
@@ -106,6 +106,27 @@ public abstract class BeanUtils {
 		catch (NoSuchMethodException ex) {
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
+	}
+
+	/**
+	 * Instantiate a class using its no-arg constructor and return the new instance
+	 * as the the specified assignable type.
+	 * <p>Useful in cases where
+	 * the type of the class to instantiate (clazz) is not available, but the type
+	 * desired (assignableTo) is known.
+	 * <p>As this method doesn't try to load classes by name, it should avoid
+	 * class-loading issues.
+	 * <p>Note that this method tries to set the constructor accessible
+	 * if given a non-accessible (that is, non-public) constructor.
+	 * @param clazz class to instantiate
+	 * @param assignableTo type that clazz must be assignableTo
+	 * @return the new instance
+	 * @throws BeanInstantiationException if the bean cannot be instantiated
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T instantiateClass(Class<?> clazz, Class<T> assignableTo) throws BeanInstantiationException {
+		Assert.isAssignable(assignableTo, clazz);
+		return (T)instantiateClass(clazz);
 	}
 
 	/**

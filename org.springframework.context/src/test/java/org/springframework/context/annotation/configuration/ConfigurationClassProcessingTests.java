@@ -16,11 +16,13 @@
 
 package org.springframework.context.annotation.configuration;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-import test.beans.ITestBean;
-import test.beans.TestBean;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Required;
@@ -43,7 +45,9 @@ import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.PriorityOrdered;
+
+import test.beans.ITestBean;
+import test.beans.TestBean;
 
 /**
  * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and error

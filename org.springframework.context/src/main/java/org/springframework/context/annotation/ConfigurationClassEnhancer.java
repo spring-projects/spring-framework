@@ -74,7 +74,7 @@ class ConfigurationClassEnhancer {
 		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
 		callbackFilter = new CallbackFilter() {
 			public int accept(Method candidateMethod) {
-				return (AnnotationUtils.findAnnotation(candidateMethod, Bean.class) != null ? 0 : 1);
+				return (BeanAnnotationHelper.isBeanAnnotated(candidateMethod) ? 0 : 1);
 			}
 		};
 	}
@@ -162,19 +162,21 @@ class ConfigurationClassEnhancer {
 		/**
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
 		 * existence of this bean object.
+		 *
+		 * @throws ProxyCreationException if an early bean reference proxy should be
+		 * created but the return type of the bean method being intercepted is not an
+		 * interface and thus not a candidate for JDK proxy creation.
+		 * @throws Throwable as a catch-all for any exception that may be thrown when
+		 * invoking the super implementation of the proxied method i.e., the actual
+		 * {@code @Bean} method.
 		 */
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			// by default the bean name is the name of the @Bean-annotated method
-			String beanName = method.getName();
+		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
+					MethodProxy cglibMethodProxy) throws ProxyCreationException, Throwable {
 
-			// check to see if the user has explicitly set the bean name
-			Bean bean = AnnotationUtils.findAnnotation(method, Bean.class);
-			if (bean != null && bean.name().length > 0) {
-				beanName = bean.name()[0];
-			}
+			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
 			// determine whether this bean is a scoped-proxy
-			Scope scope = AnnotationUtils.findAnnotation(method, Scope.class);
+			Scope scope = AnnotationUtils.findAnnotation(beanMethod, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 				String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);
 				if (this.beanFactory.isCurrentlyInCreation(scopedBeanName)) {
@@ -206,8 +208,7 @@ class ConfigurationClassEnhancer {
 				return this.beanFactory.getBean(beanName);
 			}
 
-			// no cached instance of the bean exists - actually create and return the bean
-			return proxy.invokeSuper(obj, args);
+			return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 		}
 
 		/**

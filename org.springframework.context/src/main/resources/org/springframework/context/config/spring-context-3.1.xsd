@@ -191,6 +191,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	Controls the class files eligible for component detection. Defaults to "**/*.class", the recommended value.
+	Consider use of the include-filter and exclude-filter elements for a more fine-grained approach.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

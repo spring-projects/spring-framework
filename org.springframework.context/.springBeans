@@ -11,6 +11,7 @@
 		<config>src/test/java/org/springframework/context/annotation/configuration/SecondLevelSubConfig-context.xml</config>
 		<config>src/test/java/org/springframework/context/annotation/configuration/ImportXmlWithAopNamespace-context.xml</config>
 		<config>src/test/java/org/springframework/context/annotation/Spr6602Tests-context.xml</config>
+		<config>src/test/java/org/springframework/context/annotation/FeatureConfigurationImportResourceTests-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

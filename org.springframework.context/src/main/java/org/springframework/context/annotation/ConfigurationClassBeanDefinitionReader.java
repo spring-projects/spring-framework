@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -43,23 +44,28 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.FeatureSpecification;
 import org.springframework.core.Conventions;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Reads a given fully-populated configuration model, registering bean definitions
- * with the given {@link BeanDefinitionRegistry} based on its contents.
+ * Reads a given fully-populated set of ConfigurationClass instances, registering bean
+ * definitions with the given {@link BeanDefinitionRegistry} based on its contents.
  *
  * <p>This class was modeled after the {@link BeanDefinitionReader} hierarchy, but does
- * not implement/extend any of its artifacts as a configuration model is not a {@link Resource}.
+ * not implement/extend any of its artifacts as a set of configuration classes is not a
+ * {@link Resource}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -85,6 +91,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
+	private ExecutorContext executorContext;
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
@@ -92,13 +99,20 @@ class ConfigurationClassBeanDefinitionReader {
 	 * @param problemReporter 
 	 * @param metadataReaderFactory 
 	 */
-	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
-			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory) {
+	public ConfigurationClassBeanDefinitionReader(final BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
+			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
+			ResourceLoader resourceLoader, Environment environment) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
+		this.executorContext = new ExecutorContext();
+		this.executorContext.setRegistry(this.registry);
+		this.executorContext.setRegistrar(new SimpleComponentRegistrar(this.registry));
+		this.executorContext.setResourceLoader(resourceLoader);
+		this.executorContext.setEnvironment(environment);
+		this.executorContext.setProblemReporter(problemReporter);
 	}
 
 
@@ -117,15 +131,38 @@ class ConfigurationClassBeanDefinitionReader {
 	 * class itself, all its {@link Bean} methods
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
+		AnnotationMetadata metadata = configClass.getMetadata();
+		processFeatureAnnotations(metadata);
 		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
-		for (ConfigurationClassMethod method : configClass.getMethods()) {
-			loadBeanDefinitionsForModelMethod(method);
+		for (ConfigurationClassMethod beanMethod : configClass.getMethods()) {
+			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 	}
 
+	private void processFeatureAnnotations(AnnotationMetadata metadata) {
+		try {
+			for (String annotationType : metadata.getAnnotationTypes()) {
+				MetadataReader metadataReader = new SimpleMetadataReaderFactory().getMetadataReader(annotationType);
+				if (metadataReader.getAnnotationMetadata().isAnnotated(FeatureAnnotation.class.getName())) {
+					Map<String, Object> annotationAttributes = metadataReader.getAnnotationMetadata().getAnnotationAttributes(FeatureAnnotation.class.getName(), true);
+					// TODO SPR-7420: this is where we can catch user-defined types and avoid instantiating them for STS purposes
+					FeatureAnnotationParser processor = (FeatureAnnotationParser) BeanUtils.instantiateClass(Class.forName((String)annotationAttributes.get("parser")));
+					FeatureSpecification spec = processor.process(metadata);
+					spec.execute(this.executorContext);
+				}
+			}
+		} catch (BeanDefinitionParsingException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			// TODO SPR-7420: what exception to throw?
+			throw new RuntimeException(ex);
+		}
+	}
+
 	/**
-	 * Registers the {@link Configuration} class itself as a bean definition.
+	 * Register the {@link Configuration} class itself as a bean definition.
 	 */
 	private void doLoadBeanDefinitionForConfigurationClassIfNecessary(ConfigurationClass configClass) {
 		if (configClass.getBeanName() != null) {
@@ -161,9 +198,9 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Read a particular {@link ConfigurationClassMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
-	private void loadBeanDefinitionsForModelMethod(ConfigurationClassMethod method) {
-		ConfigurationClass configClass = method.getConfigurationClass();
-		MethodMetadata metadata = method.getMetadata();
+	private void loadBeanDefinitionsForBeanMethod(ConfigurationClassMethod beanMethod) {
+		ConfigurationClass configClass = beanMethod.getConfigurationClass();
+		MethodMetadata metadata = beanMethod.getMetadata();
 
 		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
 		beanDef.setResource(configClass.getResource());
@@ -176,7 +213,7 @@ class ConfigurationClassBeanDefinitionReader {
 		// consider name and any aliases
 		Map<String, Object> beanAttributes = metadata.getAnnotationAttributes(Bean.class.getName());
 		List<String> names = new ArrayList<String>(Arrays.asList((String[]) beanAttributes.get("name")));
-		String beanName = (names.size() > 0 ? names.remove(0) : method.getMetadata().getMethodName());
+		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
 		for (String alias : names) {
 			this.registry.registerAlias(beanName, alias);
 		}
@@ -190,7 +227,7 @@ class ConfigurationClassBeanDefinitionReader {
 				// overriding is legal, return immediately
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("Skipping loading bean definition for %s: a definition for bean " +
-							"'%s' already exists. This is likely due to an override in XML.", method, beanName));
+							"'%s' already exists. This is likely due to an override in XML.", beanMethod, beanName));
 				}
 				return;
 			}
@@ -255,7 +292,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 		registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
-	
+
+
 	private void loadBeanDefinitionsFromImportedResources(Map<String, Class<?>> importedResources) {
 		Map<Class<?>, BeanDefinitionReader> readerInstanceCache = new HashMap<Class<?>, BeanDefinitionReader>();
 		for (Map.Entry<String, Class<?>> entry : importedResources.entrySet()) {
@@ -357,7 +395,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		@Override
 		public boolean isFactoryMethod(Method candidate) {
-			return (super.isFactoryMethod(candidate) && AnnotationUtils.findAnnotation(candidate, Bean.class) != null);
+			return (super.isFactoryMethod(candidate) && BeanAnnotationHelper.isBeanAnnotated(candidate));
 		}
 
 		@Override
@@ -372,14 +410,12 @@ class ConfigurationClassBeanDefinitionReader {
 	 * declare at least one {@link Bean @Bean} method.
 	 */
 	private static class InvalidConfigurationImportProblem extends Problem {
-	
 		public InvalidConfigurationImportProblem(String className, Resource resource, AnnotationMetadata metadata) {
-			super(String.format("%s was imported as a Configuration class but is not annotated " +
-					"with @Configuration nor does it declare any @Bean methods. Update the class to " +
-					"meet either of these requirements or do not attempt to import it.", className),
+			super(String.format("%s was @Import'ed as a but is not annotated with @FeatureConfiguration or " +
+					"@Configuration nor does it declare any @Bean methods. Update the class to " +
+					"meet one of these requirements or do not attempt to @Import it.", className),
 					new Location(resource, metadata));
 		}
-	
 	}
 
 }

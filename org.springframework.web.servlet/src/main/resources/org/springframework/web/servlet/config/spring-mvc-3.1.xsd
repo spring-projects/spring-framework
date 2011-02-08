@@ -23,7 +23,8 @@
 						<xsd:documentation><![CDATA[
 	Configures one or more HttpMessageConverter types to use for converting @RequestBody method parameters and @ResponseBody method return values.
 	Using this configuration element is optional.
-	If used it overrides the default set of HttpMessageConverter type registrations.
+	HttpMessageConverter registrations provided here will take precedence over HttpMessageConverter types registered by default.
+	Also see the register-defaults attribute if you want to turn off default registrations entirely.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -36,6 +37,13 @@
 								</xsd:annotation>
 							</xsd:element>
 						</xsd:sequence>
+						<xsd:attribute name="register-defaults" type="xsd:boolean" default="true">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether or not default HttpMessageConverter registrations should be added in addition to the ones provided within this element. 
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
 					</xsd:complexType>
 				</xsd:element>			
 				<xsd:element name="argument-resolvers" minOccurs="0">

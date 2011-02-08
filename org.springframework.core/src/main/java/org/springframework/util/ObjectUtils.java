@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.Arrays;
  * @author Keith Donald
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Chris Beams
  * @since 19.03.2004
  * @see org.apache.commons.lang.ObjectUtils
  */
@@ -119,6 +120,54 @@ public abstract class ObjectUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Check whether the given array of enum constants contains a constant with the given name,
+	 * ignoring case when determining a match.
+	 * @param enumValues the enum values to check, typically the product of a call to MyEnum.values()
+	 * @param constant the constant name to find (must not be null or empty string)
+	 * @return whether the constant has been found in the given array
+	 */
+	public static boolean containsConstant(Enum<?>[] enumValues, String constant) {
+		return containsConstant(enumValues, constant, false);
+	}
+
+	/**
+	 * Check whether the given array of enum constants contains a constant with the given name.
+	 * @param enumValues the enum values to check, typically the product of a call to MyEnum.values()
+	 * @param constant the constant name to find (must not be null or empty string)
+	 * @param caseSensitive whether case is significant in determining a match
+	 * @return whether the constant has been found in the given array
+	 */
+	public static boolean containsConstant(Enum<?>[] enumValues, String constant, boolean caseSensitive) {
+		for (Enum<?> candidate : enumValues) {
+			if (caseSensitive ?
+					candidate.toString().equals(constant) :
+					candidate.toString().equalsIgnoreCase(constant)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Case insensitive alternative to {@link Enum#valueOf(Class, String)}.
+	 * @param <E> the concrete Enum type
+	 * @param enumValues the array of all Enum constants in question, usually per Enum.values()
+	 * @param constant the constant to get the enum value of
+	 * @throws IllegalArgumentException if the given constant is not found in the given array
+	 * of enum values. Use {@link #containsConstant(Enum[], String)} as a guard to avoid this exception.
+	 */
+	public static <E extends Enum<?>> E caseInsensitiveValueOf(E[] enumValues, String constant) {
+		for (E candidate : enumValues) {
+			if(candidate.toString().equalsIgnoreCase(constant)) {
+				return candidate;
+			}
+		}
+		throw new IllegalArgumentException(
+				String.format("constant [%s] does not exist in enum type %s",
+						constant, enumValues.getClass().getComponentType().getName()));
 	}
 
 	/**

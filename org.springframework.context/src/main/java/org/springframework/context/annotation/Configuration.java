@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
  * @see AnnotationConfigApplicationContext
  * @see org.springframework.context.annotation.Profile
  */
-@Target({ElementType.TYPE})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component

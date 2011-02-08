@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -45,7 +45,7 @@ public class StandardTypeConverter implements TypeConverter {
 	public StandardTypeConverter() {
 		synchronized (this) {
 			if (defaultConversionService == null) {
-				defaultConversionService = ConversionServiceFactory.createDefaultConversionService();
+				defaultConversionService = new DefaultConversionService();
 			}
 		}
 		this.conversionService = defaultConversionService;
