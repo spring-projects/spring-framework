@@ -28,7 +28,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
  * either the {@code <context:component-scan>} XML element or (as of Spring 3.1) the
  * {@code @ComponentScan} annotation. These two options are equivalent to one another, and users may
  * choose between them as a matter of convention or preference. Fundamentally, both are declarative
- * mechanisms for <em>specifying</em> how the Spring container should be configured.  A {@code
+ * mechanisms for <em>specifying</em> how the Spring container should be configured. A {@code
  * FeatureSpecification} object, then, is a way of representing this configuration information independent
  * of its original source format be it XML, annotations, or otherwise.
  *
@@ -79,7 +79,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
  * <p>Typically, a user will call only the constructor and 'mutator' methods of a specification
  * object. The accessor/getter methods, however, are typically called only by the specification's
  * {@linkplain FeatureSpecificationExecutor executor} for the purpose of populating and registering
- * bean definitions with the Spring container.For this reason, it is recommended that accessor
+ * bean definitions with the Spring container. For this reason, it is recommended that accessor
  * methods be given package-private visibility. This creates a better experience for users from
  * an IDE content-assist point of view as they will see only the public mutator methods, reducing
  * any possible confusion.
@@ -87,10 +87,10 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
  * <p>Implementations should take care to allow for use of string-based bean names, placeholder
  * (<code>"${...}"</code>) and SpEL (<code>"#{...}</code>) expressions wherever they may be useful.
  * While it is generally desirable to refer to dependent beans in pure Java, in certain cases a
- * user may wish or need to refer by bean name. For example, the {@code TxAnnotationDriven} specification
+ * user may wish or need to refer to a bean by name. For example, the {@code TxAnnotationDriven} specification
  * referenced above allows for specifying its transaction-manager reference by {@code String} or by
  * {@code PlatformTransactionManager} reference. Such strings should always be candidates for placeholder
- * replacement and SpEL evaluation for maximum configurability as well as parity with the featureset
+ * replacement and SpEL evaluation for maximum configurability as well as parity with the feature set
  * available in Spring XML. With regard to SpEL expressions, users should assume that only expressions
  * evaluating to a bean name will be supported. While it is technically possible with SpEL to resolve
  * a bean instance, specification executors will not support such use unless explicitly indicated.
