@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
@@ -54,7 +54,7 @@ public class JodaTimeFormattingTests {
 
 	@Before
 	public void setUp() {
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 
 		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
 		registrar.registerFormatters(conversionService);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void addConverterNoSourceTargetClassInfoAvailable() {
 		try {
 			conversionService.addConverter(new Converter() {
@@ -109,7 +110,7 @@ public class GenericConversionServiceTests {
 	}
 
 	public void convertNullTargetClass() {
-		assertNull(conversionService.convert("3", (Class) null));
+		assertNull(conversionService.convert("3", (Class<?>) null));
 		assertNull(conversionService.convert("3", TypeDescriptor.NULL));
 	}
 
@@ -226,7 +227,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testStringArrayToResourceArray() {
-		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService conversionService = new DefaultConversionService();
 		conversionService.addConverter(new MyStringArrayToResourceArrayConverter());
 		Resource[] converted = conversionService.convert(new String[] {"x1", "z3"}, Resource[].class);
 		assertEquals(2, converted.length);
@@ -236,7 +237,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testStringArrayToIntegerArray() {
-		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService conversionService = new DefaultConversionService();
 		conversionService.addConverter(new MyStringArrayToIntegerArrayConverter());
 		Integer[] converted = conversionService.convert(new String[] {"x1", "z3"}, Integer[].class);
 		assertEquals(2, converted.length);
@@ -246,7 +247,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testStringToIntegerArray() {
-		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService conversionService = new DefaultConversionService();
 		conversionService.addConverter(new MyStringToIntegerArrayConverter());
 		Integer[] converted = conversionService.convert("x1,z3", Integer[].class);
 		assertEquals(2, converted.length);
@@ -256,7 +257,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testWildcardMap() throws Exception {
-		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService conversionService = new DefaultConversionService();
 		Map<String, String> input = new LinkedHashMap<String, String>();
 		input.put("key", "value");
 		Object converted = conversionService.convert(input, new TypeDescriptor(getClass().getField("wildcardMap")));
@@ -265,14 +266,14 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testListOfList() {
-		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService service = new DefaultConversionService();
 		List<List<String>> list = Collections.singletonList(Collections.singletonList("Foo"));
 		assertNotNull(service.convert(list, String.class));
 	}
 
 	@Test
 	public void testStringToString() {
-		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService service = new DefaultConversionService();
 		String value = "myValue";
 		String result = service.convert(value, String.class);
 		assertSame(value, result);
@@ -280,7 +281,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testStringToObject() {
-		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService service = new DefaultConversionService();
 		String value = "myValue";
 		Object result = service.convert(value, Object.class);
 		assertSame(value, result);
@@ -288,7 +289,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testIgnoreCopyConstructor() {
-		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService service = new DefaultConversionService();
 		WithCopyConstructor value = new WithCopyConstructor();
 		Object result = service.convert(value, WithCopyConstructor.class);
 		assertSame(value, result);
@@ -296,7 +297,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance1() {
-		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("integer->string conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
 		for (int i = 0; i < 4000000; i++) {
@@ -313,7 +314,7 @@ public class GenericConversionServiceTests {
 	
 	@Test
 	public void testPerformance2() throws Exception {
-		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
 		List<String> source = new LinkedList<String>();
@@ -340,7 +341,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance3() throws Exception {
-		GenericConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
 		Map<String, String> source = new HashMap<String, String>();
@@ -387,6 +388,7 @@ public class GenericConversionServiceTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListDifferentTarget"));
 		assertTrue(conversionService.canConvert(sourceType, targetType));
+		@SuppressWarnings("unchecked")
 		LinkedList<Integer> result = (LinkedList<Integer>) conversionService.convert(list, sourceType, targetType);
 		assertEquals(LinkedList.class, result.getClass());
 		assertTrue(result.isEmpty());
@@ -437,6 +439,7 @@ public class GenericConversionServiceTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapDifferentTarget"));
 		assertTrue(conversionService.canConvert(sourceType, targetType));
+		@SuppressWarnings("unchecked")
 		LinkedHashMap<String, String> result = (LinkedHashMap<String, String>) conversionService.convert(map, sourceType, targetType);
 		assertEquals(map, result);
 		assertEquals(LinkedHashMap.class, result.getClass());

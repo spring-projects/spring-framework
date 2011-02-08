@@ -175,5 +175,6 @@ final class ConfigurationClass {
 					getSimpleName(), count, methodName), new Location(getResource(), getMetadata()));
 		}
 	}
-	
+
+
 }

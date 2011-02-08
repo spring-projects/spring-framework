@@ -65,6 +65,7 @@ public class FooServiceImpl implements FooService {
 
 	private boolean initCalled = false;
 
+	@SuppressWarnings("unused")
 	@PostConstruct
 	private void init() {
 		if (this.initCalled) {

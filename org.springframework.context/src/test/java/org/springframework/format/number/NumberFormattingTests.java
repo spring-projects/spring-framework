@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionService;
@@ -46,7 +46,7 @@ public class NumberFormattingTests {
 
 	@Before
 	public void setUp() {
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.setEmbeddedValueResolver(new StringValueResolver() {
 			public String resolveStringValue(String strVal) {
 				if ("${pattern}".equals(strVal)) {

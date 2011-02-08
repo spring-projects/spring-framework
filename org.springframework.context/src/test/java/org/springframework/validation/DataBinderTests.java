@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
@@ -46,7 +44,7 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.util.StringUtils;
@@ -319,7 +317,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -350,7 +348,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -372,7 +370,7 @@ public class DataBinderTests extends TestCase {
 		BeanWithIntegerList tb = new BeanWithIntegerList();
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -393,7 +391,7 @@ public class DataBinderTests extends TestCase {
 		BeanWithIntegerList tb = new BeanWithIntegerList();
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -415,7 +413,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		binder.initDirectFieldAccess();
@@ -448,7 +446,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb);
 		binder.initDirectFieldAccess();
 		FormattingConversionService conversionService = new FormattingConversionService();
-		ConversionServiceFactory.addDefaultConverters(conversionService);
+		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(Float.class, new NumberFormatter());
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -553,7 +551,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals(1, disallowedFields.length);
 		assertEquals("age", disallowedFields[0]);
 
-		Map m = binder.getBindingResult().getModel();
+		Map<?,?> m = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -1415,6 +1413,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("badName", nameError.getCode());
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testBindingWithResortedList() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");

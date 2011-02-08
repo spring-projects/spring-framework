@@ -3368,8 +3368,10 @@ public class SimpleController {
     				</para>
 		            <note>
 						<para>
-							This list of HttpMessageConverters used can be replaced through 
-							the mvc:message-converters sub-element of mvc:annotation-driven.
+							You can provide your own HttpMessageConverters through the 
+							mvc:message-converters sub-element of mvc:annotation-driven.
+							Message converters you provide will take precedence over the 
+							ones registered by default.
 						</para>
 		            </note>
     			</listitem>

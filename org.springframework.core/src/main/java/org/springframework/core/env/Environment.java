@@ -69,7 +69,7 @@ public interface Environment extends PropertyResolver {
 	 * Return the set of profiles explicitly made active for this environment. Profiles are used for
 	 * creating logical groupings of bean definitions to be registered conditionally, often based on
 	 * deployment environment.  Profiles can be activated by setting {@linkplain
-	 * AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME "spring.profiles.active"} as a system property
+	 * AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME "spring.profile.active"} as a system property
 	 * or by calling {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
 	 *
 	 * <p>If no profiles have explicitly been specified as active, then any 'default' profiles will implicitly

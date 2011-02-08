@@ -29,66 +29,16 @@ import org.springframework.core.convert.converter.GenericConverter;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
  */
 public abstract class ConversionServiceFactory {
 
 	/**
-	 * Create a new default ConversionService instance that can be safely modified.
-	 */
-	public static GenericConversionService createDefaultConversionService() {
-		GenericConversionService conversionService = new GenericConversionService();
-		addDefaultConverters(conversionService);
-		return conversionService;
-	}
-
-	/**
-	 * Populate the given ConversionService instance with all applicable default converters.
-	 */
-	public static void addDefaultConverters(GenericConversionService conversionService) {
-		conversionService.addConverter(new ArrayToCollectionConverter(conversionService));
-		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
-
-		conversionService.addConverter(new ArrayToStringConverter(conversionService));
-		conversionService.addConverter(new StringToArrayConverter(conversionService));
-
-		conversionService.addConverter(new ArrayToObjectConverter(conversionService));
-		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
-
-		conversionService.addConverter(new CollectionToStringConverter(conversionService));
-		conversionService.addConverter(new StringToCollectionConverter(conversionService));
-
-		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
-		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));
-		
-		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
-		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
-		conversionService.addConverter(new MapToMapConverter(conversionService));
-
-		conversionService.addConverter(new PropertiesToStringConverter());
-		conversionService.addConverter(new StringToPropertiesConverter());
-
-		conversionService.addConverter(new StringToBooleanConverter());
-		conversionService.addConverter(new StringToCharacterConverter());		
-		conversionService.addConverter(new StringToLocaleConverter());
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());	
-		conversionService.addConverterFactory(new StringToEnumConverterFactory());
-
-		conversionService.addConverter(new NumberToCharacterConverter());
-		conversionService.addConverterFactory(new CharacterToNumberFactory());
-
-		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
-		
-		conversionService.addConverter(new ObjectToStringConverter());
-		conversionService.addConverter(new ObjectToObjectConverter());
-		conversionService.addConverter(new IdToEntityConverter(conversionService));
-	}
-
-	/**
-	 * Register the given converter objects with the given target registry.
+	 * Register the given Converter objects with the given target ConverterRegistry.
 	 * @param converters the converter objects: implementing {@link Converter},
 	 * {@link ConverterFactory}, or {@link GenericConverter}
-	 * @param registry the target registry to register with
+	 * @param registry the target registry
 	 */
 	public static void registerConverters(Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
@@ -108,6 +58,24 @@ public abstract class ConversionServiceFactory {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Create a new default ConversionService instance that can be safely modified.
+	 *
+	 * @deprecated in Spring 3.1 in favor of {@link DefaultConversionService#DefaultConversionService()}
+	 */
+	public static GenericConversionService createDefaultConversionService() {
+		return new DefaultConversionService();
+	}
+
+	/**
+	 * Populate the given ConversionService instance with all applicable default converters.
+	 *
+	 * @deprecated in Spring 3.1 in favor of {@link DefaultConversionService#addDefaultConverters}
+	 */
+	public static void addDefaultConverters(GenericConversionService conversionService) {
+		DefaultConversionService.addDefaultConverters(conversionService);
 	}
 
 }

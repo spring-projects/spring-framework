@@ -83,4 +83,9 @@ public class XmlReaderContext extends ReaderContext {
 		return generatedName;
 	}
 
+	// TODO SPR-7420: review exposing problem reporter
+	public ProblemReporter getProblemReporter() {
+		return this.problemReporter;
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,15 @@
 
 package org.springframework.context.annotation;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,10 +32,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -38,12 +46,24 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.FeatureSpecification;
+import org.springframework.context.config.SourceAwareSpecification;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -63,7 +83,7 @@ import org.springframework.util.ClassUtils;
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		BeanClassLoaderAware, EnvironmentAware {
+		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
 
 	/** Whether the CGLIB2 library is present on the classpath */
 	private static final boolean cglibAvailable = ClassUtils.isPresent(
@@ -76,6 +96,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
@@ -87,6 +109,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private boolean postProcessBeanFactoryCalled = false;
 
 	private Environment environment;
+
+	private ConfigurationClassBeanDefinitionReader reader;
 
 
 	/**
@@ -118,6 +142,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		this.setMetadataReaderFactoryCalled = true;
 	}
 
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
+		this.resourceLoader = resourceLoader;
+	}
+
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 		if (!this.setMetadataReaderFactoryCalled) {
@@ -126,6 +155,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	public void setEnvironment(Environment environment) {
+		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 	}
 
@@ -143,7 +173,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					"postProcessBeanFactory already called for this post-processor");
 		}
 		this.postProcessBeanDefinitionRegistryCalled = true;
-		processConfigBeanDefinitions(registry);
+		processConfigurationClasses(registry);
 	}
 
 	/**
@@ -158,18 +188,196 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		this.postProcessBeanFactoryCalled = true;
 		if (!this.postProcessBeanDefinitionRegistryCalled) {
 			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
-			// Simply call processConfigBeanDefinitions lazily at this point then.
-			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
+			// Simply call processConfigurationClasses lazily at this point then.
+			processConfigurationClasses((BeanDefinitionRegistry)beanFactory);
 		}
-		enhanceConfigurationClasses(beanFactory);
 	}
 
+	/**
+	 * Find and process all @Configuration classes with @Feature methods in the given registry.
+	 */
+	private void processConfigurationClasses(BeanDefinitionRegistry registry) {
+		ConfigurationClassBeanDefinitionReader reader = getConfigurationClassBeanDefinitionReader(registry);
+		processConfigBeanDefinitions(registry, reader);
+		enhanceConfigurationClasses((ConfigurableListableBeanFactory)registry);
+		processFeatureConfigurationClasses((ConfigurableListableBeanFactory) registry);
+	}
+
+	/**
+	 * Process any @FeatureConfiguration classes
+	 */
+	private void processFeatureConfigurationClasses(final ConfigurableListableBeanFactory beanFactory) {
+		Map<String, Object> featureConfigBeans = retrieveFeatureConfigurationBeans(beanFactory);
+
+		if (featureConfigBeans.size() == 0) {
+			return;
+		}
+
+		for (final Object featureConfigBean : featureConfigBeans.values()) {
+			checkForBeanMethods(featureConfigBean.getClass());
+		}
+
+		if (!cglibAvailable) {
+			throw new IllegalStateException("CGLIB is required to process @FeatureConfiguration classes. " +
+					"Either add CGLIB to the classpath or remove the following @FeatureConfiguration bean definitions: " +
+					featureConfigBeans.keySet());
+		}
+
+		final EarlyBeanReferenceProxyCreator proxyCreator = new EarlyBeanReferenceProxyCreator(beanFactory);
+		final ExecutorContext executorContext = createExecutorContext(beanFactory);
+
+		for (final Object featureConfigBean : featureConfigBeans.values()) {
+			ReflectionUtils.doWithMethods(featureConfigBean.getClass(),
+					new ReflectionUtils.MethodCallback() {
+						public void doWith(Method featureMethod) throws IllegalArgumentException, IllegalAccessException {
+							processFeatureMethod(featureMethod, featureConfigBean, executorContext, proxyCreator);
+						} },
+					new ReflectionUtils.MethodFilter() {
+						public boolean matches(Method candidateMethod) {
+							return candidateMethod.isAnnotationPresent(Feature.class);
+						} });
+		}
+	}
+
+	/**
+	 * Alternative to {@link ListableBeanFactory#getBeansWithAnnotation(Class)} that avoids
+	 * instantiating FactoryBean objects.  FeatureConfiguration types cannot be registered as
+	 * FactoryBeans, so ignoring them won't cause a problem.  On the other hand, using gBWA()
+	 * at this early phase of the container would cause all @Bean methods to be invoked, as they
+	 * are ultimately FactoryBeans underneath.
+	 */
+	private Map<String, Object> retrieveFeatureConfigurationBeans(ConfigurableListableBeanFactory beanFactory) {
+		Map<String, Object> fcBeans = new HashMap<String, Object>();
+		for (String beanName : beanFactory.getBeanDefinitionNames()) {
+			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
+			if (isFeatureConfiguration(beanDef)) {
+				fcBeans.put(beanName, beanFactory.getBean(beanName));
+			}
+		}
+		return fcBeans;
+	}
+
+	private boolean isFeatureConfiguration(BeanDefinition candidate) {
+		if (!(candidate instanceof AbstractBeanDefinition) || (candidate.getBeanClassName() == null)) {
+			return false;
+		}
+		AbstractBeanDefinition beanDef = (AbstractBeanDefinition) candidate;
+		if (beanDef.hasBeanClass()) {
+			Class<?> beanClass = beanDef.getBeanClass();
+			if (AnnotationUtils.findAnnotation(beanClass, FeatureConfiguration.class) != null) {
+				return true;
+			}
+		}
+		else {
+			// in the case of @FeatureConfiguration classes included with @Import the bean class name
+			// will still be in String form.  Since we don't know whether the current bean definition
+			// is a @FeatureConfiguration or not, carefully check for the annotation using ASM instead
+			// eager classloading.
+			String className = null;
+			try {
+				className = beanDef.getBeanClassName();
+				MetadataReader metadataReader = new SimpleMetadataReaderFactory().getMetadataReader(className);
+				AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+				if (annotationMetadata.isAnnotated(FeatureConfiguration.class.getName())) {
+					return true;
+				}
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Could not create MetadataReader for class " + className, ex);
+			}
+		}
+		return false;
+	}
+
+	private void checkForBeanMethods(final Class<?> featureConfigClass) {
+		ReflectionUtils.doWithMethods(featureConfigClass,
+				new ReflectionUtils.MethodCallback() {
+					public void doWith(Method beanMethod) throws IllegalArgumentException, IllegalAccessException {
+						throw new FeatureMethodExecutionException(
+								format("@FeatureConfiguration classes must not contain @Bean-annotated methods. " +
+										"%s.%s() is annotated with @Bean and must be removed in order to proceed. " +
+										"Consider moving this method into a dedicated @Configuration class and " +
+										"injecting the bean as a parameter into any @Feature method(s) that need it.",
+										beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
+					} },
+				new ReflectionUtils.MethodFilter() {
+					public boolean matches(Method candidateMethod) {
+						return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
+					} });
+	}
+
+	/**
+	 * TODO SPR-7420: this method invokes user-supplied code, which is not going to fly for STS
+	 * 
+	 * consider introducing some kind of check to see if we're in a tooling context and make guesses
+	 * based on return type rather than actually invoking the method and processing the the specification
+	 * object that returns.
+	 * @param beanFactory
+	 * @throws SecurityException 
+	 */
+	private void processFeatureMethod(final Method featureMethod, Object configInstance,
+			ExecutorContext executorContext, EarlyBeanReferenceProxyCreator proxyCreator) {
+		try {
+			// get the return type
+			if (!(FeatureSpecification.class.isAssignableFrom(featureMethod.getReturnType()))) {
+				// TODO SPR-7420: raise a Problem instead?
+				throw new IllegalArgumentException(
+						"return type from @Feature methods must be assignable to FeatureSpecification");
+			}
+
+			List<Object> beanArgs = new ArrayList<Object>();
+			Class<?>[] parameterTypes = featureMethod.getParameterTypes();
+			for (int i = 0; i < parameterTypes.length; i++) {
+				MethodParameter mp = new MethodParameter(featureMethod, i);
+				DependencyDescriptor dd = new DependencyDescriptor(mp, true, false);
+				Object proxiedBean = proxyCreator.createProxy(dd);
+				beanArgs.add(proxiedBean);
+			}
+
+			// reflectively invoke that method
+			FeatureSpecification spec;
+			featureMethod.setAccessible(true);
+			spec = (FeatureSpecification) featureMethod.invoke(configInstance, beanArgs.toArray(new Object[beanArgs.size()]));
+
+			Assert.notNull(spec,
+					format("The specification returned from @Feature method %s.%s() must not be null",
+							featureMethod.getDeclaringClass().getSimpleName(), featureMethod.getName()));
+
+			if (spec instanceof SourceAwareSpecification) {
+				((SourceAwareSpecification)spec).source(featureMethod);
+				((SourceAwareSpecification)spec).sourceName(featureMethod.getName());
+			}
+			spec.execute(executorContext);
+		} catch (Exception ex) {
+			throw new FeatureMethodExecutionException(ex);
+		}
+	}
+
+	private ExecutorContext createExecutorContext(ConfigurableListableBeanFactory beanFactory) {
+		final BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+		ExecutorContext executorContext = new ExecutorContext();
+		executorContext.setEnvironment(this.environment);
+		executorContext.setResourceLoader(this.resourceLoader);
+		executorContext.setRegistry(registry);
+		executorContext.setRegistrar(new SimpleComponentRegistrar(registry));
+		// TODO SPR-7420: how to get hold of the current problem reporter here?
+		executorContext.setProblemReporter(new FailFastProblemReporter());
+		return executorContext;
+	}
+
+	private ConfigurationClassBeanDefinitionReader getConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry) {
+		if (this.reader == null) {
+			this.reader = new ConfigurationClassBeanDefinitionReader(
+					registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory, this.resourceLoader, this.environment);
+		}
+		return this.reader;
+	}
 
 	/**
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
-	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
+	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry, ConfigurationClassBeanDefinitionReader reader) {
 		Set<BeanDefinitionHolder> configCandidates = new LinkedHashSet<BeanDefinitionHolder>();
 		for (String beanName : registry.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
@@ -202,8 +410,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		parser.validate();
 
 		// Read the model and create bean definitions based on its content
-		ConfigurationClassBeanDefinitionReader reader = new ConfigurationClassBeanDefinitionReader(
-				registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory);
 		reader.loadBeanDefinitions(parser.getConfigurationClasses());
 	}
 

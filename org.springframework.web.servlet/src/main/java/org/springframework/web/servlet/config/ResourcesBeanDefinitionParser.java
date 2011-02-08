@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,89 +16,72 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.Map;
-
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.parsing.BeanComponentDefinition;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.Ordered;
+import org.springframework.context.config.ExecutorContext;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
-import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
+import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
- * {@code resources} element to register a {@link ResourceHttpRequestHandler}.
- * Will also register a {@link SimpleUrlHandlerMapping} for mapping resource requests, 
- * and a {@link HttpRequestHandlerAdapter} if necessary. 
+ * {@code resources} element. 
  *
- * @author Keith Donald
- * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 3.0.4
+ * @see MvcResources
+ * @see MvcResourcesExecutor
  */
-class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefinitionParser implements BeanDefinitionParser {
+class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
-	@Override
-	public void doParse(Element element, ParserContext parserContext) {
-		Object source = parserContext.extractSource(element);
-		registerResourceMappings(parserContext, element, source);
+	/**
+	 * Parses the {@code <mvc:resources/>} tag
+	 */
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		MvcResources spec = createSpecification(element, parserContext);
+		if (spec != null) {
+			spec.execute(createExecutorContext(parserContext));
+		}
+		return null;
 	}
-	
-	private void registerResourceMappings(ParserContext parserContext, Element element, Object source) {
-		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
-		if (resourceHandlerName == null) {
-			return;
+
+	private MvcResources createSpecification(Element element, ParserContext parserContext) {
+		String mapping = element.getAttribute("mapping");
+		if (!StringUtils.hasText(mapping)) {
+			parserContext.getReaderContext().error("The 'mapping' attribute is required.",
+					parserContext.extractSource(element));
+			return null;
 		}
-		
-		Map<String, String> urlMap = new ManagedMap<String, String>();
-		String resourceRequestPath = element.getAttribute("mapping");
-		if (!StringUtils.hasText(resourceRequestPath)) {
-			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
-	        return;
+		String[] locations = StringUtils.commaDelimitedListToStringArray(element.getAttribute("location"));
+		if (locations.length == 0) {
+			parserContext.getReaderContext().error("The 'location' attribute is required.",
+					parserContext.extractSource(element));
+			return null;
 		}
-		urlMap.put(resourceRequestPath, resourceHandlerName);
-		
-		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
-		handlerMappingDef.setSource(source);
-		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
-		
-		String order = element.getAttribute("order");
-		// use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
-		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
-		
-		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
-		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
-		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));	
+		MvcResources spec = new MvcResources(mapping, locations);
+		if (element.hasAttribute("cache-period")) {
+			spec.cachePeriod(element.getAttribute("cache-period"));
+		}
+		if (element.hasAttribute("order")) {
+			spec.order(element.getAttribute("order"));
+		}
+		spec.source(parserContext.extractSource(element));
+		spec.sourceName(element.getTagName());
+		return spec;
 	}
-	
-	private String registerResourceHandler(ParserContext parserContext, Element element, Object source) {
-		String locationAttr = element.getAttribute("location");
-		if (!StringUtils.hasText(locationAttr)) {
-			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
-	        return null;
-		}		
 
-		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
-		resourceHandlerDef.setSource(source);
-		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getPropertyValues().add("locations", StringUtils.commaDelimitedListToStringArray(locationAttr));
-
-		String cacheSeconds = element.getAttribute("cache-period");
-		if (StringUtils.hasText(cacheSeconds)) {
-			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
-		}
-
-		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
-		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
-		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));	
-		return beanName;
+	/**
+	 * Adapt the given ParserContext instance into an ExecutorContext.
+	 *
+	 * TODO SPR-7420: consider unifying the two through a superinterface.
+	 * TODO SPR-7420: create a common ParserContext-to-ExecutorContext adapter util
+	 */
+	private ExecutorContext createExecutorContext(ParserContext parserContext) {
+		ExecutorContext executorContext = new ExecutorContext();
+		executorContext.setRegistry(parserContext.getRegistry());
+		executorContext.setRegistrar(parserContext);
+		executorContext.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
+		return executorContext;
 	}
 
 }

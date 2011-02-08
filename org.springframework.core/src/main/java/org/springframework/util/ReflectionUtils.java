@@ -373,6 +373,20 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Determine whether the given method is originally declared by {@link java.lang.Object}.
+	 */
+	public static boolean isObjectMethod(Method method) {
+		try {
+			Object.class.getDeclaredMethod(method.getName(), method.getParameterTypes());
+			return true;
+		} catch (SecurityException ex) {
+			return false;
+		} catch (NoSuchMethodException ex) {
+			return false;
+		}
+	}
+
+	/**
 	 * Make the given field accessible, explicitly setting it accessible if
 	 * necessary. The <code>setAccessible(true)</code> method is only called
 	 * when actually necessary, to avoid unnecessary conflicts with a JVM

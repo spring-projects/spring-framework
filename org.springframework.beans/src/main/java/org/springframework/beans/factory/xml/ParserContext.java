@@ -21,6 +21,7 @@ import java.util.Stack;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.ComponentRegistrar;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -36,7 +37,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * @see XmlReaderContext
  * @see BeanDefinitionParserDelegate
  */
-public final class ParserContext {
+public final class ParserContext implements ComponentRegistrar {
 
 	private final XmlReaderContext readerContext;
 
@@ -119,6 +120,10 @@ public final class ParserContext {
 	public void registerBeanComponent(BeanComponentDefinition component) {
 		BeanDefinitionReaderUtils.registerBeanDefinition(component, getRegistry());
 		registerComponent(component);
+	}
+
+	public String registerWithGeneratedName(BeanDefinition beanDefinition) {
+		return this.readerContext.registerWithGeneratedName(beanDefinition);
 	}
 
 }

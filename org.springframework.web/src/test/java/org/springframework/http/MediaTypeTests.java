@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package org.springframework.http;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,11 +29,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * @author Arjen Poutsma
@@ -490,7 +494,7 @@ public class MediaTypeTests {
 
 	@Test
 	public void testWithConversionService() {
-		ConversionService conversionService = ConversionServiceFactory.createDefaultConversionService();
+		ConversionService conversionService = new DefaultConversionService();
 		assertTrue(conversionService.canConvert(String.class, MediaType.class));
 		MediaType mediaType = MediaType.parseMediaType("application/xml");
 		assertEquals(mediaType, conversionService.convert("application/xml", MediaType.class));

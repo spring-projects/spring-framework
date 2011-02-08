@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		return new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap);
+		return new MethodMetadataReadingVisitor(name, getReturnTypeFromAsmMethodDescriptor(desc), access, this.getClassName(), this.classLoader, this.methodMetadataMap);
 	}
 
 	@Override
@@ -125,6 +125,19 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 					}
 					value = convArray;
 				}
+				else if (classValuesAsString) {
+					if (value instanceof Class) {
+						value = ((Class) value).getName();
+					}
+					else if (value instanceof Class[]) {
+						Class[] clazzArray = (Class[]) value;
+						String[] newValue = new String[clazzArray.length];
+						for (int i = 0; i < clazzArray.length; i++) {
+							newValue[i] = clazzArray[i].getName();
+						}
+						value = newValue;
+					}
+				}
 				result.put(entry.getKey(), value);
 			}
 			catch (Exception ex) {
@@ -146,6 +159,48 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(list.size());
 		annotatedMethods.addAll(list);
 		return annotatedMethods;
+	}
+
+	/**
+	 * Convert a type descriptor to a classname suitable for classloading with
+	 * Class.forName().
+	 * 
+	 * @param typeDescriptor see ASM guide section 2.1.3
+	 */
+	private static String convertAsmTypeDescriptorToClassName(String typeDescriptor) {
+		final String internalName; // See ASM guide section 2.1.2
+
+		if ("V".equals(typeDescriptor))
+			return Void.class.getName();
+		if ("I".equals(typeDescriptor))
+			return Integer.class.getName();
+		if ("Z".equals(typeDescriptor))
+			return Boolean.class.getName();
+
+		// strip the leading array/object/primitive identifier
+		if (typeDescriptor.startsWith("[["))
+			internalName = typeDescriptor.substring(3);
+		else if (typeDescriptor.startsWith("["))
+			internalName = typeDescriptor.substring(2);
+		else
+			internalName = typeDescriptor.substring(1);
+
+		// convert slashes to dots
+		String className = internalName.replace('/', '.');
+
+		// and strip trailing semicolon (if present)
+		if (className.endsWith(";"))
+			className = className.substring(0, internalName.length() - 1);
+
+		return className;
+	}
+
+	/**
+	 * @param methodDescriptor see ASM guide section 2.1.4
+	 */
+	private static String getReturnTypeFromAsmMethodDescriptor(String methodDescriptor) {
+		String returnTypeDescriptor = methodDescriptor.substring(methodDescriptor.indexOf(')') + 1);
+		return convertAsmTypeDescriptorToClassName(returnTypeDescriptor);
 	}
 
 }

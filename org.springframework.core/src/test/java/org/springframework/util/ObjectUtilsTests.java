@@ -16,6 +16,9 @@
 
 package org.springframework.util;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -43,10 +46,10 @@ public final class ObjectUtilsTests extends TestCase {
 	}
 
 	public void testIsCompatibleWithThrowsClause() {
-		Class[] empty = new Class[0];
-		Class[] exception = new Class[] {Exception.class};
-		Class[] sqlAndIO = new Class[] {SQLException.class, IOException.class};
-		Class[] throwable = new Class[] {Throwable.class};
+		Class<?>[] empty = new Class[0];
+		Class<?>[] exception = new Class[] {Exception.class};
+		Class<?>[] sqlAndIO = new Class[] {SQLException.class, IOException.class};
+		Class<?>[] throwable = new Class[] {Throwable.class};
 
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), null));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new RuntimeException(), empty));
@@ -615,6 +618,35 @@ public final class ObjectUtilsTests extends TestCase {
 
 	public void testNullSafeToStringWithStringArrayEqualToNull() {
 		assertEquals("null", ObjectUtils.nullSafeToString((String[]) null));
+	}
+
+	enum Tropes { FOO, BAR, baz };
+
+	public void testContainsConstant() {
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "FOO"), is(true));
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "foo"), is(true));
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "BaR"), is(true));
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "bar"), is(true));
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "BAZ"), is(true));
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "baz"), is(true));
+
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "BOGUS"), is(false));
+
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "FOO", true), is(true));
+		assertThat(ObjectUtils.containsConstant(Tropes.values(), "foo", true), is(false));
+	}
+
+	public void testCaseInsensitiveValueOf() {
+		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "foo"), is(Tropes.FOO));
+		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR"), is(Tropes.BAR));
+		try {
+			ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus");
+			fail("expected IllegalArgumentException");
+		} catch (IllegalArgumentException ex) {
+			assertThat(ex.getMessage(),
+					is("constant [bogus] does not exist in enum type " +
+					"org.springframework.util.ObjectUtilsTests$Tropes"));
+		}
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {
