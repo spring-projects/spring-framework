@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation.configuration;
 
-import org.springframework.beans.factory.parsing.SimpleProblemCollector;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.context.config.AbstractFeatureSpecification;
 import org.springframework.context.config.ExecutorContext;
 import org.springframework.context.config.FeatureSpecification;
@@ -33,7 +33,7 @@ public class StubSpecification extends AbstractFeatureSpecification {
 	}
 
 	@Override
-	protected void doValidate(SimpleProblemCollector reporter) {
+	protected void doValidate(ProblemCollector problems) {
 	}
 
 }

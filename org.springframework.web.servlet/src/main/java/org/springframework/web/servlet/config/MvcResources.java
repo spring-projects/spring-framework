@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.config;
 
-import org.springframework.beans.factory.parsing.SimpleProblemCollector;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.context.config.AbstractFeatureSpecification;
 import org.springframework.context.config.FeatureSpecificationExecutor;
 import org.springframework.core.Ordered;
@@ -167,7 +167,7 @@ public final class MvcResources extends AbstractFeatureSpecification {
 	}
 
 	@Override
-	protected void doValidate(SimpleProblemCollector problems) {
+	protected void doValidate(ProblemCollector problems) {
 		if (!StringUtils.hasText(mapping)) {
 			problems.error("Mapping is required");
 		}

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.parsing.SimpleProblemCollector;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -289,7 +289,7 @@ public final class ComponentScanSpec extends AbstractFeatureSpecification {
 						ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
 	}
 
-	public void doValidate(SimpleProblemCollector problems) {
+	public void doValidate(ProblemCollector problems) {
 		if(this.basePackages.isEmpty()) {
 			problems.error("At least one base package must be specified");
 		}
@@ -336,7 +336,7 @@ public final class ComponentScanSpec extends AbstractFeatureSpecification {
 		}
 	}
 
-	private static Object instantiateUserDefinedType(String description, Class<?> targetType, Object className, ClassLoader classLoader, SimpleProblemCollector problems) {
+	private static Object instantiateUserDefinedType(String description, Class<?> targetType, Object className, ClassLoader classLoader, ProblemCollector problems) {
 		Assert.isInstanceOf(String.class, className, "userType must be of type String");
 		Assert.notNull(classLoader, "classLoader must not be null");
 		Assert.notNull(targetType, "targetType must not be null");
@@ -406,7 +406,7 @@ public final class ComponentScanSpec extends AbstractFeatureSpecification {
 		}
 
 		@SuppressWarnings("unchecked")
-		TypeFilter createTypeFilter(SimpleProblemCollector problems) {
+		TypeFilter createTypeFilter(ProblemCollector problems) {
 			try {
 				if ("annotation".equalsIgnoreCase(this.filterType)) {
 					return new AnnotationTypeFilter((Class<Annotation>) this.classLoader.loadClass(this.expression));

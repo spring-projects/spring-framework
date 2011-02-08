@@ -15,7 +15,7 @@
  */
 package org.springframework.web.servlet.config;
 
-import org.springframework.beans.factory.parsing.SimpleProblemCollector;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.config.AbstractFeatureSpecification;
 import org.springframework.context.config.FeatureSpecificationExecutor;
@@ -243,7 +243,7 @@ public final class MvcAnnotationDriven extends AbstractFeatureSpecification {
 	}
 
 	@Override
-	protected void doValidate(SimpleProblemCollector reporter) {
+	protected void doValidate(ProblemCollector problems) {
 	}
 
 }

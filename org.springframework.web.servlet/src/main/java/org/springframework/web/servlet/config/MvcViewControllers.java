@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.parsing.SimpleProblemCollector;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.context.config.AbstractFeatureSpecification;
 import org.springframework.context.config.FeatureSpecificationExecutor;
 import org.springframework.util.StringUtils;
@@ -72,7 +72,7 @@ public final class MvcViewControllers extends AbstractFeatureSpecification {
 	}
 
 	@Override
-	protected void doValidate(SimpleProblemCollector problems) {
+	protected void doValidate(ProblemCollector problems) {
 		if (mappings.size() == 0) {
 			problems.error("At least one ViewController must be defined");
 		}
