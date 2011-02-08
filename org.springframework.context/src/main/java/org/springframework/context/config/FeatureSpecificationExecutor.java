@@ -36,6 +36,6 @@ public interface FeatureSpecificationExecutor {
 	 * Execute the given specification, usually resulting in registration
 	 * of bean definitions against a bean factory.
 	 */
-	void execute(FeatureSpecification spec, ExecutorContext executorContext);
+	void execute(FeatureSpecification spec, SpecificationContext specificationContext);
 
 }

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.springframework.context.annotation.configuration.StubSpecification;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.context.config.FeatureSpecification;
 import org.springframework.context.config.FeatureSpecificationExecutor;
 import org.springframework.util.Assert;
@@ -55,7 +55,7 @@ public class SimpleFeatureMethodProcessingTests {
 
 	static class MySpecificationExecutor implements FeatureSpecificationExecutor {
 		static boolean executeMethodWasCalled = false;
-		public void execute(FeatureSpecification spec, ExecutorContext executorContext) {
+		public void execute(FeatureSpecification spec, SpecificationContext specificationContext) {
 			Assert.state(executeMethodWasCalled == false);
 			executeMethodWasCalled = true;
 		}

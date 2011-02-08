@@ -19,7 +19,7 @@ package org.springframework.web.servlet.config;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -40,7 +40,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		MvcResources spec = createSpecification(element, parserContext);
 		if (spec != null) {
-			spec.execute(createExecutorContext(parserContext));
+			spec.execute(createSpecificationContext(parserContext));
 		}
 		return null;
 	}
@@ -71,17 +71,17 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Adapt the given ParserContext instance into an ExecutorContext.
+	 * Adapt the given ParserContext instance into an SpecificationContext.
 	 *
 	 * TODO SPR-7420: consider unifying the two through a superinterface.
-	 * TODO SPR-7420: create a common ParserContext-to-ExecutorContext adapter util
+	 * TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter util
 	 */
-	private ExecutorContext createExecutorContext(ParserContext parserContext) {
-		ExecutorContext executorContext = new ExecutorContext();
-		executorContext.setRegistry(parserContext.getRegistry());
-		executorContext.setRegistrar(parserContext);
-		executorContext.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
-		return executorContext;
+	private SpecificationContext createSpecificationContext(ParserContext parserContext) {
+		SpecificationContext context = new SpecificationContext();
+		context.setRegistry(parserContext.getRegistry());
+		context.setRegistrar(parserContext);
+		context.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
+		return context;
 	}
 
 }

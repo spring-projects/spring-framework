@@ -25,7 +25,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.config.AbstractSpecificationExecutor;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -45,9 +45,9 @@ final class MvcDefaultServletHandlerExecutor extends AbstractSpecificationExecut
 	private static final String HANDLER_ADAPTER_BEAN_NAME = "org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter";
 
 	@Override
-	protected void doExecute(MvcDefaultServletHandler spec, ExecutorContext executorContext) {
-		BeanDefinitionRegistry registry = executorContext.getRegistry();
-		ComponentRegistrar registrar = executorContext.getRegistrar();
+	protected void doExecute(MvcDefaultServletHandler spec, SpecificationContext specContext) {
+		BeanDefinitionRegistry registry = specContext.getRegistry();
+		ComponentRegistrar registrar = specContext.getRegistrar();
 		Object source = spec.source();
 
 		if (!registry.containsBeanDefinition(HANDLER_ADAPTER_BEAN_NAME)) {

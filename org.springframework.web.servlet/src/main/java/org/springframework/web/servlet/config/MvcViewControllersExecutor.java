@@ -23,7 +23,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.config.AbstractSpecificationExecutor;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
@@ -44,9 +44,9 @@ final class MvcViewControllersExecutor extends AbstractSpecificationExecutor<Mvc
 	private static final String HANDLER_MAPPING_BEAN_NAME = "org.springframework.web.servlet.config.viewControllerHandlerMapping";
 
 	@Override
-	protected void doExecute(MvcViewControllers spec, ExecutorContext executorContext) {
-		BeanDefinitionRegistry registry = executorContext.getRegistry();
-		ComponentRegistrar registrar = executorContext.getRegistrar();
+	protected void doExecute(MvcViewControllers spec, SpecificationContext specContext) {
+		BeanDefinitionRegistry registry = specContext.getRegistry();
+		ComponentRegistrar registrar = specContext.getRegistrar();
 		Object source = spec.source();
 
 		if (!registry.containsBeanDefinition(HANDLER_ADAPTER_BEAN_NAME)) {

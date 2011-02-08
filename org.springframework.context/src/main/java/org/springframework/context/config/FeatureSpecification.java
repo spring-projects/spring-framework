@@ -122,6 +122,6 @@ public interface FeatureSpecification {
 	 * specified within. Should work by delegating to an underlying
 	 * {@link FeatureSpecificationExecutor} for proper separation of concerns.
 	 */
-	void execute(ExecutorContext executorContext);
+	void execute(SpecificationContext specificationContext);
 
 }

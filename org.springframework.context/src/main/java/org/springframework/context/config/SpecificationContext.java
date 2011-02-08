@@ -28,7 +28,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Chris Beams
  * @since 3.1
  */
-public class ExecutorContext {
+public class SpecificationContext {
 
 	private BeanDefinitionRegistry registry;
 	private ComponentRegistrar registrar;
@@ -36,7 +36,7 @@ public class ExecutorContext {
 	private Environment environment;
 	private ProblemReporter problemReporter;
 
-	public ExecutorContext() { }
+	public SpecificationContext() { }
 
 	public void setRegistry(BeanDefinitionRegistry registry) {
 		this.registry = registry;

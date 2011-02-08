@@ -154,7 +154,7 @@ public final class MvcAnnotationDriven extends AbstractFeatureSpecification {
 	/**
 	 * Indicates whether or not default HttpMessageConverter registrations should 
 	 * be added in addition to the ones provided via 
-	 * {@link #messageConverters(HttpMessageConverter...).
+	 * {@link #messageConverters(HttpMessageConverter...)}
 	 * 
 	 * @param shouldRegister true will result in registration of defaults.
 	 */

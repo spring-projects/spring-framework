@@ -34,13 +34,13 @@ public abstract class AbstractSpecificationExecutor<S extends FeatureSpecificati
 	 * only if valid.
 	 */
 	@SuppressWarnings("unchecked")
-	public final void execute(FeatureSpecification spec, ExecutorContext executorContext) {
+	public final void execute(FeatureSpecification spec, SpecificationContext specificationContext) {
 		Assert.notNull(spec, "Specification must not be null");
-		Assert.notNull(spec, "ExecutorContext must not be null");
+		Assert.notNull(spec, "SpecificationContext must not be null");
 		Class<?> typeArg = GenericTypeResolver.resolveTypeArgument(this.getClass(), AbstractSpecificationExecutor.class);
 		Assert.isTrue(typeArg.equals(spec.getClass()), "Specification cannot be executed by this executor");
-		if (spec.validate(executorContext.getProblemReporter())) {
-			doExecute((S)spec, executorContext);
+		if (spec.validate(specificationContext.getProblemReporter())) {
+			doExecute((S)spec, specificationContext);
 		}
 	}
 
@@ -49,6 +49,6 @@ public abstract class AbstractSpecificationExecutor<S extends FeatureSpecificati
 	 * against a bean factory.
 	 * @param specification the {@linkplain FeatureSpecification#validate() validated} specification
 	 */
-	protected abstract void doExecute(S specification, ExecutorContext executorContext);
+	protected abstract void doExecute(S specification, SpecificationContext specificationContext);
 
 }
