@@ -119,7 +119,7 @@ public final class ObjectUtilsTests extends TestCase {
 	public void testAddObjectToArrayWhenEmpty() {
 		String[] array = new String[0];
 		String newElement = "foo";
-		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
+		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
 		assertEquals(1, newArray.length);
 		assertEquals(newElement, newArray[0]);
 	}
@@ -128,7 +128,7 @@ public final class ObjectUtilsTests extends TestCase {
 		String existingElement = "foo";
 		String[] array = new String[] {existingElement};
 		String newElement = "bar";
-		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
+		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
 		assertEquals(2, newArray.length);
 		assertEquals(existingElement, newArray[0]);
 		assertEquals(newElement, newArray[1]);
@@ -137,7 +137,7 @@ public final class ObjectUtilsTests extends TestCase {
 	public void testAddObjectToSingleNullElementArray() {
 		String[] array = new String[] {null};
 		String newElement = "bar";
-		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
+		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
 		assertEquals(2, newArray.length);
 		assertEquals(null, newArray[0]);
 		assertEquals(newElement, newArray[1]);
@@ -145,7 +145,7 @@ public final class ObjectUtilsTests extends TestCase {
 
 	public void testAddObjectToNullArray() throws Exception {
 		String newElement = "foo";
-		Object[] newArray = ObjectUtils.addObjectToArray(null, newElement);
+		String[] newArray = ObjectUtils.addObjectToArray(null, newElement);
 		assertEquals(1, newArray.length);
 		assertEquals(newElement, newArray[0]);
 	}
