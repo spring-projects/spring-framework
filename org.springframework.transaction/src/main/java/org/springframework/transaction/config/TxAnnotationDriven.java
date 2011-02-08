@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.config;
 
-import org.springframework.beans.factory.parsing.SimpleProblemCollector;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.context.config.AbstractFeatureSpecification;
 import org.springframework.context.config.AdviceMode;
 import org.springframework.context.config.FeatureSpecificationExecutor;
@@ -187,7 +187,7 @@ public final class TxAnnotationDriven extends AbstractFeatureSpecification {
 	}
 
 	@Override
-	protected void doValidate(SimpleProblemCollector problems) {
+	protected void doValidate(ProblemCollector problems) {
 		if (this.mode instanceof String) {
 			if (!ObjectUtils.containsConstant(AdviceMode.values(), (String)this.mode)) {
 				problems.error("no such mode name: " + this.mode);

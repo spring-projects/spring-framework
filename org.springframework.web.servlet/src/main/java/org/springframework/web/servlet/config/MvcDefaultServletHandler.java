@@ -15,7 +15,7 @@
  */
 package org.springframework.web.servlet.config;
 
-import org.springframework.beans.factory.parsing.SimpleProblemCollector;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.context.config.AbstractFeatureSpecification;
 import org.springframework.context.config.FeatureSpecificationExecutor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -78,7 +78,7 @@ public class MvcDefaultServletHandler extends AbstractFeatureSpecification {
 	}
 
 	@Override
-	protected void doValidate(SimpleProblemCollector reporter) {
+	protected void doValidate(ProblemCollector problems) {
 	}
 
 }

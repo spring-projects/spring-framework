@@ -27,7 +27,7 @@ import org.springframework.core.io.DescriptiveResource;
  * @author Chris Beams
  * @since 3.1
  */
-public class SimpleProblemCollector {
+public class SimpleProblemCollector implements ProblemCollector {
 
 	private Location location = null;
 	private List<Problem> errors = new ArrayList<Problem>();

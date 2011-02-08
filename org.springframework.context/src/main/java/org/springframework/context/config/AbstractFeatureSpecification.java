@@ -17,6 +17,7 @@
 package org.springframework.context.config;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SimpleProblemCollector;
 
@@ -42,13 +43,13 @@ public abstract class AbstractFeatureSpecification implements SourceAwareSpecifi
 	}
 
 	public final boolean validate(ProblemReporter problemReporter) {
-		SimpleProblemCollector collector = new SimpleProblemCollector(this.source());
+		ProblemCollector collector = new SimpleProblemCollector(this.source());
 		this.doValidate(collector);
 		collector.reportProblems(problemReporter);
 		return collector.hasErrors() ? false : true;
 	}
 
-	protected abstract void doValidate(SimpleProblemCollector reporter);
+	protected abstract void doValidate(ProblemCollector problems);
 
 	public AbstractFeatureSpecification source(Object source) {
 		this.source = source;
