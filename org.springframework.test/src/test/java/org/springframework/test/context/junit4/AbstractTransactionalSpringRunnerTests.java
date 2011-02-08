@@ -23,10 +23,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Abstract base class for verifying support of Spring's
- * {@link Transactional @Transactional} and
- * {@link NotTransactional @NotTransactional} annotations.
- *
+ * Abstract base class for verifying support of Spring's {@link Transactional
+ * &#64;Transactional} and {@link NotTransactional &#64;NotTransactional}
+ * annotations.
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see ClassLevelTransactionalSpringRunnerTests
@@ -34,7 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @see Transactional
  * @see NotTransactional
  */
-@ContextConfiguration(locations = {"transactionalTests-context.xml"})
+@SuppressWarnings("deprecation")
+@ContextConfiguration("transactionalTests-context.xml")
 public abstract class AbstractTransactionalSpringRunnerTests {
 
 	protected static final String BOB = "bob";

@@ -35,11 +35,12 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Simple test bean used for testing bean factories, the AOP framework etc.
- *
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
  */
+@SuppressWarnings("rawtypes")
 public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable {
 
 	private String beanName;
@@ -107,7 +108,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public TestBean(ITestBean spouse) {
-		this.spouses = new ITestBean[] {spouse};
+		this.spouses = new ITestBean[] { spouse };
 	}
 
 	public TestBean(String name, int age) {
@@ -116,7 +117,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public TestBean(ITestBean spouse, Properties someProperties) {
-		this.spouses = new ITestBean[] {spouse};
+		this.spouses = new ITestBean[] { spouse };
 		this.someProperties = someProperties;
 	}
 
@@ -135,7 +136,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	public TestBean(Properties someProperties) {
 		this.someProperties = someProperties;
 	}
-
 
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
@@ -201,7 +201,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public void setSpouse(ITestBean spouse) {
-		this.spouses = new ITestBean[] {spouse};
+		this.spouses = new ITestBean[] { spouse };
 	}
 
 	public ITestBean[] getSpouses() {
@@ -366,7 +366,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.pets = pets;
 	}
 
-
 	/**
 	 * @see ITestBean#exceptional(Throwable)
 	 */
@@ -379,6 +378,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	public void unreliableFileOperation() throws IOException {
 		throw new IOException();
 	}
+
 	/**
 	 * @see ITestBean#returnsThis()
 	 */
@@ -396,7 +396,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return age++;
 	}
 
-
 	public void destroy() {
 		this.destroyed = true;
 	}
@@ -404,7 +403,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	public boolean wasDestroyed() {
 		return destroyed;
 	}
-
 
 	public boolean equals(Object other) {
 		if (this == other) {

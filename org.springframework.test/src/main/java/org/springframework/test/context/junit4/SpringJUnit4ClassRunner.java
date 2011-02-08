@@ -462,6 +462,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see RunBeforeTestMethodCallbacks
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected Statement withBefores(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitBefores = super.withBefores(frameworkMethod, testInstance, statement);
 		return new RunBeforeTestMethodCallbacks(junitBefores, testInstance, frameworkMethod.getMethod(),
@@ -477,6 +478,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see RunAfterTestMethodCallbacks
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected Statement withAfters(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitAfters = super.withAfters(frameworkMethod, testInstance, statement);
 		return new RunAfterTestMethodCallbacks(junitAfters, testInstance, frameworkMethod.getMethod(),

@@ -29,7 +29,6 @@ import javax.sql.DataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -46,10 +45,11 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 /**
  * Combined unit test for {@link AbstractJUnit4SpringContextTests} and
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
+@SuppressWarnings("deprecation")
 @ContextConfiguration
 public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTransactionalJUnit4SpringContextTests
 		implements BeanNameAware, InitializingBean {
@@ -60,7 +60,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	protected static final String LUKE = "luke";
 	protected static final String LEIA = "leia";
 	protected static final String YODA = "yoda";
-
 
 	private boolean beanInitialized = false;
 
@@ -105,7 +104,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
-
 	@Resource
 	public void setDataSource(DataSource dataSource) {
 		super.setDataSource(dataSource);
@@ -129,13 +127,12 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		this.beanInitialized = true;
 	}
 
-
 	@Test
 	@NotTransactional
 	public final void verifyApplicationContext() {
 		assertInTransaction(false);
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				super.applicationContext);
+			super.applicationContext);
 	}
 
 	@Test
@@ -143,7 +140,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	public final void verifyBeanInitialized() {
 		assertInTransaction(false);
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				this.beanInitialized);
+			this.beanInitialized);
 	}
 
 	@Test
@@ -185,18 +182,17 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
 
-
 	@BeforeTransaction
 	public void beforeTransaction() {
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
-				countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.simpleJdbcTemplate));
 		assertEquals("Adding yoda", 1, addPerson(super.simpleJdbcTemplate, YODA));
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		assertEquals("Verifying the number of rows in the person table before a test method.",
-				(inTransaction() ? 2 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
+			(inTransaction() ? 2 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@Test
@@ -205,20 +201,20 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		assertEquals("Adding jane", 1, addPerson(super.simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(super.simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().", 4,
-				countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		assertEquals("Verifying the number of rows in the person table after a test method.",
-				(inTransaction() ? 4 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
+			(inTransaction() ? 4 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
 		assertEquals("Deleting yoda", 1, deletePerson(super.simpleJdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
-				countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 

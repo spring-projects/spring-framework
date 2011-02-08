@@ -29,7 +29,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Subclass of AbstractTransactionalSpringContextTests that adds some convenience
@@ -49,6 +48,7 @@ import org.springframework.util.StringUtils;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AbstractTransactionalDataSourceSpringContextTests
 	extends AbstractTransactionalSpringContextTests {
 

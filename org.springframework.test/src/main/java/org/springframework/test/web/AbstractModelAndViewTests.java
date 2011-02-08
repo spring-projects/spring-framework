@@ -72,6 +72,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * <code>null</code>)
 	 * @param expectedList the expected list
 	 */
+	@SuppressWarnings("rawtypes")
 	protected void assertCompareListModelAttribute(ModelAndView mav, String modelName, List expectedList) {
 		try {
 			ModelAndViewAssert.assertCompareListModelAttribute(mav, modelName, expectedList);
@@ -139,6 +140,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * not specifying the comparator, both lists will be sorted not using
 	 * any comparator.
 	 */
+	@SuppressWarnings("rawtypes")
 	protected void assertSortAndCompareListModelAttribute(
 			ModelAndView mav, String modelName, List expectedList, Comparator comparator) {
 		try {

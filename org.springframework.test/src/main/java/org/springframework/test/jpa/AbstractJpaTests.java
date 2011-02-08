@@ -161,6 +161,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 	
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void runBare() throws Throwable {
 		if (!shouldUseShadowLoader()) {
 			super.runBare();
@@ -308,6 +309,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		private final LoadTimeWeaver ltw;
 
+		@SuppressWarnings("unused")
 		public LoadTimeWeaverInjectingBeanPostProcessor(LoadTimeWeaver ltw) {
 			this.ltw = ltw;
 		}
@@ -328,6 +330,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		private final ClassLoader shadowingClassLoader;
 
+		@SuppressWarnings("unused")
 		public ShadowingLoadTimeWeaver(ClassLoader shadowingClassLoader) {
 			this.shadowingClassLoader = shadowingClassLoader;
 		}

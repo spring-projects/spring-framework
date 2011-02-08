@@ -23,8 +23,6 @@ import java.lang.reflect.Method;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ProfileValueUtils}.
@@ -32,7 +30,6 @@ import org.junit.runners.JUnit4;
  * @author Sam Brannen
  * @since 3.0
  */
-@RunWith(JUnit4.class)
 public class ProfileValueUtilsTests {
 
 	private static final String NON_ANNOTATED_METHOD = "nonAnnotatedMethod";

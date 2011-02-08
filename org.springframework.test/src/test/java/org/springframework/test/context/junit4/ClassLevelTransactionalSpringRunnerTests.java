@@ -26,7 +26,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,11 +39,11 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * <p>
  * JUnit 4 based unit test which verifies support of Spring's
- * {@link Transactional @Transactional},
- * {@link NotTransactional @NotTransactional},
- * {@link TestExecutionListeners @TestExecutionListeners}, and
- * {@link ContextConfiguration @ContextConfiguration} annotations in conjunction
- * with the {@link SpringJUnit4ClassRunner} and the following
+ * {@link Transactional &#64;Transactional}, {@link NotTransactional
+ * &#64;NotTransactional}, {@link TestExecutionListeners
+ * &#64;TestExecutionListeners}, and {@link ContextConfiguration
+ * &#64;ContextConfiguration} annotations in conjunction with the
+ * {@link SpringJUnit4ClassRunner} and the following
  * {@link TestExecutionListener TestExecutionListeners}:
  * </p>
  * <ul>
@@ -56,11 +55,12 @@ import org.springframework.transaction.annotation.Transactional;
  * This class specifically tests usage of <code>&#064;Transactional</code>
  * defined at the <strong>class level</strong>.
  * </p>
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see MethodLevelTransactionalSpringRunnerTests
  */
+@SuppressWarnings("deprecation")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @Transactional
@@ -72,7 +72,7 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 	@AfterClass
 	public static void verifyFinalTestData() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", 4,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	@Before
@@ -80,9 +80,8 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 		clearPersonTable(simpleJdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(simpleJdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
-
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
@@ -91,7 +90,7 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	@Test
@@ -102,7 +101,7 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
 		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 

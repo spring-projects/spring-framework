@@ -23,7 +23,7 @@ import junit.framework.TestResult;
  * Verifies proper handling of {@link IfProfileValue @IfProfileValue} and
  * {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration} in
  * conjunction with {@link AbstractAnnotationAwareTransactionalTests}.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
@@ -46,11 +46,11 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 		testCase.setName(testName);
 		TestResult testResult = testCase.run();
 		assertEquals("Verifying number of invocations for test method [" + testName + "].", expectedInvocationCount,
-				testCase.invocationCount);
+			testCase.invocationCount);
 		assertEquals("Verifying number of errors for test method [" + testName + "].", expectedErrorCount,
-				testResult.errorCount());
+			testResult.errorCount());
 		assertEquals("Verifying number of failures for test method [" + testName + "].", expectedFailureCount,
-				testResult.failureCount());
+			testResult.failureCount());
 	}
 
 	private void runTests(Class<? extends DefaultProfileValueSourceTestCase> testCaseType) throws Exception {
@@ -64,20 +64,22 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 
 	public void testDefaultProfileValueSource() throws Exception {
 		assertEquals("Verifying the type of the configured ProfileValueSource.", SystemProfileValueSource.class,
-				new DefaultProfileValueSourceTestCase().getProfileValueSource().getClass());
+			new DefaultProfileValueSourceTestCase().getProfileValueSource().getClass());
 		runTests(DefaultProfileValueSourceTestCase.class);
 	}
 
 	public void testHardCodedProfileValueSource() throws Exception {
 		assertEquals("Verifying the type of the configured ProfileValueSource.", HardCodedProfileValueSource.class,
-				new HardCodedProfileValueSourceTestCase().getProfileValueSource().getClass());
+			new HardCodedProfileValueSourceTestCase().getProfileValueSource().getClass());
 		runTests(HardCodedProfileValueSourceTestCase.class);
 	}
 
 
+	@SuppressWarnings("deprecation")
 	protected static class DefaultProfileValueSourceTestCase extends AbstractAnnotationAwareTransactionalTests {
 
 		int invocationCount = 0;
+
 
 		public DefaultProfileValueSourceTestCase() {
 		}
@@ -130,11 +132,9 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 		}
 	}
 
-
 	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
 	protected static class HardCodedProfileValueSourceTestCase extends DefaultProfileValueSourceTestCase {
 	}
-
 
 	public static class HardCodedProfileValueSource implements ProfileValueSource {
 

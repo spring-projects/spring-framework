@@ -52,8 +52,8 @@ import org.springframework.util.StringUtils;
  * <p>
  * <code>TestExecutionListener</code> which provides support for executing
  * tests within transactions by using
- * {@link org.springframework.transaction.annotation.Transactional @Transactional}
- * and {@link NotTransactional @NotTransactional} annotations.
+ * {@link org.springframework.transaction.annotation.Transactional &#064;Transactional}
+ * and {@link NotTransactional &#064;NotTransactional} annotations.
  * </p>
  * <p>
  * Changes to the database during a test run with &#064;Transactional will be
@@ -66,9 +66,9 @@ import org.springframework.util.StringUtils;
  * </p>
  * <p>
  * Transactional commit and rollback behavior can be configured via the
- * class-level {@link TransactionConfiguration @TransactionConfiguration} and
- * method-level {@link Rollback @Rollback} annotations.
- * {@link TransactionConfiguration @TransactionConfiguration} also provides
+ * class-level {@link TransactionConfiguration &#064;TransactionConfiguration} and
+ * method-level {@link Rollback &#064;Rollback} annotations.
+ * {@link TransactionConfiguration &#064;TransactionConfiguration} also provides
  * configuration of the bean name of the {@link PlatformTransactionManager} that
  * is to be used to drive transactions.
  * </p>
@@ -77,8 +77,8 @@ import org.springframework.util.StringUtils;
  * certain <em>set up</em> or <em>tear down</em> code outside of a
  * transaction. <code>TransactionalTestExecutionListener</code> provides such
  * support for methods annotated with
- * {@link BeforeTransaction @BeforeTransaction} and
- * {@link AfterTransaction @AfterTransaction}.
+ * {@link BeforeTransaction &#064;BeforeTransaction} and
+ * {@link AfterTransaction &#064;AfterTransaction}.
  * </p>
  *
  * @author Sam Brannen
@@ -91,6 +91,7 @@ import org.springframework.util.StringUtils;
  * @see BeforeTransaction
  * @see AfterTransaction
  */
+@SuppressWarnings("deprecation")
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
 
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
@@ -107,10 +108,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * If the test method of the supplied {@link TestContext test context} is
 	 * configured to run within a transaction, this method will run
-	 * {@link BeforeTransaction @BeforeTransaction methods} and start a new
+	 * {@link BeforeTransaction &#064;BeforeTransaction methods} and start a new
 	 * transaction.
-	 * <p>Note that if a {@link BeforeTransaction @BeforeTransaction method} fails,
-	 * remaining {@link BeforeTransaction @BeforeTransaction methods} will not
+	 * <p>Note that if a {@link BeforeTransaction &#064;BeforeTransaction method} fails,
+	 * remaining {@link BeforeTransaction &#064;BeforeTransaction methods} will not
 	 * be invoked, and a transaction will not be started.
 	 * @see org.springframework.transaction.annotation.Transactional
 	 * @see org.springframework.test.annotation.NotTransactional
@@ -167,8 +168,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * If a transaction is currently active for the test method of the supplied
 	 * {@link TestContext test context}, this method will end the transaction
-	 * and run {@link AfterTransaction @AfterTransaction methods}.
-	 * <p>{@link AfterTransaction @AfterTransaction methods} are guaranteed to be
+	 * and run {@link AfterTransaction &#064;AfterTransaction methods}.
+	 * <p>{@link AfterTransaction &#064;AfterTransaction methods} are guaranteed to be
 	 * invoked even if an error occurs while ending the transaction.
 	 */
 	@Override
@@ -189,7 +190,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Run all {@link BeforeTransaction @BeforeTransaction methods} for the
+	 * Run all {@link BeforeTransaction &#064;BeforeTransaction methods} for the
 	 * specified {@link TestContext test context}. If one of the methods fails,
 	 * however, the caught exception will be rethrown in a wrapped
 	 * {@link RuntimeException}, and the remaining methods will <strong>not</strong>
@@ -216,7 +217,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Run all {@link AfterTransaction @AfterTransaction methods} for the
+	 * Run all {@link AfterTransaction &#064;AfterTransaction methods} for the
 	 * specified {@link TestContext test context}. If one of the methods fails,
 	 * the caught exception will be logged as an error, and the remaining
 	 * methods will be given a chance to execute. After all methods have
@@ -449,7 +450,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * Retrieves the {@link TransactionConfigurationAttributes} for the
 	 * specified {@link Class class} which may optionally declare or inherit a
-	 * {@link TransactionConfiguration @TransactionConfiguration}. If a
+	 * {@link TransactionConfiguration &#064;TransactionConfiguration}. If a
 	 * {@link TransactionConfiguration} annotation is not present for the
 	 * supplied class, the <em>default values</em> for attributes defined in
 	 * {@link TransactionConfiguration} will be used instead.

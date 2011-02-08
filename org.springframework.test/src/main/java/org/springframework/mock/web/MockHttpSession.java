@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -34,21 +35,21 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
  * Supports the Servlet 2.4 API level.
- *
- * <p>Used for testing the web framework; also useful for testing
- * application controllers.
- *
+ * <p>
+ * Used for testing the web framework; also useful for testing application
+ * controllers.
+ * 
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Mark Fisher
  * @since 1.0.2
  */
+@SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
 
 	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
 	private static int nextId = 1;
-
 
 	private final String id;
 
@@ -69,6 +70,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession with a default {@link MockServletContext}.
+	 * 
 	 * @see MockServletContext
 	 */
 	public MockHttpSession() {
@@ -77,6 +79,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
+	 * 
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
@@ -85,6 +88,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
+	 * 
 	 * @param servletContext the ServletContext that the session runs in
 	 * @param id a unique identifier for this session
 	 */
@@ -92,7 +96,6 @@ public class MockHttpSession implements HttpSession {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.id = (id != null ? id : Integer.toString(nextId++));
 	}
-
 
 	public long getCreationTime() {
 		return this.creationTime;
@@ -205,10 +208,10 @@ public class MockHttpSession implements HttpSession {
 		return this.isNew;
 	}
 
-
 	/**
-	 * Serialize the attributes of this session into an object that can
-	 * be turned into a byte array with standard Java serialization.
+	 * Serialize the attributes of this session into an object that can be
+	 * turned into a byte array with standard Java serialization.
+	 * 
 	 * @return a representation of this session's serialized state
 	 */
 	public Serializable serializeState() {
@@ -233,8 +236,9 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	/**
-	 * Deserialize the attributes of this session from a state object
-	 * created by {@link #serializeState()}.
+	 * Deserialize the attributes of this session from a state object created by
+	 * {@link #serializeState()}.
+	 * 
 	 * @param state a representation of this session's serialized state
 	 */
 	@SuppressWarnings("unchecked")
