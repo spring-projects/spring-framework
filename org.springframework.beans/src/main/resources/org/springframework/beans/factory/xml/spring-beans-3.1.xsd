@@ -94,8 +94,8 @@
 			ConfigurableEnvironment#setDefaultProfiles(String...)
 
 		Properties (typically through -D system properties, environment variables, or servlet context init params):
-			spring.profile.active=p1,p2
-			spring.profile.default=p1,p2
+			spring.profiles.active=p1,p2
+			spring.profiles.default=p1,p2
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
