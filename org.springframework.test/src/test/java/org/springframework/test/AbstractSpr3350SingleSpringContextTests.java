@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2007-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ import org.springframework.context.ApplicationContext;
  * Abstract JUnit 3.8 based unit test which verifies new functionality requested
  * in <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3550"
  * target="_blank">SPR-3350</a>.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractSpr3350SingleSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
 
 	private Pet cat;
@@ -48,8 +49,9 @@ public abstract class AbstractSpr3350SingleSpringContextTests extends AbstractDe
 	/**
 	 * Forcing concrete subclasses to provide a config path appropriate to the
 	 * configured
-	 * {@link #createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext) BeanDefinitionReader}.
-	 *
+	 * {@link #createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
+	 * BeanDefinitionReader}.
+	 * 
 	 * @see org.springframework.test.AbstractSingleSpringContextTests#getConfigPath()
 	 */
 	protected abstract String getConfigPath();
@@ -62,12 +64,11 @@ public abstract class AbstractSpr3350SingleSpringContextTests extends AbstractDe
 	 * {@link AbstractSingleSpringContextTests} always uses an
 	 * {@link XmlBeanDefinitionReader} internally when creating the
 	 * {@link ApplicationContext} inside
-	 * {@link #createApplicationContext(String[])}. It would be nice to have
-	 * the bean definition reader creation in a separate method so that
-	 * subclasses can choose that individually without having to copy-n-paste
-	 * code from createApplicationContext() to do the context creation and
-	 * refresh. Consider JavaConfig where an Annotation based reader can be
-	 * plugged in.
+	 * {@link #createApplicationContext(String[])}. It would be nice to have the
+	 * bean definition reader creation in a separate method so that subclasses
+	 * can choose that individually without having to copy-n-paste code from
+	 * createApplicationContext() to do the context creation and refresh.
+	 * Consider JavaConfig where an Annotation based reader can be plugged in.
 	 * </p>
 	 */
 	public final void testApplicationContextNotAutoCreated() {

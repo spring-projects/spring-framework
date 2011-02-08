@@ -34,8 +34,8 @@ public class MockHttpServletResponseTests extends TestCase {
 	public void testSetContentTypeWithNoEncoding() {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType("test/plain");
-		assertEquals("Character encoding should be the default",
-				WebUtils.DEFAULT_CHARACTER_ENCODING, response.getCharacterEncoding());
+		assertEquals("Character encoding should be the default", WebUtils.DEFAULT_CHARACTER_ENCODING,
+			response.getCharacterEncoding());
 	}
 
 	public void testSetContentTypeWithUTF8() {
@@ -49,7 +49,7 @@ public class MockHttpServletResponseTests extends TestCase {
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader(headerName, "value1");
-		Set responseHeaders = response.getHeaderNames();
+		Set<String> responseHeaders = response.getHeaderNames();
 		assertNotNull(responseHeaders);
 		assertEquals(1, responseHeaders.size());
 		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());

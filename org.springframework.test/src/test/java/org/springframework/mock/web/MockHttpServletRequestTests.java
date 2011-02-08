@@ -32,7 +32,7 @@ public class MockHttpServletRequestTests extends TestCase {
 		String headerName = "Header1";
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader(headerName, "value1");
-		Enumeration requestHeaders = request.getHeaderNames();
+		Enumeration<String> requestHeaders = request.getHeaderNames();
 		assertNotNull(requestHeaders);
 		assertEquals("HTTP header casing not being preserved", headerName, requestHeaders.nextElement());
 	}
@@ -41,7 +41,7 @@ public class MockHttpServletRequestTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
-		Map params = new HashMap(2);
+		Map<String, Object> params = new HashMap<String, Object>(2);
 		params.put("key1", "newValue1");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.setParameters(params);
@@ -59,7 +59,7 @@ public class MockHttpServletRequestTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
-		Map params = new HashMap(2);
+		Map<String, Object> params = new HashMap<String, Object>(2);
 		params.put("key1", "newValue1");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
@@ -77,7 +77,7 @@ public class MockHttpServletRequestTests extends TestCase {
 	public void testRemoveAllParameters() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter("key1", "value1");
-		Map params = new HashMap(2);
+		Map<String, Object> params = new HashMap<String, Object>(2);
 		params.put("key2", "value2");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);

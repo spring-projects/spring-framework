@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
@@ -41,7 +42,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the {@link javax.portlet.PortletRequest} interface.
- *
+ * 
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @since 2.0
@@ -102,6 +103,7 @@ public class MockPortletRequest implements PortletRequest {
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}
 	 * and a default {@link MockPortletContext}.
+	 * 
 	 * @see MockPortalContext
 	 * @see MockPortletContext
 	 */
@@ -111,6 +113,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}.
+	 * 
 	 * @param portletContext the PortletContext that the request runs in
 	 * @see MockPortalContext
 	 */
@@ -120,6 +123,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest.
+	 * 
 	 * @param portalContext the PortalContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */
@@ -131,10 +135,9 @@ public class MockPortletRequest implements PortletRequest {
 		this.attributes.put(LIFECYCLE_PHASE, getLifecyclePhase());
 	}
 
-
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Lifecycle methods
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	/**
 	 * Return the Portlet 2.0 lifecycle id for the current phase.
@@ -167,10 +170,9 @@ public class MockPortletRequest implements PortletRequest {
 		}
 	}
 
-
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// PortletRequest methods
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	public boolean isWindowStateAllowed(WindowState windowState) {
 		return CollectionUtils.contains(this.portalContext.getSupportedWindowStates(), windowState);
@@ -234,8 +236,9 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Set a single value for the specified property.
-	 * <p>If there are already one or more values registered for the given
-	 * property key, they will be replaced.
+	 * <p>
+	 * If there are already one or more values registered for the given property
+	 * key, they will be replaced.
 	 */
 	public void setProperty(String key, String value) {
 		Assert.notNull(key, "Property key must not be null");
@@ -246,8 +249,9 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Add a single value for the specified property.
-	 * <p>If there are already one or more values registered for the given
-	 * property key, the given value will be added to the end of the list.
+	 * <p>
+	 * If there are already one or more values registered for the given property
+	 * key, the given value will be added to the end of the list.
 	 */
 	public void addProperty(String key, String value) {
 		Assert.notNull(key, "Property key must not be null");
@@ -264,7 +268,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
-		List list = this.properties.get(key);
+		List<String> list = this.properties.get(key);
 		return (list != null && list.size() > 0 ? (String) list.get(0) : null);
 	}
 
@@ -340,7 +344,7 @@ public class MockPortletRequest implements PortletRequest {
 	public void setParameter(String key, String value) {
 		Assert.notNull(key, "Parameter key must be null");
 		Assert.notNull(value, "Parameter value must not be null");
-		this.parameters.put(key, new String[] {value});
+		this.parameters.put(key, new String[] { value });
 	}
 
 	public void setParameter(String key, String[] values) {
@@ -350,7 +354,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void addParameter(String name, String value) {
-		addParameter(name, new String[] {value});
+		addParameter(name, new String[] { value });
 	}
 
 	public void addParameter(String name, String[] values) {

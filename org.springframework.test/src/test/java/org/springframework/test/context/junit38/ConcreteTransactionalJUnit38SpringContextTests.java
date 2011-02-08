@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 
 import org.junit.internal.runners.JUnit38ClassRunner;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -42,10 +41,11 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 /**
  * Combined unit test for {@link AbstractJUnit38SpringContextTests} and
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
+@SuppressWarnings("deprecation")
 @RunWith(JUnit38ClassRunner.class)
 @ContextConfiguration
 public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTransactionalJUnit38SpringContextTests
@@ -142,13 +142,13 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	@NotTransactional
 	public void testApplicationContextSet() {
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				super.applicationContext);
+			super.applicationContext);
 	}
 
 	@NotTransactional
 	public void testBeanInitialized() {
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				this.beanInitialized);
+			this.beanInitialized);
 	}
 
 	@NotTransactional
@@ -184,7 +184,7 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	public void beforeTransaction() {
 		this.inTransaction = true;
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
-				countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.simpleJdbcTemplate));
 		assertEquals("Adding yoda", 1, addPerson(super.simpleJdbcTemplate, YODA));
 	}
 
@@ -198,7 +198,7 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		assertEquals("Adding jane", 1, addPerson(super.simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(super.simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within transactionalMethod2().", 4,
-				countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@Override
@@ -211,7 +211,7 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	public void afterTransaction() {
 		assertEquals("Deleting yoda", 1, deletePerson(super.simpleJdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
-				countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 

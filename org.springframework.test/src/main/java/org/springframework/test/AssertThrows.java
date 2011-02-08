@@ -84,6 +84,7 @@ package org.springframework.test;
  * @deprecated favor use of JUnit 4's {@code @Test(expected=...)} support
  */
 @Deprecated
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AssertThrows {
 
 	private final Class expectedException;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2007-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ package org.springframework.test;
  * JUnit 3.8 based unit test which verifies new functionality requested in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3264"
  * target="_blank">SPR-3264</a>.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  * @see Spr3264SingleSpringContextTests
  */
+@SuppressWarnings("deprecation")
 public class Spr3264DependencyInjectionSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
 
 	public Spr3264DependencyInjectionSpringContextTests() {
@@ -50,7 +51,7 @@ public class Spr3264DependencyInjectionSpringContextTests extends AbstractDepend
 		// Re-assert issues covered by Spr3264SingleSpringContextTests as a
 		// safety net.
 		assertNull("The ApplicationContext should NOT be automatically created if no 'locations' are defined.",
-				this.applicationContext);
+			this.applicationContext);
 		assertEquals("Verifying the ApplicationContext load count.", 0, super.getLoadCount());
 
 		// Assert changes to AbstractDependencyInjectionSpringContextTests:

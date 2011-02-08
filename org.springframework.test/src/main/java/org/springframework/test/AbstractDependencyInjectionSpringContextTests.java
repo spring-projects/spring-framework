@@ -63,6 +63,7 @@ import org.springframework.util.Assert;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSingleSpringContextTests {
 
 	/**

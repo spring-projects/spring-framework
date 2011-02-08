@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,11 @@ import org.springframework.test.util.subpackage.Person;
 
 /**
  * JUnit 3.8 based unit tests for {@link ReflectionTestUtils}.
- *
+ * 
  * @author Sam Brannen
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public class ReflectionTestUtilsTests extends TestCase {
 
 	protected static final Float PI = new Float((float) 22 / 7);
@@ -48,11 +49,11 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertEquals("Verifying that the person's name (protected field) was set.", "Tom", person.getName());
 		assertEquals("Verifying that the person's age (private field) was set.", 42, person.getAge());
 		assertEquals("Verifying that the person's eye color (package private field) was set.", "blue",
-				person.getEyeColor());
+			person.getEyeColor());
 		assertEquals("Verifying that the person's 'likes pets' flag (package private boolean field) was set.", true,
-				person.likesPets());
+			person.likesPets());
 		assertEquals("Verifying that the person's 'favorite number' (package field) was set.", PI,
-				person.getFavoriteNumber());
+			person.getFavoriteNumber());
 
 		assertEquals(new Long(99), ReflectionTestUtils.getField(person, "id"));
 		assertEquals("Tom", ReflectionTestUtils.getField(person, "name"));
@@ -74,7 +75,7 @@ public class ReflectionTestUtilsTests extends TestCase {
 		// Null - primitives
 
 		new AssertThrows(IllegalArgumentException.class,
-				"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
+			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
 				ReflectionTestUtils.setField(person, "id", null, long.class);
@@ -82,7 +83,7 @@ public class ReflectionTestUtilsTests extends TestCase {
 		}.runTest();
 
 		new AssertThrows(IllegalArgumentException.class,
-				"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
+			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
 				ReflectionTestUtils.setField(person, "age", null, int.class);
@@ -90,7 +91,7 @@ public class ReflectionTestUtilsTests extends TestCase {
 		}.runTest();
 
 		new AssertThrows(IllegalArgumentException.class,
-				"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
+			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
 				ReflectionTestUtils.setField(person, "likesPets", null, boolean.class);
@@ -114,11 +115,11 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertEquals("Verifying that the person's name (private method) was set.", "Tom", person.getName());
 		assertEquals("Verifying that the person's age (protected method) was set.", 42, person.getAge());
 		assertEquals("Verifying that the person's eye color (package private method) was set.", "blue",
-				person.getEyeColor());
+			person.getEyeColor());
 		assertEquals("Verifying that the person's 'likes pets' flag (protected method for a boolean) was set.", true,
-				person.likesPets());
+			person.likesPets());
 		assertEquals("Verifying that the person's 'favorite number' (protected method for a Number) was set.", PI,
-				person.getFavoriteNumber());
+			person.getFavoriteNumber());
 
 		assertEquals(new Long(99), ReflectionTestUtils.invokeGetterMethod(person, "id"));
 		assertEquals("Tom", ReflectionTestUtils.invokeGetterMethod(person, "name"));
@@ -140,11 +141,11 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertEquals("Verifying that the person's name (private method) was set.", "Jerry", person.getName());
 		assertEquals("Verifying that the person's age (protected method) was set.", 33, person.getAge());
 		assertEquals("Verifying that the person's eye color (package private method) was set.", "green",
-				person.getEyeColor());
+			person.getEyeColor());
 		assertEquals("Verifying that the person's 'likes pets' flag (protected method for a boolean) was set.", false,
-				person.likesPets());
+			person.likesPets());
 		assertEquals("Verifying that the person's 'favorite number' (protected method for a Number) was set.",
-				new Integer(42), person.getFavoriteNumber());
+			new Integer(42), person.getFavoriteNumber());
 
 		assertEquals(new Long(1), ReflectionTestUtils.invokeGetterMethod(person, "getId"));
 		assertEquals("Jerry", ReflectionTestUtils.invokeGetterMethod(person, "getName"));
@@ -162,12 +163,12 @@ public class ReflectionTestUtilsTests extends TestCase {
 		assertNull("Verifying that the person's name (private method) was set.", person.getName());
 		assertNull("Verifying that the person's eye color (package private method) was set.", person.getEyeColor());
 		assertNull("Verifying that the person's 'favorite number' (protected method for a Number) was set.",
-				person.getFavoriteNumber());
+			person.getFavoriteNumber());
 
 		// Null - primitives
 
 		new AssertThrows(RuntimeException.class,
-				"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
+			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
 				ReflectionTestUtils.invokeSetterMethod(person, "id", null, long.class);
@@ -175,7 +176,7 @@ public class ReflectionTestUtilsTests extends TestCase {
 		}.runTest();
 
 		new AssertThrows(RuntimeException.class,
-				"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
+			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
 				ReflectionTestUtils.invokeSetterMethod(person, "age", null, int.class);
@@ -183,7 +184,7 @@ public class ReflectionTestUtilsTests extends TestCase {
 		}.runTest();
 
 		new AssertThrows(RuntimeException.class,
-				"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
+			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
 				ReflectionTestUtils.invokeSetterMethod(person, "likesPets", null, boolean.class);

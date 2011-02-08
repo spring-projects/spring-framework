@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
+
 import javax.el.ELContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -40,17 +41,18 @@ import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.jsp.PageContext} interface.
- *
- * <p>Used for testing the web framework; only necessary for testing
- * applications when testing custom JSP tags.
- *
- * <p>Note: Expects initialization via the constructor rather than via the
- * <code>PageContext.initialize</code> method. Does not support writing to
- * a JspWriter, request dispatching, and <code>handlePageException</code> calls.
- *
+ * <p>
+ * Used for testing the web framework; only necessary for testing applications
+ * when testing custom JSP tags.
+ * <p>
+ * Note: Expects initialization via the constructor rather than via the
+ * <code>PageContext.initialize</code> method. Does not support writing to a
+ * JspWriter, request dispatching, and <code>handlePageException</code> calls.
+ * 
  * @author Juergen Hoeller
  * @since 1.0.2
  */
+@SuppressWarnings("deprecation")
 public class MockPageContext extends PageContext {
 
 	private final ServletContext servletContext;
@@ -78,8 +80,9 @@ public class MockPageContext extends PageContext {
 	/**
 	 * Create new MockPageContext with a default {@link MockHttpServletRequest},
 	 * {@link MockHttpServletResponse}, {@link MockServletConfig}.
-	 * @param servletContext the ServletContext that the JSP page runs in
-	 * (only necessary when actually accessing the ServletContext)
+	 * 
+	 * @param servletContext the ServletContext that the JSP page runs in (only
+	 * necessary when actually accessing the ServletContext)
 	 */
 	public MockPageContext(ServletContext servletContext) {
 		this(servletContext, null, null, null);
@@ -88,9 +91,10 @@ public class MockPageContext extends PageContext {
 	/**
 	 * Create new MockPageContext with a MockHttpServletResponse,
 	 * MockServletConfig.
+	 * 
 	 * @param servletContext the ServletContext that the JSP page runs in
-	 * @param request the current HttpServletRequest
-	 * (only necessary when actually accessing the request)
+	 * @param request the current HttpServletRequest (only necessary when
+	 * actually accessing the request)
 	 */
 	public MockPageContext(ServletContext servletContext, HttpServletRequest request) {
 		this(servletContext, request, null, null);
@@ -98,10 +102,11 @@ public class MockPageContext extends PageContext {
 
 	/**
 	 * Create new MockPageContext with a MockServletConfig.
+	 * 
 	 * @param servletContext the ServletContext that the JSP page runs in
 	 * @param request the current HttpServletRequest
-	 * @param response the current HttpServletResponse
-	 * (only necessary when actually writing to the response)
+	 * @param response the current HttpServletResponse (only necessary when
+	 * actually writing to the response)
 	 */
 	public MockPageContext(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response) {
 		this(servletContext, request, response, null);
@@ -109,13 +114,15 @@ public class MockPageContext extends PageContext {
 
 	/**
 	 * Create new MockServletConfig.
+	 * 
 	 * @param servletContext the ServletContext that the JSP page runs in
 	 * @param request the current HttpServletRequest
 	 * @param response the current HttpServletResponse
-	 * @param servletConfig the ServletConfig (hardly ever accessed from within a tag)
+	 * @param servletConfig the ServletConfig (hardly ever accessed from within
+	 * a tag)
 	 */
-	public MockPageContext(ServletContext servletContext, HttpServletRequest request,
-			HttpServletResponse response, ServletConfig servletConfig) {
+	public MockPageContext(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response,
+			ServletConfig servletConfig) {
 
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.request = (request != null ? request : new MockHttpServletRequest(servletContext));
@@ -123,10 +130,8 @@ public class MockPageContext extends PageContext {
 		this.servletConfig = (servletConfig != null ? servletConfig : new MockServletConfig(servletContext));
 	}
 
-
-	public void initialize(
-			Servlet servlet, ServletRequest request, ServletResponse response,
-			String errorPageURL, boolean needsSession, int bufferSize, boolean autoFlush) {
+	public void initialize(Servlet servlet, ServletRequest request, ServletResponse response, String errorPageURL,
+			boolean needsSession, int bufferSize, boolean autoFlush) {
 
 		throw new UnsupportedOperationException("Use appropriate constructor");
 	}

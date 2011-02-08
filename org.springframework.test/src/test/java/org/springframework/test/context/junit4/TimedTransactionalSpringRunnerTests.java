@@ -20,7 +20,6 @@ import static org.springframework.test.transaction.TransactionTestUtils.assertIn
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
@@ -29,16 +28,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * JUnit 4 based unit test which verifies support of Spring's
- * {@link Transactional @Transactional} and
- * {@link NotTransactional @NotTransactional} annotations in conjunction with
- * {@link Timed @Timed} and JUnit 4's {@link Test#timeout() timeout} attribute.
- *
+ * {@link Transactional &#64;Transactional} and {@link NotTransactional
+ * &#64;NotTransactional} annotations in conjunction with {@link Timed
+ * &#64;Timed} and JUnit 4's {@link Test#timeout() timeout} attribute.
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"transactionalTests-context.xml"})
+@ContextConfiguration("transactionalTests-context.xml")
 @Transactional
+@SuppressWarnings("deprecation")
 public class TimedTransactionalSpringRunnerTests {
 
 	@Test
