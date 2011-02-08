@@ -69,10 +69,10 @@ public abstract class AbstractFeatureSpecification implements SourceAwareSpecifi
 		return this.sourceName;
 	}
 
-	public void execute(ExecutorContext executorContext) {
+	public void execute(SpecificationContext specificationContext) {
 		FeatureSpecificationExecutor executor =
 			BeanUtils.instantiateClass(this.executorType, FeatureSpecificationExecutor.class);
-		executor.execute(this, executorContext);
+		executor.execute(this, specificationContext);
 	}
 
 }

@@ -23,7 +23,7 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.config.AbstractSpecificationExecutor;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -74,8 +74,8 @@ final class MvcAnnotationDrivenExecutor extends AbstractSpecificationExecutor<Mv
 			AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	@Override
-	public void doExecute(MvcAnnotationDriven spec, ExecutorContext executorContext) {
-		ComponentRegistrar registrar = executorContext.getRegistrar();
+	public void doExecute(MvcAnnotationDriven spec, SpecificationContext specContext) {
+		ComponentRegistrar registrar = specContext.getRegistrar();
 		Object source = spec.source();
 
 		RootBeanDefinition annMappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);

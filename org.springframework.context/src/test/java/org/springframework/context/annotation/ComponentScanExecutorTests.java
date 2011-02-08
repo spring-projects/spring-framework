@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.mock.env.MockEnvironment;
 
@@ -37,31 +37,31 @@ import org.springframework.mock.env.MockEnvironment;
 public class ComponentScanExecutorTests {
 
 	private ComponentScanExecutor executor;
-	private ExecutorContext executorContext;
+	private SpecificationContext specificationContext;
 	private DefaultListableBeanFactory bf;
 
 	@Before
 	public void setUp() {
 		this.bf = new DefaultListableBeanFactory();
 		this.executor = new ComponentScanExecutor();
-		this.executorContext = new ExecutorContext();
-		this.executorContext.setRegistry(bf);
-		this.executorContext.setResourceLoader(new DefaultResourceLoader());
-		this.executorContext.setEnvironment(new MockEnvironment());
-		this.executorContext.setRegistrar(new SimpleComponentRegistrar(bf));
-		this.executorContext.setProblemReporter(new FailFastProblemReporter());
+		this.specificationContext = new SpecificationContext();
+		this.specificationContext.setRegistry(bf);
+		this.specificationContext.setResourceLoader(new DefaultResourceLoader());
+		this.specificationContext.setEnvironment(new MockEnvironment());
+		this.specificationContext.setRegistrar(new SimpleComponentRegistrar(bf));
+		this.specificationContext.setProblemReporter(new FailFastProblemReporter());
 	}
 
 	@Test
 	public void validSpec() {
-		this.executor.execute(new ComponentScanSpec("example.scannable"), this.executorContext);
+		this.executor.execute(new ComponentScanSpec("example.scannable"), this.specificationContext);
 		assertThat(bf.containsBean("fooServiceImpl"), is(true));
 	}
 
 	@Test(expected=BeanDefinitionParsingException.class)
 	public void invalidSpec() {
 		// ff problem reporter should throw due to no packages specified
-		this.executor.execute(new ComponentScanSpec(), this.executorContext);
+		this.executor.execute(new ComponentScanSpec(), this.specificationContext);
 	}
 
 }

@@ -18,9 +18,9 @@ package org.springframework.context.annotation.configuration;
 
 import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.context.config.AbstractFeatureSpecification;
-import org.springframework.context.config.ExecutorContext;
 import org.springframework.context.config.FeatureSpecification;
 import org.springframework.context.config.FeatureSpecificationExecutor;
+import org.springframework.context.config.SpecificationContext;
 
 public class StubSpecification extends AbstractFeatureSpecification {
 
@@ -40,7 +40,7 @@ public class StubSpecification extends AbstractFeatureSpecification {
 
 class StubSpecificationExecutor implements FeatureSpecificationExecutor {
 
-	public void execute(FeatureSpecification spec, ExecutorContext executorContext) {
+	public void execute(FeatureSpecification spec, SpecificationContext specificationContext) {
 	}
 
 }

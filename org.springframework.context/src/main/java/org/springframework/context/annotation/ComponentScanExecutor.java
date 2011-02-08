@@ -23,7 +23,7 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.config.AbstractSpecificationExecutor;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.filter.TypeFilter;
@@ -44,10 +44,10 @@ final class ComponentScanExecutor extends AbstractSpecificationExecutor<Componen
 	 * the given specification and perform actual scanning and bean definition
 	 * registration.
 	 */
-	protected void doExecute(ComponentScanSpec spec, ExecutorContext executorContext) {
-		BeanDefinitionRegistry registry = executorContext.getRegistry();
-		ResourceLoader resourceLoader = executorContext.getResourceLoader();
-		Environment environment = executorContext.getEnvironment();
+	protected void doExecute(ComponentScanSpec spec, SpecificationContext specificationContext) {
+		BeanDefinitionRegistry registry = specificationContext.getRegistry();
+		ResourceLoader resourceLoader = specificationContext.getResourceLoader();
+		Environment environment = specificationContext.getEnvironment();
 
 		ClassPathBeanDefinitionScanner scanner = spec.useDefaultFilters() == null ?
 			new ClassPathBeanDefinitionScanner(registry) :
@@ -104,7 +104,7 @@ final class ComponentScanExecutor extends AbstractSpecificationExecutor<Componen
 			}
 		}
 
-		executorContext.getRegistrar().registerComponent(compositeDef);
+		specificationContext.getRegistrar().registerComponent(compositeDef);
 	}
 
 }

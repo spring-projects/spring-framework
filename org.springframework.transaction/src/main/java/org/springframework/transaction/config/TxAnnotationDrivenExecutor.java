@@ -25,7 +25,7 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.config.AbstractSpecificationExecutor;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -56,9 +56,9 @@ final class TxAnnotationDrivenExecutor extends AbstractSpecificationExecutor<TxA
 
 
 	@Override
-	protected void doExecute(TxAnnotationDriven txSpec, ExecutorContext executorContext) {
-		BeanDefinitionRegistry registry = executorContext.getRegistry();
-		ComponentRegistrar registrar = executorContext.getRegistrar();
+	protected void doExecute(TxAnnotationDriven txSpec, SpecificationContext specificationContext) {
+		BeanDefinitionRegistry registry = specificationContext.getRegistry();
+		ComponentRegistrar registrar = specificationContext.getRegistrar();
 		switch (txSpec.mode()) {
 			case ASPECTJ:
 				registerTransactionAspect(txSpec, registry, registrar);

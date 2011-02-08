@@ -20,7 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlReaderContext;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -74,22 +74,22 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			.autowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns())
 			.source(readerContext.extractSource(element))
 			.sourceName(element.getTagName())
-			.execute(createExecutorContext(parserContext));
+			.execute(createSpecificationContext(parserContext));
 		return null;
 	}
 
 
-	// Adapt the given ParserContext instance into an ExecutorContext.
-	// TODO SPR-7420: create a common ParserContext-to-ExecutorContext adapter utility
+	// Adapt the given ParserContext instance into an SpecificationContext.
+	// TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter utility
 	//                or otherwise unify these two types
-	private ExecutorContext createExecutorContext(ParserContext parserContext) {
-		ExecutorContext executorContext = new ExecutorContext();
-		executorContext.setRegistry(parserContext.getRegistry());
-		executorContext.setRegistrar(parserContext);
-		executorContext.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
-		executorContext.setEnvironment(parserContext.getDelegate().getEnvironment());
-		executorContext.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
-		return executorContext;
+	private SpecificationContext createSpecificationContext(ParserContext parserContext) {
+		SpecificationContext specificationContext = new SpecificationContext();
+		specificationContext.setRegistry(parserContext.getRegistry());
+		specificationContext.setRegistrar(parserContext);
+		specificationContext.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
+		specificationContext.setEnvironment(parserContext.getDelegate().getEnvironment());
+		specificationContext.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
+		return specificationContext;
 	}
 
 }

@@ -47,7 +47,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.context.config.ExecutorContext;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.context.config.FeatureSpecification;
 import org.springframework.context.config.SourceAwareSpecification;
 import org.springframework.core.MethodParameter;
@@ -224,13 +224,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		final EarlyBeanReferenceProxyCreator proxyCreator = new EarlyBeanReferenceProxyCreator(beanFactory);
-		final ExecutorContext executorContext = createExecutorContext(beanFactory);
+		final SpecificationContext specificationContext = createSpecificationContext(beanFactory);
 
 		for (final Object featureConfigBean : featureConfigBeans.values()) {
 			ReflectionUtils.doWithMethods(featureConfigBean.getClass(),
 					new ReflectionUtils.MethodCallback() {
 						public void doWith(Method featureMethod) throws IllegalArgumentException, IllegalAccessException {
-							processFeatureMethod(featureMethod, featureConfigBean, executorContext, proxyCreator);
+							processFeatureMethod(featureMethod, featureConfigBean, specificationContext, proxyCreator);
 						} },
 					new ReflectionUtils.MethodFilter() {
 						public boolean matches(Method candidateMethod) {
@@ -316,7 +316,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @throws SecurityException 
 	 */
 	private void processFeatureMethod(final Method featureMethod, Object configInstance,
-			ExecutorContext executorContext, EarlyBeanReferenceProxyCreator proxyCreator) {
+			SpecificationContext specificationContext, EarlyBeanReferenceProxyCreator proxyCreator) {
 		try {
 			// get the return type
 			if (!(FeatureSpecification.class.isAssignableFrom(featureMethod.getReturnType()))) {
@@ -347,22 +347,24 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				((SourceAwareSpecification)spec).source(featureMethod);
 				((SourceAwareSpecification)spec).sourceName(featureMethod.getName());
 			}
-			spec.execute(executorContext);
+			spec.execute(specificationContext);
 		} catch (Exception ex) {
 			throw new FeatureMethodExecutionException(ex);
 		}
 	}
 
-	private ExecutorContext createExecutorContext(ConfigurableListableBeanFactory beanFactory) {
+	// TODO SPR-7420: consider unifying the two through a superinterface.
+	// TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter util
+	private SpecificationContext createSpecificationContext(ConfigurableListableBeanFactory beanFactory) {
 		final BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-		ExecutorContext executorContext = new ExecutorContext();
-		executorContext.setEnvironment(this.environment);
-		executorContext.setResourceLoader(this.resourceLoader);
-		executorContext.setRegistry(registry);
-		executorContext.setRegistrar(new SimpleComponentRegistrar(registry));
+		SpecificationContext specificationContext = new SpecificationContext();
+		specificationContext.setEnvironment(this.environment);
+		specificationContext.setResourceLoader(this.resourceLoader);
+		specificationContext.setRegistry(registry);
+		specificationContext.setRegistrar(new SimpleComponentRegistrar(registry));
 		// TODO SPR-7420: how to get hold of the current problem reporter here?
-		executorContext.setProblemReporter(new FailFastProblemReporter());
-		return executorContext;
+		specificationContext.setProblemReporter(new FailFastProblemReporter());
+		return specificationContext;
 	}
 
 	private ConfigurationClassBeanDefinitionReader getConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry) {
