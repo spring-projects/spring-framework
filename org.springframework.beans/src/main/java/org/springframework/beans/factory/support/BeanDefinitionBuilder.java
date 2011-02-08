@@ -305,7 +305,7 @@ public class BeanDefinitionBuilder  {
 			this.beanDefinition.setDependsOn(new String[] {beanName});
 		}
 		else {
-			String[] added = (String[]) ObjectUtils.addObjectToArray(this.beanDefinition.getDependsOn(), beanName);
+			String[] added = ObjectUtils.addObjectToArray(this.beanDefinition.getDependsOn(), beanName);
 			this.beanDefinition.setDependsOn(added);
 		}
 		return this;

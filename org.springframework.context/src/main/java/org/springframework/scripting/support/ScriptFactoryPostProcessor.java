@@ -334,12 +334,12 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 				ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
 				ScriptSource scriptSource =
 						getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
-				Class[] interfaces = scriptFactory.getScriptInterfaces();
+				Class<?>[] interfaces = scriptFactory.getScriptInterfaces();
 
-				Class[] scriptedInterfaces = interfaces;
+				Class<?>[] scriptedInterfaces = interfaces;
 				if (scriptFactory.requiresConfigInterface() && !bd.getPropertyValues().isEmpty()) {
-					Class configInterface = createConfigInterface(bd, interfaces);
-					scriptedInterfaces = (Class[]) ObjectUtils.addObjectToArray(interfaces, configInterface);
+					Class<?> configInterface = createConfigInterface(bd, interfaces);
+					scriptedInterfaces = ObjectUtils.addObjectToArray(interfaces, configInterface);
 				}
 
 				BeanDefinition objectBd = createScriptedObjectBeanDefinition(
