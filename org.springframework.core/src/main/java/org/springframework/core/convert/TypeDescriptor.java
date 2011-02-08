@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,9 +279,6 @@ public class TypeDescriptor {
 	 * Return the element type as a type descriptor.
 	 */
 	public synchronized TypeDescriptor getElementTypeDescriptor() {
-		if (!isCollection() && !isArray()) {
-			throw new IllegalStateException("Not a collection or array type");			
-		}
 		if (this.elementType == null) {
 			this.elementType = resolveElementTypeDescriptor();
 		}
@@ -309,9 +306,6 @@ public class TypeDescriptor {
 	 * Returns map key type as a type descriptor.
 	 */
 	public synchronized TypeDescriptor getMapKeyTypeDescriptor() {
-		if (!isMap()) {
-			throw new IllegalStateException("Not a Map type");
-		}
 		if (this.mapKeyType == null) {
 			this.mapKeyType = resolveMapKeyTypeDescriptor();
 		}
