@@ -19,6 +19,7 @@ package org.springframework.context.annotation.configuration;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
 import org.springframework.context.annotation.FeatureMethodEarlyBeanProxyTests;
 
 /**
@@ -29,7 +30,7 @@ import org.springframework.context.annotation.FeatureMethodEarlyBeanProxyTests;
 @RunWith(Suite.class)
 @SuiteClasses({
 	FeatureMethodEarlyBeanProxyTests.class,
-	ConfigurationClassWithPlaceholderConfigurerBeanTests.class,
+	ConfigurationClassWithPlaceholderConfigurerBeanTests.class
 })
 public class FeatureMethodLifecycleIssueTestSuite {
 
