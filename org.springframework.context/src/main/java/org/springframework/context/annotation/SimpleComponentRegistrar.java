@@ -20,9 +20,16 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentRegistrar;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
+/**
+ * TODO SPR-7420: document
+ *
+ * @author Chris Beams
+ * @since 3.1
+ */
 public class SimpleComponentRegistrar implements ComponentRegistrar {
 
 	private final BeanDefinitionRegistry registry;
@@ -32,7 +39,7 @@ public class SimpleComponentRegistrar implements ComponentRegistrar {
 	}
 
 	public String registerWithGeneratedName(BeanDefinition beanDefinition) {
-		return BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, this.registry);
+		return BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)beanDefinition, this.registry);
 	}
 
 	public void registerBeanComponent(BeanComponentDefinition component) {
