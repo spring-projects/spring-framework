@@ -57,7 +57,7 @@ final class MvcDefaultServletHandlerExecutor extends AbstractSpecificationExecut
 			registry.registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME, handlerAdapterDef);
 			registrar.registerComponent(new BeanComponentDefinition(handlerAdapterDef, HANDLER_ADAPTER_BEAN_NAME));
 		}
-		
+
 		RootBeanDefinition defaultServletHandlerDef = new RootBeanDefinition(DefaultServletHttpRequestHandler.class);
 		defaultServletHandlerDef.setSource(source);
 		defaultServletHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

@@ -107,6 +107,7 @@ class ConfigurationClassBeanDefinitionReader {
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
+		// TODO SPR-7420: see about passing in the SpecificationContext created in ConfigurationClassPostProcessor
 		this.specificationContext = new SpecificationContext();
 		this.specificationContext.setRegistry(this.registry);
 		this.specificationContext.setRegistrar(new SimpleComponentRegistrar(this.registry));
@@ -171,7 +172,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		// no bean definition exists yet -> this must be an imported configuration class (@Import).
-		GenericBeanDefinition configBeanDef = new GenericBeanDefinition();
+		BeanDefinition configBeanDef = new GenericBeanDefinition();
 		String className = configClass.getMetadata().getClassName();
 		configBeanDef.setBeanClassName(className);
 		if (checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {

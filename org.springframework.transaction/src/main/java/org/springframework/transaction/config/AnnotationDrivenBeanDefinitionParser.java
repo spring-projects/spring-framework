@@ -17,10 +17,9 @@
 package org.springframework.transaction.config;
 
 import org.springframework.aop.config.AopNamespaceUtils;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.context.config.SpecificationContext;
+import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
+import org.springframework.context.config.FeatureSpecification;
 import org.w3c.dom.Element;
 
 /**
@@ -41,7 +40,7 @@ import org.w3c.dom.Element;
  * @since 2.0
  * @see TxAnnotationDriven
  */
-class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
+class AnnotationDrivenBeanDefinitionParser extends AbstractSpecificationBeanDefinitionParser {
 
 	/**
 	 * The bean name of the internally managed transaction advisor (mode="proxy").
@@ -61,29 +60,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
 	 * with the container as necessary.
 	 */
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		new TxAnnotationDriven(element.getAttribute("transaction-manager"))
+	@Override
+	protected FeatureSpecification doParse(Element element, ParserContext parserContext) {
+		return new TxAnnotationDriven(element.getAttribute("transaction-manager"))
 			.order(element.getAttribute("order"))
 			.mode(element.getAttribute("mode"))
-			.proxyTargetClass(Boolean.valueOf(element.getAttribute("proxy-target-class")))
-			.source(parserContext.extractSource(element))
-			.sourceName(element.getTagName())
-			.execute(createSpecificationContext(parserContext));
-		return null;
-	}
-
-	/**
-	 * Adapt the given ParserContext instance into an SpecificationContext.
-	 *
-	 * TODO SPR-7420: consider unifying the two through a superinterface.
-	 * TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter util
-	 */
-	private SpecificationContext createSpecificationContext(ParserContext parserContext) {
-		SpecificationContext specificationContext = new SpecificationContext();
-		specificationContext.setRegistry(parserContext.getRegistry());
-		specificationContext.setRegistrar(parserContext);
-		specificationContext.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
-		return specificationContext;
+			.proxyTargetClass(Boolean.valueOf(element.getAttribute("proxy-target-class")));
 	}
 
 }

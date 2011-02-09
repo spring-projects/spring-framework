@@ -16,11 +16,9 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.xml.XmlReaderContext;
-import org.springframework.context.config.SpecificationContext;
+import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
+import org.springframework.context.config.FeatureSpecification;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -38,11 +36,10 @@ import org.w3c.dom.NodeList;
  * @see ComponentScanSpec
  * @see ComponentScanExecutor
  */
-public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
+public class ComponentScanBeanDefinitionParser extends AbstractSpecificationBeanDefinitionParser {
 
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		XmlReaderContext readerContext = parserContext.getReaderContext();
-		ClassLoader classLoader = readerContext.getResourceLoader().getClassLoader();
+	public FeatureSpecification doParse(Element element, ParserContext parserContext) {
+		ClassLoader classLoader = parserContext.getReaderContext().getResourceLoader().getClassLoader();
 
 		ComponentScanSpec spec =
 			ComponentScanSpec.forDelimitedPackages(element.getAttribute("base-package"))
@@ -51,7 +48,9 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			.resourcePattern(element.getAttribute("resource-pattern"))
 			.beanNameGenerator(element.getAttribute("name-generator"), classLoader)
 			.scopeMetadataResolver(element.getAttribute("scope-resolver"), classLoader)
-			.scopedProxyMode(element.getAttribute("scoped-proxy"));
+			.scopedProxyMode(element.getAttribute("scoped-proxy"))
+			.beanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults())
+			.autowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
 
 		// Parse exclude and include filter elements.
 		NodeList nodeList = element.getChildNodes();
@@ -70,26 +69,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		spec.beanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults())
-			.autowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns())
-			.source(readerContext.extractSource(element))
-			.sourceName(element.getTagName())
-			.execute(createSpecificationContext(parserContext));
-		return null;
-	}
-
-
-	// Adapt the given ParserContext instance into an SpecificationContext.
-	// TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter utility
-	//                or otherwise unify these two types
-	private SpecificationContext createSpecificationContext(ParserContext parserContext) {
-		SpecificationContext specificationContext = new SpecificationContext();
-		specificationContext.setRegistry(parserContext.getRegistry());
-		specificationContext.setRegistrar(parserContext);
-		specificationContext.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
-		specificationContext.setEnvironment(parserContext.getDelegate().getEnvironment());
-		specificationContext.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
-		return specificationContext;
+		return spec;
 	}
 
 }
