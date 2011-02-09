@@ -16,20 +16,31 @@
 
 package org.springframework.context.annotation;
 
-
 /**
  * Tests directly or indirectly related to {@link FeatureConfiguration} class and
  * {@link Feature} method processing.
  *
  * @author Chris Beams
  * @since 3.1
- */
-/*
+ * 
  * commented due to classpath visibility differences between Eclipse
  * and Ant/Ivy at the command line.  Eclipse can see classes across
  * project test folders, Ant/Ivy are not configured to do so. Uncomment
  * as necessary when doing @Feature-related work.
- * 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.transaction.TxNamespaceHandlerTests;
+import org.springframework.transaction.annotation.AnnotationTransactionNamespaceHandlerTests;
+import org.springframework.transaction.annotation.TxAnnotationDrivenFeatureTests;
+import org.springframework.transaction.config.AnnotationDrivenTests;
+import org.springframework.web.servlet.config.AnnotationDrivenBeanDefinitionParserTests;
+import org.springframework.web.servlet.config.MvcAnnotationDrivenFeatureTests;
+import org.springframework.web.servlet.config.MvcDefaultServletHandlerTests;
+import org.springframework.web.servlet.config.MvcNamespaceTests;
+import org.springframework.web.servlet.config.MvcResourcesTests;
+import org.springframework.web.servlet.config.MvcViewControllersTests;
+
 @RunWith(Suite.class)
 @SuiteClasses({
 	EarlyBeanReferenceProxyCreatorTests.class,
@@ -37,6 +48,7 @@ package org.springframework.context.annotation;
 	BeanFactoryAwareFeatureConfigurationTests.class,
 	FeatureMethodBeanReferenceTests.class,
 	FeatureMethodQualifiedBeanReferenceTests.class,
+	FeatureMethodErrorTests.class,
 	FeatureConfigurationClassTests.class,
 	FeatureMethodEarlyBeanProxyTests.class,
 	FeatureConfigurationImportTests.class,
@@ -60,9 +72,8 @@ package org.springframework.context.annotation;
 	MvcViewControllersTests.class,
 	MvcResourcesTests.class,
 	MvcDefaultServletHandlerTests.class,
-	MvcNamespaceTests.class,
-})
- */
+	MvcNamespaceTests.class
+*/
 public class FeatureTestSuite {
 
 }
