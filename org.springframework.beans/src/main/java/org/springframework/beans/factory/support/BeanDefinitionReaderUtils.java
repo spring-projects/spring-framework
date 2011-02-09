@@ -166,7 +166,7 @@ public class BeanDefinitionReaderUtils {
 	 * for the given bean definition or the definition cannot be registered
 	 */
 	public static String registerWithGeneratedName(
-			BeanDefinition definition, BeanDefinitionRegistry registry)
+			AbstractBeanDefinition definition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
 
 		String generatedName = generateBeanName(definition, registry, false);
