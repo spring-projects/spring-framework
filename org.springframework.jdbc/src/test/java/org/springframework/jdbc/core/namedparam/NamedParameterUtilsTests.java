@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,22 @@ public class NamedParameterUtilsTests {
 				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :a :a xx :a :a"), namedParams).length);
 		assertEquals(2, NamedParameterUtils
 				.buildSqlTypeArray(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams)[4]);
+	}
+
+	@Test
+	public void convertTypeMapToSqlParameterList() {
+		MapSqlParameterSource namedParams = new MapSqlParameterSource();
+		namedParams.addValue("a", "a", 1).addValue("b", "b", 2).addValue("c", "c", 3, "SQL_TYPE");
+		assertSame(3, NamedParameterUtils
+				.buildSqlParameterList(NamedParameterUtils.parseSqlStatement("xxx :a :b :c"), namedParams).size());
+		assertSame(5, NamedParameterUtils
+				.buildSqlParameterList(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams).size());
+		assertSame(5, NamedParameterUtils
+				.buildSqlParameterList(NamedParameterUtils.parseSqlStatement("xxx :a :a :a xx :a :a"), namedParams).size());
+		assertEquals(2, NamedParameterUtils
+				.buildSqlParameterList(NamedParameterUtils.parseSqlStatement("xxx :a :b :c xx :a :b"), namedParams).get(4).getSqlType());
+		assertEquals("SQL_TYPE", NamedParameterUtils
+				.buildSqlParameterList(NamedParameterUtils.parseSqlStatement("xxx :a :b :c"), namedParams).get(2).getTypeName());
 	}
 
 	@Test(expected = InvalidDataAccessApiUsageException.class)

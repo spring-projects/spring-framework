@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.core.namedparam;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -320,7 +321,7 @@ public abstract class NamedParameterUtils {
 	}
 
 	/**
-	 * Convert a Map of parameter types to a corresponding int array.
+	 * Convert parameter types from an SqlParameterSource into a corresponding int array.
 	 * This is necessary in order to reuse existing methods on JdbcTemplate.
 	 * Any named parameter types are placed in the correct position in the
 	 * Object array based on the parsed SQL statement info.
@@ -329,14 +330,34 @@ public abstract class NamedParameterUtils {
 	 */
 	public static int[] buildSqlTypeArray(ParsedSql parsedSql, SqlParameterSource paramSource) {
 		int[] sqlTypes = new int[parsedSql.getTotalParameterCount()];
-		List paramNames = parsedSql.getParameterNames();
+		List<String> paramNames = parsedSql.getParameterNames();
 		for (int i = 0; i < paramNames.size(); i++) {
-			String paramName = (String) paramNames.get(i);
+			String paramName = paramNames.get(i);
 			sqlTypes[i] = paramSource.getSqlType(paramName);
 		}
 		return sqlTypes;
 	}
 
+	/**
+	 * Convert parameter declarations from an SqlParameterSource to a corresponding List of SqlParameters.
+	 * This is necessary in order to reuse existing methods on JdbcTemplate.
+	 * The SqlParameter for a named parameter is placed in the correct position in the
+	 * resulting list based on the parsed SQL statement info.
+	 * @param parsedSql the parsed SQL statement
+	 * @param paramSource the source for named parameters
+	 */
+	public static List<SqlParameter> buildSqlParameterList(ParsedSql parsedSql, SqlParameterSource paramSource) {
+		List<String> paramNames = parsedSql.getParameterNames();
+		List<SqlParameter> params = new LinkedList<SqlParameter>();
+		for (String paramName : paramNames) {
+			SqlParameter param = new SqlParameter(
+					paramName,
+					paramSource.getSqlType(paramName),
+					paramSource.getTypeName(paramName));
+			params.add(param);
+		}
+		return params;
+	}
 
 	//-------------------------------------------------------------------------
 	// Convenience methods operating on a plain SQL String
